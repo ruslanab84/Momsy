@@ -1,0 +1,35 @@
+# Build artifacts
+build/
+DerivedData/
+*.o
+*.d
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Xcode user-specific files
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+
+# CocoaPods (if used in the future)
+Pods/
+Podfile.lock
+
+# Swift Package Manager cache
+.build/
+.swiftpm/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets and environment files
+*.env
+*.pem
+*.p12
+*.mobileprovision
+GoogleService-Info.plist
+secrets.xcconfig
