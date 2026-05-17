@@ -1,28 +1,108 @@
 import SwiftUI
 
-struct SoundsView: View {
-    @State private var sounds = sampleSounds
-    @State private var selectedTimer = 1
-    private let timerLabels = ["15 мин", "30 мин", "1 ч", "не выкл."]
+// MARK: - SoundsView
 
-    var nowPlaying: SoundItem? { sounds.first(where: { $0.isPlaying }) }
+struct SoundsView: View {
+    @AppStorage("babyName") private var babyName = ""
+
+    @State private var sounds = sampleSounds
+    @State private var selectedTimerIdx = 3        // default: ∞
+    @State private var timerSecondsLeft: Int = 0
+    @State private var countdownTask: Task<Void, Never>? = nil
+
+    private let timerDurations = [15 * 60, 30 * 60, 60 * 60, 0]
+    private let timerLabels    = ["15 мин", "30 мин", "1 ч", "∞"]
+
+    private var anyPlaying: Bool { sounds.contains { $0.isPlaying } }
+    private var nowPlaying: SoundItem? { sounds.first { $0.isPlaying } }
+    private var displayNameSuffix: String { babyName.isEmpty ? "" : " для \(babyName)" }
+
+    private var timerDisplay: String {
+        if selectedTimerIdx == 3 { return "играет непрерывно" }
+        if timerSecondsLeft <= 0 { return "—" }
+        let m = timerSecondsLeft / 60
+        if m >= 60 {
+            let h = m / 60; let rem = m % 60
+            return rem == 0 ? "\(h) ч до выкл." : "\(h) ч \(rem) мин до выкл."
+        }
+        return "\(m) мин \(String(format: "%02d", timerSecondsLeft % 60)) с до выкл."
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
                 moonHero
-                if nowPlaying != nil {
+                    .padding(.top, 4)
+
+                if anyPlaying {
                     nowPlayingCard
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .top).combined(with: .opacity),
+                            removal:   .move(edge: .top).combined(with: .opacity)
+                        ))
                 }
+
                 soundGrid
             }
             .padding(.horizontal, 22)
             .padding(.top, 8)
             .padding(.bottom, 40)
+            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: anyPlaying)
         }
-        .background(Color.bbLilac.opacity(0.3).ignoresSafeArea())
+        .background(Color.bbLilac.opacity(0.28).ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .onDisappear { countdownTask?.cancel() }
+    }
+
+    // MARK: - Actions
+
+    private func play(_ idx: Int) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+            if sounds[idx].isPlaying {
+                sounds[idx].isPlaying = false
+                stopCountdown()
+            } else {
+                for j in sounds.indices { sounds[j].isPlaying = false }
+                sounds[idx].isPlaying = true
+                startCountdown(for: selectedTimerIdx)
+            }
+        }
+    }
+
+    private func stopAll() {
+        withAnimation(.easeOut(duration: 0.35)) {
+            for i in sounds.indices { sounds[i].isPlaying = false }
+        }
+        stopCountdown()
+    }
+
+    private func selectTimer(_ idx: Int) {
+        withAnimation(.spring(response: 0.25)) { selectedTimerIdx = idx }
+        if anyPlaying { startCountdown(for: idx) }
+    }
+
+    // MARK: - Countdown
+
+    private func startCountdown(for idx: Int) {
+        countdownTask?.cancel()
+        let secs = timerDurations[idx]
+        timerSecondsLeft = secs
+        guard secs > 0 else { return }
+        countdownTask = Task {
+            while !Task.isCancelled, timerSecondsLeft > 0 {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                guard !Task.isCancelled else { break }
+                timerSecondsLeft = max(0, timerSecondsLeft - 1)
+                if timerSecondsLeft == 0 { stopAll() }
+            }
+        }
+    }
+
+    private func stopCountdown() {
+        countdownTask?.cancel()
+        countdownTask = nil
+        timerSecondsLeft = 0
     }
 
     // MARK: - Moon Hero
@@ -30,34 +110,38 @@ struct SoundsView: View {
     private var moonHero: some View {
         ZStack(alignment: .bottomLeading) {
             LinearGradient(
-                colors: [Color(bbHex: "C5B5E8"), Color(bbHex: "E8DBF5")],
-                startPoint: .top, endPoint: .bottom
+                colors: [Color(bbHex: "B5A3E0"), Color(bbHex: "DDD4F5")],
+                startPoint: .topLeading, endPoint: .bottomTrailing
             )
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .frame(height: 200)
 
-            // Stars
-            ForEach([(20, 30, 4.0), (40, 60, 3.0), (70, 25, 5.0), (82, 70, 3.5), (55, 35, 4.5), (12, 80, 3.0)], id: \.0) { x, y, d in
-                Circle()
-                    .fill(Color.white.opacity(0.8))
-                    .frame(width: d, height: d)
-                    .position(
-                        x: UIScreen.main.bounds.width * CGFloat(x) / 100 - 22,
-                        y: CGFloat(y) * 2
-                    )
+            // Stars via Canvas (no UIScreen)
+            GeometryReader { geo in
+                Canvas { ctx, size in
+                    let stars: [(CGFloat, CGFloat, CGFloat)] = [
+                        (0.08, 0.22, 3.5), (0.18, 0.58, 2.5), (0.30, 0.14, 4.0),
+                        (0.47, 0.40, 2.0), (0.58, 0.20, 3.2), (0.66, 0.65, 3.5),
+                        (0.80, 0.18, 2.5), (0.90, 0.52, 2.0), (0.94, 0.32, 3.0),
+                    ]
+                    for (rx, ry, d) in stars {
+                        let pt = CGPoint(x: size.width * rx, y: size.height * ry)
+                        ctx.fill(
+                            Path(ellipseIn: CGRect(x: pt.x - d/2, y: pt.y - d/2, width: d, height: d)),
+                            with: .color(.white.opacity(0.8))
+                        )
+                    }
+                }
+                // Moon
+                CuteBlobView(kind: .moon, size: 90, tone: .clear)
+                    .position(x: geo.size.width - 60, y: 56)
             }
-
-            // Moon
-            CuteBlobView(kind: .moon, size: 80, tone: .clear)
-                .frame(width: 80, height: 80)
-                .position(x: UIScreen.main.bounds.width - 80, y: 56)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("пусть спит крепко")
-                    .font(.custom("Georgia", size: 20))
+                    .font(.custom("Georgia", size: 18))
                     .italic()
-                    .foregroundColor(Color.bbInk.opacity(0.55))
-                Text("Колыбельная мама")
+                    .foregroundColor(Color.bbInk.opacity(0.5))
+                Text("Колыбельная\(displayNameSuffix)")
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
             }
@@ -71,58 +155,59 @@ struct SoundsView: View {
     private var nowPlayingCard: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
+                // Animated icon
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.bbCoral)
-                    .frame(width: 50, height: 50)
+                    .fill(nowPlaying?.tone ?? .bbCoral)
+                    .frame(width: 52, height: 52)
                     .overlay(
-                        HStack(spacing: 2) {
-                            ForEach([14, 22, 10, 18, 12], id: \.self) { h in
-                                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                    .fill(Color.bbInk)
-                                    .frame(width: 3, height: CGFloat(h))
-                            }
-                        }
+                        EqualizerBars(isPlaying: anyPlaying, color: .bbInk, count: 5, maxH: 20, minH: 5)
                     )
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text("СЕЙЧАС ИГРАЕТ")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbButter)
                         .kerning(0.5)
-                    Text("\(nowPlaying?.name ?? "") · \(nowPlaying?.category ?? "")")
-                        .font(.system(size: 16, weight: .heavy, design: .rounded))
-                        .foregroundColor(.white)
-                    Text("таймер: 22 мин до выключения")
+                    if let np = nowPlaying {
+                        Text("\(np.name) · \(np.category)")
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    Text(timerDisplay)
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color.white.opacity(0.7))
+                        .foregroundColor(.white.opacity(0.65))
+                        .contentTransition(.numericText())
+                        .animation(.linear(duration: 0.4), value: timerSecondsLeft)
                 }
 
                 Spacer()
 
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        HStack(spacing: 3) {
-                            ForEach(0..<2) { _ in
-                                RoundedRectangle(cornerRadius: 1, style: .continuous)
-                                    .fill(Color.bbInk)
-                                    .frame(width: 4, height: 14)
-                            }
-                        }
-                    )
+                // Stop button
+                Button(action: stopAll) {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 44, height: 44)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(Color.bbInk)
+                                .frame(width: 15, height: 15)
+                        )
+                }
             }
 
+            // Timer chips
             HStack(spacing: 6) {
                 ForEach(timerLabels.indices, id: \.self) { i in
-                    Text(timerLabels[i])
-                        .font(.system(size: 12, weight: .heavy, design: .rounded))
-                        .foregroundColor(i == selectedTimer ? .bbInk : .white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(i == selectedTimer ? Color.bbButter : Color.white.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .onTapGesture { selectedTimer = i }
+                    Button { selectTimer(i) } label: {
+                        Text(timerLabels[i])
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .foregroundColor(i == selectedTimerIdx ? .bbInk : .white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 9)
+                            .background(i == selectedTimerIdx ? Color.bbButter : Color.white.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -134,16 +219,65 @@ struct SoundsView: View {
     private var soundGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
             BBSectionLabel(text: "Звуки")
-
-            let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
-            LazyVGrid(columns: columns, spacing: 8) {
+            LazyVGrid(
+                columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
+                spacing: 8
+            ) {
                 ForEach(sounds.indices, id: \.self) { i in
-                    SoundCard(sound: sounds[i]) {
-                        for j in sounds.indices { sounds[j].isPlaying = false }
-                        sounds[i].isPlaying = true
-                    }
+                    SoundCard(sound: sounds[i]) { play(i) }
                 }
             }
+        }
+    }
+}
+
+// MARK: - Equalizer Bars
+
+private struct EqualizerBars: View {
+    let isPlaying: Bool
+    let color: Color
+    var count: Int = 5
+    var maxH: CGFloat = 22
+    var minH: CGFloat = 6
+
+    @State private var bars: [CGFloat] = []
+    @State private var animTask: Task<Void, Never>? = nil
+
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(bars.indices, id: \.self) { i in
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(color)
+                    .frame(width: 3, height: bars[i])
+                    .animation(.easeInOut(duration: 0.25), value: bars[i])
+            }
+        }
+        .onAppear {
+            bars = Array(repeating: minH, count: count)
+            if isPlaying { startAnim() }
+        }
+        .onChange(of: isPlaying) { _, playing in
+            playing ? startAnim() : stopAnim()
+        }
+        .onDisappear { animTask?.cancel() }
+    }
+
+    private func startAnim() {
+        animTask?.cancel()
+        animTask = Task {
+            while !Task.isCancelled {
+                let next = (0..<count).map { _ in CGFloat.random(in: minH...maxH) }
+                withAnimation(.easeInOut(duration: 0.25)) { bars = next }
+                try? await Task.sleep(nanoseconds: 320_000_000)
+            }
+        }
+    }
+
+    private func stopAnim() {
+        animTask?.cancel()
+        animTask = nil
+        withAnimation(.easeInOut(duration: 0.3)) {
+            bars = Array(repeating: minH, count: count)
         }
     }
 }
@@ -159,36 +293,44 @@ private struct SoundCard: View {
             ZStack(alignment: .topTrailing) {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(sound.tone)
-                    .aspectRatio(1.6, contentMode: .fit)
+                    .aspectRatio(1.65, contentMode: .fit)
                     .overlay(
-                        HStack(spacing: 3) {
-                            ForEach([20, 55, 30, 70, 40, 85, 25, 60], id: \.self) { h in
-                                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                    .fill(Color.bbInk.opacity(0.55))
-                                    .frame(width: 4, height: CGFloat(h) * 0.22)
-                            }
-                        }
+                        EqualizerBars(
+                            isPlaying: sound.isPlaying,
+                            color: Color.bbInk.opacity(0.5),
+                            count: 8,
+                            maxH: 18,
+                            minH: 4
+                        )
                     )
 
                 if sound.isPlaying {
                     Text("играет")
                         .font(.system(size: 9, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
                         .background(Color.bbLilacDeep)
-                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                        .padding(6)
+                        .clipShape(Capsule())
+                        .padding(8)
+                        .transition(.scale(scale: 0.7).combined(with: .opacity))
                 }
             }
 
-            VStack(alignment: .leading, spacing: 1) {
-                Text(sound.name)
-                    .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInk)
-                Text(sound.category)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(.bbInkMute)
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(sound.name)
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Text(sound.category)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                }
+                Spacer()
+                Image(systemName: sound.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                    .font(.system(size: 26))
+                    .foregroundColor(sound.isPlaying ? .bbLilacDeep : Color.bbInkMute.opacity(0.4))
+                    .animation(.spring(response: 0.25), value: sound.isPlaying)
             }
         }
         .bbCard(pad: 12)
@@ -196,7 +338,9 @@ private struct SoundCard: View {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .strokeBorder(sound.isPlaying ? Color.bbLilacDeep : Color.clear, lineWidth: 2.5)
         )
+        .contentShape(Rectangle())
         .onTapGesture(perform: onPlay)
+        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: sound.isPlaying)
     }
 }
 

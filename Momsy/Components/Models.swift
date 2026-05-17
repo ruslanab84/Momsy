@@ -173,18 +173,29 @@ let sampleDiary: [DiaryDay] = [
 
 // MARK: - Family
 
-enum FamilyRole: String {
-    case mom = "Мама"
-    case dad = "Папа"
-    case nanny = "Няня"
-    case grandma = "Только смотреть"
+enum FamilyRole: String, CaseIterable, Identifiable {
+    case mom     = "Мама"
+    case dad     = "Папа"
+    case nanny   = "Няня"
+    case grandma = "Бабушка"
+
+    var id: String { rawValue }
 
     var description: String {
         switch self {
         case .mom:     return "полный доступ"
         case .dad:     return "полный доступ"
         case .nanny:   return "трекинг · без медицины"
-        case .grandma: return "фото и статус"
+        case .grandma: return "только фото и статус"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .mom:     return "person.fill"
+        case .dad:     return "person.fill"
+        case .nanny:   return "hands.and.sparkles.fill"
+        case .grandma: return "eyes"
         }
     }
 }
@@ -192,10 +203,10 @@ enum FamilyRole: String {
 struct FamilyMember: Identifiable {
     let id = UUID()
     let name: String
-    let role: FamilyRole
+    var role: FamilyRole
     let isMe: Bool
-    let isOnline: Bool
-    let activity: String
+    var isOnline: Bool
+    var activity: String
     let blob: BlobKind
     let tone: Color
 }
@@ -204,7 +215,7 @@ let sampleFamily: [FamilyMember] = [
     FamilyMember(name: "Аня",      role: .mom,     isMe: true,  isOnline: false, activity: "это вы",          blob: .baby,  tone: .bbCoral),
     FamilyMember(name: "Миша",     role: .dad,     isMe: false, isOnline: true,  activity: "онлайн",          blob: .bear,  tone: .bbSky),
     FamilyMember(name: "Ольга",    role: .nanny,   isMe: false, isOnline: false, activity: "3 записи сегодня", blob: .sun,   tone: .bbMint),
-    FamilyMember(name: "Бабушка",  role: .grandma, isMe: false, isOnline: false, activity: "смотрит дневник", blob: .heart, tone: .bbLilac),
+    FamilyMember(name: "Бабушка", role: .grandma, isMe: false, isOnline: false, activity: "смотрит дневник", blob: .heart, tone: .bbLilac),
 ]
 
 // MARK: - Sounds
@@ -246,18 +257,57 @@ let sampleWeightData: [WeightPoint] = [
     WeightPoint(month: 5, babyKg: 6.4, p15: 6.2, p50: 7.5, p85: 8.7),
 ]
 
+// Height in cm — reusing WeightPoint (babyKg = cm value)
+let sampleHeightData: [WeightPoint] = [
+    WeightPoint(month: 0, babyKg: 50.0, p15: 46.1, p50: 49.1, p85: 52.0),
+    WeightPoint(month: 1, babyKg: 53.0, p15: 50.2, p50: 53.7, p85: 57.2),
+    WeightPoint(month: 2, babyKg: 57.0, p15: 53.2, p50: 57.1, p85: 60.9),
+    WeightPoint(month: 3, babyKg: 60.0, p15: 55.8, p50: 59.8, p85: 63.8),
+    WeightPoint(month: 4, babyKg: 62.0, p15: 57.8, p50: 62.1, p85: 66.4),
+    WeightPoint(month: 5, babyKg: 64.0, p15: 59.6, p50: 64.0, p85: 68.5),
+]
+
+// Head circumference in cm — reusing WeightPoint (babyKg = cm value)
+let sampleHeadData: [WeightPoint] = [
+    WeightPoint(month: 0, babyKg: 34.0, p15: 32.5, p50: 34.5, p85: 36.5),
+    WeightPoint(month: 1, babyKg: 36.5, p15: 34.5, p50: 36.5, p85: 38.5),
+    WeightPoint(month: 2, babyKg: 38.0, p15: 36.0, p50: 38.0, p85: 40.0),
+    WeightPoint(month: 3, babyKg: 40.0, p15: 37.5, p50: 39.5, p85: 41.5),
+    WeightPoint(month: 4, babyKg: 41.5, p15: 38.5, p50: 40.5, p85: 42.5),
+    WeightPoint(month: 5, babyKg: 42.0, p15: 39.5, p50: 41.5, p85: 43.5),
+]
+
 struct MeasurementEntry: Identifiable {
     let id = UUID()
     let dateLabel: String
     let weight: String
     let height: String
+    let headCirc: String
     let delta: String
     let visitLabel: String?
 }
 
 let sampleMeasurements: [MeasurementEntry] = [
-    MeasurementEntry(dateLabel: "16 мая",  weight: "6.4 кг", height: "64 см", delta: "+ 280 г · 4 нед", visitLabel: nil),
-    MeasurementEntry(dateLabel: "18 апр",  weight: "6.1 кг", height: "62 см", delta: "+ 400 г · 4 нед", visitLabel: nil),
-    MeasurementEntry(dateLabel: "21 мар",  weight: "5.7 кг", height: "60 см", delta: "+ 700 г · 4 нед", visitLabel: "визит к врачу"),
-    MeasurementEntry(dateLabel: "24 фев",  weight: "5.0 кг", height: "57 см", delta: "+ 900 г · 4 нед", visitLabel: nil),
+    MeasurementEntry(dateLabel: "16 мая", weight: "6.4 кг", height: "64 см", headCirc: "42.0 см", delta: "+ 280 г · 4 нед", visitLabel: nil),
+    MeasurementEntry(dateLabel: "18 апр", weight: "6.1 кг", height: "62 см", headCirc: "41.5 см", delta: "+ 400 г · 4 нед", visitLabel: nil),
+    MeasurementEntry(dateLabel: "21 мар", weight: "5.7 кг", height: "60 см", headCirc: "40.0 см", delta: "+ 700 г · 4 нед", visitLabel: "визит к врачу"),
+    MeasurementEntry(dateLabel: "24 фев", weight: "5.0 кг", height: "57 см", headCirc: "38.0 см", delta: "+ 900 г · 4 нед", visitLabel: nil),
+]
+
+// MARK: - Temperature
+
+struct TemperatureEntry: Identifiable {
+    let id = UUID()
+    let dateLabel: String
+    let timeLabel: String
+    let value: Double
+    var note: String
+}
+
+let sampleTempLog: [TemperatureEntry] = [
+    TemperatureEntry(dateLabel: "16 мая", timeLabel: "18:30", value: 36.7, note: "вечер"),
+    TemperatureEntry(dateLabel: "13 мая", timeLabel: "22:00", value: 37.8, note: "ночь, прорезывание"),
+    TemperatureEntry(dateLabel: "13 мая", timeLabel: "18:15", value: 37.4, note: "перед сном"),
+    TemperatureEntry(dateLabel: "10 мая", timeLabel: "09:00", value: 36.6, note: "утро"),
+    TemperatureEntry(dateLabel: "5 мая",  timeLabel: "20:10", value: 36.8, note: ""),
 ]
