@@ -81,18 +81,58 @@ struct DevelopmentLeap: Identifiable {
     let description: String
     let signs: [String]
     let skills: [String]
+    let tip: String
 }
 
 let sampleLeaps: [DevelopmentLeap] = [
-    DevelopmentLeap(id: 1, week: 5,  name: "Мир ощущений",        tone: .bbRose,   isDone: true,  isCurrent: false, description: "", signs: [], skills: []),
-    DevelopmentLeap(id: 2, week: 8,  name: "Мир узоров",          tone: .bbButter, isDone: true,  isCurrent: false, description: "", signs: [], skills: []),
-    DevelopmentLeap(id: 3, week: 12, name: "Плавные движения",     tone: .bbMint,   isDone: true,  isCurrent: false, description: "", signs: [], skills: []),
-    DevelopmentLeap(id: 4, week: 17, name: "Мир событий",          tone: .bbCoral,  isDone: false, isCurrent: true,
-        description: "Лёва начинает понимать, что одно действие приводит к другому. Это огромная работа для мозга — отсюда плач и плохой сон.",
+    DevelopmentLeap(
+        id: 1, week: 5, name: "Мир ощущений",
+        tone: .bbRose, isDone: true, isCurrent: false,
+        description: "учится обрабатывать сигналы от органов чувств — звуки, свет, прикосновения воспринимаются по-новому.",
+        signs: ["много спит", "вздрагивает от звуков", "ищет источник света"],
+        skills: ["отличает голос мамы", "реагирует на свет", "успокаивается на руках"],
+        tip: "Разговаривайте спокойным голосом и избегайте резких звуков — слуховая система ещё настраивается."
+    ),
+    DevelopmentLeap(
+        id: 2, week: 8, name: "Мир узоров",
+        tone: .bbButter, isDone: true, isCurrent: false,
+        description: "начинает распознавать регулярные образы — черты лица, ритмы, простые геометрические формы.",
+        signs: ["долго смотрит на лица", "замирает на паттернах", "больше гулит"],
+        skills: ["улыбается в ответ", "следит взглядом", "издаёт гласные звуки"],
+        tip: "Показывайте чёрно-белые картинки — контраст стимулирует зрительную кору."
+    ),
+    DevelopmentLeap(
+        id: 3, week: 12, name: "Плавные движения",
+        tone: .bbMint, isDone: true, isCurrent: false,
+        description: "обнаруживает, что может управлять своим телом — руки, ноги, голова начинают двигаться плавно и осознанно.",
+        signs: ["подолгу изучает руки", "тянет предметы в рот", "много двигает ногами"],
+        skills: ["захватывает погремушку", "удерживает голову", "переворачивается набок"],
+        tip: "Время на животике каждый день укрепляет шею и спину — это фундамент для переворотов."
+    ),
+    DevelopmentLeap(
+        id: 4, week: 17, name: "Мир событий",
+        tone: .bbCoral, isDone: false, isCurrent: true,
+        description: "начинает понимать, что одно действие приводит к другому. Это огромная работа для мозга — отсюда плач и плохой сон.",
         signs: ["хуже спит", "требует рук", "капризничает", "отказ от еды"],
-        skills: ["следит глазами", "хватает предметы", "узнаёт игрушку", "гулит на смех"]),
-    DevelopmentLeap(id: 5, week: 26, name: "Отношения",            tone: .bbLilac,  isDone: false, isCurrent: false, description: "", signs: [], skills: []),
-    DevelopmentLeap(id: 6, week: 36, name: "Категории",            tone: .bbSky,    isDone: false, isCurrent: false, description: "", signs: [], skills: []),
+        skills: ["следит глазами", "хватает предметы", "узнаёт игрушку", "гулит на смех"],
+        tip: "Покажите нажимаемую игрушку или чёрно-белую книжку — «причина → следствие» особенно увлекает в этот скачок."
+    ),
+    DevelopmentLeap(
+        id: 5, week: 26, name: "Отношения",
+        tone: .bbLilac, isDone: false, isCurrent: false,
+        description: "открывает мир связей между людьми и предметами. Тревога разлуки — нормальное и важное явление этого этапа.",
+        signs: ["тревога при расставании", "предпочитает маму", "проверяет вашу реакцию"],
+        skills: ["играет в «ку-ку»", "машет «пока»", "подражает звукам и жестам"],
+        tip: "Игра «ку-ку» помогает освоить концепцию постоянства объектов — главный навык этого скачка."
+    ),
+    DevelopmentLeap(
+        id: 6, week: 36, name: "Категории",
+        tone: .bbSky, isDone: false, isCurrent: false,
+        description: "начинает группировать вещи по свойствам: цвет, форма, размер. Активно изучает мир через классификацию.",
+        signs: ["сортирует игрушки", "дольше играет самостоятельно", "разбирает всё подряд"],
+        skills: ["понимает «большой/маленький»", "складывает предметы в ёмкость", "откликается на имя"],
+        tip: "Сортеры, стаканчики, вкладыши — идеальные игрушки. Называйте свойства: «красный», «большой», «тяжёлый»."
+    ),
 ]
 
 // MARK: - Diary
@@ -109,10 +149,10 @@ struct DiaryItem: Identifiable {
 }
 
 struct DiaryDay: Identifiable {
-    let id = UUID()
+    var id: String { dateLabel }
     let dateLabel: String
     let ageLabel: String
-    let items: [DiaryItem]
+    var items: [DiaryItem]
 }
 
 let sampleDiary: [DiaryDay] = [

@@ -110,6 +110,7 @@ final class TodayViewModel: ObservableObject {
 struct TodayView: View {
     @StateObject private var vm = TodayViewModel()
     @State private var showFeeding = false
+    @State private var showSymptom = false
     @State private var now = Date()
 
     @AppStorage("babyName")      private var babyName = ""
@@ -163,6 +164,9 @@ struct TodayView: View {
         .onReceive(minuteClock) { now = $0 }
         .sheet(isPresented: $showFeeding) {
             FeedingView(vm: vm)
+        }
+        .sheet(isPresented: $showSymptom) {
+            NavigationStack { SymptomView() }
         }
     }
 
@@ -432,7 +436,7 @@ struct TodayView: View {
             QuickItem(kind: .bottle, tone: .bbCoral, label: "Еда")    { showFeeding = true },
             QuickItem(kind: .sleep,  tone: .bbLilac, label: "Сон")    { vm.logSleep() },
             QuickItem(kind: .drop,   tone: .bbSky,   label: "Памп")   { vm.logDiaper() },
-            QuickItem(kind: .heart,  tone: .bbRose,  label: "Симптом") { vm.logSymptom() },
+            QuickItem(kind: .heart,  tone: .bbRose,  label: "Симптом") { showSymptom = true },
         ]
     }
 
