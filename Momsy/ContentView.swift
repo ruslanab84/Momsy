@@ -155,18 +155,79 @@ private struct DoctorMenuRow<D: View>: View {
 
 struct MeView: View {
     var body: some View {
-        List {
-            NavigationLink(destination: SharingView()) {
-                Label("Семья и роли", systemImage: "person.3.fill")
-                    .foregroundColor(.bbCoralDeep)
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 12) {
+                meSection(rows: [
+                    MeRow(destination: SharingView(),  icon: "person.3.fill",   bg: .bbCoral,  title: "Семья и роли",       sub: "Мама, папа, няня, бабушка"),
+                    MeRow(destination: SoundsView(),    icon: "music.note",       bg: .bbLilac,  title: "Колыбельные и шум",  sub: "Белый шум, мелодии, таймер"),
+                ])
+                meSection(rows: [
+                    MeRow(destination: SettingsView(), icon: "gearshape.fill",   bg: .bbSky,    title: "Настройки",          sub: "Тема, язык"),
+                ])
             }
-            NavigationLink(destination: SoundsView()) {
-                Label("Колыбельные и шум", systemImage: "music.note")
-                    .foregroundColor(.bbLilacDeep)
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
+        }
+        .background(Color.bbCream.ignoresSafeArea())
+        .navigationTitle("Профиль")
+    }
+
+    private func meSection(rows: [MeRow]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(rows.indices, id: \.self) { i in
+                rows[i]
+                if i < rows.count - 1 {
+                    Divider().opacity(0.2).padding(.leading, 60)
+                }
             }
         }
-        .navigationTitle("Профиль")
-        .background(Color.bbCream.ignoresSafeArea())
+        .background(Color.bbCard)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .bbShadow()
+    }
+}
+
+private struct MeRow: View {
+    let destination: AnyView
+    let icon: String
+    let bg: Color
+    let title: String
+    let sub: String
+
+    init<D: View>(destination: D, icon: String, bg: Color, title: String, sub: String) {
+        self.destination = AnyView(destination)
+        self.icon = icon
+        self.bg = bg
+        self.title = title
+        self.sub = sub
+    }
+
+    var body: some View {
+        NavigationLink(destination: destination) {
+            HStack(spacing: 14) {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(bg)
+                    .frame(width: 42, height: 42)
+                    .overlay(
+                        Image(systemName: icon)
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                    )
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Text(sub)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(.bbInkSoft)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+        }
+        .buttonStyle(.plain)
     }
 }
 
