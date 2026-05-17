@@ -3,14 +3,15 @@ import SwiftUI
 // MARK: - SharingView
 
 struct SharingView: View {
-    @AppStorage("babyName") private var babyName = ""
+    @AppStorage("babyName")    private var babyName = ""
+    @AppStorage("appLanguage") private var lang = "en"
 
     @State private var members: [FamilyMember] = sampleFamily
     @State private var showInvite = false
     @State private var editingMember: FamilyMember? = nil
-    @State private var removeTarget: FamilyMember? = nil
 
-    private var displayName: String { babyName.isEmpty ? "малыша" : babyName }
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+    private var displayName: String { babyName.isEmpty ? t("baby", "малыша") : babyName }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -55,11 +56,12 @@ struct SharingView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            BBSectionLabel(text: "Семья")
-            Text("Команда \(displayName)")
+            BBSectionLabel(text: t("Family", "Семья"))
+            Text(t("\(displayName)'s Team", "Команда \(displayName)"))
                 .font(.system(size: 26, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
-            Text("У всех своя роль — у каждой свой уровень доступа.")
+            Text(t("Everyone has a role — each with their own access level.",
+                   "У всех своя роль — у каждой свой уровень доступа."))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(.bbInkSoft)
         }
@@ -93,10 +95,10 @@ struct SharingView: View {
                             .foregroundColor(.bbCoralDeep)
                     )
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Пригласить члена семьи")
+                    Text(t("Invite family member", "Пригласить члена семьи"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text("QR-код или ссылка · выбор роли")
+                    Text(t("QR code or link · choose role", "QR-код или ссылка · выбор роли"))
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInkSoft)
                 }
@@ -118,15 +120,20 @@ struct SharingView: View {
 
     // MARK: - Role matrix
 
-    private let matrixHeaders = ["", "Мама", "Папа", "Няня", "Бабушка"]
-    private let matrixRows: [(String, [Bool])] = [
-        ("Кормления и сон",         [true,  true,  true,  false]),
-        ("Подгузники",              [true,  true,  true,  false]),
-        ("Температура / лекарства", [true,  true,  false, false]),
-        ("Симптомы",                [true,  true,  false, false]),
-        ("Фото и дневник",          [true,  true,  true,  true ]),
-        ("Отчёт педиатру",          [true,  true,  false, false]),
-    ]
+    private var matrixHeaders: [String] {
+        ["", t("Mom", "Мама"), t("Dad", "Папа"), t("Nanny", "Няня"), t("Grandma", "Бабушка")]
+    }
+
+    private var matrixRows: [(String, [Bool])] {
+        [
+            (t("Feedings & sleep",    "Кормления и сон"),         [true,  true,  true,  false]),
+            (t("Diapers",             "Подгузники"),              [true,  true,  true,  false]),
+            (t("Temp / medicine",     "Температура / лекарства"), [true,  true,  false, false]),
+            (t("Symptoms",            "Симптомы"),                [true,  true,  false, false]),
+            (t("Photos & diary",      "Фото и дневник"),          [true,  true,  true,  true ]),
+            (t("Paediatric report",   "Отчёт педиатру"),          [true,  true,  false, false]),
+        ]
+    }
 
     private func hasRole(_ role: FamilyRole) -> Bool {
         members.contains { $0.role == role }
@@ -134,10 +141,9 @@ struct SharingView: View {
 
     private var roleMatrix: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: "Что видит каждая роль")
+            BBSectionLabel(text: t("What each role sees", "Что видит каждая роль"))
 
             VStack(spacing: 0) {
-                // Column headers
                 HStack(spacing: 0) {
                     ForEach(matrixHeaders.indices, id: \.self) { i in
                         let isActive = i > 0 && hasRole(FamilyRole.allCases[i - 1])
@@ -193,6 +199,9 @@ private struct MemberCard: View {
     let member: FamilyMember
     let onEdit: () -> Void
 
+    @AppStorage("appLanguage") private var lang = "en"
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
     var body: some View {
         HStack(spacing: 12) {
             ZStack(alignment: .bottomTrailing) {
@@ -210,11 +219,11 @@ private struct MemberCard: View {
                     Text(member.name)
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text("· \(member.role.rawValue)")
+                    Text("· \(member.role.displayName(lang: lang))")
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                 }
-                Text(member.role.description)
+                Text(member.role.roleDescription(lang: lang))
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                 Text(member.activity.uppercased())
@@ -226,7 +235,7 @@ private struct MemberCard: View {
             Spacer()
 
             if member.isMe {
-                Text("вы")
+                Text(t("you", "вы"))
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                     .padding(.horizontal, 8)
@@ -257,8 +266,11 @@ private struct MemberDetailSheet: View {
     let onRemove: () -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var lang = "en"
     @State private var selectedRole: FamilyRole
     @State private var showRemoveConfirm = false
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     init(member: FamilyMember, onRoleChange: @escaping (FamilyRole) -> Void, onRemove: @escaping () -> Void) {
         self.member = member
@@ -270,7 +282,6 @@ private struct MemberDetailSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                // Avatar + name
                 VStack(spacing: 8) {
                     CuteBlobView(kind: member.blob, size: 80, tone: member.tone)
                     Text(member.name)
@@ -282,9 +293,8 @@ private struct MemberDetailSheet: View {
                 }
                 .padding(.top, 8)
 
-                // Role picker
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("РОЛЬ")
+                    Text(t("ROLE", "РОЛЬ"))
                         .font(.system(size: 11, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.5)
@@ -302,10 +312,10 @@ private struct MemberDetailSheet: View {
                                         .foregroundColor(selectedRole == role ? .bbCoralDeep : .bbInkSoft)
                                         .frame(width: 24)
                                     VStack(alignment: .leading, spacing: 1) {
-                                        Text(role.rawValue)
+                                        Text(role.displayName(lang: lang))
                                             .font(.system(size: 15, weight: .bold, design: .rounded))
                                             .foregroundColor(.bbInk)
-                                        Text(role.description)
+                                        Text(role.roleDescription(lang: lang))
                                             .font(.system(size: 12, weight: .medium, design: .rounded))
                                             .foregroundColor(.bbInkSoft)
                                     }
@@ -334,13 +344,12 @@ private struct MemberDetailSheet: View {
 
                 Spacer()
 
-                // Actions
                 VStack(spacing: 8) {
                     Button {
                         onRoleChange(selectedRole)
                         dismiss()
                     } label: {
-                        Text("Сохранить роль")
+                        Text(t("Save role", "Сохранить роль"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -354,7 +363,7 @@ private struct MemberDetailSheet: View {
                     Button(role: .destructive) {
                         showRemoveConfirm = true
                     } label: {
-                        Text("Удалить из команды")
+                        Text(t("Remove from team", "Удалить из команды"))
                             .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundColor(.bbCoralDeep)
                             .frame(maxWidth: .infinity)
@@ -365,23 +374,23 @@ private struct MemberDetailSheet: View {
                 .padding(.bottom, 16)
             }
             .background(Color.bbCream.ignoresSafeArea())
-            .navigationTitle("Редактировать")
+            .navigationTitle(t("Edit", "Редактировать"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }.foregroundColor(.bbInkSoft)
+                    Button(t("Cancel", "Отмена")) { dismiss() }.foregroundColor(.bbInkSoft)
                 }
             }
             .confirmationDialog(
-                "Удалить \(member.name) из команды?",
+                t("Remove \(member.name) from team?", "Удалить \(member.name) из команды?"),
                 isPresented: $showRemoveConfirm,
                 titleVisibility: .visible
             ) {
-                Button("Удалить", role: .destructive) {
+                Button(t("Remove", "Удалить"), role: .destructive) {
                     onRemove()
                     dismiss()
                 }
-                Button("Отмена", role: .cancel) {}
+                Button(t("Cancel", "Отмена"), role: .cancel) {}
             }
         }
     }
@@ -393,9 +402,12 @@ private struct InviteSheet: View {
     let onInvite: (FamilyMember) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var lang = "en"
     @State private var selectedRole: FamilyRole = .dad
     @State private var nameText = ""
     @State private var showShare = false
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private let blobsByRole: [FamilyRole: (BlobKind, Color)] = [
         .mom:     (.baby,  .bbCoral),
@@ -423,7 +435,6 @@ private struct InviteSheet: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
-                    // QR Card
                     VStack(spacing: 12) {
                         if let qr = qrImage {
                             qr
@@ -443,7 +454,7 @@ private struct InviteSheet: View {
                         HStack(spacing: 8) {
                             Image(systemName: "clock")
                                 .font(.system(size: 11))
-                            Text("Ссылка действует 24 часа")
+                            Text(t("Link valid for 24 hours", "Ссылка действует 24 часа"))
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                         }
                         .foregroundColor(.bbInkMute)
@@ -451,9 +462,8 @@ private struct InviteSheet: View {
                     .frame(maxWidth: .infinity)
                     .bbCard(pad: 20)
 
-                    // Role picker
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("РОЛЬ В КОМАНДЕ")
+                        Text(t("ROLE IN TEAM", "РОЛЬ В КОМАНДЕ"))
                             .font(.system(size: 11, weight: .heavy, design: .rounded))
                             .foregroundColor(.bbInkMute)
                             .kerning(0.5)
@@ -466,7 +476,7 @@ private struct InviteSheet: View {
                                     VStack(spacing: 6) {
                                         let (blob, tone) = blobsByRole[role] ?? (.star, .bbButter)
                                         CuteBlobView(kind: blob, size: 36, tone: tone)
-                                        Text(role.rawValue)
+                                        Text(role.displayName(lang: lang))
                                             .font(.system(size: 11, weight: .bold, design: .rounded))
                                             .foregroundColor(selectedRole == role ? .bbCoralDeep : .bbInk)
                                     }
@@ -483,26 +493,24 @@ private struct InviteSheet: View {
                             }
                         }
 
-                        Text(selectedRole.description)
+                        Text(selectedRole.roleDescription(lang: lang))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundColor(.bbInkSoft)
                             .padding(.top, 2)
                     }
 
-                    // Optional name
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("ИМЯ (необязательно)")
+                        Text(t("NAME (optional)", "ИМЯ (необязательно)"))
                             .font(.system(size: 11, weight: .heavy, design: .rounded))
                             .foregroundColor(.bbInkMute)
                             .kerning(0.5)
-                        TextField("Например: Миша, Бабушка Оля…", text: $nameText)
+                        TextField(t("E.g.: Mike, Grandma Olga…", "Например: Миша, Бабушка Оля…"), text: $nameText)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .padding(14)
                             .background(Color.bbCard)
                             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
 
-                    // Share + Add buttons
                     VStack(spacing: 8) {
                         Button {
                             showShare = true
@@ -510,33 +518,33 @@ private struct InviteSheet: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "square.and.arrow.up")
                                     .font(.system(size: 15, weight: .bold))
-                                Text("Поделиться ссылкой")
+                                Text(t("Share link", "Поделиться ссылкой"))
                                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                             }
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color.bbInk)
+                            .background(Color.bbSurface)
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
 
                         Button {
                             let (blob, tone) = blobsByRole[selectedRole] ?? (.star, .bbButter)
                             let name = nameText.trimmingCharacters(in: .whitespaces).isEmpty
-                                ? selectedRole.rawValue
+                                ? selectedRole.displayName(lang: lang)
                                 : nameText.trimmingCharacters(in: .whitespaces)
                             onInvite(FamilyMember(
                                 name: name,
                                 role: selectedRole,
                                 isMe: false,
                                 isOnline: false,
-                                activity: "приглашение отправлено",
+                                activity: t("invitation sent", "приглашение отправлено"),
                                 blob: blob,
                                 tone: tone
                             ))
                             dismiss()
                         } label: {
-                            Text("Добавить в команду")
+                            Text(t("Add to team", "Добавить в команду"))
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(.bbCoralDeep)
                                 .frame(maxWidth: .infinity)
@@ -551,11 +559,11 @@ private struct InviteSheet: View {
                 .padding(20)
             }
             .background(Color.bbCream.ignoresSafeArea())
-            .navigationTitle("Пригласить")
+            .navigationTitle(t("Invite", "Пригласить"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }.foregroundColor(.bbInkSoft)
+                    Button(t("Cancel", "Отмена")) { dismiss() }.foregroundColor(.bbInkSoft)
                 }
             }
             .sheet(isPresented: $showShare) {

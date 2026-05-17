@@ -4,10 +4,18 @@ import Combine
 struct FeedingView: View {
     @ObservedObject var vm: TodayViewModel
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var lang = "en"
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private let typicalSeconds = 18 * 60
     private let barValues = [22, 15, 28, 18, 14, 8]
-    private let moodTags = ["😊 спокоен", "😴 уснул", "🤢 срыгнул", "+ свой"]
+    private var moodTags: [String] {
+        [t("😊 calm", "😊 спокоен"),
+         t("😴 fell asleep", "😴 уснул"),
+         t("🤢 spit up", "🤢 срыгнул"),
+         t("+ custom", "+ свой")]
+    }
 
     var progress: Double { Double(vm.feedingSeconds) / Double(typicalSeconds) }
 
@@ -15,7 +23,6 @@ struct FeedingView: View {
         ZStack {
             Color.bbCoral.ignoresSafeArea()
 
-            // Background blobs
             Circle()
                 .fill(Color.bbCoralDeep.opacity(0.18))
                 .frame(width: 200)
@@ -63,7 +70,7 @@ struct FeedingView: View {
                     )
             }
             Spacer()
-            Text("Кормление")
+            Text(t("Feeding", "Кормление"))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
             Spacer()
@@ -71,7 +78,7 @@ struct FeedingView: View {
                 .fill(Color.white.opacity(0.6))
                 .frame(width: 64, height: 32)
                 .overlay(
-                    Text("правка")
+                    Text(t("edit", "правка"))
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
                 )
@@ -82,19 +89,17 @@ struct FeedingView: View {
 
     private var timerRing: some View {
         VStack(spacing: 8) {
-            let sideLabel = vm.feedingSide.rawValue.uppercased()
-            Text("\(sideLabel) · \(vm.isFeedingActive ? "ИДЁТ" : "ПАУЗА")")
+            let sideLabel = vm.feedingSide.displayName(lang: lang).uppercased()
+            Text("\(sideLabel) · \(vm.isFeedingActive ? t("ACTIVE", "ИДЁТ") : t("PAUSED", "ПАУЗА"))")
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundColor(Color.bbInk.opacity(0.55))
                 .kerning(1)
 
             ZStack {
-                // Track
                 Circle()
                     .stroke(Color.white.opacity(0.3), lineWidth: 14)
                     .frame(width: 260, height: 260)
 
-                // Progress arc
                 Circle()
                     .trim(from: 0, to: CGFloat(min(progress, 1)))
                     .stroke(Color.white,
@@ -103,7 +108,6 @@ struct FeedingView: View {
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 1), value: vm.feedingSeconds)
 
-                // Center
                 VStack(spacing: 6) {
                     Text(vm.feedingTimerString)
                         .font(.system(size: 52, weight: .heavy, design: .monospaced))
@@ -111,7 +115,7 @@ struct FeedingView: View {
                         .contentTransition(.numericText())
                         .animation(.linear(duration: 0.4), value: vm.feedingSeconds)
 
-                    Text("из ≈ 18 мин обычно")
+                    Text(t("of ≈ 18 min typical", "из ≈ 18 мин обычно"))
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(Color.bbInk.opacity(0.55))
                 }
@@ -126,7 +130,7 @@ struct FeedingView: View {
         HStack(spacing: 0) {
             ForEach(FeedingSide.allCases, id: \.self) { side in
                 let isSelected = vm.feedingSide == side
-                Text(side.rawValue)
+                Text(side.displayName(lang: lang))
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundColor(isSelected ? .bbCoralDeep : Color.bbInk.opacity(0.5))
                     .frame(maxWidth: .infinity)
@@ -156,7 +160,7 @@ struct FeedingView: View {
                     vm.startFeeding(side: vm.feedingSide)
                 }
             }) {
-                Text(vm.isFeedingActive ? "‖ Пауза" : "▶ Продолжить")
+                Text(vm.isFeedingActive ? t("‖ Pause", "‖ Пауза") : t("▶ Resume", "▶ Продолжить"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                     .frame(maxWidth: .infinity)
@@ -169,12 +173,12 @@ struct FeedingView: View {
                 vm.stopFeeding()
                 dismiss()
             }) {
-                Text("■ Закончить")
+                Text(t("■ Done", "■ Закончить"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.bbInk)
+                    .background(Color.bbSurface)
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
         }
@@ -184,12 +188,13 @@ struct FeedingView: View {
 
     private var noteCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("ЗАМЕТКА")
+            Text(t("NOTE", "ЗАМЕТКА"))
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.6)
 
-            Text("Срыгнул чуть-чуть, в целом ок, после кормления улыбался.")
+            Text(t("Spit up a little, overall OK, smiled after feeding.",
+                   "Срыгнул чуть-чуть, в целом ок, после кормления улыбался."))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(.bbInkSoft)
                 .fixedSize(horizontal: false, vertical: true)
@@ -226,12 +231,12 @@ struct FeedingView: View {
     private var historyBar: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Сегодня")
+                Text(t("Today", "Сегодня"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
                 let feedCount = vm.logEntries.filter { $0.kind == .bottle }.count
-                Text("\(feedCount) кормлений")
+                Text(t("\(feedCount) feedings", "\(feedCount) кормлений"))
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkMute)
             }
@@ -241,7 +246,7 @@ struct FeedingView: View {
                     let isLast = i == barValues.count - 1
                     VStack(spacing: 4) {
                         if isLast {
-                            Text("сейчас")
+                            Text(t("now", "сейчас"))
                                 .font(.system(size: 9, weight: .heavy, design: .rounded))
                                 .foregroundColor(.bbCoralDeep)
                         } else {
@@ -250,7 +255,7 @@ struct FeedingView: View {
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
                             .fill(isLast ? Color.bbCoralDeep : Color.bbCoral.opacity(0.7))
                             .frame(height: CGFloat(barValues[i]) * 1.6)
-                        Text(["01", "04", "06", "11", "14", "сейч"][i])
+                        Text(["01", "04", "06", "11", "14", t("now", "сейч")][i])
                             .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundColor(.bbInkMute)
                     }

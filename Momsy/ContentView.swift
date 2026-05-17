@@ -13,26 +13,29 @@ struct ContentView: View {
 }
 
 struct MainTabView: View {
+    @AppStorage("appLanguage") private var lang = "en"
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
     var body: some View {
         TabView {
             TodayView()
-                .tabItem { Label("Сегодня", systemImage: "sun.max.fill") }
+                .tabItem { Label(t("Today", "Сегодня"), systemImage: "sun.max.fill") }
 
             LeapsView()
-                .tabItem { Label("Скачки", systemImage: "star.fill") }
+                .tabItem { Label(t("Leaps", "Скачки"), systemImage: "star.fill") }
 
             DiaryView()
-                .tabItem { Label("Дневник", systemImage: "heart.fill") }
+                .tabItem { Label(t("Diary", "Дневник"), systemImage: "heart.fill") }
 
             NavigationStack {
                 DoctorMenuView()
             }
-            .tabItem { Label("Доктор", systemImage: "drop.fill") }
+            .tabItem { Label(t("Doctor", "Доктор"), systemImage: "drop.fill") }
 
             NavigationStack {
                 MeView()
             }
-            .tabItem { Label("Я", systemImage: "person.circle.fill") }
+            .tabItem { Label(t("Me", "Я"), systemImage: "person.circle.fill") }
         }
         .tint(.bbCoralDeep)
     }
@@ -41,10 +44,12 @@ struct MainTabView: View {
 // MARK: - Doctor Menu
 
 struct DoctorMenuView: View {
+    @AppStorage("appLanguage") private var lang = "en"
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
-                // Prominent panic button
                 NavigationLink(destination: SymptomView()) {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack(spacing: 12) {
@@ -57,11 +62,11 @@ struct DoctorMenuView: View {
                                         .foregroundColor(.white)
                                 )
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("ТРЕВОЖНАЯ КНОПКА")
+                                Text(t("PANIC BUTTON", "ТРЕВОЖНАЯ КНОПКА"))
                                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                                     .foregroundColor(.white.opacity(0.75))
                                     .kerning(0.5)
-                                Text("Что-то не так?")
+                                Text(t("Something wrong?", "Что-то не так?"))
                                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                                     .foregroundColor(.white)
                             }
@@ -70,7 +75,8 @@ struct DoctorMenuView: View {
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white.opacity(0.6))
                         }
-                        Text("Отметьте симптомы — получите подсказку. Не диагноз, а навигация.")
+                        Text(t("Note symptoms — get guidance. Not a diagnosis, just navigation.",
+                               "Отметьте симптомы — получите подсказку. Не диагноз, а навигация."))
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundColor(.white.opacity(0.85))
                             .fixedSize(horizontal: false, vertical: true)
@@ -82,15 +88,14 @@ struct DoctorMenuView: View {
                 }
                 .buttonStyle(.plain)
 
-                // Secondary items
                 VStack(spacing: 1) {
                     DoctorMenuRow(
                         destination: ReportView(),
                         icon: "doc.text.fill",
                         iconColor: .bbSkyDeep,
                         iconBg: Color.bbSky.opacity(0.3),
-                        title: "Отчёт для педиатра",
-                        sub: "PDF за неделю — сон, кормление, вес"
+                        title: t("Pediatrician Report", "Отчёт для педиатра"),
+                        sub: t("PDF for the week — sleep, feeding, weight", "PDF за неделю — сон, кормление, вес")
                     )
                     Divider().padding(.leading, 60)
                     DoctorMenuRow(
@@ -98,8 +103,8 @@ struct DoctorMenuView: View {
                         icon: "chart.xyaxis.line",
                         iconColor: .bbMintDeep,
                         iconBg: Color.bbMint.opacity(0.3),
-                        title: "Рост и вес",
-                        sub: "График по перцентилям ВОЗ"
+                        title: t("Height & Weight", "Рост и вес"),
+                        sub: t("WHO percentile chart", "График по перцентилям ВОЗ")
                     )
                 }
                 .background(Color.bbCard)
@@ -111,7 +116,7 @@ struct DoctorMenuView: View {
             .padding(.bottom, 24)
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .navigationTitle("Доктор")
+        .navigationTitle(t("Doctor", "Доктор"))
     }
 }
 
@@ -154,15 +159,27 @@ private struct DoctorMenuRow<D: View>: View {
 // MARK: - Me / Profile Menu
 
 struct MeView: View {
+    @AppStorage("appLanguage") private var lang = "en"
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
                 meSection(rows: [
-                    MeRow(destination: SharingView(),  icon: "person.3.fill",   bg: .bbCoral,  title: "Семья и роли",       sub: "Мама, папа, няня, бабушка"),
-                    MeRow(destination: SoundsView(),    icon: "music.note",       bg: .bbLilac,  title: "Колыбельные и шум",  sub: "Белый шум, мелодии, таймер"),
+                    MeRow(destination: SharingView(),
+                          icon: "person.3.fill", bg: .bbCoral,
+                          title: t("Family & Roles", "Семья и роли"),
+                          sub: t("Mom, dad, nanny, grandma", "Мама, папа, няня, бабушка")),
+                    MeRow(destination: SoundsView(),
+                          icon: "music.note", bg: .bbLilac,
+                          title: t("Lullabies & Sounds", "Колыбельные и шум"),
+                          sub: t("White noise, melodies, timer", "Белый шум, мелодии, таймер")),
                 ])
                 meSection(rows: [
-                    MeRow(destination: SettingsView(), icon: "gearshape.fill",   bg: .bbSky,    title: "Настройки",          sub: "Тема, язык"),
+                    MeRow(destination: SettingsView(),
+                          icon: "gearshape.fill", bg: .bbSky,
+                          title: t("Settings", "Настройки"),
+                          sub: t("Theme, language", "Тема, язык")),
                 ])
             }
             .padding(.horizontal, 20)
@@ -170,7 +187,7 @@ struct MeView: View {
             .padding(.bottom, 24)
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .navigationTitle("Профиль")
+        .navigationTitle(t("Profile", "Профиль"))
     }
 
     private func meSection(rows: [MeRow]) -> some View {

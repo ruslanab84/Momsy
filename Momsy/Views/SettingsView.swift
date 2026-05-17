@@ -2,7 +2,9 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage("appTheme")    private var appTheme    = "system"
-    @AppStorage("appLanguage") private var appLanguage = "ru"
+    @AppStorage("appLanguage") private var appLanguage = "en"
+
+    private func t(_ en: String, _ ru: String) -> String { appLanguage == "en" ? en : ru }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -16,7 +18,7 @@ struct SettingsView: View {
             .padding(.bottom, 32)
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .navigationTitle("Настройки")
+        .navigationTitle(t("Settings", "Настройки"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -24,15 +26,15 @@ struct SettingsView: View {
 
     private var themeSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BBSectionLabel(text: "Тема приложения")
+            BBSectionLabel(text: t("App Theme", "Тема приложения"))
 
             HStack(spacing: 10) {
-                themeCard(id: "light",  icon: "sun.max.fill",        label: "Светлая", accent: .bbButter)
-                themeCard(id: "system", icon: "circle.lefthalf.fill", label: "Авто",    accent: .bbLilac)
-                themeCard(id: "dark",   icon: "moon.fill",            label: "Тёмная",  accent: .bbSky)
+                themeCard(id: "light",  icon: "sun.max.fill",        label: t("Light", "Светлая"), accent: .bbButter)
+                themeCard(id: "system", icon: "circle.lefthalf.fill", label: t("Auto",  "Авто"),    accent: .bbLilac)
+                themeCard(id: "dark",   icon: "moon.fill",            label: t("Dark",  "Тёмная"),  accent: .bbSky)
             }
 
-            Text("Авто — следует системной теме устройства.")
+            Text(t("Auto follows the system appearance.", "Авто — следует системной теме устройства."))
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)
@@ -74,17 +76,17 @@ struct SettingsView: View {
 
     private var languageSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BBSectionLabel(text: "Язык")
+            BBSectionLabel(text: t("Language", "Язык"))
 
             HStack(spacing: 14) {
                 iconSquare(systemName: "globe", bg: .bbMint)
-                Text("Язык приложения")
+                Text(t("App Language", "Язык приложения"))
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
                 Picker("", selection: $appLanguage) {
-                    Text("🇷🇺 Русский").tag("ru")
                     Text("🇬🇧 English").tag("en")
+                    Text("🇷🇺 Русский").tag("ru")
                     Text("🇩🇪 Deutsch").tag("de")
                     Text("🇪🇸 Español").tag("es")
                 }
@@ -97,7 +99,7 @@ struct SettingsView: View {
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .bbShadow()
 
-            Text("English, Deutsch, Español — скоро.")
+            Text(t("Deutsch, Español — coming soon.", "English, Deutsch, Español — скоро."))
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)
@@ -108,16 +110,16 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BBSectionLabel(text: "О приложении")
+            BBSectionLabel(text: t("About", "О приложении"))
 
             VStack(spacing: 0) {
-                infoRow(icon: "info.circle.fill",  bg: .bbSky,    title: "Версия",               value: "1.0.0 (1)")
+                infoRow(icon: "info.circle.fill",  bg: .bbSky,    title: t("Version", "Версия"),               value: "1.0.0 (1)")
                 Divider().opacity(0.2).padding(.leading, 60)
-                infoRow(icon: "heart.fill",        bg: .bbRose,   title: "Сделано с любовью",    value: "для мам")
+                infoRow(icon: "heart.fill",        bg: .bbRose,   title: t("Made with love", "Сделано с любовью"),    value: t("for moms", "для мам"))
                 Divider().opacity(0.2).padding(.leading, 60)
-                chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: "Конфиденциальность")
+                chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: t("Privacy", "Конфиденциальность"))
                 Divider().opacity(0.2).padding(.leading, 60)
-                chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: "Написать нам")
+                chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: t("Contact Us", "Написать нам"))
             }
             .background(Color.bbCard)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))

@@ -9,7 +9,12 @@ struct TrackingView: View {
     @State private var showAddMeasurement = false
     @State private var showAddTemp = false
 
-    private let tabs = ["Вес", "Рост", "Окруж. головы", "Темп."]
+    @AppStorage("appLanguage") private var lang = "en"
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
+    private var tabs: [String] {
+        [t("Weight", "Вес"), t("Height", "Рост"), t("Head circ.", "Окруж. головы"), t("Temp.", "Темп.")]
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -17,7 +22,7 @@ struct TrackingView: View {
                 header
                 tabPicker
                 if selectedTab == 3 {
-                    TempBarChart(entries: Array(tempLog.prefix(7).reversed()))
+                    TempBarChart(entries: Array(tempLog.prefix(7).reversed()), lang: lang)
                 } else {
                     growthChartCard
                 }
@@ -43,21 +48,21 @@ struct TrackingView: View {
 
     private var headerSummary: String {
         switch selectedTab {
-        case 0: return "\(measurements.first?.weight ?? "—") · сегодня"
-        case 1: return "\(measurements.first?.height ?? "—") · сегодня"
-        case 2: return "\(measurements.first?.headCirc ?? "—") · сегодня"
+        case 0: return "\(measurements.first?.weight ?? "—") · \(t("today", "сегодня"))"
+        case 1: return "\(measurements.first?.height ?? "—") · \(t("today", "сегодня"))"
+        case 2: return "\(measurements.first?.headCirc ?? "—") · \(t("today", "сегодня"))"
         case 3:
-            guard let t = tempLog.first else { return "нет данных" }
-            return String(format: "%.1f°C · %@ %@", t.value, t.dateLabel, t.timeLabel)
+            guard let e = tempLog.first else { return t("no data", "нет данных") }
+            return String(format: "%.1f°C · %@ %@", e.value, e.dateLabel, e.timeLabel)
         default: return ""
         }
     }
 
     private var pillText: String {
         if selectedTab == 3, let v = tempLog.first?.value {
-            return v >= 38.5 ? "высокая" : v >= 37.5 ? "субфебрильная" : "норма"
+            return v >= 38.5 ? t("high", "высокая") : v >= 37.5 ? t("subfebr.", "субфебрильная") : t("normal", "норма")
         }
-        return "в норме"
+        return t("normal", "в норме")
     }
     private var pillColor: Color {
         if selectedTab == 3, let v = tempLog.first?.value {
@@ -75,8 +80,8 @@ struct TrackingView: View {
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                BBSectionLabel(text: "Здоровье")
-                Text("Рост и вес")
+                BBSectionLabel(text: t("Health", "Здоровье"))
+                Text(t("Height & Weight", "Рост и вес"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Text(headerSummary)
@@ -104,7 +109,7 @@ struct TrackingView: View {
                             .foregroundColor(i == selectedTab ? .white : .bbInkSoft)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(i == selectedTab ? Color.bbInk : Color.bbCard)
+                            .background(i == selectedTab ? Color.bbSurface : Color.bbCard)
                             .clipShape(Capsule())
                             .bbShadowSoft()
                     }
@@ -113,7 +118,7 @@ struct TrackingView: View {
         }
     }
 
-    // MARK: - Growth Chart Card (tabs 0-2)
+    // MARK: - Growth Chart Card (tabs 0–2)
 
     private struct ChartConfig {
         let title: String
@@ -124,9 +129,9 @@ struct TrackingView: View {
 
     private var currentChartConfig: ChartConfig {
         switch selectedTab {
-        case 1: return ChartConfig(title: "Рост, см",           unit: "см", data: sampleHeightData, gridVals: [50, 55, 60, 65])
-        case 2: return ChartConfig(title: "Окруж. головы, см",  unit: "см", data: sampleHeadData,   gridVals: [34, 37, 40, 43])
-        default: return ChartConfig(title: "Вес, кг",           unit: "кг", data: sampleWeightData,  gridVals: [3, 5, 7, 9])
+        case 1: return ChartConfig(title: t("Height, cm", "Рост, см"),            unit: "cm", data: sampleHeightData, gridVals: [50, 55, 60, 65])
+        case 2: return ChartConfig(title: t("Head circ., cm", "Окруж. головы, см"), unit: "cm", data: sampleHeadData,   gridVals: [34, 37, 40, 43])
+        default: return ChartConfig(title: t("Weight, kg", "Вес, кг"),             unit: "kg", data: sampleWeightData,  gridVals: [3, 5, 7, 9])
         }
     }
 
@@ -138,7 +143,7 @@ struct TrackingView: View {
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
-                Text("0–5 мес · перцентили ВОЗ")
+                Text(t("0–5 mo · WHO percentiles", "0–5 мес · перцентили ВОЗ"))
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkMute)
             }
@@ -148,9 +153,9 @@ struct TrackingView: View {
                 .animation(.easeInOut(duration: 0.3), value: selectedTab)
 
             HStack(spacing: 12) {
-                legendItem(color: .bbCoralDeep, isDashed: false, label: "Лёва")
-                legendItem(color: .bbMint,      isDashed: false, label: "Норма 15–85%")
-                legendItem(color: .bbMintDeep,  isDashed: true,  label: "Медиана")
+                legendItem(color: .bbCoralDeep, isDashed: false, label: t("Baby", "Лёва"))
+                legendItem(color: .bbMint,      isDashed: false, label: t("Normal 15–85%", "Норма 15–85%"))
+                legendItem(color: .bbMintDeep,  isDashed: true,  label: t("Median", "Медиана"))
             }
             .padding(.top, 4)
         }
@@ -179,7 +184,7 @@ struct TrackingView: View {
 
     private var measurementsList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: selectedTab == 3 ? "История температуры" : "Последние замеры")
+            BBSectionLabel(text: selectedTab == 3 ? t("Temperature history", "История температуры") : t("Recent measurements", "Последние замеры"))
             if selectedTab == 3 {
                 tempList
             } else {
@@ -280,7 +285,7 @@ struct TrackingView: View {
     private var actionButtons: some View {
         HStack(spacing: 8) {
             Button { showAddMeasurement = true } label: {
-                Text("+ Вес / рост")
+                Text(t("+ Weight / Height", "+ Вес / рост"))
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                     .frame(maxWidth: .infinity)
@@ -290,7 +295,7 @@ struct TrackingView: View {
                     .bbShadowSoft()
             }
             Button { showAddTemp = true } label: {
-                Text("+ Температура")
+                Text(t("+ Temperature", "+ Температура"))
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -310,7 +315,7 @@ struct TrackingView: View {
         v >= 38.5 ? .bbRose : v >= 37.5 ? .bbButter : .bbMint
     }
     private func tempLabel(_ v: Double) -> String {
-        v >= 38.5 ? "высокая" : v >= 37.5 ? "субфебр." : "норма"
+        v >= 38.5 ? t("high", "высокая") : v >= 37.5 ? t("subfebr.", "субфебр.") : t("normal", "норма")
     }
 }
 
@@ -341,7 +346,6 @@ private struct WHOLineChart: View {
             let maxV = (allVals.max() ?? 9.0) + 0.5
 
             ZStack(alignment: .topLeading) {
-                // P15–P85 band
                 Path { p in
                     guard !data.isEmpty else { return }
                     p.move(to: CGPoint(x: xPos(0, width: w), y: yPos(data[0].p15, height: h, minV: minV, maxV: maxV)))
@@ -355,7 +359,6 @@ private struct WHOLineChart: View {
                 }
                 .fill(Color.bbMint.opacity(0.35))
 
-                // P50 dashed median
                 Path { p in
                     guard !data.isEmpty else { return }
                     p.move(to: CGPoint(x: xPos(0, width: w), y: yPos(data[0].p50, height: h, minV: minV, maxV: maxV)))
@@ -365,7 +368,6 @@ private struct WHOLineChart: View {
                 }
                 .stroke(Color.bbMintDeep.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
 
-                // Grid lines + Y labels
                 ForEach(gridVals, id: \.self) { v in
                     let yg = yPos(Double(v), height: h, minV: minV, maxV: maxV)
                     Path { p in
@@ -379,7 +381,6 @@ private struct WHOLineChart: View {
                         .position(x: padL - 10, y: yg)
                 }
 
-                // Baby curve
                 Path { p in
                     guard !data.isEmpty else { return }
                     p.move(to: CGPoint(x: xPos(0, width: w), y: yPos(data[0].babyKg, height: h, minV: minV, maxV: maxV)))
@@ -389,7 +390,6 @@ private struct WHOLineChart: View {
                 }
                 .stroke(Color.bbCoralDeep, style: StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round))
 
-                // Dots
                 ForEach(data.indices, id: \.self) { i in
                     let pt = CGPoint(x: xPos(i, width: w), y: yPos(data[i].babyKg, height: h, minV: minV, maxV: maxV))
                     let isLast = i == data.count - 1
@@ -400,7 +400,6 @@ private struct WHOLineChart: View {
                         .position(pt)
                 }
 
-                // Current value label
                 if let last = data.last, let lastIdx = data.indices.last {
                     let pt = CGPoint(
                         x: xPos(lastIdx, width: w) - 22,
@@ -415,9 +414,8 @@ private struct WHOLineChart: View {
                         .position(pt)
                 }
 
-                // X labels
                 ForEach(data.indices, id: \.self) { i in
-                    Text("\(data[i].month)м")
+                    Text("\(data[i].month)m")
                         .font(.system(size: 9, weight: .bold, design: .monospaced))
                         .foregroundColor(.bbInkMute)
                         .position(x: xPos(i, width: w), y: h - 4)
@@ -431,7 +429,9 @@ private struct WHOLineChart: View {
 
 private struct TempBarChart: View {
     let entries: [TemperatureEntry]
+    let lang: String
 
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
     private func barColor(_ v: Double) -> Color {
         v >= 38.5 ? .bbCoralDeep : v >= 37.5 ? .bbButterDeep : .bbMintDeep
     }
@@ -439,17 +439,17 @@ private struct TempBarChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Температура, °C")
+                Text(t("Temperature, °C", "Температура, °C"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
-                Text("последние замеры")
+                Text(t("recent readings", "последние замеры"))
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkMute)
             }
 
             if entries.isEmpty {
-                Text("Нет данных о температуре")
+                Text(t("No temperature data", "Нет данных о температуре"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -485,9 +485,9 @@ private struct TempBarChart: View {
             }
 
             HStack(spacing: 12) {
-                legendDot(color: .bbMintDeep,   label: "норма < 37.5°")
-                legendDot(color: .bbButterDeep, label: "субфебр. 37.5–38.4°")
-                legendDot(color: .bbCoralDeep,  label: "высокая ≥ 38.5°")
+                legendDot(color: .bbMintDeep,   label: t("normal < 37.5°", "норма < 37.5°"))
+                legendDot(color: .bbButterDeep, label: t("subfebr. 37.5–38.4°", "субфебр. 37.5–38.4°"))
+                legendDot(color: .bbCoralDeep,  label: t("high ≥ 38.5°", "высокая ≥ 38.5°"))
             }
         }
         .bbCard(pad: 14)
@@ -507,51 +507,53 @@ private struct TempBarChart: View {
 
 private struct AddMeasurementSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var lang = "en"
     let onAdd: (MeasurementEntry) -> Void
 
     @State private var weightStr = ""
     @State private var heightStr = ""
     @State private var headStr = ""
 
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
     private var isValid: Bool { !weightStr.isEmpty || !heightStr.isEmpty }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Замеры") {
+                Section(t("Measurements", "Замеры")) {
                     HStack {
-                        Text("Вес").foregroundColor(.bbInkSoft)
-                        TextField("кг (напр. 6.4)", text: $weightStr)
+                        Text(t("Weight", "Вес")).foregroundColor(.bbInkSoft)
+                        TextField(t("kg (e.g. 6.4)", "кг (напр. 6.4)"), text: $weightStr)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
                     HStack {
-                        Text("Рост").foregroundColor(.bbInkSoft)
-                        TextField("см (напр. 64)", text: $heightStr)
+                        Text(t("Height", "Рост")).foregroundColor(.bbInkSoft)
+                        TextField(t("cm (e.g. 64)", "см (напр. 64)"), text: $heightStr)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
                     HStack {
-                        Text("Окр. головы").foregroundColor(.bbInkSoft)
-                        TextField("см (напр. 42)", text: $headStr)
+                        Text(t("Head circ.", "Окр. головы")).foregroundColor(.bbInkSoft)
+                        TextField(t("cm (e.g. 42)", "см (напр. 42)"), text: $headStr)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
                 }
                 Section {
-                    Text("Заполните хотя бы одно поле.")
+                    Text(t("Fill in at least one field.", "Заполните хотя бы одно поле."))
                         .font(.system(size: 12, design: .rounded))
                         .foregroundColor(.bbInkMute)
                 }
             }
-            .navigationTitle("Новый замер")
+            .navigationTitle(t("New measurement", "Новый замер"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
+                    Button(t("Cancel", "Отмена")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") { save() }
+                    Button(t("Save", "Сохранить")) { save() }
                         .disabled(!isValid)
                         .fontWeight(.bold)
                 }
@@ -560,11 +562,11 @@ private struct AddMeasurementSheet: View {
     }
 
     private func save() {
-        let w  = weightStr.isEmpty ? "—" : "\(weightStr) кг"
-        let h  = heightStr.isEmpty ? "—" : "\(heightStr) см"
-        let hc = headStr.isEmpty   ? "—" : "\(headStr) см"
+        let w  = weightStr.isEmpty ? "—" : "\(weightStr) \(t("kg", "кг"))"
+        let h  = heightStr.isEmpty ? "—" : "\(heightStr) \(t("cm", "см"))"
+        let hc = headStr.isEmpty   ? "—" : "\(headStr) \(t("cm", "см"))"
         onAdd(MeasurementEntry(
-            dateLabel: "Сегодня",
+            dateLabel: t("Today", "Сегодня"),
             weight: w, height: h, headCirc: hc,
             delta: "", visitLabel: nil
         ))
@@ -576,10 +578,13 @@ private struct AddMeasurementSheet: View {
 
 private struct AddTempSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var lang = "en"
     let onAdd: (TemperatureEntry) -> Void
 
     @State private var tempStr = ""
     @State private var note = ""
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private var parsedTemp: Double? {
         Double(tempStr.replacingOccurrences(of: ",", with: "."))
@@ -590,23 +595,23 @@ private struct AddTempSheet: View {
         v >= 38.5 ? .bbCoralDeep : v >= 37.5 ? .bbButterDeep : .bbMintDeep
     }
     private func valueLabel(_ v: Double) -> String {
-        v >= 38.5 ? "Высокая 🌡" : v >= 37.5 ? "Субфебрильная" : "Норма ✓"
+        v >= 38.5 ? t("High 🌡", "Высокая 🌡") : v >= 37.5 ? t("Subfebr.", "Субфебрильная") : t("Normal ✓", "Норма ✓")
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Температура") {
+                Section(t("Temperature", "Температура")) {
                     HStack {
                         Text("°C").foregroundColor(.bbInkSoft)
-                        TextField("напр. 36.6", text: $tempStr)
+                        TextField(t("e.g. 36.6", "напр. 36.6"), text: $tempStr)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
-                    TextField("Заметка (необязательно)", text: $note)
+                    TextField(t("Note (optional)", "Заметка (необязательно)"), text: $note)
                 }
                 if let val = parsedTemp {
-                    Section("Предварительный просмотр") {
+                    Section(t("Preview", "Предварительный просмотр")) {
                         HStack {
                             Text(String(format: "%.1f°C", val))
                                 .font(.system(size: 28, weight: .heavy, design: .rounded))
@@ -620,14 +625,14 @@ private struct AddTempSheet: View {
                     }
                 }
             }
-            .navigationTitle("Записать температуру")
+            .navigationTitle(t("Record temperature", "Записать температуру"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
+                    Button(t("Cancel", "Отмена")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") { save() }
+                    Button(t("Save", "Сохранить")) { save() }
                         .disabled(!isValid)
                         .fontWeight(.bold)
                 }
@@ -639,7 +644,7 @@ private struct AddTempSheet: View {
         guard let val = parsedTemp else { return }
         let comps = Calendar.current.dateComponents([.hour, .minute], from: Date())
         let timeLabel = String(format: "%02d:%02d", comps.hour ?? 0, comps.minute ?? 0)
-        onAdd(TemperatureEntry(dateLabel: "Сегодня", timeLabel: timeLabel, value: val, note: note))
+        onAdd(TemperatureEntry(dateLabel: t("Today", "Сегодня"), timeLabel: timeLabel, value: val, note: note))
         dismiss()
     }
 }

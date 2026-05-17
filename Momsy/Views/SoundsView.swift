@@ -3,7 +3,8 @@ import SwiftUI
 // MARK: - SoundsView
 
 struct SoundsView: View {
-    @AppStorage("babyName") private var babyName = ""
+    @AppStorage("babyName")    private var babyName = ""
+    @AppStorage("appLanguage") private var lang = "en"
 
     @State private var sounds = sampleSounds
     @State private var selectedTimerIdx = 3        // default: ∞
@@ -11,21 +12,42 @@ struct SoundsView: View {
     @State private var countdownTask: Task<Void, Never>? = nil
 
     private let timerDurations = [15 * 60, 30 * 60, 60 * 60, 0]
-    private let timerLabels    = ["15 мин", "30 мин", "1 ч", "∞"]
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
+    private var timerLabels: [String] {
+        ["15 \(t("min", "мин"))", "30 \(t("min", "мин"))", "1 \(t("hr", "ч"))", "∞"]
+    }
 
     private var anyPlaying: Bool { sounds.contains { $0.isPlaying } }
     private var nowPlaying: SoundItem? { sounds.first { $0.isPlaying } }
-    private var displayNameSuffix: String { babyName.isEmpty ? "" : " для \(babyName)" }
+
+    private func tone(for sound: SoundItem) -> Color {
+        switch sound.categoryEn {
+        case "white noise":  return .bbLilac
+        case "nature":       return .bbMint
+        case "pink noise":   return .bbRose
+        case "melody":       return .bbButter
+        case "for newborns": return .bbCoral
+        default:             return .bbSky
+        }
+    }
+
+    private var displayNameSuffix: String {
+        babyName.isEmpty ? "" : t(" for \(babyName)", " для \(babyName)")
+    }
 
     private var timerDisplay: String {
-        if selectedTimerIdx == 3 { return "играет непрерывно" }
+        if selectedTimerIdx == 3 { return t("playing continuously", "играет непрерывно") }
         if timerSecondsLeft <= 0 { return "—" }
         let m = timerSecondsLeft / 60
         if m >= 60 {
             let h = m / 60; let rem = m % 60
-            return rem == 0 ? "\(h) ч до выкл." : "\(h) ч \(rem) мин до выкл."
+            return rem == 0
+                ? "\(h) \(t("hr to stop", "ч до выкл."))"
+                : "\(h) \(t("hr", "ч")) \(rem) \(t("min to stop", "мин до выкл."))"
         }
-        return "\(m) мин \(String(format: "%02d", timerSecondsLeft % 60)) с до выкл."
+        return "\(m) \(t("min", "мин")) \(String(format: "%02d", timerSecondsLeft % 60)) \(t("sec to stop", "с до выкл."))"
     }
 
     var body: some View {
@@ -115,7 +137,6 @@ struct SoundsView: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
 
-            // Stars via Canvas (no UIScreen)
             GeometryReader { geo in
                 Canvas { ctx, size in
                     let stars: [(CGFloat, CGFloat, CGFloat)] = [
@@ -131,17 +152,16 @@ struct SoundsView: View {
                         )
                     }
                 }
-                // Moon
                 CuteBlobView(kind: .moon, size: 90, tone: .clear)
                     .position(x: geo.size.width - 60, y: 56)
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("пусть спит крепко")
+                Text(t("sleep tight", "пусть спит крепко"))
                     .font(.custom("Georgia", size: 18))
                     .italic()
                     .foregroundColor(Color.bbInk.opacity(0.5))
-                Text("Колыбельная\(displayNameSuffix)")
+                Text(t("Lullaby\(displayNameSuffix)", "Колыбельная\(displayNameSuffix)"))
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
             }
@@ -155,21 +175,20 @@ struct SoundsView: View {
     private var nowPlayingCard: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                // Animated icon
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(nowPlaying?.tone ?? .bbCoral)
+                    .fill(nowPlaying.map { tone(for: $0) } ?? .bbCoral)
                     .frame(width: 52, height: 52)
                     .overlay(
                         EqualizerBars(isPlaying: anyPlaying, color: .bbInk, count: 5, maxH: 20, minH: 5)
                     )
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("СЕЙЧАС ИГРАЕТ")
+                    Text(t("NOW PLAYING", "СЕЙЧАС ИГРАЕТ"))
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbButter)
                         .kerning(0.5)
                     if let np = nowPlaying {
-                        Text("\(np.name) · \(np.category)")
+                        Text("\(np.displayName(lang: lang)) · \(np.displayCategory(lang: lang))")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
                     }
@@ -182,7 +201,6 @@ struct SoundsView: View {
 
                 Spacer()
 
-                // Stop button
                 Button(action: stopAll) {
                     Circle()
                         .fill(Color.white)
@@ -195,7 +213,6 @@ struct SoundsView: View {
                 }
             }
 
-            // Timer chips
             HStack(spacing: 6) {
                 ForEach(timerLabels.indices, id: \.self) { i in
                     Button { selectTimer(i) } label: {
@@ -211,14 +228,14 @@ struct SoundsView: View {
                 }
             }
         }
-        .bbCard(pad: 14, bg: .bbInk)
+        .bbCard(pad: 14, bg: .bbSurface)
     }
 
     // MARK: - Sound Grid
 
     private var soundGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: "Звуки")
+            BBSectionLabel(text: t("Sounds", "Звуки"))
             LazyVGrid(
                 columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                 spacing: 8
@@ -288,11 +305,25 @@ private struct SoundCard: View {
     let sound: SoundItem
     let onPlay: () -> Void
 
+    @AppStorage("appLanguage") private var lang = "en"
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
+    private var cardTone: Color {
+        switch sound.categoryEn {
+        case "white noise":  return .bbLilac
+        case "nature":       return .bbMint
+        case "pink noise":   return .bbRose
+        case "melody":       return .bbButter
+        case "for newborns": return .bbCoral
+        default:             return .bbSky
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(sound.tone)
+                    .fill(cardTone)
                     .aspectRatio(1.65, contentMode: .fit)
                     .overlay(
                         EqualizerBars(
@@ -305,7 +336,7 @@ private struct SoundCard: View {
                     )
 
                 if sound.isPlaying {
-                    Text("играет")
+                    Text(t("playing", "играет"))
                         .font(.system(size: 9, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
                         .padding(.horizontal, 7)
@@ -319,10 +350,10 @@ private struct SoundCard: View {
 
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(sound.name)
+                    Text(sound.displayName(lang: lang))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text(sound.category)
+                    Text(sound.displayCategory(lang: lang))
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                 }

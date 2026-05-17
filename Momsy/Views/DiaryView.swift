@@ -6,6 +6,7 @@ import PhotosUI
 struct DiaryView: View {
     @AppStorage("babyName")      private var babyName = ""
     @AppStorage("babyBirthDate") private var babyBirthDateInterval: Double = 0
+    @AppStorage("appLanguage")   private var lang = "en"
 
     @State private var selectedFilter = 0
     @State private var entries: [DiaryDay] = sampleDiary
@@ -13,9 +14,13 @@ struct DiaryView: View {
     @State private var photosByID: [UUID: UIImage] = [:]
     @State private var showAdd = false
 
-    private let filters = ["Всё", "★ Milestones", "📷 Фото", "✎ Заметки"]
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
-    private var displayName: String { babyName.isEmpty ? "Малыша" : babyName }
+    private var filters: [String] {
+        [t("All", "Всё"), "★ Milestones", t("📷 Photo", "📷 Фото"), t("✎ Notes", "✎ Заметки")]
+    }
+
+    private var displayName: String { babyName.isEmpty ? t("Baby", "Малыша") : babyName }
 
     private var filteredEntries: [DiaryDay] {
         switch selectedFilter {
@@ -75,7 +80,8 @@ struct DiaryView: View {
                     .animation(.spring(response: 0.38, dampingFraction: 0.82), value: selectedFilter)
                 }
 
-                Text("через год вы откроете это и будете улыбаться ✿")
+                Text(t("A year from now you'll open this and smile ✿",
+                       "через год вы откроете это и будете улыбаться ✿"))
                     .font(.custom("Georgia", size: 18))
                     .italic()
                     .foregroundColor(.bbInkMute)
@@ -103,7 +109,8 @@ struct DiaryView: View {
     // MARK: - Helpers
 
     private func insertDay(_ newDay: DiaryDay) {
-        if let idx = entries.firstIndex(where: { $0.dateLabel.hasPrefix("Сегодня") }) {
+        let todayPrefix = t("Today", "Сегодня")
+        if let idx = entries.firstIndex(where: { $0.dateLabel.hasPrefix(todayPrefix) }) {
             entries[idx].items.insert(contentsOf: newDay.items, at: 0)
         } else {
             entries.insert(newDay, at: 0)
@@ -115,8 +122,8 @@ struct DiaryView: View {
     private var headerBar: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                BBSectionLabel(text: "Лента")
-                Text("Дневник \(displayName)")
+                BBSectionLabel(text: t("Feed", "Лента"))
+                Text(t("\(displayName)'s Diary", "Дневник \(displayName)"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
             }
@@ -151,7 +158,7 @@ struct DiaryView: View {
                             .foregroundColor(selectedFilter == i ? .white : .bbInkSoft)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(selectedFilter == i ? Color.bbInk : Color.bbCard)
+                            .background(selectedFilter == i ? Color.bbSurface : Color.bbCard)
                             .clipShape(Capsule())
                             .bbShadowSoft()
                     }
@@ -168,10 +175,11 @@ struct DiaryView: View {
     private var emptyState: some View {
         VStack(spacing: 12) {
             CuteBlobView(kind: .heart, size: 72, tone: .bbRose)
-            Text("Пусто")
+            Text(t("Empty", "Пусто"))
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
-            Text("В этой категории пока нет записей.\nДобавьте первую — нажмите +")
+            Text(t("Nothing in this category yet.\nAdd the first — tap +",
+                   "В этой категории пока нет записей.\nДобавьте первую — нажмите +"))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkSoft)
                 .multilineTextAlignment(.center)
@@ -254,9 +262,11 @@ private struct PhotoCard: View {
     let isLiked: Bool
     let onLike: () -> Void
 
+    @AppStorage("appLanguage") private var lang = "en"
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Background: real photo or placeholder
             if let uiImage = image {
                 Image(uiImage: uiImage)
                     .resizable()
@@ -274,13 +284,11 @@ private struct PhotoCard: View {
                     )
             }
 
-            // Gradient overlay for text readability
             LinearGradient(
                 colors: [.clear, .black.opacity(0.35)],
                 startPoint: .center, endPoint: .bottom
             )
 
-            // Caption + badges
             HStack(alignment: .bottom) {
                 Text(handwriting)
                     .font(.custom("Georgia", size: 24))
@@ -308,7 +316,7 @@ private struct PhotoCard: View {
         .overlay(alignment: .topLeading) {
             HStack(spacing: 6) {
                 if image == nil {
-                    Label("фото малыша", systemImage: "camera")
+                    Label(t("baby's photo", "фото малыша"), systemImage: "camera")
                         .font(.system(size: 10, weight: .heavy, design: .monospaced))
                         .foregroundColor(.bbInk)
                         .padding(.horizontal, 10)
@@ -399,21 +407,41 @@ struct AddEntrySheet: View {
     let onAdd: (DiaryDay, [UUID: UIImage]) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var lang = "en"
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private enum EntryType: String, CaseIterable {
-        case note = "Заметка"
-        case milestone = "Milestone"
-        case photo = "Фото"
+        case note = "note"
+        case milestone = "milestone"
+        case photo = "photo"
+
+        func displayName(lang: String) -> String {
+            switch self {
+            case .note:      return lang == "en" ? "Note"      : "Заметка"
+            case .milestone: return "Milestone"
+            case .photo:     return lang == "en" ? "Photo"     : "Фото"
+            }
+        }
     }
 
-    private let presetMilestones: [(BlobKind, String)] = [
-        (.star,   "Первая улыбка"),
-        (.moon,   "Перевернулся"),
-        (.baby,   "Сел сам"),
-        (.bear,   "Первый зуб"),
-        (.bottle, "Попробовал прикорм"),
-        (.heart,  "Первое слово"),
-    ]
+    private var presetMilestones: [(BlobKind, String)] {
+        lang == "en" ? [
+            (.star,   "First smile"),
+            (.moon,   "Rolled over"),
+            (.baby,   "Sat up alone"),
+            (.bear,   "First tooth"),
+            (.bottle, "Tried solids"),
+            (.heart,  "First word"),
+        ] : [
+            (.star,   "Первая улыбка"),
+            (.moon,   "Перевернулся"),
+            (.baby,   "Сел сам"),
+            (.bear,   "Первый зуб"),
+            (.bottle, "Попробовал прикорм"),
+            (.heart,  "Первое слово"),
+        ]
+    }
 
     private let photoTones: [Color] = [.bbCoral, .bbButter, .bbMint, .bbLilac, .bbSky, .bbRose]
 
@@ -440,30 +468,36 @@ struct AddEntrySheet: View {
         let birth = Date(timeIntervalSince1970: babyBirthDateInterval)
         let comps = Calendar.current.dateComponents([.month, .day], from: birth, to: Date())
         let m = comps.month ?? 0, d = comps.day ?? 0
-        if m == 0 { return "\(d) дн" }
-        if d == 0 { return "\(m) мес" }
-        return "\(m) мес \(d) дн"
+        if m == 0 { return "\(d) \(t("d", "дн"))" }
+        if d == 0 { return "\(m) \(t("mo", "мес"))" }
+        return "\(m) \(t("mo", "мес")) \(d) \(t("d", "дн"))"
     }
 
     private var todayLabel: String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ru_RU")
-        f.dateFormat = "EEEE, d MMMM"
-        return "Сегодня · " + String(f.string(from: Date()).prefix(2).lowercased())
+        if lang == "en" {
+            f.locale = Locale(identifier: "en_US")
+            f.dateFormat = "EEE, d MMM"
+            return "Today · " + f.string(from: Date())
+        } else {
+            f.locale = Locale(identifier: "ru_RU")
+            f.dateFormat = "EEEE, d MMMM"
+            return "Сегодня · " + String(f.string(from: Date()).prefix(2).lowercased())
+        }
     }
 
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
-                    // Type picker
-                    Picker("Тип", selection: $entryType) {
-                        ForEach(EntryType.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    Picker(t("Type", "Тип"), selection: $entryType) {
+                        ForEach(EntryType.allCases, id: \.self) {
+                            Text($0.displayName(lang: lang)).tag($0)
+                        }
                     }
                     .pickerStyle(.segmented)
                     .padding(.top, 4)
 
-                    // Content
                     Group {
                         switch entryType {
                         case .note:      noteContent
@@ -473,9 +507,8 @@ struct AddEntrySheet: View {
                     }
                     .animation(.spring(response: 0.3, dampingFraction: 0.8), value: entryType)
 
-                    // Add button
                     Button(action: commit) {
-                        Text("Добавить в дневник")
+                        Text(t("Add to Diary", "Добавить в дневник"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -489,11 +522,11 @@ struct AddEntrySheet: View {
                 .padding(20)
             }
             .background(Color.bbCream.ignoresSafeArea())
-            .navigationTitle("Новая запись")
+            .navigationTitle(t("New Entry", "Новая запись"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
+                    Button(t("Cancel", "Отмена")) { dismiss() }
                         .foregroundColor(.bbInkSoft)
                 }
             }
@@ -504,7 +537,7 @@ struct AddEntrySheet: View {
 
     private var noteContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("ЧТО ХОТИТЕ ЗАПИСАТЬ?")
+            Text(t("WHAT DO YOU WANT TO WRITE?", "ЧТО ХОТИТЕ ЗАПИСАТЬ?"))
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.5)
@@ -520,7 +553,8 @@ struct AddEntrySheet: View {
                 )
                 .overlay(alignment: .topLeading) {
                     if noteText.isEmpty {
-                        Text("Например: «Впервые засмеялся в голос!»")
+                        Text(t("E.g. Laughed out loud for the first time!",
+                               "Например: «Впервые засмеялся в голос!»"))
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .foregroundColor(.bbInkMute.opacity(0.6))
                             .padding(16)
@@ -534,12 +568,11 @@ struct AddEntrySheet: View {
 
     private var milestoneContent: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("ВЫБЕРИТЕ ИКОНКУ")
+            Text(t("CHOOSE ICON", "ВЫБЕРИТЕ ИКОНКУ"))
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.5)
 
-            // Preset milestone buttons
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                 ForEach(presetMilestones, id: \.1) { kind, label in
                     Button {
@@ -567,12 +600,12 @@ struct AddEntrySheet: View {
                 }
             }
 
-            Text("ИЛИ НАПИШИТЕ СВОЁ")
+            Text(t("OR WRITE YOUR OWN", "ИЛИ НАПИШИТЕ СВОЁ"))
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.5)
 
-            TextField("Например: «Первый переворот»", text: $milestoneLabel)
+            TextField(t("E.g. First roll-over", "Например: «Первый переворот»"), text: $milestoneLabel)
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .padding(14)
                 .background(Color.bbCard)
@@ -584,12 +617,11 @@ struct AddEntrySheet: View {
 
     private var photoContent: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("ВЫБЕРИТЕ ФОТО")
+            Text(t("CHOOSE PHOTO", "ВЫБЕРИТЕ ФОТО"))
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.5)
 
-            // Photo picker / preview
             PhotosPicker(selection: $photoItem, matching: .images) {
                 ZStack {
                     if let img = photoImage {
@@ -610,7 +642,7 @@ struct AddEntrySheet: View {
                                         Image(systemName: "camera.fill")
                                             .font(.system(size: 32, weight: .light))
                                             .foregroundColor(.white.opacity(0.8))
-                                        Text("Нажмите, чтобы выбрать")
+                                        Text(t("Tap to choose", "Нажмите, чтобы выбрать"))
                                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                                             .foregroundColor(.white.opacity(0.8))
                                     }
@@ -632,10 +664,9 @@ struct AddEntrySheet: View {
                 }
             }
 
-            // Placeholder color picker (shown when no real photo)
             if photoImage == nil {
                 HStack(spacing: 10) {
-                    Text("Цвет плейсхолдера:")
+                    Text(t("Placeholder color:", "Цвет плейсхолдера:"))
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInkSoft)
                     ForEach(photoTones, id: \.self) { c in
@@ -655,12 +686,12 @@ struct AddEntrySheet: View {
                 }
             }
 
-            Text("ПОДПИСЬ (рукописный стиль)")
+            Text(t("CAPTION (handwriting style)", "ПОДПИСЬ (рукописный стиль)"))
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.5)
 
-            TextField("Например: «первый смех»", text: $caption)
+            TextField(t("E.g. first laugh", "Например: «первый смех»"), text: $caption)
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .padding(14)
                 .background(Color.bbCard)
@@ -682,7 +713,7 @@ struct AddEntrySheet: View {
             newItem = DiaryItem(type: .milestone(icon: selectedIcon, label: milestoneLabel.trimmingCharacters(in: .whitespacesAndNewlines)))
 
         case .photo:
-            newItem = DiaryItem(type: .photo(tone: selectedTone, handwriting: caption.isEmpty ? "момент" : caption, isMilestone: false))
+            newItem = DiaryItem(type: .photo(tone: selectedTone, handwriting: caption.isEmpty ? t("moment", "момент") : caption, isMilestone: false))
             if let img = photoImage { photos[newItem.id] = img }
         }
 

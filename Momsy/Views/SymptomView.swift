@@ -5,7 +5,7 @@ import SwiftUI
 private struct Symptom: Identifiable {
     let id: String
     let label: String
-    var sub: String
+    let sub: String
     let tone: Color
     let icon: String
     var isOn: Bool
@@ -37,13 +37,6 @@ private struct SymptomResult: Equatable {
         case .urgent:   return Color.bbCoralDeep
         }
     }
-    var urgencyLabel: String {
-        switch urgency {
-        case .calm:     return "Наблюдаем"
-        case .watchful: return "Скорее всего"
-        case .urgent:   return "Нужен врач"
-        }
-    }
     var urgencyIcon: String {
         switch urgency {
         case .calm:     return "checkmark.circle.fill"
@@ -56,34 +49,54 @@ private struct SymptomResult: Equatable {
 // MARK: - View
 
 struct SymptomView: View {
-    @AppStorage("babyName") private var babyName = ""
+    @AppStorage("babyName")    private var babyName = ""
+    @AppStorage("appLanguage") private var lang = "en"
 
-    @State private var symptoms: [Symptom] = [
-        Symptom(id: "fever",  label: "Температура",  sub: "37.8°C · 40 мин",  tone: .bbCoral,     icon: "🌡", isOn: true),
-        Symptom(id: "rash",   label: "Сыпь",          sub: "выберите место",    tone: .bbRose,      icon: "◌",  isOn: false),
-        Symptom(id: "vomit",  label: "Рвота",          sub: "нет",               tone: .bbButter,    icon: "↑",  isOn: false),
-        Symptom(id: "cry",    label: "Долгий плач",    sub: "> 1 ч",             tone: .bbLilac,     icon: "♪",  isOn: true),
-        Symptom(id: "stool",  label: "Стул",           sub: "обычный",           tone: .bbMint,      icon: "⬭",  isOn: false),
-        Symptom(id: "eat",    label: "Отказ от еды",   sub: "выбрать",           tone: .bbSky,       icon: "✕",  isOn: false),
-        Symptom(id: "sleep",  label: "Нарушение сна",  sub: "короткие фазы",     tone: .bbLilac,     icon: "☾",  isOn: true),
-        Symptom(id: "other",  label: "Другое",         sub: "описать",           tone: .bbCreamSoft, icon: "+",  isOn: false),
-    ]
-
+    @State private var isOnIDs: Set<String> = ["fever", "cry", "sleep"]
     @State private var diaryLogged = false
-    @State private var showClearConfirm = false
 
-    private var displayName: String { babyName.isEmpty ? "Малыш" : babyName }
-    private var activeCount: Int { symptoms.filter(\.isOn).count }
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+    private var displayName: String { babyName.isEmpty ? t("Baby", "Малыш") : babyName }
+    private var activeCount: Int { isOnIDs.count }
+
+    private var symptoms: [Symptom] {
+        [
+            Symptom(id: "fever",  label: t("Temperature",   "Температура"),
+                    sub: "37.8°C · 40 \(t("min", "мин"))",      tone: .bbCoral,     icon: "🌡", isOn: isOnIDs.contains("fever")),
+            Symptom(id: "rash",   label: t("Rash",          "Сыпь"),
+                    sub: t("choose area",   "выберите место"),    tone: .bbRose,      icon: "◌",  isOn: isOnIDs.contains("rash")),
+            Symptom(id: "vomit",  label: t("Vomiting",      "Рвота"),
+                    sub: t("none",          "нет"),               tone: .bbButter,    icon: "↑",  isOn: isOnIDs.contains("vomit")),
+            Symptom(id: "cry",    label: t("Long crying",   "Долгий плач"),
+                    sub: "> 1 \(t("hr",    "ч"))",               tone: .bbLilac,     icon: "♪",  isOn: isOnIDs.contains("cry")),
+            Symptom(id: "stool",  label: t("Stool",         "Стул"),
+                    sub: t("normal",        "обычный"),           tone: .bbMint,      icon: "⬭",  isOn: isOnIDs.contains("stool")),
+            Symptom(id: "eat",    label: t("Refusing food", "Отказ от еды"),
+                    sub: t("select",        "выбрать"),           tone: .bbSky,       icon: "✕",  isOn: isOnIDs.contains("eat")),
+            Symptom(id: "sleep",  label: t("Sleep issues",  "Нарушение сна"),
+                    sub: t("short phases",  "короткие фазы"),     tone: .bbLilac,     icon: "☾",  isOn: isOnIDs.contains("sleep")),
+            Symptom(id: "other",  label: t("Other",         "Другое"),
+                    sub: t("describe",      "описать"),           tone: .bbCreamSoft, icon: "+",  isOn: isOnIDs.contains("other")),
+        ]
+    }
+
+    private func urgencyLabel(for urgency: SymptomUrgency) -> String {
+        switch urgency {
+        case .calm:     return t("Watching", "Наблюдаем")
+        case .watchful: return t("Likely", "Скорее всего")
+        case .urgent:   return t("See Doctor", "Нужен врач")
+        }
+    }
 
     private var result: SymptomResult {
-        let on = Set(symptoms.filter(\.isOn).map(\.id))
+        let on = isOnIDs
 
         if on.isEmpty {
             return SymptomResult(
-                title: "Ничего не отмечено",
-                detail: "Отметьте симптомы выше — мы подскажем, что может происходить.",
-                warning: "",
-                urgency: .calm
+                title: t("Nothing marked", "Ничего не отмечено"),
+                detail: t("Mark symptoms above — we'll suggest what might be happening.",
+                          "Отметьте симптомы выше — мы подскажем, что может происходить."),
+                warning: "", urgency: .calm
             )
         }
 
@@ -96,72 +109,90 @@ struct SymptomView: View {
 
         if hasFever && hasRash {
             return SymptomResult(
-                title: "Требует осмотра",
-                detail: "Сочетание температуры и сыпи требует внимания педиатра. Не откладывайте — позвоните врачу сегодня.",
-                warning: "сыпь + температура · отёк лица или горла · затруднённое дыхание",
+                title: t("Needs Examination", "Требует осмотра"),
+                detail: t("Fever combined with a rash needs a paediatrician's attention. Don't delay — call your doctor today.",
+                          "Сочетание температуры и сыпи требует внимания педиатра. Не откладывайте — позвоните врачу сегодня."),
+                warning: t("rash + fever · face or throat swelling · difficulty breathing",
+                           "сыпь + температура · отёк лица или горла · затруднённое дыхание"),
                 urgency: .urgent
             )
         }
         if hasVomit && hasFever {
             return SymptomResult(
-                title: "Гастроэнтерит",
-                detail: "Рвота с температурой — возможна кишечная инфекция. Следите за водным балансом: грудь и вода чаще обычного.",
-                warning: "отказ от воды дольше 6 ч · запавший родничок · сухой рот · рвота с кровью",
+                title: t("Gastroenteritis", "Гастроэнтерит"),
+                detail: t("Vomiting with fever may indicate a gut infection. Keep fluids up: offer breast and water more often.",
+                          "Рвота с температурой — возможна кишечная инфекция. Следите за водным балансом: грудь и вода чаще обычного."),
+                warning: t("refusing fluids 6+ hrs · sunken fontanelle · dry mouth · bloody vomit",
+                           "отказ от воды дольше 6 ч · запавший родничок · сухой рот · рвота с кровью"),
                 urgency: .urgent
             )
         }
         if hasVomit {
             return SymptomResult(
-                title: "Расстройство ЖКТ",
-                detail: "Возможен перекорм, газы или реакция на питание. Держите малыша вертикально 20 мин после еды.",
-                warning: "рвота фонтаном · рвота более 3 раз за 2 ч · кровь в рвоте",
+                title: t("Digestive Upset", "Расстройство ЖКТ"),
+                detail: t("Possible overfeeding, gas, or food reaction. Hold baby upright 20 min after feeding.",
+                          "Возможен перекорм, газы или реакция на питание. Держите малыша вертикально 20 мин после еды."),
+                warning: t("projectile vomiting · vomiting 3+ times in 2 hrs · blood in vomit",
+                           "рвота фонтаном · рвота более 3 раз за 2 ч · кровь в рвоте"),
                 urgency: .watchful
             )
         }
         if hasFever && hasCry && hasSleep {
             return SymptomResult(
-                title: "Прорезывание зубов",
-                detail: "Температура до 38°, плач, нарушение сна — частые спутники. Попробуйте холодный прорезыватель, носите на руках.",
-                warning: "t° > 38.5° дольше суток · отказ от воды · вялость · необычная сыпь",
+                title: t("Teething", "Прорезывание зубов"),
+                detail: t("Temp up to 38°, crying, disturbed sleep — classic signs. Try a cold teether, carry more.",
+                          "Температура до 38°, плач, нарушение сна — частые спутники. Попробуйте холодный прорезыватель, носите на руках."),
+                warning: t("t° > 38.5° for more than a day · refusing fluids · lethargy · unusual rash",
+                           "t° > 38.5° дольше суток · отказ от воды · вялость · необычная сыпь"),
                 urgency: .watchful
             )
         }
         if hasFever && hasEat {
             return SymptomResult(
-                title: "ОРВИ / воспаление горла",
-                detail: "Отказ от еды при температуре — частый признак вирусной инфекции. Предлагайте воду и грудь чаще обычного.",
-                warning: "t° > 39° · затруднённое дыхание · вялость · отказ от воды",
+                title: t("ARVI / Sore Throat", "ОРВИ / воспаление горла"),
+                detail: t("Refusing food with fever is a common sign of a viral infection. Offer fluids and breast more often.",
+                          "Отказ от еды при температуре — частый признак вирусной инфекции. Предлагайте воду и грудь чаще обычного."),
+                warning: t("t° > 39° · difficulty breathing · lethargy · refusing all fluids",
+                           "t° > 39° · затруднённое дыхание · вялость · отказ от воды"),
                 urgency: .watchful
             )
         }
         if hasFever {
             return SymptomResult(
-                title: "Вирусная инфекция",
-                detail: "Следите за динамикой. Жаропонижающее при t° > 38.5°. Обеспечьте достаточное питьё.",
-                warning: "t° > 38° у детей до 3 мес · t° > 39° у старших · судороги · вялость",
+                title: t("Viral Infection", "Вирусная инфекция"),
+                detail: t("Monitor closely. Use fever reducer at t° > 38.5°. Ensure adequate fluids.",
+                          "Следите за динамикой. Жаропонижающее при t° > 38.5°. Обеспечьте достаточное питьё."),
+                warning: t("t° > 38° in babies under 3 mo · t° > 39° in older babies · seizures · lethargy",
+                           "t° > 38° у детей до 3 мес · t° > 39° у старших · судороги · вялость"),
                 urgency: .watchful
             )
         }
         if hasCry && hasSleep {
             return SymptomResult(
-                title: "Скачок или колики",
-                detail: "Плач и нарушение сна без температуры чаще всего — скачок развития или колики. Попробуйте массаж животика и «позицию тигра».",
-                warning: "плач дольше 3 часов без перерыва · живот твёрдый и вздутый",
+                title: t("Leap or Colic", "Скачок или колики"),
+                detail: t("Crying and disturbed sleep without fever are usually a developmental leap or colic. Try tummy massage and the 'tiger position'.",
+                          "Плач и нарушение сна без температуры чаще всего — скачок развития или колики. Попробуйте массаж животика и «позицию тигра»."),
+                warning: t("crying 3+ hrs non-stop · hard bloated belly",
+                           "плач дольше 3 часов без перерыва · живот твёрдый и вздутый"),
                 urgency: .calm
             )
         }
         if hasCry {
             return SymptomResult(
-                title: "Долгий плач",
-                detail: "Проверьте основные причины: голод, подгузник, температура в комнате, усталость. Пик колик — 6 недель.",
-                warning: "плач необычного тона · выгибание спины · нет мочеиспускания 8+ ч",
+                title: t("Prolonged Crying", "Долгий плач"),
+                detail: t("Check the basics: hunger, diaper, room temperature, tiredness. Peak colic age is 6 weeks.",
+                          "Проверьте основные причины: голод, подгузник, температура в комнате, усталость. Пик колик — 6 недель."),
+                warning: t("unusual tone of cry · arching back · no urination 8+ hrs",
+                           "плач необычного тона · выгибание спины · нет мочеиспускания 8+ ч"),
                 urgency: .calm
             )
         }
         return SymptomResult(
-            title: "Наблюдаем",
-            detail: "Отмеченные симптомы не вызывают тревоги. Продолжайте наблюдать и записывайте любые изменения.",
-            warning: "любое ухудшение · новые симптомы · ваша интуиция — вы лучше знаете малыша",
+            title: t("Watching", "Наблюдаем"),
+            detail: t("The marked symptoms aren't alarming. Keep observing and log any changes.",
+                      "Отмеченные симптомы не вызывают тревоги. Продолжайте наблюдать и записывайте любые изменения."),
+            warning: t("any worsening · new symptoms · your gut — you know your baby best",
+                       "любое ухудшение · новые симптомы · ваша интуиция — вы лучше знаете малыша"),
             urgency: .calm
         )
     }
@@ -197,10 +228,10 @@ struct SymptomView: View {
                         .foregroundColor(.white)
                 )
             VStack(alignment: .leading, spacing: 2) {
-                Text("Что-то не так?")
+                Text(t("Something wrong?", "Что-то не так?"))
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
-                Text("Отметьте — мы подскажем, что делать")
+                Text(t("Mark it — we'll guide you on what to do", "Отметьте — мы подскажем, что делать"))
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
             }
@@ -208,10 +239,10 @@ struct SymptomView: View {
             if activeCount > 0 {
                 Button {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        for i in symptoms.indices { symptoms[i].isOn = false }
+                        isOnIDs = []
                     }
                 } label: {
-                    Text("сбросить")
+                    Text(t("reset", "сбросить"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                 }
@@ -227,17 +258,18 @@ struct SymptomView: View {
                 .font(.system(size: 18))
                 .foregroundColor(.bbButter)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Это не диагноз")
+                Text(t("NOT A DIAGNOSIS", "Это не диагноз"))
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbButter)
                     .kerning(0.6)
-                Text("Помогаем сориентироваться. Решение принимаете вы и врач.")
+                Text(t("We help you navigate. The decision is yours and your doctor's.",
+                       "Помогаем сориентироваться. Решение принимаете вы и врач."))
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(.white.opacity(0.9))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .bbCard(pad: 12, bg: .bbInk)
+        .bbCard(pad: 12, bg: .bbSurface)
     }
 
     // MARK: - Symptom Grid
@@ -245,10 +277,14 @@ struct SymptomView: View {
     private var symptomGrid: some View {
         let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
         return LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(symptoms.indices, id: \.self) { i in
-                SymptomCard(symptom: symptoms[i]) {
+            ForEach(symptoms) { symptom in
+                SymptomCard(symptom: symptom) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        symptoms[i].isOn.toggle()
+                        if isOnIDs.contains(symptom.id) {
+                            isOnIDs.remove(symptom.id)
+                        } else {
+                            isOnIDs.insert(symptom.id)
+                        }
                     }
                 }
             }
@@ -264,7 +300,7 @@ struct SymptomView: View {
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(result.warningColor)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(result.urgencyLabel.uppercased())
+                    Text(urgencyLabel(for: result.urgency).uppercased())
                         .font(.system(size: 11, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbButterDeep)
                         .kerning(0.6)
@@ -287,7 +323,7 @@ struct SymptomView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 11))
                             .foregroundColor(result.warningColor)
-                        Text("Срочно к врачу, если:")
+                        Text(t("See doctor urgently if:", "Срочно к врачу, если:"))
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
                             .foregroundColor(result.warningColor)
                     }
@@ -321,7 +357,7 @@ struct SymptomView: View {
                 HStack(spacing: 6) {
                     Image(systemName: diaryLogged ? "checkmark" : "book.closed")
                         .font(.system(size: 14, weight: .bold))
-                    Text(diaryLogged ? "Записано" : "В дневник")
+                    Text(diaryLogged ? t("Saved", "Записано") : t("To diary", "В дневник"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                 }
                 .foregroundColor(diaryLogged ? .bbMintDeep : .bbInk)
@@ -340,7 +376,7 @@ struct SymptomView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "phone.fill")
                         .font(.system(size: 14, weight: .bold))
-                    Text("Позвонить")
+                    Text(t("Call", "Позвонить"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                 }
                 .foregroundColor(.white)
@@ -355,7 +391,8 @@ struct SymptomView: View {
     // MARK: - Footer Disclaimer
 
     private var disclaimer: some View {
-        Text("Подсказки на основе симптомов — это навигация, не диагноз.\nПри любых сомнениях — всегда к педиатру.")
+        Text(t("Symptom hints are navigation, not a diagnosis.\nWhen in doubt — always see your paediatrician.",
+               "Подсказки на основе симптомов — это навигация, не диагноз.\nПри любых сомнениях — всегда к педиатру."))
             .font(.system(size: 11, weight: .semibold, design: .rounded))
             .foregroundColor(.bbInkMute)
             .multilineTextAlignment(.center)

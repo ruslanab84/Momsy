@@ -3,22 +3,6 @@ import UIKit
 
 // MARK: - Supporting types
 
-private struct ReportSection: Identifiable {
-    let id = UUID()
-    let label: String
-    var isOn: Bool
-
-    static let defaults: [ReportSection] = [
-        ReportSection(label: "Кормления и срыгивания",   isOn: true),
-        ReportSection(label: "Сон по дням",              isOn: true),
-        ReportSection(label: "Подгузники и стул",        isOn: true),
-        ReportSection(label: "Температура / симптомы",   isOn: true),
-        ReportSection(label: "Вес и рост (график)",      isOn: true),
-        ReportSection(label: "Лекарства и витамины",     isOn: false),
-        ReportSection(label: "Фото и заметки",           isOn: false),
-    ]
-}
-
 private struct ActivityView: UIViewControllerRepresentable {
     let items: [Any]
     func makeUIViewController(context: Context) -> UIActivityViewController {
@@ -30,64 +14,79 @@ private struct ActivityView: UIViewControllerRepresentable {
 // MARK: - ReportView
 
 struct ReportView: View {
-    @AppStorage("babyName") private var babyName = ""
+    @AppStorage("babyName")    private var babyName = ""
+    @AppStorage("appLanguage") private var lang = "en"
 
     @State private var selectedPeriod = 1
-    @State private var includes: [ReportSection] = ReportSection.defaults
+    @State private var isOnStates: [Bool] = [true, true, true, true, true, false, false]
     @State private var isGenerating = false
     @State private var shareURL: URL? = nil
     @State private var showShare = false
 
-    private let periods = ["3 дня", "Неделя", "2 недели", "Месяц", "С визита"]
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+    private var displayName: String { babyName.isEmpty ? t("Baby", "Малыш") : babyName }
 
-    private var displayName: String { babyName.isEmpty ? "Малыш" : babyName }
-
-    private var periodLabel: String {
-        ["3 дня", "неделю", "2 недели", "месяц", "последний визит"][selectedPeriod]
+    private var periods: [String] {
+        [t("3 days", "3 дня"), t("Week", "Неделя"), t("2 weeks", "2 недели"), t("Month", "Месяц"), t("Since visit", "С визита")]
     }
 
-    // Stats per period
+    private var periodLabel: String {
+        [t("3 days", "3 дня"), t("a week", "неделю"), t("2 weeks", "2 недели"),
+         t("a month", "месяц"), t("last visit", "последний визит")][selectedPeriod]
+    }
+
+    private var sectionLabels: [String] {
+        [
+            t("Feedings & spit-ups",   "Кормления и срыгивания"),
+            t("Sleep by day",          "Сон по дням"),
+            t("Diapers & stool",       "Подгузники и стул"),
+            t("Temp / symptoms",       "Температура / симптомы"),
+            t("Weight & height",       "Вес и рост (график)"),
+            t("Medicine & vitamins",   "Лекарства и витамины"),
+            t("Photos & notes",        "Фото и заметки"),
+        ]
+    }
+
     private var currentStats: [(label: String, value: String, sub: String, tone: Color)] {
         switch selectedPeriod {
         case 0: return [
-            ("Кормлений",   "21",      "7 / день",         .bbCoral),
-            ("Сон",         "14ч 5м",  "медиана / сутки",  .bbLilac),
-            ("Подгузники",  "16",      "мокрых · норма",   .bbSky),
-            ("Температура", "36.7°",   "норма · 3 дня",    .bbMintDeep),
+            (t("Feedings",     "Кормлений"),   "21",      t("7 / day",            "7 / день"),          .bbCoral),
+            (t("Sleep",        "Сон"),         "14h 5m",  t("median / day",       "медиана / сутки"),   .bbLilac),
+            (t("Diapers",      "Подгузники"),  "16",      t("wet · normal",       "мокрых · норма"),    .bbSky),
+            (t("Temperature",  "Температура"), "36.7°",   t("normal · 3 days",    "норма · 3 дня"),     .bbMintDeep),
         ]
         case 1: return [
-            ("Кормлений",   "47",      "6.7 / день",        .bbCoral),
-            ("Сон",         "14ч 12м", "медиана / сутки",   .bbLilac),
-            ("Подгузники",  "38",      "мокрых · обычно",   .bbSky),
-            ("Температура", "37.8°",   "пик · 1 раз",       .bbCoralDeep),
+            (t("Feedings",     "Кормлений"),   "47",      t("6.7 / day",          "6.7 / день"),        .bbCoral),
+            (t("Sleep",        "Сон"),         "14h 12m", t("median / day",       "медиана / сутки"),   .bbLilac),
+            (t("Diapers",      "Подгузники"),  "38",      t("wet · usual",        "мокрых · обычно"),   .bbSky),
+            (t("Temperature",  "Температура"), "37.8°",   t("peak · 1 time",      "пик · 1 раз"),       .bbCoralDeep),
         ]
         case 2: return [
-            ("Кормлений",   "94",      "6.7 / день",        .bbCoral),
-            ("Сон",         "14ч 8м",  "медиана / сутки",   .bbLilac),
-            ("Подгузники",  "76",      "мокрых · обычно",   .bbSky),
-            ("Температура", "37.8°",   "пик · 1 раз",       .bbCoralDeep),
+            (t("Feedings",     "Кормлений"),   "94",      t("6.7 / day",          "6.7 / день"),        .bbCoral),
+            (t("Sleep",        "Сон"),         "14h 8m",  t("median / day",       "медиана / сутки"),   .bbLilac),
+            (t("Diapers",      "Подгузники"),  "76",      t("wet · usual",        "мокрых · обычно"),   .bbSky),
+            (t("Temperature",  "Температура"), "37.8°",   t("peak · 1 time",      "пик · 1 раз"),       .bbCoralDeep),
         ]
         default: return [
-            ("Кормлений",   "~200",    "6.5 / день",        .bbCoral),
-            ("Сон",         "13ч 50м", "медиана / сутки",   .bbLilac),
-            ("Подгузники",  "~160",    "мокрых · норма",    .bbSky),
-            ("Температура", "37.8°",   "пик · 2 раза",      .bbCoralDeep),
+            (t("Feedings",     "Кормлений"),   "~200",    t("6.5 / day",          "6.5 / день"),        .bbCoral),
+            (t("Sleep",        "Сон"),         "13h 50m", t("median / day",       "медиана / сутки"),   .bbLilac),
+            (t("Diapers",      "Подгузники"),  "~160",    t("wet · normal",       "мокрых · норма"),    .bbSky),
+            (t("Temperature",  "Температура"), "37.8°",   t("peak · 2 times",     "пик · 2 раза"),      .bbCoralDeep),
         ]
         }
     }
 
-    // Sparklines per period
     private var currentSparklines: [(label: String, values: [Double], color: Color, peak: String)] {
         switch selectedPeriod {
         case 0: return [
-            ("Кормления / сут", [7, 6, 7],                               .bbCoralDeep, "7"),
-            ("Сон / сут (ч)",   [14.5, 14, 14.2],                        .bbLilacDeep, "14.5"),
-            ("Температура °C",  [36.6, 36.7, 36.6],                      .bbCoralDeep, "36.7"),
+            (t("Feedings / day", "Кормления / сут"), [7, 6, 7],              .bbCoralDeep, "7"),
+            (t("Sleep / day (h)", "Сон / сут (ч)"),  [14.5, 14, 14.2],       .bbLilacDeep, "14.5"),
+            (t("Temperature °C", "Температура °C"),  [36.6, 36.7, 36.6],     .bbCoralDeep, "36.7"),
         ]
         default: return [
-            ("Кормления / сут", [7, 8, 6, 7, 7, 7, 5],                  .bbCoralDeep, "5"),
-            ("Сон / сут (ч)",   [14.5, 14, 13.5, 14, 14.5, 14, 13],     .bbLilacDeep, "13"),
-            ("Температура °C",  [36.6, 36.7, 36.6, 36.8, 37.4, 37.8, 36.9], .bbCoralDeep, "37.8"),
+            (t("Feedings / day", "Кормления / сут"), [7, 8, 6, 7, 7, 7, 5],                   .bbCoralDeep, "5"),
+            (t("Sleep / day (h)", "Сон / сут (ч)"),  [14.5, 14, 13.5, 14, 14.5, 14, 13],      .bbLilacDeep, "13"),
+            (t("Temperature °C", "Температура °C"),  [36.6, 36.7, 36.6, 36.8, 37.4, 37.8, 36.9], .bbCoralDeep, "37.8"),
         ]
         }
     }
@@ -119,9 +118,9 @@ struct ReportView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            BBSectionLabel(text: "Отчёт для педиатра")
+            BBSectionLabel(text: t("Paediatric Report", "Отчёт для педиатра"))
             HStack(alignment: .lastTextBaseline, spacing: 6) {
-                Text("Подготовить за")
+                Text(t("Prepare for", "Подготовить за"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Text(periodLabel)
@@ -130,14 +129,15 @@ struct ReportView: View {
                     .contentTransition(.interpolate)
                     .animation(.spring(response: 0.3), value: periodLabel)
             }
-            Text("Сводка для визита: сон · еда · вес · температура · стул")
+            Text(t("Visit summary: sleep · food · weight · temp · stool",
+                   "Сводка для визита: сон · еда · вес · температура · стул"))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(.bbInkSoft)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // MARK: - Period chips (interactive)
+    // MARK: - Period chips
 
     private var periodChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -153,7 +153,7 @@ struct ReportView: View {
                             .foregroundColor(selectedPeriod == i ? .white : .bbInk)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-                            .background(selectedPeriod == i ? Color.bbInk : Color.bbCard)
+                            .background(selectedPeriod == i ? Color.bbSurface : Color.bbCard)
                             .clipShape(Capsule())
                             .bbShadowSoft()
                     }
@@ -172,7 +172,8 @@ struct ReportView: View {
             babyName: displayName,
             periodLabel: periods[selectedPeriod],
             stats: currentStats,
-            sparklines: currentSparklines
+            sparklines: currentSparklines,
+            lang: lang
         )
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .bbShadow()
@@ -185,24 +186,24 @@ struct ReportView: View {
 
     private var includeCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("ВКЛЮЧИТЬ В ОТЧЁТ")
+            Text(t("INCLUDE IN REPORT", "ВКЛЮЧИТЬ В ОТЧЁТ"))
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.5)
                 .padding(.bottom, 8)
 
-            ForEach(includes.indices, id: \.self) { i in
+            ForEach(isOnStates.indices, id: \.self) { i in
                 HStack {
-                    Text(includes[i].label)
+                    Text(sectionLabels[i])
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInk)
                     Spacer()
-                    Toggle("", isOn: $includes[i].isOn)
+                    Toggle("", isOn: $isOnStates[i])
                         .tint(.bbMintDeep)
                         .labelsHidden()
                 }
                 .padding(.vertical, 8)
-                if i < includes.count - 1 {
+                if i < isOnStates.count - 1 {
                     Divider().opacity(0.4)
                 }
             }
@@ -227,13 +228,13 @@ struct ReportView: View {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 15, weight: .bold))
                     }
-                    Text(isGenerating ? "Готовим PDF…" : "Поделиться PDF")
+                    Text(isGenerating ? t("Preparing PDF…", "Готовим PDF…") : t("Share PDF", "Поделиться PDF"))
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
-                .background(isGenerating ? Color.bbInk.opacity(0.6) : Color.bbInk)
+                .background(isGenerating ? Color.bbSurface.opacity(0.6) : Color.bbSurface)
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                 .animation(.easeInOut(duration: 0.2), value: isGenerating)
             }
@@ -245,7 +246,7 @@ struct ReportView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "printer")
                         .font(.system(size: 14, weight: .semibold))
-                    Text("Распечатать")
+                    Text(t("Print", "Распечатать"))
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                 }
                 .foregroundColor(.bbInkSoft)
@@ -274,7 +275,7 @@ struct ReportView: View {
         guard !isGenerating, let url = renderPDF() else { return }
         let info = UIPrintInfo.printInfo()
         info.outputType = .general
-        info.jobName = "Momsy — отчёт"
+        info.jobName = t("Momsy — report", "Momsy — отчёт")
         let controller = UIPrintInteractionController.shared
         controller.printInfo = info
         controller.printingItem = url
@@ -290,7 +291,8 @@ struct ReportView: View {
             babyName: displayName,
             periodLabel: periods[selectedPeriod],
             stats: currentStats,
-            sparklines: currentSparklines
+            sparklines: currentSparklines,
+            lang: lang
         )
         .frame(width: 360)
         .padding(20)
@@ -316,24 +318,25 @@ struct ReportView: View {
 }
 
 // MARK: - Report Preview Content
-// Extracted so it can be rendered both on-screen and via ImageRenderer.
 
 struct ReportPreviewContent: View {
     let babyName: String
     let periodLabel: String
     let stats: [(label: String, value: String, sub: String, tone: Color)]
     let sparklines: [(label: String, values: [Double], color: Color, peak: String)]
+    var lang: String = "en"
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private var dateString: String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ru_RU")
+        f.locale = Locale(identifier: lang == "en" ? "en_US" : "ru_RU")
         f.dateFormat = "d MMMM yyyy"
         return f.string(from: Date())
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Document header
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     Text(babyName)
@@ -344,7 +347,7 @@ struct ReportPreviewContent: View {
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                 }
-                Text("Период: \(periodLabel)")
+                Text(t("Period: \(periodLabel)", "Период: \(periodLabel)"))
                     .font(.system(size: 10, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkMute)
             }
@@ -353,7 +356,6 @@ struct ReportPreviewContent: View {
 
             Divider().overlay(Color.bbInkMute.opacity(0.2))
 
-            // Stats grid
             LazyVGrid(
                 columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                 spacing: 8
@@ -380,24 +382,23 @@ struct ReportPreviewContent: View {
             .padding(12)
             .background(Color.bbCard)
 
-            // Sparkline charts
             VStack(spacing: 10) {
                 ForEach(sparklines.indices, id: \.self) { i in
                     let row = sparklines[i]
-                    SparklineRow(label: row.label, values: row.values, color: row.color, peak: row.peak)
+                    SparklineRow(label: row.label, values: row.values, color: row.color, peak: row.peak, lang: lang)
                 }
             }
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
             .background(Color.bbCard)
 
-            // Parent notes
             VStack(alignment: .leading, spacing: 4) {
-                Text("ЗАМЕТКИ")
+                Text(t("NOTES", "ЗАМЕТКИ"))
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInkMute)
                     .kerning(0.5)
-                Text("13 мая поднималась t° до 37.8°, спал прерывисто. Появилась слюна, грызёт пальцы — думаем, зубы.")
+                Text(t("May 13 — temp rose to 37.8°, slept restlessly. Drooling, chewing fingers — probably teething.",
+                       "13 мая поднималась t° до 37.8°, спал прерывисто. Появилась слюна, грызёт пальцы — думаем, зубы."))
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInk)
                     .fixedSize(horizontal: false, vertical: true)
@@ -407,9 +408,8 @@ struct ReportPreviewContent: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.bbCard)
 
-            // Doctor notes section (blank for printing)
             VStack(alignment: .leading, spacing: 0) {
-                Text("ЗАМЕТКИ ВРАЧА")
+                Text(t("DOCTOR'S NOTES", "ЗАМЕТКИ ВРАЧА"))
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInkMute)
                     .kerning(0.5)
@@ -433,6 +433,9 @@ private struct SparklineRow: View {
     let values: [Double]
     let color: Color
     let peak: String
+    var lang: String = "en"
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     var body: some View {
         VStack(spacing: 4) {
@@ -441,7 +444,7 @@ private struct SparklineRow: View {
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                 Spacer()
-                Text("пик: \(peak)")
+                Text(t("peak: \(peak)", "пик: \(peak)"))
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundColor(color)
             }

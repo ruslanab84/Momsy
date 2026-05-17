@@ -11,18 +11,16 @@ private enum OBStep: Int, CaseIterable {
 struct OnboardingView: View {
     let onDone: () -> Void
 
-    // Persisted after onboarding
     @AppStorage("babyName")      private var savedName = ""
     @AppStorage("babyBirthDate") private var savedBirthDate: Double = 0
     @AppStorage("babyStage")     private var savedStage = BabyAgeStage.baby.rawValue
     @AppStorage("parentRole")    private var savedParentRole = "mom"
     @AppStorage("parentName")    private var savedParentName = ""
+    @AppStorage("appLanguage")   private var lang = "en"
 
-    // Local step state
     @State private var step: OBStep = .age
     @State private var forward = true
 
-    // Step data
     @State private var selectedStage: BabyAgeStage = .baby
     @State private var babyName = ""
     @State private var birthDate: Date = {
@@ -31,13 +29,14 @@ struct OnboardingView: View {
     @State private var parentName = ""
     @State private var parentRole = "mom"
 
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
     private var canContinue: Bool {
         step == .profile ? !babyName.trimmingCharacters(in: .whitespaces).isEmpty : true
     }
 
     var body: some View {
         ZStack {
-            // Animated background
             backgroundGradient
 
             VStack(spacing: 0) {
@@ -81,7 +80,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Nav Bar (progress + back)
+    // MARK: - Nav Bar
 
     private var navBar: some View {
         HStack(spacing: 12) {
@@ -96,7 +95,6 @@ struct OnboardingView: View {
             .opacity(step == .age ? 0 : 1)
             .disabled(step == .age)
 
-            // Progress dots
             HStack(spacing: 6) {
                 ForEach(OBStep.allCases, id: \.self) { s in
                     Capsule()
@@ -121,12 +119,12 @@ struct OnboardingView: View {
     private var stepContent: some View {
         switch step {
         case .age:
-            AgeStep(selected: $selectedStage, onContinue: advance)
+            AgeStep(selected: $selectedStage, lang: lang, onContinue: advance)
         case .profile:
             ProfileStep(babyName: $babyName, birthDate: $birthDate,
-                        canContinue: canContinue, onContinue: advance)
+                        lang: lang, canContinue: canContinue, onContinue: advance)
         case .role:
-            RoleStep(parentName: $parentName, selectedRole: $parentRole, onContinue: advance)
+            RoleStep(parentName: $parentName, selectedRole: $parentRole, lang: lang, onContinue: advance)
         case .ready:
             ReadyStep(
                 babyName: babyName,
@@ -134,6 +132,7 @@ struct OnboardingView: View {
                 stage: selectedStage,
                 parentName: parentName,
                 role: parentRole,
+                lang: lang,
                 onStart: finish
             )
         }
@@ -176,12 +175,14 @@ struct OnboardingView: View {
 
 private struct AgeStep: View {
     @Binding var selected: BabyAgeStage
+    let lang: String
     let onContinue: () -> Void
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
-                // Hero
                 ZStack {
                     Circle().fill(Color.bbButter).frame(width: 130, height: 130)
                     Circle().fill(Color.bbCoral).frame(width: 100, height: 100)
@@ -190,11 +191,12 @@ private struct AgeStep: View {
                 .padding(.top, 12)
                 .padding(.bottom, 20)
 
-                Text("Привет, мама!")
+                Text(t("Hello, mama!", "Привет, мама!"))
                     .font(.system(size: 30, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
 
-                Text("Сколько вашему малышу?\nМы настроим всё под его возраст.")
+                Text(t("How old is your baby?\nWe'll tailor everything to their age.",
+                       "Сколько вашему малышу?\nМы настроим всё под его возраст."))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                     .multilineTextAlignment(.center)
@@ -204,7 +206,7 @@ private struct AgeStep: View {
 
                 VStack(spacing: 10) {
                     ForEach(BabyAgeStage.allCases) { stage in
-                        OBAgeCard(stage: stage, isSelected: selected == stage)
+                        OBAgeCard(stage: stage, isSelected: selected == stage, lang: lang)
                             .onTapGesture {
                                 withAnimation(.spring(response: 0.3)) { selected = stage }
                             }
@@ -216,7 +218,7 @@ private struct AgeStep: View {
                     .padding(.horizontal, 24)
                     .padding(.top, 16)
 
-                OBContinueButton(label: "Продолжить →", action: onContinue)
+                OBContinueButton(label: t("Continue →", "Продолжить →"), action: onContinue)
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
                     .padding(.bottom, 40)
@@ -230,7 +232,8 @@ private struct AgeStep: View {
                 .fill(Color.bbMintDeep)
                 .frame(width: 24, height: 24)
                 .overlay(Text("✓").font(.system(size: 12, weight: .heavy)).foregroundColor(.white))
-            Text("Возраст можно изменить позже. Мы подсветим скачки развития именно для вас.")
+            Text(t("Age can be changed later. We'll highlight developmental leaps specifically for you.",
+                   "Возраст можно изменить позже. Мы подсветим скачки развития именно для вас."))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(.bbInk)
                 .fixedSize(horizontal: false, vertical: true)
@@ -246,44 +249,46 @@ private struct AgeStep: View {
 private struct ProfileStep: View {
     @Binding var babyName: String
     @Binding var birthDate: Date
+    let lang: String
     let canContinue: Bool
     let onContinue: () -> Void
 
     @FocusState private var nameFocused: Bool
 
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
     var ageDescription: String {
         let comps = Calendar.current.dateComponents([.month, .day], from: birthDate, to: Date())
         let months = comps.month ?? 0
         let days   = comps.day ?? 0
-        if months == 0 { return "\(days) дн" }
-        return "\(months) мес \(days) дн"
+        if months == 0 { return "\(days) \(t("d", "дн"))" }
+        return "\(months) \(t("mo", "мес")) \(days) \(t("d", "дн"))"
     }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
 
-                // Title
                 VStack(spacing: 8) {
                     CuteBlobView(kind: .star, size: 64, tone: .bbMint)
                         .padding(.top, 12)
-                    Text("Как зовут малыша?")
+                    Text(t("What's your baby's name?", "Как зовут малыша?"))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text("Имя и дата рождения помогут точнее\nотслеживать скачки и развитие.")
+                    Text(t("Name and birth date help track\nleaps and development more accurately.",
+                           "Имя и дата рождения помогут точнее\nотслеживать скачки и развитие."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.bbInkSoft)
                         .multilineTextAlignment(.center)
                 }
 
-                // Name field
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("ИМЯ МАЛЫША")
+                    Text(t("BABY'S NAME", "ИМЯ МАЛЫША"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.6)
 
-                    TextField("Например, Лёва", text: $babyName)
+                    TextField(t("E.g., Leo", "Например, Лёва"), text: $babyName)
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
                         .tint(.bbCoralDeep)
@@ -304,9 +309,8 @@ private struct ProfileStep: View {
                 }
                 .padding(.horizontal, 24)
 
-                // Birth date
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("ДАТА РОЖДЕНИЯ")
+                    Text(t("DATE OF BIRTH", "ДАТА РОЖДЕНИЯ"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.6)
@@ -325,7 +329,7 @@ private struct ProfileStep: View {
 
                         HStack {
                             CuteBlobView(kind: .baby, size: 32, tone: .bbCoral)
-                            Text("Возраст: \(ageDescription)")
+                            Text(t("Age: \(ageDescription)", "Возраст: \(ageDescription)"))
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(.bbInk)
                             Spacer()
@@ -340,7 +344,7 @@ private struct ProfileStep: View {
                 }
 
                 OBContinueButton(
-                    label: "Продолжить →",
+                    label: t("Continue →", "Продолжить →"),
                     enabled: canContinue,
                     action: onContinue
                 )
@@ -357,16 +361,21 @@ private struct ProfileStep: View {
 private struct RoleStep: View {
     @Binding var parentName: String
     @Binding var selectedRole: String
+    let lang: String
     let onContinue: () -> Void
 
     @FocusState private var nameFocused: Bool
 
-    private let roles: [(String, String, BlobKind, Color)] = [
-        ("mom",    "Мама",    .baby, .bbCoral),
-        ("dad",    "Папа",    .bear, .bbSky),
-        ("nanny",  "Няня",    .sun,  .bbMint),
-        ("other",  "Другой",  .star, .bbButter),
-    ]
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+
+    private var roles: [(String, String, BlobKind, Color)] {
+        [
+            ("mom",   t("Mom",   "Мама"),   .baby, .bbCoral),
+            ("dad",   t("Dad",   "Папа"),   .bear, .bbSky),
+            ("nanny", t("Nanny", "Няня"),   .sun,  .bbMint),
+            ("other", t("Other", "Другой"), .star, .bbButter),
+        ]
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -374,16 +383,16 @@ private struct RoleStep: View {
                 VStack(spacing: 8) {
                     CuteBlobView(kind: .heart, size: 64, tone: .bbLilac)
                         .padding(.top, 12)
-                    Text("Кто ты для малыша?")
+                    Text(t("Who are you to the baby?", "Кто ты для малыша?"))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text("Это поможет настроить\nуведомления и права доступа.")
+                    Text(t("This helps configure\nnotifications and access rights.",
+                           "Это поможет настроить\nуведомления и права доступа."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.bbInkSoft)
                         .multilineTextAlignment(.center)
                 }
 
-                // Role grid
                 let columns = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
                 LazyVGrid(columns: columns, spacing: 10) {
                     ForEach(roles, id: \.0) { id, label, blob, tone in
@@ -412,14 +421,13 @@ private struct RoleStep: View {
                 }
                 .padding(.horizontal, 24)
 
-                // Name field (optional)
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("ВАШЕ ИМЯ (необязательно)")
+                    Text(t("YOUR NAME (optional)", "ВАШЕ ИМЯ (необязательно)"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.6)
 
-                    TextField("Например, Аня", text: $parentName)
+                    TextField(t("E.g., Anna", "Например, Аня"), text: $parentName)
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInk)
                         .tint(.bbCoralDeep)
@@ -438,7 +446,7 @@ private struct RoleStep: View {
                 }
                 .padding(.horizontal, 24)
 
-                OBContinueButton(label: "Продолжить →", action: onContinue)
+                OBContinueButton(label: t("Continue →", "Продолжить →"), action: onContinue)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
             }
@@ -454,25 +462,28 @@ private struct ReadyStep: View {
     let stage: BabyAgeStage
     let parentName: String
     let role: String
+    let lang: String
     let onStart: () -> Void
 
     @State private var pulse = false
+
+    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private var ageDescription: String {
         let comps = Calendar.current.dateComponents([.month, .day], from: birthDate, to: Date())
         let m = comps.month ?? 0
         let d = comps.day ?? 0
-        if m == 0 { return "\(d) дней" }
-        return "\(m) мес \(d) дн"
+        if m == 0 { return "\(d) \(t("days", "дней"))" }
+        return "\(m) \(t("mo", "мес")) \(d) \(t("d", "дн"))"
     }
 
     private var parentLabel: String {
         let name = parentName.isEmpty ? nil : parentName
         switch role {
-        case "mom":   return name.map { "\($0)!" } ?? "Мама!"
-        case "dad":   return name.map { "\($0)!" } ?? "Папа!"
-        case "nanny": return name.map { "\($0)!" } ?? "Няня!"
-        default:      return name.map { "\($0)!" } ?? "Привет!"
+        case "mom":   return name.map { "\($0)!" } ?? t("Mama!", "Мама!")
+        case "dad":   return name.map { "\($0)!" } ?? t("Papa!", "Папа!")
+        case "nanny": return name.map { "\($0)!" } ?? t("Nanny!", "Няня!")
+        default:      return name.map { "\($0)!" } ?? t("Hello!", "Привет!")
         }
     }
 
@@ -484,11 +495,19 @@ private struct ReadyStep: View {
         }
     }
 
+    private var roleName: String {
+        switch role {
+        case "mom":   return t("Mom",   "Мама")
+        case "dad":   return t("Dad",   "Папа")
+        case "nanny": return t("Nanny", "Няня")
+        default:      return t("Other", "Другой")
+        }
+    }
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
 
-                // Celebration hero
                 ZStack {
                     Circle()
                         .fill(Color.bbButter.opacity(0.5))
@@ -503,7 +522,7 @@ private struct ReadyStep: View {
                 .onAppear { pulse = true }
 
                 VStack(spacing: 6) {
-                    Text("Всё готово,")
+                    Text(t("All set,", "Всё готово,"))
                         .font(.system(size: 32, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
                     Text(parentLabel)
@@ -512,32 +531,36 @@ private struct ReadyStep: View {
                 }
                 .multilineTextAlignment(.center)
 
-                // Summary card
                 VStack(spacing: 16) {
-                    summaryRow(blob: .baby, tone: .bbCoral, label: "Малыш",
+                    summaryRow(blob: .baby, tone: .bbCoral,
+                               label: t("Baby", "Малыш"),
                                value: babyName.isEmpty ? "—" : babyName)
                     Divider().opacity(0.3)
-                    summaryRow(blob: .moon, tone: .bbLilac, label: "Возраст", value: ageDescription)
+                    summaryRow(blob: .moon, tone: .bbLilac,
+                               label: t("Age", "Возраст"),
+                               value: ageDescription)
                     Divider().opacity(0.3)
-                    summaryRow(blob: roleBlob, tone: .bbSky, label: "Кто следит",
+                    summaryRow(blob: roleBlob, tone: .bbSky,
+                               label: t("Caregiver", "Кто следит"),
                                value: roleName)
                     Divider().opacity(0.3)
-                    summaryRow(blob: .star, tone: .bbButter, label: "Стадия", value: stage.label)
+                    summaryRow(blob: .star, tone: .bbButter,
+                               label: t("Stage", "Стадия"),
+                               value: lang == "en" ? stage.labelEn : stage.label)
                 }
                 .bbCard(pad: 16)
                 .padding(.horizontal, 24)
 
-                // Tip
-                Text("Данные хранятся только на вашем телефоне. Ничего лишнего.")
+                Text(t("Data is stored only on your phone. Nothing extra.",
+                       "Данные хранятся только на вашем телефоне. Ничего лишнего."))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkMute)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
 
-                // Start button
                 Button(action: onStart) {
                     HStack {
-                        Text("Начать")
+                        Text(t("Start", "Начать"))
                         Image(systemName: "arrow.right")
                     }
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
@@ -551,15 +574,6 @@ private struct ReadyStep: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 50)
             }
-        }
-    }
-
-    private var roleName: String {
-        switch role {
-        case "mom":   return "Мама"
-        case "dad":   return "Папа"
-        case "nanny": return "Няня"
-        default:      return "Другой"
         }
     }
 
@@ -582,21 +596,22 @@ private struct ReadyStep: View {
 private struct OBAgeCard: View {
     let stage: BabyAgeStage
     let isSelected: Bool
+    let lang: String
 
     var body: some View {
         HStack(spacing: 14) {
             CuteBlobView(kind: stage.blobKind, size: 56, tone: stage.tone)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .lastTextBaseline, spacing: 8) {
-                    Text(stage.label)
+                    Text(lang == "en" ? stage.labelEn : stage.label)
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text(stage.subtitle.uppercased())
+                    Text((lang == "en" ? stage.subtitleEn : stage.subtitle).uppercased())
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.4)
                 }
-                Text(stage.focus)
+                Text(lang == "en" ? stage.focusEn : stage.focus)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInkSoft)
             }
