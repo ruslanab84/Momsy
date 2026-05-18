@@ -329,12 +329,14 @@ struct SoundItem: Identifiable {
 }
 
 let sampleSounds: [SoundItem] = [
-    SoundItem(name: "Утроба",       nameEn: "Womb",        category: "белый шум",         categoryEn: "white noise",     isPlaying: true),
-    SoundItem(name: "Дождь",        nameEn: "Rain",        category: "природа",            categoryEn: "nature"),
-    SoundItem(name: "Фен",          nameEn: "Hair dryer",  category: "розовый шум",        categoryEn: "pink noise"),
-    SoundItem(name: "Колыбельная",  nameEn: "Lullaby",     category: "мелодия",            categoryEn: "melody"),
-    SoundItem(name: "Сердцебиение", nameEn: "Heartbeat",   category: "для новорождённых",  categoryEn: "for newborns"),
-    SoundItem(name: "Океан",        nameEn: "Ocean",       category: "природа",            categoryEn: "nature"),
+    SoundItem(name: "Утроба",       nameEn: "Womb",        category: "белый шум",         categoryEn: "white noise"),
+    SoundItem(name: "Дождь",        nameEn: "Rain",        category: "природа",           categoryEn: "nature"),
+    SoundItem(name: "Фен",          nameEn: "Hair dryer",  category: "розовый шум",       categoryEn: "pink noise"),
+    SoundItem(name: "Колыбельная",  nameEn: "Lullaby",     category: "мелодия",           categoryEn: "melody"),
+    SoundItem(name: "Сердцебиение", nameEn: "Heartbeat",   category: "для новорождённых", categoryEn: "for newborns"),
+    SoundItem(name: "Океан",        nameEn: "Ocean",       category: "природа",           categoryEn: "nature"),
+    SoundItem(name: "Лес",          nameEn: "Forest",      category: "природа",           categoryEn: "nature"),
+    SoundItem(name: "Ручей",        nameEn: "Brook",       category: "природа",           categoryEn: "nature"),
 ]
 
 // MARK: - Weight / Health Data

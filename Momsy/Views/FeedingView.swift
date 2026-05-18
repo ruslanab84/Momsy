@@ -6,15 +6,25 @@ struct FeedingView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("appLanguage") private var lang = "en"
 
+    @State private var selectedMoodIdx: Int? = nil
+    @State private var customMood = ""
+    @State private var showCustomInput = false
+
     private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private let typicalSeconds = 18 * 60
     private let barValues = [22, 15, 28, 18, 14, 8]
-    private var moodTags: [String] {
+
+    private var presetMoods: [String] {
         [t("😊 calm", "😊 спокоен"),
          t("😴 fell asleep", "😴 уснул"),
-         t("🤢 spit up", "🤢 срыгнул"),
-         t("+ custom", "+ свой")]
+         t("🤢 spit up", "🤢 срыгнул")]
+    }
+
+    private var moodNote: String? {
+        if let idx = selectedMoodIdx { return presetMoods[idx] }
+        let trimmed = customMood.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     var progress: Double { Double(vm.feedingSeconds) / Double(typicalSeconds) }
@@ -170,7 +180,7 @@ struct FeedingView: View {
             }
 
             Button(action: {
-                vm.stopFeeding()
+                vm.stopFeeding(mood: moodNote)
                 dismiss()
             }) {
                 Text(t("■ Done", "■ Закончить"))
@@ -193,37 +203,100 @@ struct FeedingView: View {
                 .foregroundColor(.bbInkMute)
                 .kerning(0.6)
 
-            Text(t("Spit up a little, overall OK, smiled after feeding.",
-                   "Срыгнул чуть-чуть, в целом ок, после кормления улыбался."))
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(.bbInkSoft)
-                .fixedSize(horizontal: false, vertical: true)
+            Group {
+                if let note = moodNote {
+                    Text(note)
+                        .foregroundColor(.bbInkSoft)
+                } else {
+                    Text(t("tap a tag to add a mood note", "нажмите тег для записи настроения"))
+                        .foregroundColor(.bbInkMute)
+                }
+            }
+            .font(.system(size: 13, weight: .semibold, design: .rounded))
+            .fixedSize(horizontal: false, vertical: true)
+            .animation(.easeInOut(duration: 0.2), value: moodNote)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    ForEach(moodTags.indices, id: \.self) { i in
-                        Text(moodTags[i])
+                    ForEach(presetMoods.indices, id: \.self) { i in
+                        let isSelected = selectedMoodIdx == i
+                        Button {
+                            withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                                selectedMoodIdx = isSelected ? nil : i
+                                if !isSelected {
+                                    customMood = ""
+                                    showCustomInput = false
+                                }
+                            }
+                        } label: {
+                            Text(presetMoods[i])
+                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .foregroundColor(isSelected ? .white : .bbInkSoft)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? Color.bbCoralDeep : Color.bbCreamSoft)
+                                .clipShape(Capsule())
+                                .animation(.spring(response: 0.25), value: isSelected)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    Button {
+                        withAnimation(.spring(response: 0.3)) {
+                            showCustomInput.toggle()
+                            if showCustomInput { selectedMoodIdx = nil }
+                            else { customMood = "" }
+                        }
+                    } label: {
+                        Text(showCustomInput ? t("✕ cancel", "✕ отмена") : t("+ custom", "+ свой"))
                             .font(.system(size: 12, weight: .bold, design: .rounded))
                             .foregroundColor(.bbInkSoft)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
-                            .background(
-                                i == moodTags.count - 1
-                                ? Color.clear
-                                : Color.bbCreamSoft
-                            )
+                            .background(Color.clear)
                             .overlay(
-                                i == moodTags.count - 1
-                                ? AnyView(Capsule().strokeBorder(Color.bbInkMute.opacity(0.3),
-                                    style: StrokeStyle(lineWidth: 1.5, dash: [4])))
-                                : AnyView(EmptyView())
+                                Capsule().strokeBorder(
+                                    Color.bbInkMute.opacity(0.3),
+                                    style: StrokeStyle(lineWidth: 1.5, dash: [4])
+                                )
                             )
                             .clipShape(Capsule())
                     }
+                    .buttonStyle(.plain)
                 }
+            }
+
+            if showCustomInput {
+                HStack(spacing: 6) {
+                    TextField(t("e.g. cried a bit, then calmed", "напр. немного поплакал, успокоился"),
+                              text: $customMood)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbInk)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            withAnimation {
+                                if !customMood.trimmingCharacters(in: .whitespaces).isEmpty {
+                                    showCustomInput = false
+                                }
+                            }
+                        }
+                    if !customMood.isEmpty {
+                        Button { customMood = "" } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.bbInkMute)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.bbCreamSoft)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
         .bbCard(pad: 14, bg: Color.white.opacity(0.9))
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: showCustomInput)
     }
 
     // MARK: - History Mini-Bar

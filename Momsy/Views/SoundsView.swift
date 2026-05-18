@@ -83,10 +83,12 @@ struct SoundsView: View {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
             if sounds[idx].isPlaying {
                 sounds[idx].isPlaying = false
+                SoundEngine.shared.stop()
                 stopCountdown()
             } else {
                 for j in sounds.indices { sounds[j].isPlaying = false }
                 sounds[idx].isPlaying = true
+                SoundEngine.shared.play(sounds[idx])
                 startCountdown(for: selectedTimerIdx)
             }
         }
@@ -96,6 +98,7 @@ struct SoundsView: View {
         withAnimation(.easeOut(duration: 0.35)) {
             for i in sounds.indices { sounds[i].isPlaying = false }
         }
+        SoundEngine.shared.stop()
         stopCountdown()
     }
 

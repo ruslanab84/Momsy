@@ -75,21 +75,32 @@ final class TodayViewModel: ObservableObject {
             .sink { [weak self] _ in self?.feedingSeconds += 1 }
     }
 
-    func stopFeeding() {
+    func stopFeeding(mood: String? = nil) {
         guard isFeedingActive else { return }
         isFeedingActive = false
         timerCancellable?.cancel()
         timerCancellable = nil
         let dur = max(1, feedingSeconds / 60)
         let side = feedingSide.displayName(lang: lang).lowercased()
-        addEntry(LogEntry(time: Date(), kind: .bottle, tone: .bbCoral,
-                          label: t("Feeding · \(dur) min · \(side)", "Кормление · \(dur) мин · \(side)")))
+        var label = t("Feeding · \(dur) min · \(side)", "Кормление · \(dur) мин · \(side)")
+        if let m = mood { label += " · \(m)" }
+        addEntry(LogEntry(time: Date(), kind: .bottle, tone: .bbCoral, label: label))
     }
 
     func logDiaper() {
         diaperCount += 1
         addEntry(LogEntry(time: Date(), kind: .drop, tone: .bbSky,
                           label: t("Diaper #\(diaperCount) · wet", "Подгузник #\(diaperCount) · мокрый")))
+    }
+
+    func removeDiaper() {
+        guard diaperCount > 0 else { return }
+        diaperCount -= 1
+        if let idx = logEntries.firstIndex(where: { $0.kind == .drop }) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                logEntries.remove(at: idx)
+            }
+        }
     }
 
     func logSleep() {
@@ -363,13 +374,32 @@ struct TodayView: View {
                 .foregroundColor(.bbInk)
                 .contentTransition(.numericText())
                 .animation(.spring(response: 0.35), value: vm.diaperCount)
-            Text(t("+ tap to add", "+ нажать, чтоб добавить"))
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundColor(.bbInkMute)
+            HStack(spacing: 8) {
+                Button { vm.removeDiaper() } label: {
+                    Image(systemName: "minus")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(vm.diaperCount > 0 ? .bbInkSoft : .bbInkMute.opacity(0.35))
+                        .frame(width: 28, height: 28)
+                        .background(Color.bbCreamSoft)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .disabled(vm.diaperCount == 0)
+                .animation(.spring(response: 0.25), value: vm.diaperCount)
+
+                Button { vm.logDiaper() } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.bbSkyDeep)
+                        .frame(width: 28, height: 28)
+                        .background(Color.bbSky.opacity(0.45))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .bbCard(pad: 14)
-        .onTapGesture { vm.logDiaper() }
     }
 
     // MARK: - AI Tip Card
