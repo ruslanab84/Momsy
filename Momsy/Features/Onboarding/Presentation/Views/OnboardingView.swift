@@ -4,13 +4,14 @@ import SwiftUI
 
 struct OnboardingView: View {
     @StateObject private var vm: OnboardingViewModel
-    @AppStorage("appLanguage") private var lang = "en"
+    @EnvironmentObject var loc: LocalizationManager
 
-    init(onDone: @escaping () -> Void) {
-        _vm = StateObject(wrappedValue: OnboardingViewModel(onDone: onDone))
+    init(container: AppContainer, onDone: @escaping () -> Void) {
+        _vm = StateObject(wrappedValue: OnboardingViewModel(
+            saveBabyProfile: container.saveBabyProfile,
+            onDone: onDone
+        ))
     }
-
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     var body: some View {
         ZStack {
@@ -87,12 +88,12 @@ struct OnboardingView: View {
     private var stepContent: some View {
         switch vm.step {
         case .age:
-            AgeStep(selected: $vm.selectedStage, lang: lang, onContinue: vm.advance)
+            AgeStep(selected: $vm.selectedStage, lang: loc.lang, onContinue: vm.advance)
         case .profile:
             ProfileStep(babyName: $vm.babyName, birthDate: $vm.birthDate,
-                        lang: lang, canContinue: vm.canContinue, onContinue: vm.advance)
+                        lang: loc.lang, canContinue: vm.canContinue, onContinue: vm.advance)
         case .role:
-            RoleStep(parentName: $vm.parentName, selectedRole: $vm.parentRole, lang: lang, onContinue: vm.advance)
+            RoleStep(parentName: $vm.parentName, selectedRole: $vm.parentRole, lang: loc.lang, onContinue: vm.advance)
         case .ready:
             ReadyStep(
                 babyName: vm.babyName,
@@ -100,7 +101,7 @@ struct OnboardingView: View {
                 stage: vm.selectedStage,
                 parentName: vm.parentName,
                 role: vm.parentRole,
-                lang: lang,
+                lang: loc.lang,
                 onStart: vm.finish
             )
         }
@@ -113,8 +114,7 @@ private struct AgeStep: View {
     @Binding var selected: BabyAgeStage
     let lang: String
     let onContinue: () -> Void
-
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+    @EnvironmentObject var loc: LocalizationManager
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -127,11 +127,11 @@ private struct AgeStep: View {
                 .padding(.top, 12)
                 .padding(.bottom, 20)
 
-                Text(t("Hello, mama!", "Привет, мама!"))
+                Text(loc.t("Hello, mama!", "Привет, мама!"))
                     .font(.system(size: 30, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
 
-                Text(t("How old is your baby?\nWe'll tailor everything to their age.",
+                Text(loc.t("How old is your baby?\nWe'll tailor everything to their age.",
                        "Сколько вашему малышу?\nМы настроим всё под его возраст."))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInkSoft)
@@ -142,7 +142,7 @@ private struct AgeStep: View {
 
                 VStack(spacing: 10) {
                     ForEach(BabyAgeStage.allCases) { stage in
-                        OBAgeCard(stage: stage, isSelected: selected == stage, lang: lang)
+                        OBAgeCard(stage: stage, isSelected: selected == stage, lang: loc.lang)
                             .onTapGesture {
                                 withAnimation(.spring(response: 0.3)) { selected = stage }
                             }
@@ -154,7 +154,7 @@ private struct AgeStep: View {
                     .padding(.horizontal, 24)
                     .padding(.top, 16)
 
-                OBContinueButton(label: t("Continue →", "Продолжить →"), action: onContinue)
+                OBContinueButton(label: loc.t("Continue →", "Продолжить →"), action: onContinue)
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
                     .padding(.bottom, 40)
@@ -168,7 +168,7 @@ private struct AgeStep: View {
                 .fill(Color.bbMintDeep)
                 .frame(width: 24, height: 24)
                 .overlay(Text("✓").font(.system(size: 12, weight: .heavy)).foregroundColor(.white))
-            Text(t("Age can be changed later. We'll highlight developmental leaps specifically for you.",
+            Text(loc.t("Age can be changed later. We'll highlight developmental leaps specifically for you.",
                    "Возраст можно изменить позже. Мы подсветим скачки развития именно для вас."))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(.bbInk)
@@ -188,17 +188,16 @@ private struct ProfileStep: View {
     let lang: String
     let canContinue: Bool
     let onContinue: () -> Void
+    @EnvironmentObject var loc: LocalizationManager
 
     @FocusState private var nameFocused: Bool
-
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     var ageDescription: String {
         let comps = Calendar.current.dateComponents([.month, .day], from: birthDate, to: Date())
         let months = comps.month ?? 0
         let days   = comps.day ?? 0
-        if months == 0 { return "\(days) \(t("d", "дн"))" }
-        return "\(months) \(t("mo", "мес")) \(days) \(t("d", "дн"))"
+        if months == 0 { return "\(days) \(loc.t("d", "дн"))" }
+        return "\(months) \(loc.t("mo", "мес")) \(days) \(loc.t("d", "дн"))"
     }
 
     var body: some View {
@@ -208,10 +207,10 @@ private struct ProfileStep: View {
                 VStack(spacing: 8) {
                     CuteBlobView(kind: .star, size: 64, tone: .bbMint)
                         .padding(.top, 12)
-                    Text(t("What's your baby's name?", "Как зовут малыша?"))
+                    Text(loc.t("What's your baby's name?", "Как зовут малыша?"))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text(t("Name and birth date help track\nleaps and development more accurately.",
+                    Text(loc.t("Name and birth date help track\nleaps and development more accurately.",
                            "Имя и дата рождения помогут точнее\nотслеживать скачки и развитие."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.bbInkSoft)
@@ -219,12 +218,12 @@ private struct ProfileStep: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(t("BABY'S NAME", "ИМЯ МАЛЫША"))
+                    Text(loc.t("BABY'S NAME", "ИМЯ МАЛЫША"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.6)
 
-                    TextField(t("E.g., Leo", "Например, Лёва"), text: $babyName)
+                    TextField(loc.t("E.g., Leo", "Например, Лёва"), text: $babyName)
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
                         .tint(.bbCoralDeep)
@@ -246,7 +245,7 @@ private struct ProfileStep: View {
                 .padding(.horizontal, 24)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(t("DATE OF BIRTH", "ДАТА РОЖДЕНИЯ"))
+                    Text(loc.t("DATE OF BIRTH", "ДАТА РОЖДЕНИЯ"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.6)
@@ -265,7 +264,7 @@ private struct ProfileStep: View {
 
                         HStack {
                             CuteBlobView(kind: .baby, size: 32, tone: .bbCoral)
-                            Text(t("Age: \(ageDescription)", "Возраст: \(ageDescription)"))
+                            Text(loc.t("Age: \(ageDescription)", "Возраст: \(ageDescription)"))
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(.bbInk)
                             Spacer()
@@ -280,7 +279,7 @@ private struct ProfileStep: View {
                 }
 
                 OBContinueButton(
-                    label: t("Continue →", "Продолжить →"),
+                    label: loc.t("Continue →", "Продолжить →"),
                     enabled: canContinue,
                     action: onContinue
                 )
@@ -299,17 +298,16 @@ private struct RoleStep: View {
     @Binding var selectedRole: String
     let lang: String
     let onContinue: () -> Void
+    @EnvironmentObject var loc: LocalizationManager
 
     @FocusState private var nameFocused: Bool
 
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
-
     private var roles: [(String, String, BlobKind, Color)] {
         [
-            ("mom",   t("Mom",   "Мама"),   .baby, .bbCoral),
-            ("dad",   t("Dad",   "Папа"),   .bear, .bbSky),
-            ("nanny", t("Nanny", "Няня"),   .sun,  .bbMint),
-            ("other", t("Other", "Другой"), .star, .bbButter),
+            ("mom",   loc.t("Mom",   "Мама"),   .baby, .bbCoral),
+            ("dad",   loc.t("Dad",   "Папа"),   .bear, .bbSky),
+            ("nanny", loc.t("Nanny", "Няня"),   .sun,  .bbMint),
+            ("other", loc.t("Other", "Другой"), .star, .bbButter),
         ]
     }
 
@@ -319,10 +317,10 @@ private struct RoleStep: View {
                 VStack(spacing: 8) {
                     CuteBlobView(kind: .heart, size: 64, tone: .bbLilac)
                         .padding(.top, 12)
-                    Text(t("Who are you to the baby?", "Кто ты для малыша?"))
+                    Text(loc.t("Who are you to the baby?", "Кто ты для малыша?"))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text(t("This helps configure\nnotifications and access rights.",
+                    Text(loc.t("This helps configure\nnotifications and access rights.",
                            "Это поможет настроить\nуведомления и права доступа."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.bbInkSoft)
@@ -358,12 +356,12 @@ private struct RoleStep: View {
                 .padding(.horizontal, 24)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(t("YOUR NAME (optional)", "ВАШЕ ИМЯ (необязательно)"))
+                    Text(loc.t("YOUR NAME (optional)", "ВАШЕ ИМЯ (необязательно)"))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.6)
 
-                    TextField(t("E.g., Anna", "Например, Аня"), text: $parentName)
+                    TextField(loc.t("E.g., Anna", "Например, Аня"), text: $parentName)
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInk)
                         .tint(.bbCoralDeep)
@@ -382,7 +380,7 @@ private struct RoleStep: View {
                 }
                 .padding(.horizontal, 24)
 
-                OBContinueButton(label: t("Continue →", "Продолжить →"), action: onContinue)
+                OBContinueButton(label: loc.t("Continue →", "Продолжить →"), action: onContinue)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
             }
@@ -400,26 +398,25 @@ private struct ReadyStep: View {
     let role: String
     let lang: String
     let onStart: () -> Void
+    @EnvironmentObject var loc: LocalizationManager
 
     @State private var pulse = false
-
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private var ageDescription: String {
         let comps = Calendar.current.dateComponents([.month, .day], from: birthDate, to: Date())
         let m = comps.month ?? 0
         let d = comps.day ?? 0
-        if m == 0 { return "\(d) \(t("days", "дней"))" }
-        return "\(m) \(t("mo", "мес")) \(d) \(t("d", "дн"))"
+        if m == 0 { return "\(d) \(loc.t("days", "дней"))" }
+        return "\(m) \(loc.t("mo", "мес")) \(d) \(loc.t("d", "дн"))"
     }
 
     private var parentLabel: String {
         let name = parentName.isEmpty ? nil : parentName
         switch role {
-        case "mom":   return name.map { "\($0)!" } ?? t("Mama!", "Мама!")
-        case "dad":   return name.map { "\($0)!" } ?? t("Papa!", "Папа!")
-        case "nanny": return name.map { "\($0)!" } ?? t("Nanny!", "Няня!")
-        default:      return name.map { "\($0)!" } ?? t("Hello!", "Привет!")
+        case "mom":   return name.map { "\($0)!" } ?? loc.t("Mama!", "Мама!")
+        case "dad":   return name.map { "\($0)!" } ?? loc.t("Papa!", "Папа!")
+        case "nanny": return name.map { "\($0)!" } ?? loc.t("Nanny!", "Няня!")
+        default:      return name.map { "\($0)!" } ?? loc.t("Hello!", "Привет!")
         }
     }
 
@@ -433,10 +430,10 @@ private struct ReadyStep: View {
 
     private var roleName: String {
         switch role {
-        case "mom":   return t("Mom",   "Мама")
-        case "dad":   return t("Dad",   "Папа")
-        case "nanny": return t("Nanny", "Няня")
-        default:      return t("Other", "Другой")
+        case "mom":   return loc.t("Mom",   "Мама")
+        case "dad":   return loc.t("Dad",   "Папа")
+        case "nanny": return loc.t("Nanny", "Няня")
+        default:      return loc.t("Other", "Другой")
         }
     }
 
@@ -458,7 +455,7 @@ private struct ReadyStep: View {
                 .onAppear { pulse = true }
 
                 VStack(spacing: 6) {
-                    Text(t("All set,", "Всё готово,"))
+                    Text(loc.t("All set,", "Всё готово,"))
                         .font(.system(size: 32, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
                     Text(parentLabel)
@@ -469,25 +466,25 @@ private struct ReadyStep: View {
 
                 VStack(spacing: 16) {
                     summaryRow(blob: .baby, tone: .bbCoral,
-                               label: t("Baby", "Малыш"),
+                               label: loc.t("Baby", "Малыш"),
                                value: babyName.isEmpty ? "—" : babyName)
                     Divider().opacity(0.3)
                     summaryRow(blob: .moon, tone: .bbLilac,
-                               label: t("Age", "Возраст"),
+                               label: loc.t("Age", "Возраст"),
                                value: ageDescription)
                     Divider().opacity(0.3)
                     summaryRow(blob: roleBlob, tone: .bbSky,
-                               label: t("Caregiver", "Кто следит"),
+                               label: loc.t("Caregiver", "Кто следит"),
                                value: roleName)
                     Divider().opacity(0.3)
                     summaryRow(blob: .star, tone: .bbButter,
-                               label: t("Stage", "Стадия"),
+                               label: loc.t("Stage", "Стадия"),
                                value: lang == "en" ? stage.labelEn : stage.label)
                 }
                 .bbCard(pad: 16)
                 .padding(.horizontal, 24)
 
-                Text(t("Data is stored only on your phone. Nothing extra.",
+                Text(loc.t("Data is stored only on your phone. Nothing extra.",
                        "Данные хранятся только на вашем телефоне. Ничего лишнего."))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkMute)
@@ -496,7 +493,7 @@ private struct ReadyStep: View {
 
                 Button(action: onStart) {
                     HStack {
-                        Text(t("Start", "Начать"))
+                        Text(loc.t("Start", "Начать"))
                         Image(systemName: "arrow.right")
                     }
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
@@ -593,5 +590,6 @@ private struct OBContinueButton: View {
 }
 
 #Preview {
-    OnboardingView(onDone: {})
+    OnboardingView(container: AppContainer(), onDone: {})
+        .environmentObject(LocalizationManager.shared)
 }

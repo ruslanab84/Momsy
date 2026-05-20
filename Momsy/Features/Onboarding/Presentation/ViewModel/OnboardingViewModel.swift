@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 enum OBStep: Int, CaseIterable {
     case age, profile, role, ready
@@ -15,9 +16,11 @@ final class OnboardingViewModel: ObservableObject {
     @Published var parentName = ""
     @Published var parentRole = "mom"
 
+    private let saveBabyProfileUC: SaveBabyProfileUseCase
     private let onDone: () -> Void
 
-    init(onDone: @escaping () -> Void) {
+    init(saveBabyProfile: SaveBabyProfileUseCase, onDone: @escaping () -> Void) {
+        self.saveBabyProfileUC = saveBabyProfile
         self.onDone = onDone
     }
 
@@ -58,11 +61,20 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     func finish() {
-        UserDefaults.standard.set(babyName.trimmingCharacters(in: .whitespaces), forKey: "babyName")
+        let name = babyName.trimmingCharacters(in: .whitespaces)
+        let parent = parentName.trimmingCharacters(in: .whitespaces)
+        // Persist via repository
+        Task {
+            try? await saveBabyProfileUC.execute(
+                BabyProfile(name: name, birthDate: birthDate, stage: selectedStage.rawValue)
+            )
+        }
+        // Keep flat keys for @AppStorage readers in existing views
+        UserDefaults.standard.set(name,                      forKey: "babyName")
         UserDefaults.standard.set(birthDate.timeIntervalSince1970, forKey: "babyBirthDate")
-        UserDefaults.standard.set(selectedStage.rawValue, forKey: "babyStage")
-        UserDefaults.standard.set(parentRole, forKey: "parentRole")
-        UserDefaults.standard.set(parentName.trimmingCharacters(in: .whitespaces), forKey: "parentName")
+        UserDefaults.standard.set(selectedStage.rawValue,    forKey: "babyStage")
+        UserDefaults.standard.set(parentRole,                forKey: "parentRole")
+        UserDefaults.standard.set(parent,                    forKey: "parentName")
         onDone()
     }
 }
