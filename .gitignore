@@ -1,0 +1,76 @@
+# ── Xcode ──────────────────────────────────────────────────────────────────────
+build/
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.xcuserstate
+*.xcscmblueprint
+
+# ── Swift Package Manager ───────────────────────────────────────────────────────
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# ── CocoaPods ──────────────────────────────────────────────────────────────────
+Pods/
+*.xcworkspace
+!*.xcodeproj/*.xcworkspace
+
+# ── Carthage ───────────────────────────────────────────────────────────────────
+Carthage/Build/
+
+# ── Firebase / Google ──────────────────────────────────────────────────────────
+# Contains API keys — add via CI/CD secrets, never commit
+GoogleService-Info.plist
+google-services.json
+
+# ── Environment & secrets ───────────────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+AuthKey_*.p8
+
+# ── macOS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Desktop.ini
+Thumbs.db
+
+# ── Archives & exports ─────────────────────────────────────────────────────────
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcarchive
+ExportOptions.plist
+
+# ── Fastlane ───────────────────────────────────────────────────────────────────
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# ── Instruments ────────────────────────────────────────────────────────────────
+*.trace
+
+# ── Testing ────────────────────────────────────────────────────────────────────
+*.xcresult
+
+# ── Claude / AI tools ──────────────────────────────────────────────────────────
+.claude/

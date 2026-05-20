@@ -1,15 +1,12 @@
-//
-//  MomsyApp.swift
-//  Momsy
-//
-//  Created by Ruslan Abdulov on 16.05.26.
-//
-
 import SwiftUI
+import FirebaseCore
 
 @main
 struct MomsyApp: App {
     @AppStorage("appTheme") private var appTheme = "system"
+
+    private let container = AppContainer()
+    private let localization = LocalizationManager.shared
 
     private var resolvedColorScheme: ColorScheme? {
         switch appTheme {
@@ -19,9 +16,16 @@ struct MomsyApp: App {
         }
     }
 
+    init() {
+        FirebaseApp.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .withContainer(container)
+                .environmentObject(localization)
+                .withLocalization(localization)
                 .preferredColorScheme(resolvedColorScheme)
         }
     }
