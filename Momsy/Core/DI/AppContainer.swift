@@ -13,6 +13,7 @@ final class AppContainer {
     let temperatureRepository: any TemperatureRepository = LocalTemperatureRepository()
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let leapsRepository: any LeapsRepository          = LocalLeapsRepository()
+    let soundRepository: any SoundRepository           = LocalSoundRepository()
     let chatRepository: any ChatRepository             = LocalChatRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
 
@@ -72,6 +73,14 @@ final class AppContainer {
 
     func makeSharingViewModel() -> SharingViewModel {
         SharingViewModel(repo: familyRepository)
+    }
+
+    func makeSoundsViewModel() -> SoundsViewModel {
+        SoundsViewModel(
+            soundRepository: soundRepository,
+            sleepTimerUC: SleepTimerUseCase(),
+            nowPlaying: NowPlayingService.shared
+        )
     }
 
     func makeSleepViewModel() -> SleepViewModel {

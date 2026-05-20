@@ -3,9 +3,13 @@ import SwiftUI
 // MARK: - SoundsView
 
 struct SoundsView: View {
-    @StateObject private var vm = SoundsViewModel()
+    @StateObject private var vm: SoundsViewModel
     @EnvironmentObject var loc: LocalizationManager
-    @AppStorage("babyName")    private var babyName = ""
+    @AppStorage("babyName") private var babyName = ""
+
+    init(container: AppContainer) {
+        _vm = StateObject(wrappedValue: container.makeSoundsViewModel())
+    }
 
     private func tone(for sound: SoundItem) -> Color {
         switch sound.categoryEn {
@@ -98,7 +102,7 @@ struct SoundsView: View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(vm.nowPlaying.map { tone(for: $0) } ?? .bbCoral)
+                    .fill(vm.nowPlayingItem.map { tone(for: $0) } ?? .bbCoral)
                     .frame(width: 52, height: 52)
                     .overlay(
                         EqualizerBars(isPlaying: vm.anyPlaying, color: .bbInk, count: 5, maxH: 20, minH: 5)
@@ -109,7 +113,7 @@ struct SoundsView: View {
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbButter)
                         .kerning(0.5)
-                    if let np = vm.nowPlaying {
+                    if let np = vm.nowPlayingItem {
                         Text("\(np.displayName(lang: loc.lang)) · \(np.displayCategory(lang: loc.lang))")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
@@ -163,7 +167,11 @@ struct SoundsView: View {
                 spacing: 8
             ) {
                 ForEach(vm.sounds.indices, id: \.self) { i in
-                    SoundCard(sound: vm.sounds[i]) { vm.play(i) }
+                    SoundCard(
+                        sound: vm.sounds[i],
+                        onPlay: { vm.play(i) },
+                        onFavorite: { vm.toggleFavorite(vm.sounds[i].nameEn) }
+                    )
                 }
             }
         }
@@ -226,6 +234,7 @@ private struct EqualizerBars: View {
 private struct SoundCard: View {
     let sound: SoundItem
     let onPlay: () -> Void
+    let onFavorite: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
     private var cardTone: Color {
@@ -278,6 +287,13 @@ private struct SoundCard: View {
                         .foregroundColor(.bbInkMute)
                 }
                 Spacer()
+                Button(action: onFavorite) {
+                    Image(systemName: sound.isFavorite ? "heart.fill" : "heart")
+                        .font(.system(size: 16))
+                        .foregroundColor(sound.isFavorite ? .bbRose : Color.bbInkMute.opacity(0.35))
+                        .animation(.spring(response: 0.25), value: sound.isFavorite)
+                }
+                .buttonStyle(.plain)
                 Image(systemName: sound.isPlaying ? "pause.circle.fill" : "play.circle.fill")
                     .font(.system(size: 26))
                     .foregroundColor(sound.isPlaying ? .bbLilacDeep : Color.bbInkMute.opacity(0.4))
@@ -296,5 +312,6 @@ private struct SoundCard: View {
 }
 
 #Preview {
-    NavigationStack { SoundsView() }
+    NavigationStack { SoundsView(container: AppContainer()) }
+        .environmentObject(LocalizationManager.shared)
 }

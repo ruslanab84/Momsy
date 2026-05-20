@@ -7,6 +7,7 @@ struct SoundItem: Identifiable {
     let category: String
     let categoryEn: String
     var isPlaying: Bool = false
+    var isFavorite: Bool = false
 
     func displayName(lang: String) -> String     { lang == "en" ? nameEn     : name }
     func displayCategory(lang: String) -> String { lang == "en" ? categoryEn : category }

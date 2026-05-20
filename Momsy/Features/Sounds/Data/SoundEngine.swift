@@ -26,7 +26,7 @@ final class SoundEngine {
     private init() {
         engine.attach(player)
         engine.connect(player, to: engine.mainMixerNode, format: format)
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
         try? AVAudioSession.sharedInstance().setActive(true)
     }
 

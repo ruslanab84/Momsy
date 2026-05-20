@@ -12,7 +12,7 @@ struct MeView: View {
                           icon: "person.3.fill", bg: .bbCoral,
                           title: lm.t("Family", "Семья"),
                           sub: lm.t("Mom, dad, nanny, grandma", "Мама, папа, няня, бабушка")),
-                    MeRow(destination: SoundsView(),
+                    MeRow(destination: SoundsView(container: container),
                           icon: "music.note", bg: .bbLilac,
                           title: lm.t("Lullabies & Sounds", "Колыбельные и шум"),
                           sub: lm.t("White noise, melodies, timer", "Белый шум, мелодии, таймер")),
