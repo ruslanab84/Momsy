@@ -1,35 +1,40 @@
-# Build artifacts
+# ── Build artifacts ────────────────────────────────────────────────────────────
 build/
 DerivedData/
-*.o
-*.d
-*.hmap
+*.xcarchive
 *.ipa
 *.dSYM
-*.dSYM.zip
-
-# Xcode user-specific files
-*.xcuserstate
-xcuserdata/
-*.xccheckout
-*.moved-aside
-
-# CocoaPods (if used in the future)
-Pods/
-Podfile.lock
-
-# Swift Package Manager cache
+*.xcresult
 .build/
 .swiftpm/
 
-# OS files
-.DS_Store
-Thumbs.db
+# ── Third-party / Firebase SDK ─────────────────────────────────────────────────
+AppCheck/
+Pods/
+Carthage/
 
-# Secrets and environment files
-*.env
-*.pem
+# ── Xcode user state ───────────────────────────────────────────────────────────
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# ── Assets (binary, no value for Claude) ───────────────────────────────────────
+Momsy/Momsy/Assets.xcassets/
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.mp3
+*.wav
+*.aiff
+
+# ── Secrets ────────────────────────────────────────────────────────────────────
+Momsy/Momsy/GoogleService-Info.plist
+*.p8
 *.p12
+*.cer
 *.mobileprovision
-GoogleService-Info.plist
-secrets.xcconfig
+
+# ── macOS noise ────────────────────────────────────────────────────────────────
+.DS_Store
