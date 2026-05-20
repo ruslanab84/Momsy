@@ -65,6 +65,10 @@ final class AppContainer {
     func makeSharingViewModel() -> SharingViewModel {
         SharingViewModel(repo: familyRepository)
     }
+
+    func makeSleepViewModel() -> SleepViewModel {
+        SleepViewModel(startSleep: startSleep, stopSleep: stopSleep, getSleep: getSleepEntries)
+    }
 }
 
 // MARK: — Environment

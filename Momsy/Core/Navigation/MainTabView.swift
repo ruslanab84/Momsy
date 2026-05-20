@@ -6,7 +6,7 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            TodayView()
+            TodayView(container: container)
                 .tabItem { Label(lm.t("Today", "Сегодня"), systemImage: "sun.max.fill") }
 
             LeapsView()
