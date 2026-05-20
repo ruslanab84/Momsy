@@ -17,4 +17,7 @@ final class LocalizationManager: ObservableObject {
     }
 
     var strings: L10n { L10n(current) }
+
+    func t(_ en: String, _ ru: String) -> String { current == .russian ? ru : en }
+    var lang: String { current.rawValue }
 }

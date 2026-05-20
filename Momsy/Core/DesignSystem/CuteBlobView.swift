@@ -233,6 +233,25 @@ private struct CloudBlob: View {
     }
 }
 
+// MARK: - BlobKind serialization
+
+extension BlobKind {
+    var iconName: String {
+        switch self {
+        case .baby:   return "baby"
+        case .sleep:  return "sleep"
+        case .bottle: return "bottle"
+        case .moon:   return "moon"
+        case .sun:    return "sun"
+        case .drop:   return "drop"
+        case .star:   return "star"
+        case .heart:  return "heart"
+        case .cloud:  return "cloud"
+        case .bear:   return "bear"
+        }
+    }
+}
+
 // MARK: - Bear
 
 private struct BearBlob: View {

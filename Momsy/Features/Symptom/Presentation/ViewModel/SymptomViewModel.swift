@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // MARK: - Supporting Types
 
@@ -51,7 +52,7 @@ final class SymptomViewModel: ObservableObject {
     @Published var diaryLogged = false
 
     private var lang: String { UserDefaults.standard.string(forKey: "appLanguage") ?? "en" }
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+    private func t(_ en: String, _ ru: String) -> String { LocalizationManager.shared.t(en, ru) }
 
     var displayName: String {
         let name = UserDefaults.standard.string(forKey: "babyName") ?? ""

@@ -9,7 +9,7 @@ struct WeightPoint: Identifiable {
     let p85: Double
 }
 
-let sampleWeightData: [WeightPoint] = [
+let whoWeightData: [WeightPoint] = [
     WeightPoint(month: 0, babyKg: 3.2, p15: 2.8, p50: 3.3, p85: 3.9),
     WeightPoint(month: 1, babyKg: 4.1, p15: 3.9, p50: 4.5, p85: 5.1),
     WeightPoint(month: 2, babyKg: 5.0, p15: 4.7, p50: 5.6, p85: 6.5),
@@ -18,7 +18,7 @@ let sampleWeightData: [WeightPoint] = [
     WeightPoint(month: 5, babyKg: 6.4, p15: 6.2, p50: 7.5, p85: 8.7),
 ]
 
-let sampleHeightData: [WeightPoint] = [
+let whoHeightData: [WeightPoint] = [
     WeightPoint(month: 0, babyKg: 50.0, p15: 46.1, p50: 49.1, p85: 52.0),
     WeightPoint(month: 1, babyKg: 53.0, p15: 50.2, p50: 53.7, p85: 57.2),
     WeightPoint(month: 2, babyKg: 57.0, p15: 53.2, p50: 57.1, p85: 60.9),
@@ -27,7 +27,7 @@ let sampleHeightData: [WeightPoint] = [
     WeightPoint(month: 5, babyKg: 64.0, p15: 59.6, p50: 64.0, p85: 68.5),
 ]
 
-let sampleHeadData: [WeightPoint] = [
+let whoHeadData: [WeightPoint] = [
     WeightPoint(month: 0, babyKg: 34.0, p15: 32.5, p50: 34.5, p85: 36.5),
     WeightPoint(month: 1, babyKg: 36.5, p15: 34.5, p50: 36.5, p85: 38.5),
     WeightPoint(month: 2, babyKg: 38.0, p15: 36.0, p50: 38.0, p85: 40.0),
@@ -47,13 +47,6 @@ struct MeasurementEntry: Identifiable, Codable {
     var visitLabel: String?
 }
 
-let sampleMeasurements: [MeasurementEntry] = [
-    MeasurementEntry(dateLabel: "16 May", weight: "6.4 kg", height: "64 cm", headCirc: "42.0 cm", delta: "+ 280 g · 4 wk", visitLabel: nil),
-    MeasurementEntry(dateLabel: "18 Apr", weight: "6.1 kg", height: "62 cm", headCirc: "41.5 cm", delta: "+ 400 g · 4 wk", visitLabel: nil),
-    MeasurementEntry(dateLabel: "21 Mar", weight: "5.7 kg", height: "60 cm", headCirc: "40.0 cm", delta: "+ 700 g · 4 wk", visitLabel: "doctor visit"),
-    MeasurementEntry(dateLabel: "24 Feb", weight: "5.0 kg", height: "57 cm", headCirc: "38.0 cm", delta: "+ 900 g · 4 wk", visitLabel: nil),
-]
-
 struct TemperatureEntry: Identifiable, Codable {
     var id: UUID = UUID()
     var date: Date = Date()
@@ -63,10 +56,4 @@ struct TemperatureEntry: Identifiable, Codable {
     var note: String
 }
 
-let sampleTempLog: [TemperatureEntry] = [
-    TemperatureEntry(dateLabel: "16 May", timeLabel: "18:30", value: 36.7, note: "evening"),
-    TemperatureEntry(dateLabel: "13 May", timeLabel: "22:00", value: 37.8, note: "night, teething"),
-    TemperatureEntry(dateLabel: "13 May", timeLabel: "18:15", value: 37.4, note: "before sleep"),
-    TemperatureEntry(dateLabel: "10 May", timeLabel: "09:00", value: 36.6, note: "morning"),
-    TemperatureEntry(dateLabel: "5 May",  timeLabel: "20:10", value: 36.8, note: ""),
-]
+

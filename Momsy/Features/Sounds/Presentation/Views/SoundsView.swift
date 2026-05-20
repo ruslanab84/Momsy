@@ -4,10 +4,8 @@ import SwiftUI
 
 struct SoundsView: View {
     @StateObject private var vm = SoundsViewModel()
+    @EnvironmentObject var loc: LocalizationManager
     @AppStorage("babyName")    private var babyName = ""
-    @AppStorage("appLanguage") private var lang = "en"
-
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
 
     private func tone(for sound: SoundItem) -> Color {
         switch sound.categoryEn {
@@ -21,7 +19,7 @@ struct SoundsView: View {
     }
 
     private var displayNameSuffix: String {
-        babyName.isEmpty ? "" : t(" for \(babyName)", " для \(babyName)")
+        babyName.isEmpty ? "" : loc.t(" for \(babyName)", " для \(babyName)")
     }
 
     var body: some View {
@@ -81,11 +79,11 @@ struct SoundsView: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(t("sleep tight", "пусть спит крепко"))
+                Text(loc.t("sleep tight", "пусть спит крепко"))
                     .font(.custom("Georgia", size: 18))
                     .italic()
                     .foregroundColor(Color.bbInk.opacity(0.5))
-                Text(t("Lullaby\(displayNameSuffix)", "Колыбельная\(displayNameSuffix)"))
+                Text(loc.t("Lullaby\(displayNameSuffix)", "Колыбельная\(displayNameSuffix)"))
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
             }
@@ -107,12 +105,12 @@ struct SoundsView: View {
                     )
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(t("NOW PLAYING", "СЕЙЧАС ИГРАЕТ"))
+                    Text(loc.t("NOW PLAYING", "СЕЙЧАС ИГРАЕТ"))
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbButter)
                         .kerning(0.5)
                     if let np = vm.nowPlaying {
-                        Text("\(np.displayName(lang: lang)) · \(np.displayCategory(lang: lang))")
+                        Text("\(np.displayName(lang: loc.lang)) · \(np.displayCategory(lang: loc.lang))")
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
                     }
@@ -159,7 +157,7 @@ struct SoundsView: View {
 
     private var soundGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: t("Sounds", "Звуки"))
+            BBSectionLabel(text: loc.t("Sounds", "Звуки"))
             LazyVGrid(
                 columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                 spacing: 8
@@ -228,9 +226,7 @@ private struct EqualizerBars: View {
 private struct SoundCard: View {
     let sound: SoundItem
     let onPlay: () -> Void
-
-    @AppStorage("appLanguage") private var lang = "en"
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+    @EnvironmentObject var loc: LocalizationManager
 
     private var cardTone: Color {
         switch sound.categoryEn {
@@ -260,7 +256,7 @@ private struct SoundCard: View {
                     )
 
                 if sound.isPlaying {
-                    Text(t("playing", "играет"))
+                    Text(loc.t("playing", "играет"))
                         .font(.system(size: 9, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
                         .padding(.horizontal, 7)
@@ -274,10 +270,10 @@ private struct SoundCard: View {
 
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(sound.displayName(lang: lang))
+                    Text(sound.displayName(lang: loc.lang))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text(sound.displayCategory(lang: lang))
+                    Text(sound.displayCategory(lang: loc.lang))
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                 }

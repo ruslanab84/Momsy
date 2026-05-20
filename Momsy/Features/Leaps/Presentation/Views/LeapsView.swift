@@ -2,11 +2,10 @@ import SwiftUI
 
 struct LeapsView: View {
     @StateObject private var vm = LeapsViewModel()
+    @EnvironmentObject var loc: LocalizationManager
     @AppStorage("babyName")    private var babyName = ""
-    @AppStorage("appLanguage") private var lang = "en"
 
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
-    private var displayName: String { babyName.isEmpty ? t("Baby", "Малыш") : babyName }
+    private var displayName: String { babyName.isEmpty ? loc.t("Baby", "Малыш") : babyName }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -27,15 +26,15 @@ struct LeapsView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            BBSectionLabel(text: t("Developmental Leaps", "Скачки развития"))
-            Text(t("Now — leap #\(vm.currentLeap.id)", "Сейчас — скачок №\(vm.currentLeap.id)"))
+            BBSectionLabel(text: loc.t("Developmental Leaps", "Скачки развития"))
+            Text(loc.t("Now — leap #\(vm.currentLeap.id)", "Сейчас — скачок №\(vm.currentLeap.id)"))
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
             HStack(spacing: 4) {
-                Text(t("Day 3 of ~5 hard days.", "День 3 из ~5 трудных."))
+                Text(loc.t("Day 3 of ~5 hard days.", "День 3 из ~5 трудных."))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
-                Text(t("hang in there, mama ✿", "держитесь, мама ✿"))
+                Text(loc.t("hang in there, mama ✿", "держитесь, мама ✿"))
                     .font(.custom("Georgia", size: 17))
                     .italic()
                     .foregroundColor(.bbCoralDeep)
@@ -51,7 +50,7 @@ struct LeapsView: View {
             HStack {
                 CuteBlobView(kind: .star, size: 56, tone: Color.white.opacity(0.4))
                 Spacer()
-                BBPill(text: t("week \(vm.currentLeap.week)", "\(vm.currentLeap.week)-я неделя"),
+                BBPill(text: loc.t("week \(vm.currentLeap.week)", "\(vm.currentLeap.week)-я неделя"),
                        color: .bbInk, fg: .white)
             }
 
@@ -66,18 +65,18 @@ struct LeapsView: View {
 
             HStack(spacing: 8) {
                 LeapInfoBlock(
-                    title: t("WHAT YOU NOTICE", "ЧТО ЗАМЕТНО"),
+                    title: loc.t("WHAT YOU NOTICE", "ЧТО ЗАМЕТНО"),
                     items: vm.leapSigns(vm.currentLeap),
                     accent: .bbCoralDeep
                 )
                 LeapInfoBlock(
-                    title: t("COMING SOON", "СКОРО НАУЧИТСЯ"),
+                    title: loc.t("COMING SOON", "СКОРО НАУЧИТСЯ"),
                     items: vm.leapSkills(vm.currentLeap),
                     accent: .bbMintDeep
                 )
             }
 
-            Text(t("✿ This will pass. Usually lasts ~1 week. Hold them more — it doesn't spoil.",
+            Text(loc.t("✿ This will pass. Usually lasts ~1 week. Hold them more — it doesn't spoil.",
                    "✿ Это пройдёт. Обычно длится ~1 неделю. Чаще берите на руки — это не балует."))
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
@@ -93,7 +92,7 @@ struct LeapsView: View {
 
     private var timelineSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: t("Leap Calendar", "Календарь скачков"))
+            BBSectionLabel(text: loc.t("Leap Calendar", "Календарь скачков"))
             VStack(spacing: 0) {
                 ForEach(sampleLeaps) { leap in
                     LeapTimelineRow(
@@ -113,11 +112,11 @@ struct LeapsView: View {
 
     private var tipCard: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(t("TIP OF THE DAY", "СОВЕТ НА СЕГОДНЯ"))
+            Text(loc.t("TIP OF THE DAY", "СОВЕТ НА СЕГОДНЯ"))
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbMintDeep)
                 .kerning(0.5)
-            Text(t("For leap «\(vm.leapName(vm.currentLeap))»", "Для скачка «\(vm.leapName(vm.currentLeap))»"))
+            Text(loc.t("For leap «\(vm.leapName(vm.currentLeap))»", "Для скачка «\(vm.leapName(vm.currentLeap))»"))
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(.bbInk)
             Text(vm.leapTip(vm.currentLeap))
@@ -162,14 +161,13 @@ private struct LeapTimelineRow: View {
     let isExpanded: Bool
     let isLast: Bool
     let onTap: () -> Void
+    @EnvironmentObject var loc: LocalizationManager
 
-    @AppStorage("appLanguage") private var lang = "en"
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
-    private var leapName: String { lang == "en" ? leap.nameEn : leap.name }
-    private var leapDesc: String { lang == "en" ? leap.descriptionEn : leap.description }
-    private var leapSigns: [String] { lang == "en" ? leap.signsEn : leap.signs }
-    private var leapSkills: [String] { lang == "en" ? leap.skillsEn : leap.skills }
-    private var leapTip: String { lang == "en" ? leap.tipEn : leap.tip }
+    private var leapName: String { loc.lang == "en" ? leap.nameEn : leap.name }
+    private var leapDesc: String { loc.lang == "en" ? leap.descriptionEn : leap.description }
+    private var leapSigns: [String] { loc.lang == "en" ? leap.signsEn : leap.signs }
+    private var leapSkills: [String] { loc.lang == "en" ? leap.skillsEn : leap.skills }
+    private var leapTip: String { loc.lang == "en" ? leap.tipEn : leap.tip }
 
     private var dotFill: Color {
         if leap.isDone    { return .bbMint }
@@ -218,7 +216,7 @@ private struct LeapTimelineRow: View {
                             .foregroundColor(leap.isCurrent ? .bbCoralDeep : .bbInk)
                         Spacer()
                         HStack(spacing: 4) {
-                            Text(t("\(leap.week) wk", "\(leap.week) нед"))
+                            Text(loc.t("\(leap.week) wk", "\(leap.week) нед"))
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundColor(.bbInkMute)
                             Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
@@ -229,13 +227,13 @@ private struct LeapTimelineRow: View {
 
                     Group {
                         if leap.isCurrent {
-                            Text(t("in progress", "идёт сейчас"))
+                            Text(loc.t("in progress", "идёт сейчас"))
                                 .foregroundColor(.bbCoralDeep)
                         } else if leap.isDone {
-                            Text(t("completed", "завершён"))
+                            Text(loc.t("completed", "завершён"))
                                 .foregroundColor(.bbMintDeep)
                         } else {
-                            Text(t("ahead · week \(leap.week)", "впереди · \(leap.week)-я неделя"))
+                            Text(loc.t("ahead · week \(leap.week)", "впереди · \(leap.week)-я неделя"))
                                 .foregroundColor(.bbInkMute)
                         }
                     }
@@ -250,8 +248,8 @@ private struct LeapTimelineRow: View {
 
                             if !leapSigns.isEmpty {
                                 HStack(alignment: .top, spacing: 10) {
-                                    MiniList(label: t("notice", "замечают"), items: leapSigns, accent: .bbCoral)
-                                    MiniList(label: t("will learn", "научится"), items: leapSkills, accent: .bbMintDeep)
+                                    MiniList(label: loc.t("notice", "замечают"), items: leapSigns, accent: .bbCoral)
+                                    MiniList(label: loc.t("will learn", "научится"), items: leapSkills, accent: .bbMintDeep)
                                 }
                             }
 

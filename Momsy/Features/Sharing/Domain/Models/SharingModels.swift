@@ -51,10 +51,28 @@ enum FamilyRole: String, CaseIterable, Identifiable {
         case .grandma: return "eyes"
         }
     }
+
+    var defaultBlob: BlobKind {
+        switch self {
+        case .mom:     return .baby
+        case .dad:     return .bear
+        case .nanny:   return .sun
+        case .grandma: return .heart
+        }
+    }
+
+    var defaultTone: Color {
+        switch self {
+        case .mom:     return .bbCoral
+        case .dad:     return .bbSky
+        case .nanny:   return .bbMint
+        case .grandma: return .bbLilac
+        }
+    }
 }
 
 struct FamilyMember: Identifiable {
-    let id = UUID()
+    let id: UUID
     let name: String
     var role: FamilyRole
     let isMe: Bool
@@ -62,11 +80,18 @@ struct FamilyMember: Identifiable {
     var activity: String
     let blob: BlobKind
     let tone: Color
+
+    init(id: UUID = UUID(), name: String, role: FamilyRole, isMe: Bool,
+         isOnline: Bool = false, activity: String = "", blob: BlobKind, tone: Color) {
+        self.id = id
+        self.name = name
+        self.role = role
+        self.isMe = isMe
+        self.isOnline = isOnline
+        self.activity = activity
+        self.blob = blob
+        self.tone = tone
+    }
 }
 
-let sampleFamily: [FamilyMember] = [
-    FamilyMember(name: "Anya",    role: .mom,     isMe: true,  isOnline: false, activity: "that's you",     blob: .baby,  tone: .bbCoral),
-    FamilyMember(name: "Misha",   role: .dad,     isMe: false, isOnline: true,  activity: "online",          blob: .bear,  tone: .bbSky),
-    FamilyMember(name: "Olga",    role: .nanny,   isMe: false, isOnline: false, activity: "3 entries today", blob: .sun,   tone: .bbMint),
-    FamilyMember(name: "Grandma", role: .grandma, isMe: false, isOnline: false, activity: "viewing diary",   blob: .heart, tone: .bbLilac),
-]
+

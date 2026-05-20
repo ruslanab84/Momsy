@@ -39,6 +39,13 @@ extension Color {
             blue:  Double( n        & 0xFF) / 255
         )
     }
+
+    var hexString: String {
+        let uiColor = UIColor(self)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0
+        uiColor.getRed(&r, green: &g, blue: &b, alpha: nil)
+        return String(format: "%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
+    }
 }
 
 extension UIColor {

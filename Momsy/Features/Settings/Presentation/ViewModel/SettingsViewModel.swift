@@ -1,11 +1,15 @@
 import SwiftUI
+import Combine
 
 final class SettingsViewModel: ObservableObject {
     @Published var appTheme: String {
         didSet { UserDefaults.standard.set(appTheme, forKey: "appTheme") }
     }
     @Published var appLanguage: String {
-        didSet { UserDefaults.standard.set(appLanguage, forKey: "appLanguage") }
+        didSet {
+            UserDefaults.standard.set(appLanguage, forKey: "appLanguage")
+            if let lang = Language(rawValue: appLanguage) { LocalizationManager.shared.set(lang) }
+        }
     }
 
     init() {
