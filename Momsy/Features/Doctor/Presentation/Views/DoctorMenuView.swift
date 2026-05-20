@@ -47,6 +47,15 @@ struct DoctorMenuView: View {
 
                 VStack(spacing: 1) {
                     DoctorMenuRow(
+                        destination: AIChatView(container: container),
+                        icon: "sparkles",
+                        iconColor: .bbMintDeep,
+                        iconBg: Color.bbMint.opacity(0.3),
+                        title: lm.t("Ask Momsy AI", "Спросить ИИ"),
+                        sub: lm.t("Sleep, feeding, development — ask anything", "Сон, кормление, развитие — спросите всё")
+                    )
+                    Divider().padding(.leading, 60)
+                    DoctorMenuRow(
                         destination: ReportView(),
                         icon: "doc.text.fill",
                         iconColor: .bbSkyDeep,

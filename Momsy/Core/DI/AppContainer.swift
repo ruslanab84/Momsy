@@ -13,6 +13,8 @@ final class AppContainer {
     let temperatureRepository: any TemperatureRepository = LocalTemperatureRepository()
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let leapsRepository: any LeapsRepository          = LocalLeapsRepository()
+    let chatRepository: any ChatRepository             = LocalChatRepository()
+    let aiChatService: any AIChatService               = GeminiChatService()
 
     // MARK: — Use Cases — Baby
 
@@ -52,6 +54,12 @@ final class AppContainer {
     lazy var getLeaps         = GetLeapsUseCase(repository: leapsRepository)
     lazy var markLeapComplete = MarkLeapCompleteUseCase(repository: leapsRepository)
 
+    // MARK: — Use Cases — Chat
+
+    lazy var getChatHistory    = GetChatHistoryUseCase(repository: chatRepository)
+    lazy var appendChatMessage = AppendChatMessageUseCase(repository: chatRepository)
+    lazy var clearChatHistory  = ClearChatHistoryUseCase(repository: chatRepository)
+
     // MARK: — ViewModel Factories
 
     func makeDiaryViewModel() -> DiaryViewModel {
@@ -68,6 +76,15 @@ final class AppContainer {
 
     func makeSleepViewModel() -> SleepViewModel {
         SleepViewModel(startSleep: startSleep, stopSleep: stopSleep, getSleep: getSleepEntries)
+    }
+
+    func makeAIChatViewModel() -> AIChatViewModel {
+        AIChatViewModel(
+            getChatHistory: getChatHistory,
+            appendMessage: appendChatMessage,
+            clearChat: clearChatHistory,
+            chatService: aiChatService
+        )
     }
 }
 
