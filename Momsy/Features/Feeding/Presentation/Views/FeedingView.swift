@@ -161,9 +161,9 @@ struct FeedingView: View {
         HStack(spacing: 10) {
             Button(action: {
                 if vm.isFeedingActive {
-                    vm.isFeedingActive = false
+                    vm.pauseFeeding()
                 } else {
-                    vm.startFeeding(side: vm.feedingSide)
+                    vm.resumeFeeding()
                 }
             }) {
                 Text(vm.isFeedingActive ? loc.strings.pause : loc.strings.resume)

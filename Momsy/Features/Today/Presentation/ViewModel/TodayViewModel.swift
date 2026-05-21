@@ -6,6 +6,8 @@ final class TodayViewModel: ObservableObject {
     @Published var isFeedingActive = false
     @Published var feedingSeconds = 0
     @Published var feedingSide: FeedingSide = .left
+    private var feedingStartDate: Date?
+    private var pausedFeedingSeconds = 0
     @Published var diaperCount: Int
     @Published var logEntries: [LogEntry] = []
 
@@ -58,8 +60,28 @@ final class TodayViewModel: ObservableObject {
         feedingSide = side
         isFeedingActive = true
         feedingSeconds = 0
+        pausedFeedingSeconds = 0
+        let startDate = Date()
+        feedingStartDate = startDate
         analytics.track(.feedingStarted(side: side.rawValue))
-        timerService.start { [weak self] secs in
+        timerService.start(from: startDate) { [weak self] secs in
+            Task { @MainActor [weak self] in self?.feedingSeconds = secs }
+        }
+    }
+
+    func pauseFeeding() {
+        guard isFeedingActive else { return }
+        isFeedingActive = false
+        pausedFeedingSeconds = feedingSeconds
+        timerService.stop()
+    }
+
+    func resumeFeeding() {
+        guard !isFeedingActive else { return }
+        isFeedingActive = true
+        let effectiveStart = Date().addingTimeInterval(-TimeInterval(pausedFeedingSeconds))
+        feedingStartDate = effectiveStart
+        timerService.start(from: effectiveStart) { [weak self] secs in
             Task { @MainActor [weak self] in self?.feedingSeconds = secs }
         }
     }
