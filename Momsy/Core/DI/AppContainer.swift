@@ -14,6 +14,8 @@ final class AppContainer {
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let leapsRepository: any LeapsRepository          = LocalLeapsRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
+    let photoStorage: any PhotoStorageService          = LocalPhotoStorageService()
+    let inviteService: any InviteServiceProtocol       = LocalInviteService()
     let diaperUseCase                                   = DiaperUseCase()
     let chatRepository: any ChatRepository             = LocalChatRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
@@ -74,7 +76,7 @@ final class AppContainer {
     }
 
     func makeDiaryViewModel() -> DiaryViewModel {
-        DiaryViewModel(repo: diaryRepository)
+        DiaryViewModel(repo: diaryRepository, photoStorage: photoStorage)
     }
 
     func makeTrackingViewModel() -> TrackingViewModel {
@@ -82,14 +84,15 @@ final class AppContainer {
     }
 
     func makeSharingViewModel() -> SharingViewModel {
-        SharingViewModel(repo: familyRepository)
+        SharingViewModel(repo: familyRepository, inviteService: inviteService)
     }
 
     func makeSoundsViewModel() -> SoundsViewModel {
         SoundsViewModel(
             soundRepository: soundRepository,
             sleepTimerUC: SleepTimerUseCase(),
-            nowPlaying: NowPlayingService.shared
+            nowPlaying: NowPlayingService.shared,
+            soundEngine: SoundEngine.shared
         )
     }
 

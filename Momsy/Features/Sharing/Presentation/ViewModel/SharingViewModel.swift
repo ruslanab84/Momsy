@@ -8,6 +8,7 @@ final class SharingViewModel: ObservableObject {
     @Published var editingMember: FamilyMember? = nil
 
     private let repo: any FamilyRepository
+    private let inviteService: any InviteServiceProtocol
 
     private var lm: LocalizationManager { .shared }
 
@@ -16,8 +17,18 @@ final class SharingViewModel: ObservableObject {
         return name.isEmpty ? lm.t("Baby", "Малыш") : name
     }
 
-    init(repo: any FamilyRepository) {
+    var inviteCode: String { inviteService.currentCode() }
+    var inviteURL:  String { inviteService.inviteURL(for: inviteCode) }
+    var inviteExpiry: Date { inviteService.expiry() }
+
+    func regenerateInvite() {
+        inviteService.regenerate()
+        objectWillChange.send()
+    }
+
+    init(repo: any FamilyRepository, inviteService: any InviteServiceProtocol = LocalInviteService()) {
         self.repo = repo
+        self.inviteService = inviteService
         Task { await loadMembers() }
     }
 

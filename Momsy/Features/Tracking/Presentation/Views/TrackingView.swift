@@ -86,38 +86,47 @@ struct TrackingView: View {
     private struct ChartConfig {
         let title: String
         let unit: String
-        let data: [WeightPoint]
+        let data: [WHOPoint]
         let gridVals: [Int]
+        let babyPoints: [BabyGrowthPoint]
     }
 
     private var currentChartConfig: ChartConfig {
         switch vm.selectedTab {
-        case 1: return ChartConfig(title: loc.t("Height, cm", "Рост, см"),            unit: "cm", data: whoHeightData, gridVals: [50, 55, 60, 65])
-        case 2: return ChartConfig(title: loc.t("Head circ., cm", "Окруж. головы, см"), unit: "cm", data: whoHeadData,   gridVals: [34, 37, 40, 43])
-        default: return ChartConfig(title: loc.t("Weight, kg", "Вес, кг"),             unit: "kg", data: whoWeightData,  gridVals: [3, 5, 7, 9])
+        case 1: return ChartConfig(title: loc.t("Height, cm", "Рост, см"),             unit: "cm", data: whoHeightData, gridVals: [50, 65, 80, 95], babyPoints: vm.babyHeightPoints)
+        case 2: return ChartConfig(title: loc.t("Head circ., cm", "Окруж. головы, см"), unit: "cm", data: whoHeadData,   gridVals: [33, 38, 43, 48], babyPoints: vm.babyHeadPoints)
+        default: return ChartConfig(title: loc.t("Weight, kg", "Вес, кг"),              unit: "kg", data: whoWeightData,  gridVals: [4, 7, 10, 13],  babyPoints: vm.babyWeightPoints)
         }
     }
 
     private var growthChartCard: some View {
         let cfg = currentChartConfig
         return VStack(alignment: .leading, spacing: 4) {
-            HStack {
+            HStack(alignment: .top) {
                 Text(cfg.title)
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
-                Text(loc.t("0–5 mo · WHO percentiles", "0–5 мес · перцентили ВОЗ"))
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInkMute)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(loc.t("0–24 mo · WHO", "0–24 мес · ВОЗ"))
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                    let pLabel = vm.currentPercentileLabel
+                    if !pLabel.isEmpty {
+                        Text(pLabel)
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .foregroundColor(.bbCoralDeep)
+                    }
+                }
             }
 
-            WHOLineChart(data: cfg.data, gridVals: cfg.gridVals, unit: cfg.unit)
+            WHOLineChart(data: cfg.data, babyPoints: cfg.babyPoints, gridVals: cfg.gridVals, unit: cfg.unit)
                 .frame(height: 160)
                 .animation(.easeInOut(duration: 0.3), value: vm.selectedTab)
 
             HStack(spacing: 12) {
-                legendItem(color: .bbCoralDeep, isDashed: false, label: loc.t("Baby", "Лёва"))
-                legendItem(color: .bbMint,      isDashed: false, label: loc.t("Normal 15–85%", "Норма 15–85%"))
+                legendItem(color: .bbCoralDeep, isDashed: false, label: vm.displayName)
+                legendItem(color: .bbMint,      isDashed: false, label: "P15–P85")
                 legendItem(color: .bbMintDeep,  isDashed: true,  label: loc.t("Median", "Медиана"))
             }
             .padding(.top, 4)
@@ -285,15 +294,16 @@ struct TrackingView: View {
 // MARK: - WHO Line Chart
 
 private struct WHOLineChart: View {
-    let data: [WeightPoint]
+    let data: [WHOPoint]
+    let babyPoints: [BabyGrowthPoint]
     let gridVals: [Int]
     let unit: String
 
-    private let padL: CGFloat = 30, padR: CGFloat = 8, padT: CGFloat = 12, padB: CGFloat = 22
+    private let padL: CGFloat = 32, padR: CGFloat = 8, padT: CGFloat = 12, padB: CGFloat = 22
+    private let maxMonth: Int = 24
 
-    private func xPos(_ i: Int, width: CGFloat) -> CGFloat {
-        guard data.count > 1 else { return padL }
-        return padL + CGFloat(i) / CGFloat(data.count - 1) * (width - padL - padR)
+    private func xPos(month: Int, width: CGFloat) -> CGFloat {
+        padL + CGFloat(month) / CGFloat(maxMonth) * (width - padL - padR)
     }
 
     private func yPos(_ v: Double, height: CGFloat, minV: Double, maxV: Double) -> CGFloat {
@@ -304,33 +314,44 @@ private struct WHOLineChart: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
-            let allVals = data.flatMap { [$0.babyKg, $0.p15, $0.p85] }
+            let whoVals = data.flatMap { [$0.p3, $0.p97] }
+            let babyVals = babyPoints.map { $0.value }
+            let allVals = whoVals + babyVals
             let minV = (allVals.min() ?? 2.5) - 0.5
-            let maxV = (allVals.max() ?? 9.0) + 0.5
+            let maxV = (allVals.max() ?? 15.0) + 0.5
+            let sorted = babyPoints.sorted { $0.month < $1.month }
 
             ZStack(alignment: .topLeading) {
+
+                // Outer band: P3–P97
                 Path { p in
-                    guard !data.isEmpty else { return }
-                    p.move(to: CGPoint(x: xPos(0, width: w), y: yPos(data[0].p15, height: h, minV: minV, maxV: maxV)))
-                    for i in data.indices.dropFirst() {
-                        p.addLine(to: CGPoint(x: xPos(i, width: w), y: yPos(data[i].p15, height: h, minV: minV, maxV: maxV)))
-                    }
-                    for i in data.indices.reversed() {
-                        p.addLine(to: CGPoint(x: xPos(i, width: w), y: yPos(data[i].p85, height: h, minV: minV, maxV: maxV)))
-                    }
+                    guard let first = data.first else { return }
+                    p.move(to: CGPoint(x: xPos(month: first.month, width: w), y: yPos(first.p3, height: h, minV: minV, maxV: maxV)))
+                    for pt in data { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p3, height: h, minV: minV, maxV: maxV))) }
+                    for pt in data.reversed() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p97, height: h, minV: minV, maxV: maxV))) }
                     p.closeSubpath()
                 }
-                .fill(Color.bbMint.opacity(0.35))
+                .fill(Color.bbMint.opacity(0.10))
 
+                // Inner band: P15–P85
                 Path { p in
-                    guard !data.isEmpty else { return }
-                    p.move(to: CGPoint(x: xPos(0, width: w), y: yPos(data[0].p50, height: h, minV: minV, maxV: maxV)))
-                    for i in data.indices.dropFirst() {
-                        p.addLine(to: CGPoint(x: xPos(i, width: w), y: yPos(data[i].p50, height: h, minV: minV, maxV: maxV)))
-                    }
+                    guard let first = data.first else { return }
+                    p.move(to: CGPoint(x: xPos(month: first.month, width: w), y: yPos(first.p15, height: h, minV: minV, maxV: maxV)))
+                    for pt in data { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p15, height: h, minV: minV, maxV: maxV))) }
+                    for pt in data.reversed() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p85, height: h, minV: minV, maxV: maxV))) }
+                    p.closeSubpath()
+                }
+                .fill(Color.bbMint.opacity(0.30))
+
+                // Median P50
+                Path { p in
+                    guard let first = data.first else { return }
+                    p.move(to: CGPoint(x: xPos(month: first.month, width: w), y: yPos(first.p50, height: h, minV: minV, maxV: maxV)))
+                    for pt in data.dropFirst() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p50, height: h, minV: minV, maxV: maxV))) }
                 }
                 .stroke(Color.bbMintDeep.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
 
+                // Grid lines
                 ForEach(gridVals, id: \.self) { v in
                     let yg = yPos(Double(v), height: h, minV: minV, maxV: maxV)
                     Path { p in
@@ -341,47 +362,47 @@ private struct WHOLineChart: View {
                     Text("\(v)")
                         .font(.system(size: 9, weight: .bold, design: .monospaced))
                         .foregroundColor(.bbInkMute)
-                        .position(x: padL - 10, y: yg)
+                        .position(x: padL - 12, y: yg)
                 }
 
-                Path { p in
-                    guard !data.isEmpty else { return }
-                    p.move(to: CGPoint(x: xPos(0, width: w), y: yPos(data[0].babyKg, height: h, minV: minV, maxV: maxV)))
-                    for i in data.indices.dropFirst() {
-                        p.addLine(to: CGPoint(x: xPos(i, width: w), y: yPos(data[i].babyKg, height: h, minV: minV, maxV: maxV)))
+                // Baby measurement line
+                if !sorted.isEmpty {
+                    Path { p in
+                        guard let first = sorted.first else { return }
+                        p.move(to: CGPoint(x: xPos(month: first.month, width: w), y: yPos(first.value, height: h, minV: minV, maxV: maxV)))
+                        for pt in sorted.dropFirst() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.value, height: h, minV: minV, maxV: maxV))) }
+                    }
+                    .stroke(Color.bbCoralDeep, style: StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round))
+
+                    ForEach(sorted.indices, id: \.self) { i in
+                        let pt = sorted[i]
+                        let isLast = i == sorted.count - 1
+                        Circle()
+                            .fill(isLast ? Color.bbCoralDeep : Color.white)
+                            .frame(width: isLast ? 9 : 5, height: isLast ? 9 : 5)
+                            .overlay(Circle().strokeBorder(Color.bbCoralDeep, lineWidth: 2))
+                            .position(x: xPos(month: pt.month, width: w),
+                                      y: yPos(pt.value, height: h, minV: minV, maxV: maxV))
+                    }
+
+                    if let last = sorted.last {
+                        Text(String(format: "%.1f \(unit)", last.value))
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6).padding(.vertical, 3)
+                            .background(Color.bbCoralDeep)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .position(x: xPos(month: last.month, width: w) - 24,
+                                      y: yPos(last.value, height: h, minV: minV, maxV: maxV) - 16)
                     }
                 }
-                .stroke(Color.bbCoralDeep, style: StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round))
 
-                ForEach(data.indices, id: \.self) { i in
-                    let pt = CGPoint(x: xPos(i, width: w), y: yPos(data[i].babyKg, height: h, minV: minV, maxV: maxV))
-                    let isLast = i == data.count - 1
-                    Circle()
-                        .fill(isLast ? Color.bbCoralDeep : Color.white)
-                        .frame(width: isLast ? 9 : 5, height: isLast ? 9 : 5)
-                        .overlay(Circle().strokeBorder(Color.bbCoralDeep, lineWidth: 2))
-                        .position(pt)
-                }
-
-                if let last = data.last, let lastIdx = data.indices.last {
-                    let pt = CGPoint(
-                        x: xPos(lastIdx, width: w) - 22,
-                        y: yPos(last.babyKg, height: h, minV: minV, maxV: maxV) - 16
-                    )
-                    Text(String(format: "%.1f \(unit)", last.babyKg))
-                        .font(.system(size: 10, weight: .heavy, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 6).padding(.vertical, 3)
-                        .background(Color.bbCoralDeep)
-                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                        .position(pt)
-                }
-
-                ForEach(data.indices, id: \.self) { i in
-                    Text("\(data[i].month)m")
+                // X-axis labels at 0, 6, 12, 18, 24
+                ForEach([0, 6, 12, 18, 24], id: \.self) { m in
+                    Text("\(m)m")
                         .font(.system(size: 9, weight: .bold, design: .monospaced))
                         .foregroundColor(.bbInkMute)
-                        .position(x: xPos(i, width: w), y: h - 4)
+                        .position(x: xPos(month: m, width: w), y: h - 4)
                 }
             }
         }

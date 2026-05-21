@@ -10,6 +10,7 @@ final class DiaryViewModel: ObservableObject {
     @Published var showAdd = false
 
     private let repo: any DiaryRepository
+    private let photoStorage: any PhotoStorageService
 
     private var lm: LocalizationManager { .shared }
 
@@ -39,15 +40,25 @@ final class DiaryViewModel: ObservableObject {
         }
     }
 
-    init(repo: any DiaryRepository) {
+    init(repo: any DiaryRepository, photoStorage: any PhotoStorageService) {
         self.repo = repo
+        self.photoStorage = photoStorage
         Task { await loadEntries() }
     }
 
     func loadEntries() async {
         let yearAgo = Calendar.current.date(byAdding: .year, value: -1, to: Date()) ?? .distantPast
         let stored = (try? await repo.getEntries(from: yearAgo, to: Date())) ?? []
+
+        var loaded: [UUID: UIImage] = [:]
+        for item in stored where item.kind == .photo {
+            if let path = item.photoPath, let img = await photoStorage.load(atPath: path) {
+                loaded[item.id] = img
+            }
+        }
+
         entries = group(stored.sorted { $0.date > $1.date })
+        photosByID.merge(loaded) { _, new in new }
     }
 
     // MARK: - Grouping & Mapping
@@ -171,7 +182,11 @@ final class DiaryViewModel: ObservableObject {
         }
         Task {
             for item in newDay.items {
-                try? await repo.add(toStored(item, date: date))
+                var stored = toStored(item, date: date)
+                if stored.kind == .photo, let img = photos[item.id] {
+                    stored.photoPath = try? await photoStorage.save(img, forID: item.id)
+                }
+                try? await repo.add(stored)
             }
         }
     }

@@ -2,7 +2,7 @@ import AVFoundation
 
 // Streams lullaby sounds via AVAudioEngine using DSP synthesis — no audio files required.
 @MainActor
-final class SoundEngine {
+final class SoundEngine: SoundEngineProtocol {
     static let shared = SoundEngine()
 
     private let engine = AVAudioEngine()

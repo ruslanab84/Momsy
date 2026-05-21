@@ -10,6 +10,12 @@ final class ReportViewModel: ObservableObject {
     @Published var shareURL: URL? = nil
     @Published var showShare = false
 
+    private let generateReport: GenerateReportUseCase
+
+    init(generateReport: GenerateReportUseCase? = nil) {
+        self.generateReport = generateReport ?? GenerateReportUseCase()
+    }
+
     private var lang: String { UserDefaults.standard.string(forKey: "appLanguage") ?? "en" }
     private func t(_ en: String, _ ru: String) -> String { LocalizationManager.shared.t(en, ru) }
 
@@ -84,13 +90,31 @@ final class ReportViewModel: ObservableObject {
     }
 
     func generateAndShare() async {
-        guard !isGenerating, let url = renderPDF() else { return }
+        guard !isGenerating else { return }
+        isGenerating = true
+        defer { isGenerating = false }
+        guard let url = generateReport.execute(
+            babyName: displayName,
+            periodLabel: periods[selectedPeriod],
+            stats: currentStats,
+            sparklines: currentSparklines,
+            lang: lang
+        ) else { return }
         shareURL = url
         showShare = true
     }
 
     func printReport() async {
-        guard !isGenerating, let url = renderPDF() else { return }
+        guard !isGenerating else { return }
+        isGenerating = true
+        defer { isGenerating = false }
+        guard let url = generateReport.execute(
+            babyName: displayName,
+            periodLabel: periods[selectedPeriod],
+            stats: currentStats,
+            sparklines: currentSparklines,
+            lang: lang
+        ) else { return }
         let info = UIPrintInfo.printInfo()
         info.outputType = .general
         info.jobName = t("Momsy — report", "Momsy — отчёт")
@@ -98,38 +122,5 @@ final class ReportViewModel: ObservableObject {
         controller.printInfo = info
         controller.printingItem = url
         controller.present(animated: true)
-    }
-
-    func renderPDF() -> URL? {
-        isGenerating = true
-        defer { isGenerating = false }
-
-        let content = ReportPreviewContent(
-            babyName: displayName,
-            periodLabel: periods[selectedPeriod],
-            stats: currentStats,
-            sparklines: currentSparklines,
-            lang: lang
-        )
-        .frame(width: 360)
-        .padding(20)
-        .background(Color.bbCard)
-
-        let renderer = ImageRenderer(content: content)
-        renderer.scale = 3.0
-
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("momsy_report.pdf")
-
-        renderer.render { size, draw in
-            var box = CGRect(origin: .zero, size: size)
-            guard let ctx = CGContext(url as CFURL, mediaBox: &box, nil) else { return }
-            ctx.beginPDFPage(nil)
-            draw(ctx)
-            ctx.endPDFPage()
-            ctx.closePDF()
-        }
-
-        return url
     }
 }

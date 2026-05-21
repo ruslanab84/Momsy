@@ -26,7 +26,13 @@ struct SharingView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $vm.showInvite) {
-            InviteSheet { newMember in vm.addMember(newMember) }
+            InviteSheet(
+                inviteCode: vm.inviteCode,
+                inviteURL:  vm.inviteURL,
+                inviteExpiry: vm.inviteExpiry,
+                onRegenerate: { vm.regenerateInvite() },
+                onInvite: { member in vm.addMember(member) }
+            )
         }
         .sheet(item: $vm.editingMember) { member in
             MemberDetailSheet(
@@ -378,12 +384,18 @@ private struct MemberDetailSheet: View {
 // MARK: - Invite Sheet
 
 private struct InviteSheet: View {
+    let inviteCode: String
+    let inviteURL:  String
+    let inviteExpiry: Date
+    let onRegenerate: () -> Void
     let onInvite: (FamilyMember) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var selectedRole: FamilyRole = .dad
     @State private var nameText = ""
     @State private var showShare = false
+    @State private var isCopied = false
+    @State private var expiryLabel = ""
     @EnvironmentObject var loc: LocalizationManager
 
     private let blobsByRole: [FamilyRole: (BlobKind, Color)] = [
@@ -392,9 +404,6 @@ private struct InviteSheet: View {
         .nanny:   (.sun,   .bbMint),
         .grandma: (.heart, .bbLilac),
     ]
-
-    private var inviteCode: String { "MOMSY-\(Int.random(in: 1000...9999))" }
-    private var inviteURL: String { "https://momsy.app/join/\(inviteCode)" }
 
     private var qrImage: Image? {
         guard let data = inviteURL.data(using: .utf8),
@@ -408,10 +417,21 @@ private struct InviteSheet: View {
         return Image(uiImage: UIImage(cgImage: cgImage))
     }
 
+    private func formatExpiry(_ date: Date) -> String {
+        let remaining = date.timeIntervalSinceNow
+        if remaining <= 0 { return loc.t("expired", "истёк") }
+        let hrs = Int(remaining / 3600)
+        let mins = Int((remaining.truncatingRemainder(dividingBy: 3600)) / 60)
+        if hrs > 0 { return loc.t("\(hrs)h \(mins)m left", "\(hrs)ч \(mins)м") }
+        return loc.t("\(mins)m left", "\(mins) мин")
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
+
+                    // QR + link card
                     VStack(spacing: 12) {
                         if let qr = qrImage {
                             qr
@@ -423,15 +443,61 @@ private struct InviteSheet: View {
                                 .background(Color.white)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
+
+                        Text(inviteCode)
+                            .font(.system(size: 16, weight: .heavy, design: .monospaced))
+                            .foregroundColor(.bbInk)
+                            .kerning(1)
+
                         Text(inviteURL)
-                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                            .font(.system(size: 10, weight: .medium, design: .monospaced))
                             .foregroundColor(.bbInkMute)
                             .multilineTextAlignment(.center)
+                            .lineLimit(2)
 
                         HStack(spacing: 8) {
+                            // Copy link button
+                            Button {
+                                UIPasteboard.general.string = inviteURL
+                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                withAnimation { isCopied = true }
+                                Task {
+                                    try? await Task.sleep(nanoseconds: 2_000_000_000)
+                                    withAnimation { isCopied = false }
+                                }
+                            } label: {
+                                Label(isCopied ? loc.t("Copied!", "Скопировано!") : loc.t("Copy link", "Копировать"),
+                                      systemImage: isCopied ? "checkmark" : "doc.on.doc")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .foregroundColor(isCopied ? .bbMintDeep : .bbInk)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(isCopied ? Color.bbMint : Color.bbCreamSoft)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .animation(.spring(response: 0.3), value: isCopied)
+
+                            // Regenerate button
+                            Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                onRegenerate()
+                            } label: {
+                                Label(loc.t("New code", "Новый код"), systemImage: "arrow.clockwise")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .foregroundColor(.bbInkSoft)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(Color.bbCreamSoft)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        HStack(spacing: 6) {
                             Image(systemName: "clock")
                                 .font(.system(size: 11))
-                            Text(loc.t("Link valid for 24 hours", "Ссылка действует 24 часа"))
+                            Text(expiryLabel)
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                         }
                         .foregroundColor(.bbInkMute)
@@ -439,6 +505,7 @@ private struct InviteSheet: View {
                     .frame(maxWidth: .infinity)
                     .bbCard(pad: 20)
 
+                    // Role picker
                     VStack(alignment: .leading, spacing: 10) {
                         Text(loc.t("ROLE IN TEAM", "РОЛЬ В КОМАНДЕ"))
                             .font(.system(size: 11, weight: .heavy, design: .rounded))
@@ -476,6 +543,7 @@ private struct InviteSheet: View {
                             .padding(.top, 2)
                     }
 
+                    // Name field
                     VStack(alignment: .leading, spacing: 8) {
                         Text(loc.t("NAME (optional)", "ИМЯ (необязательно)"))
                             .font(.system(size: 11, weight: .heavy, design: .rounded))
@@ -488,6 +556,7 @@ private struct InviteSheet: View {
                             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
 
+                    // Action buttons
                     VStack(spacing: 8) {
                         Button { showShare = true } label: {
                             HStack(spacing: 8) {
@@ -539,6 +608,13 @@ private struct InviteSheet: View {
             }
             .sheet(isPresented: $showShare) {
                 ShareSheet(items: [inviteURL])
+            }
+            .onAppear { expiryLabel = formatExpiry(inviteExpiry) }
+            .task {
+                while !Task.isCancelled {
+                    expiryLabel = formatExpiry(inviteExpiry)
+                    try? await Task.sleep(nanoseconds: 60_000_000_000)
+                }
             }
         }
     }

@@ -10,6 +10,7 @@ final class SoundsViewModel: ObservableObject {
     private let soundRepository: any SoundRepository
     private let sleepTimerUC: SleepTimerUseCase
     private let nowPlaying: NowPlayingService
+    private let soundEngine: any SoundEngineProtocol
     private var countdownTask: Task<Void, Never>? = nil
     private var favorites: Set<String> = []
 
@@ -19,10 +20,12 @@ final class SoundsViewModel: ObservableObject {
 
     init(soundRepository: any SoundRepository,
          sleepTimerUC: SleepTimerUseCase,
-         nowPlaying: NowPlayingService) {
+         nowPlaying: NowPlayingService,
+         soundEngine: any SoundEngineProtocol) {
         self.soundRepository = soundRepository
         self.sleepTimerUC = sleepTimerUC
         self.nowPlaying = nowPlaying
+        self.soundEngine = soundEngine
         self.favorites = soundRepository.loadFavorites()
         self.sounds = sampleSounds.map { s in
             var copy = s
@@ -33,8 +36,8 @@ final class SoundsViewModel: ObservableObject {
             onPlay:  { [weak self] in self?.resumeIfStopped() },
             onPause: { [weak self] in self?.stopAll() }
         )
-        SoundEngine.shared.onInterrupted = { [weak self] in self?.stopAll() }
-        SoundEngine.shared.onResumed     = { [weak self] in self?.resumeIfStopped() }
+        soundEngine.onInterrupted = { [weak self] in self?.stopAll() }
+        soundEngine.onResumed     = { [weak self] in self?.resumeIfStopped() }
     }
 
     var anyPlaying: Bool { sounds.contains { $0.isPlaying } }
@@ -62,14 +65,14 @@ final class SoundsViewModel: ObservableObject {
             if sounds[idx].isPlaying {
                 sounds[idx].isPlaying = false
                 lastPlayedIdx = nil
-                SoundEngine.shared.stop()
+                soundEngine.stop()
                 stopCountdown()
                 nowPlaying.clear()
             } else {
                 for j in sounds.indices { sounds[j].isPlaying = false }
                 sounds[idx].isPlaying = true
                 lastPlayedIdx = idx
-                SoundEngine.shared.play(sounds[idx])
+                soundEngine.play(sounds[idx])
                 startCountdown(for: selectedTimerIdx)
                 nowPlaying.update(
                     soundName: sounds[idx].displayName(lang: lm.lang),
@@ -84,7 +87,7 @@ final class SoundsViewModel: ObservableObject {
         withAnimation(.easeOut(duration: 0.35)) {
             for i in sounds.indices { sounds[i].isPlaying = false }
         }
-        SoundEngine.shared.stop()
+        soundEngine.stop()
         stopCountdown()
         nowPlaying.clear()
         // lastPlayedIdx intentionally preserved — lock screen "play" and interruption resume need it
