@@ -33,23 +33,22 @@ final class SleepViewModel: ObservableObject {
 
     var lastSleepDurationString: String {
         guard let last = todayEntries.last(where: { $0.endDate != nil }),
-              let mins = last.durationMinutes else { return lm.t("—", "—") }
+              let mins = last.durationMinutes else { return "—" }
         return formatMinutes(mins)
     }
 
     var lastSleepSubtitle: String {
         guard let last = todayEntries.last(where: { $0.endDate != nil }),
-              let end = last.endDate else { return lm.t("no sleep yet", "не спал") }
+              let end = last.endDate else { return lm.strings.noSleepYet }
         let mins = max(0, Int(-end.timeIntervalSinceNow / 60))
-        if mins == 0 { return lm.t("just now", "только что") }
-        if mins < 60 { return lm.t("\(mins) min ago", "\(mins) мин назад") }
-        let h = mins / 60
-        return lm.lang == "en" ? "\(h)h ago" : "\(h) ч назад"
+        if mins == 0 { return lm.strings.justNow }
+        if mins < 60 { return lm.strings.minsAgo(mins) }
+        return lm.strings.hrAgo(mins / 60)
     }
 
     var totalSleepToday: String {
         let total = todayEntries.compactMap(\.durationMinutes).reduce(0, +)
-        if total == 0 { return lm.t("0 min", "0 мин") }
+        if total == 0 { return "0 \(lm.strings.unitMin)" }
         return formatMinutes(total)
     }
 
@@ -61,7 +60,10 @@ final class SleepViewModel: ObservableObject {
             sleepSeconds = 0
             timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
                 .autoconnect()
-                .sink { [weak self] _ in self?.sleepSeconds += 1 }
+                .sink { [weak self] _ in
+                    guard let self, let entry = self.activeSleepEntry else { return }
+                    self.sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
+                }
         }
     }
 
@@ -88,9 +90,8 @@ final class SleepViewModel: ObservableObject {
     }
 
     private func formatMinutes(_ mins: Int) -> String {
-        if mins < 60 { return lm.lang == "en" ? "\(mins) min" : "\(mins) мин" }
+        if mins < 60 { return "\(mins) \(lm.strings.unitMin)" }
         let h = mins / 60, m = mins % 60
-        if lm.lang == "en" { return m == 0 ? "\(h)h" : "\(h)h \(m)m" }
-        return m == 0 ? "\(h) ч" : "\(h) ч \(m) м"
+        return lm.strings.sleepDurationFormatted(h: h, m: m)
     }
 }
