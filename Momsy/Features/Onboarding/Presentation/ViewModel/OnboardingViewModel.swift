@@ -13,6 +13,7 @@ final class OnboardingViewModel: ObservableObject {
     @Published var birthDate: Date = {
         Calendar.current.date(byAdding: .month, value: -4, to: Date()) ?? Date()
     }()
+    @Published var babyGender = ""
     @Published var parentName = ""
     @Published var parentRole = "mom"
 
@@ -70,7 +71,7 @@ final class OnboardingViewModel: ObservableObject {
 
     func finish() {
         let name = babyName.trimmingCharacters(in: .whitespaces)
-        let profile = BabyProfile(name: name, birthDate: birthDate, stage: selectedStage.rawValue)
+        let profile = BabyProfile(name: name, birthDate: birthDate, stage: selectedStage.rawValue, gender: babyGender)
         analytics.track(.onboardingComplete)
         pushNotifications.scheduleMorningDiary(hour: 9, minute: 0)
         Task {

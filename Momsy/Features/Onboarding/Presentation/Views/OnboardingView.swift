@@ -87,7 +87,7 @@ struct OnboardingView: View {
         case .age:
             AgeStep(selected: $vm.selectedStage, lang: loc.lang, onContinue: vm.advance)
         case .profile:
-            ProfileStep(babyName: $vm.babyName, birthDate: $vm.birthDate,
+            ProfileStep(babyName: $vm.babyName, birthDate: $vm.birthDate, gender: $vm.babyGender,
                         lang: loc.lang, canContinue: vm.canContinue, onContinue: vm.advance)
         case .role:
             RoleStep(parentName: $vm.parentName, selectedRole: $vm.parentRole, lang: loc.lang, onContinue: vm.advance)
@@ -180,12 +180,28 @@ private struct AgeStep: View {
 private struct ProfileStep: View {
     @Binding var babyName: String
     @Binding var birthDate: Date
+    @Binding var gender: String
     let lang: String
     let canContinue: Bool
     let onContinue: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
     @FocusState private var nameFocused: Bool
+
+    private struct GenderOption: Identifiable {
+        let id: String
+        let emoji: String
+        let label: (L10n) -> String
+        let color: Color
+    }
+
+    private var genderOptions: [GenderOption] {
+        [
+            GenderOption(id: "boy",     emoji: "👦", label: { $0.genderBoy },     color: .bbSky),
+            GenderOption(id: "girl",    emoji: "👧", label: { $0.genderGirl },    color: .bbCoral),
+            GenderOption(id: "unknown", emoji: "🌟", label: { $0.genderUnknown }, color: .bbButter),
+        ]
+    }
 
     var ageDescription: String {
         let comps = Calendar.current.dateComponents([.month, .day], from: birthDate, to: Date())
@@ -235,6 +251,45 @@ private struct ProfileStep: View {
                                 )
                         )
                         .bbShadowSoft()
+                }
+                .padding(.horizontal, 24)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(loc.strings.genderLabel)
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                        .kerning(0.6)
+
+                    HStack(spacing: 10) {
+                        ForEach(genderOptions) { option in
+                            let isSelected = gender == option.id
+                            Button {
+                                withAnimation(.spring(response: 0.3)) {
+                                    gender = isSelected ? "" : option.id
+                                }
+                            } label: {
+                                VStack(spacing: 6) {
+                                    Text(option.emoji)
+                                        .font(.system(size: 28))
+                                    Text(option.label(loc.strings))
+                                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                        .foregroundColor(.bbInk)
+                                        .multilineTextAlignment(.center)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(isSelected ? option.color.opacity(0.18) : Color.bbCard)
+                                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                        .strokeBorder(isSelected ? option.color : Color.bbInkMute.opacity(0.12), lineWidth: isSelected ? 2 : 1.5)
+                                )
+                                .bbShadowSoft()
+                                .scaleEffect(isSelected ? 1.03 : 1.0)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
                 .padding(.horizontal, 24)
 

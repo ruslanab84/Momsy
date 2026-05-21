@@ -393,6 +393,10 @@ struct L10n {
     var caregiver: String       { s("Caregiver",     "Кто следит",    "Betreuer") }
     var stage: String           { s("Stage",         "Стадия",        "Stufe") }
     var dataStoredLocally: String { s("Data is stored only on your phone. Nothing extra.", "Данные хранятся только на вашем телефоне. Ничего лишнего.", "Daten werden nur auf Ihrem Telefon gespeichert.") }
+    var genderLabel: String      { s("GENDER",         "ПОЛ",           "GESCHLECHT") }
+    var genderBoy: String        { s("Boy",            "Мальчик",       "Junge") }
+    var genderGirl: String       { s("Girl",           "Девочка",       "Mädchen") }
+    var genderUnknown: String    { s("Don't know yet", "Пока неизвестно","Noch unklar") }
 
     func ageDescription(_ ageStr: String) -> String { s("Age: \(ageStr)", "Возраст: \(ageStr)", "Alter: \(ageStr)") }
 
