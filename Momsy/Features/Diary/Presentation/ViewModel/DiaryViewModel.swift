@@ -17,7 +17,7 @@ final class DiaryViewModel: ObservableObject {
 
     var displayName: String {
         let name = UserDefaults.standard.string(forKey: "babyName") ?? ""
-        return name.isEmpty ? lm.t("Baby", "Малыш") : name
+        return name.isEmpty ? lm.strings.baby : name
     }
 
     var babyBirthDateInterval: Double {
@@ -96,12 +96,12 @@ final class DiaryViewModel: ObservableObject {
         df.locale = Locale(identifier: lm.lang == "en" ? "en_US" : "ru_RU")
         if cal.isDate(day, inSameDayAs: today) {
             df.dateFormat = "EEE"
-            return lm.t("Today · \(df.string(from: day))", "Сегодня · \(df.string(from: day))")
+            return lm.strings.todayEntry(df.string(from: day))
         }
         if let yesterday = cal.date(byAdding: .day, value: -1, to: today),
            cal.isDate(day, inSameDayAs: yesterday) {
             df.dateFormat = "EEE"
-            return lm.t("Yesterday · \(df.string(from: day))", "Вчера · \(df.string(from: day))")
+            return lm.strings.yesterdayEntry(df.string(from: day))
         }
         df.dateFormat = lm.lang == "en" ? "EEE d MMM" : "d MMM"
         return df.string(from: day)
@@ -183,7 +183,7 @@ final class DiaryViewModel: ObservableObject {
         }
         entryTypes.forEach { analytics.track(.diaryEntryAdded(type: $0)) }
         let date = Date()
-        let todayPrefix = lm.t("Today", "Сегодня")
+        let todayPrefix = lm.strings.today
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             if let idx = entries.firstIndex(where: { $0.dateLabel.hasPrefix(todayPrefix) }) {
                 entries[idx].items.insert(contentsOf: newDay.items, at: 0)
@@ -200,6 +200,7 @@ final class DiaryViewModel: ObservableObject {
                 }
                 try? await repo.add(stored)
             }
+            await loadEntries()
         }
     }
 }
