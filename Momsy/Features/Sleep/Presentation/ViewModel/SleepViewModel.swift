@@ -72,11 +72,11 @@ final class SleepViewModel: ObservableObject {
         timerCancellable?.cancel()
         timerCancellable = nil
         entry.quality = selectedQuality
+        isSleepActive = false
+        activeSleepEntry = nil
         Task {
-            guard let completed = try? await stopSleepUC.execute(entry) else { return }
-            activeSleepEntry = nil
-            isSleepActive = false
-            todayEntries.append(completed)
+            _ = try? await stopSleepUC.execute(entry)
+            await loadTodayEntries()
         }
     }
 
