@@ -17,12 +17,12 @@ struct AIChatView: View {
             inputBar
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .navigationTitle(loc.t("Ask Momsy AI", "Спросить ИИ"))
+        .navigationTitle(loc.strings.aiChatTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if !vm.messages.isEmpty {
-                    Button(loc.t("Clear", "Очистить")) {
+                    Button(loc.strings.clear) {
                         withAnimation(.spring(response: 0.3)) { vm.clear() }
                     }
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -84,11 +84,10 @@ struct AIChatView: View {
                 )
 
             VStack(spacing: 6) {
-                Text(loc.t("Momsy AI", "Momsy ИИ"))
+                Text(loc.strings.momsyAI)
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
-                Text(loc.t("Ask about sleep, feeding, development,\nor anything on your mind.",
-                           "Спросите о сне, кормлении, развитии\nили о том, что вас беспокоит."))
+                Text(loc.strings.aiChatSubtitle)
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                     .multilineTextAlignment(.center)
@@ -134,7 +133,7 @@ struct AIChatView: View {
     private var inputBar: some View {
         HStack(spacing: 10) {
             TextField(
-                loc.t("Ask anything…", "Спросить…"),
+                loc.strings.askAnything,
                 text: $vm.draft,
                 axis: .vertical
             )

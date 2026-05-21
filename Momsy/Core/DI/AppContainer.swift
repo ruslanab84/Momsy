@@ -121,7 +121,8 @@ final class AppContainer {
             appendMessage: appendChatMessage,
             clearChat: clearChatHistory,
             chatService: aiChatService,
-            appState: appState
+            appState: appState,
+            getLeaps: getLeaps
         )
     }
 

@@ -26,7 +26,7 @@ struct SplashView: View {
 
                 Spacer().frame(height: 6)
 
-                Text(LocalizationManager.shared.t("Your baby's little diary", "Дневник вашего малыша"))
+                Text(LocalizationManager.shared.strings.splashTagline)
                     .font(.system(size: 15, weight: .regular, design: .rounded))
                     .foregroundStyle(Color.bbInkSoft)
                     .opacity(taglineOpacity)

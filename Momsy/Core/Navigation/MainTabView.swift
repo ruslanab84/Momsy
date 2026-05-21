@@ -7,23 +7,23 @@ struct MainTabView: View {
     var body: some View {
         TabView {
             TodayView(container: container)
-                .tabItem { Label(lm.t("Today", "Сегодня"), systemImage: "sun.max.fill") }
+                .tabItem { Label(lm.strings.today, systemImage: "sun.max.fill") }
 
             LeapsView()
-                .tabItem { Label(lm.t("Leaps", "Скачки"), systemImage: "star.fill") }
+                .tabItem { Label(lm.strings.tabLeaps, systemImage: "star.fill") }
 
             DiaryView(container: container)
-                .tabItem { Label(lm.t("Diary", "Дневник"), systemImage: "heart.fill") }
+                .tabItem { Label(lm.strings.diary, systemImage: "heart.fill") }
 
             NavigationStack {
                 DoctorMenuView()
             }
-            .tabItem { Label(lm.t("Doctor", "Доктор"), systemImage: "drop.fill") }
+            .tabItem { Label(lm.strings.tabDoctor, systemImage: "drop.fill") }
 
             NavigationStack {
                 MeView()
             }
-            .tabItem { Label(lm.t("Me", "Я"), systemImage: "person.circle.fill") }
+            .tabItem { Label(lm.strings.tabMe, systemImage: "person.circle.fill") }
         }
         .tint(.bbCoralDeep)
     }

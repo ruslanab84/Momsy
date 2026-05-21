@@ -40,11 +40,11 @@ struct SleepView: View {
     private var topBar: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(loc.t("SLEEP TRACKER", "ТРЕКЕР СНА"))
+                Text(loc.strings.sleepTracker)
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .foregroundColor(.white.opacity(0.6))
                     .kerning(0.5)
-                Text(loc.t("Sleep", "Сон"))
+                Text(loc.strings.sleep)
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundColor(.white)
             }
@@ -67,14 +67,14 @@ struct SleepView: View {
     private var statsRow: some View {
         HStack(spacing: 0) {
             statCell(
-                label: loc.t("Total today", "Всего сегодня"),
+                label: loc.strings.totalToday,
                 value: vm.totalSleepToday
             )
             Rectangle()
                 .fill(Color.white.opacity(0.25))
                 .frame(width: 1, height: 44)
             statCell(
-                label: loc.t("Sessions", "Сессий"),
+                label: loc.strings.sessions,
                 value: "\(vm.todayEntries.filter { $0.endDate != nil }.count)"
             )
         }
@@ -104,7 +104,7 @@ struct SleepView: View {
                     Circle()
                         .fill(Color.white.opacity(0.85))
                         .frame(width: 8, height: 8)
-                    Text(loc.t("sleeping…", "спит…"))
+                    Text(loc.strings.sleeping)
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -132,7 +132,7 @@ struct SleepView: View {
 
     private var qualityPicker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(loc.t("SLEEP QUALITY", "КАЧЕСТВО СНА"))
+            Text(loc.strings.sleepQuality)
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.white.opacity(0.6))
                 .kerning(0.5)
@@ -171,7 +171,7 @@ struct SleepView: View {
             HStack(spacing: 10) {
                 Image(systemName: vm.isSleepActive ? "stop.fill" : "moon.fill")
                     .font(.system(size: 16, weight: .bold))
-                Text(vm.isSleepActive ? loc.t("Stop Sleep", "Остановить сон") : loc.t("Start Sleep", "Начать сон"))
+                Text(vm.isSleepActive ? loc.strings.stopSleep : loc.strings.sleep)
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
             }
             .foregroundColor(vm.isSleepActive ? .bbLilacDeep : .white)
@@ -191,7 +191,7 @@ struct SleepView: View {
         return Group {
             if !completed.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(loc.t("TODAY", "СЕГОДНЯ"))
+                    Text(loc.strings.todayUpper)
                         .font(.system(size: 11, weight: .heavy, design: .rounded))
                         .foregroundColor(.white.opacity(0.6))
                         .kerning(0.5)
@@ -227,9 +227,9 @@ struct SleepView: View {
 
     private func qualityLabel(_ q: SleepQuality) -> String {
         switch q {
-        case .good:     return loc.t("😌 Good", "😌 Хорошо")
-        case .normal:   return loc.t("😐 Normal", "😐 Нормально")
-        case .restless: return loc.t("😣 Restless", "😣 Беспокойно")
+        case .good:     return loc.strings.qualityGood
+        case .normal:   return loc.strings.qualityNormal
+        case .restless: return loc.strings.qualityRestless
         }
     }
 

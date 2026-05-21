@@ -47,15 +47,11 @@ final class TodayViewModel: ObservableObject {
 
     var lastFeedAgoString: String {
         let lm = LocalizationManager.shared
-        guard let last = logEntries.first(where: { $0.kind == .bottle }) else {
-            return lm.t("—", "—")
-        }
+        guard let last = logEntries.first(where: { $0.kind == .bottle }) else { return "—" }
         let mins = max(0, Int(-last.time.timeIntervalSinceNow / 60))
-        if mins < 60 { return lm.t("\(mins) min ago", "\(mins) мин назад") }
+        if mins < 60 { return lm.strings.minsAgo(mins) }
         let h = mins / 60, m = mins % 60
-        return lm.lang == "en"
-            ? (m == 0 ? "\(h)h ago" : "\(h)h \(m)min ago")
-            : (m == 0 ? "\(h) ч назад" : "\(h) ч \(m) мин назад")
+        return lm.strings.hrsAgoFormatted(h: h, m: m)
     }
 
     func startFeeding(side: FeedingSide) {
@@ -75,7 +71,7 @@ final class TodayViewModel: ObservableObject {
         let lm = LocalizationManager.shared
         let dur = max(1, feedingSeconds / 60)
         let side = feedingSide.displayName(lang: lm.lang).lowercased()
-        var label = lm.t("Feeding · \(dur) min · \(side)", "Кормление · \(dur) мин · \(side)")
+        var label = lm.strings.feedingLogEntry(dur: dur, side: side)
         if let m = mood { label += " · \(m)" }
         let secs = feedingSeconds
         let s = feedingSide
@@ -89,8 +85,7 @@ final class TodayViewModel: ObservableObject {
         let lm = LocalizationManager.shared
         let count = diaperUC.increment()
         diaperCount = count
-        addEntry(LogEntry(time: Date(), kind: .drop,
-                          label: lm.t("Diaper #\(count) · wet", "Подгузник #\(count) · мокрый")))
+        addEntry(LogEntry(time: Date(), kind: .drop, label: lm.strings.diaperLogEntry(count: count)))
     }
 
     func removeDiaper() {
@@ -103,22 +98,17 @@ final class TodayViewModel: ObservableObject {
     }
 
     func logSleep() {
-        let lm = LocalizationManager.shared
-        addEntry(LogEntry(time: Date(), kind: .sleep,
-                          label: lm.t("Sleep · started", "Сон · начало")))
+        addEntry(LogEntry(time: Date(), kind: .sleep, label: LocalizationManager.shared.strings.sleepStarted))
     }
 
     func logSymptom() {
-        let lm = LocalizationManager.shared
-        addEntry(LogEntry(time: Date(), kind: .heart,
-                          label: lm.t("Symptom · recorded", "Симптом · записан")))
+        addEntry(LogEntry(time: Date(), kind: .heart, label: LocalizationManager.shared.strings.symptomRecorded))
     }
 
     private func feedingLabel(_ entry: FeedingEntry) -> String {
         let lm = LocalizationManager.shared
         let side = entry.side.displayName(lang: lm.lang).lowercased()
-        return lm.t("Feeding · \(entry.durationMinutes) min · \(side)",
-                    "Кормление · \(entry.durationMinutes) мин · \(side)")
+        return lm.strings.feedingLogEntry(dur: entry.durationMinutes, side: side)
     }
 
     private func addEntry(_ entry: LogEntry) {

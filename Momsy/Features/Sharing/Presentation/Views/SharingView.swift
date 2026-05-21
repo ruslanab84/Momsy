@@ -47,12 +47,11 @@ struct SharingView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            BBSectionLabel(text: loc.t("Family", "Семья"))
-            Text(loc.t("\(vm.displayName)'s Team", "Команда \(vm.displayName)"))
+            BBSectionLabel(text: loc.strings.family)
+            Text(loc.strings.teamTitle(name: vm.displayName))
                 .font(.system(size: 26, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
-            Text(loc.t("Everyone has a role — each with their own access level.",
-                   "У всех своя роль — у каждой свой уровень доступа."))
+            Text(loc.strings.familyRoleHint)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(.bbInkSoft)
         }
@@ -86,10 +85,10 @@ struct SharingView: View {
                             .foregroundColor(.bbCoralDeep)
                     )
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(loc.t("Invite family member", "Пригласить члена семьи"))
+                    Text(loc.strings.inviteFamilyMember)
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text(loc.t("QR code or link · choose role", "QR-код или ссылка · выбор роли"))
+                    Text(loc.strings.inviteQrHint)
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInkSoft)
                 }
@@ -112,17 +111,17 @@ struct SharingView: View {
     // MARK: - Role matrix
 
     private var matrixHeaders: [String] {
-        ["", loc.t("Mom", "Мама"), loc.t("Dad", "Папа"), loc.t("Nanny", "Няня"), loc.t("Grandma", "Бабушка")]
+        ["", loc.strings.roleMom, loc.strings.roleDad, loc.strings.roleNanny, loc.strings.roleGrandma]
     }
 
     private var matrixRows: [(String, [Bool])] {
         [
-            (loc.t("Feedings & sleep",    "Кормления и сон"),         [true,  true,  true,  false]),
-            (loc.t("Diapers",             "Подгузники"),              [true,  true,  true,  false]),
-            (loc.t("Temp / medicine",     "Температура / лекарства"), [true,  true,  false, false]),
-            (loc.t("Symptoms",            "Симптомы"),                [true,  true,  false, false]),
-            (loc.t("Photos & diary",      "Фото и дневник"),          [true,  true,  true,  true ]),
-            (loc.t("Paediatric report",   "Отчёт педиатру"),          [true,  true,  false, false]),
+            (loc.strings.matrixFeedingSleep,  [true,  true,  true,  false]),
+            (loc.strings.diapers,             [true,  true,  true,  false]),
+            (loc.strings.matrixTempMedicine,  [true,  true,  false, false]),
+            (loc.strings.symptoms,             [true,  true,  false, false]),
+            (loc.strings.matrixPhotosDiary,   [true,  true,  true,  true ]),
+            (loc.strings.matrixPaedsReport,   [true,  true,  false, false]),
         ]
     }
 
@@ -132,7 +131,7 @@ struct SharingView: View {
 
     private var roleMatrix: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: loc.t("What each role sees", "Что видит каждая роль"))
+            BBSectionLabel(text: loc.strings.whatEachRoleSees)
 
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
@@ -224,7 +223,7 @@ private struct MemberCard: View {
             Spacer()
 
             if member.isMe {
-                Text(loc.t("you", "вы"))
+                Text(loc.strings.you)
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                     .padding(.horizontal, 8)
@@ -281,7 +280,7 @@ private struct MemberDetailSheet: View {
                 .padding(.top, 8)
 
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(loc.t("ROLE", "РОЛЬ"))
+                    Text(loc.strings.roleLabel)
                         .font(.system(size: 11, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.5)
@@ -334,7 +333,7 @@ private struct MemberDetailSheet: View {
                         onRoleChange(selectedRole)
                         dismiss()
                     } label: {
-                        Text(loc.t("Save role", "Сохранить роль"))
+                        Text(loc.strings.saveRole)
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -348,7 +347,7 @@ private struct MemberDetailSheet: View {
                     Button(role: .destructive) {
                         showRemoveConfirm = true
                     } label: {
-                        Text(loc.t("Remove from team", "Удалить из команды"))
+                        Text(loc.strings.removeFromTeamAction)
                             .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundColor(.bbCoralDeep)
                             .frame(maxWidth: .infinity)
@@ -359,23 +358,23 @@ private struct MemberDetailSheet: View {
                 .padding(.bottom, 16)
             }
             .background(Color.bbCream.ignoresSafeArea())
-            .navigationTitle(loc.t("Edit", "Редактировать"))
+            .navigationTitle(loc.strings.editMember)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(loc.t("Cancel", "Отмена")) { dismiss() }.foregroundColor(.bbInkSoft)
+                    Button(loc.strings.cancel) { dismiss() }.foregroundColor(.bbInkSoft)
                 }
             }
             .confirmationDialog(
-                loc.t("Remove \(member.name) from team?", "Удалить \(member.name) из команды?"),
+                loc.strings.removeConfirm(name: member.name),
                 isPresented: $showRemoveConfirm,
                 titleVisibility: .visible
             ) {
-                Button(loc.t("Remove", "Удалить"), role: .destructive) {
+                Button(loc.strings.remove, role: .destructive) {
                     onRemove()
                     dismiss()
                 }
-                Button(loc.t("Cancel", "Отмена"), role: .cancel) {}
+                Button(loc.strings.cancel, role: .cancel) {}
             }
         }
     }
@@ -419,11 +418,11 @@ private struct InviteSheet: View {
 
     private func formatExpiry(_ date: Date) -> String {
         let remaining = date.timeIntervalSinceNow
-        if remaining <= 0 { return loc.t("expired", "истёк") }
+        if remaining <= 0 { return loc.strings.expired }
         let hrs = Int(remaining / 3600)
         let mins = Int((remaining.truncatingRemainder(dividingBy: 3600)) / 60)
-        if hrs > 0 { return loc.t("\(hrs)h \(mins)m left", "\(hrs)ч \(mins)м") }
-        return loc.t("\(mins)m left", "\(mins) мин")
+        if hrs > 0 { return loc.strings.expiryHoursLeft(hrs: hrs, mins: mins) }
+        return loc.strings.expiryMinsLeft(mins)
     }
 
     var body: some View {
@@ -466,7 +465,7 @@ private struct InviteSheet: View {
                                     withAnimation { isCopied = false }
                                 }
                             } label: {
-                                Label(isCopied ? loc.t("Copied!", "Скопировано!") : loc.t("Copy link", "Копировать"),
+                                Label(isCopied ? loc.strings.copied : loc.strings.copyLink,
                                       systemImage: isCopied ? "checkmark" : "doc.on.doc")
                                     .font(.system(size: 12, weight: .bold, design: .rounded))
                                     .foregroundColor(isCopied ? .bbMintDeep : .bbInk)
@@ -483,7 +482,7 @@ private struct InviteSheet: View {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 onRegenerate()
                             } label: {
-                                Label(loc.t("New code", "Новый код"), systemImage: "arrow.clockwise")
+                                Label(loc.strings.newCode, systemImage: "arrow.clockwise")
                                     .font(.system(size: 12, weight: .bold, design: .rounded))
                                     .foregroundColor(.bbInkSoft)
                                     .padding(.horizontal, 14)
@@ -507,7 +506,7 @@ private struct InviteSheet: View {
 
                     // Role picker
                     VStack(alignment: .leading, spacing: 10) {
-                        Text(loc.t("ROLE IN TEAM", "РОЛЬ В КОМАНДЕ"))
+                        Text(loc.strings.roleInTeam)
                             .font(.system(size: 11, weight: .heavy, design: .rounded))
                             .foregroundColor(.bbInkMute)
                             .kerning(0.5)
@@ -545,11 +544,11 @@ private struct InviteSheet: View {
 
                     // Name field
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(loc.t("NAME (optional)", "ИМЯ (необязательно)"))
+                        Text(loc.strings.nameOptional)
                             .font(.system(size: 11, weight: .heavy, design: .rounded))
                             .foregroundColor(.bbInkMute)
                             .kerning(0.5)
-                        TextField(loc.t("E.g.: Mike, Grandma Olga…", "Например: Миша, Бабушка Оля…"), text: $nameText)
+                        TextField(loc.strings.memberNamePlaceholder, text: $nameText)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .padding(14)
                             .background(Color.bbCard)
@@ -562,7 +561,7 @@ private struct InviteSheet: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "square.and.arrow.up")
                                     .font(.system(size: 15, weight: .bold))
-                                Text(loc.t("Share link", "Поделиться ссылкой"))
+                                Text(loc.strings.shareLink)
                                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                             }
                             .foregroundColor(.white)
@@ -579,12 +578,12 @@ private struct InviteSheet: View {
                                 : nameText.trimmingCharacters(in: .whitespaces)
                             onInvite(FamilyMember(
                                 name: name, role: selectedRole, isMe: false, isOnline: false,
-                                activity: loc.t("invitation sent", "приглашение отправлено"),
+                                activity: loc.strings.invitationSent,
                                 blob: blob, tone: tone
                             ))
                             dismiss()
                         } label: {
-                            Text(loc.t("Add to team", "Добавить в команду"))
+                            Text(loc.strings.addToTeam)
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(.bbCoralDeep)
                                 .frame(maxWidth: .infinity)
@@ -599,11 +598,11 @@ private struct InviteSheet: View {
                 .padding(20)
             }
             .background(Color.bbCream.ignoresSafeArea())
-            .navigationTitle(loc.t("Invite", "Пригласить"))
+            .navigationTitle(loc.strings.invite)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(loc.t("Cancel", "Отмена")) { dismiss() }.foregroundColor(.bbInkSoft)
+                    Button(loc.strings.cancel) { dismiss() }.foregroundColor(.bbInkSoft)
                 }
             }
             .sheet(isPresented: $showShare) {

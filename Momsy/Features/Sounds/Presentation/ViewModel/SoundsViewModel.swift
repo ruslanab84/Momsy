@@ -44,20 +44,20 @@ final class SoundsViewModel: ObservableObject {
     var nowPlayingItem: SoundItem? { sounds.first { $0.isPlaying } }
 
     var timerLabels: [String] {
-        ["15 \(lm.t("min", "мин"))", "30 \(lm.t("min", "мин"))", "1 \(lm.t("hr", "ч"))", "∞"]
+        ["15 \(lm.strings.unitMin)", "30 \(lm.strings.unitMin)", "1 \(lm.strings.unitHr)", "∞"]
     }
 
     var timerDisplay: String {
-        if selectedTimerIdx == 3 { return lm.t("playing continuously", "играет непрерывно") }
+        if selectedTimerIdx == 3 { return lm.strings.playingContinuously }
         if timerSecondsLeft <= 0 { return "—" }
         let m = timerSecondsLeft / 60
         if m >= 60 {
             let h = m / 60; let rem = m % 60
             return rem == 0
-                ? "\(h) \(lm.t("hr to stop", "ч до выкл."))"
-                : "\(h) \(lm.t("hr", "ч")) \(rem) \(lm.t("min to stop", "мин до выкл."))"
+                ? "\(h) \(lm.strings.hrToStop)"
+                : "\(h) \(lm.strings.unitHr) \(rem) \(lm.strings.minToStop)"
         }
-        return "\(m) \(lm.t("min", "мин")) \(String(format: "%02d", timerSecondsLeft % 60)) \(lm.t("sec to stop", "с до выкл."))"
+        return "\(m) \(lm.strings.unitMin) \(String(format: "%02d", timerSecondsLeft % 60)) \(lm.strings.secToStop)"
     }
 
     func play(_ idx: Int) {

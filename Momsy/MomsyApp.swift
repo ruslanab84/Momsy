@@ -31,13 +31,13 @@ struct MomsyApp: App {
                 .preferredColorScheme(resolvedColorScheme)
                 .task {
                     await appState.load()
-                    await setupNotificationsOnLaunch()
+                    await setupNotificationsOnLaunch(appState: appState)
                 }
         }
     }
 }
 
-private func setupNotificationsOnLaunch() async {
+private func setupNotificationsOnLaunch(appState: AppState) async {
     let push = LocalPushNotificationService.shared
     await push.requestPermission()
 

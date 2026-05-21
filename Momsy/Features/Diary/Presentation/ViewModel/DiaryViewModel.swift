@@ -23,6 +23,10 @@ final class DiaryViewModel: ObservableObject {
 
     var babyBirthDate: Date? { appState.babyProfile?.birthDate }
 
+    var babyBirthDateInterval: Double {
+        appState.babyProfile?.birthDate.timeIntervalSince1970 ?? 0
+    }
+
     var filteredEntries: [DiaryDay] {
         switch selectedFilter {
         case 1:

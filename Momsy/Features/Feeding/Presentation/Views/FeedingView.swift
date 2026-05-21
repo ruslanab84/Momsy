@@ -14,9 +14,7 @@ struct FeedingView: View {
     private let barValues = [22, 15, 28, 18, 14, 8]
 
     private var presetMoods: [String] {
-        [loc.t("😊 calm", "😊 спокоен"),
-         loc.t("😴 fell asleep", "😴 уснул"),
-         loc.t("🤢 spit up", "🤢 срыгнул")]
+        [loc.strings.moodCalm, loc.strings.moodAsleep, loc.strings.moodSpitUp]
     }
 
     private var moodNote: String? {
@@ -78,7 +76,7 @@ struct FeedingView: View {
                     )
             }
             Spacer()
-            Text(loc.t("Feeding", "Кормление"))
+            Text(loc.strings.feeding)
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
             Spacer()
@@ -86,7 +84,7 @@ struct FeedingView: View {
                 .fill(Color.white.opacity(0.6))
                 .frame(width: 64, height: 32)
                 .overlay(
-                    Text(loc.t("edit", "правка"))
+                    Text(loc.strings.editSmall)
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
                 )
@@ -98,7 +96,7 @@ struct FeedingView: View {
     private var timerRing: some View {
         VStack(spacing: 8) {
             let sideLabel = vm.feedingSide.displayName(lang: loc.lang).uppercased()
-            Text("\(sideLabel) · \(vm.isFeedingActive ? loc.t("ACTIVE", "ИДЁТ") : loc.t("PAUSED", "ПАУЗА"))")
+            Text("\(sideLabel) · \(vm.isFeedingActive ? loc.strings.active : loc.strings.paused)")
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundColor(Color.bbInk.opacity(0.55))
                 .kerning(1)
@@ -123,7 +121,7 @@ struct FeedingView: View {
                         .contentTransition(.numericText())
                         .animation(.linear(duration: 0.4), value: vm.feedingSeconds)
 
-                    Text(loc.t("of ≈ 18 min typical", "из ≈ 18 мин обычно"))
+                    Text(loc.strings.typicalDuration)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(Color.bbInk.opacity(0.55))
                 }
@@ -168,7 +166,7 @@ struct FeedingView: View {
                     vm.startFeeding(side: vm.feedingSide)
                 }
             }) {
-                Text(vm.isFeedingActive ? loc.t("‖ Pause", "‖ Пауза") : loc.t("▶ Resume", "▶ Продолжить"))
+                Text(vm.isFeedingActive ? loc.strings.pause : loc.strings.resume)
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                     .frame(maxWidth: .infinity)
@@ -181,7 +179,7 @@ struct FeedingView: View {
                 vm.stopFeeding(mood: moodNote)
                 dismiss()
             }) {
-                Text(loc.t("■ Done", "■ Закончить"))
+                Text(loc.strings.stopDone)
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -196,7 +194,7 @@ struct FeedingView: View {
 
     private var noteCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(loc.t("NOTE", "ЗАМЕТКА"))
+            Text(loc.strings.note)
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.6)
@@ -206,7 +204,7 @@ struct FeedingView: View {
                     Text(note)
                         .foregroundColor(.bbInkSoft)
                 } else {
-                    Text(loc.t("tap a tag to add a mood note", "нажмите тег для записи настроения"))
+                    Text(loc.strings.tapTagMood)
                         .foregroundColor(.bbInkMute)
                 }
             }
@@ -246,7 +244,7 @@ struct FeedingView: View {
                             else { customMood = "" }
                         }
                     } label: {
-                        Text(showCustomInput ? loc.t("✕ cancel", "✕ отмена") : loc.t("+ custom", "+ свой"))
+                        Text(showCustomInput ? loc.strings.cancelTag : loc.strings.customTag)
                             .font(.system(size: 12, weight: .bold, design: .rounded))
                             .foregroundColor(.bbInkSoft)
                             .padding(.horizontal, 10)
@@ -266,7 +264,7 @@ struct FeedingView: View {
 
             if showCustomInput {
                 HStack(spacing: 6) {
-                    TextField(loc.t("e.g. cried a bit, then calmed", "напр. немного поплакал, успокоился"),
+                    TextField(loc.strings.customMoodPlaceholder,
                               text: $customMood)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInk)
@@ -302,12 +300,12 @@ struct FeedingView: View {
     private var historyBar: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(loc.t("Today", "Сегодня"))
+                Text(loc.strings.today)
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
                 let feedCount = vm.logEntries.filter { $0.kind == .bottle }.count
-                Text(loc.t("\(feedCount) feedings", "\(feedCount) кормлений"))
+                Text(loc.strings.feedingsCount(feedCount))
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkMute)
             }
@@ -317,7 +315,7 @@ struct FeedingView: View {
                     let isLast = i == barValues.count - 1
                     VStack(spacing: 4) {
                         if isLast {
-                            Text(loc.t("now", "сейчас"))
+                            Text(loc.strings.now)
                                 .font(.system(size: 9, weight: .heavy, design: .rounded))
                                 .foregroundColor(.bbCoralDeep)
                         } else {
@@ -326,7 +324,7 @@ struct FeedingView: View {
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
                             .fill(isLast ? Color.bbCoralDeep : Color.bbCoral.opacity(0.7))
                             .frame(height: CGFloat(barValues[i]) * 1.6)
-                        Text(["01", "04", "06", "11", "14", loc.t("now", "сейч")][i])
+                        Text(["01", "04", "06", "11", "14", loc.strings.now][i])
                             .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundColor(.bbInkMute)
                     }

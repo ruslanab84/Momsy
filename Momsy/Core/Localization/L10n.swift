@@ -28,6 +28,18 @@ struct L10n {
     var confirm: String     { s("Confirm",       "Подтвердить",  "Bestätigen") }
     var note: String        { s("NOTE",          "ЗАМЕТКА",      "NOTIZ") }
     var history: String     { s("History",       "История",      "Verlauf") }
+    var remove: String      { s("Remove",        "Удалить",      "Entfernen") }
+    var clear: String       { s("Clear",         "Очистить",     "Löschen") }
+    var saved: String       { s("Saved",         "Записано",     "Gespeichert") }
+    var start: String       { s("Start",         "Начать",       "Starten") }
+    var all: String         { s("All",           "Всё",          "Alle") }
+    var you: String         { s("you",           "вы",           "du") }
+    var expired: String     { s("expired",       "истёк",        "abgelaufen") }
+    var copied: String      { s("Copied!",       "Скопировано!", "Kopiert!") }
+    var reset: String       { s("reset",         "сбросить",     "zurücksetzen") }
+    var call: String        { s("Call",          "Позвонить",    "Anrufen") }
+    var days: String        { s("days",          "дней",         "Tage") }
+    var editSmall: String   { s("edit",          "правка",       "bearbeiten") }
 
     // MARK: — Time units
     var unitDay: String     { s("d",    "дн",   "T") }
@@ -36,8 +48,30 @@ struct L10n {
     var unitHour: String    { s("h",    "ч",    "h") }
     var unitMin: String     { s("min",  "мин",  "min") }
     var unitSec: String     { s("sec",  "сек",  "s") }
+    var unitHr: String      { s("hr",   "ч",    "h") }
     var unitKg: String      { s("kg",   "кг",   "kg") }
     var unitCm: String      { s("cm",   "см",   "cm") }
+    var justNow: String     { s("just now",    "только что",   "gerade eben") }
+    var noSleepYet: String  { s("no sleep yet","не спал",      "noch nicht geschlafen") }
+    var noData: String      { s("no data",     "нет данных",   "keine Daten") }
+    var playingContinuously: String { s("playing continuously","играет непрерывно","spielt kontinuierlich") }
+    var sleepStarted: String { s("Sleep · started", "Сон · начало", "Schlaf · begonnen") }
+    var symptomRecorded: String { s("Symptom · recorded","Симптом · записан","Symptom · erfasst") }
+    var belowP3: String     { s("below P3",  "ниже P3",   "unter P3") }
+    var aboveP97: String    { s("above P97", "выше P97",  "über P97") }
+    var headShort: String   { s("Head",      "Голова",    "Kopf") }
+    var hrToStop: String    { s("hr to stop",  "ч до выкл.",  "h bis Stopp") }
+    var minToStop: String   { s("min to stop", "мин до выкл.","min bis Stopp") }
+    var secToStop: String   { s("sec to stop", "с до выкл.",  "s bis Stopp") }
+    func minsAgo(_ n: Int) -> String { s("\(n) min ago", "\(n) мин назад", "vor \(n) Min.") }
+    func hrsAgo(h: Int, m: Int) -> String { s("\(h) hr \(m) min ago", "\(h) ч \(m) мин назад", "vor \(h) h \(m) min") }
+    func hrsAgoFormatted(h: Int, m: Int) -> String { m == 0 ? s("\(h)h ago", "\(h) ч назад", "vor \(h)h") : s("\(h)h \(m)m ago", "\(h) ч \(m) мин назад", "vor \(h)h \(m)m") }
+    func hrAgo(_ h: Int) -> String { s("\(h)h ago", "\(h) ч назад", "vor \(h)h") }
+    func sleepDurationFormatted(h: Int, m: Int) -> String { m == 0 ? s("\(h)h", "\(h) ч", "\(h)h") : s("\(h)h \(m)m", "\(h) ч \(m) м", "\(h)h \(m)m") }
+    func diaperLogEntry(count: Int) -> String { s("Diaper #\(count) · wet", "Подгузник #\(count) · мокрый", "Windel #\(count) · nass") }
+    func feedingLogEntry(dur: Int, side: String) -> String { s("Feeding · \(dur) min · \(side)", "Кормление · \(dur) мин · \(side)", "Fütterung · \(dur) min · \(side)") }
+    func todayEntry(_ date: String) -> String { s("Today · \(date)", "Сегодня · \(date)", "Heute · \(date)") }
+    func yesterdayEntry(_ date: String) -> String { s("Yesterday · \(date)", "Вчера · \(date)", "Gestern · \(date)") }
 
     // MARK: — Tabs / Sections
     var tabHome: String     { s("Home",     "Главная",   "Startseite") }
@@ -50,20 +84,48 @@ struct L10n {
     var tabTracking: String { s("Tracking", "Показатели","Messung") }
     var tabSharing: String  { s("Family",   "Семья",     "Familie") }
 
+    // MARK: — Greetings
+    var goodNight: String       { s("Good night,",     "Доброй ночи,",  "Gute Nacht,") }
+    var goodMorning: String     { s("Good morning",    "Доброе утро",   "Guten Morgen") }
+    var goodAfternoon: String   { s("Good afternoon",  "Добрый день",   "Guten Tag") }
+    var goodEvening: String     { s("Good evening",    "Добрый вечер",  "Guten Abend") }
+    var goodMorningGreeting: String   { s("Good morning,",   "Доброе утро,",   "Guten Morgen,") }
+    var goodAfternoonGreeting: String { s("Good afternoon,", "Добрый день,",   "Guten Tag,") }
+    var goodEveningGreeting: String   { s("Good evening,",   "Добрый вечер,",  "Guten Abend,") }
+
     // MARK: — Today / Home
-    var goodMorning: String  { s("Good morning", "Доброе утро",  "Guten Morgen") }
-    var goodAfternoon: String{ s("Good afternoon","Добрый день", "Guten Tag") }
-    var goodEvening: String  { s("Good evening", "Добрый вечер", "Guten Abend") }
     var baby: String         { s("Baby",         "Малыш",        "Baby") }
     var logEntry: String     { s("Log",          "Журнал",       "Tagebuch") }
     var quickLog: String     { s("Quick Log",    "Быстрый лог",  "Schnellnotiz") }
+    var quickLogLabel: String{ s("Quick log",    "Быстро записать", "Schnell erfassen") }
     var feeding: String      { s("Feeding",      "Кормление",    "Fütterung") }
     var sleep: String        { s("Sleep",        "Сон",          "Schlaf") }
     var diaper: String       { s("Diaper",       "Подгузник",    "Windel") }
+    var diaperQuick: String  { s("Diaper",       "Памп",         "Windel") }
     var diapers: String      { s("Diapers",      "Подгузники",   "Windeln") }
     var diary: String        { s("Diary",        "Дневник",      "Tagebuch") }
     var symptom: String      { s("Symptom",      "Симптом",      "Symptom") }
     var mood: String         { s("Mood",         "Настроение",   "Stimmung") }
+    var feedLabel: String    { s("Feed",         "Еда",          "Essen") }
+    var sleeping: String     { s("sleeping…",    "спит…",        "schläft…") }
+    var feedingLabel: String { s("FEEDING",      "КОРМЛЕНИЕ",    "FÜTTERUNG") }
+    var typicalLengthHint: String { s("Typical length — 18 min. Tap pause or stop.", "Обычная длина — 18 мин. Нажмите паузу или стоп.", "Typische Länge — 18 Min. Pause oder Stop tippen.") }
+    var usuallyAroundThisTime: String { s("Usually around this time — tap to start.", "Обычно в это время — нажмите для старта.", "Normalerweise um diese Zeit — zum Starten tippen.") }
+    var tipOfDay: String     { s("Tip of the day",   "Подсказка дня",      "Tipp des Tages") }
+    var todaySoFar: String   { s("Today so far",     "Сегодня уже было",   "Heute bisher") }
+    var todayUpper: String   { s("TODAY",            "СЕГОДНЯ",            "HEUTE") }
+    var leapPillLabel: String { s("Leap #4",         "Скачок №4",          "Schub #4") }
+    var leapDayCard: String  { s("LEAP #4 · DAY 3 OF ~5", "СКАЧОК №4 · ДЕНЬ 3 ИЗ ~5", "SCHUB #4 · TAG 3 VON ~5") }
+    var worldOfEventsLabel: String { s("«World of Events» — this is normal", "«Мир событий» — это нормально", "«Welt der Ereignisse» — das ist normal") }
+    var leapCryingNote: String { s("Crying, poor sleep, wants to be held. Not sick — growing.", "Плачет, плохо спит, просит руки. Он не болен — он растёт.", "Weint, schläft schlecht, will gehalten werden. Nicht krank — wächst.") }
+
+    func howDidSleep(name: String) -> String { s("how did \(name) sleep?", "как \(name) спал?", "wie hat \(name) geschlafen?") }
+    func feedingActiveLabel(side: String) -> String { s("active · \(side)", "идёт · \(side)", "aktiv · \(side)") }
+    func feedingDuration(_ time: String) -> String { s("Feeding has been going for \(time). Typical length is 18 min.", "Кормление идёт уже \(time). Обычная длина — 18 мин.", "Fütterung dauert seit \(time). Typische Länge 18 Min.") }
+    func feedingTip(ago: String, name: String) -> String { s("\(ago) since last feeding — \(name) usually eats now. If crying — try breast first.", "Прошло \(ago) с прошлого кормления — обычно \(name) ест в это время. Если плачет — попробуйте сначала грудь.", "\(ago) seit der letzten Fütterung — \(name) isst normalerweise jetzt.") }
+    func leapContrastsTip(name: String) -> String { s("During this leap \(name) is especially drawn to contrasts — show a black-and-white book.", "В этот скачок \(name) особенно интересны контрасты — покажите чёрно-белую книжку.", "In diesem Schub ist \(name) besonders von Kontrasten angezogen.") }
+    func diaperCountDay(_ n: Int) -> String { s("\(n) / day", "\(n) / день", "\(n) / Tag") }
+    func entriesCount(_ n: Int) -> String { s("\(n) entries", "\(n) записей", "\(n) Einträge") }
 
     // MARK: — Feeding
     var feedingLeft: String   { s("Left",   "Левая",   "Links") }
@@ -83,12 +145,22 @@ struct L10n {
     var customMoodPlaceholder: String { s("e.g. cried a bit, then calmed", "напр. немного поплакал, успокоился", "z.B. kurz geweint, dann ruhig") }
     var feedingsToday: String { s("feedings today", "кормлений сегодня", "Mahlzeiten heute") }
 
+    func feedingsCount(_ n: Int) -> String { s("\(n) feedings", "\(n) кормлений", "\(n) Mahlzeiten") }
+
     // MARK: — Sleep
-    var sleepStart: String  { s("Start sleep",   "Начать сон",   "Schlaf starten") }
-    var sleepStop: String   { s("Wake up",        "Проснулся",    "Aufwachen") }
-    var sleepDuration: String { s("Duration",     "Длительность", "Dauer") }
-    var asleep: String      { s("Asleep",         "Спит",         "Schläft") }
-    var awake: String       { s("Awake",          "Проснулся",    "Wach") }
+    var sleepStart: String   { s("Start sleep",   "Начать сон",    "Schlaf starten") }
+    var sleepStop: String    { s("Wake up",        "Проснулся",     "Aufwachen") }
+    var stopSleep: String    { s("Stop Sleep",     "Остановить сон","Schlaf stoppen") }
+    var sleepDuration: String { s("Duration",      "Длительность",  "Dauer") }
+    var asleep: String       { s("Asleep",         "Спит",          "Schläft") }
+    var awake: String        { s("Awake",          "Проснулся",     "Wach") }
+    var sleepTracker: String { s("SLEEP TRACKER",  "ТРЕКЕР СНА",    "SCHLAFTRACKER") }
+    var totalToday: String   { s("Total today",    "Всего сегодня", "Heute gesamt") }
+    var sessions: String     { s("Sessions",       "Сессий",        "Sitzungen") }
+    var sleepQuality: String { s("SLEEP QUALITY",  "КАЧЕСТВО СНА",  "SCHLAFQUALITÄT") }
+    var qualityGood: String    { s("😌 Good",      "😌 Хорошо",     "😌 Gut") }
+    var qualityNormal: String  { s("😐 Normal",    "😐 Нормально",  "😐 Normal") }
+    var qualityRestless: String{ s("😣 Restless",  "😣 Беспокойно", "😣 Unruhig") }
 
     // MARK: — Diaper
     var diaperWet: String   { s("Wet",    "Мокрый",  "Nass") }
@@ -101,14 +173,56 @@ struct L10n {
     var addPhoto: String    { s("Add photo",     "Добавить фото",    "Foto hinzufügen") }
     var milestone: String   { s("Milestone",     "Веха",             "Meilenstein") }
     var milestones: String  { s("Milestones",    "Вехи",             "Meilensteine") }
+    var feed: String        { s("Feed",          "Лента",            "Feed") }
+    var empty: String       { s("Empty",         "Пусто",            "Leer") }
+    var diaryEmptyHint: String { s("Nothing in this category yet.\nAdd the first — tap +", "В этой категории пока нет записей.\nДобавьте первую — нажмите +", "Noch nichts hier.\nAuf + tippen") }
+    var filterPhoto: String { s("📷 Photo",      "📷 Фото",          "📷 Foto") }
+    var filterNotes: String { s("✎ Notes",       "✎ Заметки",        "✎ Notizen") }
+    var diaryQuote: String  { s("A year from now you'll open this and smile ✿", "через год вы откроете это и будете улыбаться ✿", "In einem Jahr wirst du das öffnen und lächeln ✿") }
+    var babyPhotoLabel: String { s("baby's photo", "фото малыша",    "Babyfoto") }
+    var entryType: String   { s("Type",          "Тип",              "Typ") }
+    var addToDiary: String  { s("Add to Diary",  "Добавить в дневник","Zum Tagebuch") }
+    var newEntry: String    { s("New Entry",     "Новая запись",     "Neuer Eintrag") }
+    var whatToWrite: String { s("WHAT DO YOU WANT TO WRITE?", "ЧТО ХОТИТЕ ЗАПИСАТЬ?", "WAS MÖCHTEN SIE SCHREIBEN?") }
+    var noteExamplePlaceholder: String { s("E.g. Laughed out loud for the first time!", "Например: «Впервые засмеялся в голос!»", "Z.B. Zum ersten Mal laut gelacht!") }
+    var chooseIcon: String  { s("CHOOSE ICON",   "ВЫБЕРИТЕ ИКОНКУ",  "SYMBOL WÄHLEN") }
+    var orWriteYourOwn: String { s("OR WRITE YOUR OWN", "ИЛИ НАПИШИТЕ СВОЁ", "ODER EIGENES SCHREIBEN") }
+    var milestoneExamplePlaceholder: String { s("E.g. First roll-over", "Например: «Первый переворот»", "Z.B. Erste Drehung") }
+    var choosePhoto: String { s("CHOOSE PHOTO",  "ВЫБЕРИТЕ ФОТО",    "FOTO WÄHLEN") }
+    var tapToChoose: String { s("Tap to choose", "Нажмите, чтобы выбрать", "Zum Auswählen tippen") }
+    var placeholderColor: String { s("Placeholder color:", "Цвет плейсхолдера:", "Platzhalterfarbe:") }
+    var captionHandwriting: String { s("CAPTION (handwriting style)", "ПОДПИСЬ (рукописный стиль)", "BILDUNTERSCHRIFT (Handschrift)") }
+    var captionExamplePlaceholder: String { s("E.g. first laugh", "Например: «первый смех»", "Z.B. erstes Lachen") }
+    var moment: String      { s("moment",        "момент",           "Moment") }
+    var toDiary: String     { s("To diary",      "В дневник",        "Zum Tagebuch") }
+
+    func diaryTitle(name: String) -> String { s("\(name)'s Diary", "Дневник \(name)", "Tagebuch von \(name)") }
 
     // MARK: — Leaps
     var leaps: String           { s("Leaps",             "Скачки развития",  "Entwicklungsschübe") }
+    var developmentalLeaps: String { s("Developmental Leaps", "Скачки развития", "Entwicklungsschübe") }
     var leapWeeks: String       { s("weeks",             "недель",           "Wochen") }
     var leapCompleted: String   { s("Completed",         "Завершён",         "Abgeschlossen") }
     var leapInProgress: String  { s("In progress",       "В процессе",       "Im Gange") }
     var leapUpcoming: String    { s("Upcoming",          "Предстоит",        "Bevorstehend") }
     var markDone: String        { s("Mark complete",     "Отметить",         "Abschließen") }
+    var day3HardDays: String    { s("Day 3 of ~5 hard days.", "День 3 из ~5 трудных.", "Tag 3 von ~5 schweren.") }
+    var hangInThere: String     { s("hang in there, mama ✿", "держитесь, мама ✿", "Haltet durch, Mama ✿") }
+    var whatYouNotice: String   { s("WHAT YOU NOTICE",   "ЧТО ЗАМЕТНО",      "WAS SIE BEMERKEN") }
+    var comingSoon: String      { s("COMING SOON",       "СКОРО НАУЧИТСЯ",   "KOMMT BALD") }
+    var leapWillPass: String    { s("✿ This will pass. Usually lasts ~1 week. Hold them more — it doesn't spoil.", "✿ Это пройдёт. Обычно длится ~1 неделю. Чаще берите на руки — это не балует.", "✿ Das geht vorüber. Dauert ~1 Woche. Öfter auf den Arm nehmen.") }
+    var leapCalendar: String    { s("Leap Calendar",     "Календарь скачков","Schub-Kalender") }
+    var tipOfTheDay: String     { s("TIP OF THE DAY",    "СОВЕТ НА СЕГОДНЯ", "TIPP DES TAGES") }
+    var leapInProgressStatus: String { s("in progress",  "идёт сейчас",      "im Gange") }
+    var leapCompletedStatus: String  { s("completed",    "завершён",         "abgeschlossen") }
+    var notice: String          { s("notice",            "замечают",         "bemerken") }
+    var willLearn: String       { s("will learn",        "научится",         "wird lernen") }
+
+    func currentLeapTitle(id: Int) -> String { s("Now — leap #\(id)", "Сейчас — скачок №\(id)", "Jetzt — Schub №\(id)") }
+    func weekPill(n: Int) -> String { s("week \(n)", "\(n)-я неделя", "Woche \(n)") }
+    func weekRow(n: Int) -> String  { s("\(n) wk",   "\(n) нед",     "\(n) W") }
+    func leapAhead(week: Int) -> String { s("ahead · week \(week)", "впереди · \(week)-я неделя", "bald · Woche \(week)") }
+    func forLeapTip(name: String) -> String { s("For leap «\(name)»", "Для скачка «\(name)»", "Für Schub «\(name)»") }
 
     // MARK: — Tracking
     var weight: String          { s("Weight",        "Вес",           "Gewicht") }
@@ -122,12 +236,49 @@ struct L10n {
     var normal: String          { s("Normal",        "Норма",         "Normal") }
     var elevated: String        { s("Elevated",      "Повышена",      "Erhöht") }
     var high: String            { s("High",          "Высокая",       "Hoch") }
+    var health: String          { s("Health",        "Здоровье",      "Gesundheit") }
+    var heightAndWeight: String { s("Height & Weight","Рост и вес",   "Größe & Gewicht") }
+    var whoRange: String        { s("0–24 mo · WHO", "0–24 мес · ВОЗ","0–24 Mon. · WHO") }
+    var median: String          { s("Median",        "Медиана",       "Median") }
+    var temperatureHistory: String { s("Temperature history", "История температуры", "Temperaturverlauf") }
+    var recentMeasurements: String { s("Recent measurements", "Последние замеры", "Letzte Messungen") }
+    var weightKg: String        { s("Weight, kg",    "Вес, кг",       "Gewicht, kg") }
+    var heightCm: String        { s("Height, cm",    "Рост, см",      "Größe, cm") }
+    var headCircCm: String      { s("Head circ., cm","Окруж. головы, см","Kopfumfang, cm") }
+    var normalRange: String      { s("normal",        "в норме",        "normal") }
+    var subfebr: String         { s("subfebr.",      "субфебр.",       "subfebr.") }
+    var subfebrLabel: String    { s("Subfebr.",      "Субфебрильная", "Subfebril") }
+    var highTemp: String        { s("High 🌡",       "Высокая 🌡",    "Hoch 🌡") }
+    var normalOk: String        { s("Normal ✓",      "Норма ✓",       "Normal ✓") }
+    var addWeightHeight: String { s("+ Weight / Height", "+ Вес / рост", "+ Gewicht / Größe") }
+    var addTemperature: String  { s("+ Temperature", "+ Температура", "+ Temperatur") }
+    var measurements: String    { s("Measurements",  "Замеры",        "Messungen") }
+    var weightPlaceholder: String { s("kg (e.g. 6.4)", "кг (напр. 6.4)", "kg (z.B. 6.4)") }
+    var heightPlaceholder: String { s("cm (e.g. 64)",  "см (напр. 64)",  "cm (z.B. 64)") }
+    var headCirc: String        { s("Head circ.",    "Окр. головы",   "Kopfumfang") }
+    var headCircPlaceholder: String { s("cm (e.g. 42)", "см (напр. 42)", "cm (z.B. 42)") }
+    var fillAtLeastOneField: String { s("Fill in at least one field.", "Заполните хотя бы одно поле.", "Mindestens ein Feld ausfüllen.") }
+    var newMeasurement: String  { s("New measurement","Новый замер",   "Neue Messung") }
+    var tempPlaceholder: String { s("e.g. 37.2",     "напр. 37.2",    "z.B. 37.2") }
+    var noteSectionLabel: String { s("Note",         "Заметка",       "Notiz") }
+    var optionalNote: String    { s("Optional note…","Необязательная заметка…", "Optionale Notiz…") }
+    var temperatureCelsius: String { s("Temperature, °C", "Температура, °C", "Temperatur, °C") }
+    var recentReadings: String  { s("recent readings", "последние замеры", "letzte Messungen") }
+    var noTemperatureData: String { s("No temperature data", "Нет данных о температуре", "Keine Temperaturdaten") }
+    var tempNormalRange: String { s("normal < 37.5°", "норма < 37.5°", "normal < 37.5°") }
+    var tempSubfebrRange: String { s("subfebr. 37.5–38.4°", "субфебр. 37.5–38.4°", "subfebril. 37.5–38.4°") }
+    var tempHighRange: String   { s("high ≥ 38.5°", "высокая ≥ 38.5°", "hoch ≥ 38.5°") }
 
     // MARK: — Sounds / Lullaby
     var sounds: String          { s("Sounds",        "Звуки",         "Klänge") }
     var lullaby: String         { s("Lullaby",       "Колыбельная",   "Schlaflied") }
     var nowPlaying: String      { s("NOW PLAYING",   "ИГРАЕТ",        "SPIELT") }
+    var nowPlayingFull: String  { s("NOW PLAYING",   "СЕЙЧАС ИГРАЕТ", "SPIELT GERADE") }
     var tapToPlay: String       { s("Tap to play",   "Нажмите чтобы играть", "Zum Abspielen tippen") }
+    var sleepTight: String      { s("sleep tight",   "пусть спит крепко", "schlaf gut") }
+    var playing: String         { s("playing",       "играет",        "spielt") }
+
+    func forBabyName(_ name: String) -> String { s(" for \(name)", " для \(name)", " für \(name)") }
 
     // MARK: — Family / Sharing
     var family: String          { s("Family",        "Семья",         "Familie") }
@@ -139,6 +290,32 @@ struct L10n {
     var roleGrandma: String     { s("Grandma",       "Бабушка",       "Oma") }
     var roleGrandpa: String     { s("Grandpa",       "Дедушка",       "Opa") }
     var roleNanny: String       { s("Nanny",         "Няня",          "Nanny") }
+    var roleOther: String       { s("Other",         "Другой",        "Andere") }
+    var familyRoleHint: String  { s("Everyone has a role — each with their own access level.", "У всех своя роль — у каждой свой уровень доступа.", "Jeder hat eine Rolle — mit eigenem Zugangslevel.") }
+    var inviteFamilyMember: String { s("Invite family member", "Пригласить члена семьи", "Familienmitglied einladen") }
+    var inviteQrHint: String    { s("QR code or link · choose role", "QR-код или ссылка · выбор роли", "QR-Code oder Link · Rolle wählen") }
+    var matrixFeedingSleep: String { s("Feedings & sleep", "Кормления и сон", "Fütterung & Schlaf") }
+    var matrixTempMedicine: String { s("Temp / medicine", "Температура / лекарства", "Temperatur / Medizin") }
+    var matrixPhotosDiary: String  { s("Photos & diary", "Фото и дневник", "Fotos & Tagebuch") }
+    var matrixPaedsReport: String  { s("Paediatric report", "Отчёт педиатру", "Kinderbericht") }
+    var whatEachRoleSees: String{ s("What each role sees", "Что видит каждая роль", "Was jede Rolle sieht") }
+    var roleLabel: String       { s("ROLE",          "РОЛЬ",          "ROLLE") }
+    var saveRole: String        { s("Save role",     "Сохранить роль","Rolle speichern") }
+    var removeFromTeamAction: String { s("Remove from team", "Удалить из команды", "Aus Team entfernen") }
+    var editMember: String      { s("Edit",          "Редактировать", "Bearbeiten") }
+    var roleInTeam: String      { s("ROLE IN TEAM",  "РОЛЬ В КОМАНДЕ","ROLLE IM TEAM") }
+    var nameOptional: String    { s("NAME (optional)","ИМЯ (необязательно)","NAME (optional)") }
+    var memberNamePlaceholder: String { s("E.g.: Mike, Grandma Olga…", "Например: Миша, Бабушка Оля…", "Z.B.: Mike, Oma Olga…") }
+    var shareLink: String       { s("Share link",    "Поделиться ссылкой", "Link teilen") }
+    var invitationSent: String  { s("invitation sent","приглашение отправлено", "Einladung gesendet") }
+    var addToTeam: String       { s("Add to team",   "Добавить в команду", "Zum Team hinzufügen") }
+    var copyLink: String        { s("Copy link",     "Копировать",    "Link kopieren") }
+    var newCode: String         { s("New code",      "Новый код",     "Neuer Code") }
+
+    func teamTitle(name: String) -> String { s("\(name)'s Team", "Команда \(name)", "Team von \(name)") }
+    func removeConfirm(name: String) -> String { s("Remove \(name) from team?", "Удалить \(name) из команды?", "\(name) aus Team entfernen?") }
+    func expiryHoursLeft(hrs: Int, mins: Int) -> String { s("\(hrs)h \(mins)m left", "\(hrs)ч \(mins)м", "\(hrs)h \(mins)m übrig") }
+    func expiryMinsLeft(_ mins: Int) -> String { s("\(mins)m left", "\(mins) мин", "\(mins)m übrig") }
 
     // MARK: — Report
     var report: String          { s("Report",        "Отчёт",         "Bericht") }
@@ -146,11 +323,37 @@ struct L10n {
     var daily: String           { s("Daily",         "Дневной",       "Täglich") }
     var exportPDF: String       { s("Export PDF",    "Экспорт PDF",   "PDF exportieren") }
     var shareReport: String     { s("Share",         "Поделиться",    "Teilen") }
+    var paediatricReport: String { s("Paediatric Report", "Отчёт для педиатра", "Kinderbericht") }
+    var prepareFor: String      { s("Prepare for",   "Подготовить за","Vorbereiten für") }
+    var visitSummaryHint: String { s("Visit summary: sleep · food · weight · temp · stool", "Итог визита: сон · еда · вес · темп · стул", "Besuchszusammenfassung: Schlaf · Essen · Gewicht · Temp · Stuhl") }
+    var includeInReport: String { s("INCLUDE IN REPORT", "ВКЛЮЧИТЬ В ОТЧЁТ", "IN BERICHT EINSCHLIESSEN") }
+    var preparingPdf: String    { s("Preparing PDF…","Готовим PDF…",  "PDF vorbereiten…") }
+    var sharePdf: String        { s("Share PDF",     "Поделиться PDF","PDF teilen") }
+    var printAction: String     { s("Print",         "Распечатать",   "Drucken") }
+
+    // MARK: — Navigation tabs
+    var tabDoctor: String       { s("Doctor",        "Доктор",        "Arzt") }
+    var tabMe: String           { s("Me",            "Я",             "Ich") }
+    var profile: String         { s("Profile",       "Профиль",       "Profil") }
+
+    // MARK: — Splash
+    var splashTagline: String   { s("Your baby's little diary", "Дневник вашего малыша", "Das Tagebuch deines Babys") }
 
     // MARK: — Settings
     var settings: String        { s("Settings",      "Настройки",     "Einstellungen") }
     var language: String        { s("Language",      "Язык",          "Sprache") }
     var theme: String           { s("Theme",         "Тема",          "Design") }
+    var appTheme: String        { s("App Theme",     "Тема приложения","App-Design") }
+    var themeAuto: String       { s("Auto",          "Авто",          "Auto") }
+    var autoThemeHint: String   { s("Auto follows the system appearance.", "Авто — следует системной теме устройства.", "Auto folgt der Systemdarstellung.") }
+    var appLanguage: String     { s("App Language",  "Язык приложения","App-Sprache") }
+    var languageComingSoon: String { s("Deutsch, Español — coming soon.", "English, Deutsch, Español — скоро.", "Bald verfügbar.") }
+    var about: String           { s("About",         "О приложении",  "Über") }
+    var version: String         { s("Version",       "Версия",        "Version") }
+    var madeWithLove: String    { s("Made with love","Сделано с любовью","Mit Liebe gemacht") }
+    var forMoms: String         { s("for moms",      "для мам",       "für Mütter") }
+    var privacy: String         { s("Privacy",       "Конфиденциальность","Datenschutz") }
+    var contactUs: String       { s("Contact Us",    "Написать нам",  "Kontakt") }
     var themeSystem: String     { s("System",        "Системная",     "System") }
     var themeLight: String      { s("Light",         "Светлая",       "Hell") }
     var themeDark: String       { s("Dark",          "Тёмная",        "Dunkel") }
@@ -167,7 +370,31 @@ struct L10n {
     var birthDate: String       { s("Birth date",    "Дата рождения", "Geburtsdatum") }
     var getStarted: String      { s("Get started",   "Начать",        "Loslegen") }
     var continueLabel: String   { s("Continue",      "Продолжить",    "Weiter") }
+    var continueArrow: String   { s("Continue →",    "Продолжить →",  "Weiter →") }
     var skip: String            { s("Skip",          "Пропустить",    "Überspringen") }
+    var helloMama: String       { s("Hello, mama!",  "Привет, мама!", "Hallo, Mama!") }
+    var howOldIsYourBaby: String { s("How old is your baby?\nWe'll tailor everything to their age.", "Сколько малышу?\nМы всё адаптируем под его возраст.", "Wie alt ist Ihr Baby?\nWir passen alles an.") }
+    var ageChangeNote: String   { s("Age can be changed later. We'll highlight developmental leaps specifically for you.", "Возраст можно изменить позже. Мы выделим скачки развития специально для вас.", "Alter kann später geändert werden.") }
+    var whatsYourBabyName: String { s("What's your baby's name?", "Как зовут малыша?", "Wie heißt Ihr Baby?") }
+    var nameBirthHelp: String   { s("Name and birth date help track\nleaps and development more accurately.", "Имя и дата рождения помогают точнее\nотслеживать скачки и развитие.", "Name und Geburtsdatum helfen genauer.") }
+    var babyNameLabel: String   { s("BABY'S NAME",   "ИМЯ МАЛЫША",   "NAME DES BABYS") }
+    var babyNamePlaceholder: String { s("E.g., Leo", "Например, Лёва","Z.B. Leon") }
+    var dateOfBirthLabel: String { s("DATE OF BIRTH","ДАТА РОЖДЕНИЯ", "GEBURTSDATUM") }
+    var whoAreYou: String       { s("Who are you to the baby?", "Кто ты для малыша?", "Wer bist du für das Baby?") }
+    var roleHelp: String        { s("This helps configure\nnotifications and access rights.", "Это помогает настроить\nуведомления и права доступа.", "Das hilft bei der Konfiguration.") }
+    var yourNameOptional: String { s("YOUR NAME (optional)", "ВАШЕ ИМЯ (необязательно)", "IHR NAME (optional)") }
+    var yourNamePlaceholder: String { s("E.g., Anna", "Например, Аня","Z.B. Anna") }
+    var greetMom: String        { s("Mama!",         "Мама!",         "Mama!") }
+    var greetDad: String        { s("Papa!",         "Папа!",         "Papa!") }
+    var greetNanny: String      { s("Nanny!",        "Няня!",         "Nanny!") }
+    var greetDefault: String    { s("Hello!",        "Привет!",       "Hallo!") }
+    var allSet: String          { s("All set,",      "Всё готово,",   "Fertig,") }
+    var age: String             { s("Age",           "Возраст",       "Alter") }
+    var caregiver: String       { s("Caregiver",     "Кто следит",    "Betreuer") }
+    var stage: String           { s("Stage",         "Стадия",        "Stufe") }
+    var dataStoredLocally: String { s("Data is stored only on your phone. Nothing extra.", "Данные хранятся только на вашем телефоне. Ничего лишнего.", "Daten werden nur auf Ihrem Telefon gespeichert.") }
+
+    func ageDescription(_ ageStr: String) -> String { s("Age: \(ageStr)", "Возраст: \(ageStr)", "Alter: \(ageStr)") }
 
     // MARK: — Symptoms
     var symptoms: String        { s("Symptoms",      "Симптомы",      "Symptome") }
@@ -177,4 +404,31 @@ struct L10n {
     var runnyNose: String       { s("Runny nose",    "Насморк",       "Schnupfen") }
     var rash: String            { s("Rash",          "Сыпь",          "Ausschlag") }
     var teething: String        { s("Teething",      "Зубы",          "Zahnen") }
+    var somethingWrong: String  { s("Something wrong?", "Что-то не так?", "Etwas nicht in Ordnung?") }
+    var markItGuide: String     { s("Mark it — we'll guide you on what to do", "Отметьте — мы подскажем, что делать", "Markieren — wir führen Sie.") }
+    var notADiagnosis: String   { s("NOT A DIAGNOSIS","Это не диагноз","KEINE DIAGNOSE") }
+    var symptomDisclaimer: String { s("We help you navigate. The decision is yours and your doctor's.", "Помогаем сориентироваться. Решение принимаете вы и врач.", "Wir helfen bei der Orientierung.") }
+    var seeDoctorUrgently: String { s("See doctor urgently if:", "Срочно к врачу, если:", "Arzt dringend aufsuchen wenn:") }
+    var symptomFooterDisclaimer: String { s("Symptom hints are navigation, not a diagnosis.\nWhen in doubt — always see your paediatrician.", "Подсказки на основе симптомов — это навигация, не диагноз.\nПри любых сомнениях — всегда к педиатру.", "Symptomhinweise sind Orientierung, keine Diagnose.\nIm Zweifel — immer zum Kinderarzt.") }
+    var symptomsUpper: String   { s("SYMPTOMS",      "СИМПТОМЫ",      "SYMPTOME") }
+    var noteSymptoms: String    { s("Note symptoms — get guidance. Not a diagnosis, just navigation.", "Отметьте симптомы — подскажем, что делать. Не диагноз, только навигация.", "Symptome notieren — Orientierung erhalten. Keine Diagnose.") }
+
+    // MARK: — Doctor Menu
+    var askMomsyAI: String      { s("Ask Momsy AI",  "Спросить ИИ",   "Momsy KI fragen") }
+    var aiMenuSub: String       { s("Sleep, feeding, development — ask anything", "Сон, кормление, развитие — спросите всё", "Schlaf, Ernährung, Entwicklung — alles fragen") }
+    var pediatricianReport: String { s("Pediatrician Report","Отчёт для педиатра","Kinderarztbericht") }
+    var pdfForWeek: String      { s("PDF for the week — sleep, feeding, weight", "PDF за неделю — сон, кормление, вес", "PDF für die Woche — Schlaf, Ernährung, Gewicht") }
+    var whoPercentileChart: String { s("WHO percentile chart", "График по перцентилям ВОЗ", "WHO-Perzentilkurve") }
+
+    // MARK: — Me / Profile
+    var familyMembersHint: String { s("Mom, dad, nanny, grandma", "Мама, папа, няня, бабушка", "Mama, Papa, Nanny, Oma") }
+    var lullabiesSounds: String { s("Lullabies & Sounds", "Колыбельные и шум", "Lieder & Klänge") }
+    var lullabiesHint: String   { s("White noise, melodies, timer", "Белый шум, мелодии, таймер", "Weißes Rauschen, Melodien, Timer") }
+    var settingsHint: String    { s("Theme, language",  "Тема, язык",    "Design, Sprache") }
+
+    // MARK: — AI Chat
+    var aiChatTitle: String     { s("Ask Momsy AI", "Спросить ИИ",   "Momsy KI fragen") }
+    var momsyAI: String         { s("Momsy AI",     "Momsy ИИ",      "Momsy KI") }
+    var aiChatSubtitle: String  { s("Ask about sleep, feeding, development,\nor anything on your mind.", "Спросите о сне, кормлении, развитии\nили о том, что вас беспокоит.", "Fragen zu Schlaf, Ernährung, Entwicklung\noder allem, was Sie beschäftigt.") }
+    var askAnything: String     { s("Ask anything…","Спросить…",     "Alles fragen…") }
 }

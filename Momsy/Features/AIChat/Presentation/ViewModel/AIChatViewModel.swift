@@ -14,18 +14,23 @@ final class AIChatViewModel: ObservableObject {
     private let clearChatUC: ClearChatHistoryUseCase
     private let chatService: any AIChatService
     private let appState: AppState
+    private let getLeapsUC: GetLeapsUseCase
+    private var leapProgress: [LeapProgress] = []
 
     init(getChatHistory: GetChatHistoryUseCase,
          appendMessage: AppendChatMessageUseCase,
          clearChat: ClearChatHistoryUseCase,
          chatService: any AIChatService,
-         appState: AppState) {
+         appState: AppState,
+         getLeaps: GetLeapsUseCase) {
         self.getChatHistoryUC = getChatHistory
         self.appendMessageUC = appendMessage
         self.clearChatUC = clearChat
         self.chatService = chatService
         self.appState = appState
+        self.getLeapsUC = getLeaps
         Task { await loadHistory() }
+        Task { await loadLeapProgress() }
     }
 
     var canSend: Bool {
@@ -37,7 +42,10 @@ final class AIChatViewModel: ObservableObject {
         let name = profile?.name ?? ""
         let birth = profile?.birthDate ?? Date()
         let weeks = max(0, Calendar.current.dateComponents([.weekOfYear], from: birth, to: Date()).weekOfYear ?? 0)
-        let leap = sampleLeaps.first(where: { $0.isCurrent })
+        let completedIds = Set(leapProgress.filter(\.isDone).map(\.id))
+        // Current leap: first not-yet-done leap at or near baby's age
+        let leap = sampleLeaps.first(where: { !completedIds.contains($0.id) && $0.week <= weeks + 4 })
+            ?? sampleLeaps.last(where: { $0.week <= weeks })
         return BabyContext(
             babyName: name.isEmpty ? "Baby" : name,
             ageWeeks: weeks,
@@ -94,6 +102,12 @@ final class AIChatViewModel: ObservableObject {
     private func loadHistory() async {
         if let history = try? await getChatHistoryUC.execute() {
             messages = history
+        }
+    }
+
+    private func loadLeapProgress() async {
+        if let progress = try? await getLeapsUC.execute() {
+            leapProgress = progress
         }
     }
 }

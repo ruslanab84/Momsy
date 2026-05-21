@@ -10,18 +10,18 @@ struct MeView: View {
                 meSection(rows: [
                     MeRow(destination: SharingView(container: container),
                           icon: "person.3.fill", bg: .bbCoral,
-                          title: lm.t("Family", "Семья"),
-                          sub: lm.t("Mom, dad, nanny, grandma", "Мама, папа, няня, бабушка")),
+                          title: lm.strings.family,
+                          sub: lm.strings.familyMembersHint),
                     MeRow(destination: SoundsView(container: container),
                           icon: "music.note", bg: .bbLilac,
-                          title: lm.t("Lullabies & Sounds", "Колыбельные и шум"),
-                          sub: lm.t("White noise, melodies, timer", "Белый шум, мелодии, таймер")),
+                          title: lm.strings.lullabiesSounds,
+                          sub: lm.strings.lullabiesHint),
                 ])
                 meSection(rows: [
                     MeRow(destination: SettingsView(),
                           icon: "gearshape.fill", bg: .bbSky,
-                          title: lm.t("Settings", "Настройки"),
-                          sub: lm.t("Theme, language", "Тема, язык")),
+                          title: lm.strings.settings,
+                          sub: lm.strings.settingsHint),
                 ])
             }
             .padding(.horizontal, 20)
@@ -29,7 +29,7 @@ struct MeView: View {
             .padding(.bottom, 24)
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .navigationTitle(lm.t("Profile", "Профиль"))
+        .navigationTitle(lm.strings.profile)
     }
 
     private func meSection(rows: [MeRow]) -> some View {

@@ -24,7 +24,7 @@ struct SettingsView: View {
             .padding(.bottom, 32)
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .navigationTitle(lm.t("Settings", "Настройки"))
+        .navigationTitle(lm.strings.settings)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -32,15 +32,15 @@ struct SettingsView: View {
 
     private var themeSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BBSectionLabel(text: lm.t("App Theme", "Тема приложения"))
+            BBSectionLabel(text: lm.strings.appTheme)
 
             HStack(spacing: 10) {
-                themeCard(id: "light",  icon: "sun.max.fill",        label: lm.t("Light", "Светлая"), accent: .bbButter)
-                themeCard(id: "system", icon: "circle.lefthalf.fill", label: lm.t("Auto",  "Авто"),    accent: .bbLilac)
-                themeCard(id: "dark",   icon: "moon.fill",            label: lm.t("Dark",  "Тёмная"),  accent: .bbSky)
+                themeCard(id: "light",  icon: "sun.max.fill",        label: lm.strings.themeLight, accent: .bbButter)
+                themeCard(id: "system", icon: "circle.lefthalf.fill", label: lm.strings.themeAuto,  accent: .bbLilac)
+                themeCard(id: "dark",   icon: "moon.fill",            label: lm.strings.themeDark,  accent: .bbSky)
             }
 
-            Text(lm.t("Auto follows the system appearance.", "Авто — следует системной теме устройства."))
+            Text(lm.strings.autoThemeHint)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)
@@ -82,11 +82,11 @@ struct SettingsView: View {
 
     private var languageSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BBSectionLabel(text: lm.t("Language", "Язык"))
+            BBSectionLabel(text: lm.strings.language)
 
             HStack(spacing: 14) {
                 iconSquare(systemName: "globe", bg: .bbMint)
-                Text(lm.t("App Language", "Язык приложения"))
+                Text(lm.strings.appLanguage)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
@@ -105,7 +105,7 @@ struct SettingsView: View {
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .bbShadow()
 
-            Text(lm.t("Deutsch, Español — coming soon.", "English, Deutsch, Español — скоро."))
+            Text(lm.strings.languageComingSoon)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)
@@ -116,16 +116,16 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BBSectionLabel(text: lm.t("About", "О приложении"))
+            BBSectionLabel(text: lm.strings.about)
 
             VStack(spacing: 0) {
-                infoRow(icon: "info.circle.fill",  bg: .bbSky,    title: lm.t("Version", "Версия"),               value: "1.0.0 (1)")
+                infoRow(icon: "info.circle.fill",  bg: .bbSky,    title: lm.strings.version,       value: "1.0.0 (1)")
                 Divider().opacity(0.2).padding(.leading, 60)
-                infoRow(icon: "heart.fill",        bg: .bbRose,   title: lm.t("Made with love", "Сделано с любовью"),    value: lm.t("for moms", "для мам"))
+                infoRow(icon: "heart.fill",        bg: .bbRose,   title: lm.strings.madeWithLove,  value: lm.strings.forMoms)
                 Divider().opacity(0.2).padding(.leading, 60)
-                chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: lm.t("Privacy", "Конфиденциальность"))
+                chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: lm.strings.privacy)
                 Divider().opacity(0.2).padding(.leading, 60)
-                chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.t("Contact Us", "Написать нам"))
+                chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.contactUs)
             }
             .background(Color.bbCard)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
