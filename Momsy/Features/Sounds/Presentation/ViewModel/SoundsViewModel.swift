@@ -15,6 +15,7 @@ final class SoundsViewModel: ObservableObject {
 
     private let timerDurations = [15 * 60, 30 * 60, 60 * 60, 0]
     private var lm: LocalizationManager { .shared }
+    private var lastPlayedIdx: Int?
 
     init(soundRepository: any SoundRepository,
          sleepTimerUC: SleepTimerUseCase,
@@ -32,6 +33,8 @@ final class SoundsViewModel: ObservableObject {
             onPlay:  { [weak self] in self?.resumeIfStopped() },
             onPause: { [weak self] in self?.stopAll() }
         )
+        SoundEngine.shared.onInterrupted = { [weak self] in self?.stopAll() }
+        SoundEngine.shared.onResumed     = { [weak self] in self?.resumeIfStopped() }
     }
 
     var anyPlaying: Bool { sounds.contains { $0.isPlaying } }
@@ -58,12 +61,14 @@ final class SoundsViewModel: ObservableObject {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
             if sounds[idx].isPlaying {
                 sounds[idx].isPlaying = false
+                lastPlayedIdx = nil
                 SoundEngine.shared.stop()
                 stopCountdown()
                 nowPlaying.clear()
             } else {
                 for j in sounds.indices { sounds[j].isPlaying = false }
                 sounds[idx].isPlaying = true
+                lastPlayedIdx = idx
                 SoundEngine.shared.play(sounds[idx])
                 startCountdown(for: selectedTimerIdx)
                 nowPlaying.update(
@@ -82,6 +87,7 @@ final class SoundsViewModel: ObservableObject {
         SoundEngine.shared.stop()
         stopCountdown()
         nowPlaying.clear()
+        // lastPlayedIdx intentionally preserved — lock screen "play" and interruption resume need it
     }
 
     func selectTimer(_ idx: Int) {
@@ -128,7 +134,7 @@ final class SoundsViewModel: ObservableObject {
     }
 
     private func resumeIfStopped() {
-        guard let first = sounds.firstIndex(where: { !$0.isPlaying }) else { return }
-        play(first)
+        guard !anyPlaying, let idx = lastPlayedIdx else { return }
+        play(idx)
     }
 }

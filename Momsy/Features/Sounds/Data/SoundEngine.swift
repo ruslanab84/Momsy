@@ -23,11 +23,44 @@ final class SoundEngine {
     private var wombLP    = 0.0
     private var nextChirpT = 1.5   // absolute t of next bird chirp in forest sound
 
+    var onInterrupted: (() -> Void)?
+    var onResumed: (() -> Void)?
+
     private init() {
         engine.attach(player)
         engine.connect(player, to: engine.mainMixerNode, format: format)
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
         try? AVAudioSession.sharedInstance().setActive(true)
+        setupInterruption()
+    }
+
+    private func setupInterruption() {
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            self?.handleInterruption(note)
+        }
+    }
+
+    private func handleInterruption(_ note: Notification) {
+        guard let info = note.userInfo,
+              let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
+        switch type {
+        case .began:
+            onInterrupted?()
+        case .ended:
+            let opts = (info[AVAudioSessionInterruptionOptionKey] as? UInt).map {
+                AVAudioSession.InterruptionOptions(rawValue: $0)
+            }
+            if opts?.contains(.shouldResume) == true {
+                try? AVAudioSession.sharedInstance().setActive(true)
+                onResumed?()
+            }
+        @unknown default: break
+        }
     }
 
     // MARK: - Public

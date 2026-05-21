@@ -65,6 +65,21 @@ extension UIColor {
     }
 }
 
+// MARK: - SemanticColor → SwiftUI Color
+
+extension SemanticColor {
+    var color: Color {
+        switch self {
+        case .rose:   return .bbRose
+        case .butter: return .bbButter
+        case .mint:   return .bbMint
+        case .coral:  return .bbCoral
+        case .lilac:  return .bbLilac
+        case .sky:    return .bbSky
+        }
+    }
+}
+
 // MARK: - Card Modifier
 
 struct BBCardStyle: ViewModifier {

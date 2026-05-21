@@ -1,9 +1,5 @@
 import SwiftUI
 
-enum BlobKind {
-    case baby, sleep, bottle, moon, sun, drop, star, heart, cloud, bear
-}
-
 struct CuteBlobView: View {
     let kind: BlobKind
     var size: CGFloat = 80
@@ -229,25 +225,6 @@ private struct CloudBlob: View {
             Circle().fill(Color.white).frame(width: s*0.4, height: s*0.4).offset(x: s*0.04, y: -s*0.14)
             Circle().fill(Color.white).frame(width: s*0.28, height: s*0.28).offset(x: s*0.22, y: -s*0.06)
             Capsule().fill(Color.white).frame(width: s*0.65, height: s*0.22)
-        }
-    }
-}
-
-// MARK: - BlobKind serialization
-
-extension BlobKind {
-    var iconName: String {
-        switch self {
-        case .baby:   return "baby"
-        case .sleep:  return "sleep"
-        case .bottle: return "bottle"
-        case .moon:   return "moon"
-        case .sun:    return "sun"
-        case .drop:   return "drop"
-        case .star:   return "star"
-        case .heart:  return "heart"
-        case .cloud:  return "cloud"
-        case .bear:   return "bear"
         }
     }
 }

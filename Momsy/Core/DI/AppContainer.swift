@@ -14,6 +14,7 @@ final class AppContainer {
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let leapsRepository: any LeapsRepository          = LocalLeapsRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
+    let diaperUseCase                                   = DiaperUseCase()
     let chatRepository: any ChatRepository             = LocalChatRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
 
@@ -62,6 +63,15 @@ final class AppContainer {
     lazy var clearChatHistory  = ClearChatHistoryUseCase(repository: chatRepository)
 
     // MARK: — ViewModel Factories
+
+    func makeTodayViewModel() -> TodayViewModel {
+        TodayViewModel(
+            logFeeding: logFeeding,
+            getFeeding: getFeedingEntries,
+            diaperUC: diaperUseCase,
+            timerService: FeedingTimerService()
+        )
+    }
 
     func makeDiaryViewModel() -> DiaryViewModel {
         DiaryViewModel(repo: diaryRepository)

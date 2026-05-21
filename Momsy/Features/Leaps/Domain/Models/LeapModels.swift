@@ -1,11 +1,11 @@
-import SwiftUI
+import Foundation
 
 struct DevelopmentLeap: Identifiable {
     let id: Int
     let week: Int
     let name: String
     let nameEn: String
-    let tone: Color
+    let semanticColor: SemanticColor
     let isDone: Bool
     let isCurrent: Bool
     let description: String
@@ -22,7 +22,7 @@ let sampleLeaps: [DevelopmentLeap] = [
     DevelopmentLeap(
         id: 1, week: 5,
         name: "Мир ощущений", nameEn: "World of Senses",
-        tone: .bbRose, isDone: true, isCurrent: false,
+        semanticColor: .rose, isDone: true, isCurrent: false,
         description: "учится обрабатывать сигналы от органов чувств — звуки, свет, прикосновения воспринимаются по-новому.",
         descriptionEn: "is learning to process sensory signals — sounds, light, and touch feel entirely new.",
         signs: ["много спит", "вздрагивает от звуков", "ищет источник света"],
@@ -35,7 +35,7 @@ let sampleLeaps: [DevelopmentLeap] = [
     DevelopmentLeap(
         id: 2, week: 8,
         name: "Мир узоров", nameEn: "World of Patterns",
-        tone: .bbButter, isDone: true, isCurrent: false,
+        semanticColor: .butter, isDone: true, isCurrent: false,
         description: "начинает распознавать регулярные образы — черты лица, ритмы, простые геометрические формы.",
         descriptionEn: "begins recognising regular patterns — faces, rhythms, and simple geometric shapes.",
         signs: ["долго смотрит на лица", "замирает на паттернах", "больше гулит"],
@@ -48,7 +48,7 @@ let sampleLeaps: [DevelopmentLeap] = [
     DevelopmentLeap(
         id: 3, week: 12,
         name: "Плавные движения", nameEn: "Smooth Transitions",
-        tone: .bbMint, isDone: true, isCurrent: false,
+        semanticColor: .mint, isDone: true, isCurrent: false,
         description: "обнаруживает, что может управлять своим телом — руки, ноги, голова начинают двигаться плавно и осознанно.",
         descriptionEn: "discovers the ability to control their body — arms, legs, and head start moving smoothly and intentionally.",
         signs: ["подолгу изучает руки", "тянет предметы в рот", "много двигает ногами"],
@@ -61,7 +61,7 @@ let sampleLeaps: [DevelopmentLeap] = [
     DevelopmentLeap(
         id: 4, week: 17,
         name: "Мир событий", nameEn: "World of Events",
-        tone: .bbCoral, isDone: false, isCurrent: true,
+        semanticColor: .coral, isDone: false, isCurrent: true,
         description: "начинает понимать, что одно действие приводит к другому. Это огромная работа для мозга — отсюда плач и плохой сон.",
         descriptionEn: "begins to understand that one action leads to another. This is enormous brain work — hence the crying and poor sleep.",
         signs: ["хуже спит", "требует рук", "капризничает", "отказ от еды"],
@@ -74,7 +74,7 @@ let sampleLeaps: [DevelopmentLeap] = [
     DevelopmentLeap(
         id: 5, week: 26,
         name: "Отношения", nameEn: "Relationships",
-        tone: .bbLilac, isDone: false, isCurrent: false,
+        semanticColor: .lilac, isDone: false, isCurrent: false,
         description: "открывает мир связей между людьми и предметами. Тревога разлуки — нормальное и важное явление этого этапа.",
         descriptionEn: "discovers the world of connections between people and objects. Separation anxiety is a normal and important part of this stage.",
         signs: ["тревога при расставании", "предпочитает маму", "проверяет вашу реакцию"],
@@ -87,7 +87,7 @@ let sampleLeaps: [DevelopmentLeap] = [
     DevelopmentLeap(
         id: 6, week: 36,
         name: "Категории", nameEn: "Categories",
-        tone: .bbSky, isDone: false, isCurrent: false,
+        semanticColor: .sky, isDone: false, isCurrent: false,
         description: "начинает группировать вещи по свойствам: цвет, форма, размер. Активно изучает мир через классификацию.",
         descriptionEn: "begins grouping things by properties: colour, shape, size. Actively explores the world through classification.",
         signs: ["сортирует игрушки", "дольше играет самостоятельно", "разбирает всё подряд"],

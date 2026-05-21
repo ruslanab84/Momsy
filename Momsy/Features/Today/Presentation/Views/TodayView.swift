@@ -1,8 +1,7 @@
 import SwiftUI
-import Combine
 
 struct TodayView: View {
-    @StateObject private var vm = TodayViewModel()
+    @StateObject private var vm: TodayViewModel
     @StateObject private var sleepVM: SleepViewModel
     @State private var showFeeding = false
     @State private var showSymptom = false
@@ -10,6 +9,7 @@ struct TodayView: View {
     @State private var now = Date()
 
     init(container: AppContainer) {
+        _vm      = StateObject(wrappedValue: container.makeTodayViewModel())
         _sleepVM = StateObject(wrappedValue: container.makeSleepViewModel())
     }
 
@@ -17,7 +17,6 @@ struct TodayView: View {
     @AppStorage("babyBirthDate") private var babyBirthDateInterval: Double = 0
     @EnvironmentObject var loc: LocalizationManager
 
-    private let minuteClock = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     private var displayName: String { babyName.isEmpty ? loc.t("Baby", "Малыш") : babyName }
 
@@ -71,7 +70,13 @@ struct TodayView: View {
             .padding(.bottom, 24)
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .onReceive(minuteClock) { now = $0 }
+        .task { await vm.loadTodayEntries() }
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 60_000_000_000)
+                now = Date()
+            }
+        }
         .sheet(isPresented: $showFeeding) {
             FeedingView(vm: vm)
         }
@@ -445,7 +450,7 @@ struct TodayView: View {
                             .font(.system(size: 12, weight: .bold, design: .monospaced))
                             .foregroundColor(.bbInkMute)
                             .frame(width: 44, alignment: .leading)
-                        CuteBlobView(kind: entry.kind, size: 32, tone: entry.tone)
+                        CuteBlobView(kind: entry.kind, size: 32, tone: entry.kind.defaultTone)
                         Text(entry.label)
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundColor(.bbInk)

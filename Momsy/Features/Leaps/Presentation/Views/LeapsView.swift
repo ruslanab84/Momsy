@@ -171,7 +171,7 @@ private struct LeapTimelineRow: View {
 
     private var dotFill: Color {
         if leap.isDone    { return .bbMint }
-        if leap.isCurrent { return leap.tone }
+        if leap.isCurrent { return leap.semanticColor.color }
         return .bbCreamSoft
     }
     private var dotBorder: Color {

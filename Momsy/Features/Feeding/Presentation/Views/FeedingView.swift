@@ -340,5 +340,5 @@ struct FeedingView: View {
 }
 
 #Preview {
-    FeedingView(vm: TodayViewModel())
+    FeedingView(vm: AppContainer().makeTodayViewModel())
 }
