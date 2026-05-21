@@ -11,6 +11,7 @@ final class DiaryViewModel: ObservableObject {
 
     private let repo: any DiaryRepository
     private let photoStorage: any PhotoStorageService
+    private let analytics: any AnalyticsServiceProtocol
 
     private var lm: LocalizationManager { .shared }
 
@@ -40,9 +41,12 @@ final class DiaryViewModel: ObservableObject {
         }
     }
 
-    init(repo: any DiaryRepository, photoStorage: any PhotoStorageService) {
+    init(repo: any DiaryRepository,
+         photoStorage: any PhotoStorageService,
+         analytics: any AnalyticsServiceProtocol = LogAnalyticsService()) {
         self.repo = repo
         self.photoStorage = photoStorage
+        self.analytics = analytics
         Task { await loadEntries() }
     }
 
@@ -170,6 +174,14 @@ final class DiaryViewModel: ObservableObject {
     }
 
     func insertDay(_ newDay: DiaryDay, photos: [UUID: UIImage]) {
+        let entryTypes = newDay.items.map { item -> String in
+            switch item.type {
+            case .note: return "note"
+            case .milestone: return "milestone"
+            case .photo: return "photo"
+            }
+        }
+        entryTypes.forEach { analytics.track(.diaryEntryAdded(type: $0)) }
         let date = Date()
         let todayPrefix = lm.t("Today", "Сегодня")
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {

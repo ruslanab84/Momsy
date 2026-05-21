@@ -11,9 +11,12 @@ final class ReportViewModel: ObservableObject {
     @Published var showShare = false
 
     private let generateReport: GenerateReportUseCase
+    private let analytics: any AnalyticsServiceProtocol
 
-    init(generateReport: GenerateReportUseCase? = nil) {
+    init(generateReport: GenerateReportUseCase? = nil,
+         analytics: any AnalyticsServiceProtocol = LogAnalyticsService()) {
         self.generateReport = generateReport ?? GenerateReportUseCase()
+        self.analytics = analytics
     }
 
     private var lang: String { UserDefaults.standard.string(forKey: "appLanguage") ?? "en" }
@@ -100,6 +103,7 @@ final class ReportViewModel: ObservableObject {
             sparklines: currentSparklines,
             lang: lang
         ) else { return }
+        analytics.track(.reportGenerated(period: periods[selectedPeriod]))
         shareURL = url
         showShare = true
     }

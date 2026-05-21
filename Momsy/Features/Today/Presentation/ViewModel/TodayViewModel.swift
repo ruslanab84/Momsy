@@ -13,15 +13,21 @@ final class TodayViewModel: ObservableObject {
     private let getFeeding: GetFeedingEntriesUseCase
     private let diaperUC: DiaperUseCase
     private let timerService: FeedingTimerService
+    private let analytics: any AnalyticsServiceProtocol
+    private let pushNotifications: any PushNotificationServiceProtocol
 
     init(logFeeding: LogFeedingUseCase,
          getFeeding: GetFeedingEntriesUseCase,
          diaperUC: DiaperUseCase,
-         timerService: FeedingTimerService) {
+         timerService: FeedingTimerService,
+         analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
+         pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared) {
         self.logFeeding = logFeeding
         self.getFeeding = getFeeding
         self.diaperUC = diaperUC
         self.timerService = timerService
+        self.analytics = analytics
+        self.pushNotifications = pushNotifications
         self.diaperCount = diaperUC.count
     }
 
@@ -56,6 +62,7 @@ final class TodayViewModel: ObservableObject {
         feedingSide = side
         isFeedingActive = true
         feedingSeconds = 0
+        analytics.track(.feedingStarted(side: side.rawValue))
         timerService.start { [weak self] secs in
             Task { @MainActor [weak self] in self?.feedingSeconds = secs }
         }
@@ -72,6 +79,8 @@ final class TodayViewModel: ObservableObject {
         if let m = mood { label += " · \(m)" }
         let secs = feedingSeconds
         let s = feedingSide
+        analytics.track(.feedingStopped(durationMinutes: dur, side: s.rawValue))
+        pushNotifications.scheduleFeedingReminder(afterMinutes: 3 * 60)
         Task { try? await logFeeding.execute(durationSeconds: secs, side: s, mood: mood) }
         addEntry(LogEntry(time: Date(), kind: .bottle, label: label))
     }

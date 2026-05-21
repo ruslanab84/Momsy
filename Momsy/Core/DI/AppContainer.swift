@@ -16,6 +16,8 @@ final class AppContainer {
     let soundRepository: any SoundRepository           = LocalSoundRepository()
     let photoStorage: any PhotoStorageService          = LocalPhotoStorageService()
     let inviteService: any InviteServiceProtocol       = LocalInviteService()
+    let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
+    let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let diaperUseCase                                   = DiaperUseCase()
     let chatRepository: any ChatRepository             = LocalChatRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
@@ -71,12 +73,23 @@ final class AppContainer {
             logFeeding: logFeeding,
             getFeeding: getFeedingEntries,
             diaperUC: diaperUseCase,
-            timerService: FeedingTimerService()
+            timerService: FeedingTimerService(),
+            analytics: analytics,
+            pushNotifications: pushNotifications
+        )
+    }
+
+    func makeOnboardingViewModel(onDone: @escaping () -> Void) -> OnboardingViewModel {
+        OnboardingViewModel(
+            saveBabyProfile: saveBabyProfile,
+            analytics: analytics,
+            pushNotifications: pushNotifications,
+            onDone: onDone
         )
     }
 
     func makeDiaryViewModel() -> DiaryViewModel {
-        DiaryViewModel(repo: diaryRepository, photoStorage: photoStorage)
+        DiaryViewModel(repo: diaryRepository, photoStorage: photoStorage, analytics: analytics)
     }
 
     func makeTrackingViewModel() -> TrackingViewModel {

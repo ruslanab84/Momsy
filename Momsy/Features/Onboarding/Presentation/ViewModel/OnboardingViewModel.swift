@@ -17,10 +17,17 @@ final class OnboardingViewModel: ObservableObject {
     @Published var parentRole = "mom"
 
     private let saveBabyProfileUC: SaveBabyProfileUseCase
+    private let analytics: any AnalyticsServiceProtocol
+    private let pushNotifications: any PushNotificationServiceProtocol
     private let onDone: () -> Void
 
-    init(saveBabyProfile: SaveBabyProfileUseCase, onDone: @escaping () -> Void) {
+    init(saveBabyProfile: SaveBabyProfileUseCase,
+         analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
+         pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared,
+         onDone: @escaping () -> Void) {
         self.saveBabyProfileUC = saveBabyProfile
+        self.analytics = analytics
+        self.pushNotifications = pushNotifications
         self.onDone = onDone
     }
 
@@ -75,6 +82,8 @@ final class OnboardingViewModel: ObservableObject {
         UserDefaults.standard.set(selectedStage.rawValue,    forKey: "babyStage")
         UserDefaults.standard.set(parentRole,                forKey: "parentRole")
         UserDefaults.standard.set(parent,                    forKey: "parentName")
+        analytics.track(.onboardingComplete)
+        pushNotifications.scheduleMorningDiary(hour: 9, minute: 0)
         onDone()
     }
 }
