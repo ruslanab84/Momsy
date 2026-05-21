@@ -2,8 +2,12 @@ import SwiftUI
 
 struct SettingsView: View {
     @StateObject private var vm = SettingsViewModel()
-
     @EnvironmentObject private var lm: LocalizationManager
+
+#if DEBUG
+    @State private var iconShareItems: [Any] = []
+    @State private var showIconShare = false
+#endif
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -11,6 +15,9 @@ struct SettingsView: View {
                 themeSection
                 languageSection
                 aboutSection
+#if DEBUG
+                debugSection
+#endif
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -166,6 +173,55 @@ struct SettingsView: View {
                     .foregroundColor(.white)
             )
     }
+
+#if DEBUG
+    // MARK: - Debug
+
+    private var debugSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BBSectionLabel(text: "Debug")
+
+            Button {
+                exportAppIcon()
+            } label: {
+                HStack(spacing: 14) {
+                    iconSquare(systemName: "square.and.arrow.up", bg: .bbCoral)
+                    Text("Export App Icon PNG")
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.bbInkMute)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .buttonStyle(.plain)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .bbShadow()
+            .sheet(isPresented: $showIconShare) {
+                ActivityView(items: iconShareItems)
+            }
+
+            Text("Renders AppIconView at 1024×1024 — share to Mac and drop into AppIcon.appiconset.")
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .padding(.horizontal, 2)
+        }
+    }
+
+    @MainActor
+    private func exportAppIcon() {
+        let renderer = ImageRenderer(content: AppIconView())
+        renderer.scale = 1.0
+        renderer.proposedSize = .init(width: 1024, height: 1024)
+        guard let uiImage = renderer.uiImage else { return }
+        iconShareItems = [uiImage]
+        showIconShare = true
+    }
+#endif
 }
 
 #Preview {

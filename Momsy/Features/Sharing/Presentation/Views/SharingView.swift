@@ -607,7 +607,7 @@ private struct InviteSheet: View {
                 }
             }
             .sheet(isPresented: $showShare) {
-                ShareSheet(items: [inviteURL])
+                ActivityView(items: [inviteURL])
             }
             .onAppear { expiryLabel = formatExpiry(inviteExpiry) }
             .task {
@@ -620,15 +620,6 @@ private struct InviteSheet: View {
     }
 }
 
-// MARK: - Share Sheet
-
-private struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-    func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
-}
 
 #Preview {
     NavigationStack { SharingView(container: AppContainer()) }

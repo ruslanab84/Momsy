@@ -1,16 +1,6 @@
 import SwiftUI
 import UIKit
 
-// MARK: - Supporting types
-
-private struct ActivityView: UIViewControllerRepresentable {
-    let items: [Any]
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-    func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
-}
-
 // MARK: - ReportView
 
 struct ReportView: View {

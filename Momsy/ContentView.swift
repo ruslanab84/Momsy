@@ -3,12 +3,27 @@ import SwiftUI
 struct ContentView: View {
     @AppStorage("onboardingDone") private var onboardingDone = false
     @Environment(\.appContainer) private var container
+    @State private var showSplash = true
 
     var body: some View {
-        if !onboardingDone {
-            OnboardingView(container: container, onDone: { onboardingDone = true })
-        } else {
-            MainTabView()
+        ZStack {
+            if showSplash {
+                SplashView()
+                    .transition(.opacity)
+                    .zIndex(1)
+            } else if !onboardingDone {
+                OnboardingView(container: container, onDone: { onboardingDone = true })
+                    .transition(.opacity)
+            } else {
+                MainTabView()
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.35), value: showSplash)
+        .animation(.easeInOut(duration: 0.35), value: onboardingDone)
+        .task {
+            try? await Task.sleep(for: .seconds(1.6))
+            showSplash = false
         }
     }
 }
