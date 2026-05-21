@@ -18,7 +18,7 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     func scheduleFeedingReminder(afterMinutes minutes: Int) {
         center.removePendingNotificationRequests(withIdentifiers: [ID.feeding])
-        let isEn = (UserDefaults.standard.string(forKey: "appLanguage") ?? "en") == "en"
+        let isEn = LocalizationManager.shared.current == .english
         let hours = minutes / 60
 
         let content = UNMutableNotificationContent()
@@ -40,7 +40,7 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     func scheduleMorningDiary(hour: Int = 9, minute: Int = 0) {
         center.removePendingNotificationRequests(withIdentifiers: [ID.diary])
-        let isEn = (UserDefaults.standard.string(forKey: "appLanguage") ?? "en") == "en"
+        let isEn = LocalizationManager.shared.current == .english
 
         let content = UNMutableNotificationContent()
         content.title = isEn ? "Daily diary" : "Дневник малыша"
@@ -58,7 +58,7 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     func scheduleLeapNotification(leapID: Int, name: String, nameEn: String, startDate: Date) {
         guard startDate > Date() else { return }
-        let isEn = (UserDefaults.standard.string(forKey: "appLanguage") ?? "en") == "en"
+        let isEn = LocalizationManager.shared.current == .english
 
         let content = UNMutableNotificationContent()
         content.title = isEn ? "Development leap" : "Скачок развития"
