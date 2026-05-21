@@ -17,21 +17,22 @@ final class OnboardingViewModel: ObservableObject {
     @Published var parentRole = "mom"
 
     private let saveBabyProfileUC: SaveBabyProfileUseCase
+    private let appState: AppState
     private let analytics: any AnalyticsServiceProtocol
     private let pushNotifications: any PushNotificationServiceProtocol
     private let onDone: () -> Void
 
     init(saveBabyProfile: SaveBabyProfileUseCase,
+         appState: AppState,
          analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
          pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared,
          onDone: @escaping () -> Void) {
         self.saveBabyProfileUC = saveBabyProfile
+        self.appState = appState
         self.analytics = analytics
         self.pushNotifications = pushNotifications
         self.onDone = onDone
     }
-
-    private var lang: String { UserDefaults.standard.string(forKey: "appLanguage") ?? "en" }
 
     var canContinue: Bool {
         step == .profile ? !babyName.trimmingCharacters(in: .whitespaces).isEmpty : true
@@ -69,21 +70,15 @@ final class OnboardingViewModel: ObservableObject {
 
     func finish() {
         let name = babyName.trimmingCharacters(in: .whitespaces)
-        let parent = parentName.trimmingCharacters(in: .whitespaces)
-        // Persist via repository
-        Task {
-            try? await saveBabyProfileUC.execute(
-                BabyProfile(name: name, birthDate: birthDate, stage: selectedStage.rawValue)
-            )
-        }
-        // Keep flat keys for @AppStorage readers in existing views
-        UserDefaults.standard.set(name,                      forKey: "babyName")
-        UserDefaults.standard.set(birthDate.timeIntervalSince1970, forKey: "babyBirthDate")
-        UserDefaults.standard.set(selectedStage.rawValue,    forKey: "babyStage")
-        UserDefaults.standard.set(parentRole,                forKey: "parentRole")
-        UserDefaults.standard.set(parent,                    forKey: "parentName")
+        let profile = BabyProfile(name: name, birthDate: birthDate, stage: selectedStage.rawValue)
         analytics.track(.onboardingComplete)
         pushNotifications.scheduleMorningDiary(hour: 9, minute: 0)
-        onDone()
+        Task {
+            try? await saveBabyProfileUC.execute(profile)
+            await MainActor.run {
+                appState.update(profile)
+                onDone()
+            }
+        }
     }
 }

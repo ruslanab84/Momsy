@@ -3,8 +3,12 @@ import SwiftUI
 // MARK: - View
 
 struct SymptomView: View {
-    @StateObject private var vm = SymptomViewModel()
+    @StateObject private var vm: SymptomViewModel
     @EnvironmentObject var loc: LocalizationManager
+
+    init(container: AppContainer) {
+        _vm = StateObject(wrappedValue: container.makeSymptomViewModel())
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -37,17 +41,17 @@ struct SymptomView: View {
                         .foregroundColor(.white)
                 )
             VStack(alignment: .leading, spacing: 2) {
-                Text(loc.t("Something wrong?", "Что-то не так?"))
+                Text(loc.strings.somethingWrong)
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
-                Text(loc.t("Mark it — we'll guide you on what to do", "Отметьте — мы подскажем, что делать"))
+                Text(loc.strings.markItGuide)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
             }
             Spacer()
             if vm.activeCount > 0 {
                 Button { vm.reset() } label: {
-                    Text(loc.t("reset", "сбросить"))
+                    Text(loc.strings.reset)
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                 }
@@ -63,12 +67,11 @@ struct SymptomView: View {
                 .font(.system(size: 18))
                 .foregroundColor(.bbButter)
             VStack(alignment: .leading, spacing: 2) {
-                Text(loc.t("NOT A DIAGNOSIS", "Это не диагноз"))
+                Text(loc.strings.notADiagnosis)
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbButter)
                     .kerning(0.6)
-                Text(loc.t("We help you navigate. The decision is yours and your doctor's.",
-                       "Помогаем сориентироваться. Решение принимаете вы и врач."))
+                Text(loc.strings.symptomDisclaimer)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(.white.opacity(0.9))
                     .fixedSize(horizontal: false, vertical: true)
@@ -122,7 +125,7 @@ struct SymptomView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 11))
                             .foregroundColor(vm.result.warningColor)
-                        Text(loc.t("See doctor urgently if:", "Срочно к врачу, если:"))
+                        Text(loc.strings.seeDoctorUrgently)
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
                             .foregroundColor(vm.result.warningColor)
                     }
@@ -149,7 +152,7 @@ struct SymptomView: View {
                 HStack(spacing: 6) {
                     Image(systemName: vm.diaryLogged ? "checkmark" : "book.closed")
                         .font(.system(size: 14, weight: .bold))
-                    Text(vm.diaryLogged ? loc.t("Saved", "Записано") : loc.t("To diary", "В дневник"))
+                    Text(vm.diaryLogged ? loc.strings.saved : loc.strings.toDiary)
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                 }
                 .foregroundColor(vm.diaryLogged ? .bbMintDeep : .bbInk)
@@ -168,7 +171,7 @@ struct SymptomView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "phone.fill")
                         .font(.system(size: 14, weight: .bold))
-                    Text(loc.t("Call", "Позвонить"))
+                    Text(loc.strings.call)
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                 }
                 .foregroundColor(.white)
@@ -183,8 +186,7 @@ struct SymptomView: View {
     // MARK: - Footer Disclaimer
 
     private var disclaimer: some View {
-        Text(loc.t("Symptom hints are navigation, not a diagnosis.\nWhen in doubt — always see your paediatrician.",
-               "Подсказки на основе симптомов — это навигация, не диагноз.\nПри любых сомнениях — всегда к педиатру."))
+        Text(loc.strings.symptomFooterDisclaimer)
             .font(.system(size: 11, weight: .semibold, design: .rounded))
             .foregroundColor(.bbInkMute)
             .multilineTextAlignment(.center)
@@ -245,5 +247,5 @@ private struct SymptomCard: View {
 }
 
 #Preview {
-    NavigationStack { SymptomView() }
+    NavigationStack { SymptomView(container: AppContainer()) }
 }

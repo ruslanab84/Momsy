@@ -9,12 +9,13 @@ final class SharingViewModel: ObservableObject {
 
     private let repo: any FamilyRepository
     private let inviteService: any InviteServiceProtocol
+    private let appState: AppState
 
     private var lm: LocalizationManager { .shared }
 
     var displayName: String {
-        let name = UserDefaults.standard.string(forKey: "babyName") ?? ""
-        return name.isEmpty ? lm.t("Baby", "Малыш") : name
+        let name = appState.babyProfile?.name ?? ""
+        return name.isEmpty ? lm.strings.baby : name
     }
 
     var inviteCode: String { inviteService.currentCode() }
@@ -26,9 +27,10 @@ final class SharingViewModel: ObservableObject {
         objectWillChange.send()
     }
 
-    init(repo: any FamilyRepository, inviteService: any InviteServiceProtocol = LocalInviteService()) {
+    init(repo: any FamilyRepository, inviteService: any InviteServiceProtocol = LocalInviteService(), appState: AppState) {
         self.repo = repo
         self.inviteService = inviteService
+        self.appState = appState
         Task { await loadMembers() }
     }
 

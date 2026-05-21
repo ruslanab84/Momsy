@@ -7,7 +7,7 @@ struct DoctorMenuView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
-                NavigationLink(destination: SymptomView()) {
+                NavigationLink(destination: SymptomView(container: container)) {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack(spacing: 12) {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -19,11 +19,11 @@ struct DoctorMenuView: View {
                                         .foregroundColor(.white)
                                 )
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(lm.t("SYMPTOMS", "СИМПТОМЫ"))
+                                Text(lm.strings.symptomsUpper)
                                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                                     .foregroundColor(.white.opacity(0.75))
                                     .kerning(0.5)
-                                Text(lm.t("Something wrong?", "Что-то не так?"))
+                                Text(lm.strings.somethingWrong)
                                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                                     .foregroundColor(.white)
                             }
@@ -32,8 +32,7 @@ struct DoctorMenuView: View {
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white.opacity(0.6))
                         }
-                        Text(lm.t("Note symptoms — get guidance. Not a diagnosis, just navigation.",
-                               "Отметьте симптомы — получите подсказку. Не диагноз, а навигация."))
+                        Text(lm.strings.noteSymptoms)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundColor(.white.opacity(0.85))
                             .fixedSize(horizontal: false, vertical: true)
@@ -51,17 +50,17 @@ struct DoctorMenuView: View {
                         icon: "sparkles",
                         iconColor: .bbMintDeep,
                         iconBg: Color.bbMint.opacity(0.3),
-                        title: lm.t("Ask Momsy AI", "Спросить ИИ"),
-                        sub: lm.t("Sleep, feeding, development — ask anything", "Сон, кормление, развитие — спросите всё")
+                        title: lm.strings.askMomsyAI,
+                        sub: lm.strings.aiMenuSub
                     )
                     Divider().padding(.leading, 60)
                     DoctorMenuRow(
-                        destination: ReportView(),
+                        destination: ReportView(container: container),
                         icon: "doc.text.fill",
                         iconColor: .bbSkyDeep,
                         iconBg: Color.bbSky.opacity(0.3),
-                        title: lm.t("Pediatrician Report", "Отчёт для педиатра"),
-                        sub: lm.t("PDF for the week — sleep, feeding, weight", "PDF за неделю — сон, кормление, вес")
+                        title: lm.strings.pediatricianReport,
+                        sub: lm.strings.pdfForWeek
                     )
                     Divider().padding(.leading, 60)
                     DoctorMenuRow(
@@ -69,8 +68,8 @@ struct DoctorMenuView: View {
                         icon: "chart.xyaxis.line",
                         iconColor: .bbMintDeep,
                         iconBg: Color.bbMint.opacity(0.3),
-                        title: lm.t("Height & Weight", "Рост и вес"),
-                        sub: lm.t("WHO percentile chart", "График по перцентилям ВОЗ")
+                        title: lm.strings.heightAndWeight,
+                        sub: lm.strings.whoPercentileChart
                     )
                 }
                 .background(Color.bbCard)
@@ -82,7 +81,7 @@ struct DoctorMenuView: View {
             .padding(.bottom, 24)
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .navigationTitle(lm.t("Doctor", "Доктор"))
+        .navigationTitle(lm.strings.tabDoctor)
     }
 }
 

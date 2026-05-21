@@ -5,7 +5,7 @@ import SwiftUI
 struct SoundsView: View {
     @StateObject private var vm: SoundsViewModel
     @EnvironmentObject var loc: LocalizationManager
-    @AppStorage("babyName") private var babyName = ""
+    @EnvironmentObject var appState: AppState
 
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeSoundsViewModel())
@@ -23,7 +23,8 @@ struct SoundsView: View {
     }
 
     private var displayNameSuffix: String {
-        babyName.isEmpty ? "" : loc.t(" for \(babyName)", " для \(babyName)")
+        let n = appState.babyProfile?.name ?? ""
+        return n.isEmpty ? "" : loc.strings.forBabyName(n)
     }
 
     var body: some View {
@@ -83,11 +84,11 @@ struct SoundsView: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(loc.t("sleep tight", "пусть спит крепко"))
+                Text(loc.strings.sleepTight)
                     .font(.custom("Georgia", size: 18))
                     .italic()
                     .foregroundColor(Color.bbInk.opacity(0.5))
-                Text(loc.t("Lullaby\(displayNameSuffix)", "Колыбельная\(displayNameSuffix)"))
+                Text(loc.strings.lullaby + displayNameSuffix)
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
             }
@@ -109,7 +110,7 @@ struct SoundsView: View {
                     )
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(loc.t("NOW PLAYING", "СЕЙЧАС ИГРАЕТ"))
+                    Text(loc.strings.nowPlayingFull)
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbButter)
                         .kerning(0.5)
@@ -161,7 +162,7 @@ struct SoundsView: View {
 
     private var soundGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: loc.t("Sounds", "Звуки"))
+            BBSectionLabel(text: loc.strings.sounds)
             LazyVGrid(
                 columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                 spacing: 8
@@ -265,7 +266,7 @@ private struct SoundCard: View {
                     )
 
                 if sound.isPlaying {
-                    Text(loc.t("playing", "играет"))
+                    Text(loc.strings.playing)
                         .font(.system(size: 9, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
                         .padding(.horizontal, 7)

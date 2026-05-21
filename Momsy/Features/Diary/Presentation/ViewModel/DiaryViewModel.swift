@@ -12,17 +12,16 @@ final class DiaryViewModel: ObservableObject {
     private let repo: any DiaryRepository
     private let photoStorage: any PhotoStorageService
     private let analytics: any AnalyticsServiceProtocol
+    private let appState: AppState
 
     private var lm: LocalizationManager { .shared }
 
     var displayName: String {
-        let name = UserDefaults.standard.string(forKey: "babyName") ?? ""
+        let name = appState.babyProfile?.name ?? ""
         return name.isEmpty ? lm.strings.baby : name
     }
 
-    var babyBirthDateInterval: Double {
-        UserDefaults.standard.double(forKey: "babyBirthDate")
-    }
+    var babyBirthDate: Date? { appState.babyProfile?.birthDate }
 
     var filteredEntries: [DiaryDay] {
         switch selectedFilter {
@@ -43,10 +42,12 @@ final class DiaryViewModel: ObservableObject {
 
     init(repo: any DiaryRepository,
          photoStorage: any PhotoStorageService,
-         analytics: any AnalyticsServiceProtocol = LogAnalyticsService()) {
+         analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
+         appState: AppState) {
         self.repo = repo
         self.photoStorage = photoStorage
         self.analytics = analytics
+        self.appState = appState
         Task { await loadEntries() }
     }
 
@@ -70,10 +71,7 @@ final class DiaryViewModel: ObservableObject {
     private func group(_ items: [StoredDiaryItem]) -> [DiaryDay] {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
-        let birth: Date? = {
-            let interval = babyBirthDateInterval
-            return interval > 0 ? Date(timeIntervalSince1970: interval) : nil
-        }()
+        let birth: Date? = babyBirthDate
 
         var grouped: [Date: [StoredDiaryItem]] = [:]
         for item in items {

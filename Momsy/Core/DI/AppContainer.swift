@@ -26,6 +26,7 @@ final class AppContainer {
 
     lazy var getBabyProfile   = GetBabyProfileUseCase(repository: babyRepository)
     lazy var saveBabyProfile  = SaveBabyProfileUseCase(repository: babyRepository)
+    lazy var appState         = AppState(getBabyProfile: getBabyProfile)
 
     // MARK: — Use Cases — Sleep
 
@@ -82,6 +83,7 @@ final class AppContainer {
     func makeOnboardingViewModel(onDone: @escaping () -> Void) -> OnboardingViewModel {
         OnboardingViewModel(
             saveBabyProfile: saveBabyProfile,
+            appState: appState,
             analytics: analytics,
             pushNotifications: pushNotifications,
             onDone: onDone
@@ -89,15 +91,15 @@ final class AppContainer {
     }
 
     func makeDiaryViewModel() -> DiaryViewModel {
-        DiaryViewModel(repo: diaryRepository, photoStorage: photoStorage, analytics: analytics)
+        DiaryViewModel(repo: diaryRepository, photoStorage: photoStorage, analytics: analytics, appState: appState)
     }
 
     func makeTrackingViewModel() -> TrackingViewModel {
-        TrackingViewModel(measurementRepo: measurementRepository, temperatureRepo: temperatureRepository)
+        TrackingViewModel(measurementRepo: measurementRepository, temperatureRepo: temperatureRepository, appState: appState)
     }
 
     func makeSharingViewModel() -> SharingViewModel {
-        SharingViewModel(repo: familyRepository, inviteService: inviteService)
+        SharingViewModel(repo: familyRepository, inviteService: inviteService, appState: appState)
     }
 
     func makeSoundsViewModel() -> SoundsViewModel {
@@ -118,8 +120,17 @@ final class AppContainer {
             getChatHistory: getChatHistory,
             appendMessage: appendChatMessage,
             clearChat: clearChatHistory,
-            chatService: aiChatService
+            chatService: aiChatService,
+            appState: appState
         )
+    }
+
+    func makeReportViewModel() -> ReportViewModel {
+        ReportViewModel(appState: appState, analytics: analytics)
+    }
+
+    func makeSymptomViewModel() -> SymptomViewModel {
+        SymptomViewModel(appState: appState)
     }
 }
 

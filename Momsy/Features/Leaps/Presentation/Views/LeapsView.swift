@@ -3,9 +3,12 @@ import SwiftUI
 struct LeapsView: View {
     @StateObject private var vm = LeapsViewModel()
     @EnvironmentObject var loc: LocalizationManager
-    @AppStorage("babyName")    private var babyName = ""
+    @EnvironmentObject var appState: AppState
 
-    private var displayName: String { babyName.isEmpty ? loc.t("Baby", "Малыш") : babyName }
+    private var displayName: String {
+        let name = appState.babyProfile?.name ?? ""
+        return name.isEmpty ? loc.strings.baby : name
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -26,15 +29,15 @@ struct LeapsView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            BBSectionLabel(text: loc.t("Developmental Leaps", "Скачки развития"))
-            Text(loc.t("Now — leap #\(vm.currentLeap.id)", "Сейчас — скачок №\(vm.currentLeap.id)"))
+            BBSectionLabel(text: loc.strings.developmentalLeaps)
+            Text(loc.strings.currentLeapTitle(id: vm.currentLeap.id))
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
             HStack(spacing: 4) {
-                Text(loc.t("Day 3 of ~5 hard days.", "День 3 из ~5 трудных."))
+                Text(loc.strings.day3HardDays)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
-                Text(loc.t("hang in there, mama ✿", "держитесь, мама ✿"))
+                Text(loc.strings.hangInThere)
                     .font(.custom("Georgia", size: 17))
                     .italic()
                     .foregroundColor(.bbCoralDeep)
@@ -50,7 +53,7 @@ struct LeapsView: View {
             HStack {
                 CuteBlobView(kind: .star, size: 56, tone: Color.white.opacity(0.4))
                 Spacer()
-                BBPill(text: loc.t("week \(vm.currentLeap.week)", "\(vm.currentLeap.week)-я неделя"),
+                BBPill(text: loc.strings.weekPill(n: vm.currentLeap.week),
                        color: .bbInk, fg: .white)
             }
 
@@ -65,19 +68,18 @@ struct LeapsView: View {
 
             HStack(spacing: 8) {
                 LeapInfoBlock(
-                    title: loc.t("WHAT YOU NOTICE", "ЧТО ЗАМЕТНО"),
+                    title: loc.strings.whatYouNotice,
                     items: vm.leapSigns(vm.currentLeap),
                     accent: .bbCoralDeep
                 )
                 LeapInfoBlock(
-                    title: loc.t("COMING SOON", "СКОРО НАУЧИТСЯ"),
+                    title: loc.strings.comingSoon,
                     items: vm.leapSkills(vm.currentLeap),
                     accent: .bbMintDeep
                 )
             }
 
-            Text(loc.t("✿ This will pass. Usually lasts ~1 week. Hold them more — it doesn't spoil.",
-                   "✿ Это пройдёт. Обычно длится ~1 неделю. Чаще берите на руки — это не балует."))
+            Text(loc.strings.leapWillPass)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)
@@ -92,7 +94,7 @@ struct LeapsView: View {
 
     private var timelineSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: loc.t("Leap Calendar", "Календарь скачков"))
+            BBSectionLabel(text: loc.strings.leapCalendar)
             VStack(spacing: 0) {
                 ForEach(sampleLeaps) { leap in
                     LeapTimelineRow(
@@ -112,11 +114,11 @@ struct LeapsView: View {
 
     private var tipCard: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(loc.t("TIP OF THE DAY", "СОВЕТ НА СЕГОДНЯ"))
+            Text(loc.strings.tipOfTheDay)
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbMintDeep)
                 .kerning(0.5)
-            Text(loc.t("For leap «\(vm.leapName(vm.currentLeap))»", "Для скачка «\(vm.leapName(vm.currentLeap))»"))
+            Text(loc.strings.forLeapTip(name: vm.leapName(vm.currentLeap)))
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(.bbInk)
             Text(vm.leapTip(vm.currentLeap))
@@ -216,7 +218,7 @@ private struct LeapTimelineRow: View {
                             .foregroundColor(leap.isCurrent ? .bbCoralDeep : .bbInk)
                         Spacer()
                         HStack(spacing: 4) {
-                            Text(loc.t("\(leap.week) wk", "\(leap.week) нед"))
+                            Text(loc.strings.weekRow(n: leap.week))
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundColor(.bbInkMute)
                             Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
@@ -227,13 +229,13 @@ private struct LeapTimelineRow: View {
 
                     Group {
                         if leap.isCurrent {
-                            Text(loc.t("in progress", "идёт сейчас"))
+                            Text(loc.strings.leapInProgressStatus)
                                 .foregroundColor(.bbCoralDeep)
                         } else if leap.isDone {
-                            Text(loc.t("completed", "завершён"))
+                            Text(loc.strings.leapCompletedStatus)
                                 .foregroundColor(.bbMintDeep)
                         } else {
-                            Text(loc.t("ahead · week \(leap.week)", "впереди · \(leap.week)-я неделя"))
+                            Text(loc.strings.leapAhead(week: leap.week))
                                 .foregroundColor(.bbInkMute)
                         }
                     }
@@ -248,8 +250,8 @@ private struct LeapTimelineRow: View {
 
                             if !leapSigns.isEmpty {
                                 HStack(alignment: .top, spacing: 10) {
-                                    MiniList(label: loc.t("notice", "замечают"), items: leapSigns, accent: .bbCoral)
-                                    MiniList(label: loc.t("will learn", "научится"), items: leapSkills, accent: .bbMintDeep)
+                                    MiniList(label: loc.strings.notice, items: leapSigns, accent: .bbCoral)
+                                    MiniList(label: loc.strings.willLearn, items: leapSkills, accent: .bbMintDeep)
                                 }
                             }
 

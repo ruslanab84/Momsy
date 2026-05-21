@@ -4,8 +4,12 @@ import UIKit
 // MARK: - ReportView
 
 struct ReportView: View {
-    @StateObject private var vm = ReportViewModel()
+    @StateObject private var vm: ReportViewModel
     @EnvironmentObject var loc: LocalizationManager
+
+    init(container: AppContainer) {
+        _vm = StateObject(wrappedValue: container.makeReportViewModel())
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -34,9 +38,9 @@ struct ReportView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            BBSectionLabel(text: loc.t("Paediatric Report", "Отчёт для педиатра"))
+            BBSectionLabel(text: loc.strings.paediatricReport)
             HStack(alignment: .lastTextBaseline, spacing: 6) {
-                Text(loc.t("Prepare for", "Подготовить за"))
+                Text(loc.strings.prepareFor)
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Text(vm.periodLabel)
@@ -45,8 +49,7 @@ struct ReportView: View {
                     .contentTransition(.interpolate)
                     .animation(.spring(response: 0.3), value: vm.periodLabel)
             }
-            Text(loc.t("Visit summary: sleep · food · weight · temp · stool",
-                   "Сводка для визита: сон · еда · вес · температура · стул"))
+            Text(loc.strings.visitSummaryHint)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(.bbInkSoft)
         }
@@ -102,7 +105,7 @@ struct ReportView: View {
 
     private var includeCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(loc.t("INCLUDE IN REPORT", "ВКЛЮЧИТЬ В ОТЧЁТ"))
+            Text(loc.strings.includeInReport)
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .kerning(0.5)
@@ -144,7 +147,7 @@ struct ReportView: View {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 15, weight: .bold))
                     }
-                    Text(vm.isGenerating ? loc.t("Preparing PDF…", "Готовим PDF…") : loc.t("Share PDF", "Поделиться PDF"))
+                    Text(vm.isGenerating ? loc.strings.preparingPdf : loc.strings.sharePdf)
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                 }
                 .foregroundColor(.white)
@@ -162,7 +165,7 @@ struct ReportView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "printer")
                         .font(.system(size: 14, weight: .semibold))
-                    Text(loc.t("Print", "Распечатать"))
+                    Text(loc.strings.printAction)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                 }
                 .foregroundColor(.bbInkSoft)
@@ -352,5 +355,5 @@ private struct SparklineChart: View {
 }
 
 #Preview {
-    NavigationStack { ReportView() }
+    NavigationStack { ReportView(container: AppContainer()) }
 }

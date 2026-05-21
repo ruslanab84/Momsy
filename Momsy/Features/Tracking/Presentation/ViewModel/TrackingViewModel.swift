@@ -11,15 +11,18 @@ final class TrackingViewModel: ObservableObject {
 
     private let measurementRepo: any MeasurementRepository
     private let temperatureRepo: any TemperatureRepository
+    private let appState: AppState
 
     private var lm: LocalizationManager { .shared }
 
-    private var babyBirthInterval: Double { UserDefaults.standard.double(forKey: "babyBirthDate") }
+    private var babyBirthDate: Date? { appState.babyProfile?.birthDate }
 
     init(measurementRepo: any MeasurementRepository,
-         temperatureRepo: any TemperatureRepository) {
+         temperatureRepo: any TemperatureRepository,
+         appState: AppState) {
         self.measurementRepo = measurementRepo
         self.temperatureRepo = temperatureRepo
+        self.appState = appState
         Task { await loadAll() }
     }
 
@@ -50,8 +53,7 @@ final class TrackingViewModel: ObservableObject {
     }
 
     private func growthPoints(keyPath: KeyPath<MeasurementEntry, String>) -> [BabyGrowthPoint] {
-        guard babyBirthInterval > 0 else { return [] }
-        let birth = Date(timeIntervalSince1970: babyBirthInterval)
+        guard let birth = babyBirthDate else { return [] }
         return measurements.compactMap { m in
             let months = Calendar.current.dateComponents([.month], from: birth, to: m.date).month ?? 0
             guard let val = parseNumber(from: m[keyPath: keyPath]),
@@ -71,32 +73,33 @@ final class TrackingViewModel: ObservableObject {
               let ref = reference.min(by: { abs($0.month - latest.month) < abs($1.month - latest.month) })
         else { return "" }
         let v = latest.value
-        if v < ref.p3  { return lm.t("below P3",  "ниже P3") }
+        if v < ref.p3  { return lm.strings.belowP3 }
         if v < ref.p15 { return "P3–P15" }
         if v < ref.p50 { return "P15–P50" }
         if v < ref.p85 { return "P50–P85" }
         if v < ref.p97 { return "P85–P97" }
-        return lm.t("above P97", "выше P97")
+        return lm.strings.aboveP97
     }
 
     // MARK: - Tabs
 
     var tabs: [String] {
-        [lm.t("Weight", "Вес"), lm.t("Height", "Рост"), lm.t("Head", "Голова"), lm.t("Temperature", "Температура")]
+        [lm.strings.weight, lm.strings.height, lm.strings.headShort, lm.strings.temperature]
     }
 
     var displayName: String {
-        let name = UserDefaults.standard.string(forKey: "babyName") ?? ""
-        return name.isEmpty ? lm.t("Baby", "Малыш") : name
+        let name = appState.babyProfile?.name ?? ""
+        return name.isEmpty ? lm.strings.baby : name
     }
 
     var headerSummary: String {
+        let todayStr = lm.strings.today.lowercased()
         switch selectedTab {
-        case 0: return "\(measurements.first?.weight ?? "—") · \(lm.t("today", "сегодня"))"
-        case 1: return "\(measurements.first?.height ?? "—") · \(lm.t("today", "сегодня"))"
-        case 2: return "\(measurements.first?.headCirc ?? "—") · \(lm.t("today", "сегодня"))"
+        case 0: return "\(measurements.first?.weight ?? "—") · \(todayStr)"
+        case 1: return "\(measurements.first?.height ?? "—") · \(todayStr)"
+        case 2: return "\(measurements.first?.headCirc ?? "—") · \(todayStr)"
         case 3:
-            guard let e = tempLog.first else { return lm.t("no data", "нет данных") }
+            guard let e = tempLog.first else { return lm.strings.noData }
             return String(format: "%.1f°C · %@ %@", e.value, e.dateLabel, e.timeLabel)
         default: return ""
         }
@@ -104,9 +107,9 @@ final class TrackingViewModel: ObservableObject {
 
     var pillText: String {
         if selectedTab == 3, let v = tempLog.first?.value {
-            return v >= 38.5 ? lm.t("high", "высокая") : v >= 37.5 ? lm.t("subfebr.", "субфебрильная") : lm.t("normal", "норма")
+            return v >= 38.5 ? lm.strings.high.lowercased() : v >= 37.5 ? lm.strings.subfebrLabel.lowercased() : lm.strings.normal.lowercased()
         }
-        return lm.t("normal", "в норме")
+        return lm.strings.normalRange
     }
 
     var pillColor: Color {

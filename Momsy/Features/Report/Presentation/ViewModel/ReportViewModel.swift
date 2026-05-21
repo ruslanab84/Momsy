@@ -12,19 +12,23 @@ final class ReportViewModel: ObservableObject {
 
     private let generateReport: GenerateReportUseCase
     private let analytics: any AnalyticsServiceProtocol
+    private let appState: AppState
 
     init(generateReport: GenerateReportUseCase? = nil,
+         appState: AppState,
          analytics: any AnalyticsServiceProtocol = LogAnalyticsService()) {
         self.generateReport = generateReport ?? GenerateReportUseCase()
+        self.appState = appState
         self.analytics = analytics
     }
 
-    private var lang: String { UserDefaults.standard.string(forKey: "appLanguage") ?? "en" }
-    private func t(_ en: String, _ ru: String) -> String { LocalizationManager.shared.t(en, ru) }
+    private var lm: LocalizationManager { .shared }
+    private var lang: String { lm.lang }
+    private func t(_ en: String, _ ru: String) -> String { lang == "ru" ? ru : en }
 
     var displayName: String {
-        let name = UserDefaults.standard.string(forKey: "babyName") ?? ""
-        return name.isEmpty ? t("Baby", "Малыш") : name
+        let name = appState.babyProfile?.name ?? ""
+        return name.isEmpty ? lm.strings.baby : name
     }
 
     var periods: [String] {

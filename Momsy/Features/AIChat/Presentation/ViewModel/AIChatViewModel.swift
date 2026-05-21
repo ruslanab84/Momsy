@@ -13,15 +13,18 @@ final class AIChatViewModel: ObservableObject {
     private let appendMessageUC: AppendChatMessageUseCase
     private let clearChatUC: ClearChatHistoryUseCase
     private let chatService: any AIChatService
+    private let appState: AppState
 
     init(getChatHistory: GetChatHistoryUseCase,
          appendMessage: AppendChatMessageUseCase,
          clearChat: ClearChatHistoryUseCase,
-         chatService: any AIChatService) {
+         chatService: any AIChatService,
+         appState: AppState) {
         self.getChatHistoryUC = getChatHistory
         self.appendMessageUC = appendMessage
         self.clearChatUC = clearChat
         self.chatService = chatService
+        self.appState = appState
         Task { await loadHistory() }
     }
 
@@ -30,9 +33,9 @@ final class AIChatViewModel: ObservableObject {
     }
 
     var babyContext: BabyContext {
-        let name = UserDefaults.standard.string(forKey: "babyName") ?? ""
-        let interval = UserDefaults.standard.double(forKey: "babyBirthDate")
-        let birth = interval > 0 ? Date(timeIntervalSince1970: interval) : Date()
+        let profile = appState.babyProfile
+        let name = profile?.name ?? ""
+        let birth = profile?.birthDate ?? Date()
         let weeks = max(0, Calendar.current.dateComponents([.weekOfYear], from: birth, to: Date()).weekOfYear ?? 0)
         let leap = sampleLeaps.first(where: { $0.isCurrent })
         return BabyContext(

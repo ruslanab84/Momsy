@@ -8,21 +8,24 @@ struct TodayView: View {
     @State private var showSleep = false
     @State private var now = Date()
 
+    private let container: AppContainer
+
     init(container: AppContainer) {
+        self.container = container
         _vm      = StateObject(wrappedValue: container.makeTodayViewModel())
         _sleepVM = StateObject(wrappedValue: container.makeSleepViewModel())
     }
 
-    @AppStorage("babyName")      private var babyName = ""
-    @AppStorage("babyBirthDate") private var babyBirthDateInterval: Double = 0
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject var appState: AppState
 
-
-    private var displayName: String { babyName.isEmpty ? loc.t("Baby", "Малыш") : babyName }
+    private var displayName: String {
+        let name = appState.babyProfile?.name ?? ""
+        return name.isEmpty ? loc.strings.baby : name
+    }
 
     private var babyAgeString: String {
-        guard babyBirthDateInterval > 0 else { return "" }
-        let birth = Date(timeIntervalSince1970: babyBirthDateInterval)
+        guard let birth = appState.babyProfile?.birthDate else { return "" }
         let comps = Calendar.current.dateComponents([.month, .day], from: birth, to: Date())
         let m = comps.month ?? 0
         let d = comps.day ?? 0
@@ -40,10 +43,10 @@ struct TodayView: View {
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: now)
         switch h {
-        case 0..<5:   return loc.t("Good night,", "Доброй ночи,")
-        case 5..<12:  return loc.t("Good morning,", "Доброе утро,")
-        case 12..<18: return loc.t("Good afternoon,", "Добрый день,")
-        default:      return loc.t("Good evening,", "Добрый вечер,")
+        case 0..<5:   return loc.strings.goodNight
+        case 5..<12:  return loc.strings.goodMorningGreeting
+        case 12..<18: return loc.strings.goodAfternoonGreeting
+        default:      return loc.strings.goodEveningGreeting
         }
     }
 
@@ -81,7 +84,7 @@ struct TodayView: View {
             FeedingView(vm: vm)
         }
         .sheet(isPresented: $showSymptom) {
-            NavigationStack { SymptomView() }
+            NavigationStack { SymptomView(container: container) }
         }
         .sheet(isPresented: $showSleep) {
             SleepView(vm: sleepVM)
@@ -104,7 +107,7 @@ struct TodayView: View {
                 }
             }
             Spacer()
-            BBPill(text: loc.t("Leap #4", "Скачок №4"), color: Color.bbLilac.opacity(0.6), fg: .bbLilacDeep, size: 12)
+            BBPill(text: loc.strings.leapPillLabel, color: Color.bbLilac.opacity(0.6), fg: .bbLilacDeep, size: 12)
         }
         .padding(.top, 8)
     }
@@ -116,7 +119,7 @@ struct TodayView: View {
             Text(greeting)
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
-            Text(loc.t("how did \(displayName) sleep?", "как \(displayName) спал?"))
+            Text(loc.strings.howDidSleep(name: displayName))
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbCoralDeep)
             Text(dateString)
@@ -143,7 +146,7 @@ struct TodayView: View {
     private var feedingCard: some View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(loc.t("FEEDING", "КОРМЛЕНИЕ"))
+                Text(loc.strings.feedingLabel)
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(Color.bbInk.opacity(0.6))
                     .kerning(0.5)
@@ -155,21 +158,18 @@ struct TodayView: View {
                             .foregroundColor(.bbInk)
                             .contentTransition(.numericText())
                             .animation(.linear(duration: 0.3), value: vm.feedingSeconds)
-                        Text(loc.t("active · \(vm.feedingSide.displayName(lang: loc.lang).lowercased())",
-                               "идёт · \(vm.feedingSide.rawValue.lowercased())"))
+                        Text(loc.strings.feedingActiveLabel(side: vm.feedingSide.displayName(lang: loc.lang).lowercased()))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(Color.bbInk.opacity(0.6))
                     }
-                    Text(loc.t("Typical length — 18 min. Tap pause or stop.",
-                           "Обычная длина — 18 мин. Нажмите паузу или стоп."))
+                    Text(loc.strings.typicalLengthHint)
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(Color.bbInk.opacity(0.6))
                 } else {
                     Text(vm.lastFeedAgoString)
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text(loc.t("Usually around this time — tap to start.",
-                           "Обычно в это время — нажмите для старта."))
+                    Text(loc.strings.usuallyAroundThisTime)
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(Color.bbInk.opacity(0.6))
                 }
@@ -247,7 +247,7 @@ struct TodayView: View {
                         .transition(.scale.combined(with: .opacity))
                 }
             }
-            Text(loc.t("Sleep", "Сон"))
+            Text(loc.strings.sleep)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundColor(.bbInkSoft)
             if sleepVM.isSleepActive {
@@ -256,7 +256,7 @@ struct TodayView: View {
                     .foregroundColor(.bbLilacDeep)
                     .contentTransition(.numericText())
                     .animation(.linear(duration: 0.3), value: sleepVM.sleepSeconds)
-                Text(loc.t("sleeping…", "спит…"))
+                Text(loc.strings.sleeping)
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkMute)
             } else {
@@ -279,10 +279,10 @@ struct TodayView: View {
     private var diaperCard: some View {
         VStack(alignment: .leading, spacing: 6) {
             CuteBlobView(kind: .drop, size: 36, tone: .bbSky)
-            Text(loc.t("Diapers", "Подгузники"))
+            Text(loc.strings.diapers)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundColor(.bbInkSoft)
-            Text(loc.t("\(vm.diaperCount) / day", "\(vm.diaperCount) / день"))
+            Text(loc.strings.diaperCountDay(vm.diaperCount))
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
                 .contentTransition(.numericText())
@@ -329,7 +329,7 @@ struct TodayView: View {
                 )
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(loc.t("Tip of the day", "Подсказка дня"))
+                Text(loc.strings.tipOfDay)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInk)
                 Text(aiTipText)
@@ -350,17 +350,14 @@ struct TodayView: View {
 
     private var aiTipText: String {
         if vm.isFeedingActive {
-            return loc.t("Feeding has been going for \(vm.feedingTimerString). Typical length is 18 min.",
-                     "Кормление идёт уже \(vm.feedingTimerString). Обычная длина — 18 мин.")
+            return loc.strings.feedingDuration(vm.feedingTimerString)
         }
         let lastFeed = vm.logEntries.first(where: { $0.kind == .bottle })?.time
         let mins = lastFeed.map { max(0, Int(-$0.timeIntervalSinceNow / 60)) } ?? 0
         if mins >= 150 {
-            return loc.t("\(vm.lastFeedAgoString) since last feeding — \(displayName) usually eats now. If crying — try breast first.",
-                     "Прошло \(vm.lastFeedAgoString) с прошлого кормления — обычно \(displayName) ест в это время. Если плачет — попробуйте сначала грудь.")
+            return loc.strings.feedingTip(ago: vm.lastFeedAgoString, name: displayName)
         }
-        return loc.t("During this leap \(displayName) is especially drawn to contrasts — show a black-and-white book.",
-                 "В этот скачок \(displayName) особенно интересны контрасты — покажите чёрно-белую книжку.")
+        return loc.strings.leapContrastsTip(name: displayName)
     }
 
     // MARK: - Leap Card
@@ -369,15 +366,14 @@ struct TodayView: View {
         HStack(spacing: 12) {
             CuteBlobView(kind: .moon, size: 48, tone: .bbLilac)
             VStack(alignment: .leading, spacing: 2) {
-                Text(loc.t("LEAP #4 · DAY 3 OF ~5", "СКАЧОК №4 · ДЕНЬ 3 ИЗ ~5"))
+                Text(loc.strings.leapDayCard)
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbLilacDeep)
                     .kerning(0.4)
-                Text(loc.t("«World of Events» — this is normal", "«Мир событий» — это нормально"))
+                Text(loc.strings.worldOfEventsLabel)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInk)
-                Text(loc.t("Crying, poor sleep, wants to be held. Not sick — growing.",
-                        "Плачет, плохо спит, просит руки. Он не болен — он растёт."))
+                Text(loc.strings.leapCryingNote)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                     .fixedSize(horizontal: false, vertical: true)
@@ -397,16 +393,16 @@ struct TodayView: View {
 
     private var quickItems: [QuickItem] {
         [
-            QuickItem(kind: .bottle, tone: .bbCoral, label: loc.t("Feed", "Еда"))        { showFeeding = true },
-            QuickItem(kind: .sleep,  tone: .bbLilac, label: loc.t("Sleep", "Сон"))       { showSleep = true },
-            QuickItem(kind: .drop,   tone: .bbSky,   label: loc.t("Diaper", "Памп"))     { vm.logDiaper() },
-            QuickItem(kind: .heart,  tone: .bbRose,  label: loc.t("Symptom", "Симптом")) { showSymptom = true },
+            QuickItem(kind: .bottle, tone: .bbCoral, label: loc.strings.feedLabel)    { showFeeding = true },
+            QuickItem(kind: .sleep,  tone: .bbLilac, label: loc.strings.sleep)        { showSleep = true },
+            QuickItem(kind: .drop,   tone: .bbSky,   label: loc.strings.diaperQuick) { vm.logDiaper() },
+            QuickItem(kind: .heart,  tone: .bbRose,  label: loc.strings.symptom)     { showSymptom = true },
         ]
     }
 
     private var quickLogSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: loc.t("Quick log", "Быстро записать"))
+            BBSectionLabel(text: loc.strings.quickLogLabel)
             HStack(spacing: 8) {
                 ForEach(quickItems, id: \.label) { item in
                     Button(action: item.action) {
@@ -433,11 +429,11 @@ struct TodayView: View {
     private var historyCard: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(loc.t("Today so far", "Сегодня уже было"))
+                Text(loc.strings.todaySoFar)
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
-                Text(loc.t("\(vm.logEntries.count) entries", "\(vm.logEntries.count) записей"))
+                Text(loc.strings.entriesCount(vm.logEntries.count))
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkMute)
             }
