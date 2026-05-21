@@ -119,6 +119,18 @@ final class TodayViewModel: ObservableObject {
         }
     }
 
+    func logWalk() {
+        addEntry(LogEntry(time: Date(), kind: .walk, label: LocalizationManager.shared.strings.walkLogged))
+    }
+
+    func logBath() {
+        addEntry(LogEntry(time: Date(), kind: .bath, label: LocalizationManager.shared.strings.bathLogged))
+    }
+
+    func logVitamins() {
+        addEntry(LogEntry(time: Date(), kind: .vitamin, label: LocalizationManager.shared.strings.vitaminsGiven))
+    }
+
     func logSleep() {
         addEntry(LogEntry(time: Date(), kind: .sleep, label: LocalizationManager.shared.strings.sleepStarted))
     }

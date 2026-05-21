@@ -393,33 +393,40 @@ struct TodayView: View {
 
     private var quickItems: [QuickItem] {
         [
-            QuickItem(kind: .bottle, tone: .bbCoral, label: loc.strings.feedLabel)    { showFeeding = true },
-            QuickItem(kind: .sleep,  tone: .bbLilac, label: loc.strings.sleep)        { showSleep = true },
-            QuickItem(kind: .drop,   tone: .bbSky,   label: loc.strings.diaperQuick) { vm.logDiaper() },
-            QuickItem(kind: .heart,  tone: .bbRose,  label: loc.strings.symptom)     { showSymptom = true },
+            QuickItem(kind: .bottle,  tone: .bbCoral,  label: loc.strings.feedLabel)   { showFeeding = true },
+            QuickItem(kind: .sleep,   tone: .bbLilac,  label: loc.strings.sleep)       { showSleep = true },
+            QuickItem(kind: .drop,    tone: .bbSky,    label: loc.strings.diaperQuick) { vm.logDiaper() },
+            QuickItem(kind: .heart,   tone: .bbRose,   label: loc.strings.symptom)     { showSymptom = true },
+            QuickItem(kind: .walk,    tone: .bbMint,   label: loc.strings.walk)        { vm.logWalk() },
+            QuickItem(kind: .bath,    tone: .bbSky,    label: loc.strings.bath)        { vm.logBath() },
+            QuickItem(kind: .vitamin, tone: .bbButter, label: loc.strings.vitamins)    { vm.logVitamins() },
         ]
     }
 
     private var quickLogSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             BBSectionLabel(text: loc.strings.quickLogLabel)
-            HStack(spacing: 8) {
-                ForEach(quickItems, id: \.label) { item in
-                    Button(action: item.action) {
-                        VStack(spacing: 6) {
-                            CuteBlobView(kind: item.kind, size: 36, tone: item.tone)
-                            Text(item.label)
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundColor(.bbInkSoft)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(quickItems, id: \.label) { item in
+                        Button(action: item.action) {
+                            VStack(spacing: 6) {
+                                CuteBlobView(kind: item.kind, size: 36, tone: item.tone)
+                                Text(item.label)
+                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                                    .foregroundColor(.bbInkSoft)
+                            }
+                            .frame(width: 70)
+                            .padding(.vertical, 10)
+                            .background(Color.bbCard)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .bbShadowSoft()
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(Color.bbCard)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .bbShadowSoft()
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
+                .padding(.vertical, 2)
+                .padding(.horizontal, 1)
             }
         }
     }

@@ -105,6 +105,12 @@ struct L10n {
     var diapers: String      { s("Diapers",      "Подгузники",   "Windeln") }
     var diary: String        { s("Diary",        "Дневник",      "Tagebuch") }
     var symptom: String      { s("Symptom",      "Симптом",      "Symptom") }
+    var walk: String         { s("Walk",         "Прогулка",     "Spaziergang") }
+    var bath: String         { s("Bath",         "Купание",      "Bad") }
+    var vitamins: String     { s("Vitamins",     "Витамины",     "Vitamine") }
+    var walkLogged: String   { s("Walk · logged",    "Прогулка · записана",   "Spaziergang · erfasst") }
+    var bathLogged: String   { s("Bath · logged",    "Купание · записано",    "Bad · erfasst") }
+    var vitaminsGiven: String { s("Vitamins · given","Витамины · приняты",    "Vitamine · gegeben") }
     var mood: String         { s("Mood",         "Настроение",   "Stimmung") }
     var feedLabel: String    { s("Feed",         "Еда",          "Essen") }
     var sleeping: String     { s("sleeping…",    "спит…",        "schläft…") }

@@ -28,6 +28,9 @@ struct CuteBlobView: View {
         case .heart:   HeartBlob(s: size)
         case .cloud:   CloudBlob(s: size)
         case .bear:    BearBlob(s: size)
+        case .walk:    WalkBlob(s: size)
+        case .bath:    BathBlob(s: size)
+        case .vitamin: VitaminBlob(s: size)
         }
     }
 }
@@ -226,6 +229,39 @@ private struct CloudBlob: View {
             Circle().fill(Color.white).frame(width: s*0.28, height: s*0.28).offset(x: s*0.22, y: -s*0.06)
             Capsule().fill(Color.white).frame(width: s*0.65, height: s*0.22)
         }
+    }
+}
+
+// MARK: - Walk
+
+private struct WalkBlob: View {
+    let s: CGFloat
+    var body: some View {
+        Image(systemName: "figure.walk")
+            .font(.system(size: s * 0.5, weight: .medium))
+            .foregroundColor(Color(bbHex: "5FB99B"))
+    }
+}
+
+// MARK: - Bath
+
+private struct BathBlob: View {
+    let s: CGFloat
+    var body: some View {
+        Image(systemName: "drop.fill")
+            .font(.system(size: s * 0.46, weight: .medium))
+            .foregroundColor(Color(bbHex: "6FA8CE"))
+    }
+}
+
+// MARK: - Vitamin
+
+private struct VitaminBlob: View {
+    let s: CGFloat
+    var body: some View {
+        Image(systemName: "pills.fill")
+            .font(.system(size: s * 0.44, weight: .medium))
+            .foregroundColor(Color(bbHex: "F2B85C"))
     }
 }
 
