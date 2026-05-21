@@ -14,6 +14,7 @@ final class TodayViewModel: ObservableObject {
     private let logFeeding: LogFeedingUseCase
     private let getFeeding: GetFeedingEntriesUseCase
     private let diaperUC: DiaperUseCase
+    private let quickLogRepo: QuickLogRepository
     private let timerService: FeedingTimerService
     private let analytics: any AnalyticsServiceProtocol
     private let pushNotifications: any PushNotificationServiceProtocol
@@ -21,12 +22,14 @@ final class TodayViewModel: ObservableObject {
     init(logFeeding: LogFeedingUseCase,
          getFeeding: GetFeedingEntriesUseCase,
          diaperUC: DiaperUseCase,
+         quickLogRepo: QuickLogRepository,
          timerService: FeedingTimerService,
          analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
          pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared) {
         self.logFeeding = logFeeding
         self.getFeeding = getFeeding
         self.diaperUC = diaperUC
+        self.quickLogRepo = quickLogRepo
         self.timerService = timerService
         self.analytics = analytics
         self.pushNotifications = pushNotifications
@@ -34,12 +37,16 @@ final class TodayViewModel: ObservableObject {
     }
 
     func loadTodayEntries() async {
-        let all = (try? await getFeeding.execute(for: Date())) ?? []
-        let mapped: [LogEntry] = all
-            .sorted { $0.date > $1.date }
-            .map { LogEntry(time: $0.date, kind: .bottle, label: feedingLabel($0)) }
+        let feedings = (try? await getFeeding.execute(for: Date())) ?? []
+        let feedingEntries: [LogEntry] = feedings.map {
+            LogEntry(time: $0.date, kind: .bottle, label: feedingLabel($0))
+        }
+        let quickEntries: [LogEntry] = quickLogRepo.load().map {
+            LogEntry(time: $0.time, kind: $0.kind, label: $0.label)
+        }
+        let merged = (feedingEntries + quickEntries).sorted { $0.time > $1.time }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-            logEntries = mapped
+            logEntries = merged
         }
     }
 
@@ -107,11 +114,14 @@ final class TodayViewModel: ObservableObject {
         let lm = LocalizationManager.shared
         let count = diaperUC.increment()
         diaperCount = count
-        addEntry(LogEntry(time: Date(), kind: .drop, label: lm.strings.diaperLogEntry(count: count)))
+        let label = lm.strings.diaperLogEntry(count: count)
+        quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .drop, label: label))
+        addEntry(LogEntry(time: Date(), kind: .drop, label: label))
     }
 
     func removeDiaper() {
         diaperCount = diaperUC.decrement()
+        quickLogRepo.removeLast(kind: .drop)
         if let idx = logEntries.firstIndex(where: { $0.kind == .drop }) {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                 logEntries.remove(at: idx)
@@ -120,15 +130,21 @@ final class TodayViewModel: ObservableObject {
     }
 
     func logWalk() {
-        addEntry(LogEntry(time: Date(), kind: .walk, label: LocalizationManager.shared.strings.walkLogged))
+        let label = LocalizationManager.shared.strings.walkLogged
+        quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .walk, label: label))
+        addEntry(LogEntry(time: Date(), kind: .walk, label: label))
     }
 
     func logBath() {
-        addEntry(LogEntry(time: Date(), kind: .bath, label: LocalizationManager.shared.strings.bathLogged))
+        let label = LocalizationManager.shared.strings.bathLogged
+        quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .bath, label: label))
+        addEntry(LogEntry(time: Date(), kind: .bath, label: label))
     }
 
     func logVitamins() {
-        addEntry(LogEntry(time: Date(), kind: .vitamin, label: LocalizationManager.shared.strings.vitaminsGiven))
+        let label = LocalizationManager.shared.strings.vitaminsGiven
+        quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .vitamin, label: label))
+        addEntry(LogEntry(time: Date(), kind: .vitamin, label: label))
     }
 
     func logSleep() {

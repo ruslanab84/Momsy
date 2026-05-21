@@ -19,6 +19,7 @@ final class AppContainer {
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let diaperUseCase                                   = DiaperUseCase()
+    let quickLogRepository                              = QuickLogRepository()
     let chatRepository: any ChatRepository             = LocalChatRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
 
@@ -74,6 +75,7 @@ final class AppContainer {
             logFeeding: logFeeding,
             getFeeding: getFeedingEntries,
             diaperUC: diaperUseCase,
+            quickLogRepo: quickLogRepository,
             timerService: FeedingTimerService(),
             analytics: analytics,
             pushNotifications: pushNotifications

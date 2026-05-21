@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum BlobKind {
+enum BlobKind: String, Codable {
     case baby, sleep, bottle, moon, sun, drop, star, heart, cloud, bear
     case walk, bath, vitamin
 }
