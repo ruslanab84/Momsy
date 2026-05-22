@@ -6,8 +6,8 @@ struct DevelopmentLeap: Identifiable {
     let name: String
     let nameEn: String
     let semanticColor: SemanticColor
-    let isDone: Bool
-    let isCurrent: Bool
+    var isDone: Bool
+    var isCurrent: Bool
     let description: String
     let descriptionEn: String
     let signs: [String]
@@ -18,7 +18,8 @@ struct DevelopmentLeap: Identifiable {
     let tipEn: String
 }
 
-let sampleLeaps: [DevelopmentLeap] = [
+extension DevelopmentLeap {
+    static let catalog: [DevelopmentLeap] = [
     DevelopmentLeap(
         id: 1, week: 5,
         name: "Мир ощущений", nameEn: "World of Senses",
@@ -97,4 +98,5 @@ let sampleLeaps: [DevelopmentLeap] = [
         tip: "Сортеры, стаканчики, вкладыши — идеальные игрушки. Называйте свойства: «красный», «большой», «тяжёлый».",
         tipEn: "Sorters, cups, nesting toys — ideal. Name properties: 'red', 'big', 'heavy'."
     ),
-]
+    ]
+}

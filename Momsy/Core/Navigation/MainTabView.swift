@@ -9,7 +9,7 @@ struct MainTabView: View {
             TodayView(container: container)
                 .tabItem { Label(lm.strings.today, systemImage: "sun.max.fill") }
 
-            LeapsView()
+            LeapsView(container: container)
                 .tabItem { Label(lm.strings.tabLeaps, systemImage: "star.fill") }
 
             DiaryView(container: container)

@@ -72,17 +72,31 @@ final class SleepViewModel: ObservableObject {
         }
     }
 
+    func syncTimerWithStartDate() {
+        guard isSleepActive, let entry = activeSleepEntry else { return }
+        sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
+    }
+
     func stop() {
         guard isSleepActive, var entry = activeSleepEntry else { return }
         timerCancellable?.cancel()
         timerCancellable = nil
         entry.quality = selectedQuality
+        var completed = entry
+        completed.endDate = Date()
+        todayEntries.append(completed)
         isSleepActive = false
         activeSleepEntry = nil
         Task {
-            do { _ = try await stopSleepUC.execute(entry) }
-            catch { saveError = error.localizedDescription }
-            await loadTodayEntries()
+            do {
+                let saved = try await stopSleepUC.execute(entry)
+                if let idx = todayEntries.firstIndex(where: { $0.id == saved.id }) {
+                    todayEntries[idx] = saved
+                }
+            } catch {
+                todayEntries.removeAll { $0.id == completed.id }
+                saveError = error.localizedDescription
+            }
         }
     }
 

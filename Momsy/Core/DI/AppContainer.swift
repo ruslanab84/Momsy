@@ -148,6 +148,10 @@ final class AppContainer {
         BathViewModel(bathRepository: bathRepository, quickLogRepo: quickLogRepository)
     }
 
+    func makeLeapsViewModel() -> LeapsViewModel {
+        LeapsViewModel(getLeaps: getLeaps, appState: appState)
+    }
+
     func makeSymptomViewModel() -> SymptomViewModel {
         SymptomViewModel(appState: appState)
     }

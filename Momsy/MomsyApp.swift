@@ -42,7 +42,7 @@ private func setupNotificationsOnLaunch(appState: AppState) async {
     await push.requestPermission()
 
     guard let birth = appState.babyProfile?.birthDate else { return }
-    for leap in sampleLeaps {
+    for leap in DevelopmentLeap.catalog {
         guard let start = Calendar.current.date(byAdding: .weekOfYear, value: leap.week, to: birth) else { continue }
         push.scheduleLeapNotification(leapID: leap.id, name: leap.name, nameEn: leap.nameEn, startDate: start)
     }

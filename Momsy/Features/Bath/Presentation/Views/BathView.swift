@@ -3,6 +3,7 @@ import SwiftUI
 struct BathView: View {
     @ObservedObject var vm: BathViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
 
     var body: some View {
@@ -33,6 +34,9 @@ struct BathView: View {
             }
         }
         .errorToast($vm.saveError)
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { vm.syncTimerWithStartDate() }
+        }
     }
 
     // MARK: - Top Bar

@@ -3,6 +3,7 @@ import SwiftUI
 struct WalkView: View {
     @ObservedObject var vm: WalkViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
 
     var body: some View {
@@ -33,6 +34,9 @@ struct WalkView: View {
             }
         }
         .errorToast($vm.saveError)
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { vm.syncTimerWithStartDate() }
+        }
     }
 
     // MARK: - Top Bar

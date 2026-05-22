@@ -88,6 +88,11 @@ final class BathViewModel: ObservableObject {
         }
     }
 
+    func syncTimerWithStartDate() {
+        guard isBathActive, let entry = activeBathEntry else { return }
+        bathSeconds = Int(Date().timeIntervalSince(entry.startDate))
+    }
+
     func loadTodayEntries() async {
         let cal = Calendar.current
         let start = cal.startOfDay(for: Date())

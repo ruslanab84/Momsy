@@ -44,8 +44,8 @@ final class AIChatViewModel: ObservableObject {
         let weeks = max(0, Calendar.current.dateComponents([.weekOfYear], from: birth, to: Date()).weekOfYear ?? 0)
         let completedIds = Set(leapProgress.filter(\.isDone).map(\.id))
         // Current leap: first not-yet-done leap at or near baby's age
-        let leap = sampleLeaps.first(where: { !completedIds.contains($0.id) && $0.week <= weeks + 4 })
-            ?? sampleLeaps.last(where: { $0.week <= weeks })
+        let leap = DevelopmentLeap.catalog.first(where: { !completedIds.contains($0.id) && $0.week <= weeks + 4 })
+            ?? DevelopmentLeap.catalog.last(where: { $0.week <= weeks })
         return BabyContext(
             babyName: name.isEmpty ? "Baby" : name,
             ageWeeks: weeks,

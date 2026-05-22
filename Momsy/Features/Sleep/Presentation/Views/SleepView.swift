@@ -3,6 +3,7 @@ import SwiftUI
 struct SleepView: View {
     @ObservedObject var vm: SleepViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
 
     var body: some View {
@@ -34,6 +35,9 @@ struct SleepView: View {
             }
         }
         .errorToast($vm.saveError)
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { vm.syncTimerWithStartDate() }
+        }
     }
 
     // MARK: - Top Bar

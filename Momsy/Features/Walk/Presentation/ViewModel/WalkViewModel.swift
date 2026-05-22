@@ -88,6 +88,11 @@ final class WalkViewModel: ObservableObject {
         }
     }
 
+    func syncTimerWithStartDate() {
+        guard isWalkActive, let entry = activeWalkEntry else { return }
+        walkSeconds = Int(Date().timeIntervalSince(entry.startDate))
+    }
+
     func loadTodayEntries() async {
         let cal = Calendar.current
         let start = cal.startOfDay(for: Date())

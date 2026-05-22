@@ -1,9 +1,13 @@
 import SwiftUI
 
 struct LeapsView: View {
-    @StateObject private var vm = LeapsViewModel()
+    @StateObject private var vm: LeapsViewModel
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
+
+    init(container: AppContainer) {
+        _vm = StateObject(wrappedValue: container.makeLeapsViewModel())
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -91,11 +95,11 @@ struct LeapsView: View {
         VStack(alignment: .leading, spacing: 8) {
             BBSectionLabel(text: loc.strings.leapCalendar)
             VStack(spacing: 0) {
-                ForEach(sampleLeaps) { leap in
+                ForEach(vm.leaps) { leap in
                     LeapTimelineRow(
                         leap: leap,
                         isExpanded: vm.expandedLeapID == leap.id,
-                        isLast: leap.id == sampleLeaps.count
+                        isLast: leap.id == vm.leaps.last?.id
                     ) {
                         vm.toggleExpand(leap.id)
                     }
@@ -301,5 +305,7 @@ private struct MiniList: View {
 }
 
 #Preview {
-    LeapsView()
+    LeapsView(container: AppContainer())
+        .environmentObject(LocalizationManager.shared)
+        .environmentObject(AppState(getBabyProfile: GetBabyProfileUseCase(repository: LocalBabyRepository())))
 }

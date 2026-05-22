@@ -225,6 +225,7 @@ final class DiaryViewModel: ObservableObject {
             photosByID.merge(photos) { _, new in new }
         }
         Task {
+            var allSaved = true
             for item in newDay.items {
                 var stored = toStored(item, date: date)
                 if stored.kind == .photo, let img = photos[item.id] {
@@ -241,12 +242,16 @@ final class DiaryViewModel: ObservableObject {
                     } catch {
                         uploadProgress.removeValue(forKey: item.id)
                         saveError = error.localizedDescription
+                        allSaved = false
                     }
                 }
                 do { try await repo.add(stored) }
-                catch { saveError = error.localizedDescription }
+                catch {
+                    saveError = error.localizedDescription
+                    allSaved = false
+                }
             }
-            await loadEntries()
+            if allSaved { await loadEntries() }
         }
     }
 }

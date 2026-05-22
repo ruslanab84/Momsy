@@ -457,19 +457,6 @@ struct AddEntrySheet: View {
         return "\(m) \(loc.strings.unitMonth) \(d) \(loc.strings.unitDay)"
     }
 
-    private var todayLabel: String {
-        let f = DateFormatter()
-        if loc.lang == "en" {
-            f.locale = Locale(identifier: "en_US")
-            f.dateFormat = "EEE, d MMM"
-            return "Today · " + f.string(from: Date())
-        } else {
-            f.locale = Locale(identifier: "ru_RU")
-            f.dateFormat = "EEEE, d MMMM"
-            return "Сегодня · " + String(f.string(from: Date()).prefix(2).lowercased())
-        }
-    }
-
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
@@ -703,7 +690,7 @@ struct AddEntrySheet: View {
             if let img = photoImage { photos[newItem.id] = img }
         }
 
-        let newDay = DiaryDay(dateLabel: todayLabel, ageLabel: ageLabel, items: [newItem])
+        let newDay = DiaryDay(dateLabel: "", ageLabel: ageLabel, items: [newItem])
         onAdd(newDay, photos)
         dismiss()
     }
