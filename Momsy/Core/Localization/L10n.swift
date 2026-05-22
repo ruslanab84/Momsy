@@ -117,6 +117,12 @@ struct L10n {
     var stopWalk: String     { s("Stop Walk",       "Закончить прогулку",    "Spaziergang stoppen") }
     var noWalkYet: String    { s("no walk yet",     "ещё не гуляли",         "noch nicht spaziert") }
     func walkLogEntry(dur: Int) -> String { s("Walk · \(dur) min", "Прогулка · \(dur) мин", "Spaziergang · \(dur) min") }
+    var bathTracker: String  { s("BATH TRACKER",     "ТРЕКЕР КУПАНИЯ",        "BADTRACKER") }
+    var bathing: String      { s("bathing…",         "купаемся…",             "Baden…") }
+    var startBath: String    { s("Start Bath",       "Начать купание",        "Bad starten") }
+    var stopBath: String     { s("Stop Bath",        "Закончить купание",     "Bad stoppen") }
+    var noBathYet: String    { s("no bath yet",      "ещё не купались",       "noch nicht gebadet") }
+    func bathLogEntry(dur: Int) -> String { s("Bath · \(dur) min", "Купание · \(dur) мин", "Bad · \(dur) min") }
     var mood: String         { s("Mood",         "Настроение",   "Stimmung") }
     var feedLabel: String    { s("Feed",         "Еда",          "Essen") }
     var sleeping: String     { s("sleeping…",    "спит…",        "schläft…") }

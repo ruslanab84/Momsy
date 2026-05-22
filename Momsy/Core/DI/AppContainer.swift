@@ -21,6 +21,7 @@ final class AppContainer {
     let diaperUseCase                                   = DiaperUseCase()
     let quickLogRepository                              = QuickLogRepository()
     let walkRepository: any WalkRepository             = LocalWalkRepository()
+    let bathRepository: any BathRepository             = LocalBathRepository()
     let chatRepository: any ChatRepository             = LocalChatRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
 
@@ -141,6 +142,10 @@ final class AppContainer {
 
     func makeWalkViewModel() -> WalkViewModel {
         WalkViewModel(walkRepository: walkRepository, quickLogRepo: quickLogRepository)
+    }
+
+    func makeBathViewModel() -> BathViewModel {
+        BathViewModel(bathRepository: bathRepository, quickLogRepo: quickLogRepository)
     }
 
     func makeSymptomViewModel() -> SymptomViewModel {

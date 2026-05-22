@@ -4,10 +4,12 @@ struct TodayView: View {
     @StateObject private var vm: TodayViewModel
     @StateObject private var sleepVM: SleepViewModel
     @StateObject private var walkVM: WalkViewModel
+    @StateObject private var bathVM: BathViewModel
     @State private var showFeeding = false
     @State private var showSymptom = false
     @State private var showSleep = false
     @State private var showWalk = false
+    @State private var showBath = false
     @State private var now = Date()
 
     private let container: AppContainer
@@ -17,6 +19,7 @@ struct TodayView: View {
         _vm      = StateObject(wrappedValue: container.makeTodayViewModel())
         _sleepVM = StateObject(wrappedValue: container.makeSleepViewModel())
         _walkVM  = StateObject(wrappedValue: container.makeWalkViewModel())
+        _bathVM  = StateObject(wrappedValue: container.makeBathViewModel())
     }
 
     @EnvironmentObject var loc: LocalizationManager
@@ -94,6 +97,10 @@ struct TodayView: View {
         }
         .sheet(isPresented: $showWalk) {
             WalkView(vm: walkVM)
+                .onDisappear { Task { await vm.loadTodayEntries() } }
+        }
+        .sheet(isPresented: $showBath) {
+            BathView(vm: bathVM)
                 .onDisappear { Task { await vm.loadTodayEntries() } }
         }
         .errorToast($vm.saveError)
@@ -406,7 +413,7 @@ struct TodayView: View {
             QuickItem(kind: .drop,    tone: .bbSky,    label: loc.strings.diaperQuick) { vm.logDiaper() },
             QuickItem(kind: .heart,   tone: .bbRose,   label: loc.strings.symptom)     { showSymptom = true },
             QuickItem(kind: .walk,    tone: .bbMint,   label: loc.strings.walk)        { showWalk = true },
-            QuickItem(kind: .bath,    tone: .bbSky,    label: loc.strings.bath)        { vm.logBath() },
+            QuickItem(kind: .bath,    tone: .bbSky,    label: loc.strings.bath)        { showBath = true },
             QuickItem(kind: .vitamin, tone: .bbButter, label: loc.strings.vitamins)    { vm.logVitamins() },
         ]
     }
