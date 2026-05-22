@@ -54,7 +54,10 @@ final class DiaryViewModel: ObservableObject {
         self.photoStorage = photoStorage
         self.analytics = analytics
         self.appState = appState
-        Task { await loadEntries() }
+        Task {
+            await loadEntries()
+            await migrateLocalPhotosToFirebase()
+        }
     }
 
     func loadEntries() async {
@@ -70,6 +73,31 @@ final class DiaryViewModel: ObservableObject {
 
         entries = group(stored.sorted { $0.date > $1.date })
         photosByID.merge(loaded) { _, new in new }
+    }
+
+    // MARK: - Migration
+
+    private func migrateLocalPhotosToFirebase() async {
+        let yearAgo = Calendar.current.date(byAdding: .year, value: -1, to: Date()) ?? .distantPast
+        let stored = (try? await repo.getEntries(from: yearAgo, to: Date())) ?? []
+        let localItems = stored.filter { $0.kind == .photo && ($0.photoPath?.hasPrefix("/") == true) }
+        guard !localItems.isEmpty else { return }
+
+        for item in localItems {
+            guard let localPath = item.photoPath,
+                  let image = UIImage(contentsOfFile: localPath) else { continue }
+            do {
+                let firebasePath = try await photoStorage.save(image, forID: item.id)
+                var updated = item
+                updated.photoPath = firebasePath
+                try await repo.update(updated)
+                try? FileManager.default.removeItem(atPath: localPath)
+            } catch {
+                // Leave local file intact if upload fails; will retry next launch
+            }
+        }
+
+        await loadEntries()
     }
 
     // MARK: - Grouping & Mapping

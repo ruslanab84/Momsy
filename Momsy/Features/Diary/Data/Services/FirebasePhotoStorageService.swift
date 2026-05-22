@@ -51,10 +51,15 @@ final class FirebasePhotoStorageService: PhotoStorageService, @unchecked Sendabl
         let key = path as NSString
         if let cached = cache.object(forKey: key) { return cached }
 
-        guard let data = try? await Storage.storage().reference().child(path).data(maxSize: 10 * 1024 * 1024),
-              let image = UIImage(data: data) else { return nil }
+        let image: UIImage?
+        if path.hasPrefix("/") {
+            image = UIImage(contentsOfFile: path)
+        } else {
+            guard let data = try? await Storage.storage().reference().child(path).data(maxSize: 10 * 1024 * 1024) else { return nil }
+            image = UIImage(data: data)
+        }
 
-        cache.setObject(image, forKey: key)
+        if let image { cache.setObject(image, forKey: key) }
         return image
     }
 
