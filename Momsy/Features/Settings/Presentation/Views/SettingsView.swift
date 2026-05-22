@@ -1,8 +1,12 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @StateObject private var vm = SettingsViewModel()
+    @StateObject private var vm: SettingsViewModel
     @EnvironmentObject private var lm: LocalizationManager
+
+    init(container: AppContainer) {
+        _vm = StateObject(wrappedValue: container.makeSettingsViewModel())
+    }
 
 #if DEBUG
     @State private var iconShareItems: [Any] = []
@@ -224,5 +228,6 @@ struct SettingsView: View {
 }
 
 #Preview {
-    NavigationStack { SettingsView() }
+    NavigationStack { SettingsView(container: AppContainer()) }
+        .environmentObject(LocalizationManager.shared)
 }

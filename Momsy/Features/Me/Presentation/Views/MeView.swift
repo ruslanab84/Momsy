@@ -21,7 +21,7 @@ struct MeView: View {
                           sub: lm.strings.lullabiesHint),
                 ])
                 meSection(rows: [
-                    MeRow(destination: SettingsView(),
+                    MeRow(destination: SettingsView(container: container),
                           icon: "gearshape.fill", bg: .bbSky,
                           title: lm.strings.settings,
                           sub: lm.strings.settingsHint),

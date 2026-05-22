@@ -1,18 +1,28 @@
 import Foundation
 import SwiftUI
+import SwiftData
 
 final class AppContainer {
 
+    // MARK: — Persistence
+
+    let modelContainer: ModelContainer = AppPersistence.makeContainer()
+    private lazy var context: ModelContext = ModelContext(modelContainer)
+
     // MARK: — Repositories
 
-    let babyRepository: any BabyRepository            = LocalBabyRepository()
-    let sleepRepository: any SleepRepository          = LocalSleepRepository()
-    let feedingRepository: any FeedingRepository      = LocalFeedingRepository()
-    let diaryRepository: any DiaryRepository          = LocalDiaryRepository()
-    let measurementRepository: any MeasurementRepository = LocalMeasurementRepository()
-    let temperatureRepository: any TemperatureRepository = LocalTemperatureRepository()
+    lazy var babyRepository: any BabyRepository            = SwiftDataBabyRepository(context: context)
+    lazy var sleepRepository: any SleepRepository          = SwiftDataSleepRepository(context: context)
+    lazy var feedingRepository: any FeedingRepository      = SwiftDataFeedingRepository(context: context)
+    lazy var diaryRepository: any DiaryRepository          = SwiftDataDiaryRepository(context: context)
+    lazy var measurementRepository: any MeasurementRepository = SwiftDataMeasurementRepository(context: context)
+    lazy var temperatureRepository: any TemperatureRepository = SwiftDataTemperatureRepository(context: context)
+    lazy var leapsRepository: any LeapsRepository          = SwiftDataLeapsRepository(context: context)
+    lazy var chatRepository: any ChatRepository            = SwiftDataChatRepository(context: context)
+    lazy var walkRepository: any WalkRepository            = SwiftDataWalkRepository(context: context)
+    lazy var bathRepository: any BathRepository            = SwiftDataBathRepository(context: context)
+
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
-    let leapsRepository: any LeapsRepository          = LocalLeapsRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
     let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
     let inviteService: any InviteServiceProtocol       = LocalInviteService()
@@ -20,10 +30,8 @@ final class AppContainer {
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let diaperUseCase                                   = DiaperUseCase()
     let quickLogRepository                              = QuickLogRepository()
-    let walkRepository: any WalkRepository             = LocalWalkRepository()
-    let bathRepository: any BathRepository             = LocalBathRepository()
-    let chatRepository: any ChatRepository             = LocalChatRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
+    let preferencesRepository: any UserPreferencesRepository = LocalUserPreferencesRepository()
 
     // MARK: — Use Cases — Baby
 
@@ -69,6 +77,12 @@ final class AppContainer {
     lazy var getChatHistory    = GetChatHistoryUseCase(repository: chatRepository)
     lazy var appendChatMessage = AppendChatMessageUseCase(repository: chatRepository)
     lazy var clearChatHistory  = ClearChatHistoryUseCase(repository: chatRepository)
+
+    // MARK: — Migration
+
+    func runMigrationIfNeeded() {
+        UserDefaultsMigration.runIfNeeded(context: context)
+    }
 
     // MARK: — ViewModel Factories
 
@@ -160,6 +174,10 @@ final class AppContainer {
 
     func makeSymptomViewModel() -> SymptomViewModel {
         SymptomViewModel(appState: appState)
+    }
+
+    func makeSettingsViewModel() -> SettingsViewModel {
+        SettingsViewModel(repo: preferencesRepository)
     }
 }
 

@@ -30,6 +30,7 @@ struct MomsyApp: App {
                 .withLocalization(localization)
                 .preferredColorScheme(resolvedColorScheme)
                 .task {
+                    container.runMigrationIfNeeded()
                     await appState.load()
                     await setupNotificationsOnLaunch(appState: appState)
                 }
