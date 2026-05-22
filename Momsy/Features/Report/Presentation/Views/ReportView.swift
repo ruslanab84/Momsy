@@ -263,8 +263,9 @@ struct ReportPreviewContent: View {
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInkMute)
                     .kerning(0.5)
-                Text(t("May 13 — temp rose to 37.8°, slept restlessly. Drooling, chewing fingers — probably teething.",
-                       "13 мая поднималась t° до 37.8°, спал прерывисто. Появилась слюна, грызёт пальцы — думаем, зубы."))
+                Text(lm.lang == "en"
+                     ? "May 13 — temp rose to 37.8°, slept restlessly. Drooling, chewing fingers — probably teething."
+                     : "13 мая поднималась t° до 37.8°, спал прерывисто. Появилась слюна, грызёт пальцы — думаем, зубы.")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInk)
                     .fixedSize(horizontal: false, vertical: true)
