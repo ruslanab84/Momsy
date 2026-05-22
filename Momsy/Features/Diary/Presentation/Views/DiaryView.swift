@@ -36,6 +36,7 @@ struct DiaryView: View {
                                 day: day,
                                 likedIDs: vm.likedIDs,
                                 photosByID: vm.photosByID,
+                                uploadProgress: vm.uploadProgress,
                                 onLike: { id in vm.toggleLike(id) }
                             )
                         }
@@ -141,6 +142,7 @@ private struct DiaryDaySection: View {
     let day: DiaryDay
     let likedIDs: Set<UUID>
     let photosByID: [UUID: UIImage]
+    let uploadProgress: [UUID: Double]
     let onLike: (UUID) -> Void
 
     var body: some View {
@@ -160,6 +162,7 @@ private struct DiaryDaySection: View {
                 DiaryItemView(
                     item: item,
                     image: photosByID[item.id],
+                    uploadProgress: uploadProgress[item.id],
                     isLiked: likedIDs.contains(item.id),
                     onLike: { onLike(item.id) }
                 )
@@ -177,6 +180,7 @@ private struct DiaryDaySection: View {
 private struct DiaryItemView: View {
     let item: DiaryItem
     let image: UIImage?
+    let uploadProgress: Double?
     let isLiked: Bool
     let onLike: () -> Void
 
@@ -188,6 +192,7 @@ private struct DiaryItemView: View {
                 handwriting: handwriting,
                 isMilestone: isMilestone,
                 image: image,
+                uploadProgress: uploadProgress,
                 isLiked: isLiked,
                 onLike: onLike
             )
@@ -206,6 +211,7 @@ private struct PhotoCard: View {
     let handwriting: String
     let isMilestone: Bool
     let image: UIImage?
+    let uploadProgress: Double?
     let isLiked: Bool
     let onLike: () -> Void
     @EnvironmentObject var loc: LocalizationManager
@@ -255,12 +261,16 @@ private struct PhotoCard: View {
                         .scaleEffect(isLiked ? 1.15 : 1.0)
                 }
             }
+
+            if let progress = uploadProgress {
+                UploadProgressOverlay(progress: progress)
+            }
         }
         .frame(height: 240)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(alignment: .topLeading) {
             HStack(spacing: 6) {
-                if image == nil {
+                if image == nil && uploadProgress == nil {
                     Label(loc.strings.babyPhotoLabel, systemImage: "camera")
                         .font(.system(size: 10, weight: .heavy, design: .monospaced))
                         .foregroundColor(.bbInk)
@@ -282,6 +292,37 @@ private struct PhotoCard: View {
             .padding(12)
         }
         .bbShadowSoft()
+    }
+}
+
+private struct UploadProgressOverlay: View {
+    let progress: Double
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.45)
+
+            VStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .stroke(Color.white.opacity(0.3), lineWidth: 3)
+                        .frame(width: 44, height: 44)
+                    Circle()
+                        .trim(from: 0, to: progress)
+                        .stroke(Color.white, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .frame(width: 44, height: 44)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.easeInOut(duration: 0.2), value: progress)
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                Text("\(Int(progress * 100))%")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

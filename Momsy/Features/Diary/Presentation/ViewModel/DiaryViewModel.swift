@@ -7,6 +7,7 @@ final class DiaryViewModel: ObservableObject {
     @Published var entries: [DiaryDay] = []
     @Published var likedIDs: Set<UUID> = []
     @Published var photosByID: [UUID: UIImage] = [:]
+    @Published var uploadProgress: [UUID: Double] = [:]
     @Published var showAdd = false
     @Published var saveError: String?
 
@@ -202,7 +203,20 @@ final class DiaryViewModel: ObservableObject {
             for item in newDay.items {
                 var stored = toStored(item, date: date)
                 if stored.kind == .photo, let img = photos[item.id] {
-                    stored.photoPath = try? await photoStorage.save(img, forID: item.id)
+                    do {
+                        for try await event in photoStorage.saveWithProgress(img, forID: item.id) {
+                            switch event {
+                            case .progress(let fraction):
+                                uploadProgress[item.id] = fraction
+                            case .completed(let path):
+                                stored.photoPath = path
+                                uploadProgress.removeValue(forKey: item.id)
+                            }
+                        }
+                    } catch {
+                        uploadProgress.removeValue(forKey: item.id)
+                        saveError = error.localizedDescription
+                    }
                 }
                 do { try await repo.add(stored) }
                 catch { saveError = error.localizedDescription }

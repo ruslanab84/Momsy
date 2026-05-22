@@ -14,7 +14,7 @@ final class AppContainer {
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let leapsRepository: any LeapsRepository          = LocalLeapsRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
-    let photoStorage: any PhotoStorageService          = LocalPhotoStorageService()
+    let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
     let inviteService: any InviteServiceProtocol       = LocalInviteService()
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
