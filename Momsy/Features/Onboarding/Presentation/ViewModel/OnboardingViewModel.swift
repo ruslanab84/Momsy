@@ -5,6 +5,7 @@ enum OBStep: Int, CaseIterable {
     case age, profile, role, ready
 }
 
+@MainActor
 final class OnboardingViewModel: ObservableObject {
     @Published var step: OBStep = .age
     @Published var forward = true
@@ -76,10 +77,8 @@ final class OnboardingViewModel: ObservableObject {
         pushNotifications.scheduleMorningDiary(hour: 9, minute: 0)
         Task {
             try? await saveBabyProfileUC.execute(profile)
-            await MainActor.run {
-                appState.update(profile)
-                onDone()
-            }
+            appState.update(profile)
+            onDone()
         }
     }
 }
