@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TodayView: View {
     @StateObject private var vm: TodayViewModel
+    @StateObject private var feedingVM: FeedingViewModel
     @StateObject private var sleepVM: SleepViewModel
     @StateObject private var walkVM: WalkViewModel
     @StateObject private var bathVM: BathViewModel
@@ -16,10 +17,11 @@ struct TodayView: View {
 
     init(container: AppContainer) {
         self.container = container
-        _vm      = StateObject(wrappedValue: container.makeTodayViewModel())
-        _sleepVM = StateObject(wrappedValue: container.makeSleepViewModel())
-        _walkVM  = StateObject(wrappedValue: container.makeWalkViewModel())
-        _bathVM  = StateObject(wrappedValue: container.makeBathViewModel())
+        _vm         = StateObject(wrappedValue: container.makeTodayViewModel())
+        _feedingVM  = StateObject(wrappedValue: container.makeFeedingViewModel())
+        _sleepVM    = StateObject(wrappedValue: container.makeSleepViewModel())
+        _walkVM     = StateObject(wrappedValue: container.makeWalkViewModel())
+        _bathVM     = StateObject(wrappedValue: container.makeBathViewModel())
     }
 
     @EnvironmentObject var loc: LocalizationManager
@@ -59,6 +61,7 @@ struct TodayView: View {
         }
         .background(Color.bbCream.ignoresSafeArea())
         .task { await vm.loadTodayEntries() }
+        .task { await feedingVM.loadTodayEntries() }
         .task {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 60_000_000_000)
@@ -66,7 +69,8 @@ struct TodayView: View {
             }
         }
         .sheet(isPresented: $showFeeding) {
-            FeedingView(vm: vm)
+            FeedingView(vm: feedingVM)
+                .onDisappear { Task { await vm.loadTodayEntries() } }
         }
         .sheet(isPresented: $showSymptom) {
             NavigationStack { SymptomView(container: container) }
@@ -145,14 +149,14 @@ struct TodayView: View {
                     .foregroundColor(Color.bbInk.opacity(0.6))
                     .kerning(0.5)
 
-                if vm.isFeedingActive {
+                if feedingVM.isFeedingActive {
                     HStack(alignment: .lastTextBaseline, spacing: 6) {
-                        Text(vm.feedingTimerString)
+                        Text(feedingVM.feedingTimerString)
                             .font(.system(size: 32, weight: .heavy, design: .monospaced))
                             .foregroundColor(.bbInk)
                             .contentTransition(.numericText())
-                            .animation(.linear(duration: 0.3), value: vm.feedingSeconds)
-                        Text(loc.strings.feedingActiveLabel(side: vm.feedingSide.displayName(lang: loc.lang).lowercased()))
+                            .animation(.linear(duration: 0.3), value: feedingVM.feedingSeconds)
+                        Text(loc.strings.feedingActiveLabel(side: feedingVM.feedingSide.displayName(lang: loc.lang).lowercased()))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(Color.bbInk.opacity(0.6))
                     }
@@ -160,7 +164,7 @@ struct TodayView: View {
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(Color.bbInk.opacity(0.6))
                 } else {
-                    Text(vm.lastFeedAgoString)
+                    Text(feedingVM.lastFeedAgoString)
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
                     Text(loc.strings.usuallyAroundThisTime)
@@ -171,7 +175,7 @@ struct TodayView: View {
 
             Spacer(minLength: 8)
 
-            if vm.isFeedingActive {
+            if feedingVM.isFeedingActive {
                 VStack(spacing: 8) {
                     Button(action: { showFeeding = true }) {
                         Circle()
@@ -188,7 +192,10 @@ struct TodayView: View {
                             )
                             .bbShadowSoft()
                     }
-                    Button(action: { vm.stopFeeding() }) {
+                    Button(action: {
+                        feedingVM.stopFeeding()
+                        Task { await vm.loadTodayEntries() }
+                    }) {
                         Circle()
                             .fill(Color.bbSurface)
                             .frame(width: 48, height: 48)
@@ -216,7 +223,7 @@ struct TodayView: View {
         }
         .bbCard(pad: 14, bg: .bbCoral)
         .overlay(alignment: .topTrailing) {
-            if vm.isFeedingActive {
+            if feedingVM.isFeedingActive {
                 Circle()
                     .fill(Color.bbSurface)
                     .frame(width: 10, height: 10)
@@ -343,13 +350,13 @@ struct TodayView: View {
     }
 
     private var aiTipText: String {
-        if vm.isFeedingActive {
-            return loc.strings.feedingDuration(vm.feedingTimerString)
+        if feedingVM.isFeedingActive {
+            return loc.strings.feedingDuration(feedingVM.feedingTimerString)
         }
         let lastFeed = vm.logEntries.first(where: { $0.kind == .bottle })?.time
         let mins = lastFeed.map { max(0, Int(-$0.timeIntervalSinceNow / 60)) } ?? 0
         if mins >= 150 {
-            return loc.strings.feedingTip(ago: vm.lastFeedAgoString, name: appState.displayName)
+            return loc.strings.feedingTip(ago: feedingVM.lastFeedAgoString, name: appState.displayName)
         }
         return loc.strings.leapContrastsTip(name: appState.displayName)
     }

@@ -348,6 +348,86 @@ struct L10n {
     var preparingPdf: String    { s("Preparing PDF…","Готовим PDF…",  "PDF vorbereiten…") }
     var sharePdf: String        { s("Share PDF",     "Поделиться PDF","PDF teilen") }
     var printAction: String     { s("Print",         "Распечатать",   "Drucken") }
+    var reportJobName: String   { s("Momsy — report","Momsy — отчёт", "Momsy — Bericht") }
+    var reportPeriod3Days: String      { s("3 days",       "3 дня",                "3 Tage") }
+    var reportPeriodWeek: String       { s("Week",          "Неделя",               "Woche") }
+    var reportPeriod2Weeks: String     { s("2 weeks",       "2 недели",             "2 Wochen") }
+    var reportPeriodMonth: String      { s("Month",         "Месяц",                "Monat") }
+    var reportPeriodSinceVisit: String { s("Since visit",   "С визита",             "Seit Besuch") }
+    var reportPeriodLabelWeek: String  { s("a week",        "неделю",               "eine Woche") }
+    var reportPeriodLabelMonth: String { s("a month",       "месяц",                "einen Monat") }
+    var reportPeriodLabelLastVisit: String { s("last visit","последний визит",       "letzten Besuch") }
+    var reportSectionFeedings: String  { s("Feedings & spit-ups",  "Кормления и срыгивания",  "Mahlzeiten & Spucken") }
+    var reportSectionSleepByDay: String { s("Sleep by day",        "Сон по дням",             "Schlaf täglich") }
+    var reportSectionDiapers: String   { s("Diapers & stool",      "Подгузники и стул",       "Windeln & Stuhl") }
+    var reportSectionTempSymptoms: String { s("Temp / symptoms",   "Температура / симптомы",  "Temp / Symptome") }
+    var reportSectionWeightHeight: String { s("Weight & height",   "Вес и рост (график)",     "Gewicht & Größe") }
+    var reportSectionMedicine: String  { s("Medicine & vitamins",  "Лекарства и витамины",    "Medizin & Vitamine") }
+    var reportSectionPhotosNotes: String { s("Photos & notes",     "Фото и заметки",          "Fotos & Notizen") }
+    var reportStatFeedingsLabel: String { s("Feedings",    "Кормлений",               "Mahlzeiten") }
+    func reportFeedAvgSub(avg: Double) -> String { s(String(format: "%.1f / day", avg), String(format: "%.1f / день", avg), String(format: "%.1f / Tag", avg)) }
+    var reportStatSleepLabel: String   { s("Sleep",        "Сон",                     "Schlaf") }
+    var reportStatSleepSub: String     { s("median / day", "медиана / сутки",          "Median / Tag") }
+    var reportStatDiapersLabel: String { s("Diapers",      "Подгузники",              "Windeln") }
+    var reportNotTracked: String       { s("not tracked",  "не отслеживается",         "nicht verfolgt") }
+    var reportStatTempLabel: String    { s("Temperature",  "Температура",             "Temperatur") }
+    func reportTempPeakSub(n: Int) -> String { s("peak · \(n)×", "пик · \(n)×",      "Peak · \(n)×") }
+    var reportTempNormal: String       { s("normal",       "норма",                   "normal") }
+    var reportSparkFeedingsLabel: String { s("Feedings / day",  "Кормления / сут",    "Mahlzeiten / Tag") }
+    var reportSparkSleepLabel: String  { s("Sleep / day (h)",   "Сон / сут (ч)",      "Schlaf / Tag (h)") }
+    var reportSparkTempLabel: String   { s("Temperature °C",    "Температура °C",     "Temperatur °C") }
+    func reportPreviewPeriod(label: String) -> String { s("Period: \(label)", "Период: \(label)", "Zeitraum: \(label)") }
+    var reportPreviewNotes: String     { s("NOTES",         "ЗАМЕТКИ",                 "NOTIZEN") }
+    var reportPreviewDoctorNotes: String { s("DOCTOR'S NOTES", "ЗАМЕТКИ ВРАЧА",        "ARZTNOTIZEN") }
+    func reportSparkPeak(value: String) -> String { s("peak: \(value)", "пик: \(value)", "Peak: \(value)") }
+
+    // MARK: — Symptoms
+    var symptomLabelTemperature: String  { s("Temperature",    "Температура",     "Temperatur") }
+    var symptomLabelRash: String         { s("Rash",           "Сыпь",            "Ausschlag") }
+    var symptomLabelVomiting: String     { s("Vomiting",       "Рвота",           "Erbrechen") }
+    var symptomLabelLongCrying: String   { s("Long crying",    "Долгий плач",     "Langes Weinen") }
+    var symptomLabelStool: String        { s("Stool",          "Стул",            "Stuhl") }
+    var symptomLabelRefusingFood: String { s("Refusing food",  "Отказ от еды",    "Nahrungsverweigerung") }
+    var symptomLabelSleepIssues: String  { s("Sleep issues",   "Нарушение сна",   "Schlafprobleme") }
+    var symptomLabelOther: String        { s("Other",          "Другое",          "Sonstiges") }
+    var symptomSubChooseArea: String     { s("choose area",    "выберите место",   "Bereich wählen") }
+    var symptomSubNone: String           { s("none",           "нет",             "keine") }
+    var symptomSubStoolNormal: String    { s("normal",         "обычный",         "normal") }
+    var symptomSubSelect: String         { s("select",         "выбрать",         "auswählen") }
+    var symptomSubShortPhases: String    { s("short phases",   "короткие фазы",   "kurze Phasen") }
+    var symptomSubDescribe: String       { s("describe",       "описать",         "beschreiben") }
+    var symptomUrgencyWatching: String   { s("Watching",       "Наблюдаем",       "Beobachten") }
+    var symptomUrgencyLikely: String     { s("Likely",         "Скорее всего",    "Wahrscheinlich") }
+    var symptomUrgencySeeDoctor: String  { s("See Doctor",     "Нужен врач",      "Arzt aufsuchen") }
+    var symptomResultNothingTitle: String  { s("Nothing marked",      "Ничего не отмечено",          "Nichts markiert") }
+    var symptomResultNothingDetail: String { s("Mark symptoms above — we'll suggest what might be happening.", "Отметьте симптомы выше — мы подскажем, что может происходить.", "Markieren Sie Symptome oben — wir schlagen vor, was passieren könnte.") }
+    var symptomResultExamTitle: String   { s("Needs Examination",     "Требует осмотра",             "Untersuchung nötig") }
+    var symptomResultExamDetail: String  { s("Fever combined with a rash needs a paediatrician's attention. Don't delay — call your doctor today.", "Сочетание температуры и сыпи требует внимания педиатра. Не откладывайте — позвоните врачу сегодня.", "Fieber mit Ausschlag erfordert einen Kinderarzt. Nicht verzögern — rufen Sie heute an.") }
+    var symptomResultExamWarning: String { s("rash + fever · face or throat swelling · difficulty breathing", "сыпь + температура · отёк лица или горла · затруднённое дыхание", "Ausschlag + Fieber · Gesichts-/Halschwellung · Atembeschwerden") }
+    var symptomResultGastroTitle: String   { s("Gastroenteritis",    "Гастроэнтерит",               "Gastroenteritis") }
+    var symptomResultGastroDetail: String  { s("Vomiting with fever may indicate a gut infection. Keep fluids up: offer breast and water more often.", "Рвота с температурой — возможна кишечная инфекция. Следите за водным балансом: грудь и вода чаще обычного.", "Erbrechen mit Fieber kann auf eine Darminfektion hinweisen. Mehr Flüssigkeit anbieten.") }
+    var symptomResultGastroWarning: String { s("refusing fluids 6+ hrs · sunken fontanelle · dry mouth · bloody vomit", "отказ от воды дольше 6 ч · запавший родничок · сухой рот · рвота с кровью", "Flüssigkeitsverweigerung 6+ Std. · eingesunkene Fontanelle · trockener Mund · blutiges Erbrechen") }
+    var symptomResultDigestTitle: String   { s("Digestive Upset",    "Расстройство ЖКТ",            "Verdauungsstörung") }
+    var symptomResultDigestDetail: String  { s("Possible overfeeding, gas, or food reaction. Hold baby upright 20 min after feeding.", "Возможен перекорм, газы или реакция на питание. Держите малыша вертикально 20 мин после еды.", "Mögliche Überernährung, Blähungen oder Nahrungsreaktion. 20 Min. nach dem Füttern aufrichten.") }
+    var symptomResultDigestWarning: String { s("projectile vomiting · vomiting 3+ times in 2 hrs · blood in vomit", "рвота фонтаном · рвота более 3 раз за 2 ч · кровь в рвоте", "Schwallartigem Erbrechen · 3+ Erbrechen in 2 Std. · Blut im Erbrechen") }
+    var symptomResultTeethTitle: String    { s("Teething",           "Прорезывание зубов",          "Zahnen") }
+    var symptomResultTeethDetail: String   { s("Temp up to 38°, crying, disturbed sleep — classic signs. Try a cold teether, carry more.", "Температура до 38°, плач, нарушение сна — частые спутники. Попробуйте холодный прорезыватель, носите на руках.", "Temp bis 38°, Weinen, gestörter Schlaf — klassische Anzeichen. Kühler Beißring, mehr tragen.") }
+    var symptomResultTeethWarning: String  { s("t° > 38.5° for more than a day · refusing fluids · lethargy · unusual rash", "t° > 38.5° дольше суток · отказ от воды · вялость · необычная сыпь", "t° > 38,5° mehr als einen Tag · Flüssigkeitsverweigerung · Lethargie · ungewöhnlicher Ausschlag") }
+    var symptomResultArviTitle: String     { s("ARVI / Sore Throat", "ОРВИ / воспаление горла",     "Virusinfektion / Halsschmerzen") }
+    var symptomResultArviDetail: String    { s("Refusing food with fever is a common sign of a viral infection. Offer fluids and breast more often.", "Отказ от еды при температуре — частый признак вирусной инфекции. Предлагайте воду и грудь чаще обычного.", "Nahrungsverweigerung mit Fieber ist häufig bei Virusinfektionen. Mehr Flüssigkeit anbieten.") }
+    var symptomResultArviWarning: String   { s("t° > 39° · difficulty breathing · lethargy · refusing all fluids", "t° > 39° · затруднённое дыхание · вялость · отказ от воды", "t° > 39° · Atembeschwerden · Lethargie · Flüssigkeitsverweigerung") }
+    var symptomResultViralTitle: String    { s("Viral Infection",    "Вирусная инфекция",           "Virale Infektion") }
+    var symptomResultViralDetail: String   { s("Monitor closely. Use fever reducer at t° > 38.5°. Ensure adequate fluids.", "Следите за динамикой. Жаропонижающее при t° > 38.5°. Обеспечьте достаточное питьё.", "Genau beobachten. Fiebermittel bei t° > 38,5°. Ausreichend Flüssigkeit sicherstellen.") }
+    var symptomResultViralWarning: String  { s("t° > 38° in babies under 3 mo · t° > 39° in older babies · seizures · lethargy", "t° > 38° у детей до 3 мес · t° > 39° у старших · судороги · вялость", "t° > 38° bei Säuglingen unter 3 Mo · t° > 39° bei älteren · Krämpfe · Lethargie") }
+    var symptomResultLeapTitle: String     { s("Leap or Colic",      "Скачок или колики",           "Entwicklungsschub oder Koliken") }
+    var symptomResultLeapDetail: String    { s("Crying and disturbed sleep without fever are usually a developmental leap or colic. Try tummy massage and the 'tiger position'.", "Плач и нарушение сна без температуры чаще всего — скачок развития или колики. Попробуйте массаж животика и «позицию тигра».", "Weinen und gestörter Schlaf ohne Fieber sind meist ein Entwicklungsschub oder Koliken. Bauchmassage und 'Tigerposition' versuchen.") }
+    var symptomResultLeapWarning: String   { s("crying 3+ hrs non-stop · hard bloated belly", "плач дольше 3 часов без перерыва · живот твёрдый и вздутый", "Weinen 3+ Std. ohne Unterbrechung · harter aufgeblähter Bauch") }
+    var symptomResultCryingTitle: String   { s("Prolonged Crying",   "Долгий плач",                "Anhaltender Weinkrampf") }
+    var symptomResultCryingDetail: String  { s("Check the basics: hunger, diaper, room temperature, tiredness. Peak colic age is 6 weeks.", "Проверьте основные причины: голод, подгузник, температура в комнате, усталость. Пик колик — 6 недель.", "Grundlegendes prüfen: Hunger, Windel, Raumtemperatur, Müdigkeit. Höhepunkt der Koliken: 6 Wochen.") }
+    var symptomResultCryingWarning: String { s("unusual tone of cry · arching back · no urination 8+ hrs", "плач необычного тона · выгибание спины · нет мочеиспускания 8+ ч", "Ungewöhnlicher Weinton · Rücken wölben · kein Wasserlassen 8+ Std.") }
+    var symptomResultWatchingTitle: String   { s("Watching",         "Наблюдаем",                  "Beobachten") }
+    var symptomResultWatchingDetail: String  { s("The marked symptoms aren't alarming. Keep observing and log any changes.", "Отмеченные симптомы не вызывают тревоги. Продолжайте наблюдать и записывайте любые изменения.", "Die markierten Symptome sind nicht besorgniserregend. Weiter beobachten.") }
+    var symptomResultWatchingWarning: String { s("any worsening · new symptoms · your gut — you know your baby best", "любое ухудшение · новые симптомы · ваша интуиция — вы лучше знаете малыша", "Jede Verschlechterung · neue Symptome · Ihr Instinkt — Sie kennen Ihr Baby am besten") }
 
     // MARK: — Navigation tabs
     var tabDoctor: String       { s("Doctor",        "Доктор",        "Arzt") }

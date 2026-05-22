@@ -3,37 +3,22 @@ import Combine
 
 @MainActor
 final class TodayViewModel: ObservableObject {
-    @Published var isFeedingActive = false
-    @Published var feedingSeconds = 0
-    @Published var feedingSide: FeedingSide = .left
-    private var feedingStartDate: Date?
-    private var pausedFeedingSeconds = 0
     @Published var diaperCount: Int
     @Published var logEntries: [LogEntry] = []
     @Published var saveError: String?
 
-    private let logFeeding: LogFeedingUseCase
     private let getFeeding: GetFeedingEntriesUseCase
     private let diaperUC: DiaperUseCase
     private let quickLogRepo: QuickLogRepository
-    private let timerService: FeedingTimerService
-    private let analytics: any AnalyticsServiceProtocol
-    private let pushNotifications: any PushNotificationServiceProtocol
 
-    init(logFeeding: LogFeedingUseCase,
-         getFeeding: GetFeedingEntriesUseCase,
-         diaperUC: DiaperUseCase,
-         quickLogRepo: QuickLogRepository,
-         timerService: FeedingTimerService,
-         analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
-         pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared) {
-        self.logFeeding = logFeeding
+    init(
+        getFeeding: GetFeedingEntriesUseCase,
+        diaperUC: DiaperUseCase,
+        quickLogRepo: QuickLogRepository
+    ) {
         self.getFeeding = getFeeding
         self.diaperUC = diaperUC
         self.quickLogRepo = quickLogRepo
-        self.timerService = timerService
-        self.analytics = analytics
-        self.pushNotifications = pushNotifications
         self.diaperCount = diaperUC.count
     }
 
@@ -49,69 +34,6 @@ final class TodayViewModel: ObservableObject {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             logEntries = merged
         }
-    }
-
-    var feedingTimerString: String {
-        String(format: "%02d:%02d", feedingSeconds / 60, feedingSeconds % 60)
-    }
-
-    var lastFeedAgoString: String {
-        let lm = LocalizationManager.shared
-        guard let last = logEntries.first(where: { $0.kind == .bottle }) else { return "—" }
-        let mins = max(0, Int(-last.time.timeIntervalSinceNow / 60))
-        if mins < 60 { return lm.strings.minsAgo(mins) }
-        let h = mins / 60, m = mins % 60
-        return lm.strings.hrsAgoFormatted(h: h, m: m)
-    }
-
-    func startFeeding(side: FeedingSide) {
-        feedingSide = side
-        isFeedingActive = true
-        feedingSeconds = 0
-        pausedFeedingSeconds = 0
-        let startDate = Date()
-        feedingStartDate = startDate
-        analytics.track(.feedingStarted(side: side.rawValue))
-        timerService.start(from: startDate) { [weak self] secs in
-            Task { @MainActor [weak self] in self?.feedingSeconds = secs }
-        }
-    }
-
-    func pauseFeeding() {
-        guard isFeedingActive else { return }
-        isFeedingActive = false
-        pausedFeedingSeconds = feedingSeconds
-        timerService.stop()
-    }
-
-    func resumeFeeding() {
-        guard !isFeedingActive else { return }
-        isFeedingActive = true
-        let effectiveStart = Date().addingTimeInterval(-TimeInterval(pausedFeedingSeconds))
-        feedingStartDate = effectiveStart
-        timerService.start(from: effectiveStart) { [weak self] secs in
-            Task { @MainActor [weak self] in self?.feedingSeconds = secs }
-        }
-    }
-
-    func stopFeeding(mood: String? = nil) {
-        guard isFeedingActive else { return }
-        isFeedingActive = false
-        timerService.stop()
-        let lm = LocalizationManager.shared
-        let dur = max(1, feedingSeconds / 60)
-        let side = feedingSide.displayName(lang: lm.lang).lowercased()
-        var label = lm.strings.feedingLogEntry(dur: dur, side: side)
-        if let m = mood { label += " · \(m)" }
-        let secs = feedingSeconds
-        let s = feedingSide
-        analytics.track(.feedingStopped(durationMinutes: dur, side: s.rawValue))
-        pushNotifications.scheduleFeedingReminder(afterMinutes: 3 * 60)
-        Task {
-            do { try await logFeeding.execute(durationSeconds: secs, side: s, mood: mood) }
-            catch { saveError = error.localizedDescription }
-        }
-        addEntry(LogEntry(time: Date(), kind: .bottle, label: label))
     }
 
     func logDiaper() {

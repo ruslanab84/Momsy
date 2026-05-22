@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct FeedingView: View {
-    @ObservedObject var vm: TodayViewModel
+    @ObservedObject var vm: FeedingViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
 
@@ -304,7 +304,7 @@ struct FeedingView: View {
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
-                let feedCount = vm.logEntries.filter { $0.kind == .bottle }.count
+                let feedCount = vm.todayEntries.count
                 Text(loc.strings.feedingsCount(feedCount))
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkMute)
@@ -338,5 +338,5 @@ struct FeedingView: View {
 }
 
 #Preview {
-    FeedingView(vm: AppContainer().makeTodayViewModel())
+    FeedingView(vm: AppContainer().makeFeedingViewModel())
 }

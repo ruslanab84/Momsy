@@ -35,29 +35,30 @@ final class ReportViewModel: ObservableObject {
     }
 
     private var lm: LocalizationManager { .shared }
-    private var lang: String { lm.lang }
-    private func t(_ en: String, _ ru: String) -> String { lang == "ru" ? ru : en }
 
     var displayName: String { appState.displayName }
 
     var periods: [String] {
-        [t("3 days", "3 дня"), t("Week", "Неделя"), t("2 weeks", "2 недели"), t("Month", "Месяц"), t("Since visit", "С визита")]
+        [lm.strings.reportPeriod3Days, lm.strings.reportPeriodWeek,
+         lm.strings.reportPeriod2Weeks, lm.strings.reportPeriodMonth,
+         lm.strings.reportPeriodSinceVisit]
     }
 
     var periodLabel: String {
-        [t("3 days", "3 дня"), t("a week", "неделю"), t("2 weeks", "2 недели"),
-         t("a month", "месяц"), t("last visit", "последний визит")][selectedPeriod]
+        [lm.strings.reportPeriod3Days, lm.strings.reportPeriodLabelWeek,
+         lm.strings.reportPeriod2Weeks, lm.strings.reportPeriodLabelMonth,
+         lm.strings.reportPeriodLabelLastVisit][selectedPeriod]
     }
 
     var sectionLabels: [String] {
         [
-            t("Feedings & spit-ups",   "Кормления и срыгивания"),
-            t("Sleep by day",          "Сон по дням"),
-            t("Diapers & stool",       "Подгузники и стул"),
-            t("Temp / symptoms",       "Температура / симптомы"),
-            t("Weight & height",       "Вес и рост (график)"),
-            t("Medicine & vitamins",   "Лекарства и витамины"),
-            t("Photos & notes",        "Фото и заметки"),
+            lm.strings.reportSectionFeedings,
+            lm.strings.reportSectionSleepByDay,
+            lm.strings.reportSectionDiapers,
+            lm.strings.reportSectionTempSymptoms,
+            lm.strings.reportSectionWeightHeight,
+            lm.strings.reportSectionMedicine,
+            lm.strings.reportSectionPhotosNotes,
         ]
     }
 
@@ -122,29 +123,29 @@ final class ReportViewModel: ObservableObject {
 
         currentStats = [
             (
-                t("Feedings", "Кормлений"),
+                lm.strings.reportStatFeedingsLabel,
                 feedCount > 0 ? "\(feedCount)" : "—",
-                feedCount > 0 ? String(format: t("%.1f / day", "%.1f / день"), feedAvg) : t("no data", "нет данных"),
+                feedCount > 0 ? lm.strings.reportFeedAvgSub(avg: feedAvg) : lm.strings.noData,
                 .bbCoral
             ),
             (
-                t("Sleep", "Сон"),
+                lm.strings.reportStatSleepLabel,
                 medianSleep > 0 ? formatHM(medianSleep) : "—",
-                medianSleep > 0 ? t("median / day", "медиана / сутки") : t("no data", "нет данных"),
+                medianSleep > 0 ? lm.strings.reportStatSleepSub : lm.strings.noData,
                 .bbLilac
             ),
             (
-                t("Diapers", "Подгузники"),
+                lm.strings.reportStatDiapersLabel,
                 "—",
-                t("not tracked", "не отслеживается"),
+                lm.strings.reportNotTracked,
                 .bbSky
             ),
             (
-                t("Temperature", "Температура"),
+                lm.strings.reportStatTempLabel,
                 maxTemp > 0 ? String(format: "%.1f°", maxTemp) : "—",
                 maxTemp > 0
-                    ? (peakCount > 0 ? t("peak · \(peakCount)×", "пик · \(peakCount)×") : t("normal", "норма"))
-                    : t("no data", "нет данных"),
+                    ? (peakCount > 0 ? lm.strings.reportTempPeakSub(n: peakCount) : lm.strings.reportTempNormal)
+                    : lm.strings.noData,
                 maxTemp > 37.5 ? .bbCoralDeep : .bbMintDeep
             ),
         ]
@@ -155,19 +156,19 @@ final class ReportViewModel: ObservableObject {
 
         currentSparklines = [
             (
-                t("Feedings / day", "Кормления / сут"),
+                lm.strings.reportSparkFeedingsLabel,
                 feedPerDay.isEmpty ? [0] : feedPerDay,
                 .bbCoralDeep,
                 feedPerDay.max().map { String(format: "%.0f", $0) } ?? "—"
             ),
             (
-                t("Sleep / day (h)", "Сон / сут (ч)"),
+                lm.strings.reportSparkSleepLabel,
                 sleepPerDay.isEmpty ? [0] : sleepPerDay,
                 .bbLilacDeep,
                 sleepPerDay.max().map { formatHM($0) } ?? "—"
             ),
             (
-                t("Temperature °C", "Температура °C"),
+                lm.strings.reportSparkTempLabel,
                 tempForChart.isEmpty ? [36.6] : tempForChart,
                 .bbCoralDeep,
                 tempPeakStr
@@ -188,9 +189,7 @@ final class ReportViewModel: ObservableObject {
         guard hours > 0 else { return "—" }
         let h = Int(hours)
         let m = min(Int(round((hours - Double(h)) * 60)), 59)
-        return lang == "ru"
-            ? (m > 0 ? "\(h)ч \(m)м" : "\(h)ч")
-            : (m > 0 ? "\(h)h \(m)m" : "\(h)h")
+        return lm.strings.sleepDurationFormatted(h: h, m: m)
     }
 
     // MARK: - Actions
@@ -205,7 +204,7 @@ final class ReportViewModel: ObservableObject {
             periodLabel: periods[selectedPeriod],
             stats: currentStats,
             sparklines: currentSparklines,
-            lang: lang
+            lang: lm.lang
         ) else { return }
         analytics.track(.reportGenerated(period: periods[selectedPeriod]))
         shareURL = url
@@ -222,11 +221,11 @@ final class ReportViewModel: ObservableObject {
             periodLabel: periods[selectedPeriod],
             stats: currentStats,
             sparklines: currentSparklines,
-            lang: lang
+            lang: lm.lang
         ) else { return }
         let info = UIPrintInfo.printInfo()
         info.outputType = .general
-        info.jobName = t("Momsy — report", "Momsy — отчёт")
+        info.jobName = lm.strings.reportJobName
         let controller = UIPrintInteractionController.shared
         controller.printInfo = info
         controller.printingItem = url

@@ -72,15 +72,21 @@ final class AppContainer {
 
     // MARK: — ViewModel Factories
 
-    func makeTodayViewModel() -> TodayViewModel {
-        TodayViewModel(
+    func makeFeedingViewModel() -> FeedingViewModel {
+        FeedingViewModel(
             logFeeding: logFeeding,
             getFeeding: getFeedingEntries,
-            diaperUC: diaperUseCase,
-            quickLogRepo: quickLogRepository,
             timerService: FeedingTimerService(),
             analytics: analytics,
             pushNotifications: pushNotifications
+        )
+    }
+
+    func makeTodayViewModel() -> TodayViewModel {
+        TodayViewModel(
+            getFeeding: getFeedingEntries,
+            diaperUC: diaperUseCase,
+            quickLogRepo: quickLogRepository
         )
     }
 

@@ -192,7 +192,7 @@ struct ReportPreviewContent: View {
     let sparklines: [(label: String, values: [Double], color: Color, peak: String)]
     var lang: String = "en"
 
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+    private var lm: LocalizationManager { .shared }
 
     private var dateString: String {
         let f = DateFormatter()
@@ -213,7 +213,7 @@ struct ReportPreviewContent: View {
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                 }
-                Text(t("Period: \(periodLabel)", "Период: \(periodLabel)"))
+                Text(lm.strings.reportPreviewPeriod(label: periodLabel))
                     .font(.system(size: 10, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkMute)
             }
@@ -259,7 +259,7 @@ struct ReportPreviewContent: View {
             .background(Color.bbCard)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(t("NOTES", "ЗАМЕТКИ"))
+                Text(lm.strings.reportPreviewNotes)
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInkMute)
                     .kerning(0.5)
@@ -275,7 +275,7 @@ struct ReportPreviewContent: View {
             .background(Color.bbCard)
 
             VStack(alignment: .leading, spacing: 0) {
-                Text(t("DOCTOR'S NOTES", "ЗАМЕТКИ ВРАЧА"))
+                Text(lm.strings.reportPreviewDoctorNotes)
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInkMute)
                     .kerning(0.5)
@@ -301,7 +301,7 @@ private struct SparklineRow: View {
     let peak: String
     var lang: String = "en"
 
-    private func t(_ en: String, _ ru: String) -> String { lang == "en" ? en : ru }
+    private var lm: LocalizationManager { .shared }
 
     var body: some View {
         VStack(spacing: 4) {
@@ -310,7 +310,7 @@ private struct SparklineRow: View {
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                 Spacer()
-                Text(t("peak: \(peak)", "пик: \(peak)"))
+                Text(lm.strings.reportSparkPeak(value: peak))
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundColor(color)
             }
