@@ -88,10 +88,7 @@ final class TrackingViewModel: ObservableObject {
         [lm.strings.weight, lm.strings.height, lm.strings.headShort, lm.strings.temperature]
     }
 
-    var displayName: String {
-        let name = appState.babyProfile?.name ?? ""
-        return name.isEmpty ? lm.strings.baby : name
-    }
+    var displayName: String { appState.displayName }
 
     var headerSummary: String {
         let todayStr = lm.strings.today.lowercased()

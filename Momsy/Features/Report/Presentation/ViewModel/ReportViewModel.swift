@@ -38,10 +38,7 @@ final class ReportViewModel: ObservableObject {
     private var lang: String { lm.lang }
     private func t(_ en: String, _ ru: String) -> String { lang == "ru" ? ru : en }
 
-    var displayName: String {
-        let name = appState.babyProfile?.name ?? ""
-        return name.isEmpty ? lm.strings.baby : name
-    }
+    var displayName: String { appState.displayName }
 
     var periods: [String] {
         [t("3 days", "3 дня"), t("Week", "Неделя"), t("2 weeks", "2 недели"), t("Month", "Месяц"), t("Since visit", "С визита")]

@@ -14,10 +14,7 @@ final class SharingViewModel: ObservableObject {
 
     private var lm: LocalizationManager { .shared }
 
-    var displayName: String {
-        let name = appState.babyProfile?.name ?? ""
-        return name.isEmpty ? lm.strings.baby : name
-    }
+    var displayName: String { appState.displayName }
 
     var inviteCode: String { inviteService.currentCode() }
     var inviteURL:  String { inviteService.inviteURL(for: inviteCode) }

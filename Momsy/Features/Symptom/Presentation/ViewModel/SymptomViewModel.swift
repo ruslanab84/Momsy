@@ -59,10 +59,7 @@ final class SymptomViewModel: ObservableObject {
         self.appState = appState
     }
 
-    var displayName: String {
-        let name = appState.babyProfile?.name ?? ""
-        return name.isEmpty ? lm.strings.baby : name
-    }
+    var displayName: String { appState.displayName }
     var activeCount: Int { isOnIDs.count }
 
     var symptoms: [Symptom] {

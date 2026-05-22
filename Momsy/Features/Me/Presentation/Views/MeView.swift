@@ -6,26 +6,6 @@ struct MeView: View {
     @Environment(\.appContainer) private var container
     @State private var showEditProfile = false
 
-    private var displayName: String {
-        let name = appState.babyProfile?.name ?? ""
-        return name.isEmpty ? lm.strings.baby : name
-    }
-
-    private var babyAgeString: String {
-        guard let birth = appState.babyProfile?.birthDate else { return "" }
-        let comps = Calendar.current.dateComponents([.month, .day], from: birth, to: Date())
-        let m = comps.month ?? 0, d = comps.day ?? 0
-        if lm.lang == "en" {
-            if m == 0 { return "\(d)d" }
-            if d == 0 { return "\(m)mo" }
-            return "\(m)mo \(d)d"
-        } else {
-            if m == 0 { return "\(d) дн" }
-            if d == 0 { return "\(m) мес" }
-            return "\(m) мес \(d) дн"
-        }
-    }
-
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
@@ -69,11 +49,11 @@ struct MeView: View {
         HStack(spacing: 14) {
             CuteBlobView(kind: .baby, size: 56, tone: .bbCoral)
             VStack(alignment: .leading, spacing: 2) {
-                Text(displayName)
+                Text(appState.displayName)
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
-                if !babyAgeString.isEmpty {
-                    Text(babyAgeString)
+                if !appState.babyAgeString(lang: lm.lang).isEmpty {
+                    Text(appState.babyAgeString(lang: lm.lang))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInkSoft)
                 }

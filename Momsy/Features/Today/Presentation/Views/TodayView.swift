@@ -25,27 +25,6 @@ struct TodayView: View {
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
 
-    private var displayName: String {
-        let name = appState.babyProfile?.name ?? ""
-        return name.isEmpty ? loc.strings.baby : name
-    }
-
-    private var babyAgeString: String {
-        guard let birth = appState.babyProfile?.birthDate else { return "" }
-        let comps = Calendar.current.dateComponents([.month, .day], from: birth, to: Date())
-        let m = comps.month ?? 0
-        let d = comps.day ?? 0
-        if loc.lang == "en" {
-            if m == 0 { return "\(d)d" }
-            if d == 0 { return "\(m)mo" }
-            return "\(m)mo \(d)d"
-        } else {
-            if m == 0 { return "\(d) дн" }
-            if d == 0 { return "\(m) мес" }
-            return "\(m) мес \(d) дн"
-        }
-    }
-
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: now)
         switch h {
@@ -112,11 +91,11 @@ struct TodayView: View {
         HStack(spacing: 10) {
             CuteBlobView(kind: .baby, size: 44, tone: .bbCoral)
             VStack(alignment: .leading, spacing: 0) {
-                Text(displayName)
+                Text(appState.displayName)
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
-                if !babyAgeString.isEmpty {
-                    Text(babyAgeString)
+                if !appState.babyAgeString(lang: loc.lang).isEmpty {
+                    Text(appState.babyAgeString(lang: loc.lang))
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInkSoft)
                 }
@@ -134,7 +113,7 @@ struct TodayView: View {
             Text(greeting)
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
-            Text(loc.strings.howDidSleep(name: displayName))
+            Text(loc.strings.howDidSleep(name: appState.displayName))
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbCoralDeep)
             Text(dateString)
@@ -370,9 +349,9 @@ struct TodayView: View {
         let lastFeed = vm.logEntries.first(where: { $0.kind == .bottle })?.time
         let mins = lastFeed.map { max(0, Int(-$0.timeIntervalSinceNow / 60)) } ?? 0
         if mins >= 150 {
-            return loc.strings.feedingTip(ago: vm.lastFeedAgoString, name: displayName)
+            return loc.strings.feedingTip(ago: vm.lastFeedAgoString, name: appState.displayName)
         }
-        return loc.strings.leapContrastsTip(name: displayName)
+        return loc.strings.leapContrastsTip(name: appState.displayName)
     }
 
     // MARK: - Leap Card

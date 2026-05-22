@@ -5,11 +5,6 @@ struct LeapsView: View {
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
 
-    private var displayName: String {
-        let name = appState.babyProfile?.name ?? ""
-        return name.isEmpty ? loc.strings.baby : name
-    }
-
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
@@ -61,7 +56,7 @@ struct LeapsView: View {
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
 
-            Text("\(displayName) \(vm.leapDesc(vm.currentLeap))")
+            Text("\(appState.displayName) \(vm.leapDesc(vm.currentLeap))")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(Color.bbInk.opacity(0.7))
                 .fixedSize(horizontal: false, vertical: true)
