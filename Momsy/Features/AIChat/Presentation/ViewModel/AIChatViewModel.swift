@@ -63,7 +63,10 @@ final class AIChatViewModel: ObservableObject {
 
         let userMsg = ChatMessage(role: .user, content: text)
         messages.append(userMsg)
-        Task { try? await appendMessageUC.execute(userMsg) }
+        Task {
+            do { try await appendMessageUC.execute(userMsg) }
+            catch { errorMessage = error.localizedDescription }
+        }
 
         isStreaming = true
         streamingText = ""
@@ -82,7 +85,8 @@ final class AIChatViewModel: ObservableObject {
                 }
                 let assistantMsg = ChatMessage(role: .assistant, content: streamingText)
                 messages.append(assistantMsg)
-                try? await appendMessageUC.execute(assistantMsg)
+                do { try await appendMessageUC.execute(assistantMsg) }
+                catch { errorMessage = error.localizedDescription }
                 streamingText = ""
             } catch {
                 errorMessage = "Something went wrong. Please try again."

@@ -36,6 +36,7 @@ struct TrackingView: View {
         .sheet(isPresented: $vm.showAddTemp) {
             AddTempSheet { entry in vm.addTemp(entry) }
         }
+        .errorToast($vm.saveError)
     }
 
     // MARK: - Header

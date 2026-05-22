@@ -27,6 +27,8 @@ struct ReportView: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .task { await vm.loadData() }
+        .onChange(of: vm.selectedPeriod) { _ in Task { await vm.loadData() } }
         .sheet(isPresented: $vm.showShare) {
             if let url = vm.shareURL {
                 ActivityView(items: [url])

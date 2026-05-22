@@ -8,6 +8,7 @@ final class TrackingViewModel: ObservableObject {
     @Published var tempLog: [TemperatureEntry] = []
     @Published var showAddMeasurement = false
     @Published var showAddTemp = false
+    @Published var saveError: String?
 
     private let measurementRepo: any MeasurementRepository
     private let temperatureRepo: any TemperatureRepository
@@ -128,11 +129,17 @@ final class TrackingViewModel: ObservableObject {
 
     func addMeasurement(_ entry: MeasurementEntry) {
         measurements.insert(entry, at: 0)
-        Task { try? await measurementRepo.add(entry) }
+        Task {
+            do { try await measurementRepo.add(entry) }
+            catch { saveError = error.localizedDescription }
+        }
     }
 
     func addTemp(_ entry: TemperatureEntry) {
         tempLog.insert(entry, at: 0)
-        Task { try? await temperatureRepo.add(entry) }
+        Task {
+            do { try await temperatureRepo.add(entry) }
+            catch { saveError = error.localizedDescription }
+        }
     }
 }

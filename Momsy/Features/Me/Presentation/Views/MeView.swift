@@ -2,11 +2,34 @@ import SwiftUI
 
 struct MeView: View {
     @EnvironmentObject private var lm: LocalizationManager
+    @EnvironmentObject private var appState: AppState
     @Environment(\.appContainer) private var container
+    @State private var showEditProfile = false
+
+    private var displayName: String {
+        let name = appState.babyProfile?.name ?? ""
+        return name.isEmpty ? lm.strings.baby : name
+    }
+
+    private var babyAgeString: String {
+        guard let birth = appState.babyProfile?.birthDate else { return "" }
+        let comps = Calendar.current.dateComponents([.month, .day], from: birth, to: Date())
+        let m = comps.month ?? 0, d = comps.day ?? 0
+        if lm.lang == "en" {
+            if m == 0 { return "\(d)d" }
+            if d == 0 { return "\(m)mo" }
+            return "\(m)mo \(d)d"
+        } else {
+            if m == 0 { return "\(d) дн" }
+            if d == 0 { return "\(m) мес" }
+            return "\(m) мес \(d) дн"
+        }
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
+                babyProfileCard
                 meSection(rows: [
                     MeRow(destination: SharingView(container: container),
                           icon: "person.3.fill", bg: .bbCoral,
@@ -30,6 +53,47 @@ struct MeView: View {
         }
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.profile)
+        .sheet(isPresented: $showEditProfile) {
+            if let profile = appState.babyProfile {
+                EditBabyProfileView(profile: profile)
+                    .environmentObject(lm)
+                    .environmentObject(appState)
+                    .environment(\.appContainer, container)
+            }
+        }
+    }
+
+    // MARK: - Baby Profile Card
+
+    private var babyProfileCard: some View {
+        HStack(spacing: 14) {
+            CuteBlobView(kind: .baby, size: 56, tone: .bbCoral)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(displayName)
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbInk)
+                if !babyAgeString.isEmpty {
+                    Text(babyAgeString)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbInkSoft)
+                }
+            }
+            Spacer()
+            Button {
+                showEditProfile = true
+            } label: {
+                Text(lm.strings.editProfile)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbCoralDeep)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.bbCoral.opacity(0.15))
+                    .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .disabled(appState.babyProfile == nil)
+        }
+        .bbCard(pad: 16)
     }
 
     private func meSection(rows: [MeRow]) -> some View {

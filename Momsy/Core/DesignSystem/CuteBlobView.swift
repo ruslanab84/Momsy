@@ -237,8 +237,8 @@ private struct CloudBlob: View {
 private struct WalkBlob: View {
     let s: CGFloat
     var body: some View {
-        Image(systemName: "figure.walk")
-            .font(.system(size: s * 0.5, weight: .medium))
+        Image(systemName: "stroller")
+            .font(.system(size: s * 0.46, weight: .medium))
             .foregroundColor(Color(bbHex: "5FB99B"))
     }
 }

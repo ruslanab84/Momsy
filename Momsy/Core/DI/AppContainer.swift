@@ -20,6 +20,7 @@ final class AppContainer {
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let diaperUseCase                                   = DiaperUseCase()
     let quickLogRepository                              = QuickLogRepository()
+    let walkRepository: any WalkRepository             = LocalWalkRepository()
     let chatRepository: any ChatRepository             = LocalChatRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
 
@@ -129,7 +130,17 @@ final class AppContainer {
     }
 
     func makeReportViewModel() -> ReportViewModel {
-        ReportViewModel(appState: appState, analytics: analytics)
+        ReportViewModel(
+            feedingRepo: feedingRepository,
+            sleepRepo: sleepRepository,
+            temperatureRepo: temperatureRepository,
+            appState: appState,
+            analytics: analytics
+        )
+    }
+
+    func makeWalkViewModel() -> WalkViewModel {
+        WalkViewModel(walkRepository: walkRepository, quickLogRepo: quickLogRepository)
     }
 
     func makeSymptomViewModel() -> SymptomViewModel {

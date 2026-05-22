@@ -10,6 +10,7 @@ final class TodayViewModel: ObservableObject {
     private var pausedFeedingSeconds = 0
     @Published var diaperCount: Int
     @Published var logEntries: [LogEntry] = []
+    @Published var saveError: String?
 
     private let logFeeding: LogFeedingUseCase
     private let getFeeding: GetFeedingEntriesUseCase
@@ -106,7 +107,10 @@ final class TodayViewModel: ObservableObject {
         let s = feedingSide
         analytics.track(.feedingStopped(durationMinutes: dur, side: s.rawValue))
         pushNotifications.scheduleFeedingReminder(afterMinutes: 3 * 60)
-        Task { try? await logFeeding.execute(durationSeconds: secs, side: s, mood: mood) }
+        Task {
+            do { try await logFeeding.execute(durationSeconds: secs, side: s, mood: mood) }
+            catch { saveError = error.localizedDescription }
+        }
         addEntry(LogEntry(time: Date(), kind: .bottle, label: label))
     }
 

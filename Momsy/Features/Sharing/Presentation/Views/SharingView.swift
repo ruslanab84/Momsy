@@ -41,6 +41,7 @@ struct SharingView: View {
                 onRemove: { vm.removeMember(id: member.id) }
             )
         }
+        .errorToast($vm.saveError)
     }
 
     // MARK: - Header

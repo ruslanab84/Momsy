@@ -6,6 +6,7 @@ final class SharingViewModel: ObservableObject {
     @Published var members: [FamilyMember] = []
     @Published var showInvite = false
     @Published var editingMember: FamilyMember? = nil
+    @Published var saveError: String?
 
     private let repo: any FamilyRepository
     private let inviteService: any InviteServiceProtocol
@@ -43,21 +44,30 @@ final class SharingViewModel: ObservableObject {
         withAnimation(.spring(response: 0.38, dampingFraction: 0.8)) {
             members.append(member)
         }
-        Task { try? await repo.add(member.toStored()) }
+        Task {
+            do { try await repo.add(member.toStored()) }
+            catch { saveError = error.localizedDescription }
+        }
     }
 
     func changeRole(id: UUID, to newRole: FamilyRole) {
         guard let idx = members.firstIndex(where: { $0.id == id }) else { return }
         withAnimation { members[idx].role = newRole }
         let stored = members[idx].toStored()
-        Task { try? await repo.update(stored) }
+        Task {
+            do { try await repo.update(stored) }
+            catch { saveError = error.localizedDescription }
+        }
     }
 
     func removeMember(id: UUID) {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             members.removeAll { $0.id == id }
         }
-        Task { try? await repo.remove(id: id) }
+        Task {
+            do { try await repo.remove(id: id) }
+            catch { saveError = error.localizedDescription }
+        }
     }
 }
 

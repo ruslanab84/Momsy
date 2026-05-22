@@ -30,6 +30,7 @@ struct AIChatView: View {
                 }
             }
         }
+        .errorToast($vm.errorMessage)
     }
 
     // MARK: - Message List

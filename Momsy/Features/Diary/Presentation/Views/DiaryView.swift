@@ -62,6 +62,7 @@ struct DiaryView: View {
                 onAdd: { newDay, photos in vm.insertDay(newDay, photos: photos) }
             )
         }
+        .errorToast($vm.saveError)
     }
 
     // MARK: - Header

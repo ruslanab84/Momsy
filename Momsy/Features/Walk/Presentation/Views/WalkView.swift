@@ -1,20 +1,20 @@
 import SwiftUI
 
-struct SleepView: View {
-    @ObservedObject var vm: SleepViewModel
+struct WalkView: View {
+    @ObservedObject var vm: WalkViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
 
     var body: some View {
         ZStack {
-            Color.bbLilac.ignoresSafeArea()
+            Color.bbMint.ignoresSafeArea()
             Circle()
-                .fill(Color.bbLilacDeep.opacity(0.18))
+                .fill(Color.bbMintDeep.opacity(0.18))
                 .frame(width: 200)
                 .offset(x: 80, y: -200)
                 .ignoresSafeArea()
             Circle()
-                .fill(Color.bbMint.opacity(0.15))
+                .fill(Color.bbSky.opacity(0.15))
                 .frame(width: 220)
                 .offset(x: -120, y: 160)
                 .ignoresSafeArea()
@@ -24,7 +24,6 @@ struct SleepView: View {
                     topBar
                     statsRow
                     timerBlock
-                    if vm.isSleepActive { qualityPicker }
                     actionButton
                     todayList
                 }
@@ -41,11 +40,11 @@ struct SleepView: View {
     private var topBar: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(loc.strings.sleepTracker)
+                Text(loc.strings.walkTracker)
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .foregroundColor(.white.opacity(0.6))
                     .kerning(0.5)
-                Text(loc.strings.sleep)
+                Text(loc.strings.walk)
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundColor(.white)
             }
@@ -69,7 +68,7 @@ struct SleepView: View {
         HStack(spacing: 0) {
             statCell(
                 label: loc.strings.totalToday,
-                value: vm.totalSleepToday
+                value: vm.totalWalksToday
             )
             Rectangle()
                 .fill(Color.white.opacity(0.25))
@@ -100,25 +99,25 @@ struct SleepView: View {
 
     private var timerBlock: some View {
         VStack(spacing: 8) {
-            if vm.isSleepActive {
+            if vm.isWalkActive {
                 HStack(spacing: 8) {
                     Circle()
                         .fill(Color.white.opacity(0.85))
                         .frame(width: 8, height: 8)
-                    Text(loc.strings.sleeping)
+                    Text(loc.strings.walking)
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundColor(.white.opacity(0.8))
                 }
-                Text(vm.sleepTimerString)
+                Text(vm.walkTimerString)
                     .font(.system(size: 60, weight: .heavy, design: .monospaced))
                     .foregroundColor(.white)
                     .contentTransition(.numericText())
-                    .animation(.linear(duration: 0.3), value: vm.sleepSeconds)
+                    .animation(.linear(duration: 0.3), value: vm.walkSeconds)
             } else {
-                Text(vm.lastSleepDurationString)
+                Text(vm.lastWalkDurationString)
                     .font(.system(size: 56, weight: .heavy, design: .rounded))
                     .foregroundColor(.white)
-                Text(vm.lastSleepSubtitle)
+                Text(vm.lastWalkSubtitle)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(.white.opacity(0.7))
             }
@@ -129,58 +128,26 @@ struct SleepView: View {
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
-    // MARK: - Quality Picker
-
-    private var qualityPicker: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(loc.strings.sleepQuality)
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundColor(.white.opacity(0.6))
-                .kerning(0.5)
-            HStack(spacing: 8) {
-                ForEach(SleepQuality.allCases, id: \.self) { q in
-                    Button {
-                        withAnimation(.spring(response: 0.3)) { vm.selectedQuality = q }
-                    } label: {
-                        Text(qualityLabel(q))
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(vm.selectedQuality == q ? .bbLilacDeep : .white.opacity(0.85))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .background(vm.selectedQuality == q ? Color.white : Color.white.opacity(0.15))
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .animation(.spring(response: 0.25), value: vm.selectedQuality)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color.white.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
     // MARK: - Action Button
 
     private var actionButton: some View {
         Button {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                if vm.isSleepActive { vm.stop() } else { vm.start() }
+                if vm.isWalkActive { vm.stop() } else { vm.start() }
             }
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: vm.isSleepActive ? "stop.fill" : "moon.fill")
+                Image(systemName: vm.isWalkActive ? "stop.fill" : "stroller")
                     .font(.system(size: 16, weight: .bold))
-                Text(vm.isSleepActive ? loc.strings.stopSleep : loc.strings.sleep)
+                Text(vm.isWalkActive ? loc.strings.stopWalk : loc.strings.startWalk)
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
             }
-            .foregroundColor(vm.isSleepActive ? .bbLilacDeep : .white)
+            .foregroundColor(vm.isWalkActive ? .bbMintDeep : .white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
-            .background(vm.isSleepActive ? Color.white : Color.white.opacity(0.2))
+            .background(vm.isWalkActive ? Color.white : Color.white.opacity(0.2))
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .animation(.easeInOut(duration: 0.2), value: vm.isSleepActive)
+            .animation(.easeInOut(duration: 0.2), value: vm.isWalkActive)
         }
         .buttonStyle(.plain)
     }
@@ -188,7 +155,7 @@ struct SleepView: View {
     // MARK: - Today List
 
     private var todayList: some View {
-        let completed = vm.todayEntries.filter { $0.endDate != nil }.reversed() as [SleepEntry]
+        let completed = vm.todayEntries.filter { $0.endDate != nil }.reversed() as [WalkEntry]
         return Group {
             if !completed.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
@@ -207,7 +174,7 @@ struct SleepView: View {
                                 Text(entryDurationString(entry))
                                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                                     .foregroundColor(.white)
-                                Text(qualityLabel(entry.quality))
+                                Text(loc.strings.walk)
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundColor(.white.opacity(0.6))
                             }
@@ -226,34 +193,17 @@ struct SleepView: View {
         }
     }
 
-    private func qualityLabel(_ q: SleepQuality) -> String {
-        switch q {
-        case .good:     return loc.strings.qualityGood
-        case .normal:   return loc.strings.qualityNormal
-        case .restless: return loc.strings.qualityRestless
-        }
-    }
-
     private func timeString(_ date: Date) -> String {
         let f = DateFormatter()
         f.dateFormat = "HH:mm"
         return f.string(from: date)
     }
 
-    private func entryDurationString(_ entry: SleepEntry) -> String {
+    private func entryDurationString(_ entry: WalkEntry) -> String {
         guard let mins = entry.durationMinutes else { return "—" }
         if mins < 60 { return loc.lang == "en" ? "\(mins) min" : "\(mins) мин" }
         let h = mins / 60, m = mins % 60
         if loc.lang == "en" { return m == 0 ? "\(h)h" : "\(h)h \(m)m" }
         return m == 0 ? "\(h) ч" : "\(h) ч \(m) м"
     }
-}
-
-#Preview {
-    SleepView(vm: SleepViewModel(
-        startSleep: StartSleepUseCase(repository: LocalSleepRepository()),
-        stopSleep: StopSleepUseCase(repository: LocalSleepRepository()),
-        getSleep: GetSleepEntriesUseCase(repository: LocalSleepRepository())
-    ))
-    .environmentObject(LocalizationManager.shared)
 }

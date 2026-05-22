@@ -111,6 +111,12 @@ struct L10n {
     var walkLogged: String   { s("Walk · logged",    "Прогулка · записана",   "Spaziergang · erfasst") }
     var bathLogged: String   { s("Bath · logged",    "Купание · записано",    "Bad · erfasst") }
     var vitaminsGiven: String { s("Vitamins · given","Витамины · приняты",    "Vitamine · gegeben") }
+    var walkTracker: String  { s("WALK TRACKER",    "ТРЕКЕР ПРОГУЛКИ",       "GEHTRACKER") }
+    var walking: String      { s("walking…",        "гуляем…",               "gehen…") }
+    var startWalk: String    { s("Start Walk",      "Начать прогулку",       "Spaziergang starten") }
+    var stopWalk: String     { s("Stop Walk",       "Закончить прогулку",    "Spaziergang stoppen") }
+    var noWalkYet: String    { s("no walk yet",     "ещё не гуляли",         "noch nicht spaziert") }
+    func walkLogEntry(dur: Int) -> String { s("Walk · \(dur) min", "Прогулка · \(dur) мин", "Spaziergang · \(dur) min") }
     var mood: String         { s("Mood",         "Настроение",   "Stimmung") }
     var feedLabel: String    { s("Feed",         "Еда",          "Essen") }
     var sleeping: String     { s("sleeping…",    "спит…",        "schläft…") }
@@ -353,7 +359,7 @@ struct L10n {
     var themeAuto: String       { s("Auto",          "Авто",          "Auto") }
     var autoThemeHint: String   { s("Auto follows the system appearance.", "Авто — следует системной теме устройства.", "Auto folgt der Systemdarstellung.") }
     var appLanguage: String     { s("App Language",  "Язык приложения","App-Sprache") }
-    var languageComingSoon: String { s("Deutsch, Español — coming soon.", "English, Deutsch, Español — скоро.", "Bald verfügbar.") }
+    var languageComingSoon: String { s("More languages coming soon.", "Больше языков — скоро.", "Weitere Sprachen folgen bald.") }
     var about: String           { s("About",         "О приложении",  "Über") }
     var version: String         { s("Version",       "Версия",        "Version") }
     var madeWithLove: String    { s("Made with love","Сделано с любовью","Mit Liebe gemacht") }
@@ -365,6 +371,9 @@ struct L10n {
     var themeDark: String       { s("Dark",          "Тёмная",        "Dunkel") }
     var notifications: String   { s("Notifications", "Уведомления",   "Benachrichtigungen") }
     var babyProfile: String     { s("Baby profile",  "Профиль малыша","Baby-Profil") }
+    var editProfile: String     { s("Edit Profile",  "Редактировать", "Bearbeiten") }
+    var saveChanges: String     { s("Save changes",  "Сохранить",     "Speichern") }
+    var profileUpdated: String  { s("Profile saved", "Профиль сохранён","Profil gespeichert") }
     var subscription: String    { s("Subscription",  "Подписка",      "Abonnement") }
     var privacyPolicy: String   { s("Privacy Policy","Политика конфид.", "Datenschutz") }
     var termsOfUse: String      { s("Terms of Use",  "Условия использования", "Nutzungsbedingungen") }

@@ -8,6 +8,7 @@ final class DiaryViewModel: ObservableObject {
     @Published var likedIDs: Set<UUID> = []
     @Published var photosByID: [UUID: UIImage] = [:]
     @Published var showAdd = false
+    @Published var saveError: String?
 
     private let repo: any DiaryRepository
     private let photoStorage: any PhotoStorageService
@@ -185,12 +186,15 @@ final class DiaryViewModel: ObservableObject {
         }
         entryTypes.forEach { analytics.track(.diaryEntryAdded(type: $0)) }
         let date = Date()
+        let todayStart = Calendar.current.startOfDay(for: date)
         let todayPrefix = lm.strings.today
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             if let idx = entries.firstIndex(where: { $0.dateLabel.hasPrefix(todayPrefix) }) {
                 entries[idx].items.insert(contentsOf: newDay.items, at: 0)
             } else {
-                entries.insert(newDay, at: 0)
+                let label = makeDateLabel(todayStart, today: todayStart)
+                let age = babyBirthDate.map { makeAgeLabel(todayStart, birth: $0) } ?? ""
+                entries.insert(DiaryDay(dateLabel: label, ageLabel: age, items: newDay.items), at: 0)
             }
             photosByID.merge(photos) { _, new in new }
         }
@@ -200,7 +204,8 @@ final class DiaryViewModel: ObservableObject {
                 if stored.kind == .photo, let img = photos[item.id] {
                     stored.photoPath = try? await photoStorage.save(img, forID: item.id)
                 }
-                try? await repo.add(stored)
+                do { try await repo.add(stored) }
+                catch { saveError = error.localizedDescription }
             }
             await loadEntries()
         }
