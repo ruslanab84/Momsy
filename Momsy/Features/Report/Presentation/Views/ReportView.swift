@@ -16,6 +16,9 @@ struct ReportView: View {
             VStack(spacing: 12) {
                 header
                 periodChips
+                if vm.selectedPeriod == 4 {
+                    visitDateCard
+                }
                 pdfPreviewCard
                 includeCard
                 actionButtons
@@ -84,6 +87,48 @@ struct ReportView: View {
             }
             .padding(.vertical, 2)
         }
+    }
+
+    // MARK: - Visit date card
+
+    private var visitDateCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 14) {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.bbMint)
+                    .frame(width: 36, height: 36)
+                    .overlay(
+                        Image(systemName: "cross.fill")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
+                    )
+                Text(loc.strings.lastVisitDate)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInk)
+                Spacer()
+                if vm.lastVisitDate == nil {
+                    Text(loc.strings.noVisitRecorded)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                }
+            }
+
+            DatePicker(
+                "",
+                selection: Binding(
+                    get: { vm.lastVisitDate ?? Calendar.current.date(byAdding: .day, value: -7, to: Date())! },
+                    set: { date in Task { await vm.saveVisitDate(date) } }
+                ),
+                in: ...Date(),
+                displayedComponents: .date
+            )
+            .datePickerStyle(.graphical)
+            .tint(.bbMintDeep)
+            .labelsHidden()
+        }
+        .bbCard(pad: 14)
+        .transition(.opacity.combined(with: .scale(scale: 0.97)))
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: vm.selectedPeriod)
     }
 
     // MARK: - PDF preview card

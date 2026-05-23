@@ -20,7 +20,8 @@ final class AppContainer {
     lazy var leapsRepository: any LeapsRepository          = SwiftDataLeapsRepository(context: context)
     lazy var chatRepository: any ChatRepository            = SwiftDataChatRepository(context: context)
     lazy var walkRepository: any WalkRepository            = SwiftDataWalkRepository(context: context)
-    lazy var bathRepository: any BathRepository            = SwiftDataBathRepository(context: context)
+    lazy var bathRepository: any BathRepository             = SwiftDataBathRepository(context: context)
+    lazy var doctorVisitRepository: any DoctorVisitRepository = SwiftDataDoctorVisitRepository(context: context)
 
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
@@ -69,8 +70,13 @@ final class AppContainer {
 
     // MARK: — Use Cases — Leaps
 
-    lazy var getLeaps         = GetLeapsUseCase(repository: leapsRepository)
-    lazy var markLeapComplete = MarkLeapCompleteUseCase(repository: leapsRepository)
+    lazy var getLeaps          = GetLeapsUseCase(repository: leapsRepository)
+    lazy var markLeapComplete  = MarkLeapCompleteUseCase(repository: leapsRepository)
+
+    // MARK: — Use Cases — Doctor Visit
+
+    lazy var getLastDoctorVisit = GetLastDoctorVisitUseCase(repository: doctorVisitRepository)
+    lazy var saveDoctorVisit    = SaveDoctorVisitUseCase(repository: doctorVisitRepository)
 
     // MARK: — Use Cases — Chat
 
@@ -155,6 +161,7 @@ final class AppContainer {
             feedingRepo: feedingRepository,
             sleepRepo: sleepRepository,
             temperatureRepo: temperatureRepository,
+            doctorVisitRepo: doctorVisitRepository,
             appState: appState,
             analytics: analytics
         )

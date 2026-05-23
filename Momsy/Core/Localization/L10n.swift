@@ -357,6 +357,9 @@ struct L10n {
     var reportPeriodLabelWeek: String  { s("a week",        "неделю",               "eine Woche") }
     var reportPeriodLabelMonth: String { s("a month",       "месяц",                "einen Monat") }
     var reportPeriodLabelLastVisit: String { s("last visit","последний визит",       "letzten Besuch") }
+    var noVisitRecorded: String        { s("No visit recorded",  "Визит не записан",  "Kein Besuch eingetragen") }
+    var lastVisitDate: String          { s("Last visit date",    "Дата последнего визита", "Datum des letzten Besuchs") }
+    var setVisitDate: String           { s("Set visit date",     "Указать дату визита",    "Besuchsdatum setzen") }
     var reportSectionFeedings: String  { s("Feedings & spit-ups",  "Кормления и срыгивания",  "Mahlzeiten & Spucken") }
     var reportSectionSleepByDay: String { s("Sleep by day",        "Сон по дням",             "Schlaf täglich") }
     var reportSectionDiapers: String   { s("Diapers & stool",      "Подгузники и стул",       "Windeln & Stuhl") }

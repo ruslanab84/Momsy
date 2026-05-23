@@ -11,6 +11,7 @@ final class ReportViewModel: ObservableObject {
     @Published var showShare = false
     @Published private(set) var currentStats: [(label: String, value: String, sub: String, tone: Color)] = []
     @Published private(set) var currentSparklines: [(label: String, values: [Double], color: Color, peak: String)] = []
+    @Published var lastVisitDate: Date? = nil
 
     private let generateReport: GenerateReportUseCase
     private let analytics: any AnalyticsServiceProtocol
@@ -18,17 +19,20 @@ final class ReportViewModel: ObservableObject {
     private let feedingRepo: any FeedingRepository
     private let sleepRepo: any SleepRepository
     private let temperatureRepo: any TemperatureRepository
+    private let doctorVisitRepo: any DoctorVisitRepository
 
     init(
         feedingRepo: any FeedingRepository,
         sleepRepo: any SleepRepository,
         temperatureRepo: any TemperatureRepository,
+        doctorVisitRepo: any DoctorVisitRepository,
         appState: AppState,
         analytics: any AnalyticsServiceProtocol
     ) {
         self.feedingRepo = feedingRepo
         self.sleepRepo = sleepRepo
         self.temperatureRepo = temperatureRepo
+        self.doctorVisitRepo = doctorVisitRepo
         self.appState = appState
         self.analytics = analytics
         self.generateReport = GenerateReportUseCase()
@@ -67,21 +71,34 @@ final class ReportViewModel: ObservableObject {
         case 0: return 3
         case 1: return 7
         case 2: return 14
+        case 3: return 30
         default: return 30
         }
     }
 
-    private var dateRange: (from: Date, to: Date) {
-        let to = Date()
-        let from = Calendar.current.date(byAdding: .day, value: -periodDays, to: to) ?? to
-        return (from, to)
+    func saveVisitDate(_ date: Date) async {
+        try? await doctorVisitRepo.save(DoctorVisit(id: UUID(), date: date))
+        lastVisitDate = date
+        await loadData()
     }
 
     // MARK: - Data loading
 
     func loadData() async {
-        let (from, to) = dateRange
-        let days = periodDays
+        if selectedPeriod == 4 {
+            lastVisitDate = (try? await doctorVisitRepo.getLast())?.date
+        }
+
+        let to = Date()
+        let from: Date
+        let days: Int
+        if selectedPeriod == 4, let visitDate = lastVisitDate {
+            from = visitDate
+            days = max(1, Calendar.current.dateComponents([.day], from: visitDate, to: to).day ?? 30)
+        } else {
+            days = periodDays
+            from = Calendar.current.date(byAdding: .day, value: -days, to: to) ?? to
+        }
         let cal = Calendar.current
 
         async let feedingsResult = feedingRepo.getEntries(from: from, to: to)

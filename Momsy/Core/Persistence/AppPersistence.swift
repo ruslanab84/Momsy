@@ -13,6 +13,7 @@ enum AppPersistence {
             LeapProgressRecord.self,
             ChatMessageRecord.self,
             DiaryItemRecord.self,
+            DoctorVisitRecord.self,
         ])
         do {
             return try ModelContainer(for: schema)
