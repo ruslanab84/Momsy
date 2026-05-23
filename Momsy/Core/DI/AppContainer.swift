@@ -176,7 +176,7 @@ final class AppContainer {
     }
 
     func makeLeapsViewModel() -> LeapsViewModel {
-        LeapsViewModel(getLeaps: getLeaps, appState: appState)
+        LeapsViewModel(getLeaps: getLeaps, markLeapComplete: markLeapComplete, appState: appState)
     }
 
     func makeSymptomViewModel() -> SymptomViewModel {

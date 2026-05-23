@@ -7,11 +7,13 @@ final class LeapsViewModel: ObservableObject {
     @Published var expandedLeapID: Int? = nil
 
     private let getLeapsUC: GetLeapsUseCase
+    private let markLeapCompleteUC: MarkLeapCompleteUseCase
     private let appState: AppState
     private var lm: LocalizationManager { .shared }
 
-    init(getLeaps: GetLeapsUseCase, appState: AppState) {
+    init(getLeaps: GetLeapsUseCase, markLeapComplete: MarkLeapCompleteUseCase, appState: AppState) {
         self.getLeapsUC = getLeaps
+        self.markLeapCompleteUC = markLeapComplete
         self.appState = appState
         Task { await loadLeaps() }
     }
@@ -42,6 +44,11 @@ final class LeapsViewModel: ObservableObject {
     func leapSigns(_ l: DevelopmentLeap) -> [String] { lm.lang == "en" ? l.signsEn : l.signs }
     func leapSkills(_ l: DevelopmentLeap) -> [String] { lm.lang == "en" ? l.skillsEn : l.skills }
     func leapTip(_ l: DevelopmentLeap) -> String { lm.lang == "en" ? l.tipEn : l.tip }
+
+    func markComplete(id: Int) async {
+        try? await markLeapCompleteUC.execute(leapId: id)
+        await loadLeaps()
+    }
 
     func toggleExpand(_ id: Int) {
         withAnimation(.spring(response: 0.38, dampingFraction: 0.78)) {

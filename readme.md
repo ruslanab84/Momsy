@@ -21,9 +21,13 @@ AI-powered baby care assistant built with SwiftUI and Firebase.
 
 ## Setup
 
-1. Clone repository
-2. Add GoogleService-Info.plist
-3. Run project in Xcode
+1. Clone the repository
+2. **Add Firebase config** (never committed — listed in `.gitignore`):
+   - Open [Firebase Console](https://console.firebase.google.com) → Project Settings → Your apps → iOS
+   - Download `GoogleService-Info.plist`
+   - Place it at `Momsy/Momsy/GoogleService-Info.plist`
+   - See `Momsy/GoogleService-Info.plist.template` for the expected structure
+3. Open `Momsy.xcodeproj` in Xcode and run on simulator or device
 
 ## Architecture
 
