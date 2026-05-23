@@ -2,7 +2,7 @@ import Foundation
 import FirebaseAI
 
 final class GeminiChatService: AIChatService {
-    private let modelName = "gemini-2.0-flash"
+    private let modelName = "gemini-1.5-flash"
 
     func stream(
         userText: String,
@@ -31,6 +31,7 @@ final class GeminiChatService: AIChatService {
                     }
                     continuation.finish()
                 } catch {
+                    print("[GeminiChatService] error: \(error)")
                     continuation.finish(throwing: error)
                 }
             }

@@ -89,7 +89,7 @@ final class AIChatViewModel: ObservableObject {
                 catch { errorMessage = error.localizedDescription }
                 streamingText = ""
             } catch {
-                errorMessage = "Something went wrong. Please try again."
+                errorMessage = error.localizedDescription
                 streamingText = ""
             }
             isStreaming = false

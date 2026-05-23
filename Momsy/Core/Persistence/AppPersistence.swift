@@ -1,6 +1,11 @@
+import Foundation
 import SwiftData
 
 enum AppPersistence {
+    // Bump this string whenever you change the SwiftData schema.
+    private static let schemaVersion = "v11"
+    private static let schemaVersionKey = "AppPersistence.schemaVersion"
+
     static func makeContainer() -> ModelContainer {
         let schema = Schema([
             SleepRecord.self,
@@ -15,10 +20,38 @@ enum AppPersistence {
             DiaryItemRecord.self,
             DoctorVisitRecord.self,
         ])
+
+        // If schema version changed since last run, wipe the old store
+        // before SwiftData tries (and hangs) on incompatible migration.
+        let stored = UserDefaults.standard.string(forKey: schemaVersionKey)
+        if stored != schemaVersion {
+            deleteStore()
+        }
+
         do {
-            return try ModelContainer(for: schema)
+            let container = try ModelContainer(for: schema)
+            UserDefaults.standard.set(schemaVersion, forKey: schemaVersionKey)
+            return container
         } catch {
-            fatalError("SwiftData container failed: \(error)")
+            // Fallback: delete and retry once.
+            deleteStore()
+            UserDefaults.standard.removeObject(forKey: schemaVersionKey)
+            do {
+                let container = try ModelContainer(for: schema)
+                UserDefaults.standard.set(schemaVersion, forKey: schemaVersionKey)
+                return container
+            } catch {
+                fatalError("SwiftData container failed after store reset: \(error)")
+            }
+        }
+    }
+
+    private static func deleteStore() {
+        guard let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return }
+        let store = dir.appendingPathComponent("default.store")
+        for suffix in ["", "-shm", "-wal"] {
+            let url = suffix.isEmpty ? store : URL(fileURLWithPath: store.path + suffix)
+            try? FileManager.default.removeItem(at: url)
         }
     }
 }

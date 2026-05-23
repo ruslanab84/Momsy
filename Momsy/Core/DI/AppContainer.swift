@@ -192,7 +192,8 @@ final class AppContainer {
 // MARK: — Environment
 
 private struct AppContainerKey: EnvironmentKey {
-    static let defaultValue = AppContainer()
+    // Never used at runtime — withContainer(_:) always injects the real instance.
+    nonisolated(unsafe) static let defaultValue = AppContainer()
 }
 
 extension EnvironmentValues {
