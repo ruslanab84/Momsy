@@ -56,6 +56,31 @@ struct DiaryViewModelTests {
         #expect(vm.photosByID[id] != nil)
     }
 
+    @Test("insertDay rolls back entry on repository error")
+    func insertDayRollsBackOnRepoError() async throws {
+        let repo = MockDiaryRepository()
+        repo.throwOnAdd = true
+        let vm = try await makeVM(repo: repo)
+        let item = DiaryItem(id: UUID(), type: .note(text: "Lost note"))
+        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item]), photos: [:])
+        try await Task.sleep(nanoseconds: 100_000_000)
+        #expect(vm.entries.allSatisfy { $0.items.allSatisfy { $0.id != item.id } })
+        #expect(vm.saveError != nil)
+    }
+
+    @Test("insertDay second entry appears without removing first")
+    func insertDayTwoEntriesCoexist() async throws {
+        let vm = try await makeVM()
+        let item1 = DiaryItem(id: UUID(), type: .note(text: "First"))
+        let item2 = DiaryItem(id: UUID(), type: .milestone(icon: .star, label: "Second"))
+        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item1]), photos: [:])
+        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item2]), photos: [:])
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let allItems = vm.entries.flatMap { $0.items }
+        #expect(allItems.contains { $0.id == item1.id })
+        #expect(allItems.contains { $0.id == item2.id })
+    }
+
     // MARK: - loadEntries
 
     @Test("loadEntries groups stored items by day")

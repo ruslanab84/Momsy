@@ -225,7 +225,6 @@ final class DiaryViewModel: ObservableObject {
             photosByID.merge(photos) { _, new in new }
         }
         Task {
-            var allSaved = true
             for item in newDay.items {
                 var stored = toStored(item, date: date)
                 if stored.kind == .photo, let img = photos[item.id] {
@@ -241,17 +240,25 @@ final class DiaryViewModel: ObservableObject {
                         }
                     } catch {
                         uploadProgress.removeValue(forKey: item.id)
+                        rollbackItem(item, photos: photos)
                         saveError = error.localizedDescription
-                        allSaved = false
+                        continue
                     }
                 }
                 do { try await repo.add(stored) }
                 catch {
+                    rollbackItem(item, photos: photos)
                     saveError = error.localizedDescription
-                    allSaved = false
                 }
             }
-            if allSaved { await loadEntries() }
+        }
+    }
+
+    private func rollbackItem(_ item: DiaryItem, photos: [UUID: UIImage]) {
+        withAnimation {
+            for i in entries.indices { entries[i].items.removeAll { $0.id == item.id } }
+            entries.removeAll { $0.items.isEmpty }
+            if photos[item.id] != nil { photosByID.removeValue(forKey: item.id) }
         }
     }
 }
