@@ -18,9 +18,13 @@ struct TodayViewModelTests {
         UserDefaults.standard.removeObject(forKey: "quick_log_today_date")
     }
 
-    func makeVM(repo: MockFeedingRepository = MockFeedingRepository()) -> TodayViewModel {
+    func makeVM(
+        repo: MockFeedingRepository = MockFeedingRepository(),
+        sleepRepo: MockSleepRepository = MockSleepRepository()
+    ) -> TodayViewModel {
         TodayViewModel(
             getFeeding: GetFeedingEntriesUseCase(repository: repo),
+            getSleep: GetSleepEntriesUseCase(repository: sleepRepo),
             diaperUC: DiaperUseCase(),
             quickLogRepo: QuickLogRepository()
         )

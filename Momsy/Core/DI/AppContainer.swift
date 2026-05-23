@@ -105,6 +105,7 @@ final class AppContainer {
     func makeTodayViewModel() -> TodayViewModel {
         TodayViewModel(
             getFeeding: getFeedingEntries,
+            getSleep: getSleepEntries,
             diaperUC: diaperUseCase,
             quickLogRepo: quickLogRepository
         )

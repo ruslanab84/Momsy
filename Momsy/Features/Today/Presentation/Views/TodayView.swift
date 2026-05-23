@@ -77,6 +77,7 @@ struct TodayView: View {
         }
         .sheet(isPresented: $showSleep) {
             SleepView(vm: sleepVM)
+                .onDisappear { Task { await vm.loadTodayEntries() } }
         }
         .sheet(isPresented: $showWalk) {
             WalkView(vm: walkVM)

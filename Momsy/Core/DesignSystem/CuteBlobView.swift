@@ -139,21 +139,29 @@ private struct SunBlob: View {
     }
 }
 
-// MARK: - Drop
+// MARK: - Drop (Diaper)
 
-private struct DropShape: Shape {
+private struct DiaperShape: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()
         let w = rect.width, h = rect.height
-        p.move(to: CGPoint(x: w*0.5, y: 0))
-        p.addCurve(to: CGPoint(x: w, y: h*0.62),
-                   control1: CGPoint(x: w*0.95, y: h*0.28), control2: CGPoint(x: w, y: h*0.45))
-        p.addCurve(to: CGPoint(x: w*0.5, y: h),
-                   control1: CGPoint(x: w, y: h*0.82), control2: CGPoint(x: w*0.75, y: h))
-        p.addCurve(to: CGPoint(x: 0, y: h*0.62),
-                   control1: CGPoint(x: w*0.25, y: h), control2: CGPoint(x: 0, y: h*0.82))
-        p.addCurve(to: CGPoint(x: w*0.5, y: 0),
-                   control1: CGPoint(x: 0, y: h*0.45), control2: CGPoint(x: w*0.05, y: h*0.28))
+        let r: CGFloat = 0.08
+        p.move(to: CGPoint(x: w*r, y: 0))
+        p.addLine(to: CGPoint(x: w*(1-r), y: 0))
+        p.addQuadCurve(to: CGPoint(x: w, y: h*r), control: CGPoint(x: w, y: 0))
+        p.addCurve(to: CGPoint(x: w*0.72, y: h*0.5),
+                   control1: CGPoint(x: w, y: h*0.26), control2: CGPoint(x: w*0.72, y: h*0.38))
+        p.addCurve(to: CGPoint(x: w, y: h*(1-r)),
+                   control1: CGPoint(x: w*0.72, y: h*0.62), control2: CGPoint(x: w, y: h*0.74))
+        p.addQuadCurve(to: CGPoint(x: w*(1-r), y: h), control: CGPoint(x: w, y: h))
+        p.addLine(to: CGPoint(x: w*r, y: h))
+        p.addQuadCurve(to: CGPoint(x: 0, y: h*(1-r)), control: CGPoint(x: 0, y: h))
+        p.addCurve(to: CGPoint(x: w*0.28, y: h*0.5),
+                   control1: CGPoint(x: 0, y: h*0.74), control2: CGPoint(x: w*0.28, y: h*0.62))
+        p.addCurve(to: CGPoint(x: 0, y: h*r),
+                   control1: CGPoint(x: w*0.28, y: h*0.38), control2: CGPoint(x: 0, y: h*0.26))
+        p.addQuadCurve(to: CGPoint(x: w*r, y: 0), control: CGPoint(x: 0, y: 0))
+        p.closeSubpath()
         return p
     }
 }
@@ -161,7 +169,21 @@ private struct DropShape: Shape {
 private struct DropBlob: View {
     let s: CGFloat
     var body: some View {
-        DropShape().fill(Color.bbSkyDeep).frame(width: s*0.42, height: s*0.56)
+        ZStack {
+            DiaperShape()
+                .fill(Color.white.opacity(0.92))
+                .frame(width: s*0.5, height: s*0.5)
+            // Left tape tab
+            RoundedRectangle(cornerRadius: s*0.03)
+                .fill(Color.bbSkyDeep)
+                .frame(width: s*0.15, height: s*0.09)
+                .offset(x: -s*0.27, y: -s*0.16)
+            // Right tape tab
+            RoundedRectangle(cornerRadius: s*0.03)
+                .fill(Color.bbSkyDeep)
+                .frame(width: s*0.15, height: s*0.09)
+                .offset(x: s*0.27, y: -s*0.16)
+        }
     }
 }
 

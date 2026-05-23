@@ -8,15 +8,18 @@ final class TodayViewModel: ObservableObject {
     @Published var saveError: String?
 
     private let getFeeding: GetFeedingEntriesUseCase
+    private let getSleep: GetSleepEntriesUseCase
     private let diaperUC: DiaperUseCase
     private let quickLogRepo: QuickLogRepository
 
     init(
         getFeeding: GetFeedingEntriesUseCase,
+        getSleep: GetSleepEntriesUseCase,
         diaperUC: DiaperUseCase,
         quickLogRepo: QuickLogRepository
     ) {
         self.getFeeding = getFeeding
+        self.getSleep = getSleep
         self.diaperUC = diaperUC
         self.quickLogRepo = quickLogRepo
         self.diaperCount = diaperUC.count
@@ -27,10 +30,15 @@ final class TodayViewModel: ObservableObject {
         let feedingEntries: [LogEntry] = feedings.map {
             LogEntry(time: $0.date, kind: .bottle, label: feedingLabel($0))
         }
+        let cal = Calendar.current
+        let startOfDay = cal.startOfDay(for: Date())
+        let endOfDay = cal.date(byAdding: .day, value: 1, to: startOfDay) ?? Date()
+        let sleeps = (try? await getSleep.execute(from: startOfDay, to: endOfDay)) ?? []
+        let sleepEntries: [LogEntry] = sleeps.map { sleepLabel($0) }
         let quickEntries: [LogEntry] = quickLogRepo.load().map {
             LogEntry(time: $0.time, kind: $0.kind, label: $0.label)
         }
-        let merged = (feedingEntries + quickEntries).sorted { $0.time > $1.time }
+        let merged = (feedingEntries + sleepEntries + quickEntries).sorted { $0.time > $1.time }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             logEntries = merged
         }
@@ -73,12 +81,21 @@ final class TodayViewModel: ObservableObject {
         addEntry(LogEntry(time: Date(), kind: .vitamin, label: label))
     }
 
-    func logSleep() {
-        addEntry(LogEntry(time: Date(), kind: .sleep, label: LocalizationManager.shared.strings.sleepStarted))
-    }
-
     func logSymptom() {
         addEntry(LogEntry(time: Date(), kind: .heart, label: LocalizationManager.shared.strings.symptomRecorded))
+    }
+
+    private func sleepLabel(_ entry: SleepEntry) -> LogEntry {
+        let lm = LocalizationManager.shared
+        let label: String
+        if let mins = entry.durationMinutes {
+            let h = mins / 60, m = mins % 60
+            let dur = lm.strings.sleepDurationFormatted(h: h, m: m)
+            label = lm.lang == "en" ? "Sleep · \(dur)" : "Сон · \(dur)"
+        } else {
+            label = lm.strings.sleepStarted
+        }
+        return LogEntry(time: entry.startDate, kind: .sleep, label: label)
     }
 
     private func feedingLabel(_ entry: FeedingEntry) -> String {
