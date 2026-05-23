@@ -1,4 +1,5 @@
 @testable import Momsy
+import Foundation
 
 final class MockLeapsRepository: LeapsRepository {
     var progress: [LeapProgress] = []

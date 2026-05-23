@@ -1,4 +1,5 @@
 @testable import Momsy
+import Foundation
 
 final class MockChatRepository: ChatRepository, @unchecked Sendable {
     var history: [ChatMessage] = []

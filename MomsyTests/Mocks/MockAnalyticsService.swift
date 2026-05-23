@@ -1,4 +1,5 @@
 @testable import Momsy
+import Foundation
 
 final class MockAnalyticsService: AnalyticsServiceProtocol, @unchecked Sendable {
     var events: [AnalyticsEvent] = []

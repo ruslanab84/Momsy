@@ -1,4 +1,5 @@
 @testable import Momsy
+import Foundation
 
 final class MockSleepRepository: SleepRepository {
     var entries: [SleepEntry] = []

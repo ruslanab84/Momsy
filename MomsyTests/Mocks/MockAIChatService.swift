@@ -1,4 +1,5 @@
 @testable import Momsy
+import Foundation
 
 final class MockAIChatService: AIChatService, @unchecked Sendable {
     var chunks: [String] = ["Hello", " World"]

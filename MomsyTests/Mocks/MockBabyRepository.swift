@@ -1,4 +1,5 @@
 @testable import Momsy
+import Foundation
 
 final class MockBabyRepository: BabyRepository {
     private var profile: BabyProfile?
