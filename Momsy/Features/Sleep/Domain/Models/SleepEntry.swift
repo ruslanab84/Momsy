@@ -1,5 +1,11 @@
 import Foundation
 
+struct SleepDayPoint: Identifiable {
+    let id: Date
+    let totalMinutes: Int
+    var totalHours: Double { Double(totalMinutes) / 60 }
+}
+
 enum SleepQuality: String, Codable, CaseIterable {
     case good = "good"
     case normal = "normal"

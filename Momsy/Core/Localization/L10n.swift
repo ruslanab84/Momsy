@@ -180,6 +180,16 @@ struct L10n {
     var qualityNormal: String  { s("😐 Normal",    "😐 Нормально",  "😐 Normal") }
     var qualityRestless: String{ s("😣 Restless",  "😣 Беспокойно", "😣 Unruhig") }
 
+    var sleepChartTitle: String  { s("Sleep chart",   "График сна",    "Schlafdiagramm") }
+    var sleepPeriodWeek: String  { s("7 days",        "7 дней",        "7 Tage") }
+    var sleepPeriodMonth: String { s("30 days",       "30 дней",       "30 Tage") }
+    var sleepAverage: String     { s("Average",       "Среднее",       "Durchschn.") }
+    var sleepNormLabel: String   { s("Norm",          "Норма",         "Norm") }
+    var sleepInNorm: String      { s("In norm",       "В норме",       "In Norm") }
+    var sleepBelowNorm: String   { s("Below norm",    "Ниже нормы",    "Unter Norm") }
+    var sleepAboveNorm: String   { s("Above norm",    "Выше нормы",    "Über Norm") }
+    var sleepNoData: String      { s("No sleep data yet", "Данных о сне пока нет", "Noch keine Schlafdaten") }
+
     // MARK: — Diaper
     var diaperWet: String   { s("Wet",    "Мокрый",  "Nass") }
     var diaperDirty: String { s("Dirty",  "Грязный", "Schmutzig") }

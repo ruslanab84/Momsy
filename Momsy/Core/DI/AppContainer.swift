@@ -143,7 +143,8 @@ final class AppContainer {
     }
 
     func makeSleepViewModel() -> SleepViewModel {
-        SleepViewModel(startSleep: startSleep, stopSleep: stopSleep, getSleep: getSleepEntries)
+        SleepViewModel(startSleep: startSleep, stopSleep: stopSleep,
+                       getSleep: getSleepEntries, appState: appState)
     }
 
     func makeAIChatViewModel() -> AIChatViewModel {

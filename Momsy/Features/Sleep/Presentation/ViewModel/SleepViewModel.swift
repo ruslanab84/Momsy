@@ -8,20 +8,61 @@ final class SleepViewModel: ObservableObject {
     @Published var todayEntries: [SleepEntry] = []
     @Published var selectedQuality: SleepQuality = .normal
     @Published var saveError: String?
+    @Published var selectedChartPeriod = 0
+    @Published var sleepDays: [SleepDayPoint] = []
 
     private var activeSleepEntry: SleepEntry?
     private var timerCancellable: AnyCancellable?
+    private var chartPeriodCancellable: AnyCancellable?
     private var lm: LocalizationManager { .shared }
 
     private let startSleepUC: StartSleepUseCase
     private let stopSleepUC: StopSleepUseCase
     private let getSleepUC: GetSleepEntriesUseCase
+    private let appState: AppState
 
-    init(startSleep: StartSleepUseCase, stopSleep: StopSleepUseCase, getSleep: GetSleepEntriesUseCase) {
+    init(startSleep: StartSleepUseCase, stopSleep: StopSleepUseCase,
+         getSleep: GetSleepEntriesUseCase, appState: AppState) {
         self.startSleepUC = startSleep
         self.stopSleepUC = stopSleep
         self.getSleepUC = getSleep
-        Task { await loadTodayEntries() }
+        self.appState = appState
+        Task {
+            await loadTodayEntries()
+            await loadChartData()
+        }
+        chartPeriodCancellable = $selectedChartPeriod
+            .dropFirst()
+            .sink { [weak self] _ in Task { [weak self] in await self?.loadChartData() } }
+    }
+
+    var sleepNorm: (min: Double, max: Double) {
+        guard let birth = appState.babyProfile?.birthDate else { return (12, 14) }
+        let months = Calendar.current.dateComponents([.month], from: birth, to: Date()).month ?? 0
+        switch months {
+        case 0..<3:  return (14, 17)
+        case 3..<6:  return (12, 15)
+        case 6..<12: return (12, 14)
+        case 12..<24: return (11, 14)
+        default:     return (10, 13)
+        }
+    }
+
+    func loadChartData() async {
+        let cal = Calendar.current
+        let dayCount = selectedChartPeriod == 0 ? 7 : 30
+        let today = cal.startOfDay(for: Date())
+        guard let periodStart = cal.date(byAdding: .day, value: -(dayCount - 1), to: today) else { return }
+        let entries = (try? await getSleepUC.execute(from: periodStart, to: Date())) ?? []
+        let completed = entries.filter { $0.endDate != nil }
+        sleepDays = (0..<dayCount).compactMap { offset in
+            guard let day = cal.date(byAdding: .day, value: offset, to: periodStart) else { return nil }
+            let mins = completed
+                .filter { cal.isDate($0.startDate, inSameDayAs: day) }
+                .compactMap(\.durationMinutes)
+                .reduce(0, +)
+            return SleepDayPoint(id: day, totalMinutes: mins)
+        }
     }
 
     var sleepTimerString: String {

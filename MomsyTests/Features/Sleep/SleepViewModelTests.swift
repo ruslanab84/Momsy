@@ -6,11 +6,14 @@ import Foundation
 @MainActor
 struct SleepViewModelTests {
 
-    func makeVM(repo: MockSleepRepository = MockSleepRepository()) -> SleepViewModel {
-        SleepViewModel(
+    func makeVM(repo: MockSleepRepository = MockSleepRepository(),
+                babyRepo: MockBabyRepository = MockBabyRepository()) -> SleepViewModel {
+        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: babyRepo))
+        return SleepViewModel(
             startSleep: StartSleepUseCase(repository: repo),
             stopSleep: StopSleepUseCase(repository: repo),
-            getSleep: GetSleepEntriesUseCase(repository: repo)
+            getSleep: GetSleepEntriesUseCase(repository: repo),
+            appState: appState
         )
     }
 
@@ -132,5 +135,72 @@ struct SleepViewModelTests {
         vm.sleepSeconds = 0
         vm.syncTimerWithStartDate()
         #expect(vm.sleepSeconds == 0)
+    }
+
+    // MARK: - loadChartData
+
+    @Test("loadChartData groups entries into daily points")
+    func chartDataGroupsByDay() async throws {
+        let repo = MockSleepRepository()
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let yesterday = cal.date(byAdding: .day, value: -1, to: today)!
+        let e1 = SleepEntry(startDate: yesterday, endDate: yesterday.addingTimeInterval(3600))
+        let e2 = SleepEntry(startDate: today, endDate: today.addingTimeInterval(7200))
+        repo.entries = [e1, e2]
+        let vm = makeVM(repo: repo)
+        vm.selectedChartPeriod = 0
+        await vm.loadChartData()
+        let todayPt = vm.sleepDays.first { cal.isDateInToday($0.id) }
+        let yestPt = vm.sleepDays.first { cal.isDate($0.id, inSameDayAs: yesterday) }
+        #expect(todayPt?.totalMinutes == 120)
+        #expect(yestPt?.totalMinutes == 60)
+    }
+
+    @Test("loadChartData produces 7 points for week period")
+    func chartDataWeekHasSevenPoints() async throws {
+        let vm = makeVM()
+        vm.selectedChartPeriod = 0
+        await vm.loadChartData()
+        #expect(vm.sleepDays.count == 7)
+    }
+
+    @Test("loadChartData produces 30 points for month period")
+    func chartDataMonthHasThirtyPoints() async throws {
+        let vm = makeVM()
+        vm.selectedChartPeriod = 1
+        await vm.loadChartData()
+        #expect(vm.sleepDays.count == 30)
+    }
+
+    // MARK: - sleepNorm
+
+    @Test("sleepNorm returns 14-17h for newborn")
+    func normForNewborn() {
+        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: MockBabyRepository()))
+        appState.update(BabyProfile(name: "Test", birthDate: Date(), stage: "newborn", gender: "boy"))
+        let vm = SleepViewModel(
+            startSleep: StartSleepUseCase(repository: MockSleepRepository()),
+            stopSleep: StopSleepUseCase(repository: MockSleepRepository()),
+            getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
+            appState: appState
+        )
+        #expect(vm.sleepNorm.min == 14)
+        #expect(vm.sleepNorm.max == 17)
+    }
+
+    @Test("sleepNorm returns 12-14h for 6-month-old")
+    func normForSixMonths() {
+        let birth = Calendar.current.date(byAdding: .month, value: -6, to: Date())!
+        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: MockBabyRepository()))
+        appState.update(BabyProfile(name: "Test", birthDate: birth, stage: "newborn", gender: "boy"))
+        let vm = SleepViewModel(
+            startSleep: StartSleepUseCase(repository: MockSleepRepository()),
+            stopSleep: StopSleepUseCase(repository: MockSleepRepository()),
+            getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
+            appState: appState
+        )
+        #expect(vm.sleepNorm.min == 12)
+        #expect(vm.sleepNorm.max == 14)
     }
 }

@@ -28,6 +28,13 @@ struct SleepView: View {
                     if vm.isSleepActive { qualityPicker }
                     actionButton
                     todayList
+                    SleepChartSection(
+                        days: vm.sleepDays,
+                        normMin: vm.sleepNorm.min,
+                        normMax: vm.sleepNorm.max,
+                        selectedPeriod: $vm.selectedChartPeriod,
+                        lang: loc.lang
+                    )
                 }
                 .padding(.horizontal, 22)
                 .padding(.top, 16)
@@ -254,10 +261,7 @@ struct SleepView: View {
 }
 
 #Preview {
-    SleepView(vm: SleepViewModel(
-        startSleep: StartSleepUseCase(repository: LocalSleepRepository()),
-        stopSleep: StopSleepUseCase(repository: LocalSleepRepository()),
-        getSleep: GetSleepEntriesUseCase(repository: LocalSleepRepository())
-    ))
-    .environmentObject(LocalizationManager.shared)
+    let container = AppContainer()
+    SleepView(vm: container.makeSleepViewModel())
+        .environmentObject(LocalizationManager.shared)
 }
