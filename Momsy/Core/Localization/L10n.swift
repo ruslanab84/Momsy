@@ -40,6 +40,10 @@ struct L10n {
     var call: String        { s("Call",          "Позвонить",    "Anrufen") }
     var days: String        { s("days",          "дней",         "Tage") }
     var editSmall: String   { s("edit",          "правка",       "bearbeiten") }
+    var delete: String     { s("Delete",        "Удалить",      "Löschen") }
+    var notes: String      { s("Notes",         "Заметки",      "Notizen") }
+    var optional: String   { s("optional",      "необязательно","optional") }
+    var photo: String      { s("Photo",         "Фото",         "Foto") }
 
     // MARK: — Time units
     var unitDay: String     { s("d",    "дн",   "T") }
@@ -386,6 +390,8 @@ struct L10n {
     var reportStatTempLabel: String    { s("Temperature",  "Температура",             "Temperatur") }
     func reportTempPeakSub(n: Int) -> String { s("peak · \(n)×", "пик · \(n)×",      "Peak · \(n)×") }
     var reportTempNormal: String       { s("normal",       "норма",                   "normal") }
+    var reportStatWeightLabel: String  { s("Weight & Height", "Вес и рост",           "Gewicht & Größe") }
+    var reportSparkWeightLabel: String { s("Weight, kg",      "Вес, кг",              "Gewicht, kg") }
     var reportSparkFeedingsLabel: String { s("Feedings / day",  "Кормления / сут",    "Mahlzeiten / Tag") }
     var reportSparkSleepLabel: String  { s("Sleep / day (h)",   "Сон / сут (ч)",      "Schlaf / Tag (h)") }
     var reportSparkTempLabel: String   { s("Temperature °C",    "Температура °C",     "Temperatur °C") }
@@ -537,6 +543,34 @@ struct L10n {
     var pediatricianReport: String { s("Pediatrician Report","Отчёт для педиатра","Kinderarztbericht") }
     var pdfForWeek: String      { s("PDF for the week — sleep, feeding, weight", "PDF за неделю — сон, кормление, вес", "PDF für die Woche — Schlaf, Ernährung, Gewicht") }
     var whoPercentileChart: String { s("WHO percentile chart", "График по перцентилям ВОЗ", "WHO-Perzentilkurve") }
+    var vaccinations: String            { s("Vaccinations",          "Прививки",                     "Impfungen") }
+    var vaccinationCalendar: String     { s("Vaccination calendar",   "Календарь прививок",           "Impfkalender") }
+    var vaccinationCalendarSub: String  { s("Schedule & reminders",   "Расписание и напоминания",     "Zeitplan & Erinnerungen") }
+    var vaccinationMarkDone: String     { s("Mark as done",           "Отметить выполненной",         "Als erledigt markieren") }
+    var vaccinationUndo: String         { s("Undo",                   "Отменить",                     "Rückgängig") }
+
+    // MARK: — Food Diary
+    var foodDiary: String           { s("Food Diary",          "Прикорм-дневник",        "Beikost-Tagebuch") }
+    var foodDiarySub: String        { s("New foods, reactions, allergies", "Новые продукты, реакции, аллергии", "Neue Lebensmittel, Reaktionen, Allergien") }
+    var addFood: String             { s("Add food",             "Добавить продукт",        "Lebensmittel hinzufügen") }
+    var foodName: String            { s("Food name",            "Название продукта",       "Lebensmittelname") }
+    var foodCategory: String        { s("Category",             "Категория",               "Kategorie") }
+    var foodReaction: String        { s("Reaction",             "Реакция",                 "Reaktion") }
+    var foodReactionNone: String    { s("No reaction",          "Без реакции",             "Keine Reaktion") }
+    var foodReactionMild: String    { s("Mild",                 "Лёгкая",                  "Leicht") }
+    var foodReactionSevere: String  { s("Severe",               "Сильная",                 "Schwer") }
+    var foodAllergen: String        { s("Allergen",             "Аллерген",                "Allergen") }
+    var foodAllergens: String       { s("Allergens",            "Аллергены",               "Allergene") }
+    var foodAllergensNone: String   { s("No allergens logged",  "Аллергены не зафиксированы", "Keine Allergene erfasst") }
+    var foodCatVegetable: String    { s("Vegetable",            "Овощ",                    "Gemüse") }
+    var foodCatFruit: String        { s("Fruit",                "Фрукт",                   "Frucht") }
+    var foodCatCereal: String       { s("Cereal",               "Каша",                    "Getreide") }
+    var foodCatMeat: String         { s("Meat",                 "Мясо",                    "Fleisch") }
+    var foodCatDairy: String        { s("Dairy",                "Молочное",                "Milchprodukt") }
+    var foodCatFish: String         { s("Fish",                 "Рыба",                    "Fisch") }
+    var foodCatEgg: String          { s("Egg",                  "Яйцо",                    "Ei") }
+    var foodCatOther: String        { s("Other",                "Другое",                  "Sonstiges") }
+    var foodStartHint: String       { s("Log first solid foods for your baby", "Записывайте первые продукты прикорма", "Erste Beikost für Ihr Baby protokollieren") }
 
     // MARK: — Me / Profile
     var familyMembersHint: String { s("Mom, dad, nanny, grandma", "Мама, папа, няня, бабушка", "Mama, Papa, Nanny, Oma") }

@@ -19,12 +19,14 @@ final class ReportViewModel: ObservableObject {
     private let feedingRepo: any FeedingRepository
     private let sleepRepo: any SleepRepository
     private let temperatureRepo: any TemperatureRepository
+    private let measurementRepo: any MeasurementRepository
     private let doctorVisitRepo: any DoctorVisitRepository
 
     init(
         feedingRepo: any FeedingRepository,
         sleepRepo: any SleepRepository,
         temperatureRepo: any TemperatureRepository,
+        measurementRepo: any MeasurementRepository,
         doctorVisitRepo: any DoctorVisitRepository,
         appState: AppState,
         analytics: any AnalyticsServiceProtocol
@@ -32,6 +34,7 @@ final class ReportViewModel: ObservableObject {
         self.feedingRepo = feedingRepo
         self.sleepRepo = sleepRepo
         self.temperatureRepo = temperatureRepo
+        self.measurementRepo = measurementRepo
         self.doctorVisitRepo = doctorVisitRepo
         self.appState = appState
         self.analytics = analytics
@@ -101,13 +104,15 @@ final class ReportViewModel: ObservableObject {
         }
         let cal = Calendar.current
 
-        async let feedingsResult = feedingRepo.getEntries(from: from, to: to)
-        async let sleepsResult   = sleepRepo.getEntries(from: from, to: to)
-        async let tempsResult    = temperatureRepo.getEntries(from: from, to: to)
+        async let feedingsResult      = feedingRepo.getEntries(from: from, to: to)
+        async let sleepsResult        = sleepRepo.getEntries(from: from, to: to)
+        async let tempsResult         = temperatureRepo.getEntries(from: from, to: to)
+        async let measurementsResult  = measurementRepo.getEntries(from: from, to: to)
 
-        let feedings = (try? await feedingsResult) ?? []
-        let sleeps   = (try? await sleepsResult)   ?? []
-        let temps    = (try? await tempsResult)    ?? []
+        let feedings     = (try? await feedingsResult)     ?? []
+        let sleeps       = (try? await sleepsResult)       ?? []
+        let temps        = (try? await tempsResult)        ?? []
+        let measurements = (try? await measurementsResult) ?? []
 
         var feedPerDay  = [Double]()
         var sleepPerDay = [Double]()
@@ -138,6 +143,24 @@ final class ReportViewModel: ObservableObject {
         let maxTemp   = temps.map(\.value).max() ?? 0
         let peakCount = temps.filter { $0.value > 37.5 }.count
 
+        let sortedMeasurements = measurements.sorted { $0.date < $1.date }
+        let weightValue: String
+        let weightSub: String
+        if let last = sortedMeasurements.last, !last.weight.isEmpty {
+            weightValue = "\(last.weight) кг"
+            if let first = sortedMeasurements.first, first.id != last.id,
+               let fw = Double(first.weight.replacingOccurrences(of: ",", with: ".")),
+               let lw = Double(last.weight.replacingOccurrences(of: ",", with: ".")) {
+                let d = lw - fw
+                weightSub = String(format: d >= 0 ? "+%.2f кг" : "%.2f кг", d)
+            } else {
+                weightSub = last.height.isEmpty ? lm.strings.noData : "\(last.height) см"
+            }
+        } else {
+            weightValue = "—"
+            weightSub = lm.strings.noData
+        }
+
         currentStats = [
             (
                 lm.strings.reportStatFeedingsLabel,
@@ -165,11 +188,21 @@ final class ReportViewModel: ObservableObject {
                     : lm.strings.noData,
                 maxTemp > 37.5 ? .bbCoralDeep : .bbMintDeep
             ),
+            (
+                lm.strings.reportStatWeightLabel,
+                weightValue,
+                weightSub,
+                .bbMintDeep
+            ),
         ]
 
         let tempForChart = rawTempPerDay.map { $0 > 0 ? $0 : 36.6 }
         let tempPeakStr  = rawTempPerDay.compactMap { $0 > 0 ? $0 : nil }.max()
             .map { String(format: "%.1f", $0) } ?? "—"
+
+        let weightValues = sortedMeasurements.compactMap {
+            Double($0.weight.replacingOccurrences(of: ",", with: "."))
+        }
 
         currentSparklines = [
             (
@@ -189,6 +222,12 @@ final class ReportViewModel: ObservableObject {
                 tempForChart.isEmpty ? [36.6] : tempForChart,
                 .bbCoralDeep,
                 tempPeakStr
+            ),
+            (
+                lm.strings.reportSparkWeightLabel,
+                weightValues.isEmpty ? [0] : weightValues,
+                .bbMintDeep,
+                weightValues.last.map { String(format: "%.1f", $0) } ?? "—"
             ),
         ]
     }

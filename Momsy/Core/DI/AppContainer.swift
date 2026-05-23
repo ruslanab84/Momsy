@@ -22,6 +22,8 @@ final class AppContainer {
     lazy var walkRepository: any WalkRepository            = SwiftDataWalkRepository(context: context)
     lazy var bathRepository: any BathRepository             = SwiftDataBathRepository(context: context)
     lazy var doctorVisitRepository: any DoctorVisitRepository = SwiftDataDoctorVisitRepository(context: context)
+    lazy var vaccinationRepository: any VaccinationRepository = SwiftDataVaccinationRepository(context: context)
+    lazy var complementaryFeedingRepository: any ComplementaryFeedingRepository = SwiftDataComplementaryFeedingRepository(context: context)
 
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
@@ -77,6 +79,18 @@ final class AppContainer {
 
     lazy var getLastDoctorVisit = GetLastDoctorVisitUseCase(repository: doctorVisitRepository)
     lazy var saveDoctorVisit    = SaveDoctorVisitUseCase(repository: doctorVisitRepository)
+
+    // MARK: — Use Cases — Vaccination
+
+    lazy var getVaccinationStatus = GetVaccinationStatusUseCase(repository: vaccinationRepository)
+    lazy var markVaccinationDone  = MarkVaccinationDoneUseCase(repository: vaccinationRepository)
+    lazy var unmarkVaccination    = UnmarkVaccinationUseCase(repository: vaccinationRepository)
+
+    // MARK: — Use Cases — Complementary Feeding
+
+    lazy var addFoodEntry   = AddFoodEntryUseCase(repository: complementaryFeedingRepository)
+    lazy var getFoodEntries = GetFoodEntriesUseCase(repository: complementaryFeedingRepository)
+    lazy var deleteFoodEntry = DeleteFoodEntryUseCase(repository: complementaryFeedingRepository)
 
     // MARK: — Use Cases — Chat
 
@@ -163,6 +177,7 @@ final class AppContainer {
             feedingRepo: feedingRepository,
             sleepRepo: sleepRepository,
             temperatureRepo: temperatureRepository,
+            measurementRepo: measurementRepository,
             doctorVisitRepo: doctorVisitRepository,
             appState: appState,
             analytics: analytics
@@ -179,6 +194,25 @@ final class AppContainer {
 
     func makeLeapsViewModel() -> LeapsViewModel {
         LeapsViewModel(getLeaps: getLeaps, markLeapComplete: markLeapComplete, appState: appState)
+    }
+
+    func makeVaccinationViewModel() -> VaccinationViewModel {
+        VaccinationViewModel(
+            getStatus: getVaccinationStatus,
+            markDone: markVaccinationDone,
+            unmark: unmarkVaccination,
+            pushNotifications: pushNotifications,
+            appState: appState
+        )
+    }
+
+    func makeFoodDiaryViewModel() -> FoodDiaryViewModel {
+        FoodDiaryViewModel(
+            add: addFoodEntry,
+            get: getFoodEntries,
+            delete: deleteFoodEntry,
+            photoStorage: photoStorage
+        )
     }
 
     func makeSymptomViewModel() -> SymptomViewModel {

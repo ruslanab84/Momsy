@@ -10,6 +10,7 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
         static let feeding = "momsy.feeding.reminder"
         static let diary   = "momsy.diary.morning"
         static func leap(_ id: Int) -> String { "momsy.leap.\(id)" }
+        static func vaccination(_ id: Int) -> String { "momsy.vaccination.\(id)" }
     }
 
     func requestPermission() async {
@@ -74,5 +75,25 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     func cancelLeapNotification(leapID: Int) {
         center.removePendingNotificationRequests(withIdentifiers: [ID.leap(leapID)])
+    }
+
+    func scheduleVaccinationReminder(catalogId: Int, name: String, dueDate: Date) {
+        center.removePendingNotificationRequests(withIdentifiers: [ID.vaccination(catalogId)])
+        guard let fireDate = Calendar.current.date(byAdding: .day, value: -7, to: dueDate),
+              fireDate > Date() else { return }
+        let isEn = LocalizationManager.shared.current == .english
+
+        let content = UNMutableNotificationContent()
+        content.title = isEn ? "Vaccination reminder" : "Напоминание о прививке"
+        content.body  = isEn ? "\(name) — in 7 days" : "\(name) — через 7 дней"
+        content.sound = .default
+
+        let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+        center.add(UNNotificationRequest(identifier: ID.vaccination(catalogId), content: content, trigger: trigger), withCompletionHandler: nil)
+    }
+
+    func cancelVaccinationReminder(catalogId: Int) {
+        center.removePendingNotificationRequests(withIdentifiers: [ID.vaccination(catalogId)])
     }
 }

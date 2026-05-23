@@ -71,6 +71,24 @@ struct DoctorMenuView: View {
                         title: lm.strings.heightAndWeight,
                         sub: lm.strings.whoPercentileChart
                     )
+                    Divider().padding(.leading, 60)
+                    DoctorMenuRow(
+                        destination: VaccinationView(container: container),
+                        icon: "syringe",
+                        iconColor: .bbLilacDeep,
+                        iconBg: Color.bbLilac.opacity(0.3),
+                        title: lm.strings.vaccinations,
+                        sub: lm.strings.vaccinationCalendarSub
+                    )
+                    Divider().padding(.leading, 60)
+                    DoctorMenuRow(
+                        destination: FoodDiaryView(container: container),
+                        icon: "fork.knife.circle.fill",
+                        iconColor: .bbCoralDeep,
+                        iconBg: Color.bbCoral.opacity(0.2),
+                        title: lm.strings.foodDiary,
+                        sub: lm.strings.foodDiarySub
+                    )
                 }
                 .background(Color.bbCard)
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))

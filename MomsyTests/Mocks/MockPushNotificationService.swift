@@ -11,4 +11,6 @@ final class MockPushNotificationService: PushNotificationServiceProtocol, @unche
     func scheduleMorningDiary(hour: Int, minute: Int) { scheduledDiaryHour = hour }
     func scheduleLeapNotification(leapID: Int, name: String, nameEn: String, startDate: Date) {}
     func cancelLeapNotification(leapID: Int) {}
+    func scheduleVaccinationReminder(catalogId: Int, name: String, dueDate: Date) {}
+    func cancelVaccinationReminder(catalogId: Int) {}
 }
