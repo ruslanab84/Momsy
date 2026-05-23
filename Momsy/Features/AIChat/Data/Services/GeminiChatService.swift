@@ -2,7 +2,7 @@ import Foundation
 import FirebaseAI
 
 final class GeminiChatService: AIChatService {
-    private let modelName = "gemini-1.5-flash"
+    private let modelName = "gemini-2.5-flash-lite"
 
     func stream(
         userText: String,

@@ -13,6 +13,7 @@ final class DiaryViewModel: ObservableObject {
 
     private let repo: any DiaryRepository
     private let photoStorage: any PhotoStorageService
+    private let localPhotoStorage = LocalPhotoStorageService()
     private let analytics: any AnalyticsServiceProtocol
     private let appState: AppState
 
@@ -240,9 +241,9 @@ final class DiaryViewModel: ObservableObject {
                         }
                     } catch {
                         uploadProgress.removeValue(forKey: item.id)
-                        rollbackItem(item, photos: photos)
-                        saveError = error.localizedDescription
-                        continue
+                        // Firebase upload failed — persist locally so the entry survives app restarts.
+                        // migrateLocalPhotosToFirebase() will retry the upload on next launch.
+                        stored.photoPath = try? await localPhotoStorage.save(img, forID: item.id)
                     }
                 }
                 do { try await repo.add(stored) }
