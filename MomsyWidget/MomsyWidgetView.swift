@@ -42,7 +42,8 @@ private struct SmallWidgetView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(12)
-        .containerBackground(.fill.tertiary, for: .widget)
+        .colorScheme(.light)
+        .containerBackground(Color(red: 1.0, green: 0.965, blue: 0.925), for: .widget)
     }
 }
 
@@ -60,9 +61,15 @@ private struct MediumWidgetView: View {
                 .frame(maxWidth: .infinity)
         }
         .padding(12)
-        .containerBackground(.fill.tertiary, for: .widget)
+        .colorScheme(.light)
+        .containerBackground(Color(red: 1.0, green: 0.965, blue: 0.925), for: .widget)
     }
 }
+
+private let bbCoral   = Color(red: 0.941, green: 0.541, blue: 0.431)
+private let bbLilac   = Color(red: 0.624, green: 0.510, blue: 0.847)
+private let bbInk     = Color(red: 0.239, green: 0.165, blue: 0.125)
+private let bbInkSoft = Color(red: 0.420, green: 0.329, blue: 0.275)
 
 private struct FeedingColumn: View {
     let state: FeedingWidgetState
@@ -71,7 +78,7 @@ private struct FeedingColumn: View {
         VStack(alignment: .leading, spacing: 4) {
             Label("Кормление", systemImage: "drop.fill")
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(bbCoral)
             switch state {
             case .running(let start, let side):
                 Text(timerInterval: start...Date.distantFuture, countsDown: false)
@@ -108,7 +115,7 @@ private struct SleepColumn: View {
         VStack(alignment: .leading, spacing: 4) {
             Label("Сон", systemImage: "moon.fill")
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(bbLilac)
             switch state {
             case .active(let start):
                 Text(timerInterval: start...Date.distantFuture, countsDown: false)
@@ -199,7 +206,7 @@ private struct FeedingTimerView: View {
         VStack(alignment: .leading, spacing: 4) {
             Label("Кормление", systemImage: "drop.fill")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(bbCoral)
             if paused {
                 Text(formatSeconds(pausedSecs))
                     .font(.system(.title, design: .rounded, weight: .bold).monospacedDigit())
@@ -225,7 +232,7 @@ private struct SleepTimerView: View {
         VStack(alignment: .leading, spacing: 4) {
             Label("Сон", systemImage: "moon.fill")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(bbLilac)
             Text(timerInterval: startDate...Date.distantFuture, countsDown: false)
                 .font(.system(.title, design: .rounded, weight: .bold).monospacedDigit())
                 .minimumScaleFactor(0.6)
@@ -247,7 +254,7 @@ private struct IdleSummaryView: View {
         VStack(alignment: .leading, spacing: 2) {
             Label("Кормление", systemImage: "drop.fill")
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(bbCoral)
             if case .idle(let date) = entry.feedingState, let d = date {
                 Text(d, style: .relative)
                     .font(.subheadline.monospacedDigit().weight(.medium))
@@ -262,7 +269,7 @@ private struct IdleSummaryView: View {
         VStack(alignment: .leading, spacing: 2) {
             Label("Сон", systemImage: "moon.fill")
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(bbLilac)
             if case .idle(let dur) = entry.sleepState, let secs = dur {
                 Text(formatSeconds(secs))
                     .font(.subheadline.monospacedDigit().weight(.medium))
