@@ -89,6 +89,15 @@ struct DoctorMenuView: View {
                         title: lm.strings.foodDiary,
                         sub: lm.strings.foodDiarySub
                     )
+                    Divider().padding(.leading, 60)
+                    DoctorMenuRow(
+                        destination: MomMoodView(container: container),
+                        icon: "heart.text.square.fill",
+                        iconColor: .bbRoseDeep,
+                        iconBg: Color.bbRose.opacity(0.25),
+                        title: lm.strings.momMoodTitle,
+                        sub: lm.strings.momMoodSub
+                    )
                 }
                 .background(Color.bbCard)
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))

@@ -34,12 +34,10 @@ struct MeView: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.profile)
         .sheet(isPresented: $showEditProfile) {
-            if let profile = appState.babyProfile {
-                EditBabyProfileView(profile: profile)
-                    .environmentObject(lm)
-                    .environmentObject(appState)
-                    .environment(\.appContainer, container)
-            }
+            EditBabyProfileView(profile: appState.babyProfile ?? BabyProfile())
+                .environmentObject(lm)
+                .environmentObject(appState)
+                .environment(\.appContainer, container)
         }
     }
 
@@ -71,7 +69,6 @@ struct MeView: View {
                     .clipShape(Capsule())
             }
             .buttonStyle(.plain)
-            .disabled(appState.babyProfile == nil)
         }
         .bbCard(pad: 16)
     }

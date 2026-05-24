@@ -395,6 +395,7 @@ struct L10n {
     var reportSparkFeedingsLabel: String { s("Feedings / day",  "Кормления / сут",    "Mahlzeiten / Tag") }
     var reportSparkSleepLabel: String  { s("Sleep / day (h)",   "Сон / сут (ч)",      "Schlaf / Tag (h)") }
     var reportSparkTempLabel: String   { s("Temperature °C",    "Температура °C",     "Temperatur °C") }
+    var reportSparkDiapersLabel: String { s("Diapers / day",   "Подгузники / сут",   "Windeln / Tag") }
     func reportPreviewPeriod(label: String) -> String { s("Period: \(label)", "Период: \(label)", "Zeitraum: \(label)") }
     var reportPreviewNotes: String     { s("NOTES",         "ЗАМЕТКИ",                 "NOTIZEN") }
     var reportPreviewDoctorNotes: String { s("DOCTOR'S NOTES", "ЗАМЕТКИ ВРАЧА",        "ARZTNOTIZEN") }
@@ -583,4 +584,61 @@ struct L10n {
     var momsyAI: String         { s("Momsy AI",     "Momsy ИИ",      "Momsy KI") }
     var aiChatSubtitle: String  { s("Ask about sleep, feeding, development,\nor anything on your mind.", "Спросите о сне, кормлении, развитии\nили о том, что вас беспокоит.", "Fragen zu Schlaf, Ernährung, Entwicklung\noder allem, was Sie beschäftigt.") }
     var askAnything: String     { s("Ask anything…","Спросить…",     "Alles fragen…") }
+
+    // MARK: — Mom Mood Tracker
+    var momMoodTitle: String          { s("My Wellbeing",            "Моё самочувствие",           "Mein Wohlbefinden") }
+    var momMoodSub: String            { s("Mood & PPD screening",    "Настроение и PPD скрининг",  "Stimmung & PPD-Screening") }
+    var momMoodSectionLabel: String   { s("WELLBEING",               "САМОЧУВСТВИЕ",               "WOHLBEFINDEN") }
+    var momMoodTodayPrompt: String    { s("How are you feeling today?", "Как вы себя чувствуете сегодня?", "Wie geht es Ihnen heute?") }
+    var momMoodEnergyLabel: String    { s("Energy",                  "Энергия",                    "Energie") }
+    var momMoodCheckin: String        { s("Daily Check-in",          "Ежедневная отметка",         "Tägliches Check-in") }
+    var momMoodCheckinSub: String     { s("Rate your mood & energy", "Оцените настроение и силы",  "Stimmung & Energie bewerten") }
+    var momMoodHistory: String        { s("30-day history",          "История за 30 дней",         "30-Tage-Verlauf") }
+    var momMoodNoData: String         { s("No check-ins yet",        "Пока нет отметок",           "Noch keine Einträge") }
+    var momMoodNoteSub: String        { s("optional note",           "заметка (необязательно)",    "Notiz (optional)") }
+    var epdsTitle: String             { s("EPDS Screening",          "Скрининг EPDS",              "EPDS-Screening") }
+    var epdsSubtitle: String          { s("Edinburgh Postnatal Depression Scale", "Эдинбургская шкала послеродовой депрессии", "Edinburgher Wochenbettdepressionsskala") }
+    var epdsStartCTA: String          { s("Take Screening",          "Пройти скрининг",            "Screening starten") }
+    var epdsLastScore: String         { s("Last score",              "Последний результат",        "Letztes Ergebnis") }
+    var epdsProgress: String          { s("Question",                "Вопрос",                     "Frage") }
+    var epdsOf: String                { s("of",                      "из",                         "von") }
+    var epdsYourScore: String         { s("Your score",              "Ваш результат",              "Ihr Ergebnis") }
+    var epdsLowRisk: String           { s("Low risk",                "Низкий риск",                "Geringes Risiko") }
+    var epdsMildRisk: String          { s("Possible mild depression","Возможная лёгкая депрессия", "Mögliche leichte Depression") }
+    var epdsHighRisk: String          { s("Seek support",            "Обратитесь за помощью",      "Unterstützung suchen") }
+    var epdsDisclaimer: String        { s("This tool is not a diagnosis. If your score is 10 or above, please consult your doctor.",
+                                          "Этот инструмент не является диагнозом. При результате 10 и выше обратитесь к врачу.",
+                                          "Dieses Tool ist keine Diagnose. Bei einem Score von 10 oder mehr wenden Sie sich an Ihren Arzt.") }
+    var epdsDoneButton: String        { s("Done",                    "Готово",                     "Fertig") }
+    var epdsNextButton: String        { s("Next",                    "Далее",                      "Weiter") }
+    var epdsQ1: String  { s("I have been able to laugh and see the funny side of things.",
+                             "Я была способна смеяться и видеть смешную сторону вещей.",
+                             "Ich konnte lachen und die lustige Seite der Dinge sehen.") }
+    var epdsQ2: String  { s("I have looked forward with enjoyment to things.",
+                             "Я с удовольствием ждала каких-то событий.",
+                             "Ich habe mich auf kommende Dinge gefreut.") }
+    var epdsQ3: String  { s("I have blamed myself unnecessarily when things went wrong.",
+                             "Я напрасно винила себя, когда что-то шло не так.",
+                             "Ich habe mich unnötig beschuldigt, wenn etwas schief lief.") }
+    var epdsQ4: String  { s("I have been anxious or worried for no good reason.",
+                             "Я испытывала тревогу или беспокойство без видимой причины.",
+                             "Ich war ängstlich oder besorgt ohne triftigen Grund.") }
+    var epdsQ5: String  { s("I have felt scared or panicky for no very good reason.",
+                             "Я чувствовала страх или панику без особой причины.",
+                             "Ich hatte Angst oder Panik ohne besonderen Grund.") }
+    var epdsQ6: String  { s("Things have been getting on top of me.",
+                             "Всё навалилось на меня.",
+                             "Die Dinge häuften sich für mich.") }
+    var epdsQ7: String  { s("I have been so unhappy that I have had difficulty sleeping.",
+                             "Мне было так плохо, что я с трудом засыпала.",
+                             "Ich war so unglücklich, dass ich Schwierigkeiten beim Schlafen hatte.") }
+    var epdsQ8: String  { s("I have felt sad or miserable.",
+                             "Я чувствовала себя грустной или несчастной.",
+                             "Ich fühlte mich traurig oder elend.") }
+    var epdsQ9: String  { s("I have been so unhappy that I have been crying.",
+                             "Мне было так плохо, что я плакала.",
+                             "Ich war so unglücklich, dass ich geweint habe.") }
+    var epdsQ10: String { s("The thought of harming myself has occurred to me.",
+                             "У меня возникали мысли о причинении себе вреда.",
+                             "Der Gedanke, mir selbst Schaden zuzufügen, kam mir.") }
 }

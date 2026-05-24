@@ -30,7 +30,6 @@ struct AIChatView: View {
                 }
             }
         }
-        .errorToast($vm.errorMessage)
     }
 
     // MARK: - Message List
@@ -54,7 +53,7 @@ struct AIChatView: View {
                             .id("streaming")
                     }
                     if let err = vm.errorMessage {
-                        ErrorBubble(text: err)
+                        ErrorBubble(text: err, onRetry: { vm.retry() })
                     }
                     Color.clear.frame(height: 1).id("bottom")
                 }
@@ -249,16 +248,29 @@ private struct StreamingBubble: View {
 
 private struct ErrorBubble: View {
     let text: String
+    let onRetry: () -> Void
 
     var body: some View {
-        Text(text)
-            .font(.system(size: 13, weight: .medium, design: .rounded))
-            .foregroundColor(.bbCoralDeep)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(Color.bbRose.opacity(0.3))
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .frame(maxWidth: .infinity, alignment: .center)
+        VStack(spacing: 8) {
+            Text(text)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(.bbCoralDeep)
+                .multilineTextAlignment(.center)
+            Button(action: onRetry) {
+                Text("Try again")
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbCoralDeep)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+                    .background(Color.bbRose.opacity(0.3))
+                    .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+        .background(Color.bbRose.opacity(0.2))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .frame(maxWidth: .infinity)
     }
 }
 

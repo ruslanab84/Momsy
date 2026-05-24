@@ -6,6 +6,10 @@ struct DiaryView: View {
     @StateObject private var vm: DiaryViewModel
     @EnvironmentObject var loc: LocalizationManager
 
+    @State private var showAdd = false
+    @State private var pendingEntry: (DiaryDay, [UUID: UIImage])? = nil
+    @State private var sheetID = UUID()
+
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeDiaryViewModel())
     }
@@ -55,12 +59,18 @@ struct DiaryView: View {
             }
         }
         .background(Color.bbCream.ignoresSafeArea())
-        .sheet(isPresented: $vm.showAdd) {
+        .sheet(isPresented: $showAdd, onDismiss: {
+            if let (day, photos) = pendingEntry {
+                vm.insertDay(day, photos: photos)
+                pendingEntry = nil
+            }
+        }) {
             AddEntrySheet(
                 babyName: vm.displayName,
                 babyBirthDateInterval: vm.babyBirthDateInterval,
-                onAdd: { newDay, photos in vm.insertDay(newDay, photos: photos) }
+                onAdd: { day, photos in pendingEntry = (day, photos) }
             )
+            .id(sheetID)
         }
         .errorToast($vm.saveError)
     }
@@ -76,7 +86,7 @@ struct DiaryView: View {
                     .foregroundColor(.bbInk)
             }
             Spacer()
-            Button { vm.showAdd = true } label: {
+            Button { sheetID = UUID(); showAdd = true } label: {
                 Circle()
                     .fill(Color.bbCoralDeep)
                     .frame(width: 44, height: 44)

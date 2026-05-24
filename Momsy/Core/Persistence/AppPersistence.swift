@@ -3,7 +3,7 @@ import SwiftData
 
 enum AppPersistence {
     // Bump this string whenever you change the SwiftData schema.
-    private static let schemaVersion = "v13"
+    private static let schemaVersion = "v15"
     private static let schemaVersionKey = "AppPersistence.schemaVersion"
 
     static func makeContainer() -> ModelContainer {
@@ -21,6 +21,8 @@ enum AppPersistence {
             DoctorVisitRecord.self,
             VaccinationRecord.self,
             ComplementaryFoodRecord.self,
+            DiaperRecord.self,
+            MomMoodRecord.self,
         ])
 
         // If schema version changed since last run, wipe the old store

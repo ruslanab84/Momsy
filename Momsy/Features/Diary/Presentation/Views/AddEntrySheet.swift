@@ -59,7 +59,7 @@ struct AddEntrySheet: View {
         switch entryType {
         case .note:      return !noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         case .milestone: return !milestoneLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        case .photo:     return true
+        case .photo:     return photoImage != nil && !isLoadingPhoto
         }
     }
 

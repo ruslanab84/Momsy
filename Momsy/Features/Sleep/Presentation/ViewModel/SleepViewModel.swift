@@ -101,6 +101,7 @@ final class SleepViewModel: ObservableObject {
                 activeSleepEntry = entry
                 isSleepActive = true
                 sleepSeconds = 0
+                WidgetDataStore.shared.setSleepActive(startDate: entry.startDate)
                 timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
                     .autoconnect()
                     .sink { [weak self] _ in
@@ -128,6 +129,7 @@ final class SleepViewModel: ObservableObject {
         todayEntries.append(completed)
         isSleepActive = false
         activeSleepEntry = nil
+        WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds)
         Task {
             do {
                 let saved = try await stopSleepUC.execute(entry)

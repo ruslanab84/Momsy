@@ -16,6 +16,7 @@ final class AIChatViewModel: ObservableObject {
     private let appState: AppState
     private let getLeapsUC: GetLeapsUseCase
     private var leapProgress: [LeapProgress] = []
+    private var lastUserText = ""
 
     init(getChatHistory: GetChatHistoryUseCase,
          appendMessage: AppendChatMessageUseCase,
@@ -55,9 +56,17 @@ final class AIChatViewModel: ObservableObject {
         )
     }
 
+    func retry() {
+        guard !isStreaming, !lastUserText.isEmpty else { return }
+        if let last = messages.last, last.role == .user { messages.removeLast() }
+        draft = lastUserText
+        send()
+    }
+
     func send() {
         let text = draft.trimmingCharacters(in: .whitespaces)
         guard !text.isEmpty, !isStreaming else { return }
+        lastUserText = text
         draft = ""
         errorMessage = nil
 

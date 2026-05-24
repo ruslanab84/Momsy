@@ -3,26 +3,30 @@ import Combine
 
 @MainActor
 final class TodayViewModel: ObservableObject {
-    @Published var diaperCount: Int
+    @Published var diaperCount: Int = 0
     @Published var logEntries: [LogEntry] = []
     @Published var saveError: String?
 
     private let getFeeding: GetFeedingEntriesUseCase
     private let getSleep: GetSleepEntriesUseCase
-    private let diaperUC: DiaperUseCase
+    private let diaperRepo: any DiaperRepository
     private let quickLogRepo: QuickLogRepository
 
     init(
         getFeeding: GetFeedingEntriesUseCase,
         getSleep: GetSleepEntriesUseCase,
-        diaperUC: DiaperUseCase,
+        diaperRepo: any DiaperRepository,
         quickLogRepo: QuickLogRepository
     ) {
         self.getFeeding = getFeeding
         self.getSleep = getSleep
-        self.diaperUC = diaperUC
+        self.diaperRepo = diaperRepo
         self.quickLogRepo = quickLogRepo
-        self.diaperCount = diaperUC.count
+        Task { await loadDiaperCount() }
+    }
+
+    private func loadDiaperCount() async {
+        diaperCount = (try? await diaperRepo.countToday()) ?? 0
     }
 
     func loadTodayEntries() async {
@@ -46,21 +50,24 @@ final class TodayViewModel: ObservableObject {
 
     func logDiaper() {
         let lm = LocalizationManager.shared
-        let count = diaperUC.increment()
-        diaperCount = count
-        let label = lm.strings.diaperLogEntry(count: count)
+        let newCount = diaperCount + 1
+        diaperCount = newCount
+        let label = lm.strings.diaperLogEntry(count: newCount)
         quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .drop, label: label))
         addEntry(LogEntry(time: Date(), kind: .drop, label: label))
+        Task { try? await diaperRepo.add(DiaperEntry()) }
     }
 
     func removeDiaper() {
-        diaperCount = diaperUC.decrement()
+        guard diaperCount > 0 else { return }
+        diaperCount -= 1
         quickLogRepo.removeLast(kind: .drop)
         if let idx = logEntries.firstIndex(where: { $0.kind == .drop }) {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                 logEntries.remove(at: idx)
             }
         }
+        Task { try? await diaperRepo.removeLatest(on: Date()) }
     }
 
     func logWalk() {

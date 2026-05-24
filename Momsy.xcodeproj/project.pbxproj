@@ -7,34 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		024E4F85BD81AC394E8CA74C /* MockSoundRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 772F05E6F2F8A790BB660917 /* MockSoundRepository.swift */; };
-		026DB349D36F8570C753ECA7 /* SoundsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14AB864CEE3403CD74AC9654 /* SoundsViewModelTests.swift */; };
+		03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */; };
 		069763CA9C87B826640F4A60 /* MockAIChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C89620DBC5A4E8DF0169200 /* MockAIChatService.swift */; };
-		0DB2999780B90A4F9D52D41D /* LeapsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */; };
-		1A042BC3D2193439E56F1453 /* DiaryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89316574BE009A52297A40D5 /* DiaryViewModelTests.swift */; };
 		1C2C05E640CD3141B7AFA19F /* MockChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEAA5B698775CAA6B42D47F /* MockChatRepository.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
-		2C3D4C984539488B233206D0 /* MockDiaryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B6D62B0527D4EA67A8EB2FC /* MockDiaryRepository.swift */; };
+		38944D43E482FFA7FCD38281 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4820A4E27274110E9256D2F7 /* SwiftUI.framework */; };
+		38EF65D83AACCA049FB163E3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AA2EA0D382D4DC3EE6C09A /* WidgetKit.framework */; };
 		3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */; };
-		3AB227CCD8F55DBAD199BD19 /* MockPushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45F950517BF58D078B26608 /* MockPushNotificationService.swift */; };
 		443C7EF01C216B989D605CE2 /* MockBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50479E8852BDAA636377733 /* MockBabyRepository.swift */; };
 		4BACDEB740F77369DB5F5A01 /* MockAnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */; };
-		557351728453C2057FCD0343 /* TodayViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC885445D021739FD892202 /* TodayViewModelTests.swift */; };
 		56A4C28EC62F43A96F2D8DA4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
 		628E743BEB94F3AB623133EF /* AIChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3629953DE09AA74C6D2F44 /* AIChatViewModelTests.swift */; };
-		6A9DAE47EF5A15D253BF2199 /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D4B0BAEF83286E9732D9C9 /* SleepViewModelTests.swift */; };
-		7C8069160499DC76803E9724 /* MockFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F6EA2A332CF39167F1C2CB /* MockFeedingRepository.swift */; };
-		7F97DDFBD0FF2006183746A1 /* OnboardingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DFCA599DD5851314281335 /* OnboardingViewModelTests.swift */; };
 		802A6938D28AA6A793B23C06 /* MockFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */; };
+		85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */; };
+		880ACB76F459C0F289D9A8A4 /* MomsyWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4F159218252E2FF5857958F7 /* MomsyWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8872BBDA2E0981A7146C21CC /* MockLeapsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37279E74C1D7F7DFA7CED64 /* MockLeapsRepository.swift */; };
-		8F836DDB37A6D811B8088277 /* MockSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A5ACFF0B19C867F09310A /* MockSoundEngine.swift */; };
+		8FF13D35CD4F298D09319CE3 /* MomsyWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */; };
 		8FF4DECAE6F4B06FFD6E7189 /* MockPushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */; };
-		921518E87C09C63A355C858E /* MockAIChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83EB46AD280B60D75F99514 /* MockAIChatService.swift */; };
-		99A0C8A843165DA605E7F8D0 /* MockLeapsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3164FDFBF5812A759E9204 /* MockLeapsRepository.swift */; };
-		A14231429B2E78684742B5DD /* MockBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A46ABCF5A1A31976CF2C739 /* MockBabyRepository.swift */; };
+		9CBCB9DF036CA6355130F76C /* MomsyWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */; };
+		9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */; };
 		A5522FF4A6C0AF27DC5EF07E /* MockSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */; };
+		AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */; };
+		AA9D8473BEC847159E9AAAA4 /* MomMoodViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */; };
 		B24FC7CC0D782B29188B1E9F /* TodayViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */; };
-		B2E49C69EDC278FD4003868B /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8637519A9E26B4D5A7849327 /* TestHelpers.swift */; };
+		B5191FCCF0C277E193F33888 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
 		B7318C7B2FBBA132003CCB0B /* ARCHITECTURE.md in Resources */ = {isa = PBXBuildFile; fileRef = B7318C752FBBA132003CCB0B /* ARCHITECTURE.md */; };
 		B7318C7C2FBBA132003CCB0B /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = B7318C762FBBA132003CCB0B /* CLAUDE.md */; };
 		B7318C7D2FBBA132003CCB0B /* LOCALIZATION_RULES.md in Resources */ = {isa = PBXBuildFile; fileRef = B7318C772FBBA132003CCB0B /* LOCALIZATION_RULES.md */; };
@@ -47,30 +43,18 @@
 		B7318F4F2FBCEA96003CCB0B /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = B7318F4E2FBCEA96003CCB0B /* FirebaseDatabase */; };
 		B7318F512FBCEA96003CCB0B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B7318F502FBCEA96003CCB0B /* FirebaseFirestore */; };
 		B7318F532FBCEA96003CCB0B /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = B7318F522FBCEA96003CCB0B /* FirebaseStorage */; };
-		B94C35C6AC15824126676A70 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
-		BDD113C6424C0A859F95460E /* AIChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC577BE621E9EC76A891B30B /* AIChatViewModelTests.swift */; };
-		C0069BFF2478716095C24B01 /* MockSleepRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F261A70D74866E7728C38F /* MockSleepRepository.swift */; };
-		D60FB27B1EB625DB145C1A16 /* MockAnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE6CCCC6E58B3B71587C901 /* MockAnalyticsService.swift */; };
+		CFE0C4DB867A5136830C1D5A /* MomsyWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */; };
 		DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C118A36FCB09993B8CBD0D /* DiaryViewModelTests.swift */; };
-		E09C6F734345CC4F051A739D /* MockPhotoStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B980FB86BDBC034A6A8C4A /* MockPhotoStorageService.swift */; };
 		E3675A54C413256446C3DD5A /* MockPhotoStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEE355A3C4D0976FC9EBE07 /* MockPhotoStorageService.swift */; };
 		E3D39EF3449D3301F24E663A /* MockSoundRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */; };
 		E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */; };
 		EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */; };
-		F0195C7A8311DCC6E4A74B81 /* MockChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D5C82D29DCC728C9D4597 /* MockChatRepository.swift */; };
 		FC2E77342D0D91D52C40605A /* MockDiaryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7744983E8EF2AF6D12E3DE /* MockDiaryRepository.swift */; };
 		FF136D2C455F9FBD0E166DED /* MockSleepRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0ED0FC63356D42900B3E456 /* MockSleepRepository.swift */; };
 		FF93FE7B3A6F5DDA40F2B2D6 /* SoundsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		052A1B3898B46D1F2EDDEA32 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B7318B3F2FB8F473003CCB0B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = B7318B462FB8F473003CCB0B;
-			remoteInfo = Momsy;
-		};
 		4C458065BDFC8130CAC09B8A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B7318B3F2FB8F473003CCB0B /* Project object */;
@@ -78,7 +62,28 @@
 			remoteGlobalIDString = B7318B462FB8F473003CCB0B;
 			remoteInfo = Momsy;
 		};
+		DA6C0F89F794A1DA83FD0F2B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B7318B3F2FB8F473003CCB0B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 98925C9D754BF673E921DF8F;
+			remoteInfo = MomsyWidget;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E7A3B6225227A343AA22DCE5 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				880ACB76F459C0F289D9A8A4 /* MomsyWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
@@ -89,13 +94,20 @@
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		13B980FB86BDBC034A6A8C4A /* MockPhotoStorageService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPhotoStorageService.swift; sourceTree = "<group>"; };
 		14AB864CEE3403CD74AC9654 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
+		153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetProvider.swift; sourceTree = "<group>"; };
 		1C4A5ACFF0B19C867F09310A /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
+		1C50DB4AF650A300CDE7D8BA /* MomsyWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MomsyWidget.entitlements; sourceTree = "<group>"; };
 		27CCA3ED5F2ECE7D8505B730 /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
+		322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetEntry.swift; sourceTree = "<group>"; };
 		33A740574DACB7A766F4A51D /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
+		3BBE7E66563E0F26A2DFF70C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C3629953DE09AA74C6D2F44 /* AIChatViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatViewModelTests.swift; sourceTree = "<group>"; };
+		480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaperRepository.swift; sourceTree = "<group>"; };
+		4820A4E27274110E9256D2F7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		482ADA73C55024953C8197D9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		4C89620DBC5A4E8DF0169200 /* MockAIChatService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAIChatService.swift; sourceTree = "<group>"; };
+		4F159218252E2FF5857958F7 /* MomsyWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MomsyWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		53A0E7913296744B89DD122D /* DiaryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryViewModelTests.swift; sourceTree = "<group>"; };
 		53F845EB5F589FB39171B36B /* MockLeapsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockLeapsRepository.swift; sourceTree = "<group>"; };
 		5C108DEF939A1DFF17A30728 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -118,7 +130,10 @@
 		99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
+		AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockMomMoodRepository.swift; sourceTree = "<group>"; };
+		AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomMoodViewModelTests.swift; sourceTree = "<group>"; };
 		B0D4B0BAEF83286E9732D9C9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
+		B1AA2EA0D382D4DC3EE6C09A /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
 		B7318B472FB8F473003CCB0B /* Momsy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Momsy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7318C752FBBA132003CCB0B /* ARCHITECTURE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ARCHITECTURE.md; sourceTree = "<group>"; };
@@ -137,14 +152,17 @@
 		CAADDB368FFD0B2A73ADFB21 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		CC3164FDFBF5812A759E9204 /* MockLeapsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockLeapsRepository.swift; sourceTree = "<group>"; };
 		D2D8FBFA13BEAB5198BAAF2E /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
+		D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WidgetDataStore.swift; path = Momsy/Core/Widget/WidgetDataStore.swift; sourceTree = "<group>"; };
 		D45F950517BF58D078B26608 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		D5F6EA2A332CF39167F1C2CB /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		D793B1E582AA51EFE6BE28F1 /* AIChatViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatViewModelTests.swift; sourceTree = "<group>"; };
 		D8E2302C2FFD377BB31E23DD /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
 		DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		DED78F3E8524577CFF50864B /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetBundle.swift; sourceTree = "<group>"; };
 		E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		E89BA45A7EB93E4CF6AA23BA /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
+		E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetView.swift; sourceTree = "<group>"; };
 		E9B50B0C5B463D402F0ABBAD /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		ECEE355A3C4D0976FC9EBE07 /* MockPhotoStorageService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPhotoStorageService.swift; sourceTree = "<group>"; };
 		F9447E2BE7AA19806CCDF9B8 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
@@ -172,6 +190,16 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0B7A3AA673B11031BD63FA3A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B5191FCCF0C277E193F33888 /* Foundation.framework in Frameworks */,
+				38EF65D83AACCA049FB163E3 /* WidgetKit.framework in Frameworks */,
+				38944D43E482FFA7FCD38281 /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B7318B442FB8F473003CCB0B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -203,7 +231,6 @@
 				0FC885445D021739FD892202 /* TodayViewModelTests.swift */,
 				6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */,
 			);
-			name = Today;
 			path = Today;
 			sourceTree = "<group>";
 		};
@@ -220,7 +247,6 @@
 				09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */,
 				A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */,
 			);
-			name = Sounds;
 			path = Sounds;
 			sourceTree = "<group>";
 		};
@@ -230,7 +256,6 @@
 				CF188E3D6A5F475289D564B6 /* Features */,
 				ABCCB7544C43D5D7725CF1CA /* Mocks */,
 			);
-			name = MomsyTests;
 			path = MomsyTests;
 			sourceTree = "<group>";
 		};
@@ -241,7 +266,6 @@
 				FC577BE621E9EC76A891B30B /* AIChatViewModelTests.swift */,
 				3C3629953DE09AA74C6D2F44 /* AIChatViewModelTests.swift */,
 			);
-			name = AIChat;
 			path = AIChat;
 			sourceTree = "<group>";
 		};
@@ -252,7 +276,6 @@
 				B0D4B0BAEF83286E9732D9C9 /* SleepViewModelTests.swift */,
 				E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */,
 			);
-			name = Sleep;
 			path = Sleep;
 			sourceTree = "<group>";
 		};
@@ -271,8 +294,15 @@
 				89316574BE009A52297A40D5 /* DiaryViewModelTests.swift */,
 				84C118A36FCB09993B8CBD0D /* DiaryViewModelTests.swift */,
 			);
-			name = Diary;
 			path = Diary;
+			sourceTree = "<group>";
+		};
+		AA9D8473BEC847159E9AAAA5 /* MomMood */ = {
+			isa = PBXGroup;
+			children = (
+				AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */,
+			);
+			path = MomMood;
 			sourceTree = "<group>";
 		};
 		ABCCB7544C43D5D7725CF1CA /* Mocks */ = {
@@ -310,9 +340,10 @@
 				ECEE355A3C4D0976FC9EBE07 /* MockPhotoStorageService.swift */,
 				A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */,
 				C0ED0FC63356D42900B3E456 /* MockSleepRepository.swift */,
+				480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */,
+				AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */,
 				99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */,
 			);
-			name = Mocks;
 			path = Mocks;
 			sourceTree = "<group>";
 		};
@@ -323,7 +354,6 @@
 				C0DFCA599DD5851314281335 /* OnboardingViewModelTests.swift */,
 				5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */,
 			);
-			name = Onboarding;
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
@@ -341,6 +371,10 @@
 				B7318B482FB8F473003CCB0B /* Products */,
 				E11F73F23CEF7F5CEEF34B20 /* Frameworks */,
 				24C05EE6BF7D0D4B0444897D /* MomsyTests */,
+				EC750286825DA9283696D65D /* MomsyWidget */,
+				B1AA2EA0D382D4DC3EE6C09A /* WidgetKit.framework */,
+				4820A4E27274110E9256D2F7 /* SwiftUI.framework */,
+				D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -351,6 +385,7 @@
 				DED78F3E8524577CFF50864B /* MomsyTests.xctest */,
 				F9F1F99234A1F4FCB8840C13 /* MomsyTests.xctest */,
 				5C108DEF939A1DFF17A30728 /* MomsyTests.xctest */,
+				4F159218252E2FF5857958F7 /* MomsyWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -362,7 +397,6 @@
 				04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */,
 				0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */,
 			);
-			name = Leaps;
 			path = Leaps;
 			sourceTree = "<group>";
 		};
@@ -372,12 +406,12 @@
 				3D5E9099F7CEDDD83E5D9539 /* AIChat */,
 				945C65C48948BC238DDFA608 /* Diary */,
 				BF481C984AA7F1A163924A81 /* Leaps */,
+				AA9D8473BEC847159E9AAAA5 /* MomMood */,
 				B0F8A2BD09FB72AF53F5081C /* Onboarding */,
 				594ADF75F51FCB61A1675525 /* Sleep */,
 				093C86EC881A5CA51A49035D /* Sounds */,
 				040A2B934577228C40866FB2 /* Today */,
 			);
-			name = Features;
 			path = Features;
 			sourceTree = "<group>";
 		};
@@ -387,6 +421,20 @@
 				7B88800A53419BE4AE2FB859 /* iOS */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EC750286825DA9283696D65D /* MomsyWidget */ = {
+			isa = PBXGroup;
+			children = (
+				E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */,
+				322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */,
+				153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */,
+				E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */,
+				1C50DB4AF650A300CDE7D8BA /* MomsyWidget.entitlements */,
+				3BBE7E66563E0F26A2DFF70C /* Info.plist */,
+			);
+			name = MomsyWidget;
+			path = MomsyWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -410,6 +458,23 @@
 			productReference = 5C108DEF939A1DFF17A30728 /* MomsyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		98925C9D754BF673E921DF8F /* MomsyWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0E45FA9D2161E4EE7B21EFC /* Build configuration list for PBXNativeTarget "MomsyWidget" */;
+			buildPhases = (
+				4F07692F46E43E013920DDA6 /* Sources */,
+				0B7A3AA673B11031BD63FA3A /* Frameworks */,
+				30C20104F32739EBA8DBF193 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MomsyWidget;
+			productName = MomsyWidget;
+			productReference = 4F159218252E2FF5857958F7 /* MomsyWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		B7318B462FB8F473003CCB0B /* Momsy */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B7318B522FB8F474003CCB0B /* Build configuration list for PBXNativeTarget "Momsy" */;
@@ -417,10 +482,12 @@
 				B7318B432FB8F473003CCB0B /* Sources */,
 				B7318B442FB8F473003CCB0B /* Frameworks */,
 				B7318B452FB8F473003CCB0B /* Resources */,
+				E7A3B6225227A343AA22DCE5 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B926D12583D826B50B869133 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				B7318B492FB8F473003CCB0B /* Momsy */,
@@ -473,11 +540,19 @@
 			targets = (
 				B7318B462FB8F473003CCB0B /* Momsy */,
 				8A4B44DCCA1F90276E0C526A /* MomsyTests */,
+				98925C9D754BF673E921DF8F /* MomsyWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		30C20104F32739EBA8DBF193 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B7318B452FB8F473003CCB0B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -524,7 +599,22 @@
 				E3675A54C413256446C3DD5A /* MockPhotoStorageService.swift in Sources */,
 				8FF4DECAE6F4B06FFD6E7189 /* MockPushNotificationService.swift in Sources */,
 				FF136D2C455F9FBD0E166DED /* MockSleepRepository.swift in Sources */,
+				9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */,
+				AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */,
+				AA9D8473BEC847159E9AAAA4 /* MomMoodViewModelTests.swift in Sources */,
 				E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F07692F46E43E013920DDA6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9CBCB9DF036CA6355130F76C /* MomsyWidgetBundle.swift in Sources */,
+				85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */,
+				CFE0C4DB867A5136830C1D5A /* MomsyWidgetProvider.swift in Sources */,
+				8FF13D35CD4F298D09319CE3 /* MomsyWidgetView.swift in Sources */,
+				03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -538,6 +628,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		B926D12583D826B50B869133 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MomsyWidget;
+			target = 98925C9D754BF673E921DF8F /* MomsyWidget */;
+			targetProxy = DA6C0F89F794A1DA83FD0F2B /* PBXContainerItemProxy */;
+		};
 		B9FDA87B2076E78F2D6705EA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Momsy;
@@ -594,28 +690,69 @@
 			};
 			name = Release;
 		};
-		AB250B3857528D02DA3A0AC1 /* Debug */ = {
+		5FC8D721F2D4A855A91DC777 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = NO;
-				ENABLE_TESTABILITY = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				CODE_SIGN_ENTITLEMENTS = MomsyWidget/MomsyWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 58ZSRJHNGW;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MomsyWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
+					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.momsy.MomsyTests;
-				PRODUCT_NAME = MomsyTests;
+				PRODUCT_BUNDLE_IDENTIFIER = RuslanAbd.Momsy.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Momsy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Momsy";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
+		};
+		6FE43E4CD6FD0DBF84A290D7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = MomsyWidget/MomsyWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 58ZSRJHNGW;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MomsyWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = RuslanAbd.Momsy.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
 		};
 		B7318B502FB8F474003CCB0B /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -743,6 +880,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
@@ -780,6 +918,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
@@ -812,30 +951,6 @@
 			};
 			name = Release;
 		};
-		DABE648542E6D3538C8E4610 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				ENABLE_TESTABILITY = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.momsy.MomsyTests;
-				PRODUCT_NAME = MomsyTests;
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Momsy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Momsy";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -844,6 +959,15 @@
 			buildConfigurations = (
 				4DA84946C3CB062BF2B7B126 /* Release */,
 				26C3419AF5C5BD846F530F65 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B0E45FA9D2161E4EE7B21EFC /* Build configuration list for PBXNativeTarget "MomsyWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6FE43E4CD6FD0DBF84A290D7 /* Release */,
+				5FC8D721F2D4A855A91DC777 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

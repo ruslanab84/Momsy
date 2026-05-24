@@ -24,6 +24,8 @@ final class AppContainer {
     lazy var doctorVisitRepository: any DoctorVisitRepository = SwiftDataDoctorVisitRepository(context: context)
     lazy var vaccinationRepository: any VaccinationRepository = SwiftDataVaccinationRepository(context: context)
     lazy var complementaryFeedingRepository: any ComplementaryFeedingRepository = SwiftDataComplementaryFeedingRepository(context: context)
+    lazy var diaperRepository: any DiaperRepository                             = SwiftDataDiaperRepository(context: context)
+    lazy var momMoodRepository: any MomMoodRepository                           = SwiftDataMomMoodRepository(context: context)
 
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
@@ -120,7 +122,7 @@ final class AppContainer {
         TodayViewModel(
             getFeeding: getFeedingEntries,
             getSleep: getSleepEntries,
-            diaperUC: diaperUseCase,
+            diaperRepo: diaperRepository,
             quickLogRepo: quickLogRepository
         )
     }
@@ -176,6 +178,7 @@ final class AppContainer {
         ReportViewModel(
             feedingRepo: feedingRepository,
             sleepRepo: sleepRepository,
+            diaperRepo: diaperRepository,
             temperatureRepo: temperatureRepository,
             measurementRepo: measurementRepository,
             doctorVisitRepo: doctorVisitRepository,
@@ -221,6 +224,10 @@ final class AppContainer {
 
     func makeSettingsViewModel() -> SettingsViewModel {
         SettingsViewModel(repo: preferencesRepository)
+    }
+
+    func makeMomMoodViewModel() -> MomMoodViewModel {
+        MomMoodViewModel(repository: momMoodRepository)
     }
 }
 

@@ -18,6 +18,7 @@ final class ReportViewModel: ObservableObject {
     private let appState: AppState
     private let feedingRepo: any FeedingRepository
     private let sleepRepo: any SleepRepository
+    private let diaperRepo: any DiaperRepository
     private let temperatureRepo: any TemperatureRepository
     private let measurementRepo: any MeasurementRepository
     private let doctorVisitRepo: any DoctorVisitRepository
@@ -25,6 +26,7 @@ final class ReportViewModel: ObservableObject {
     init(
         feedingRepo: any FeedingRepository,
         sleepRepo: any SleepRepository,
+        diaperRepo: any DiaperRepository,
         temperatureRepo: any TemperatureRepository,
         measurementRepo: any MeasurementRepository,
         doctorVisitRepo: any DoctorVisitRepository,
@@ -33,6 +35,7 @@ final class ReportViewModel: ObservableObject {
     ) {
         self.feedingRepo = feedingRepo
         self.sleepRepo = sleepRepo
+        self.diaperRepo = diaperRepo
         self.temperatureRepo = temperatureRepo
         self.measurementRepo = measurementRepo
         self.doctorVisitRepo = doctorVisitRepo
@@ -92,30 +95,34 @@ final class ReportViewModel: ObservableObject {
             lastVisitDate = (try? await doctorVisitRepo.getLast())?.date
         }
 
-        let to = Date()
+        let cal = Calendar.current
+        let todayStart = cal.startOfDay(for: Date())
+        let to = cal.date(byAdding: .day, value: 1, to: todayStart) ?? Date()
         let from: Date
         let days: Int
         if selectedPeriod == 4, let visitDate = lastVisitDate {
-            from = visitDate
-            days = max(1, Calendar.current.dateComponents([.day], from: visitDate, to: to).day ?? 30)
+            from = cal.startOfDay(for: visitDate)
+            days = max(1, cal.dateComponents([.day], from: from, to: todayStart).day ?? 30) + 1
         } else {
             days = periodDays
-            from = Calendar.current.date(byAdding: .day, value: -days, to: to) ?? to
+            from = cal.date(byAdding: .day, value: -(days - 1), to: todayStart) ?? todayStart
         }
-        let cal = Calendar.current
 
         async let feedingsResult      = feedingRepo.getEntries(from: from, to: to)
         async let sleepsResult        = sleepRepo.getEntries(from: from, to: to)
+        async let diapersResult       = diaperRepo.getEntries(from: from, to: to)
         async let tempsResult         = temperatureRepo.getEntries(from: from, to: to)
         async let measurementsResult  = measurementRepo.getEntries(from: from, to: to)
 
         let feedings     = (try? await feedingsResult)     ?? []
         let sleeps       = (try? await sleepsResult)       ?? []
+        let diapers      = (try? await diapersResult)      ?? []
         let temps        = (try? await tempsResult)        ?? []
         let measurements = (try? await measurementsResult) ?? []
 
-        var feedPerDay  = [Double]()
-        var sleepPerDay = [Double]()
+        var feedPerDay    = [Double]()
+        var sleepPerDay   = [Double]()
+        var diaperPerDay  = [Double]()
         var rawTempPerDay = [Double]()
 
         for dayOffset in 0..<days {
@@ -123,6 +130,7 @@ final class ReportViewModel: ObservableObject {
                                     to: cal.startOfDay(for: from)) ?? from
 
             feedPerDay.append(Double(feedings.filter { cal.isDate($0.date, inSameDayAs: dayStart) }.count))
+            diaperPerDay.append(Double(diapers.filter { cal.isDate($0.date, inSameDayAs: dayStart) }.count))
 
             let sleepMins = sleeps
                 .filter { cal.isDate($0.startDate, inSameDayAs: dayStart) }
@@ -137,24 +145,31 @@ final class ReportViewModel: ObservableObject {
             rawTempPerDay.append(maxT ?? 0)
         }
 
-        let feedCount = feedings.count
-        let feedAvg   = days > 0 ? Double(feedCount) / Double(days) : 0
-        let medianSleep = median(sleepPerDay)
+        let feedCount    = feedings.count
+        let feedAvg      = days > 0 ? Double(feedCount) / Double(days) : 0
+        let medianSleep  = median(sleepPerDay)
+        let diaperCount  = diapers.count
+        let diaperAvg    = days > 0 ? Double(diaperCount) / Double(days) : 0
         let maxTemp   = temps.map(\.value).max() ?? 0
         let peakCount = temps.filter { $0.value > 37.5 }.count
 
         let sortedMeasurements = measurements.sorted { $0.date < $1.date }
         let weightValue: String
         let weightSub: String
-        if let last = sortedMeasurements.last, !last.weight.isEmpty {
-            weightValue = "\(last.weight) кг"
+        // Stored values already include the unit suffix (e.g. "5.2 кг", "60 см")
+        // — strip it for numeric operations only, display as-is.
+        func numericPart(_ s: String) -> Double? {
+            Double((s.components(separatedBy: " ").first ?? s).replacingOccurrences(of: ",", with: "."))
+        }
+        if let last = sortedMeasurements.last, !last.weight.isEmpty, last.weight != "—" {
+            weightValue = last.weight
             if let first = sortedMeasurements.first, first.id != last.id,
-               let fw = Double(first.weight.replacingOccurrences(of: ",", with: ".")),
-               let lw = Double(last.weight.replacingOccurrences(of: ",", with: ".")) {
+               let fw = numericPart(first.weight),
+               let lw = numericPart(last.weight) {
                 let d = lw - fw
                 weightSub = String(format: d >= 0 ? "+%.2f кг" : "%.2f кг", d)
             } else {
-                weightSub = last.height.isEmpty ? lm.strings.noData : "\(last.height) см"
+                weightSub = last.height.isEmpty || last.height == "—" ? lm.strings.noData : last.height
             }
         } else {
             weightValue = "—"
@@ -176,8 +191,8 @@ final class ReportViewModel: ObservableObject {
             ),
             (
                 lm.strings.reportStatDiapersLabel,
-                "—",
-                lm.strings.reportNotTracked,
+                diaperCount > 0 ? "\(diaperCount)" : "—",
+                diaperCount > 0 ? lm.strings.reportFeedAvgSub(avg: diaperAvg) : lm.strings.noData,
                 .bbSky
             ),
             (
@@ -200,9 +215,7 @@ final class ReportViewModel: ObservableObject {
         let tempPeakStr  = rawTempPerDay.compactMap { $0 > 0 ? $0 : nil }.max()
             .map { String(format: "%.1f", $0) } ?? "—"
 
-        let weightValues = sortedMeasurements.compactMap {
-            Double($0.weight.replacingOccurrences(of: ",", with: "."))
-        }
+        let weightValues = sortedMeasurements.compactMap { numericPart($0.weight) }
 
         currentSparklines = [
             (
@@ -216,6 +229,12 @@ final class ReportViewModel: ObservableObject {
                 sleepPerDay.isEmpty ? [0] : sleepPerDay,
                 .bbLilacDeep,
                 sleepPerDay.max().map { formatHM($0) } ?? "—"
+            ),
+            (
+                lm.strings.reportSparkDiapersLabel,
+                diaperPerDay.isEmpty ? [0] : diaperPerDay,
+                .bbSky,
+                diaperPerDay.max().map { String(format: "%.0f", $0) } ?? "—"
             ),
             (
                 lm.strings.reportSparkTempLabel,

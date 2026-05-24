@@ -53,6 +53,7 @@ final class FeedingViewModel: ObservableObject {
         feedingSeconds = 0
         pausedFeedingSeconds = 0
         let startDate = Date()
+        WidgetDataStore.shared.setFeedingRunning(effectiveStartDate: startDate, side: side.rawValue)
         analytics.track(.feedingStarted(side: side.rawValue))
         timerService.start(from: startDate) { [weak self] secs in
             Task { @MainActor [weak self] in self?.feedingSeconds = secs }
@@ -64,12 +65,14 @@ final class FeedingViewModel: ObservableObject {
         isFeedingActive = false
         pausedFeedingSeconds = feedingSeconds
         timerService.stop()
+        WidgetDataStore.shared.setFeedingPaused(elapsedSeconds: pausedFeedingSeconds, side: feedingSide.rawValue)
     }
 
     func resumeFeeding() {
         guard !isFeedingActive else { return }
         isFeedingActive = true
         let effectiveStart = Date().addingTimeInterval(-TimeInterval(pausedFeedingSeconds))
+        WidgetDataStore.shared.setFeedingRunning(effectiveStartDate: effectiveStart, side: feedingSide.rawValue)
         timerService.start(from: effectiveStart) { [weak self] secs in
             Task { @MainActor [weak self] in self?.feedingSeconds = secs }
         }
@@ -79,6 +82,7 @@ final class FeedingViewModel: ObservableObject {
         guard isFeedingActive else { return }
         isFeedingActive = false
         timerService.stop()
+        WidgetDataStore.shared.clearFeeding(lastFeedingDate: Date())
         let dur = max(1, feedingSeconds / 60)
         let secs = feedingSeconds
         let s = feedingSide

@@ -8,7 +8,6 @@ final class DiaryViewModel: ObservableObject {
     @Published var likedIDs: Set<UUID> = []
     @Published var photosByID: [UUID: UIImage] = [:]
     @Published var uploadProgress: [UUID: Double] = [:]
-    @Published var showAdd = false
     @Published var saveError: String?
 
     private let repo: any DiaryRepository
@@ -89,7 +88,6 @@ final class DiaryViewModel: ObservableObject {
                 var updated = item
                 updated.photoPath = firebasePath
                 try await repo.update(updated)
-                try? FileManager.default.removeItem(atPath: localPath)
             } catch {
                 // Leave local file intact if upload fails; will retry next launch
             }
@@ -229,27 +227,26 @@ final class DiaryViewModel: ObservableObject {
             for item in newDay.items {
                 var stored = toStored(item, date: date)
                 if stored.kind == .photo, let img = photos[item.id] {
-                    do {
-                        for try await event in photoStorage.saveWithProgress(img, forID: item.id) {
-                            switch event {
-                            case .progress(let fraction):
-                                uploadProgress[item.id] = fraction
-                            case .completed(let path):
-                                stored.photoPath = path
-                                uploadProgress.removeValue(forKey: item.id)
-                            }
-                        }
-                    } catch {
-                        uploadProgress.removeValue(forKey: item.id)
-                        // Firebase upload failed — persist locally so the entry survives app restarts.
-                        // migrateLocalPhotosToFirebase() will retry the upload on next launch.
-                        stored.photoPath = try? await localPhotoStorage.save(img, forID: item.id)
-                    }
+                    stored.photoPath = try? await localPhotoStorage.save(img, forID: item.id)
                 }
-                do { try await repo.add(stored) }
-                catch {
+                do {
+                    try await repo.add(stored)
+                } catch {
                     rollbackItem(item, photos: photos)
                     saveError = error.localizedDescription
+                    continue
+                }
+                if stored.kind == .photo, let img = photos[item.id] {
+                    Task {
+                        do {
+                            for try await event in photoStorage.saveWithProgress(img, forID: item.id) {
+                                if case .progress(let fraction) = event { uploadProgress[item.id] = fraction }
+                                if case .completed = event { uploadProgress.removeValue(forKey: item.id) }
+                            }
+                        } catch {
+                            uploadProgress.removeValue(forKey: item.id)
+                        }
+                    }
                 }
             }
         }

@@ -11,31 +11,43 @@ final class GeminiChatService: AIChatService {
     ) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {
-                do {
-                    let model = FirebaseAI.firebaseAI(backend: .googleAI()).generativeModel(
-                        modelName: modelName,
-                        systemInstruction: ModelContent(role: "system", parts: systemPrompt(context))
-                    )
-
-                    let chatHistory = history.map { msg in
-                        ModelContent(role: msg.role == .user ? "user" : "model", parts: msg.content)
-                    }
-
-                    let chat = model.startChat(history: chatHistory)
-                    let responseStream = try chat.sendMessageStream(userText)
-
-                    for try await chunk in responseStream {
-                        if let text = chunk.text {
-                            continuation.yield(text)
+                var lastError: Error?
+                for attempt in 0..<3 {
+                    do {
+                        let model = FirebaseAI.firebaseAI(backend: .googleAI()).generativeModel(
+                            modelName: modelName,
+                            systemInstruction: ModelContent(role: "system", parts: systemPrompt(context))
+                        )
+                        let chatHistory = history.map { msg in
+                            ModelContent(role: msg.role == .user ? "user" : "model", parts: msg.content)
                         }
+                        let chat = model.startChat(history: chatHistory)
+                        let responseStream = try chat.sendMessageStream(userText)
+                        for try await chunk in responseStream {
+                            if let text = chunk.text { continuation.yield(text) }
+                        }
+                        continuation.finish()
+                        return
+                    } catch {
+                        lastError = error
+                        print("[GeminiChatService] attempt \(attempt + 1) failed: \(error)")
+                        if !isRetriable(error) || attempt == 2 { break }
+                        try? await Task.sleep(nanoseconds: UInt64(1_000_000_000 * (1 << attempt)))
                     }
-                    continuation.finish()
-                } catch {
-                    print("[GeminiChatService] error: \(error)")
-                    continuation.finish(throwing: error)
                 }
+                continuation.finish(throwing: lastError!)
             }
         }
+    }
+
+    private func isRetriable(_ error: Error) -> Bool {
+        if let urlError = error as? URLError {
+            return [.timedOut, .networkConnectionLost, .cannotConnectToHost,
+                    .cannotFindHost, .notConnectedToInternet].contains(urlError.code)
+        }
+        let desc = error.localizedDescription.lowercased()
+        return desc.contains("503") || desc.contains("429") || desc.contains("unavailable")
+            || desc.contains("timeout") || desc.contains("try again")
     }
 
     private func systemPrompt(_ ctx: BabyContext) -> String {

@@ -6,26 +6,23 @@ import Foundation
 @MainActor
 struct TodayViewModelTests {
 
-    private let diaperCountKey = "diaper_today_count"
-    private let diaperDateKey  = "diaper_today_date"
-    private let quickLogKey    = "quick_log_today_entries"
-    private let quickLogDate   = "quick_log_today_date"
+    private let quickLogKey  = "quick_log_today_entries"
+    private let quickLogDate = "quick_log_today_date"
 
     init() {
-        UserDefaults.standard.removeObject(forKey: "diaper_today_count")
-        UserDefaults.standard.removeObject(forKey: "diaper_today_date")
         UserDefaults.standard.removeObject(forKey: "quick_log_today_entries")
         UserDefaults.standard.removeObject(forKey: "quick_log_today_date")
     }
 
     func makeVM(
         repo: MockFeedingRepository = MockFeedingRepository(),
-        sleepRepo: MockSleepRepository = MockSleepRepository()
+        sleepRepo: MockSleepRepository = MockSleepRepository(),
+        diaperRepo: MockDiaperRepository = MockDiaperRepository()
     ) -> TodayViewModel {
         TodayViewModel(
             getFeeding: GetFeedingEntriesUseCase(repository: repo),
             getSleep: GetSleepEntriesUseCase(repository: sleepRepo),
-            diaperUC: DiaperUseCase(),
+            diaperRepo: diaperRepo,
             quickLogRepo: QuickLogRepository()
         )
     }
