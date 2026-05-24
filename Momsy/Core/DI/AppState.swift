@@ -14,10 +14,14 @@ final class AppState: ObservableObject {
 
     func load() async {
         babyProfile = try? await getBabyProfile.execute()
+        if let p = babyProfile {
+            WidgetDataStore.shared.setBabyInfo(name: p.name, birthDate: p.birthDate)
+        }
     }
 
     func update(_ profile: BabyProfile) {
         babyProfile = profile
+        WidgetDataStore.shared.setBabyInfo(name: profile.name, birthDate: profile.birthDate)
     }
 
     var displayName: String {

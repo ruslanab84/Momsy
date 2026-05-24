@@ -15,8 +15,6 @@ enum SleepWidgetState {
 final class WidgetDataStore {
     static let shared = WidgetDataStore()
 
-    static let widgetKind = "MomsyFeedSleepWidget"
-
     private let defaults: UserDefaults
 
     private init() {
@@ -59,6 +57,25 @@ final class WidgetDataStore {
         reload()
     }
 
+    func setLastSleepEnd(_ date: Date) {
+        defaults.set(date.timeIntervalSinceReferenceDate, forKey: "w_last_sleep_end")
+    }
+
+    // MARK: - Baby info writes (called from AppState)
+
+    func setBabyInfo(name: String, birthDate: Date) {
+        defaults.set(name, forKey: "w_baby_name")
+        defaults.set(birthDate.timeIntervalSinceReferenceDate, forKey: "w_baby_birth")
+        reload()
+    }
+
+    // MARK: - Diaper writes (called from TodayViewModel)
+
+    func updateDiaperCount(_ count: Int) {
+        defaults.set(count, forKey: "w_diaper_count")
+        reload()
+    }
+
     // MARK: - Reads (called from MomsyWidgetProvider)
 
     var feedingState: FeedingWidgetState {
@@ -87,6 +104,26 @@ final class WidgetDataStore {
         return .active(startDate: Date(timeIntervalSinceReferenceDate: ti))
     }
 
+    var babyName: String {
+        defaults.string(forKey: "w_baby_name") ?? ""
+    }
+
+    var babyBirthDate: Date? {
+        let ti = defaults.double(forKey: "w_baby_birth")
+        guard ti > 0 else { return nil }
+        return Date(timeIntervalSinceReferenceDate: ti)
+    }
+
+    var diaperCount: Int {
+        defaults.integer(forKey: "w_diaper_count")
+    }
+
+    var lastSleepEndDate: Date? {
+        let ti = defaults.double(forKey: "w_last_sleep_end")
+        guard ti > 0 else { return nil }
+        return Date(timeIntervalSinceReferenceDate: ti)
+    }
+
     // MARK: - Private
 
     private var idleFeeding: FeedingWidgetState {
@@ -96,6 +133,6 @@ final class WidgetDataStore {
     }
 
     private func reload() {
-        WidgetCenter.shared.reloadTimelines(ofKind: WidgetDataStore.widgetKind)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }

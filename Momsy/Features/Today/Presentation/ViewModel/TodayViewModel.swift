@@ -27,6 +27,7 @@ final class TodayViewModel: ObservableObject {
 
     private func loadDiaperCount() async {
         diaperCount = (try? await diaperRepo.countToday()) ?? 0
+        WidgetDataStore.shared.updateDiaperCount(diaperCount)
     }
 
     func loadTodayEntries() async {
@@ -52,6 +53,7 @@ final class TodayViewModel: ObservableObject {
         let lm = LocalizationManager.shared
         let newCount = diaperCount + 1
         diaperCount = newCount
+        WidgetDataStore.shared.updateDiaperCount(newCount)
         let label = lm.strings.diaperLogEntry(count: newCount)
         quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .drop, label: label))
         addEntry(LogEntry(time: Date(), kind: .drop, label: label))
@@ -61,6 +63,7 @@ final class TodayViewModel: ObservableObject {
     func removeDiaper() {
         guard diaperCount > 0 else { return }
         diaperCount -= 1
+        WidgetDataStore.shared.updateDiaperCount(diaperCount)
         quickLogRepo.removeLast(kind: .drop)
         if let idx = logEntries.firstIndex(where: { $0.kind == .drop }) {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {

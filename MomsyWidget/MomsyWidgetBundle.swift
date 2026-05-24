@@ -4,19 +4,47 @@ import SwiftUI
 @main
 struct MomsyWidgetBundle: WidgetBundle {
     var body: some Widget {
-        MomsyFeedSleepWidget()
+        MomsyFeedingWidget()
+        MomsySleepWidget()
+        MomsySummaryWidget()
     }
 }
 
-struct MomsyFeedSleepWidget: Widget {
-    let kind = WidgetDataStore.widgetKind
+struct MomsyFeedingWidget: Widget {
+    let kind = "MomsyFeedingWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: MomsyWidgetProvider()) { entry in
-            MomsyWidgetView(entry: entry)
+            MomsyFeedingWidgetView(entry: entry)
         }
-        .configurationDisplayName("Momsy")
-        .description("Таймер кормления и сна")
+        .configurationDisplayName("Кормление")
+        .description("Таймер кормления")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryCircular])
+    }
+}
+
+struct MomsySleepWidget: Widget {
+    let kind = "MomsySleepWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: MomsyWidgetProvider()) { entry in
+            MomsySleepWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Сон")
+        .description("Трекер сна")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+    }
+}
+
+struct MomsySummaryWidget: Widget {
+    let kind = "MomsySummaryWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: MomsyWidgetProvider()) { entry in
+            MomsySummaryWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Сводка дня")
+        .description("Кормление, сон и подгузники")
+        .supportedFamilies([.systemMedium])
     }
 }

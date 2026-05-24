@@ -129,6 +129,7 @@ final class SleepViewModel: ObservableObject {
         todayEntries.append(completed)
         isSleepActive = false
         activeSleepEntry = nil
+        WidgetDataStore.shared.setLastSleepEnd(Date())
         WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds)
         Task {
             do {

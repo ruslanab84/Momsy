@@ -1,9 +1,11 @@
 import SwiftUI
 import FirebaseCore
+import WidgetKit
 
 @main
 struct MomsyApp: App {
     @AppStorage("appTheme") private var appTheme = "system"
+    @Environment(\.scenePhase) private var scenePhase
 
     private let container = AppContainer()
     private let localization = LocalizationManager.shared
@@ -34,6 +36,11 @@ struct MomsyApp: App {
                     await appState.load()
                     await setupNotificationsOnLaunch(appState: appState)
                 }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
         }
     }
 }

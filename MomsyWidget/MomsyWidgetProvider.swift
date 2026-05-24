@@ -13,8 +13,15 @@ struct MomsyWidgetProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<MomsyWidgetEntry>) -> Void) {
         let entry = liveEntry()
-        // Refresh every 15 min as a safety net; primary updates come from WidgetCenter.reloadTimelines
-        let next = Calendar.current.date(byAdding: .minute, value: 15, to: .now) ?? .now
+        // 60s refresh when feeding/sleep is active; 15min otherwise
+        let isActive: Bool
+        switch entry.feedingState {
+        case .running: isActive = true
+        default:
+            if case .active = entry.sleepState { isActive = true } else { isActive = false }
+        }
+        let interval: Int = isActive ? 1 : 15
+        let next = Calendar.current.date(byAdding: .minute, value: interval, to: .now) ?? .now
         completion(Timeline(entries: [entry], policy: .after(next)))
     }
 
@@ -22,7 +29,11 @@ struct MomsyWidgetProvider: TimelineProvider {
         MomsyWidgetEntry(
             date: .now,
             feedingState: WidgetDataStore.shared.feedingState,
-            sleepState: WidgetDataStore.shared.sleepState
+            sleepState: WidgetDataStore.shared.sleepState,
+            babyName: WidgetDataStore.shared.babyName,
+            babyBirthDate: WidgetDataStore.shared.babyBirthDate,
+            diaperCount: WidgetDataStore.shared.diaperCount,
+            lastSleepEndDate: WidgetDataStore.shared.lastSleepEndDate
         )
     }
 }

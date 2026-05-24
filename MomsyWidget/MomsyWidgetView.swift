@@ -1,11 +1,16 @@
 import SwiftUI
 import WidgetKit
 
-struct MomsyWidgetView: View {
+struct MomsyFeedingWidgetView: View {
     let entry: MomsyWidgetEntry
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
+        content
+            .widgetURL(URL(string: "momsy://feeding"))
+    }
+
+    @ViewBuilder private var content: some View {
         switch family {
         case .systemSmall:
             SmallWidgetView(entry: entry)
@@ -13,6 +18,8 @@ struct MomsyWidgetView: View {
             MediumWidgetView(entry: entry)
         case .accessoryRectangular:
             AccessoryRectangularView(entry: entry)
+        case .accessoryCircular:
+            AccessoryCircularView(entry: entry)
         default:
             SmallWidgetView(entry: entry)
         }
@@ -256,9 +263,11 @@ private struct IdleSummaryView: View {
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(bbCoral)
             if case .idle(let date) = entry.feedingState, let d = date {
-                Text(d, style: .relative)
-                    .font(.subheadline.monospacedDigit().weight(.medium))
-                + Text(" назад").font(.caption).foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(d, style: .relative)
+                        .font(.subheadline.monospacedDigit().weight(.medium))
+                    Text("назад").font(.caption).foregroundStyle(.secondary)
+                }
             } else {
                 Text("—").foregroundStyle(.tertiary)
             }
@@ -277,6 +286,39 @@ private struct IdleSummaryView: View {
                 Text("—").foregroundStyle(.tertiary)
             }
         }
+    }
+}
+
+// MARK: - Accessory Circular (Lock Screen)
+
+private struct AccessoryCircularView: View {
+    let entry: MomsyWidgetEntry
+
+    var body: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            VStack(spacing: 1) {
+                Image(systemName: "drop.fill")
+                    .font(.caption2.weight(.semibold))
+                Group {
+                    switch entry.feedingState {
+                    case .running(let start, _):
+                        Text(timerInterval: start...Date.distantFuture, countsDown: false)
+                    case .paused(let secs, _):
+                        Text(formatSeconds(secs))
+                    case .idle(let date):
+                        if let d = date {
+                            Text(d, style: .relative)
+                        } else {
+                            Text("—")
+                        }
+                    }
+                }
+                .font(.caption2.monospacedDigit())
+                .minimumScaleFactor(0.6)
+            }
+        }
+        .containerBackground(.clear, for: .widget)
     }
 }
 
