@@ -62,6 +62,8 @@ struct TodayView: View {
         .background(Color.bbCream.ignoresSafeArea())
         .task { await vm.loadTodayEntries() }
         .task { await feedingVM.loadTodayEntries() }
+        .task { await vm.fetchDailyTipIfNeeded() }
+        .onChange(of: vm.logEntries) { Task { await vm.fetchDailyTipIfNeeded() } }
         .task {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 60_000_000_000)
@@ -330,14 +332,16 @@ struct TodayView: View {
                         .foregroundColor(.bbButterDeep)
                 )
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(loc.strings.tipOfDay)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInk)
-                Text(aiTipText)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundColor(.bbInkSoft)
-                    .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(loc.strings.tipOfDay)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    if let tip = vm.dailyTip, tip.isFromCache {
+                        BBPill(text: tip.ageLabel, color: Color.bbInkMute.opacity(0.12), fg: .bbInkMute, size: 10)
+                    }
+                }
+                aiTipBody
             }
         }
         .bbCard(pad: 14, bg: .bbCreamSoft)
@@ -350,16 +354,32 @@ struct TodayView: View {
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
-    private var aiTipText: String {
-        if feedingVM.isFeedingActive {
-            return loc.strings.feedingDuration(feedingVM.feedingTimerString)
+    @ViewBuilder
+    private var aiTipBody: some View {
+        if vm.isTipLoading && vm.dailyTip == nil {
+            // Loading shimmer — show placeholder text with redaction
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Подбираем совет для вашего малыша...")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+                    .redacted(reason: .placeholder)
+                Text("Это займёт секунду.")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+                    .redacted(reason: .placeholder)
+            }
+        } else if let tip = vm.dailyTip {
+            Text(tip.text)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            // Fallback — no internet + no cache
+            Text(loc.strings.leapContrastsTip(name: appState.displayName))
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        let lastFeed = vm.logEntries.first(where: { $0.kind == .bottle })?.time
-        let mins = lastFeed.map { max(0, Int(-$0.timeIntervalSinceNow / 60)) } ?? 0
-        if mins >= 150 {
-            return loc.strings.feedingTip(ago: feedingVM.lastFeedAgoString, name: appState.displayName)
-        }
-        return loc.strings.leapContrastsTip(name: appState.displayName)
     }
 
     // MARK: - Leap Card

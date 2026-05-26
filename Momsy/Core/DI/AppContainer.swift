@@ -37,6 +37,8 @@ final class AppContainer {
     let quickLogRepository                              = QuickLogRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
     let preferencesRepository: any UserPreferencesRepository = LocalUserPreferencesRepository()
+    let dailyTipRepository                             = DailyTipRepository()
+    lazy var dailyTipService: any DailyTipService      = GeminiDailyTipService()
 
     // MARK: — Use Cases — Baby
 
@@ -123,7 +125,10 @@ final class AppContainer {
             getFeeding: getFeedingEntries,
             getSleep: getSleepEntries,
             diaperRepo: diaperRepository,
-            quickLogRepo: quickLogRepository
+            quickLogRepo: quickLogRepository,
+            tipService: dailyTipService,
+            tipRepository: dailyTipRepository,
+            appState: appState
         )
     }
 

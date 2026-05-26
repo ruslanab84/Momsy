@@ -1,6 +1,6 @@
 import Foundation
 
-struct LogEntry: Identifiable {
+struct LogEntry: Identifiable, Equatable {
     let id = UUID()
     let time: Date
     let kind: BlobKind

@@ -6,22 +6,33 @@ final class TodayViewModel: ObservableObject {
     @Published var diaperCount: Int = 0
     @Published var logEntries: [LogEntry] = []
     @Published var saveError: String?
+    @Published var dailyTip: DailyTip?
+    @Published var isTipLoading: Bool = false
 
     private let getFeeding: GetFeedingEntriesUseCase
     private let getSleep: GetSleepEntriesUseCase
     private let diaperRepo: any DiaperRepository
     private let quickLogRepo: QuickLogRepository
+    private let tipService: any DailyTipService
+    private let tipRepository: DailyTipRepository
+    private let appState: AppState
 
     init(
         getFeeding: GetFeedingEntriesUseCase,
         getSleep: GetSleepEntriesUseCase,
         diaperRepo: any DiaperRepository,
-        quickLogRepo: QuickLogRepository
+        quickLogRepo: QuickLogRepository,
+        tipService: any DailyTipService,
+        tipRepository: DailyTipRepository,
+        appState: AppState
     ) {
         self.getFeeding = getFeeding
         self.getSleep = getSleep
         self.diaperRepo = diaperRepo
         self.quickLogRepo = quickLogRepo
+        self.tipService = tipService
+        self.tipRepository = tipRepository
+        self.appState = appState
         Task { await loadDiaperCount() }
     }
 
@@ -48,6 +59,56 @@ final class TodayViewModel: ObservableObject {
             logEntries = merged
         }
     }
+
+    // MARK: - Daily AI Tip
+
+    func fetchDailyTipIfNeeded() async {
+        let ctx = DailyContextBuilder.build(from: logEntries, diaperCount: diaperCount, appState: appState)
+
+        // Return immediately if cached tip is fresh and data hasn't changed
+        if tipRepository.isFresh(for: ctx.contextHash) {
+            if var cached = tipRepository.load() {
+                cached.isFromCache = true
+                dailyTip = cached
+            }
+            return
+        }
+
+        isTipLoading = true
+        do {
+            let text = try await tipService.fetch(context: ctx)
+            let tip = DailyTip(text: text, generatedAt: Date(), contextHash: ctx.contextHash)
+            tipRepository.save(tip)
+            dailyTip = tip
+        } catch {
+            // Graceful fallback: show stale cached tip if available, otherwise leave dailyTip = nil
+            if var stale = tipRepository.load() {
+                stale.isFromCache = true
+                dailyTip = stale
+            }
+        }
+        isTipLoading = false
+    }
+
+    /// Force-fetches a new tip, ignoring TTL cache.
+    func refreshTip() async {
+        isTipLoading = true
+        let ctx = DailyContextBuilder.build(from: logEntries, diaperCount: diaperCount, appState: appState)
+        do {
+            let text = try await tipService.fetch(context: ctx)
+            let tip = DailyTip(text: text, generatedAt: Date(), contextHash: ctx.contextHash)
+            tipRepository.save(tip)
+            dailyTip = tip
+        } catch {
+            if var stale = tipRepository.load() {
+                stale.isFromCache = true
+                dailyTip = stale
+            }
+        }
+        isTipLoading = false
+    }
+
+    // MARK: - Quick log actions
 
     func logDiaper() {
         let lm = LocalizationManager.shared

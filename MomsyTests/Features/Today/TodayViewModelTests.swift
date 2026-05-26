@@ -14,16 +14,39 @@ struct TodayViewModelTests {
         UserDefaults.standard.removeObject(forKey: "quick_log_today_date")
     }
 
+    private func makeAppState() -> AppState {
+        let profile = BabyProfile(
+            id: UUID(),
+            name: "Тест",
+            birthDate: Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date(),
+            gender: "girl"
+        )
+        let repo = MockBabyRepository(initialProfile: profile)
+        return AppState(getBabyProfile: GetBabyProfileUseCase(repository: repo))
+    }
+
+    private func makeTipRepository() -> DailyTipRepository {
+        // Isolated UserDefaults suite per test run to avoid cache pollution
+        let defaults = UserDefaults(suiteName: UUID().uuidString)!
+        return DailyTipRepository(defaults: defaults)
+    }
+
     func makeVM(
         repo: MockFeedingRepository = MockFeedingRepository(),
         sleepRepo: MockSleepRepository = MockSleepRepository(),
-        diaperRepo: MockDiaperRepository = MockDiaperRepository()
+        diaperRepo: MockDiaperRepository = MockDiaperRepository(),
+        tipService: MockDailyTipService = MockDailyTipService(),
+        tipRepository: DailyTipRepository? = nil
     ) -> TodayViewModel {
-        TodayViewModel(
+        let tipRepo = tipRepository ?? makeTipRepository()
+        return TodayViewModel(
             getFeeding: GetFeedingEntriesUseCase(repository: repo),
             getSleep: GetSleepEntriesUseCase(repository: sleepRepo),
             diaperRepo: diaperRepo,
-            quickLogRepo: QuickLogRepository()
+            quickLogRepo: QuickLogRepository(),
+            tipService: tipService,
+            tipRepository: tipRepo,
+            appState: makeAppState()
         )
     }
 
@@ -122,5 +145,67 @@ struct TodayViewModelTests {
         vm.logBath()
         #expect(vm.logEntries.count == 1)
         #expect(vm.logEntries[0].kind == .bath)
+    }
+
+    // MARK: - Daily AI Tip
+
+    @Test("fetchDailyTipIfNeeded sets dailyTip text from service")
+    func fetchDailyTipIfNeeded_setsDailyTip() async {
+        let service = MockDailyTipService()
+        service.stubbedText = "Test AI tip"
+        let vm = makeVM(tipService: service)
+        await vm.fetchDailyTipIfNeeded()
+        #expect(vm.dailyTip?.text == "Test AI tip")
+        #expect(vm.isTipLoading == false)
+    }
+
+    @Test("fetchDailyTipIfNeeded does not call service when cache is fresh")
+    func fetchDailyTipIfNeeded_usesCache_whenHashUnchanged() async {
+        let service = MockDailyTipService()
+        service.stubbedText = "Cached tip"
+        let tipRepo = makeTipRepository()
+        let vm = makeVM(tipService: service, tipRepository: tipRepo)
+
+        // First fetch — populates cache
+        await vm.fetchDailyTipIfNeeded()
+        #expect(service.callCount == 1)
+
+        // Second fetch — same context hash, cache is fresh
+        await vm.fetchDailyTipIfNeeded()
+        #expect(service.callCount == 1)   // service NOT called again
+        #expect(vm.dailyTip?.isFromCache == true)
+    }
+
+    @Test("fetchDailyTipIfNeeded falls back to stale cache on network error")
+    func fetchDailyTipIfNeeded_fallsBackToCache_onError() async {
+        let service = MockDailyTipService()
+        service.stubbedText = "Stale tip"
+        let tipRepo = makeTipRepository()
+        let vm = makeVM(tipService: service, tipRepository: tipRepo)
+
+        // Populate cache with a successful fetch
+        await vm.fetchDailyTipIfNeeded()
+        #expect(vm.dailyTip?.text == "Stale tip")
+
+        // Force cache to be stale by modifying diaperCount so hash changes
+        vm.logDiaper()
+
+        // Now network fails
+        service.shouldThrow = true
+        await vm.fetchDailyTipIfNeeded()
+
+        // Should show stale cached tip, not nil
+        #expect(vm.dailyTip != nil)
+        #expect(vm.dailyTip?.isFromCache == true)
+        #expect(vm.isTipLoading == false)
+    }
+
+    @Test("fetchDailyTipIfNeeded resets isTipLoading to false after fetch")
+    func fetchDailyTipIfNeeded_resetsLoadingState() async {
+        let service = MockDailyTipService()
+        let vm = makeVM(tipService: service)
+        #expect(vm.isTipLoading == false)
+        await vm.fetchDailyTipIfNeeded()
+        #expect(vm.isTipLoading == false)
     }
 }
