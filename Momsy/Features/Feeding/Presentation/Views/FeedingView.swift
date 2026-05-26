@@ -9,6 +9,7 @@ struct FeedingView: View {
     @State private var selectedMoodIdx: Int? = nil
     @State private var customMood = ""
     @State private var showCustomInput = false
+    @State private var showAddManual = false
 
     private let typicalSeconds = 18 * 60
     private let barValues = [22, 15, 28, 18, 14, 8]
@@ -308,6 +309,12 @@ struct FeedingView: View {
                 Text(loc.strings.feedingsCount(feedCount))
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkMute)
+                Button { showAddManual = true } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.bbCoralDeep)
+                }
+                .buttonStyle(.plain)
             }
 
             HStack(alignment: .bottom, spacing: 6) {
@@ -334,6 +341,10 @@ struct FeedingView: View {
             .frame(height: 80)
         }
         .bbCard(pad: 14, bg: Color.white.opacity(0.9))
+        .sheet(isPresented: $showAddManual) {
+            AddFeedingSheet(vm: vm)
+                .environmentObject(loc)
+        }
     }
 }
 
