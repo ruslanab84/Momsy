@@ -1,12 +1,11 @@
 import SwiftUI
-import PhotosUI
 
 // MARK: - Add Entry Sheet
 
 struct AddEntrySheet: View {
     let babyName: String
     let babyBirthDateInterval: Double
-    let onAdd: (DiaryDay, [UUID: UIImage]) -> Void
+    let onAdd: (DiaryDay) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
@@ -14,13 +13,11 @@ struct AddEntrySheet: View {
     private enum EntryType: String, CaseIterable {
         case note = "note"
         case milestone = "milestone"
-        case photo = "photo"
 
         func displayName(lang: String) -> String {
             switch self {
             case .note:      return lang == "en" ? "Note"      : "Заметка"
             case .milestone: return "Milestone"
-            case .photo:     return lang == "en" ? "Photo"     : "Фото"
             }
         }
     }
@@ -43,23 +40,15 @@ struct AddEntrySheet: View {
         ]
     }
 
-    private let photoTones: [Color] = [.bbCoral, .bbButter, .bbMint, .bbLilac, .bbSky, .bbRose]
-
     @State private var entryType: EntryType = .note
     @State private var noteText = ""
     @State private var milestoneLabel = ""
     @State private var selectedIcon: BlobKind = .star
-    @State private var caption = ""
-    @State private var selectedTone: Color = .bbCoral
-    @State private var photoItem: PhotosPickerItem? = nil
-    @State private var photoImage: UIImage? = nil
-    @State private var isLoadingPhoto = false
 
     private var isValid: Bool {
         switch entryType {
         case .note:      return !noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         case .milestone: return !milestoneLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        case .photo:     return photoImage != nil && !isLoadingPhoto
         }
     }
 
@@ -89,7 +78,6 @@ struct AddEntrySheet: View {
                         switch entryType {
                         case .note:      noteContent
                         case .milestone: milestoneContent
-                        case .photo:     photoContent
                         }
                     }
                     .animation(.spring(response: 0.3, dampingFraction: 0.8), value: entryType)
@@ -199,115 +187,18 @@ struct AddEntrySheet: View {
         }
     }
 
-    // MARK: - Photo content
-
-    private var photoContent: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(loc.strings.choosePhoto)
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInkMute)
-                .kerning(0.5)
-
-            PhotosPicker(selection: $photoItem, matching: .images) {
-                ZStack {
-                    if let img = photoImage {
-                        Image(uiImage: img)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 180)
-                            .clipped()
-                    } else {
-                        selectedTone
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 180)
-                            .overlay(
-                                VStack(spacing: 8) {
-                                    if isLoadingPhoto {
-                                        ProgressView().tint(.white)
-                                    } else {
-                                        Image(systemName: "camera.fill")
-                                            .font(.system(size: 32, weight: .light))
-                                            .foregroundColor(.white.opacity(0.8))
-                                        Text(loc.strings.tapToChoose)
-                                            .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.8))
-                                    }
-                                }
-                            )
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .contentShape(Rectangle())
-            }
-            .onChange(of: photoItem) { _, new in
-                guard let new else { return }
-                isLoadingPhoto = true
-                Task {
-                    if let data = try? await new.loadTransferable(type: Data.self),
-                       let img = UIImage(data: data) {
-                        photoImage = img
-                    }
-                    isLoadingPhoto = false
-                }
-            }
-
-            if photoImage == nil {
-                HStack(spacing: 10) {
-                    Text(loc.strings.placeholderColor)
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundColor(.bbInkSoft)
-                    ForEach(photoTones, id: \.self) { c in
-                        Button { selectedTone = c } label: {
-                            Circle()
-                                .fill(c)
-                                .frame(width: 24, height: 24)
-                                .overlay(
-                                    Circle().strokeBorder(
-                                        selectedTone == c ? Color.bbInk : Color.clear,
-                                        lineWidth: 2
-                                    )
-                                )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-
-            Text(loc.strings.captionHandwriting)
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInkMute)
-                .kerning(0.5)
-
-            TextField(loc.strings.captionExamplePlaceholder, text: $caption)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .padding(14)
-                .background(Color.bbCard)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-    }
-
     // MARK: - Commit
 
     private func commit() {
-        var photos: [UUID: UIImage] = [:]
         let newItem: DiaryItem
-
         switch entryType {
         case .note:
             newItem = DiaryItem(type: .note(text: noteText.trimmingCharacters(in: .whitespacesAndNewlines)))
-
         case .milestone:
             newItem = DiaryItem(type: .milestone(icon: selectedIcon, label: milestoneLabel.trimmingCharacters(in: .whitespacesAndNewlines)))
-
-        case .photo:
-            newItem = DiaryItem(type: .photo(tone: selectedTone, handwriting: caption.isEmpty ? loc.strings.moment : caption, isMilestone: false))
-            if let img = photoImage { photos[newItem.id] = img }
         }
-
         let newDay = DiaryDay(dateLabel: "", ageLabel: ageLabel, items: [newItem])
-        onAdd(newDay, photos)
+        onAdd(newDay)
         dismiss()
     }
 }

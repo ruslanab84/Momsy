@@ -1,7 +1,6 @@
 import SwiftUI
 
 enum DiaryItemType {
-    case photo(tone: Color, handwriting: String, isMilestone: Bool)
     case note(text: String)
     case milestone(icon: BlobKind, label: String)
 }

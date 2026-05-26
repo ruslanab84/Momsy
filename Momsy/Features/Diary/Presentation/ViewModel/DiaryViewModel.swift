@@ -6,13 +6,9 @@ final class DiaryViewModel: ObservableObject {
     @Published var selectedFilter = 0
     @Published var entries: [DiaryDay] = []
     @Published var likedIDs: Set<UUID> = []
-    @Published var photosByID: [UUID: UIImage] = [:]
-    @Published var uploadProgress: [UUID: Double] = [:]
     @Published var saveError: String?
 
     private let repo: any DiaryRepository
-    private let photoStorage: any PhotoStorageService
-    private let localPhotoStorage = LocalPhotoStorageService()
     private let analytics: any AnalyticsServiceProtocol
     private let appState: AppState
 
@@ -31,12 +27,9 @@ final class DiaryViewModel: ObservableObject {
         case 1:
             return compact { item in
                 if case .milestone = item.type { return true }
-                if case let .photo(_, _, isMilestone) = item.type { return isMilestone }
                 return false
             }
         case 2:
-            return compact { if case .photo = $0.type { return true }; return false }
-        case 3:
             return compact { if case .note = $0.type { return true }; return false }
         default:
             return entries
@@ -44,56 +37,18 @@ final class DiaryViewModel: ObservableObject {
     }
 
     init(repo: any DiaryRepository,
-         photoStorage: any PhotoStorageService,
          analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
          appState: AppState) {
         self.repo = repo
-        self.photoStorage = photoStorage
         self.analytics = analytics
         self.appState = appState
-        Task {
-            await loadEntries()
-            await migrateLocalPhotosToFirebase()
-        }
+        Task { await loadEntries() }
     }
 
     func loadEntries() async {
         let yearAgo = Calendar.current.date(byAdding: .year, value: -1, to: Date()) ?? .distantPast
         let stored = (try? await repo.getEntries(from: yearAgo, to: Date())) ?? []
-
-        var loaded: [UUID: UIImage] = [:]
-        for item in stored where item.kind == .photo {
-            if let path = item.photoPath, let img = await photoStorage.load(atPath: path) {
-                loaded[item.id] = img
-            }
-        }
-
-        entries = group(stored.sorted { $0.date > $1.date })
-        photosByID.merge(loaded) { _, new in new }
-    }
-
-    // MARK: - Migration
-
-    private func migrateLocalPhotosToFirebase() async {
-        let yearAgo = Calendar.current.date(byAdding: .year, value: -1, to: Date()) ?? .distantPast
-        let stored = (try? await repo.getEntries(from: yearAgo, to: Date())) ?? []
-        let localItems = stored.filter { $0.kind == .photo && ($0.photoPath?.hasPrefix("/") == true) }
-        guard !localItems.isEmpty else { return }
-
-        for item in localItems {
-            guard let localPath = item.photoPath,
-                  let image = UIImage(contentsOfFile: localPath) else { continue }
-            do {
-                let firebasePath = try await photoStorage.save(image, forID: item.id)
-                var updated = item
-                updated.photoPath = firebasePath
-                try await repo.update(updated)
-            } catch {
-                // Leave local file intact if upload fails; will retry next launch
-            }
-        }
-
-        await loadEntries()
+        entries = group(stored.filter { $0.kind != .photo }.sorted { $0.date > $1.date })
     }
 
     // MARK: - Grouping & Mapping
@@ -150,11 +105,8 @@ final class DiaryViewModel: ObservableObject {
         case .milestone:
             return DiaryItem(id: stored.id, type: .milestone(icon: blobKind(stored.iconName), label: stored.text))
         case .photo:
-            return DiaryItem(id: stored.id, type: .photo(
-                tone: Color(bbHex: stored.toneHex),
-                handwriting: stored.text,
-                isMilestone: stored.isMilestone
-            ))
+            // Photo entries no longer supported; filtered out before reaching here
+            return DiaryItem(id: stored.id, type: .note(text: stored.text))
         }
     }
 
@@ -164,9 +116,6 @@ final class DiaryViewModel: ObservableObject {
             return StoredDiaryItem(id: item.id, date: date, kind: .note, text: text)
         case let .milestone(icon, label):
             return StoredDiaryItem(id: item.id, date: date, kind: .milestone, text: label, iconName: icon.iconName)
-        case let .photo(tone, handwriting, isMilestone):
-            return StoredDiaryItem(id: item.id, date: date, kind: .photo, text: handwriting,
-                                   toneHex: tone.hexString, isMilestone: isMilestone)
         }
     }
 
@@ -201,12 +150,11 @@ final class DiaryViewModel: ObservableObject {
         }
     }
 
-    func insertDay(_ newDay: DiaryDay, photos: [UUID: UIImage]) {
+    func insertDay(_ newDay: DiaryDay) {
         let entryTypes = newDay.items.map { item -> String in
             switch item.type {
             case .note: return "note"
             case .milestone: return "milestone"
-            case .photo: return "photo"
             }
         }
         entryTypes.forEach { analytics.track(.diaryEntryAdded(type: $0)) }
@@ -221,42 +169,24 @@ final class DiaryViewModel: ObservableObject {
                 let age = babyBirthDate.map { makeAgeLabel(todayStart, birth: $0) } ?? ""
                 entries.insert(DiaryDay(dateLabel: label, ageLabel: age, items: newDay.items), at: 0)
             }
-            photosByID.merge(photos) { _, new in new }
         }
         Task {
             for item in newDay.items {
-                var stored = toStored(item, date: date)
-                if stored.kind == .photo, let img = photos[item.id] {
-                    stored.photoPath = try? await localPhotoStorage.save(img, forID: item.id)
-                }
+                let stored = toStored(item, date: date)
                 do {
                     try await repo.add(stored)
                 } catch {
-                    rollbackItem(item, photos: photos)
+                    rollbackItem(item)
                     saveError = error.localizedDescription
-                    continue
-                }
-                if stored.kind == .photo, let img = photos[item.id] {
-                    Task {
-                        do {
-                            for try await event in photoStorage.saveWithProgress(img, forID: item.id) {
-                                if case .progress(let fraction) = event { uploadProgress[item.id] = fraction }
-                                if case .completed = event { uploadProgress.removeValue(forKey: item.id) }
-                            }
-                        } catch {
-                            uploadProgress.removeValue(forKey: item.id)
-                        }
-                    }
                 }
             }
         }
     }
 
-    private func rollbackItem(_ item: DiaryItem, photos: [UUID: UIImage]) {
+    private func rollbackItem(_ item: DiaryItem) {
         withAnimation {
             for i in entries.indices { entries[i].items.removeAll { $0.id == item.id } }
             entries.removeAll { $0.items.isEmpty }
-            if photos[item.id] != nil { photosByID.removeValue(forKey: item.id) }
         }
     }
 }

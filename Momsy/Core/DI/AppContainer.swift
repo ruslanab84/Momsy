@@ -138,7 +138,7 @@ final class AppContainer {
     }
 
     func makeDiaryViewModel() -> DiaryViewModel {
-        DiaryViewModel(repo: diaryRepository, photoStorage: photoStorage, analytics: analytics, appState: appState)
+        DiaryViewModel(repo: diaryRepository, analytics: analytics, appState: appState)
     }
 
     func makeTrackingViewModel() -> TrackingViewModel {

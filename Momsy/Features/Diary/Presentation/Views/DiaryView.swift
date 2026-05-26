@@ -7,7 +7,7 @@ struct DiaryView: View {
     @EnvironmentObject var loc: LocalizationManager
 
     @State private var showAdd = false
-    @State private var pendingEntry: (DiaryDay, [UUID: UIImage])? = nil
+    @State private var pendingEntry: DiaryDay? = nil
     @State private var sheetID = UUID()
 
     init(container: AppContainer) {
@@ -15,7 +15,7 @@ struct DiaryView: View {
     }
 
     private var filters: [String] {
-        [loc.strings.all, "★ Milestones", loc.strings.filterPhoto, loc.strings.filterNotes]
+        [loc.strings.all, "★ Milestones", loc.strings.filterNotes]
     }
 
     var body: some View {
@@ -38,8 +38,6 @@ struct DiaryView: View {
                             DiaryDaySection(
                                 day: day,
                                 likedIDs: vm.likedIDs,
-                                photosByID: vm.photosByID,
-                                uploadProgress: vm.uploadProgress,
                                 onLike: { id in vm.toggleLike(id) }
                             )
                         }
@@ -60,15 +58,15 @@ struct DiaryView: View {
         }
         .background(Color.bbCream.ignoresSafeArea())
         .sheet(isPresented: $showAdd, onDismiss: {
-            if let (day, photos) = pendingEntry {
-                vm.insertDay(day, photos: photos)
+            if let day = pendingEntry {
+                vm.insertDay(day)
                 pendingEntry = nil
             }
         }) {
             AddEntrySheet(
                 babyName: vm.displayName,
                 babyBirthDateInterval: vm.babyBirthDateInterval,
-                onAdd: { day, photos in pendingEntry = (day, photos) }
+                onAdd: { day in pendingEntry = day }
             )
             .id(sheetID)
         }

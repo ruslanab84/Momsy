@@ -1,6 +1,6 @@
 import Testing
+import Foundation
 @testable import Momsy
-import UIKit
 
 @Suite("DiaryViewModel", .serialized)
 @MainActor
@@ -12,7 +12,6 @@ struct DiaryViewModelTests {
     ) async throws -> DiaryViewModel {
         let vm = DiaryViewModel(
             repo: repo,
-            photoStorage: MockPhotoStorageService(),
             analytics: MockAnalyticsService(),
             appState: makeAppState(profile: profile)
         )
@@ -27,7 +26,7 @@ struct DiaryViewModelTests {
         let vm = try await makeVM()
         let item = DiaryItem(id: UUID(), type: .note(text: "First note"))
         let day  = DiaryDay(dateLabel: "", ageLabel: "", items: [item])
-        vm.insertDay(day, photos: [:])
+        vm.insertDay(day)
         #expect(vm.entries.count == 1)
         #expect(vm.entries[0].items.count == 1)
     }
@@ -41,19 +40,9 @@ struct DiaryViewModelTests {
         vm.entries = [todayDay]
 
         let newItem = DiaryItem(id: UUID(), type: .note(text: "New"))
-        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [newItem]), photos: [:])
+        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [newItem]))
         #expect(vm.entries.count == 1)
         #expect(vm.entries[0].items.count == 2)
-    }
-
-    @Test("insertDay merges photos into photosByID")
-    func insertDayMergesPhotos() async throws {
-        let vm = try await makeVM()
-        let id  = UUID()
-        let img = UIImage()
-        let item = DiaryItem(id: id, type: .photo(tone: .bbMint, handwriting: "", isMilestone: false))
-        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item]), photos: [id: img])
-        #expect(vm.photosByID[id] != nil)
     }
 
     @Test("insertDay rolls back entry on repository error")
@@ -62,7 +51,7 @@ struct DiaryViewModelTests {
         repo.throwOnAdd = true
         let vm = try await makeVM(repo: repo)
         let item = DiaryItem(id: UUID(), type: .note(text: "Lost note"))
-        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item]), photos: [:])
+        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item]))
         try await Task.sleep(nanoseconds: 100_000_000)
         #expect(vm.entries.allSatisfy { $0.items.allSatisfy { $0.id != item.id } })
         #expect(vm.saveError != nil)
@@ -73,8 +62,8 @@ struct DiaryViewModelTests {
         let vm = try await makeVM()
         let item1 = DiaryItem(id: UUID(), type: .note(text: "First"))
         let item2 = DiaryItem(id: UUID(), type: .milestone(icon: .star, label: "Second"))
-        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item1]), photos: [:])
-        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item2]), photos: [:])
+        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item1]))
+        vm.insertDay(DiaryDay(dateLabel: "", ageLabel: "", items: [item2]))
         try await Task.sleep(nanoseconds: 100_000_000)
         let allItems = vm.entries.flatMap { $0.items }
         #expect(allItems.contains { $0.id == item1.id })
@@ -106,14 +95,16 @@ struct DiaryViewModelTests {
         #expect(vm.entries[0].items.first?.id == new.id)
     }
 
-    @Test("loadEntries clears stale photos when path is missing")
-    func loadEntriesDoesNotCrashWithMissingPhoto() async throws {
+    @Test("loadEntries filters out photo-kind stored items")
+    func loadEntriesFiltersPhotos() async throws {
         let repo = MockDiaryRepository()
-        let item = StoredDiaryItem(id: UUID(), date: Date(), kind: .photo, text: "", photoPath: nil)
-        repo.items = [item]
+        let note  = StoredDiaryItem(id: UUID(), date: Date(), kind: .note, text: "hello")
+        let photo = StoredDiaryItem(id: UUID(), date: Date(), kind: .photo, text: "pic", photoPath: nil)
+        repo.items = [note, photo]
         let vm = try await makeVM(repo: repo)
         await vm.loadEntries()
         #expect(vm.entries.count == 1)
+        #expect(vm.entries[0].items.count == 1)
     }
 
     // MARK: - filteredEntries
@@ -141,26 +132,13 @@ struct DiaryViewModelTests {
         }
     }
 
-    @Test("filteredEntries(2) returns only photo items")
-    func filterPhotos() async throws {
-        let vm = try await makeVM()
-        let note  = DiaryItem(id: UUID(), type: .note(text: "n"))
-        let photo = DiaryItem(id: UUID(), type: .photo(tone: .bbMint, handwriting: "", isMilestone: false))
-        vm.entries = [DiaryDay(dateLabel: "d", ageLabel: "", items: [note, photo])]
-        vm.selectedFilter = 2
-        #expect(vm.filteredEntries[0].items.count == 1)
-        if case .photo = vm.filteredEntries[0].items[0].type {} else {
-            Issue.record("Expected photo item")
-        }
-    }
-
-    @Test("filteredEntries(3) returns only note items")
+    @Test("filteredEntries(2) returns only note items")
     func filterNotes() async throws {
         let vm = try await makeVM()
         let note      = DiaryItem(id: UUID(), type: .note(text: "n"))
         let milestone = DiaryItem(id: UUID(), type: .milestone(icon: .star, label: "m"))
         vm.entries = [DiaryDay(dateLabel: "d", ageLabel: "", items: [note, milestone])]
-        vm.selectedFilter = 3
+        vm.selectedFilter = 2
         #expect(vm.filteredEntries[0].items.count == 1)
         if case .note = vm.filteredEntries[0].items[0].type {} else {
             Issue.record("Expected note item")
@@ -172,7 +150,7 @@ struct DiaryViewModelTests {
         let vm = try await makeVM()
         let note = DiaryItem(id: UUID(), type: .note(text: "n"))
         vm.entries = [DiaryDay(dateLabel: "d", ageLabel: "", items: [note])]
-        vm.selectedFilter = 2 // photos only
+        vm.selectedFilter = 1 // milestones only — note-only day should disappear
         #expect(vm.filteredEntries.isEmpty)
     }
 }
