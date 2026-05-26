@@ -95,10 +95,10 @@ final class AIChatViewModel: ObservableObject {
                 let assistantMsg = ChatMessage(role: .assistant, content: streamingText)
                 messages.append(assistantMsg)
                 do { try await appendMessageUC.execute(assistantMsg) }
-                catch { errorMessage = error.localizedDescription }
+                catch { errorMessage = friendlyError(error) }
                 streamingText = ""
             } catch {
-                errorMessage = error.localizedDescription
+                errorMessage = friendlyError(error)
                 streamingText = ""
             }
             isStreaming = false
@@ -122,5 +122,14 @@ final class AIChatViewModel: ObservableObject {
         if let progress = try? await getLeapsUC.execute() {
             leapProgress = progress
         }
+    }
+
+    private func friendlyError(_ error: Error) -> String {
+        let lm = LocalizationManager.shared
+        if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
+            return lm.strings.aiChatErrorNoInternet
+        }
+        // All GenerateContentError cases and other failures map to a generic friendly message
+        return lm.strings.aiChatErrorGeneric
     }
 }

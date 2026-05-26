@@ -589,6 +589,16 @@ struct L10n {
     var momsyAI: String         { s("Momsy AI",     "Momsy ИИ",      "Momsy KI") }
     var aiChatSubtitle: String  { s("Ask about sleep, feeding, development,\nor anything on your mind.", "Спросите о сне, кормлении, развитии\nили о том, что вас беспокоит.", "Fragen zu Schlaf, Ernährung, Entwicklung\noder allem, was Sie beschäftigt.") }
     var askAnything: String     { s("Ask anything…","Спросить…",     "Alles fragen…") }
+    var tryAgain: String        { s("Try again",    "Повторить",      "Erneut versuchen") }
+    var aiChatErrorGeneric: String { s("Something went wrong. Please try again.",
+                                       "Что-то пошло не так. Пожалуйста, попробуйте ещё раз.",
+                                       "Etwas ist schiefgelaufen. Bitte versuche es erneut.") }
+    var aiChatErrorNoInternet: String { s("No internet connection.",
+                                          "Нет подключения к интернету.",
+                                          "Keine Internetverbindung.") }
+    var aiChatErrorLocation: String { s("AI service is not available in your region.",
+                                        "ИИ-сервис недоступен в вашем регионе.",
+                                        "KI-Dienst ist in Ihrer Region nicht verfügbar.") }
 
     // MARK: — Mom Mood Tracker
     var momMoodTitle: String          { s("My Wellbeing",            "Моё самочувствие",           "Mein Wohlbefinden") }

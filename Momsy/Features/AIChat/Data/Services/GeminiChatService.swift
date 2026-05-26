@@ -41,6 +41,11 @@ final class GeminiChatService: AIChatService {
     }
 
     private func isRetriable(_ error: Error) -> Bool {
+        if let genError = error as? GenerateContentError {
+            // internalError wraps transient server/network failures — safe to retry
+            if case .internalError = genError { return true }
+            return false
+        }
         if let urlError = error as? URLError {
             return [.timedOut, .networkConnectionLost, .cannotConnectToHost,
                     .cannotFindHost, .notConnectedToInternet].contains(urlError.code)

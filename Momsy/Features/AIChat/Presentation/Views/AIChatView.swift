@@ -117,15 +117,26 @@ struct AIChatView: View {
 
     private var suggestedPrompts: [String] {
         let name = vm.babyContext.babyName
-        return loc.lang == "en" ? [
-            "Why does \(name) wake up so often at night?",
-            "How much should \(name) eat at this age?",
-            "Is this a developmental leap?",
-        ] : [
-            "Почему \(name) так часто просыпается ночью?",
-            "Сколько \(name) должен есть в этом возрасте?",
-            "Это скачок развития?",
-        ]
+        switch loc.lang {
+        case "de":
+            return [
+                "Warum wacht \(name) so oft nachts auf?",
+                "Wie viel sollte \(name) in diesem Alter essen?",
+                "Ist das ein Entwicklungsschub?",
+            ]
+        case "ru":
+            return [
+                "Почему \(name) так часто просыпается ночью?",
+                "Сколько \(name) должен есть в этом возрасте?",
+                "Это скачок развития?",
+            ]
+        default:
+            return [
+                "Why does \(name) wake up so often at night?",
+                "How much should \(name) eat at this age?",
+                "Is this a developmental leap?",
+            ]
+        }
     }
 
     // MARK: - Input Bar
@@ -249,6 +260,7 @@ private struct StreamingBubble: View {
 private struct ErrorBubble: View {
     let text: String
     let onRetry: () -> Void
+    @EnvironmentObject var loc: LocalizationManager
 
     var body: some View {
         VStack(spacing: 8) {
@@ -257,7 +269,7 @@ private struct ErrorBubble: View {
                 .foregroundColor(.bbCoralDeep)
                 .multilineTextAlignment(.center)
             Button(action: onRetry) {
-                Text("Try again")
+                Text(loc.strings.tryAgain)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundColor(.bbCoralDeep)
                     .padding(.horizontal, 16)

@@ -33,6 +33,10 @@ final class GeminiDailyTipService: DailyTipService {
     }
 
     private func isRetriable(_ error: Error) -> Bool {
+        if let genError = error as? GenerateContentError {
+            if case .internalError = genError { return true }
+            return false
+        }
         if let urlError = error as? URLError {
             return [.timedOut, .networkConnectionLost, .cannotConnectToHost,
                     .cannotFindHost, .notConnectedToInternet].contains(urlError.code)
