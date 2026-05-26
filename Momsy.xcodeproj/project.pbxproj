@@ -12,6 +12,7 @@
 		1C2C05E640CD3141B7AFA19F /* MockChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEAA5B698775CAA6B42D47F /* MockChatRepository.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
+		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
 		38944D43E482FFA7FCD38281 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4820A4E27274110E9256D2F7 /* SwiftUI.framework */; };
 		38EF65D83AACCA049FB163E3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AA2EA0D382D4DC3EE6C09A /* WidgetKit.framework */; };
 		3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */; };
@@ -48,7 +49,6 @@
 		BB001122CC33DD44EE55FF61 /* MomsySleepWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF60 /* MomsySleepWidgetView.swift */; };
 		BB001122CC33DD44EE55FF63 /* MomsySummaryWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF62 /* MomsySummaryWidgetView.swift */; };
 		CFE0C4DB867A5136830C1D5A /* MomsyWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */; };
-		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
 		DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C118A36FCB09993B8CBD0D /* DiaryViewModelTests.swift */; };
 		E3D39EF3449D3301F24E663A /* MockSoundRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */; };
 		E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */; };
@@ -93,16 +93,16 @@
 		04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
 		0A46ABCF5A1A31976CF2C739 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
-		0AFF57C67693A66C17AD71C6 /* DailyContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyContext.swift; path = DailyContext.swift; sourceTree = "<group>"; };
+		0AFF57C67693A66C17AD71C6 /* DailyContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyContext.swift; sourceTree = "<group>"; };
 		0B6D62B0527D4EA67A8EB2FC /* MockDiaryRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaryRepository.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
-		134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyContextBuilderTests.swift; path = DailyContextBuilderTests.swift; sourceTree = "<group>"; };
+		134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyContextBuilderTests.swift; sourceTree = "<group>"; };
 		14AB864CEE3403CD74AC9654 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
 		153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetProvider.swift; sourceTree = "<group>"; };
 		1C4A5ACFF0B19C867F09310A /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
 		1C50DB4AF650A300CDE7D8BA /* MomsyWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MomsyWidget.entitlements; sourceTree = "<group>"; };
-		1FBC13D67DAB3C192859429B /* GeminiDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GeminiDailyTipService.swift; path = GeminiDailyTipService.swift; sourceTree = "<group>"; };
+		1FBC13D67DAB3C192859429B /* GeminiDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GeminiDailyTipService.swift; sourceTree = "<group>"; };
 		27CCA3ED5F2ECE7D8505B730 /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
 		322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetEntry.swift; sourceTree = "<group>"; };
@@ -114,7 +114,7 @@
 		482ADA73C55024953C8197D9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		4C89620DBC5A4E8DF0169200 /* MockAIChatService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAIChatService.swift; sourceTree = "<group>"; };
 		4F159218252E2FF5857958F7 /* MomsyWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MomsyWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MockDailyTipService.swift; path = MockDailyTipService.swift; sourceTree = "<group>"; };
+		4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDailyTipService.swift; sourceTree = "<group>"; };
 		53A0E7913296744B89DD122D /* DiaryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryViewModelTests.swift; sourceTree = "<group>"; };
 		53F845EB5F589FB39171B36B /* MockLeapsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockLeapsRepository.swift; sourceTree = "<group>"; };
 		5C108DEF939A1DFF17A30728 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -123,9 +123,9 @@
 		64F261A70D74866E7728C38F /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		6D7744983E8EF2AF6D12E3DE /* MockDiaryRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaryRepository.swift; sourceTree = "<group>"; };
-		6DEF29B80396B5A8C06CB2DE /* DailyTip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyTip.swift; path = DailyTip.swift; sourceTree = "<group>"; };
+		6DEF29B80396B5A8C06CB2DE /* DailyTip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTip.swift; sourceTree = "<group>"; };
 		772F05E6F2F8A790BB660917 /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
-		777A2D15DFB6A97CB572C749 /* DailyTipRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyTipRepository.swift; path = DailyTipRepository.swift; sourceTree = "<group>"; };
+		777A2D15DFB6A97CB572C749 /* DailyTipRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipRepository.swift; sourceTree = "<group>"; };
 		7BE6CCCC6E58B3B71587C901 /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
 		7BEAA5B698775CAA6B42D47F /* MockChatRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockChatRepository.swift; sourceTree = "<group>"; };
 		836D5C82D29DCC728C9D4597 /* MockChatRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockChatRepository.swift; sourceTree = "<group>"; };
@@ -135,7 +135,7 @@
 		899719668465504148CFB39B /* MockDiaryRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaryRepository.swift; sourceTree = "<group>"; };
 		9475DD524688A6F70C04B3C7 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		97DB3E7B730E66559F754EC5 /* MockChatRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockChatRepository.swift; sourceTree = "<group>"; };
-		990B4C0F2CAF36C3F93A25A2 /* DailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyTipService.swift; path = DailyTipService.swift; sourceTree = "<group>"; };
+		990B4C0F2CAF36C3F93A25A2 /* DailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipService.swift; sourceTree = "<group>"; };
 		99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
@@ -171,31 +171,27 @@
 		DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		DED78F3E8524577CFF50864B /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetBundle.swift; sourceTree = "<group>"; };
-		F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingViewModelTests.swift; sourceTree = "<group>"; };
 		E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		E89BA45A7EB93E4CF6AA23BA /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetView.swift; sourceTree = "<group>"; };
 		E9B50B0C5B463D402F0ABBAD /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingViewModelTests.swift; sourceTree = "<group>"; };
 		F9447E2BE7AA19806CCDF9B8 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
 		F9F1F99234A1F4FCB8840C13 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA16402FBC4C3F01E5573DB2 /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		FB2828F5A5DB44A9E2563938 /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		FC577BE621E9EC76A891B30B /* AIChatViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatViewModelTests.swift; sourceTree = "<group>"; };
-		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyTipPrompt.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
+		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B7318B492FB8F473003CCB0B /* Momsy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = Momsy;
 			sourceTree = "<group>";
 		};
 		B7318F872FBE4210003CCB0B /* models */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = models;
 			sourceTree = "<group>";
 		};
@@ -331,6 +327,14 @@
 				1FBC13D67DAB3C192859429B /* GeminiDailyTipService.swift */,
 			);
 			name = Services;
+			sourceTree = "<group>";
+		};
+		6CD81E05E696492F92ABC1E4 /* Feeding */ = {
+			isa = PBXGroup;
+			children = (
+				F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */,
+			);
+			path = Feeding;
 			sourceTree = "<group>";
 		};
 		6E373B9A48AA21EAE4780914 /* Models */ = {
@@ -485,14 +489,6 @@
 				2C1E6AADD0C982C7CE9C3224 /* Today */,
 			);
 			name = Features;
-			sourceTree = "<group>";
-		};
-		6CD81E05E696492F92ABC1E4 /* Feeding */ = {
-			isa = PBXGroup;
-			children = (
-				F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */,
-			);
-			path = Feeding;
 			sourceTree = "<group>";
 		};
 		BF481C984AA7F1A163924A81 /* Leaps */ = {
