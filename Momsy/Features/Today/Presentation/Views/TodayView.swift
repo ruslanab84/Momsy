@@ -152,14 +152,16 @@ struct TodayView: View {
                     .foregroundColor(Color.bbInk.opacity(0.6))
                     .kerning(0.5)
 
-                if feedingVM.isFeedingActive {
+                if feedingVM.feedingSessionExists {
                     HStack(alignment: .lastTextBaseline, spacing: 6) {
                         Text(feedingVM.feedingTimerString)
                             .font(.system(size: 32, weight: .heavy, design: .monospaced))
                             .foregroundColor(.bbInk)
                             .contentTransition(.numericText())
                             .animation(.linear(duration: 0.3), value: feedingVM.feedingSeconds)
-                        Text(loc.strings.feedingActiveLabel(side: feedingVM.feedingSide.displayName(lang: loc.lang).lowercased()))
+                        Text(feedingVM.isFeedingActive
+                            ? loc.strings.feedingActiveLabel(side: feedingVM.feedingSide.displayName(lang: loc.lang).lowercased())
+                            : loc.strings.paused)
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(Color.bbInk.opacity(0.6))
                     }
@@ -178,22 +180,38 @@ struct TodayView: View {
 
             Spacer(minLength: 8)
 
-            if feedingVM.isFeedingActive {
+            if feedingVM.feedingSessionExists {
                 VStack(spacing: 8) {
-                    Button(action: { showFeeding = true }) {
+                    Button(action: {
+                        if feedingVM.isFeedingActive {
+                            feedingVM.pauseFeeding()
+                        } else {
+                            feedingVM.resumeFeeding()
+                        }
+                    }) {
                         Circle()
                             .fill(Color.white)
                             .frame(width: 48, height: 48)
                             .overlay(
-                                HStack(spacing: 3) {
-                                    ForEach(0..<2) { _ in
-                                        RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                            .fill(Color.bbCoralDeep)
-                                            .frame(width: 4, height: 16)
+                                Group {
+                                    if feedingVM.isFeedingActive {
+                                        HStack(spacing: 3) {
+                                            ForEach(0..<2) { _ in
+                                                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                                    .fill(Color.bbCoralDeep)
+                                                    .frame(width: 4, height: 16)
+                                            }
+                                        }
+                                    } else {
+                                        Image(systemName: "play.fill")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.bbCoralDeep)
+                                            .offset(x: 2)
                                     }
                                 }
                             )
                             .bbShadowSoft()
+                            .animation(.spring(response: 0.25), value: feedingVM.isFeedingActive)
                     }
                     Button(action: {
                         feedingVM.stopFeeding()
@@ -226,9 +244,9 @@ struct TodayView: View {
         }
         .bbCard(pad: 14, bg: .bbCoral)
         .overlay(alignment: .topTrailing) {
-            if feedingVM.isFeedingActive {
+            if feedingVM.feedingSessionExists {
                 Circle()
-                    .fill(Color.bbSurface)
+                    .fill(feedingVM.isFeedingActive ? Color.bbSurface : Color.bbCoralDeep.opacity(0.5))
                     .frame(width: 10, height: 10)
                     .padding(10)
                     .opacity(0.7)

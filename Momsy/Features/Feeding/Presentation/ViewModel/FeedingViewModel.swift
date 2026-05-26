@@ -7,6 +7,7 @@ final class FeedingViewModel: ObservableObject {
     @Published var feedingSeconds = 0
     @Published var feedingSide: FeedingSide = .left
     @Published var saveError: String?
+    @Published var feedingSessionExists: Bool = false
     @Published private(set) var todayEntries: [FeedingEntry] = []
 
     private var pausedFeedingSeconds = 0
@@ -50,6 +51,7 @@ final class FeedingViewModel: ObservableObject {
     func startFeeding(side: FeedingSide) {
         feedingSide = side
         isFeedingActive = true
+        feedingSessionExists = true
         feedingSeconds = 0
         pausedFeedingSeconds = 0
         let startDate = Date()
@@ -79,8 +81,9 @@ final class FeedingViewModel: ObservableObject {
     }
 
     func stopFeeding(mood: String? = nil) {
-        guard isFeedingActive else { return }
+        guard isFeedingActive || feedingSessionExists else { return }
         isFeedingActive = false
+        feedingSessionExists = false
         timerService.stop()
         WidgetDataStore.shared.clearFeeding(lastFeedingDate: Date())
         let dur = max(1, feedingSeconds / 60)
@@ -124,6 +127,7 @@ final class FeedingViewModel: ObservableObject {
         case .running(let effectiveStartDate, let sideRaw):
             feedingSide = FeedingSide(rawValue: sideRaw) ?? side
             isFeedingActive = true
+            feedingSessionExists = true
             let elapsed = max(0, Int(Date().timeIntervalSince(effectiveStartDate)))
             feedingSeconds = elapsed
             pausedFeedingSeconds = 0
@@ -133,6 +137,7 @@ final class FeedingViewModel: ObservableObject {
         case .paused(let elapsedSeconds, let sideRaw):
             feedingSide = FeedingSide(rawValue: sideRaw) ?? side
             isFeedingActive = false
+            feedingSessionExists = true
             feedingSeconds = elapsedSeconds
             pausedFeedingSeconds = elapsedSeconds
         default:
