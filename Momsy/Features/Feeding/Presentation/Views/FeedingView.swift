@@ -81,14 +81,24 @@ struct FeedingView: View {
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
             Spacer()
-            Capsule()
-                .fill(Color.white.opacity(0.6))
-                .frame(width: 64, height: 32)
-                .overlay(
-                    Text(loc.strings.editSmall)
-                        .font(.system(size: 12, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbInk)
-                )
+            Button { showAddManual = true } label: {
+                Capsule()
+                    .fill(Color.white.opacity(0.6))
+                    .frame(width: 88, height: 32)
+                    .overlay(
+                        Text(loc.strings.enterManuallyLabel)
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .foregroundColor(.bbInk)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .padding(.horizontal, 6)
+                    )
+            }
+            .buttonStyle(.plain)
+            .sheet(isPresented: $showAddManual) {
+                AddFeedingSheet(vm: vm)
+                    .environmentObject(loc)
+            }
         }
     }
 
@@ -309,12 +319,6 @@ struct FeedingView: View {
                 Text(loc.strings.feedingsCount(feedCount))
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInkMute)
-                Button { showAddManual = true } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.bbCoralDeep)
-                }
-                .buttonStyle(.plain)
             }
 
             HStack(alignment: .bottom, spacing: 6) {
@@ -341,10 +345,6 @@ struct FeedingView: View {
             .frame(height: 80)
         }
         .bbCard(pad: 14, bg: Color.white.opacity(0.9))
-        .sheet(isPresented: $showAddManual) {
-            AddFeedingSheet(vm: vm)
-                .environmentObject(loc)
-        }
     }
 }
 
