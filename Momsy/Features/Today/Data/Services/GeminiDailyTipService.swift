@@ -15,7 +15,7 @@ final class GeminiDailyTipService: DailyTipService {
                 let model = FirebaseAI.firebaseAI(backend: .googleAI()).generativeModel(
                     modelName: modelName,
                     generationConfig: config,
-                    systemInstruction: ModelContent(role: "system", parts: DailyTipPrompt.system)
+                    systemInstruction: ModelContent(role: "system", parts: DailyTipPrompt.system(for: context.language))
                 )
                 let response = try await model.generateContent(DailyTipPrompt.user(ctx: context))
                 guard let text = response.text, !text.isEmpty else {

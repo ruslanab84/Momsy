@@ -15,12 +15,29 @@ enum TimeOfDay: String {
         }
     }
 
-    var displayName: String {
-        switch self {
-        case .morning:   return "утро"
-        case .afternoon: return "день"
-        case .evening:   return "вечер"
-        case .night:     return "ночь"
+    func displayName(for lang: Language) -> String {
+        switch lang {
+        case .english:
+            switch self {
+            case .morning:   return "morning"
+            case .afternoon: return "afternoon"
+            case .evening:   return "evening"
+            case .night:     return "night"
+            }
+        case .russian:
+            switch self {
+            case .morning:   return "утро"
+            case .afternoon: return "день"
+            case .evening:   return "вечер"
+            case .night:     return "ночь"
+            }
+        case .german:
+            switch self {
+            case .morning:   return "Morgen"
+            case .afternoon: return "Nachmittag"
+            case .evening:   return "Abend"
+            case .night:     return "Nacht"
+            }
         }
     }
 }
@@ -40,10 +57,12 @@ struct DailyContext {
     let totalSleepMinutes: Int
     let diaperCount: Int
     let timeOfDay: TimeOfDay
+    let language: Language
 
     /// Simple string hash for cache deduplication — no CryptoKit needed
+    /// Language included so switching app language invalidates the cache
     var contextHash: String {
-        "\(feedingCount)-\(totalFeedingMinutes)-\(minutesSinceLastFeed ?? -1)-\(sleepCount)-\(totalSleepMinutes)-\(diaperCount)"
+        "\(language.rawValue)-\(feedingCount)-\(totalFeedingMinutes)-\(minutesSinceLastFeed ?? -1)-\(sleepCount)-\(totalSleepMinutes)-\(diaperCount)"
     }
 }
 
@@ -84,7 +103,8 @@ enum DailyContextBuilder {
             sleepCount: sleepCount,
             totalSleepMinutes: totalSleepMinutes,
             diaperCount: diaperCount,
-            timeOfDay: .current()
+            timeOfDay: .current(),
+            language: LocalizationManager.shared.current
         )
     }
 
