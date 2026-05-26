@@ -97,4 +97,23 @@ final class FeedingViewModel: ObservableObject {
             }
         }
     }
+
+    func logManualEntry(date: Date, durationMinutes: Int, side: FeedingSide, mood: String?) {
+        Task {
+            do {
+                let saved = try await logFeeding.execute(
+                    durationSeconds: max(60, durationMinutes * 60),
+                    side: side,
+                    mood: mood,
+                    date: date
+                )
+                if Calendar.current.isDateInToday(saved.date) {
+                    todayEntries.append(saved)
+                    todayEntries.sort { $0.date < $1.date }
+                }
+            } catch {
+                saveError = error.localizedDescription
+            }
+        }
+    }
 }

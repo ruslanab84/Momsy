@@ -48,6 +48,7 @@
 		BB001122CC33DD44EE55FF61 /* MomsySleepWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF60 /* MomsySleepWidgetView.swift */; };
 		BB001122CC33DD44EE55FF63 /* MomsySummaryWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF62 /* MomsySummaryWidgetView.swift */; };
 		CFE0C4DB867A5136830C1D5A /* MomsyWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */; };
+		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
 		DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C118A36FCB09993B8CBD0D /* DiaryViewModelTests.swift */; };
 		E3D39EF3449D3301F24E663A /* MockSoundRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */; };
 		E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */; };
@@ -170,6 +171,7 @@
 		DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		DED78F3E8524577CFF50864B /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetBundle.swift; sourceTree = "<group>"; };
+		F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingViewModelTests.swift; sourceTree = "<group>"; };
 		E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		E89BA45A7EB93E4CF6AA23BA /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetView.swift; sourceTree = "<group>"; };
@@ -485,6 +487,14 @@
 			name = Features;
 			sourceTree = "<group>";
 		};
+		6CD81E05E696492F92ABC1E4 /* Feeding */ = {
+			isa = PBXGroup;
+			children = (
+				F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */,
+			);
+			path = Feeding;
+			sourceTree = "<group>";
+		};
 		BF481C984AA7F1A163924A81 /* Leaps */ = {
 			isa = PBXGroup;
 			children = (
@@ -500,6 +510,7 @@
 			children = (
 				3D5E9099F7CEDDD83E5D9539 /* AIChat */,
 				945C65C48948BC238DDFA608 /* Diary */,
+				6CD81E05E696492F92ABC1E4 /* Feeding */,
 				BF481C984AA7F1A163924A81 /* Leaps */,
 				AA9D8473BEC847159E9AAAA5 /* MomMood */,
 				B0F8A2BD09FB72AF53F5081C /* Onboarding */,
@@ -678,6 +689,7 @@
 			files = (
 				628E743BEB94F3AB623133EF /* AIChatViewModelTests.swift in Sources */,
 				DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */,
+				2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */,
 				3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */,
 				EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */,
 				27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */,
