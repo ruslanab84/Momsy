@@ -24,7 +24,7 @@ final class GeminiDailyTipService: DailyTipService {
                 return text.trimmingCharacters(in: .whitespacesAndNewlines)
             } catch {
                 lastError = error
-                print("[GeminiDailyTipService] attempt \(attempt + 1) failed: \(error)")
+                Self.logError(error, attempt: attempt + 1)
                 if !isRetriable(error) || attempt == 2 { break }
                 try? await Task.sleep(nanoseconds: UInt64(1_000_000_000 * (1 << attempt)))
             }
@@ -33,9 +33,10 @@ final class GeminiDailyTipService: DailyTipService {
     }
 
     private func isRetriable(_ error: Error) -> Bool {
-        if let genError = error as? GenerateContentError {
-            if case .internalError = genError { return true }
-            return false
+        if let genError = error as? GenerateContentError,
+           case .internalError(let underlying) = genError {
+            let httpCode = (underlying as NSError).code
+            return httpCode == 500 || httpCode == 503 || httpCode == 0
         }
         if let urlError = error as? URLError {
             return [.timedOut, .networkConnectionLost, .cannotConnectToHost,
@@ -50,4 +51,16 @@ final class GeminiDailyTipService: DailyTipService {
 enum DailyTipError: Error {
     case emptyResponse
     case unknown
+}
+
+private extension GeminiDailyTipService {
+    static func logError(_ error: Error, attempt: Int) {
+        if let genError = error as? GenerateContentError,
+           case .internalError(let underlying) = genError {
+            let ns = underlying as NSError
+            print("[GeminiDailyTipService] attempt \(attempt) internalError — domain: \(ns.domain), code: \(ns.code), desc: \(ns.localizedDescription)")
+        } else {
+            print("[GeminiDailyTipService] attempt \(attempt) failed: \(error)")
+        }
+    }
 }

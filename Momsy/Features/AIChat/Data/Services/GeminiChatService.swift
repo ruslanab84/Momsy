@@ -30,7 +30,7 @@ final class GeminiChatService: AIChatService {
                         return
                     } catch {
                         lastError = error
-                        print("[GeminiChatService] attempt \(attempt + 1) failed: \(error)")
+                        Self.logError(error, attempt: attempt + 1)
                         if !isRetriable(error) || attempt == 2 { break }
                         try? await Task.sleep(nanoseconds: UInt64(1_000_000_000 * (1 << attempt)))
                     }
@@ -41,10 +41,13 @@ final class GeminiChatService: AIChatService {
     }
 
     private func isRetriable(_ error: Error) -> Bool {
-        if let genError = error as? GenerateContentError {
-            // internalError wraps transient server/network failures — safe to retry
-            if case .internalError = genError { return true }
-            return false
+        if let genError = error as? GenerateContentError,
+           case .internalError(let underlying) = genError {
+            let nsError = underlying as NSError
+            // BackendError maps httpResponseCode to NSError.code
+            // Only retry genuine transient server errors (5xx); never retry config errors (4xx)
+            let httpCode = nsError.code
+            return httpCode == 500 || httpCode == 503 || httpCode == 0
         }
         if let urlError = error as? URLError {
             return [.timedOut, .networkConnectionLost, .cannotConnectToHost,
@@ -53,6 +56,16 @@ final class GeminiChatService: AIChatService {
         let desc = error.localizedDescription.lowercased()
         return desc.contains("503") || desc.contains("429") || desc.contains("unavailable")
             || desc.contains("timeout") || desc.contains("try again")
+    }
+
+    private static func logError(_ error: Error, attempt: Int) {
+        if let genError = error as? GenerateContentError,
+           case .internalError(let underlying) = genError {
+            let ns = underlying as NSError
+            print("[GeminiChatService] attempt \(attempt) internalError — domain: \(ns.domain), code: \(ns.code), desc: \(ns.localizedDescription)")
+        } else {
+            print("[GeminiChatService] attempt \(attempt) failed: \(error)")
+        }
     }
 
     private func systemPrompt(_ ctx: BabyContext) -> String {
