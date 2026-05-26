@@ -5,39 +5,55 @@ struct AddFeedingSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
 
-    @State private var date = Date()
-    @State private var durationMinutes = 10
+    @State private var startTime = Date().addingTimeInterval(-600)   // 10 min ago default
+    @State private var endTime   = Date()
     @State private var side: FeedingSide = .left
     @State private var note = ""
+
+    private var isValid: Bool { endTime > startTime }
+    private var durationMinutes: Int { max(1, Int(endTime.timeIntervalSince(startTime)) / 60) }
 
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
-                    fieldSection(label: loc.strings.feedingWhenLabel) {
+
+                    fieldSection(label: loc.strings.feedingStartedLabel) {
                         DatePicker(
                             "",
-                            selection: $date,
+                            selection: $startTime,
                             in: ...Date(),
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .onChange(of: startTime) { _, newStart in
+                            if endTime <= newStart {
+                                endTime = newStart.addingTimeInterval(600)
+                            }
+                        }
+                    }
+
+                    fieldSection(label: loc.strings.feedingEndedLabel) {
+                        DatePicker(
+                            "",
+                            selection: $endTime,
+                            in: startTime...,
                             displayedComponents: [.date, .hourAndMinute]
                         )
                         .labelsHidden()
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
-                    fieldSection(label: loc.strings.feedingDurationLabel) {
-                        HStack {
-                            Text("\(durationMinutes)")
-                                .font(.system(size: 28, weight: .heavy, design: .rounded))
-                                .foregroundColor(.bbInk)
-                            Text(loc.strings.unitMin)
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(.bbInkMute)
-                                .padding(.top, 6)
-                            Spacer()
-                            Stepper("", value: $durationMinutes, in: 1...180)
-                                .labelsHidden()
+                    if isValid {
+                        HStack(spacing: 4) {
+                            Image(systemName: "clock")
+                                .font(.system(size: 12, weight: .semibold))
+                            Text("\(durationMinutes) \(loc.strings.unitMin)")
+                                .font(.system(size: 12, weight: .bold, design: .rounded))
                         }
+                        .foregroundColor(.bbInkMute)
+                        .padding(.horizontal, 4)
                     }
 
                     fieldSection(label: loc.strings.feedingSideLabel) {
@@ -83,7 +99,7 @@ struct AddFeedingSheet: View {
                     Button(loc.strings.save) {
                         let trimmedNote = note.trimmingCharacters(in: .whitespaces)
                         vm.logManualEntry(
-                            date: date,
+                            date: startTime,
                             durationMinutes: durationMinutes,
                             side: side,
                             mood: trimmedNote.isEmpty ? nil : trimmedNote
@@ -91,7 +107,8 @@ struct AddFeedingSheet: View {
                         dismiss()
                     }
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbCoralDeep)
+                    .foregroundColor(isValid ? .bbCoralDeep : Color.bbInkMute)
+                    .disabled(!isValid)
                 }
             }
         }

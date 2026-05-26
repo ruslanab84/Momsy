@@ -168,10 +168,11 @@ struct L10n {
     var feedingsToday: String { s("feedings today", "кормлений сегодня", "Mahlzeiten heute") }
 
     func feedingsCount(_ n: Int) -> String { s("\(n) feedings", "\(n) кормлений", "\(n) Mahlzeiten") }
-    var addFeedingTitle: String      { s("Add Feeding",  "Добавить кормление", "Fütterung eintragen") }
-    var feedingWhenLabel: String     { s("WHEN",         "КОГДА",              "WANN") }
-    var feedingDurationLabel: String { s("DURATION",     "ДЛИТЕЛЬНОСТЬ",       "DAUER") }
-    var feedingSideLabel: String     { s("SIDE",         "СТОРОНА",            "SEITE") }
+    var addFeedingTitle: String      { s("Add Feeding",     "Добавить кормление",  "Fütterung eintragen") }
+    var feedingStartedLabel: String  { s("STARTED",        "НАЧАЛО",              "BEGINN") }
+    var feedingEndedLabel: String    { s("ENDED",          "КОНЕЦ",               "ENDE") }
+    var feedingSideLabel: String     { s("SIDE",           "СТОРОНА",             "SEITE") }
+    var enterManuallyLabel: String   { s("enter manually", "ввести вручную",      "manuell eingeben") }
 
     // MARK: — Sleep
     var sleepStart: String   { s("Start sleep",   "Начать сон",    "Schlaf starten") }
