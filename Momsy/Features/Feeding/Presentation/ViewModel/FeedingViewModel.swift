@@ -116,4 +116,37 @@ final class FeedingViewModel: ObservableObject {
             }
         }
     }
+
+    /// Called on FeedingView appear — resumes an existing session from WidgetDataStore
+    /// (e.g. after app relaunch) or starts a fresh one if none exists.
+    func restoreOrStartFeeding(side: FeedingSide) {
+        switch WidgetDataStore.shared.feedingState {
+        case .running(let effectiveStartDate, let sideRaw):
+            feedingSide = FeedingSide(rawValue: sideRaw) ?? side
+            isFeedingActive = true
+            let elapsed = max(0, Int(Date().timeIntervalSince(effectiveStartDate)))
+            feedingSeconds = elapsed
+            pausedFeedingSeconds = 0
+            timerService.start(from: effectiveStartDate) { [weak self] secs in
+                Task { @MainActor [weak self] in self?.feedingSeconds = secs }
+            }
+        case .paused(let elapsedSeconds, let sideRaw):
+            feedingSide = FeedingSide(rawValue: sideRaw) ?? side
+            isFeedingActive = false
+            feedingSeconds = elapsedSeconds
+            pausedFeedingSeconds = elapsedSeconds
+        default:
+            startFeeding(side: side)
+        }
+    }
+
+    /// Called on scenePhase → .active — restarts the in-process timer from the
+    /// stored effectiveStartDate so elapsed time is accurate after backgrounding.
+    func syncTimerWithStartDate() {
+        guard isFeedingActive else { return }
+        guard case .running(let effectiveStartDate, _) = WidgetDataStore.shared.feedingState else { return }
+        timerService.start(from: effectiveStartDate) { [weak self] secs in
+            Task { @MainActor [weak self] in self?.feedingSeconds = secs }
+        }
+    }
 }
