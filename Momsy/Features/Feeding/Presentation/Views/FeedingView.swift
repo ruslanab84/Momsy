@@ -5,6 +5,7 @@ struct FeedingView: View {
     @ObservedObject var vm: FeedingViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedMoodIdx: Int? = nil
     @State private var customMood = ""
@@ -56,8 +57,11 @@ struct FeedingView: View {
             }
         }
         .onAppear {
-            if !vm.isFeedingActive {
-                vm.startFeeding(side: vm.feedingSide)
+            vm.restoreOrStartFeeding(side: vm.feedingSide)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                vm.syncTimerWithStartDate()
             }
         }
     }
