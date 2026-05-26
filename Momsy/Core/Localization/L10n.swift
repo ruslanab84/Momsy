@@ -599,6 +599,9 @@ struct L10n {
     var aiChatErrorLocation: String { s("AI service is not available in your region.",
                                         "ИИ-сервис недоступен в вашем регионе.",
                                         "KI-Dienst ist in Ihrer Region nicht verfügbar.") }
+    var aiChatErrorBusy: String     { s("AI is busy right now. Please try again in a moment.",
+                                        "ИИ сейчас занят. Попробуйте чуть позже.",
+                                        "KI ist gerade beschäftigt. Bitte versuche es gleich erneut.") }
 
     // MARK: — Mom Mood Tracker
     var momMoodTitle: String          { s("My Wellbeing",            "Моё самочувствие",           "Mein Wohlbefinden") }

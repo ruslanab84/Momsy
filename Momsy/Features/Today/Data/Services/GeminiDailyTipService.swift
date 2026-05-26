@@ -3,7 +3,8 @@ import FirebaseAI
 
 final class GeminiDailyTipService: DailyTipService {
 
-    private let modelName = "gemini-2.5-flash-lite"
+    // gemini-2.0-flash-lite: 1500 RPD free tier (vs 20 RPD for 2.5-flash-lite)
+    private let modelName = "gemini-2.0-flash-lite"
     private let maxOutputTokens = 150
 
     func fetch(context: DailyContext) async throws -> String {
@@ -36,7 +37,7 @@ final class GeminiDailyTipService: DailyTipService {
         if let genError = error as? GenerateContentError,
            case .internalError(let underlying) = genError {
             let httpCode = (underlying as NSError).code
-            return httpCode == 500 || httpCode == 503 || httpCode == 0
+            return httpCode == 429 || httpCode == 500 || httpCode == 503 || httpCode == 0
         }
         if let urlError = error as? URLError {
             return [.timedOut, .networkConnectionLost, .cannotConnectToHost,

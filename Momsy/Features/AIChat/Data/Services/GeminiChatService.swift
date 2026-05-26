@@ -2,7 +2,8 @@ import Foundation
 import FirebaseAI
 
 final class GeminiChatService: AIChatService {
-    private let modelName = "gemini-2.5-flash-lite"
+    // gemini-2.0-flash-lite: 1500 RPD free tier (vs 20 RPD for 2.5-flash-lite)
+    private let modelName = "gemini-2.0-flash-lite"
 
     func stream(
         userText: String,
@@ -32,7 +33,11 @@ final class GeminiChatService: AIChatService {
                         lastError = error
                         Self.logError(error, attempt: attempt + 1)
                         if !isRetriable(error) || attempt == 2 { break }
-                        try? await Task.sleep(nanoseconds: UInt64(1_000_000_000 * (1 << attempt)))
+                        // 429: rate-limited — use longer fixed delay; others: exponential backoff
+                        let delayNs: UInt64 = Self.is429(error)
+                            ? 3_000_000_000
+                            : UInt64(1_000_000_000 * (1 << attempt))
+                        try? await Task.sleep(nanoseconds: delayNs)
                     }
                 }
                 continuation.finish(throwing: lastError!)
@@ -43,11 +48,10 @@ final class GeminiChatService: AIChatService {
     private func isRetriable(_ error: Error) -> Bool {
         if let genError = error as? GenerateContentError,
            case .internalError(let underlying) = genError {
-            let nsError = underlying as NSError
-            // BackendError maps httpResponseCode to NSError.code
-            // Only retry genuine transient server errors (5xx); never retry config errors (4xx)
-            let httpCode = nsError.code
-            return httpCode == 500 || httpCode == 503 || httpCode == 0
+            let httpCode = (underlying as NSError).code
+            // 429 = rate limit (server provides RetryInfo delay); 5xx = transient server error
+            // 4xx config errors (400/403/404) are not retriable — won't self-heal
+            return httpCode == 429 || httpCode == 500 || httpCode == 503 || httpCode == 0
         }
         if let urlError = error as? URLError {
             return [.timedOut, .networkConnectionLost, .cannotConnectToHost,
@@ -56,6 +60,12 @@ final class GeminiChatService: AIChatService {
         let desc = error.localizedDescription.lowercased()
         return desc.contains("503") || desc.contains("429") || desc.contains("unavailable")
             || desc.contains("timeout") || desc.contains("try again")
+    }
+
+    private static func is429(_ error: Error) -> Bool {
+        guard let genError = error as? GenerateContentError,
+              case .internalError(let underlying) = genError else { return false }
+        return (underlying as NSError).code == 429
     }
 
     private static func logError(_ error: Error, attempt: Int) {

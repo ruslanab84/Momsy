@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import FirebaseAI
 
 @MainActor
 final class AIChatViewModel: ObservableObject {
@@ -129,7 +130,12 @@ final class AIChatViewModel: ObservableObject {
         if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
             return lm.strings.aiChatErrorNoInternet
         }
-        // All GenerateContentError cases and other failures map to a generic friendly message
+        // Unwrap BackendError HTTP code for specific messages
+        if let genError = error as? GenerateContentError,
+           case .internalError(let underlying) = genError,
+           (underlying as NSError).code == 429 {
+            return lm.strings.aiChatErrorBusy
+        }
         return lm.strings.aiChatErrorGeneric
     }
 }
