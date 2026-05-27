@@ -9,17 +9,7 @@ struct SleepView: View {
 
     var body: some View {
         ZStack {
-            Color.bbLilac.ignoresSafeArea()
-            Circle()
-                .fill(Color.bbLilacDeep.opacity(0.18))
-                .frame(width: 200)
-                .offset(x: 80, y: -200)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color.bbMint.opacity(0.15))
-                .frame(width: 220)
-                .offset(x: -120, y: 160)
-                .ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
@@ -28,7 +18,6 @@ struct SleepView: View {
                     timerBlock
                     if vm.isSleepActive { qualityPicker }
                     actionButton
-                    todayList
                     SleepChartSection(
                         days: vm.sleepDays,
                         normMin: vm.sleepNorm.min,
@@ -59,35 +48,33 @@ struct SleepView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(loc.strings.sleepTracker)
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.bbInkMute)
                     .kerning(0.5)
                 Text(loc.strings.sleep)
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.bbLilacDeep)
             }
             Spacer()
             Button { showAddManual = true } label: {
-                Capsule()
-                    .fill(Color.white.opacity(0.2))
-                    .frame(height: 32)
-                    .overlay(
-                        Text(loc.strings.enterManuallyLabel)
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                            .padding(.horizontal, 10)
-                    )
+                Text(loc.strings.enterManuallyLabel)
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbLilacDeep)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.bbLilac.opacity(0.25))
+                    .clipShape(Capsule())
             }
             .buttonStyle(.plain)
             Button { dismiss() } label: {
                 Circle()
-                    .fill(Color.white.opacity(0.2))
+                    .fill(Color.bbLilac.opacity(0.25))
                     .frame(width: 36, height: 36)
                     .overlay(
                         Image(systemName: "xmark")
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.bbLilacDeep)
                     )
             }
         }
@@ -155,7 +142,7 @@ struct SleepView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
-        .background(Color.white.opacity(0.12))
+        .background(Color.bbLilac)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
@@ -165,7 +152,7 @@ struct SleepView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(loc.strings.sleepQuality)
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.bbInkMute)
                 .kerning(0.5)
             HStack(spacing: 8) {
                 ForEach(SleepQuality.allCases, id: \.self) { q in
@@ -174,10 +161,10 @@ struct SleepView: View {
                     } label: {
                         Text(qualityLabel(q))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(vm.selectedQuality == q ? .bbLilacDeep : .white.opacity(0.85))
+                            .foregroundColor(vm.selectedQuality == q ? .bbLilacDeep : .bbInkSoft)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
-                            .background(vm.selectedQuality == q ? Color.white : Color.white.opacity(0.15))
+                            .background(vm.selectedQuality == q ? Color.white : Color.bbLilac.opacity(0.25))
                             .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
@@ -187,7 +174,7 @@ struct SleepView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color.white.opacity(0.1))
+        .background(Color.bbLilac.opacity(0.15))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -208,52 +195,11 @@ struct SleepView: View {
             .foregroundColor(vm.isSleepActive ? .bbLilacDeep : .white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
-            .background(vm.isSleepActive ? Color.white : Color.white.opacity(0.2))
+            .background(vm.isSleepActive ? Color.bbLilac.opacity(0.25) : Color.bbLilacDeep)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .animation(.easeInOut(duration: 0.2), value: vm.isSleepActive)
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: - Today List
-
-    private var todayList: some View {
-        let completed = vm.todayEntries.filter { $0.endDate != nil }.reversed() as [SleepEntry]
-        return Group {
-            if !completed.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(loc.strings.todayUpper)
-                        .font(.system(size: 11, weight: .heavy, design: .rounded))
-                        .foregroundColor(.white.opacity(0.6))
-                        .kerning(0.5)
-                        .padding(.bottom, 10)
-                    ForEach(Array(completed.enumerated()), id: \.element.id) { idx, entry in
-                        HStack(spacing: 12) {
-                            Text(timeString(entry.startDate))
-                                .font(.system(size: 12, weight: .bold, design: .monospaced))
-                                .foregroundColor(.white.opacity(0.65))
-                                .frame(width: 46, alignment: .leading)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(entryDurationString(entry))
-                                    .font(.system(size: 14, weight: .heavy, design: .rounded))
-                                    .foregroundColor(.white)
-                                Text(qualityLabel(entry.quality))
-                                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white.opacity(0.6))
-                            }
-                            Spacer()
-                        }
-                        .padding(.vertical, 8)
-                        if idx < completed.count - 1 {
-                            Divider().overlay(Color.white.opacity(0.15))
-                        }
-                    }
-                }
-                .padding(14)
-                .background(Color.white.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            }
-        }
     }
 
     private func qualityLabel(_ q: SleepQuality) -> String {
@@ -262,20 +208,6 @@ struct SleepView: View {
         case .normal:   return loc.strings.qualityNormal
         case .restless: return loc.strings.qualityRestless
         }
-    }
-
-    private func timeString(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f.string(from: date)
-    }
-
-    private func entryDurationString(_ entry: SleepEntry) -> String {
-        guard let mins = entry.durationMinutes else { return "—" }
-        if mins < 60 { return loc.lang == "en" ? "\(mins) min" : "\(mins) мин" }
-        let h = mins / 60, m = mins % 60
-        if loc.lang == "en" { return m == 0 ? "\(h)h" : "\(h)h \(m)m" }
-        return m == 0 ? "\(h) ч" : "\(h) ч \(m) м"
     }
 }
 
