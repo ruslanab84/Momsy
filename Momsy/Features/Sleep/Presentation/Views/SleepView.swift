@@ -102,7 +102,7 @@ struct SleepView: View {
                 value: vm.totalSleepToday
             )
             Rectangle()
-                .fill(Color.white.opacity(0.25))
+                .fill(Color.bbLilac.opacity(0.4))
                 .frame(width: 1, height: 44)
             statCell(
                 label: loc.strings.sessions,
@@ -110,7 +110,7 @@ struct SleepView: View {
             )
         }
         .padding(.vertical, 14)
-        .background(Color.white.opacity(0.15))
+        .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -118,10 +118,10 @@ struct SleepView: View {
         VStack(spacing: 2) {
             Text(value)
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(.bbLilacDeep)
             Text(label)
                 .font(.system(size: 11, weight: .bold, design: .rounded))
-                .foregroundColor(.white.opacity(0.65))
+                .foregroundColor(.bbInkMute)
         }
         .frame(maxWidth: .infinity)
     }

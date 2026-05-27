@@ -25,7 +25,7 @@ struct SleepChartSection: View {
             }
         }
         .padding(14)
-        .background(Color.white.opacity(0.12))
+        .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -35,7 +35,7 @@ struct SleepChartSection: View {
         HStack {
             Text(loc.strings.sleepChartTitle.uppercased())
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.bbInkMute)
                 .kerning(0.5)
             Spacer()
             normBadge
@@ -72,10 +72,10 @@ struct SleepChartSection: View {
         } label: {
             Text(title)
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundColor(selectedPeriod == index ? .bbLilacDeep : .white.opacity(0.7))
+                .foregroundColor(selectedPeriod == index ? .white : .bbInkSoft)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(selectedPeriod == index ? Color.white : Color.white.opacity(0.15))
+                .background(selectedPeriod == index ? Color.bbLilacDeep : Color.bbLilac.opacity(0.15))
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -112,7 +112,7 @@ struct SleepChartSection: View {
                         var p = Path()
                         p.move(to: CGPoint(x: 0, y: y))
                         p.addLine(to: CGPoint(x: size.width, y: y))
-                        ctx.stroke(p, with: .color(.white.opacity(0.2)),
+                        ctx.stroke(p, with: .color(.bbLilac.opacity(0.5)),
                                    style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
                     }
                 }
@@ -126,12 +126,12 @@ struct SleepChartSection: View {
                         VStack(spacing: 3) {
                             Spacer(minLength: 0)
                             RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                .fill(isToday ? Color.white : Color.white.opacity(0.55))
+                                .fill(isToday ? Color.bbLilacDeep : Color.bbLilac)
                                 .frame(width: bw,
                                        height: day.totalMinutes == 0 ? 2 : max(4, CGFloat(ratio) * barAreaH))
                             Text(dayLabel(for: day.id, count: count))
                                 .font(.system(size: count > 14 ? 7 : 8, weight: .bold, design: .rounded))
-                                .foregroundColor(isToday ? .white : .white.opacity(0.5))
+                                .foregroundColor(isToday ? .bbLilacDeep : .bbInkMute)
                                 .frame(width: bw, height: labelHeight)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.5)
@@ -163,14 +163,14 @@ struct SleepChartSection: View {
         let diffColor: Color = isIn ? .bbMintDeep : (diff < 0 ? Color(UIColor.systemOrange) : .bbMintDeep)
 
         return HStack(spacing: 0) {
-            miniStat(top: loc.strings.sleepAverage, value: avgTxt, valueColor: .white)
-            Divider().frame(height: 28).overlay(Color.white.opacity(0.2))
-            miniStat(top: loc.strings.sleepNormLabel, value: normTxt, valueColor: .white.opacity(0.8))
-            Divider().frame(height: 28).overlay(Color.white.opacity(0.2))
+            miniStat(top: loc.strings.sleepAverage, value: avgTxt, valueColor: .bbLilacDeep)
+            Divider().frame(height: 28).overlay(Color.bbLilac.opacity(0.4))
+            miniStat(top: loc.strings.sleepNormLabel, value: normTxt, valueColor: .bbInk)
+            Divider().frame(height: 28).overlay(Color.bbLilac.opacity(0.4))
             miniStat(top: statusTxt, value: diffTxt, valueColor: diffColor)
         }
         .padding(.vertical, 8)
-        .background(Color.white.opacity(0.08))
+        .background(Color.bbLilac.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
@@ -178,7 +178,7 @@ struct SleepChartSection: View {
         VStack(spacing: 2) {
             Text(top)
                 .font(.system(size: 9, weight: .heavy, design: .rounded))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.bbInkMute)
                 .kerning(0.3)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
@@ -196,10 +196,10 @@ struct SleepChartSection: View {
         VStack(spacing: 6) {
             Image(systemName: "moon.zzz")
                 .font(.system(size: 28, weight: .light))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(.bbLilac)
             Text(loc.strings.sleepNoData)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.bbInkMute)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
