@@ -198,6 +198,7 @@ struct L10n {
     var sleepBelowNorm: String   { s("Below norm",    "Ниже нормы",    "Unter Norm") }
     var sleepAboveNorm: String   { s("Above norm",    "Выше нормы",    "Über Norm") }
     var sleepNoData: String      { s("No sleep data yet", "Данных о сне пока нет", "Noch keine Schlafdaten") }
+    var addSleepTitle: String    { s("Add Sleep",          "Добавить сон",           "Schlaf eintragen") }
 
     // MARK: — Diaper
     var diaperWet: String   { s("Wet",    "Мокрый",  "Nass") }

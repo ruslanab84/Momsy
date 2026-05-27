@@ -51,6 +51,7 @@ final class AppContainer {
     lazy var startSleep         = StartSleepUseCase(repository: sleepRepository)
     lazy var stopSleep          = StopSleepUseCase(repository: sleepRepository)
     lazy var getSleepEntries    = GetSleepEntriesUseCase(repository: sleepRepository)
+    lazy var addManualSleep     = AddManualSleepUseCase(repository: sleepRepository)
 
     // MARK: — Use Cases — Feeding
 
@@ -165,7 +166,7 @@ final class AppContainer {
 
     func makeSleepViewModel() -> SleepViewModel {
         SleepViewModel(startSleep: startSleep, stopSleep: stopSleep,
-                       getSleep: getSleepEntries, appState: appState)
+                       getSleep: getSleepEntries, addManualSleep: addManualSleep, appState: appState)
     }
 
     func makeAIChatViewModel() -> AIChatViewModel {

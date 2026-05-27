@@ -5,6 +5,7 @@ struct SleepView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
+    @State private var showAddManual = false
 
     var body: some View {
         ZStack {
@@ -45,6 +46,10 @@ struct SleepView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { vm.syncTimerWithStartDate() }
         }
+        .sheet(isPresented: $showAddManual) {
+            AddSleepEntrySheet(vm: vm)
+                .environmentObject(loc)
+        }
     }
 
     // MARK: - Top Bar
@@ -61,6 +66,20 @@ struct SleepView: View {
                     .foregroundColor(.white)
             }
             Spacer()
+            Button { showAddManual = true } label: {
+                Capsule()
+                    .fill(Color.white.opacity(0.2))
+                    .frame(height: 32)
+                    .overlay(
+                        Text(loc.strings.enterManuallyLabel)
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .padding(.horizontal, 10)
+                    )
+            }
+            .buttonStyle(.plain)
             Button { dismiss() } label: {
                 Circle()
                     .fill(Color.white.opacity(0.2))

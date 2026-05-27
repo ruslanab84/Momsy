@@ -19,13 +19,15 @@ final class SleepViewModel: ObservableObject {
     private let startSleepUC: StartSleepUseCase
     private let stopSleepUC: StopSleepUseCase
     private let getSleepUC: GetSleepEntriesUseCase
+    private let addManualSleepUC: AddManualSleepUseCase
     private let appState: AppState
 
     init(startSleep: StartSleepUseCase, stopSleep: StopSleepUseCase,
-         getSleep: GetSleepEntriesUseCase, appState: AppState) {
+         getSleep: GetSleepEntriesUseCase, addManualSleep: AddManualSleepUseCase, appState: AppState) {
         self.startSleepUC = startSleep
         self.stopSleepUC = stopSleep
         self.getSleepUC = getSleep
+        self.addManualSleepUC = addManualSleep
         self.appState = appState
         Task {
             await loadTodayEntries()
@@ -150,6 +152,23 @@ final class SleepViewModel: ObservableObject {
                 }
             } catch {
                 todayEntries.removeAll { $0.id == completed.id }
+                saveError = error.localizedDescription
+            }
+        }
+    }
+
+    func logManualEntry(startDate: Date, endDate: Date, quality: SleepQuality, note: String) {
+        Task {
+            do {
+                let saved = try await addManualSleepUC.execute(
+                    startDate: startDate, endDate: endDate, quality: quality, note: note
+                )
+                if Calendar.current.isDateInToday(saved.startDate) {
+                    todayEntries.append(saved)
+                    todayEntries.sort { $0.startDate < $1.startDate }
+                }
+                await loadChartData()
+            } catch {
                 saveError = error.localizedDescription
             }
         }
