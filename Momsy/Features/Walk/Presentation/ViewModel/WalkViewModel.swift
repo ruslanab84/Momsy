@@ -21,7 +21,17 @@ final class WalkViewModel: ObservableObject {
         self.walkRepository = walkRepository
         self.quickLogRepo = quickLogRepo
         self.addManualWalkUC = addManualWalk
-        Task { await loadTodayEntries() }
+        Task {
+            await loadTodayEntries()
+            if let open = todayEntries.first(where: { $0.endDate == nil }) {
+                if case .active = WidgetDataStore.shared.walkState {
+                    activateTimer(entry: open)
+                } else {
+                    // Stale open entry — async stop() didn't complete before kill
+                    Task { try? await walkRepository.stop(open) }
+                }
+            }
+        }
     }
 
     var walkTimerString: String {
@@ -56,15 +66,7 @@ final class WalkViewModel: ObservableObject {
         Task {
             do {
                 let entry = try await walkRepository.start()
-                activeWalkEntry = entry
-                isWalkActive = true
-                walkSeconds = 0
-                timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-                    .autoconnect()
-                    .sink { [weak self] _ in
-                        guard let self, let entry = self.activeWalkEntry else { return }
-                        self.walkSeconds = Int(Date().timeIntervalSince(entry.startDate))
-                    }
+                activateTimer(entry: entry)
             } catch {
                 saveError = error.localizedDescription
             }
@@ -77,6 +79,7 @@ final class WalkViewModel: ObservableObject {
         timerCancellable = nil
         isWalkActive = false
         activeWalkEntry = nil
+        WidgetDataStore.shared.clearWalk(lastDurationSeconds: walkSeconds)
         Task {
             do {
                 let finished = try await walkRepository.stop(entry)
@@ -88,6 +91,19 @@ final class WalkViewModel: ObservableObject {
                 saveError = error.localizedDescription
             }
         }
+    }
+
+    private func activateTimer(entry: WalkEntry) {
+        activeWalkEntry = entry
+        isWalkActive = true
+        walkSeconds = Int(Date().timeIntervalSince(entry.startDate))
+        WidgetDataStore.shared.setWalkActive(startDate: entry.startDate)
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self, let entry = self.activeWalkEntry else { return }
+                self.walkSeconds = Int(Date().timeIntervalSince(entry.startDate))
+            }
     }
 
     func syncTimerWithStartDate() {
