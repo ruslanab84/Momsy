@@ -14,6 +14,7 @@ struct TodayView: View {
     @State private var showBath = false
     @State private var showVitamins = false
     @State private var showStool = false
+    @State private var showAllEntries = false
     @State private var now = Date()
 
     private let container: AppContainer
@@ -102,6 +103,10 @@ struct TodayView: View {
         }
         .sheet(isPresented: $showStool) {
             AddStoolEntrySheet { date in vm.logStool(date: date) }
+                .environmentObject(loc)
+        }
+        .sheet(isPresented: $showAllEntries) {
+            AllTodayEntriesView(entries: vm.logEntries)
                 .environmentObject(loc)
         }
         .errorToast($vm.saveError)
@@ -486,19 +491,26 @@ struct TodayView: View {
 
     private var historyCard: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text(loc.strings.todaySoFar)
-                    .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInk)
-                Spacer()
-                Text(loc.strings.entriesCount(vm.logEntries.count))
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInkMute)
+            Button { showAllEntries = true } label: {
+                HStack {
+                    Text(loc.strings.todaySoFar)
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Spacer()
+                    Text(loc.strings.entriesCount(vm.logEntries.count))
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.bbInkMute)
+                        .padding(.leading, 2)
+                }
             }
+            .buttonStyle(.plain)
             .padding(.bottom, 12)
 
             VStack(spacing: 10) {
-                ForEach(vm.logEntries.prefix(6)) { entry in
+                ForEach(vm.logEntries.prefix(7)) { entry in
                     HStack(spacing: 12) {
                         Text(entry.timeString)
                             .font(.system(size: 12, weight: .bold, design: .monospaced))

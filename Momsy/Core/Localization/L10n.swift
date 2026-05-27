@@ -165,6 +165,7 @@ struct L10n {
     func leapContrastsTip(name: String) -> String { s("During this leap \(name) is especially drawn to contrasts — show a black-and-white book.", "В этот скачок \(name) особенно интересны контрасты — покажите чёрно-белую книжку.", "In diesem Schub ist \(name) besonders von Kontrasten angezogen.") }
     func diaperCountDay(_ n: Int) -> String { s("\(n) / day", "\(n) / день", "\(n) / Tag") }
     func entriesCount(_ n: Int) -> String { s("\(n) entries", "\(n) записей", "\(n) Einträge") }
+    var noEntriesYet: String { s("Nothing logged yet today", "Ещё ничего не записано", "Noch nichts eingetragen") }
 
     // MARK: — Feeding
     var feedingLeft: String   { s("Left",   "Левая",   "Links") }
