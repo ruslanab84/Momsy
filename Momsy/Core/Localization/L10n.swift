@@ -121,6 +121,11 @@ struct L10n {
     var walkLogged: String   { s("Walk · logged",    "Прогулка · записана",   "Spaziergang · erfasst") }
     var bathLogged: String   { s("Bath · logged",    "Купание · записано",    "Bad · erfasst") }
     var vitaminsGiven: String { s("Vitamins · given","Витамины · приняты",    "Vitamine · gegeben") }
+    var vitaminNamePlaceholder: String { s("e.g. Vitamin D", "напр. Витамин D",     "z.B. Vitamin D") }
+    var todaysVitamins: String         { s("Today's vitamins","Витамины сегодня",    "Vitamine heute") }
+    var noVitaminsYet: String          { s("No vitamins added yet","Витамины ещё не добавлены","Noch keine Vitamine") }
+    var vitaminNameLabel: String       { s("VITAMIN NAME", "НАЗВАНИЕ ВИТАМИНА",    "VITAMINNAME") }
+    func vitaminAdded(name: String) -> String { s("Vitamins · \(name)", "Витамины · \(name)", "Vitamine · \(name)") }
     var walkTracker: String  { s("WALK TRACKER",    "ТРЕКЕР ПРОГУЛКИ",       "GEHTRACKER") }
     var walking: String      { s("walking…",        "гуляем…",               "gehen…") }
     var startWalk: String    { s("Start Walk",      "Начать прогулку",       "Spaziergang starten") }

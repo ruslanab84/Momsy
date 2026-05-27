@@ -206,6 +206,10 @@ final class AppContainer {
                       addManualBath: addManualBath)
     }
 
+    func makeVitaminViewModel() -> VitaminViewModel {
+        VitaminViewModel(quickLogRepo: quickLogRepository)
+    }
+
     func makeLeapsViewModel() -> LeapsViewModel {
         LeapsViewModel(getLeaps: getLeaps, markLeapComplete: markLeapComplete, appState: appState)
     }

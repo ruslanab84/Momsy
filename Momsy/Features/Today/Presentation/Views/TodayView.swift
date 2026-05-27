@@ -6,11 +6,13 @@ struct TodayView: View {
     @StateObject private var sleepVM: SleepViewModel
     @StateObject private var walkVM: WalkViewModel
     @StateObject private var bathVM: BathViewModel
+    @StateObject private var vitaminVM: VitaminViewModel
     @State private var showFeeding = false
     @State private var showSymptom = false
     @State private var showSleep = false
     @State private var showWalk = false
     @State private var showBath = false
+    @State private var showVitamins = false
     @State private var now = Date()
 
     private let container: AppContainer
@@ -22,6 +24,7 @@ struct TodayView: View {
         _sleepVM    = StateObject(wrappedValue: container.makeSleepViewModel())
         _walkVM     = StateObject(wrappedValue: container.makeWalkViewModel())
         _bathVM     = StateObject(wrappedValue: container.makeBathViewModel())
+        _vitaminVM  = StateObject(wrappedValue: container.makeVitaminViewModel())
     }
 
     @EnvironmentObject var loc: LocalizationManager
@@ -86,6 +89,14 @@ struct TodayView: View {
         }
         .sheet(isPresented: $showBath) {
             BathView(vm: bathVM)
+                .onDisappear { Task { await vm.loadTodayEntries() } }
+        }
+        .sheet(isPresented: $showVitamins) {
+            VitaminView(vm: vitaminVM)
+                .onAppear {
+                    vitaminVM.onEntrySaved = { Task { await vm.loadTodayEntries() } }
+                    vitaminVM.loadToday()
+                }
                 .onDisappear { Task { await vm.loadTodayEntries() } }
         }
         .errorToast($vm.saveError)
@@ -438,7 +449,7 @@ struct TodayView: View {
             QuickItem(kind: .heart,   tone: .bbRose,   label: loc.strings.symptom)     { showSymptom = true },
             QuickItem(kind: .walk,    tone: .bbMint,   label: loc.strings.walk)        { showWalk = true },
             QuickItem(kind: .bath,    tone: .bbSky,    label: loc.strings.bath)        { showBath = true },
-            QuickItem(kind: .vitamin, tone: .bbButter, label: loc.strings.vitamins)    { vm.logVitamins() },
+            QuickItem(kind: .vitamin, tone: .bbButter, label: loc.strings.vitamins)    { showVitamins = true },
         ]
     }
 
