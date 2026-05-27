@@ -22,7 +22,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: onboardingDone)
         .task {
-            try? await Task.sleep(for: .seconds(1.6))
+            try? await Task.sleep(for: .seconds(2.2))
             showSplash = false
         }
     }
