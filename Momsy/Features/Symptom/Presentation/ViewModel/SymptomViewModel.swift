@@ -52,10 +52,12 @@ final class SymptomViewModel: ObservableObject {
     @Published var diaryLogged = false
 
     private let appState: AppState
+    private let addDiaryEntry: AddDiaryEntryUseCase
     private var lm: LocalizationManager { .shared }
 
-    init(appState: AppState) {
+    init(appState: AppState, addDiaryEntry: AddDiaryEntryUseCase) {
         self.appState = appState
+        self.addDiaryEntry = addDiaryEntry
     }
 
     var displayName: String { appState.displayName }
@@ -194,8 +196,15 @@ final class SymptomViewModel: ObservableObject {
     }
 
     func logToDiary() {
+        let symptomLabels = symptoms.filter(\.isOn).map(\.label).joined(separator: ", ")
+        let noteText = symptomLabels.isEmpty
+            ? "🩺 \(result.title)"
+            : "🩺 \(result.title)\n\(symptomLabels)"
+        let item = StoredDiaryItem(kind: .note, text: noteText)
+
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { diaryLogged = true }
         Task {
+            try? await addDiaryEntry.execute(item)
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             await MainActor.run { withAnimation { diaryLogged = false } }
         }

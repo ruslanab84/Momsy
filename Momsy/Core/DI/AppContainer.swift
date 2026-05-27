@@ -236,7 +236,7 @@ final class AppContainer {
     }
 
     func makeSymptomViewModel() -> SymptomViewModel {
-        SymptomViewModel(appState: appState)
+        SymptomViewModel(appState: appState, addDiaryEntry: addDiaryEntry)
     }
 
     func makeSettingsViewModel() -> SettingsViewModel {
