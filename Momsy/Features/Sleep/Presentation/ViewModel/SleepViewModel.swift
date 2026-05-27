@@ -29,6 +29,9 @@ final class SleepViewModel: ObservableObject {
         self.appState = appState
         Task {
             await loadTodayEntries()
+            if let open = todayEntries.first(where: { $0.endDate == nil }) {
+                activateTimer(entry: open)
+            }
             await loadChartData()
         }
         chartPeriodCancellable = $selectedChartPeriod
@@ -98,16 +101,7 @@ final class SleepViewModel: ObservableObject {
         Task {
             do {
                 let entry = try await startSleepUC.execute()
-                activeSleepEntry = entry
-                isSleepActive = true
-                sleepSeconds = 0
-                WidgetDataStore.shared.setSleepActive(startDate: entry.startDate)
-                timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-                    .autoconnect()
-                    .sink { [weak self] _ in
-                        guard let self, let entry = self.activeSleepEntry else { return }
-                        self.sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
-                    }
+                activateTimer(entry: entry)
             } catch {
                 saveError = error.localizedDescription
             }
@@ -119,6 +113,19 @@ final class SleepViewModel: ObservableObject {
         sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
     }
 
+    private func activateTimer(entry: SleepEntry) {
+        activeSleepEntry = entry
+        isSleepActive = true
+        sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
+        WidgetDataStore.shared.setSleepActive(startDate: entry.startDate)
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self, let entry = self.activeSleepEntry else { return }
+                self.sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
+            }
+    }
+
     func stop() {
         guard isSleepActive, var entry = activeSleepEntry else { return }
         timerCancellable?.cancel()
@@ -126,7 +133,11 @@ final class SleepViewModel: ObservableObject {
         entry.quality = selectedQuality
         var completed = entry
         completed.endDate = Date()
-        todayEntries.append(completed)
+        if let idx = todayEntries.firstIndex(where: { $0.id == completed.id }) {
+            todayEntries[idx] = completed
+        } else {
+            todayEntries.append(completed)
+        }
         isSleepActive = false
         activeSleepEntry = nil
         WidgetDataStore.shared.setLastSleepEnd(Date())
