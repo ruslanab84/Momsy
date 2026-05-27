@@ -28,4 +28,9 @@ final class SwiftDataBathRepository: BathRepository {
         let all = try context.fetch(FetchDescriptor<BathRecord>())
         return all.filter { $0.startDate >= from && $0.startDate < to }.map { $0.toDomain() }
     }
+
+    func add(_ entry: BathEntry) async throws {
+        context.insert(BathRecord(entry))
+        try context.save()
+    }
 }

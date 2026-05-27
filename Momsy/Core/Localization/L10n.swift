@@ -133,6 +133,7 @@ struct L10n {
     var startBath: String    { s("Start Bath",       "Начать купание",        "Bad starten") }
     var stopBath: String     { s("Stop Bath",        "Закончить купание",     "Bad stoppen") }
     var noBathYet: String    { s("no bath yet",      "ещё не купались",       "noch nicht gebadet") }
+    var addBathTitle: String { s("Add Bath",         "Добавить купание",      "Bad erfassen") }
     func bathLogEntry(dur: Int) -> String { s("Bath · \(dur) min", "Купание · \(dur) мин", "Bad · \(dur) min") }
     var mood: String         { s("Mood",         "Настроение",   "Stimmung") }
     var feedLabel: String    { s("Feed",         "Еда",          "Essen") }

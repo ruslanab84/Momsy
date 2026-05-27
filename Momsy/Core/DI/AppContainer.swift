@@ -194,6 +194,7 @@ final class AppContainer {
     }
 
     lazy var addManualWalk = AddManualWalkUseCase(repository: walkRepository)
+    lazy var addManualBath = AddManualBathUseCase(repository: bathRepository)
 
     func makeWalkViewModel() -> WalkViewModel {
         WalkViewModel(walkRepository: walkRepository, quickLogRepo: quickLogRepository,
@@ -201,7 +202,8 @@ final class AppContainer {
     }
 
     func makeBathViewModel() -> BathViewModel {
-        BathViewModel(bathRepository: bathRepository, quickLogRepo: quickLogRepository)
+        BathViewModel(bathRepository: bathRepository, quickLogRepo: quickLogRepository,
+                      addManualBath: addManualBath)
     }
 
     func makeLeapsViewModel() -> LeapsViewModel {

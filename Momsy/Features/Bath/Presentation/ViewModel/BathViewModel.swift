@@ -14,10 +14,13 @@ final class BathViewModel: ObservableObject {
 
     private let bathRepository: any BathRepository
     private let quickLogRepo: QuickLogRepository
+    private let addManualBathUC: AddManualBathUseCase
 
-    init(bathRepository: any BathRepository, quickLogRepo: QuickLogRepository) {
+    init(bathRepository: any BathRepository, quickLogRepo: QuickLogRepository,
+         addManualBath: AddManualBathUseCase) {
         self.bathRepository = bathRepository
         self.quickLogRepo = quickLogRepo
+        self.addManualBathUC = addManualBath
         Task {
             await loadTodayEntries()
             if let open = todayEntries.first(where: { $0.endDate == nil }) {
@@ -101,6 +104,22 @@ final class BathViewModel: ObservableObject {
                 guard let self, let entry = self.activeBathEntry else { return }
                 self.bathSeconds = Int(Date().timeIntervalSince(entry.startDate))
             }
+    }
+
+    func logManualEntry(startDate: Date, endDate: Date, note: String) {
+        Task {
+            do {
+                let saved = try await addManualBathUC.execute(startDate: startDate, endDate: endDate)
+                let dur = saved.durationMinutes ?? 1
+                let label = lm.strings.bathLogEntry(dur: dur)
+                quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .bath, label: label))
+                if Calendar.current.isDateInToday(saved.startDate) {
+                    await loadTodayEntries()
+                }
+            } catch {
+                saveError = error.localizedDescription
+            }
+        }
     }
 
     func syncTimerWithStartDate() {
