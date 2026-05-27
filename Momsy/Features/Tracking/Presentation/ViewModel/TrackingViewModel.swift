@@ -91,16 +91,27 @@ final class TrackingViewModel: ObservableObject {
     var displayName: String { appState.displayName }
 
     var headerSummary: String {
-        let todayStr = lm.strings.today.lowercased()
+        let latestDate = measurements.first?.date
         switch selectedTab {
-        case 0: return "\(measurements.first?.weight ?? "—") · \(todayStr)"
-        case 1: return "\(measurements.first?.height ?? "—") · \(todayStr)"
-        case 2: return "\(measurements.first?.headCirc ?? "—") · \(todayStr)"
+        case 0: return "\(measurements.first?.weight ?? "—") · \(formattedDate(latestDate))"
+        case 1: return "\(measurements.first?.height ?? "—") · \(formattedDate(latestDate))"
+        case 2: return "\(measurements.first?.headCirc ?? "—") · \(formattedDate(latestDate))"
         case 3:
             guard let e = tempLog.first else { return lm.strings.noData }
             return String(format: "%.1f°C · %@ %@", e.value, e.dateLabel, e.timeLabel)
         default: return ""
         }
+    }
+
+    private func formattedDate(_ date: Date?) -> String {
+        guard let date = date else { return lm.strings.today.lowercased() }
+        if Calendar.current.isDateInToday(date) {
+            return lm.strings.today.lowercased()
+        }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "d MMM"
+        fmt.locale = Locale(identifier: lm.lang)
+        return fmt.string(from: date)
     }
 
     var pillText: String {

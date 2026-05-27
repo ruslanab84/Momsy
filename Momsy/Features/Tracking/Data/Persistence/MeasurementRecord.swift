@@ -24,8 +24,12 @@ final class MeasurementRecord {
     }
 
     func toDomain() -> MeasurementEntry {
-        MeasurementEntry(
-            id: id, date: date, dateLabel: dateLabel, weight: weight,
+        let fmt = DateFormatter()
+        fmt.dateFormat = "d MMM"
+        fmt.locale = Locale.current
+        let label = fmt.string(from: date)
+        return MeasurementEntry(
+            id: id, date: date, dateLabel: label, weight: weight,
             height: height, headCirc: headCirc, delta: delta, visitLabel: visitLabel
         )
     }

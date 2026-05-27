@@ -61,8 +61,11 @@ struct AddMeasurementSheet: View {
         let w  = weightStr.isEmpty ? "—" : "\(weightStr) \(loc.strings.unitKg)"
         let h  = heightStr.isEmpty ? "—" : "\(heightStr) \(loc.strings.unitCm)"
         let hc = headStr.isEmpty   ? "—" : "\(headStr) \(loc.strings.unitCm)"
+        let fmt = DateFormatter()
+        fmt.dateFormat = "d MMM"
+        fmt.locale = Locale(identifier: loc.lang)
         onAdd(MeasurementEntry(
-            dateLabel: loc.strings.today,
+            dateLabel: fmt.string(from: Date()),
             weight: w, height: h, headCirc: hc,
             delta: "", visitLabel: nil
         ))
