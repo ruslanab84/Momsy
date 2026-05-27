@@ -14,6 +14,9 @@ struct VaccinationEntry: Identifiable {
     var catalogId: Int
     var doneDate: Date
     var notes: String
+    var customName: String?
+
+    var isCustom: Bool { customName != nil }
 }
 
 struct VaccinationStatus: Identifiable {

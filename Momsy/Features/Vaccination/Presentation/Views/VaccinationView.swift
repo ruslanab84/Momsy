@@ -47,12 +47,27 @@ struct VaccinationView: View {
         }
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.vaccinations)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    vm.showAddCustom = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 16, weight: .semibold))
+                }
+            }
+        }
         .task { await vm.load() }
         .sheet(item: $vm.showMarkDone) { status in
             MarkDoneSheet(vm: vm, status: status, lm: lm)
         }
+        .sheet(isPresented: $vm.showAddCustom) {
+            AddCustomVaccinationSheet(vm: vm, lm: lm)
+        }
     }
 }
+
+// MARK: - Row
 
 private struct VaccinationRowView: View {
     let status: VaccinationStatus
@@ -79,6 +94,8 @@ private struct VaccinationRowView: View {
         case .russian: return status.item.nameRU
         }
     }
+
+    private var isCustom: Bool { status.entry?.isCustom == true }
 
     var body: some View {
         Button(action: { if !status.isDone { onTap() } }) {
@@ -116,13 +133,18 @@ private struct VaccinationRowView: View {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             if status.isDone {
                 Button(role: .destructive, action: onUnmark) {
-                    Label(lm.strings.vaccinationUndo, systemImage: "arrow.uturn.backward")
+                    Label(
+                        isCustom ? lm.strings.delete : lm.strings.vaccinationUndo,
+                        systemImage: isCustom ? "trash" : "arrow.uturn.backward"
+                    )
                 }
                 .tint(.bbCoralDeep)
             }
         }
     }
 }
+
+// MARK: - Mark Done Sheet
 
 private struct MarkDoneSheet: View {
     @ObservedObject var vm: VaccinationViewModel
@@ -182,6 +204,100 @@ private struct MarkDoneSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(lm.strings.cancel) { vm.showMarkDone = nil }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Add Custom Vaccination Sheet
+
+private struct AddCustomVaccinationSheet: View {
+    @ObservedObject var vm: VaccinationViewModel
+    let lm: LocalizationManager
+
+    @State private var name: String = ""
+    @State private var date: Date = Date()
+
+    private var isSaveDisabled: Bool {
+        name.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private var title: String {
+        switch lm.current {
+        case .english: return "Add vaccine"
+        case .german:  return "Impfung hinzufügen"
+        case .russian: return "Добавить прививку"
+        }
+    }
+
+    private var namePlaceholder: String {
+        switch lm.current {
+        case .english: return "Vaccine name"
+        case .german:  return "Name der Impfung"
+        case .russian: return "Название прививки"
+        }
+    }
+
+    private var saveLabel: String {
+        switch lm.current {
+        case .english: return "Save"
+        case .german:  return "Speichern"
+        case .russian: return "Сохранить"
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                VStack(spacing: 8) {
+                    Image(systemName: "syringe")
+                        .font(.system(size: 44))
+                        .foregroundColor(.bbLilacDeep)
+                }
+                .padding(.top, 24)
+
+                // Name input
+                TextField(namePlaceholder, text: $name)
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.bbCard)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .padding(.horizontal, 20)
+
+                // Date picker
+                DatePicker(
+                    saveLabel,
+                    selection: $date,
+                    in: ...Date(),
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.graphical)
+                .accentColor(.bbLilacDeep)
+                .padding(.horizontal, 16)
+
+                Button {
+                    Task { await vm.saveCustomVaccination(name: name.trimmingCharacters(in: .whitespaces), date: date) }
+                } label: {
+                    Text(saveLabel)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(isSaveDisabled ? Color.bbLilacDeep.opacity(0.4) : Color.bbLilacDeep)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .disabled(isSaveDisabled)
+                .padding(.horizontal, 20)
+
+                Spacer()
+            }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(lm.strings.cancel) { vm.showAddCustom = false }
                 }
             }
         }

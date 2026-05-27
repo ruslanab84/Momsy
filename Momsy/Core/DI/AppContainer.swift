@@ -87,9 +87,10 @@ final class AppContainer {
 
     // MARK: — Use Cases — Vaccination
 
-    lazy var getVaccinationStatus = GetVaccinationStatusUseCase(repository: vaccinationRepository)
-    lazy var markVaccinationDone  = MarkVaccinationDoneUseCase(repository: vaccinationRepository)
-    lazy var unmarkVaccination    = UnmarkVaccinationUseCase(repository: vaccinationRepository)
+    lazy var getVaccinationStatus   = GetVaccinationStatusUseCase(repository: vaccinationRepository)
+    lazy var markVaccinationDone    = MarkVaccinationDoneUseCase(repository: vaccinationRepository)
+    lazy var unmarkVaccination      = UnmarkVaccinationUseCase(repository: vaccinationRepository)
+    lazy var addCustomVaccination   = AddCustomVaccinationUseCase(repository: vaccinationRepository)
 
     // MARK: — Use Cases — Complementary Feeding
 
@@ -219,6 +220,7 @@ final class AppContainer {
             getStatus: getVaccinationStatus,
             markDone: markVaccinationDone,
             unmark: unmarkVaccination,
+            addCustom: addCustomVaccination,
             pushNotifications: pushNotifications,
             appState: appState
         )

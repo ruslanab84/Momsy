@@ -15,11 +15,13 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
 
     func save(_ entry: VaccinationEntry) async throws {
         let all = try context.fetch(FetchDescriptor<VaccinationRecord>())
-        if let existing = all.first(where: { $0.catalogId == entry.catalogId }) {
+        // Dedup only for catalog entries — custom vaccines (isCustom) each have a unique catalogId
+        if !entry.isCustom, let existing = all.first(where: { $0.catalogId == entry.catalogId }) {
             context.delete(existing)
         }
         context.insert(VaccinationRecord(id: entry.id, catalogId: entry.catalogId,
-                                          doneDate: entry.doneDate, notes: entry.notes))
+                                          doneDate: entry.doneDate, notes: entry.notes,
+                                          customName: entry.customName))
         try context.save()
     }
 
