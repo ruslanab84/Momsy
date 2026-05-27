@@ -13,7 +13,6 @@ struct FeedingView: View {
     @State private var showAddManual = false
 
     private let typicalSeconds = 18 * 60
-    private let barValues = [22, 15, 28, 18, 14, 8]
 
     private var presetMoods: [String] {
         [loc.strings.moodCalm, loc.strings.moodAsleep, loc.strings.moodSpitUp]
@@ -49,12 +48,21 @@ struct FeedingView: View {
                     sideToggle
                     actionButtons
                     noteCard
-                    historyBar
+                    FeedingChartSection(
+                        days: vm.feedingDays,
+                        selectedPeriod: $vm.selectedChartPeriod,
+                        lang: loc.lang
+                    )
+                    .environmentObject(loc)
                 }
                 .padding(.horizontal, 22)
                 .padding(.top, 16)
                 .padding(.bottom, 40)
             }
+        }
+        .task {
+            await vm.loadTodayEntries()
+            await vm.loadChartData()
         }
         .onAppear {
             vm.restoreOrStartFeeding(side: vm.feedingSide)
@@ -63,6 +71,9 @@ struct FeedingView: View {
             if phase == .active {
                 vm.syncTimerWithStartDate()
             }
+        }
+        .onChange(of: vm.selectedChartPeriod) { _, _ in
+            Task { await vm.loadChartData() }
         }
     }
 
@@ -327,46 +338,6 @@ struct FeedingView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: showCustomInput)
     }
 
-    // MARK: - History Mini-Bar
-
-    private var historyBar: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(loc.strings.today)
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInk)
-                Spacer()
-                let feedCount = vm.todayEntries.count
-                Text(loc.strings.feedingsCount(feedCount))
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInkMute)
-            }
-
-            HStack(alignment: .bottom, spacing: 6) {
-                ForEach(barValues.indices, id: \.self) { i in
-                    let isLast = i == barValues.count - 1
-                    VStack(spacing: 4) {
-                        if isLast {
-                            Text(loc.strings.now)
-                                .font(.system(size: 9, weight: .heavy, design: .rounded))
-                                .foregroundColor(.bbCoralDeep)
-                        } else {
-                            Spacer().frame(height: 14)
-                        }
-                        RoundedRectangle(cornerRadius: 4, style: .continuous)
-                            .fill(isLast ? Color.bbCoralDeep : Color.bbCoral.opacity(0.7))
-                            .frame(height: CGFloat(barValues[i]) * 1.6)
-                        Text(["01", "04", "06", "11", "14", loc.strings.now][i])
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundColor(.bbInkMute)
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-            }
-            .frame(height: 80)
-        }
-        .bbCard(pad: 14, bg: Color.white.opacity(0.9))
-    }
 }
 
 #Preview {

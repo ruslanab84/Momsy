@@ -32,3 +32,10 @@ struct FeedingEntry: Identifiable, Codable {
         self.mood = mood
     }
 }
+
+struct FeedingDayPoint: Identifiable {
+    let id: Date           // start-of-day
+    let sessionCount: Int
+    let totalMinutes: Int
+    var avgMinutes: Int { sessionCount > 0 ? totalMinutes / sessionCount : 0 }
+}

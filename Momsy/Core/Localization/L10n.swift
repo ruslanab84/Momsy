@@ -202,6 +202,14 @@ struct L10n {
     var qualityNormal: String  { s("😐 Normal",    "😐 Нормально",  "😐 Normal") }
     var qualityRestless: String{ s("😣 Restless",  "😣 Беспокойно", "😣 Unruhig") }
 
+    var feedingChartTitle: String  { s("Feeding",          "Кормление",             "Stillen") }
+    var feedingPeriodWeek: String  { s("7 days",           "7 дней",                "7 Tage") }
+    var feedingPeriodMonth: String { s("30 days",          "30 дней",               "30 Tage") }
+    var feedingAvgPerDay: String   { s("avg/day",          "ср/день",               "Ø/Tag") }
+    var feedingTotalSessions: String { s("total",          "всего",                 "gesamt") }
+    var feedingAvgDuration: String { s("avg dur.",         "ср. длит.",             "Ø Dauer") }
+    var feedingNoData: String      { s("No data for period", "Нет данных за период", "Keine Daten") }
+
     var sleepChartTitle: String  { s("Sleep chart",   "График сна",    "Schlafdiagramm") }
     var sleepPeriodWeek: String  { s("7 days",        "7 дней",        "7 Tage") }
     var sleepPeriodMonth: String { s("30 days",       "30 дней",       "30 Tage") }

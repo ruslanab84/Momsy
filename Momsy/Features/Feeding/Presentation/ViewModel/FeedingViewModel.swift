@@ -9,6 +9,8 @@ final class FeedingViewModel: ObservableObject {
     @Published var saveError: String?
     @Published var feedingSessionExists: Bool = false
     @Published private(set) var todayEntries: [FeedingEntry] = []
+    @Published private(set) var feedingDays: [FeedingDayPoint] = []
+    @Published var selectedChartPeriod: Int = 0
 
     private var pausedFeedingSeconds = 0
     private let logFeeding: LogFeedingUseCase
@@ -46,6 +48,23 @@ final class FeedingViewModel: ObservableObject {
 
     func loadTodayEntries() async {
         todayEntries = (try? await getFeeding.execute(for: Date())) ?? []
+    }
+
+    func loadChartData() async {
+        let dayCount = selectedChartPeriod == 0 ? 7 : 30
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        guard let start = cal.date(byAdding: .day, value: -(dayCount - 1), to: today) else { return }
+        let entries = (try? await getFeeding.execute(from: start, to: Date())) ?? []
+        feedingDays = (0..<dayCount).compactMap { offset in
+            guard let day = cal.date(byAdding: .day, value: offset, to: start) else { return nil }
+            let dayEntries = entries.filter { cal.isDate($0.date, inSameDayAs: day) }
+            return FeedingDayPoint(
+                id: day,
+                sessionCount: dayEntries.count,
+                totalMinutes: dayEntries.map(\.durationMinutes).reduce(0, +)
+            )
+        }
     }
 
     func startFeeding(side: FeedingSide) {
