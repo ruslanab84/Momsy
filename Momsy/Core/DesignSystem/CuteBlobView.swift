@@ -31,6 +31,7 @@ struct CuteBlobView: View {
         case .walk:    WalkBlob(s: size)
         case .bath:    BathBlob(s: size)
         case .vitamin: VitaminBlob(s: size)
+        case .stool:   StoolBlob(s: size)
         }
     }
 }
@@ -284,6 +285,17 @@ private struct VitaminBlob: View {
         Image(systemName: "pills.fill")
             .font(.system(size: s * 0.44, weight: .medium))
             .foregroundColor(Color(bbHex: "F2B85C"))
+    }
+}
+
+// MARK: - Stool
+
+private struct StoolBlob: View {
+    let s: CGFloat
+    var body: some View {
+        Image(systemName: "waveform.path.ecg")
+            .font(.system(size: s * 0.42, weight: .medium))
+            .foregroundColor(Color(bbHex: "5FB99B"))
     }
 }
 

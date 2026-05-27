@@ -118,6 +118,10 @@ struct L10n {
     var walk: String         { s("Walk",         "Прогулка",     "Spaziergang") }
     var bath: String         { s("Bath",         "Купание",      "Bad") }
     var vitamins: String     { s("Vitamins",     "Витамины",     "Vitamine") }
+    var stoolLabel: String     { s("Stool",           "Стул",                  "Stuhlgang") }
+    var stoolLogged: String    { s("Stool · logged",  "Стул · записан",        "Stuhlgang · notiert") }
+    var addStoolTitle: String  { s("Add Entry",       "Новая запись",          "Eintrag") }
+    var stoolTimeLabel: String { s("Time",            "Время",                 "Zeit") }
     var walkLogged: String   { s("Walk · logged",    "Прогулка · записана",   "Spaziergang · erfasst") }
     var bathLogged: String   { s("Bath · logged",    "Купание · записано",    "Bad · erfasst") }
     var vitaminsGiven: String { s("Vitamins · given","Витамины · приняты",    "Vitamine · gegeben") }

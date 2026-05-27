@@ -2,7 +2,7 @@ import SwiftUI
 
 enum BlobKind: String, Codable {
     case baby, sleep, bottle, moon, sun, drop, star, heart, cloud, bear
-    case walk, bath, vitamin
+    case walk, bath, vitamin, stool
 }
 
 extension BlobKind {
@@ -21,6 +21,7 @@ extension BlobKind {
         case .walk:    return "walk"
         case .bath:    return "bath"
         case .vitamin: return "vitamin"
+        case .stool:   return "stool"
         }
     }
 
@@ -39,6 +40,7 @@ extension BlobKind {
         case .walk:    return .bbMint
         case .bath:    return .bbSky
         case .vitamin: return .bbButter
+        case .stool:   return .bbMint
         }
     }
 }

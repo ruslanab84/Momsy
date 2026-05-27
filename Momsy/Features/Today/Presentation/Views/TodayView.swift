@@ -13,6 +13,7 @@ struct TodayView: View {
     @State private var showWalk = false
     @State private var showBath = false
     @State private var showVitamins = false
+    @State private var showStool = false
     @State private var now = Date()
 
     private let container: AppContainer
@@ -98,6 +99,10 @@ struct TodayView: View {
                     vitaminVM.loadToday()
                 }
                 .onDisappear { Task { await vm.loadTodayEntries() } }
+        }
+        .sheet(isPresented: $showStool) {
+            AddStoolEntrySheet { date in vm.logStool(date: date) }
+                .environmentObject(loc)
         }
         .errorToast($vm.saveError)
     }
@@ -441,6 +446,7 @@ struct TodayView: View {
             QuickItem(kind: .bottle,  tone: .bbCoral,  label: loc.strings.feedLabel)   { showFeeding = true },
             QuickItem(kind: .sleep,   tone: .bbLilac,  label: loc.strings.sleep)       { showSleep = true },
             QuickItem(kind: .drop,    tone: .bbSky,    label: loc.strings.diaperQuick) { vm.logDiaper() },
+            QuickItem(kind: .stool,   tone: .bbMint,   label: loc.strings.stoolLabel)  { showStool = true },
             QuickItem(kind: .heart,   tone: .bbRose,   label: loc.strings.symptom)     { showSymptom = true },
             QuickItem(kind: .walk,    tone: .bbMint,   label: loc.strings.walk)        { showWalk = true },
             QuickItem(kind: .bath,    tone: .bbSky,    label: loc.strings.bath)        { showBath = true },

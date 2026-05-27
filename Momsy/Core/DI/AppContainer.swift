@@ -26,6 +26,7 @@ final class AppContainer {
     lazy var complementaryFeedingRepository: any ComplementaryFeedingRepository = SwiftDataComplementaryFeedingRepository(context: context)
     lazy var diaperRepository: any DiaperRepository                             = SwiftDataDiaperRepository(context: context)
     lazy var momMoodRepository: any MomMoodRepository                           = SwiftDataMomMoodRepository(context: context)
+    lazy var stoolRepository: any StoolRepository                               = SwiftDataStoolRepository(context: context)
 
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
@@ -127,6 +128,7 @@ final class AppContainer {
             getFeeding: getFeedingEntries,
             getSleep: getSleepEntries,
             diaperRepo: diaperRepository,
+            stoolRepo: stoolRepository,
             quickLogRepo: quickLogRepository,
             tipService: dailyTipService,
             tipRepository: dailyTipRepository,

@@ -12,6 +12,7 @@ final class TodayViewModel: ObservableObject {
     private let getFeeding: GetFeedingEntriesUseCase
     private let getSleep: GetSleepEntriesUseCase
     private let diaperRepo: any DiaperRepository
+    private let stoolRepo: any StoolRepository
     private let quickLogRepo: QuickLogRepository
     private let tipService: any DailyTipService
     private let tipRepository: DailyTipRepository
@@ -23,6 +24,7 @@ final class TodayViewModel: ObservableObject {
         getFeeding: GetFeedingEntriesUseCase,
         getSleep: GetSleepEntriesUseCase,
         diaperRepo: any DiaperRepository,
+        stoolRepo: any StoolRepository,
         quickLogRepo: QuickLogRepository,
         tipService: any DailyTipService,
         tipRepository: DailyTipRepository,
@@ -31,6 +33,7 @@ final class TodayViewModel: ObservableObject {
         self.getFeeding = getFeeding
         self.getSleep = getSleep
         self.diaperRepo = diaperRepo
+        self.stoolRepo = stoolRepo
         self.quickLogRepo = quickLogRepo
         self.tipService = tipService
         self.tipRepository = tipRepository
@@ -126,6 +129,14 @@ final class TodayViewModel: ObservableObject {
         let label = LocalizationManager.shared.strings.vitaminsGiven
         quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .vitamin, label: label))
         addEntry(LogEntry(time: Date(), kind: .vitamin, label: label))
+    }
+
+    func logStool(date: Date) {
+        let lm = LocalizationManager.shared
+        let label = lm.strings.stoolLogged
+        quickLogRepo.append(QuickLogEntry(id: UUID(), time: date, kind: .stool, label: label))
+        addEntry(LogEntry(time: date, kind: .stool, label: label))
+        Task { try? await stoolRepo.add(date: date) }
     }
 
     func logSymptom() {
