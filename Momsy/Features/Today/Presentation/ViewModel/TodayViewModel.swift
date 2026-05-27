@@ -16,6 +16,8 @@ final class TodayViewModel: ObservableObject {
     private let tipService: any DailyTipService
     private let tipRepository: DailyTipRepository
     private let appState: AppState
+    /// Prevents repeated Gemini calls on tab switches within the same session.
+    private var hasFetchedThisSession = false
 
     init(
         getFeeding: GetFeedingEntriesUseCase,
@@ -63,6 +65,9 @@ final class TodayViewModel: ObservableObject {
     // MARK: - Daily AI Tip
 
     func fetchDailyTipIfNeeded() async {
+        // Already fetched (or loaded from cache) this session — return immediately.
+        guard !hasFetchedThisSession else { return }
+
         let ctx = DailyContextBuilder.build(from: logEntries, diaperCount: diaperCount, appState: appState)
 
         // Return immediately if cached tip is fresh and data hasn't changed
@@ -71,6 +76,7 @@ final class TodayViewModel: ObservableObject {
                 cached.isFromCache = true
                 dailyTip = cached
             }
+            hasFetchedThisSession = true
             return
         }
 
@@ -88,6 +94,7 @@ final class TodayViewModel: ObservableObject {
             }
         }
         isTipLoading = false
+        hasFetchedThisSession = true
     }
 
     /// Force-fetches a new tip, ignoring TTL cache.

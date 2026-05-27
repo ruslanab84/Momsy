@@ -62,7 +62,7 @@ struct DailyContext {
     /// Simple string hash for cache deduplication — no CryptoKit needed
     /// Language included so switching app language invalidates the cache
     var contextHash: String {
-        "\(language.rawValue)-\(feedingCount)-\(totalFeedingMinutes)-\(minutesSinceLastFeed ?? -1)-\(sleepCount)-\(totalSleepMinutes)-\(diaperCount)"
+        "\(language.rawValue)-\(feedingCount)-\(totalFeedingMinutes)-\(sleepCount)-\(totalSleepMinutes)-\(diaperCount)"
     }
 }
 
