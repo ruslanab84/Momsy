@@ -690,4 +690,17 @@ struct L10n {
     var epdsQ10: String { s("The thought of harming myself has occurred to me.",
                              "У меня возникали мысли о причинении себе вреда.",
                              "Der Gedanke, mir selbst Schaden zuzufügen, kam mir.") }
+
+    // MARK: — Water Intake
+    var waterIntakeTitle: String       { s("Water Intake",               "Жидкость мамы",                "Flüssigkeit") }
+    var waterIntakeLabel: String       { s("HYDRATION",                  "ГИДРАТАЦИЯ",                   "HYDRATION") }
+    var waterIntakeSub: String         { s("Daily hydration",            "Суточное потребление жидкости", "Tagesflüssigkeit") }
+    var waterGoalLabel: String         { s("Goal",                       "Цель",                          "Ziel") }
+    var waterTodayLabel: String        { s("today",                      "сегодня",                       "heute") }
+    var waterAdd150: String            { s("+150 ml",                    "+150 мл",                       "+150 ml") }
+    var waterAdd250: String            { s("+250 ml",                    "+250 мл",                       "+250 ml") }
+    var waterAdd500: String            { s("+500 ml",                    "+500 мл",                       "+500 ml") }
+    var waterNoEntries: String         { s("No logs today",              "Записей нет",                   "Keine Einträge") }
+    var waterWeekLabel: String         { s("LAST 7 DAYS",                "ПОСЛЕДНИЕ 7 ДНЕЙ",              "LETZTE 7 TAGE") }
+    var waterTodayEntriesLabel: String { s("TODAY",                      "СЕГОДНЯ",                       "HEUTE") }
 }

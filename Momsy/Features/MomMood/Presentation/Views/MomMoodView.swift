@@ -3,12 +3,15 @@ import SwiftUI
 struct MomMoodView: View {
     @StateObject private var vm: MomMoodViewModel
     @StateObject private var sleepVM: MomSleepViewModel
+    @StateObject private var waterVM: WaterIntakeViewModel
     @EnvironmentObject private var lm: LocalizationManager
     @State private var showMomSleep = false
+    @State private var showWaterIntake = false
 
     init(container: AppContainer) {
         _vm      = StateObject(wrappedValue: container.makeMomMoodViewModel())
         _sleepVM = StateObject(wrappedValue: container.makeMomSleepViewModel())
+        _waterVM = StateObject(wrappedValue: container.makeWaterIntakeViewModel())
     }
 
     private let faces = ["😔", "😕", "😐", "🙂", "😊"]
@@ -18,6 +21,7 @@ struct MomMoodView: View {
             VStack(spacing: 20) {
                 checkinCard
                 sleepCard
+                waterCard
                 if vm.shouldPromptEPDS {
                     epdsPromptCard
                 } else if let score = vm.latestEPDSScore {
@@ -31,9 +35,16 @@ struct MomMoodView: View {
         }
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.momMoodTitle)
-        .task { await vm.loadHistory() }
+        .task {
+            await vm.loadHistory()
+            await waterVM.load()
+        }
         .sheet(isPresented: $showMomSleep) {
             MomSleepView(vm: sleepVM)
+                .environmentObject(lm)
+        }
+        .sheet(isPresented: $showWaterIntake) {
+            WaterIntakeView(vm: waterVM)
                 .environmentObject(lm)
         }
         .sheet(item: $vm.activeSheet) { sheet in
@@ -108,6 +119,40 @@ struct MomMoodView: View {
                         .fill(Color.bbRoseDeep)
                         .frame(width: 10, height: 10)
                 }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.bbInkSoft)
+            }
+            .padding(18)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .bbShadow()
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Water Card
+
+    private var waterCard: some View {
+        Button { showWaterIntake = true } label: {
+            HStack(spacing: 12) {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.bbSky.opacity(0.3))
+                    .frame(width: 48, height: 48)
+                    .overlay(
+                        Image(systemName: "drop.fill")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundColor(.bbSkyDeep)
+                    )
+                VStack(alignment: .leading, spacing: 2) {
+                    BBSectionLabel(text: lm.strings.waterIntakeLabel)
+                    Text("\(waterVM.todayTotalMl) \(lm.strings.mlUnit)")
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundColor(.bbInk)
+                        .contentTransition(.numericText())
+                        .animation(.spring(response: 0.3), value: waterVM.todayTotalMl)
+                }
+                Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.bbInkSoft)
