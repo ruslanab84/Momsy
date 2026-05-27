@@ -32,7 +32,14 @@ final class SleepViewModel: ObservableObject {
         Task {
             await loadTodayEntries()
             if let open = todayEntries.first(where: { $0.endDate == nil }) {
-                activateTimer(entry: open)
+                // Cross-check WidgetDataStore: if it says idle, the session was stopped
+                // but the async DB write didn't complete before the app was killed.
+                if case .active = WidgetDataStore.shared.sleepState {
+                    activateTimer(entry: open)
+                } else {
+                    // Stale open entry — clean it up silently
+                    Task { try? await stopSleepUC.execute(open) }
+                }
             }
             await loadChartData()
         }

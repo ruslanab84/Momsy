@@ -173,34 +173,51 @@ struct FeedingView: View {
     // MARK: - Action Buttons
 
     private var actionButtons: some View {
-        HStack(spacing: 10) {
-            Button(action: {
-                if vm.isFeedingActive {
-                    vm.pauseFeeding()
-                } else {
-                    vm.resumeFeeding()
+        Group {
+            if !vm.feedingSessionExists {
+                // No active session — show Start button
+                Button(action: {
+                    vm.startFeeding(side: vm.feedingSide)
+                }) {
+                    Text(loc.strings.start)
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color.bbCoralDeep)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 }
-            }) {
-                Text(vm.isFeedingActive ? loc.strings.pause : loc.strings.resume)
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInk)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.white.opacity(0.8))
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            }
+            } else {
+                HStack(spacing: 10) {
+                    Button(action: {
+                        if vm.isFeedingActive {
+                            vm.pauseFeeding()
+                        } else {
+                            vm.resumeFeeding()
+                        }
+                    }) {
+                        Text(vm.isFeedingActive ? loc.strings.pause : loc.strings.resume)
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundColor(.bbInk)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.white.opacity(0.8))
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
 
-            Button(action: {
-                vm.stopFeeding(mood: moodNote)
-                dismiss()
-            }) {
-                Text(loc.strings.stopDone)
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.bbSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    Button(action: {
+                        vm.stopFeeding(mood: moodNote)
+                        dismiss()
+                    }) {
+                        Text(loc.strings.stopDone)
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.bbSurface)
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
+                }
             }
         }
     }

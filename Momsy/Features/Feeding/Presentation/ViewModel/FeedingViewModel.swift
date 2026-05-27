@@ -141,7 +141,7 @@ final class FeedingViewModel: ObservableObject {
             feedingSeconds = elapsedSeconds
             pausedFeedingSeconds = elapsedSeconds
         default:
-            startFeeding(side: side)
+            break  // Idle — don't auto-start; user must explicitly tap Start
         }
     }
 
