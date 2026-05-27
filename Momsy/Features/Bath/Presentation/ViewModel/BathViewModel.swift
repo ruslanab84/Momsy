@@ -18,7 +18,17 @@ final class BathViewModel: ObservableObject {
     init(bathRepository: any BathRepository, quickLogRepo: QuickLogRepository) {
         self.bathRepository = bathRepository
         self.quickLogRepo = quickLogRepo
-        Task { await loadTodayEntries() }
+        Task {
+            await loadTodayEntries()
+            if let open = todayEntries.first(where: { $0.endDate == nil }) {
+                if case .active = WidgetDataStore.shared.bathState {
+                    activateTimer(entry: open)
+                } else {
+                    // Stale open entry — async stop() didn't complete before kill
+                    Task { try? await bathRepository.stop(open) }
+                }
+            }
+        }
     }
 
     var bathTimerString: String {
@@ -53,15 +63,7 @@ final class BathViewModel: ObservableObject {
         Task {
             do {
                 let entry = try await bathRepository.start()
-                activeBathEntry = entry
-                isBathActive = true
-                bathSeconds = 0
-                timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-                    .autoconnect()
-                    .sink { [weak self] _ in
-                        guard let self, let entry = self.activeBathEntry else { return }
-                        self.bathSeconds = Int(Date().timeIntervalSince(entry.startDate))
-                    }
+                activateTimer(entry: entry)
             } catch {
                 saveError = error.localizedDescription
             }
@@ -74,6 +76,7 @@ final class BathViewModel: ObservableObject {
         timerCancellable = nil
         isBathActive = false
         activeBathEntry = nil
+        WidgetDataStore.shared.clearBath(lastDurationSeconds: bathSeconds)
         Task {
             do {
                 let finished = try await bathRepository.stop(entry)
@@ -85,6 +88,19 @@ final class BathViewModel: ObservableObject {
                 saveError = error.localizedDescription
             }
         }
+    }
+
+    private func activateTimer(entry: BathEntry) {
+        activeBathEntry = entry
+        isBathActive = true
+        bathSeconds = Int(Date().timeIntervalSince(entry.startDate))
+        WidgetDataStore.shared.setBathActive(startDate: entry.startDate)
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self, let entry = self.activeBathEntry else { return }
+                self.bathSeconds = Int(Date().timeIntervalSince(entry.startDate))
+            }
     }
 
     func syncTimerWithStartDate() {

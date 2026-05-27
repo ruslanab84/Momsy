@@ -17,6 +17,11 @@ enum WalkWidgetState {
     case active(startDate: Date)
 }
 
+enum BathWidgetState {
+    case idle(lastDurationSeconds: Int?)
+    case active(startDate: Date)
+}
+
 final class WidgetDataStore {
     static let shared = WidgetDataStore()
 
@@ -80,6 +85,20 @@ final class WidgetDataStore {
         reload()
     }
 
+    // MARK: - Bath writes (called from BathViewModel)
+
+    func setBathActive(startDate: Date) {
+        defaults.set(true, forKey: "w_bath_active")
+        defaults.set(startDate.timeIntervalSinceReferenceDate, forKey: "w_bath_start")
+        reload()
+    }
+
+    func clearBath(lastDurationSeconds: Int) {
+        defaults.set(false, forKey: "w_bath_active")
+        defaults.set(lastDurationSeconds, forKey: "w_last_bath_dur")
+        reload()
+    }
+
     // MARK: - Baby info writes (called from AppState)
 
     func setBabyInfo(name: String, birthDate: Date) {
@@ -129,6 +148,16 @@ final class WidgetDataStore {
             return .idle(lastDurationSeconds: dur > 0 ? dur : nil)
         }
         let ti = defaults.double(forKey: "w_walk_start")
+        guard ti > 0 else { return .idle(lastDurationSeconds: nil) }
+        return .active(startDate: Date(timeIntervalSinceReferenceDate: ti))
+    }
+
+    var bathState: BathWidgetState {
+        guard defaults.bool(forKey: "w_bath_active") else {
+            let dur = defaults.integer(forKey: "w_last_bath_dur")
+            return .idle(lastDurationSeconds: dur > 0 ? dur : nil)
+        }
+        let ti = defaults.double(forKey: "w_bath_start")
         guard ti > 0 else { return .idle(lastDurationSeconds: nil) }
         return .active(startDate: Date(timeIntervalSinceReferenceDate: ti))
     }
