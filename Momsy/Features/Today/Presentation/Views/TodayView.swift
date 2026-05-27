@@ -361,14 +361,9 @@ struct TodayView: View {
                 )
 
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(loc.strings.tipOfDay)
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .foregroundColor(.bbInk)
-                    if let tip = vm.dailyTip, tip.isFromCache {
-                        BBPill(text: tip.ageLabel, color: Color.bbInkMute.opacity(0.12), fg: .bbInkMute, size: 10)
-                    }
-                }
+                Text(loc.strings.tipOfDay)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInk)
                 aiTipBody
             }
         }

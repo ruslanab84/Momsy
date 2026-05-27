@@ -38,7 +38,7 @@ final class AppContainer {
     let aiChatService: any AIChatService               = GeminiChatService()
     let preferencesRepository: any UserPreferencesRepository = LocalUserPreferencesRepository()
     let dailyTipRepository                             = DailyTipRepository()
-    lazy var dailyTipService: any DailyTipService      = GeminiDailyTipService()
+    lazy var dailyTipService: any DailyTipService      = StaticDailyTipService()
 
     // MARK: — Use Cases — Baby
 

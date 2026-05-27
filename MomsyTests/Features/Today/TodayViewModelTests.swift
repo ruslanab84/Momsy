@@ -147,56 +147,39 @@ struct TodayViewModelTests {
         #expect(vm.logEntries[0].kind == .bath)
     }
 
-    // MARK: - Daily AI Tip
+    // MARK: - Daily Tip
 
     @Test("fetchDailyTipIfNeeded sets dailyTip text from service")
     func fetchDailyTipIfNeeded_setsDailyTip() async {
         let service = MockDailyTipService()
-        service.stubbedText = "Test AI tip"
+        service.stubbedText = "Test tip"
         let vm = makeVM(tipService: service)
         await vm.fetchDailyTipIfNeeded()
-        #expect(vm.dailyTip?.text == "Test AI tip")
+        #expect(vm.dailyTip?.text == "Test tip")
         #expect(vm.isTipLoading == false)
     }
 
-    @Test("fetchDailyTipIfNeeded does not call service when cache is fresh")
-    func fetchDailyTipIfNeeded_usesCache_whenHashUnchanged() async {
+    @Test("fetchDailyTipIfNeeded does not call service a second time in same session")
+    func fetchDailyTipIfNeeded_skipsSecondCall_withinSession() async {
         let service = MockDailyTipService()
-        service.stubbedText = "Cached tip"
-        let tipRepo = makeTipRepository()
-        let vm = makeVM(tipService: service, tipRepository: tipRepo)
+        service.stubbedText = "Tip"
+        let vm = makeVM(tipService: service)
 
-        // First fetch — populates cache
         await vm.fetchDailyTipIfNeeded()
         #expect(service.callCount == 1)
 
-        // Second fetch — same context hash, cache is fresh
+        // Second call within same session — service must NOT be called again
         await vm.fetchDailyTipIfNeeded()
-        #expect(service.callCount == 1)   // service NOT called again
-        #expect(vm.dailyTip?.isFromCache == true)
+        #expect(service.callCount == 1)
     }
 
-    @Test("fetchDailyTipIfNeeded falls back to stale cache on network error")
-    func fetchDailyTipIfNeeded_fallsBackToCache_onError() async {
+    @Test("fetchDailyTipIfNeeded leaves dailyTip nil when service throws")
+    func fetchDailyTipIfNeeded_leavesDailyTipNil_onError() async {
         let service = MockDailyTipService()
-        service.stubbedText = "Stale tip"
-        let tipRepo = makeTipRepository()
-        let vm = makeVM(tipService: service, tipRepository: tipRepo)
-
-        // Populate cache with a successful fetch
-        await vm.fetchDailyTipIfNeeded()
-        #expect(vm.dailyTip?.text == "Stale tip")
-
-        // Force cache to be stale by modifying diaperCount so hash changes
-        vm.logDiaper()
-
-        // Now network fails
         service.shouldThrow = true
+        let vm = makeVM(tipService: service)
         await vm.fetchDailyTipIfNeeded()
-
-        // Should show stale cached tip, not nil
-        #expect(vm.dailyTip != nil)
-        #expect(vm.dailyTip?.isFromCache == true)
+        #expect(vm.dailyTip == nil)
         #expect(vm.isTipLoading == false)
     }
 

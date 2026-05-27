@@ -185,6 +185,5 @@ private struct MarkDoneSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
     }
 }

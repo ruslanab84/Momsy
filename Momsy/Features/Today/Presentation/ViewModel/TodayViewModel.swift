@@ -62,57 +62,26 @@ final class TodayViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Daily AI Tip
+    // MARK: - Daily Tip
 
     func fetchDailyTipIfNeeded() async {
-        // Already fetched (or loaded from cache) this session — return immediately.
         guard !hasFetchedThisSession else { return }
-
         let ctx = DailyContextBuilder.build(from: logEntries, diaperCount: diaperCount, appState: appState)
-
-        // Return immediately if cached tip is fresh and data hasn't changed
-        if tipRepository.isFresh(for: ctx.contextHash) {
-            if var cached = tipRepository.load() {
-                cached.isFromCache = true
-                dailyTip = cached
-            }
-            hasFetchedThisSession = true
-            return
-        }
-
         isTipLoading = true
         do {
             let text = try await tipService.fetch(context: ctx)
-            let tip = DailyTip(text: text, generatedAt: Date(), contextHash: ctx.contextHash)
-            tipRepository.save(tip)
-            dailyTip = tip
+            dailyTip = DailyTip(text: text, generatedAt: Date(), contextHash: ctx.contextHash)
         } catch {
-            // Graceful fallback: show stale cached tip if available, otherwise leave dailyTip = nil
-            if var stale = tipRepository.load() {
-                stale.isFromCache = true
-                dailyTip = stale
-            }
+            // Leave dailyTip = nil → View shows static fallback text
         }
         isTipLoading = false
         hasFetchedThisSession = true
     }
 
-    /// Force-fetches a new tip, ignoring TTL cache.
+    /// Re-fetches the tip (e.g. after language switch).
     func refreshTip() async {
-        isTipLoading = true
-        let ctx = DailyContextBuilder.build(from: logEntries, diaperCount: diaperCount, appState: appState)
-        do {
-            let text = try await tipService.fetch(context: ctx)
-            let tip = DailyTip(text: text, generatedAt: Date(), contextHash: ctx.contextHash)
-            tipRepository.save(tip)
-            dailyTip = tip
-        } catch {
-            if var stale = tipRepository.load() {
-                stale.isFromCache = true
-                dailyTip = stale
-            }
-        }
-        isTipLoading = false
+        hasFetchedThisSession = false
+        await fetchDailyTipIfNeeded()
     }
 
     // MARK: - Quick log actions
