@@ -99,7 +99,7 @@ final class FeedingViewModel: ObservableObject {
         }
     }
 
-    func stopFeeding(mood: String? = nil) {
+    func stopFeeding(mood: String? = nil, milliliters: Int? = nil) {
         guard isFeedingActive || feedingSessionExists else { return }
         isFeedingActive = false
         feedingSessionExists = false
@@ -112,7 +112,8 @@ final class FeedingViewModel: ObservableObject {
         pushNotifications.scheduleFeedingReminder(afterMinutes: 3 * 60)
         Task {
             do {
-                let saved = try await logFeeding.execute(durationSeconds: secs, side: s, mood: mood)
+                let saved = try await logFeeding.execute(durationSeconds: secs, side: s,
+                                                         mood: mood, milliliters: milliliters)
                 todayEntries.append(saved)
             } catch {
                 saveError = error.localizedDescription
@@ -120,13 +121,15 @@ final class FeedingViewModel: ObservableObject {
         }
     }
 
-    func logManualEntry(date: Date, durationMinutes: Int, side: FeedingSide, mood: String?) {
+    func logManualEntry(date: Date, durationMinutes: Int, side: FeedingSide,
+                        mood: String?, milliliters: Int? = nil) {
         Task {
             do {
                 let saved = try await logFeeding.execute(
                     durationSeconds: max(60, durationMinutes * 60),
                     side: side,
                     mood: mood,
+                    milliliters: milliliters,
                     date: date
                 )
                 if Calendar.current.isDateInToday(saved.date) {

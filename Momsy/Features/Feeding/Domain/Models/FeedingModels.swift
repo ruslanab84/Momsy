@@ -20,16 +20,18 @@ struct FeedingEntry: Identifiable, Codable {
     var durationSeconds: Int
     var side: FeedingSide
     var mood: String?
+    var milliliters: Int?
 
     var durationMinutes: Int { max(1, durationSeconds / 60) }
 
     init(id: UUID = UUID(), date: Date = Date(), durationSeconds: Int = 0,
-         side: FeedingSide = .left, mood: String? = nil) {
+         side: FeedingSide = .left, mood: String? = nil, milliliters: Int? = nil) {
         self.id = id
         self.date = date
         self.durationSeconds = durationSeconds
         self.side = side
         self.mood = mood
+        self.milliliters = milliliters
     }
 }
 

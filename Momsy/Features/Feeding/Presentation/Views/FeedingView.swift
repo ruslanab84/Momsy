@@ -11,6 +11,7 @@ struct FeedingView: View {
     @State private var customMood = ""
     @State private var showCustomInput = false
     @State private var showAddManual = false
+    @State private var bottleML: Int = 120
 
     private let typicalSeconds = 18 * 60
 
@@ -47,7 +48,11 @@ struct FeedingView: View {
                     timerRing
                     sideToggle
                     actionButtons
-                    noteCard
+                    if vm.feedingSide == .bottle {
+                        bottleMlCard
+                    } else {
+                        noteCard
+                    }
                     FeedingChartSection(
                         days: vm.feedingDays,
                         selectedPeriod: $vm.selectedChartPeriod,
@@ -217,7 +222,10 @@ struct FeedingView: View {
                     }
 
                     Button(action: {
-                        vm.stopFeeding(mood: moodNote)
+                        vm.stopFeeding(
+                            mood: vm.feedingSide == .bottle ? nil : moodNote,
+                            milliliters: vm.feedingSide == .bottle ? bottleML : nil
+                        )
                         dismiss()
                     }) {
                         Text(loc.strings.stopDone)
@@ -336,6 +344,46 @@ struct FeedingView: View {
         }
         .bbCard(pad: 14, bg: Color.white.opacity(0.9))
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: showCustomInput)
+    }
+
+    // MARK: - Bottle ML Card
+
+    private var bottleMlCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(loc.strings.bottleVolume)
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .kerning(0.6)
+
+            HStack(spacing: 20) {
+                Button {
+                    if bottleML > 10 { bottleML -= 10 }
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.system(size: 30))
+                        .foregroundColor(.bbCoralDeep)
+                }
+                .buttonStyle(.plain)
+
+                Text("\(bottleML) \(loc.strings.mlUnit)")
+                    .font(.system(size: 24, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbInk)
+                    .frame(minWidth: 90, alignment: .center)
+                    .contentTransition(.numericText())
+                    .animation(.spring(response: 0.25), value: bottleML)
+
+                Button {
+                    if bottleML < 500 { bottleML += 10 }
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 30))
+                        .foregroundColor(.bbCoralDeep)
+                }
+                .buttonStyle(.plain)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+        }
+        .bbCard(pad: 14, bg: Color.white.opacity(0.9))
     }
 
 }

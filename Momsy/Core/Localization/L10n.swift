@@ -184,6 +184,8 @@ struct L10n {
     var cancelTag: String     { s("✕ cancel",       "✕ отмена",      "✕ abbrechen") }
     var customMoodPlaceholder: String { s("e.g. cried a bit, then calmed", "напр. немного поплакал, успокоился", "z.B. kurz geweint, dann ruhig") }
     var feedingsToday: String { s("feedings today", "кормлений сегодня", "Mahlzeiten heute") }
+    var mlUnit: String        { s("ml", "мл", "ml") }
+    var bottleVolume: String  { s("VOLUME", "ОБЪЁМ", "MENGE") }
 
     func feedingsCount(_ n: Int) -> String { s("\(n) feedings", "\(n) кормлений", "\(n) Mahlzeiten") }
     var addFeedingTitle: String      { s("Add Feeding",     "Добавить кормление",  "Fütterung eintragen") }

@@ -9,9 +9,11 @@ final class LogFeedingUseCase {
         durationSeconds: Int,
         side: FeedingSide,
         mood: String? = nil,
+        milliliters: Int? = nil,
         date: Date = Date()
     ) async throws -> FeedingEntry {
-        let entry = FeedingEntry(date: date, durationSeconds: durationSeconds, side: side, mood: mood)
+        let entry = FeedingEntry(date: date, durationSeconds: durationSeconds,
+                                 side: side, mood: mood, milliliters: milliliters)
         try await repository.add(entry)
         return entry
     }

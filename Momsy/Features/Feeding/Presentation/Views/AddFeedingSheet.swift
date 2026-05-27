@@ -9,6 +9,7 @@ struct AddFeedingSheet: View {
     @State private var endTime   = Date()
     @State private var side: FeedingSide = .left
     @State private var note = ""
+    @State private var bottleML: Int = 120
 
     private var isValid: Bool { endTime > startTime }
     private var durationMinutes: Int { max(1, Int(endTime.timeIntervalSince(startTime)) / 60) }
@@ -77,11 +78,43 @@ struct AddFeedingSheet: View {
                         .clipShape(Capsule())
                     }
 
-                    fieldSection(label: loc.strings.note) {
-                        TextField(loc.strings.optional, text: $note)
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundColor(.bbInk)
-                            .submitLabel(.done)
+                    if side == .bottle {
+                        fieldSection(label: loc.strings.bottleVolume) {
+                            HStack(spacing: 20) {
+                                Button {
+                                    if bottleML > 10 { bottleML -= 10 }
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .font(.system(size: 28))
+                                        .foregroundColor(.bbCoralDeep)
+                                }
+                                .buttonStyle(.plain)
+
+                                Text("\(bottleML) \(loc.strings.mlUnit)")
+                                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                    .foregroundColor(.bbInk)
+                                    .frame(minWidth: 80, alignment: .center)
+                                    .contentTransition(.numericText())
+                                    .animation(.spring(response: 0.25), value: bottleML)
+
+                                Button {
+                                    if bottleML < 500 { bottleML += 10 }
+                                } label: {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 28))
+                                        .foregroundColor(.bbCoralDeep)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        }
+                    } else {
+                        fieldSection(label: loc.strings.note) {
+                            TextField(loc.strings.optional, text: $note)
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(.bbInk)
+                                .submitLabel(.done)
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -102,7 +135,8 @@ struct AddFeedingSheet: View {
                             date: startTime,
                             durationMinutes: durationMinutes,
                             side: side,
-                            mood: trimmedNote.isEmpty ? nil : trimmedNote
+                            mood: side == .bottle ? nil : (trimmedNote.isEmpty ? nil : trimmedNote),
+                            milliliters: side == .bottle ? bottleML : nil
                         )
                         dismiss()
                     }

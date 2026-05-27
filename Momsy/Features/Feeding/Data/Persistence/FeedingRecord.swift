@@ -8,6 +8,7 @@ final class FeedingRecord {
     var durationSeconds: Int
     var sideRaw: String
     var mood: String?
+    var milliliters: Int?
 
     init(_ entry: FeedingEntry) {
         id              = entry.id
@@ -15,13 +16,15 @@ final class FeedingRecord {
         durationSeconds = entry.durationSeconds
         sideRaw         = entry.side.rawValue
         mood            = entry.mood
+        milliliters     = entry.milliliters
     }
 
     func toDomain() -> FeedingEntry {
         FeedingEntry(
             id: id, date: date, durationSeconds: durationSeconds,
             side: FeedingSide(rawValue: sideRaw) ?? .left,
-            mood: mood
+            mood: mood,
+            milliliters: milliliters
         )
     }
 }
