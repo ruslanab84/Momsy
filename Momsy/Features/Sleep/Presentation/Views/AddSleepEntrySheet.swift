@@ -60,7 +60,7 @@ struct AddSleepEntrySheet: View {
                         HStack(spacing: 0) {
                             ForEach(SleepQuality.allCases, id: \.self) { q in
                                 let isSelected = quality == q
-                                Text(qualityLabel(q))
+                                Text(q.localizedLabel(loc.strings))
                                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                                     .foregroundColor(isSelected ? .bbLilacDeep : Color.bbInk.opacity(0.5))
                                     .frame(maxWidth: .infinity)
@@ -132,13 +132,6 @@ struct AddSleepEntrySheet: View {
         }
     }
 
-    private func qualityLabel(_ q: SleepQuality) -> String {
-        switch q {
-        case .good:     return loc.strings.qualityGood
-        case .normal:   return loc.strings.qualityNormal
-        case .restless: return loc.strings.qualityRestless
-        }
-    }
 }
 
 #Preview {

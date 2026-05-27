@@ -159,7 +159,7 @@ struct SleepView: View {
                     Button {
                         withAnimation(.spring(response: 0.3)) { vm.selectedQuality = q }
                     } label: {
-                        Text(qualityLabel(q))
+                        Text(q.localizedLabel(loc.strings))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(vm.selectedQuality == q ? .bbLilacDeep : .bbInkSoft)
                             .padding(.horizontal, 14)
@@ -202,13 +202,6 @@ struct SleepView: View {
         .buttonStyle(.plain)
     }
 
-    private func qualityLabel(_ q: SleepQuality) -> String {
-        switch q {
-        case .good:     return loc.strings.qualityGood
-        case .normal:   return loc.strings.qualityNormal
-        case .restless: return loc.strings.qualityRestless
-        }
-    }
 }
 
 #Preview {

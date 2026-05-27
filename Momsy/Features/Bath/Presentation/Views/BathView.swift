@@ -170,12 +170,12 @@ struct BathView: View {
                         .padding(.bottom, 10)
                     ForEach(Array(completed.enumerated()), id: \.element.id) { idx, entry in
                         HStack(spacing: 12) {
-                            Text(timeString(entry.startDate))
+                            Text(DateFormatter.bbTime.string(from: entry.startDate))
                                 .font(.system(size: 12, weight: .bold, design: .monospaced))
                                 .foregroundColor(.white.opacity(0.65))
                                 .frame(width: 46, alignment: .leading)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(entryDurationString(entry))
+                                Text(entry.durationMinutes.map { loc.strings.durationFormatted($0) } ?? "—")
                                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                                     .foregroundColor(.white)
                                 Text(loc.strings.bath)
@@ -197,17 +197,4 @@ struct BathView: View {
         }
     }
 
-    private func timeString(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f.string(from: date)
-    }
-
-    private func entryDurationString(_ entry: BathEntry) -> String {
-        guard let mins = entry.durationMinutes else { return "—" }
-        if mins < 60 { return loc.lang == "en" ? "\(mins) min" : "\(mins) мин" }
-        let h = mins / 60, m = mins % 60
-        if loc.lang == "en" { return m == 0 ? "\(h)h" : "\(h)h \(m)m" }
-        return m == 0 ? "\(h) ч" : "\(h) ч \(m) м"
-    }
 }

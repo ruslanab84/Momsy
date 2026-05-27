@@ -88,7 +88,7 @@ final class SleepViewModel: ObservableObject {
     var lastSleepDurationString: String {
         guard let last = todayEntries.last(where: { $0.endDate != nil }),
               let mins = last.durationMinutes else { return "—" }
-        return formatMinutes(mins)
+        return lm.strings.durationFormatted(mins)
     }
 
     var lastSleepSubtitle: String {
@@ -102,8 +102,7 @@ final class SleepViewModel: ObservableObject {
 
     var totalSleepToday: String {
         let total = todayEntries.compactMap(\.durationMinutes).reduce(0, +)
-        if total == 0 { return "0 \(lm.strings.unitMin)" }
-        return formatMinutes(total)
+        return lm.strings.durationFormatted(total)
     }
 
     func start() {
@@ -190,9 +189,4 @@ final class SleepViewModel: ObservableObject {
         }
     }
 
-    private func formatMinutes(_ mins: Int) -> String {
-        if mins < 60 { return "\(mins) \(lm.strings.unitMin)" }
-        let h = mins / 60, m = mins % 60
-        return lm.strings.sleepDurationFormatted(h: h, m: m)
-    }
 }

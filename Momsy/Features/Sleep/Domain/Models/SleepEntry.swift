@@ -12,6 +12,16 @@ enum SleepQuality: String, Codable, CaseIterable {
     case restless = "restless"
 }
 
+extension SleepQuality {
+    func localizedLabel(_ strings: L10n) -> String {
+        switch self {
+        case .good:     return strings.qualityGood
+        case .normal:   return strings.qualityNormal
+        case .restless: return strings.qualityRestless
+        }
+    }
+}
+
 struct SleepEntry: Identifiable, Codable {
     var id: UUID
     var startDate: Date
