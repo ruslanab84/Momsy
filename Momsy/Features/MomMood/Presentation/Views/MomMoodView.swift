@@ -2,10 +2,13 @@ import SwiftUI
 
 struct MomMoodView: View {
     @StateObject private var vm: MomMoodViewModel
+    @StateObject private var sleepVM: MomSleepViewModel
     @EnvironmentObject private var lm: LocalizationManager
+    @State private var showMomSleep = false
 
     init(container: AppContainer) {
-        _vm = StateObject(wrappedValue: container.makeMomMoodViewModel())
+        _vm      = StateObject(wrappedValue: container.makeMomMoodViewModel())
+        _sleepVM = StateObject(wrappedValue: container.makeMomSleepViewModel())
     }
 
     private let faces = ["😔", "😕", "😐", "🙂", "😊"]
@@ -14,6 +17,7 @@ struct MomMoodView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
                 checkinCard
+                sleepCard
                 if vm.shouldPromptEPDS {
                     epdsPromptCard
                 } else if let score = vm.latestEPDSScore {
@@ -28,6 +32,10 @@ struct MomMoodView: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.momMoodTitle)
         .task { await vm.loadHistory() }
+        .sheet(isPresented: $showMomSleep) {
+            MomSleepView(vm: sleepVM)
+                .environmentObject(lm)
+        }
         .sheet(item: $vm.activeSheet) { sheet in
             switch sheet {
             case .checkin: MoodCheckinSheet(vm: vm)
@@ -62,6 +70,46 @@ struct MomMoodView: View {
                 }
                 Text(lm.strings.momMoodCheckinSub)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+            }
+            .padding(18)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .bbShadow()
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Sleep Card
+
+    private var sleepCard: some View {
+        Button { showMomSleep = true } label: {
+            HStack(spacing: 12) {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.bbRoseDeep.opacity(0.15))
+                    .frame(width: 48, height: 48)
+                    .overlay(
+                        Image(systemName: sleepVM.isSleepActive ? "moon.zzz.fill" : "moon.stars.fill")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundColor(.bbRoseDeep)
+                    )
+                VStack(alignment: .leading, spacing: 2) {
+                    BBSectionLabel(text: lm.strings.momSleepTitle.uppercased())
+                    Text(sleepVM.isSleepActive
+                         ? "\(lm.strings.sleeping) \(sleepVM.sleepTimerString)"
+                         : sleepVM.lastSleepDurationString)
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundColor(.bbInk)
+                        .contentTransition(.numericText())
+                }
+                Spacer()
+                if sleepVM.isSleepActive {
+                    Circle()
+                        .fill(Color.bbRoseDeep)
+                        .frame(width: 10, height: 10)
+                }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.bbInkSoft)
             }
             .padding(18)

@@ -27,6 +27,7 @@ final class AppContainer {
     lazy var diaperRepository: any DiaperRepository                             = SwiftDataDiaperRepository(context: context)
     lazy var momMoodRepository: any MomMoodRepository                           = SwiftDataMomMoodRepository(context: context)
     lazy var stoolRepository: any StoolRepository                               = SwiftDataStoolRepository(context: context)
+    lazy var momSleepRepository: any MomSleepRepository                         = SwiftDataMomSleepRepository(context: context)
 
     let familyRepository: any FamilyRepository        = LocalFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
@@ -53,6 +54,12 @@ final class AppContainer {
     lazy var stopSleep          = StopSleepUseCase(repository: sleepRepository)
     lazy var getSleepEntries    = GetSleepEntriesUseCase(repository: sleepRepository)
     lazy var addManualSleep     = AddManualSleepUseCase(repository: sleepRepository)
+
+    // MARK: — Use Cases — Mom Sleep
+    lazy var startMomSleep      = StartMomSleepUseCase(repository: momSleepRepository)
+    lazy var stopMomSleep       = StopMomSleepUseCase(repository: momSleepRepository)
+    lazy var getMomSleepEntries = GetMomSleepEntriesUseCase(repository: momSleepRepository)
+    lazy var addManualMomSleep  = AddManualMomSleepUseCase(repository: momSleepRepository)
 
     // MARK: — Use Cases — Feeding
 
@@ -247,6 +254,11 @@ final class AppContainer {
 
     func makeMomMoodViewModel() -> MomMoodViewModel {
         MomMoodViewModel(repository: momMoodRepository)
+    }
+
+    func makeMomSleepViewModel() -> MomSleepViewModel {
+        MomSleepViewModel(start: startMomSleep, stop: stopMomSleep,
+                          get: getMomSleepEntries, addManual: addManualMomSleep)
     }
 }
 

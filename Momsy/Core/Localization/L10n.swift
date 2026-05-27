@@ -640,6 +640,8 @@ struct L10n {
     var momMoodCheckinSub: String     { s("Rate your mood & energy", "Оцените настроение и силы",  "Stimmung & Energie bewerten") }
     var momMoodHistory: String        { s("30-day history",          "История за 30 дней",         "30-Tage-Verlauf") }
     var momMoodNoData: String         { s("No check-ins yet",        "Пока нет отметок",           "Noch keine Einträge") }
+    var momSleepTitle: String         { s("Mom's Sleep",             "Сон мамы",                   "Schlaf der Mutter") }
+    var momSleepCardSub: String       { s("Track your rest",         "Отслеживайте свой отдых",    "Ihren Schlaf verfolgen") }
     var momMoodNoteSub: String        { s("optional note",           "заметка (необязательно)",    "Notiz (optional)") }
     var epdsTitle: String             { s("EPDS Screening",          "Скрининг EPDS",              "EPDS-Screening") }
     var epdsSubtitle: String          { s("Edinburgh Postnatal Depression Scale", "Эдинбургская шкала послеродовой депрессии", "Edinburgher Wochenbettdepressionsskala") }
