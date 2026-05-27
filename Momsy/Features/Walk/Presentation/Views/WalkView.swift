@@ -5,6 +5,7 @@ struct WalkView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
+    @State private var showAddManual = false
 
     var body: some View {
         ZStack {
@@ -37,6 +38,10 @@ struct WalkView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { vm.syncTimerWithStartDate() }
         }
+        .sheet(isPresented: $showAddManual) {
+            AddWalkEntrySheet(vm: vm)
+                .environmentObject(loc)
+        }
     }
 
     // MARK: - Top Bar
@@ -53,6 +58,18 @@ struct WalkView: View {
                     .foregroundColor(.white)
             }
             Spacer()
+            Button { showAddManual = true } label: {
+                Text(loc.strings.enterManuallyLabel)
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbMintDeep)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.bbMint.opacity(0.25))
+                    .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
             Button { dismiss() } label: {
                 Circle()
                     .fill(Color.white.opacity(0.2))

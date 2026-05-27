@@ -28,4 +28,9 @@ final class SwiftDataWalkRepository: WalkRepository {
         let all = try context.fetch(FetchDescriptor<WalkRecord>())
         return all.filter { $0.startDate >= from && $0.startDate < to }.map { $0.toDomain() }
     }
+
+    func add(_ entry: WalkEntry) async throws {
+        context.insert(WalkRecord(entry))
+        try context.save()
+    }
 }

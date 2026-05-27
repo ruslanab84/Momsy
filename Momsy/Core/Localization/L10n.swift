@@ -125,6 +125,7 @@ struct L10n {
     var walking: String      { s("walking…",        "гуляем…",               "gehen…") }
     var startWalk: String    { s("Start Walk",      "Начать прогулку",       "Spaziergang starten") }
     var stopWalk: String     { s("Stop Walk",       "Закончить прогулку",    "Spaziergang stoppen") }
+    var addWalkTitle: String { s("Add Walk",        "Добавить прогулку",     "Spaziergang erfassen") }
     var noWalkYet: String    { s("no walk yet",     "ещё не гуляли",         "noch nicht spaziert") }
     func walkLogEntry(dur: Int) -> String { s("Walk · \(dur) min", "Прогулка · \(dur) мин", "Spaziergang · \(dur) min") }
     var bathTracker: String  { s("BATH TRACKER",     "ТРЕКЕР КУПАНИЯ",        "BADTRACKER") }

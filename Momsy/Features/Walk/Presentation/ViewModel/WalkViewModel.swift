@@ -14,10 +14,13 @@ final class WalkViewModel: ObservableObject {
 
     private let walkRepository: any WalkRepository
     private let quickLogRepo: QuickLogRepository
+    private let addManualWalkUC: AddManualWalkUseCase
 
-    init(walkRepository: any WalkRepository, quickLogRepo: QuickLogRepository) {
+    init(walkRepository: any WalkRepository, quickLogRepo: QuickLogRepository,
+         addManualWalk: AddManualWalkUseCase) {
         self.walkRepository = walkRepository
         self.quickLogRepo = quickLogRepo
+        self.addManualWalkUC = addManualWalk
         Task { await loadTodayEntries() }
     }
 
@@ -90,6 +93,22 @@ final class WalkViewModel: ObservableObject {
     func syncTimerWithStartDate() {
         guard isWalkActive, let entry = activeWalkEntry else { return }
         walkSeconds = Int(Date().timeIntervalSince(entry.startDate))
+    }
+
+    func logManualEntry(startDate: Date, endDate: Date, note: String) {
+        Task {
+            do {
+                let saved = try await addManualWalkUC.execute(startDate: startDate, endDate: endDate)
+                let dur = saved.durationMinutes ?? 1
+                let label = lm.strings.walkLogEntry(dur: dur)
+                quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .walk, label: label))
+                if Calendar.current.isDateInToday(saved.startDate) {
+                    await loadTodayEntries()
+                }
+            } catch {
+                saveError = error.localizedDescription
+            }
+        }
     }
 
     func loadTodayEntries() async {

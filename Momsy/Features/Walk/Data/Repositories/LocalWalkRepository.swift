@@ -26,6 +26,12 @@ final class LocalWalkRepository: WalkRepository {
         load().filter { $0.startDate >= from && $0.startDate < to }
     }
 
+    func add(_ entry: WalkEntry) async throws {
+        var all = load()
+        all.append(entry)
+        persist(all)
+    }
+
     private func load() -> [WalkEntry] {
         guard let data = UserDefaults.standard.data(forKey: key),
               let entries = try? JSONDecoder().decode([WalkEntry].self, from: data)
