@@ -55,7 +55,7 @@ struct TodayView: View {
                 headerRow
                 greetingBlock
                 mainCards
-                aiTipCard
+                dailyTipCard
                 leapCard
                 quickLogSection
                 historyCard
@@ -357,30 +357,58 @@ struct TodayView: View {
         .bbCard(pad: 14)
     }
 
-    // MARK: - AI Tip Card
+    // MARK: - Daily Tip Card
 
-    private var aiTipCard: some View {
+    private var tipCategory: TipCategory { vm.dailyTip?.category ?? .defaultTip }
+
+    private var tipAccentColor: Color {
+        switch tipCategory {
+        case .alert:       return .bbCoralDeep
+        case .situational: return .bbMintDeep
+        case .care:        return .bbMintDeep
+        case .development: return .bbLilacDeep
+        case .defaultTip:  return .bbButterDeep
+        }
+    }
+
+    private var tipCardBackground: Color {
+        switch tipCategory {
+        case .alert:       return Color.bbCoral.opacity(0.12)
+        case .situational: return Color.bbMint.opacity(0.12)
+        case .care:        return Color.bbCreamSoft
+        case .development: return Color.bbLilac.opacity(0.12)
+        case .defaultTip:  return Color.bbCreamSoft
+        }
+    }
+
+    private var tipBadgeEmoji: String {
+        switch tipCategory {
+        case .alert:       return "⚠️"
+        case .situational: return "💡"
+        case .care:        return "🌿"
+        case .development: return "⭐"
+        case .defaultTip:  return "💛"
+        }
+    }
+
+    private var dailyTipCard: some View {
         HStack(alignment: .top, spacing: 10) {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.bbButter)
+                .fill(tipAccentColor.opacity(0.15))
                 .frame(width: 28, height: 28)
-                .overlay(
-                    Text("AI")
-                        .font(.system(size: 12, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbButterDeep)
-                )
+                .overlay(Text(tipBadgeEmoji).font(.system(size: 14)))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(loc.strings.tipOfDay)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundColor(.bbInk)
-                aiTipBody
+                dailyTipBody
             }
         }
-        .bbCard(pad: 14, bg: .bbCreamSoft)
+        .bbCard(pad: 14, bg: tipCardBackground)
         .overlay(alignment: .leading) {
             Rectangle()
-                .fill(Color.bbButterDeep)
+                .fill(tipAccentColor)
                 .frame(width: 4)
                 .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
         }
@@ -388,9 +416,8 @@ struct TodayView: View {
     }
 
     @ViewBuilder
-    private var aiTipBody: some View {
+    private var dailyTipBody: some View {
         if vm.isTipLoading && vm.dailyTip == nil {
-            // Loading shimmer — show placeholder text with redaction
             VStack(alignment: .leading, spacing: 4) {
                 Text("Подбираем совет для вашего малыша...")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -407,7 +434,6 @@ struct TodayView: View {
                 .foregroundColor(.bbInkSoft)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
-            // Fallback — no internet + no cache
             Text(loc.strings.leapContrastsTip(name: appState.displayName))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkSoft)
