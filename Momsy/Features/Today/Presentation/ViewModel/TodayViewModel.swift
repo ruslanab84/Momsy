@@ -14,10 +14,8 @@ final class TodayViewModel: ObservableObject {
     private let diaperRepo: any DiaperRepository
     private let stoolRepo: any StoolRepository
     private let quickLogRepo: QuickLogRepository
-    private let tipService: any DailyTipService
     private let tipRepository: DailyTipRepository
     private let appState: AppState
-    /// Prevents repeated Gemini calls on tab switches within the same session.
     private var hasFetchedThisSession = false
 
     init(
@@ -26,7 +24,6 @@ final class TodayViewModel: ObservableObject {
         diaperRepo: any DiaperRepository,
         stoolRepo: any StoolRepository,
         quickLogRepo: QuickLogRepository,
-        tipService: any DailyTipService,
         tipRepository: DailyTipRepository,
         appState: AppState
     ) {
@@ -35,7 +32,6 @@ final class TodayViewModel: ObservableObject {
         self.diaperRepo = diaperRepo
         self.stoolRepo = stoolRepo
         self.quickLogRepo = quickLogRepo
-        self.tipService = tipService
         self.tipRepository = tipRepository
         self.appState = appState
         Task { await loadDiaperCount() }
@@ -69,22 +65,38 @@ final class TodayViewModel: ObservableObject {
 
     func fetchDailyTipIfNeeded() async {
         guard !hasFetchedThisSession else { return }
-        let ctx = DailyContextBuilder.build(from: logEntries, diaperCount: diaperCount, appState: appState)
-        isTipLoading = true
-        do {
-            let text = try await tipService.fetch(context: ctx)
-            dailyTip = DailyTip(text: text, generatedAt: Date(), contextHash: ctx.contextHash)
-        } catch {
-            // Leave dailyTip = nil → View shows static fallback text
-        }
-        isTipLoading = false
+        await updateTip()
         hasFetchedThisSession = true
     }
 
-    /// Re-fetches the tip (e.g. after language switch).
     func refreshTip() async {
         hasFetchedThisSession = false
         await fetchDailyTipIfNeeded()
+    }
+
+    private func updateTip() async {
+        isTipLoading = true
+        let days = await computeDaysSinceLastStool()
+        let ctx = DailyContextBuilder.build(
+            from: logEntries,
+            diaperCount: diaperCount,
+            daysSinceLastStool: days,
+            appState: appState
+        )
+        dailyTip = DailyTipAlgorithm.evaluate(context: ctx)
+        isTipLoading = false
+    }
+
+    private func computeDaysSinceLastStool() async -> Int {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        for daysBack in 0...10 {
+            guard let date = cal.date(byAdding: .day, value: -daysBack, to: today) else { continue }
+            let nextDay = cal.date(byAdding: .day, value: 1, to: date) ?? date
+            let entries = (try? await stoolRepo.getEntries(from: date, to: nextDay)) ?? []
+            if !entries.isEmpty { return daysBack }
+        }
+        return 10
     }
 
     // MARK: - Quick log actions

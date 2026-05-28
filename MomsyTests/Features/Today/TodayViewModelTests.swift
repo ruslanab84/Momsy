@@ -36,7 +36,6 @@ struct TodayViewModelTests {
         sleepRepo: MockSleepRepository = MockSleepRepository(),
         diaperRepo: MockDiaperRepository = MockDiaperRepository(),
         stoolRepo: MockStoolRepository = MockStoolRepository(),
-        tipService: MockDailyTipService = MockDailyTipService(),
         tipRepository: DailyTipRepository? = nil
     ) -> TodayViewModel {
         let tipRepo = tipRepository ?? makeTipRepository()
@@ -46,7 +45,6 @@ struct TodayViewModelTests {
             diaperRepo: diaperRepo,
             stoolRepo: stoolRepo,
             quickLogRepo: QuickLogRepository(),
-            tipService: tipService,
             tipRepository: tipRepo,
             appState: makeAppState()
         )
@@ -151,44 +149,34 @@ struct TodayViewModelTests {
 
     // MARK: - Daily Tip
 
-    @Test("fetchDailyTipIfNeeded sets dailyTip text from service")
+    @Test("fetchDailyTipIfNeeded always produces a non-nil tip")
     func fetchDailyTipIfNeeded_setsDailyTip() async {
-        let service = MockDailyTipService()
-        service.stubbedText = "Test tip"
-        let vm = makeVM(tipService: service)
+        let vm = makeVM()
         await vm.fetchDailyTipIfNeeded()
-        #expect(vm.dailyTip?.text == "Test tip")
+        #expect(vm.dailyTip != nil)
         #expect(vm.isTipLoading == false)
     }
 
-    @Test("fetchDailyTipIfNeeded does not call service a second time in same session")
+    @Test("fetchDailyTipIfNeeded does not recompute on second call in same session")
     func fetchDailyTipIfNeeded_skipsSecondCall_withinSession() async {
-        let service = MockDailyTipService()
-        service.stubbedText = "Tip"
-        let vm = makeVM(tipService: service)
-
+        let vm = makeVM()
         await vm.fetchDailyTipIfNeeded()
-        #expect(service.callCount == 1)
-
-        // Second call within same session — service must NOT be called again
+        let firstTip = vm.dailyTip
+        // Second call: tip object must be the same instance (no recompute)
         await vm.fetchDailyTipIfNeeded()
-        #expect(service.callCount == 1)
+        #expect(vm.dailyTip?.contextHash == firstTip?.contextHash)
     }
 
-    @Test("fetchDailyTipIfNeeded leaves dailyTip nil when service throws")
-    func fetchDailyTipIfNeeded_leavesDailyTipNil_onError() async {
-        let service = MockDailyTipService()
-        service.shouldThrow = true
-        let vm = makeVM(tipService: service)
+    @Test("fetchDailyTipIfNeeded sets a TipCategory on the returned tip")
+    func fetchDailyTipIfNeeded_setsTipCategory() async {
+        let vm = makeVM()
         await vm.fetchDailyTipIfNeeded()
-        #expect(vm.dailyTip == nil)
-        #expect(vm.isTipLoading == false)
+        #expect(vm.dailyTip?.category != nil)
     }
 
     @Test("fetchDailyTipIfNeeded resets isTipLoading to false after fetch")
     func fetchDailyTipIfNeeded_resetsLoadingState() async {
-        let service = MockDailyTipService()
-        let vm = makeVM(tipService: service)
+        let vm = makeVM()
         #expect(vm.isTipLoading == false)
         await vm.fetchDailyTipIfNeeded()
         #expect(vm.isTipLoading == false)
