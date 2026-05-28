@@ -35,6 +35,7 @@ struct TodayViewModelTests {
         repo: MockFeedingRepository = MockFeedingRepository(),
         sleepRepo: MockSleepRepository = MockSleepRepository(),
         diaperRepo: MockDiaperRepository = MockDiaperRepository(),
+        stoolRepo: MockStoolRepository = MockStoolRepository(),
         tipService: MockDailyTipService = MockDailyTipService(),
         tipRepository: DailyTipRepository? = nil
     ) -> TodayViewModel {
@@ -43,6 +44,7 @@ struct TodayViewModelTests {
             getFeeding: GetFeedingEntriesUseCase(repository: repo),
             getSleep: GetSleepEntriesUseCase(repository: sleepRepo),
             diaperRepo: diaperRepo,
+            stoolRepo: stoolRepo,
             quickLogRepo: QuickLogRepository(),
             tipService: tipService,
             tipRepository: tipRepo,
