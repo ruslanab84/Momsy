@@ -1,19 +1,34 @@
 import Foundation
 
+enum TipCategory: String, Codable {
+    case alert
+    case situational
+    case care
+    case development
+    case defaultTip
+}
+
 struct DailyTip: Codable {
     let text: String
     let generatedAt: Date
     let contextHash: String
     var isFromCache: Bool
+    let category: TipCategory
 
-    init(text: String, generatedAt: Date = Date(), contextHash: String, isFromCache: Bool = false) {
+    init(
+        text: String,
+        generatedAt: Date = Date(),
+        contextHash: String,
+        isFromCache: Bool = false,
+        category: TipCategory = .defaultTip
+    ) {
         self.text = text
         self.generatedAt = generatedAt
         self.contextHash = contextHash
         self.isFromCache = isFromCache
+        self.category = category
     }
 
-    /// Human-readable age label, e.g. "3 ч назад" or "5 мин назад"
     var ageLabel: String {
         let mins = Int(-generatedAt.timeIntervalSinceNow / 60)
         if mins < 1  { return "только что" }
