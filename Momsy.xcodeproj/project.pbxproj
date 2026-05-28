@@ -28,6 +28,7 @@
 		8FF4DECAE6F4B06FFD6E7189 /* MockPushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */; };
 		9CBCB9DF036CA6355130F76C /* MomsyWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */; };
 		9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */; };
+		8A1C80ECC1124FCF9CAA91E2 /* MockStoolRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B117796E1BA4881A6B15248 /* MockStoolRepository.swift */; };
 		A5522FF4A6C0AF27DC5EF07E /* MockSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */; };
 		A63165E2B06D8E9D3DC6D060 /* MockDailyTipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */; };
 		AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */; };
@@ -110,6 +111,7 @@
 		3BBE7E66563E0F26A2DFF70C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C3629953DE09AA74C6D2F44 /* AIChatViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatViewModelTests.swift; sourceTree = "<group>"; };
 		480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaperRepository.swift; sourceTree = "<group>"; };
+		6B117796E1BA4881A6B15248 /* MockStoolRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockStoolRepository.swift; sourceTree = "<group>"; };
 		4820A4E27274110E9256D2F7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		482ADA73C55024953C8197D9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		4C89620DBC5A4E8DF0169200 /* MockAIChatService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAIChatService.swift; sourceTree = "<group>"; };
@@ -424,6 +426,7 @@
 				C0ED0FC63356D42900B3E456 /* MockSleepRepository.swift */,
 				480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */,
 				AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */,
+				6B117796E1BA4881A6B15248 /* MockStoolRepository.swift */,
 				99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */,
 				4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */,
 			);
@@ -703,6 +706,7 @@
 				8FF4DECAE6F4B06FFD6E7189 /* MockPushNotificationService.swift in Sources */,
 				FF136D2C455F9FBD0E166DED /* MockSleepRepository.swift in Sources */,
 				9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */,
+				8A1C80ECC1124FCF9CAA91E2 /* MockStoolRepository.swift in Sources */,
 				AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */,
 				AA9D8473BEC847159E9AAAA4 /* MomMoodViewModelTests.swift in Sources */,
 				E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */,

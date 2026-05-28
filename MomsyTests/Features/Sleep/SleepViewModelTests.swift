@@ -13,6 +13,7 @@ struct SleepViewModelTests {
             startSleep: StartSleepUseCase(repository: repo),
             stopSleep: StopSleepUseCase(repository: repo),
             getSleep: GetSleepEntriesUseCase(repository: repo),
+            addManualSleep: AddManualSleepUseCase(repository: repo),
             appState: appState
         )
     }
@@ -183,6 +184,7 @@ struct SleepViewModelTests {
             startSleep: StartSleepUseCase(repository: MockSleepRepository()),
             stopSleep: StopSleepUseCase(repository: MockSleepRepository()),
             getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
+            addManualSleep: AddManualSleepUseCase(repository: MockSleepRepository()),
             appState: appState
         )
         #expect(vm.sleepNorm.min == 14)
@@ -198,6 +200,7 @@ struct SleepViewModelTests {
             startSleep: StartSleepUseCase(repository: MockSleepRepository()),
             stopSleep: StopSleepUseCase(repository: MockSleepRepository()),
             getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
+            addManualSleep: AddManualSleepUseCase(repository: MockSleepRepository()),
             appState: appState
         )
         #expect(vm.sleepNorm.min == 12)
