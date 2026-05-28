@@ -68,6 +68,7 @@ struct TodayView: View {
         .task { await vm.loadTodayEntries() }
         .task { await feedingVM.loadTodayEntries() }
         .task { await vm.fetchDailyTipIfNeeded() }
+        .onChange(of: loc.current) { _, _ in Task { await vm.refreshTip() } }
         .task {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 60_000_000_000)
