@@ -16,6 +16,7 @@ struct SharingView: View {
                 header
                 memberList
                 inviteCard
+                joinCard
                 roleMatrix
             }
             .padding(.horizontal, 20)
@@ -107,6 +108,53 @@ struct SharingView: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Join with code
+
+    private var joinCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BBSectionLabel(text: "Присоединиться к семье")
+            HStack(spacing: 10) {
+                TextField("MOMSY-XXXX", text: $vm.joinCode)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
+                    .font(.system(size: 15, weight: .semibold, design: .monospaced))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(Color.bbCreamSoft)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                Button {
+                    vm.joinFamily()
+                } label: {
+                    if vm.isJoining {
+                        ProgressView()
+                            .frame(width: 56, height: 44)
+                    } else {
+                        Text("Войти")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(width: 56, height: 44)
+                            .background(Color.bbCoralDeep)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                }
+                .disabled(vm.isJoining || vm.joinCode.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            if let err = vm.joinError {
+                Text(err)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundColor(.red)
+            }
+            if vm.joinSuccess {
+                Text("Вы успешно присоединились к семье!")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbMintDeep)
+            }
+        }
+        .padding(16)
+        .background(Color.bbCreamSoft)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
     // MARK: - Role matrix

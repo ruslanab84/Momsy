@@ -13,7 +13,7 @@ final class AppContainer {
 
     lazy var babyRepository: any BabyRepository            = SwiftDataBabyRepository(context: context)
     lazy var sleepRepository: any SleepRepository          = SwiftDataSleepRepository(context: context)
-    lazy var feedingRepository: any FeedingRepository      = SwiftDataFeedingRepository(context: context)
+    lazy var feedingRepository: any FeedingRepository      = FirestoreFeedingRepository()
     lazy var diaryRepository: any DiaryRepository          = SwiftDataDiaryRepository(context: context)
     lazy var measurementRepository: any MeasurementRepository = SwiftDataMeasurementRepository(context: context)
     lazy var temperatureRepository: any TemperatureRepository = SwiftDataTemperatureRepository(context: context)
@@ -30,10 +30,10 @@ final class AppContainer {
     lazy var momSleepRepository: any MomSleepRepository                         = SwiftDataMomSleepRepository(context: context)
     lazy var waterIntakeRepository: any WaterIntakeRepository                    = SwiftDataWaterIntakeRepository(context: context)
 
-    let familyRepository: any FamilyRepository        = LocalFamilyRepository()
+    let familyRepository: any FamilyRepository        = FirestoreFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
     let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
-    let inviteService: any InviteServiceProtocol       = LocalInviteService()
+    let inviteService: any InviteServiceProtocol       = FirestoreInviteService()
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let authManager                                    = AuthManager()

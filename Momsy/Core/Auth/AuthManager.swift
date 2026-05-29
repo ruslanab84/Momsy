@@ -25,8 +25,19 @@ final class AuthManager: ObservableObject {
     private(set) var currentNonce: String?
 
     init() {
-        // Guard against test environments where Firebase is not configured
-        firebaseUser = FirebaseApp.app() != nil ? Auth.auth().currentUser : nil
+        guard FirebaseApp.app() != nil else { return }
+        firebaseUser = Auth.auth().currentUser
+        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            self?.firebaseUser = user
+            if let user {
+                Task { @MainActor in
+                    let name = user.displayName ?? user.email ?? "User"
+                    try? await FamilyManager.shared.setup(uid: user.uid, displayName: name)
+                }
+            } else {
+                Task { @MainActor in FamilyManager.shared.reset() }
+            }
+        }
     }
 
     // MARK: — Apple Sign-In

@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseCore
+import FirebaseFirestore
 import WidgetKit
 
 @main
@@ -22,6 +23,9 @@ struct MomsyApp: App {
 
     init() {
         FirebaseApp.configure()
+        let settings = FirestoreSettings()
+        settings.cacheSettings = PersistentCacheSettings()
+        Firestore.firestore().settings = settings
     }
 
     var body: some Scene {
