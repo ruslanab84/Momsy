@@ -29,6 +29,7 @@ struct TodayView: View {
         _vitaminVM  = StateObject(wrappedValue: container.makeVitaminViewModel())
     }
 
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
 
@@ -68,7 +69,11 @@ struct TodayView: View {
         .task { await vm.loadTodayEntries() }
         .task { await feedingVM.loadTodayEntries() }
         .task { await vm.fetchDailyTipIfNeeded() }
+        .task { feedingVM.restoreOrStartFeeding(side: .left) }
         .onChange(of: loc.current) { _, _ in Task { await vm.refreshTip() } }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { feedingVM.syncTimerWithStartDate() }
+        }
         .task {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 60_000_000_000)
