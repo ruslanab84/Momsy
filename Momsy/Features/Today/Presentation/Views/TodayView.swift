@@ -74,6 +74,9 @@ struct TodayView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { feedingVM.syncTimerWithStartDate() }
         }
+        .onChange(of: feedingVM.todayEntries.count) { _, _ in
+            Task { await vm.loadTodayEntries() }
+        }
         .task {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 60_000_000_000)

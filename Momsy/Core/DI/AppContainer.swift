@@ -13,7 +13,7 @@ final class AppContainer {
 
     lazy var babyRepository: any BabyRepository            = SwiftDataBabyRepository(context: context)
     lazy var sleepRepository: any SleepRepository          = SwiftDataSleepRepository(context: context)
-    lazy var feedingRepository: any FeedingRepository      = FirestoreFeedingRepository()
+    lazy var feedingRepository: any FeedingRepository      = SwiftDataFeedingRepository(context: context)
     lazy var diaryRepository: any DiaryRepository          = SwiftDataDiaryRepository(context: context)
     lazy var measurementRepository: any MeasurementRepository = SwiftDataMeasurementRepository(context: context)
     lazy var temperatureRepository: any TemperatureRepository = SwiftDataTemperatureRepository(context: context)
