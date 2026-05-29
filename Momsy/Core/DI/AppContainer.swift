@@ -36,6 +36,7 @@ final class AppContainer {
     let inviteService: any InviteServiceProtocol       = LocalInviteService()
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
+    let authManager                                    = AuthManager()
     let diaperUseCase                                   = DiaperUseCase()
     let quickLogRepository                              = QuickLogRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
@@ -150,6 +151,7 @@ final class AppContainer {
         OnboardingViewModel(
             saveBabyProfile: saveBabyProfile,
             appState: appState,
+            authManager: authManager,
             analytics: analytics,
             pushNotifications: pushNotifications,
             onDone: onDone

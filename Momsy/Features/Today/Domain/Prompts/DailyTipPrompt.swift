@@ -6,7 +6,7 @@ enum DailyTipPrompt {
 
     static func system(for language: Language) -> String {
         switch language {
-        case .english:
+        case .english, .spanish, .portuguese:
             return """
             You are a warm and caring assistant for mothers. ONLY answer questions about baby care.
             Response: 1–2 sentences, warm tone, no medical diagnoses, in English.
@@ -32,7 +32,7 @@ enum DailyTipPrompt {
 
     static func user(ctx: DailyContext) -> String {
         switch ctx.language {
-        case .english: return buildEN(ctx: ctx)
+        case .english, .spanish, .portuguese: return buildEN(ctx: ctx)
         case .russian: return buildRU(ctx: ctx)
         case .german:  return buildDE(ctx: ctx)
         }

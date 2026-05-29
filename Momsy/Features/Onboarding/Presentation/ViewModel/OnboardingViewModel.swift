@@ -1,8 +1,9 @@
 import SwiftUI
 import Combine
+import AuthenticationServices
 
 enum OBStep: Int, CaseIterable {
-    case age, profile, role, ready
+    case age, profile, role, auth, ready
 }
 
 @MainActor
@@ -17,6 +18,10 @@ final class OnboardingViewModel: ObservableObject {
     @Published var babyGender = ""
     @Published var parentName = ""
     @Published var parentRole = "mom"
+    @Published var isSigningIn = false
+    @Published var authError: Error?
+
+    let authManager: AuthManager
 
     private let saveBabyProfileUC: SaveBabyProfileUseCase
     private let appState: AppState
@@ -26,11 +31,13 @@ final class OnboardingViewModel: ObservableObject {
 
     init(saveBabyProfile: SaveBabyProfileUseCase,
          appState: AppState,
+         authManager: AuthManager,
          analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
          pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared,
          onDone: @escaping () -> Void) {
         self.saveBabyProfileUC = saveBabyProfile
         self.appState = appState
+        self.authManager = authManager
         self.analytics = analytics
         self.pushNotifications = pushNotifications
         self.onDone = onDone
@@ -45,6 +52,7 @@ final class OnboardingViewModel: ObservableObject {
         case .age:     return .bbCoral
         case .profile: return .bbMint
         case .role:    return .bbLilac
+        case .auth:    return .bbSky
         case .ready:   return .bbButter
         }
     }
@@ -69,6 +77,38 @@ final class OnboardingViewModel: ObservableObject {
             }
         }
     }
+
+    func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) {
+        isSigningIn = true
+        authError = nil
+        Task {
+            do {
+                try await authManager.handleAppleCompletion(result)
+                advance()
+            } catch let error as ASAuthorizationError where error.code == .canceled {
+                // User cancelled — no error shown
+            } catch {
+                authError = error
+            }
+            isSigningIn = false
+        }
+    }
+
+    func signInWithGoogle() {
+        isSigningIn = true
+        authError = nil
+        Task {
+            do {
+                try await authManager.signInWithGoogle()
+                advance()
+            } catch {
+                authError = error
+            }
+            isSigningIn = false
+        }
+    }
+
+    func skipAuth() { advance() }
 
     func finish() {
         let name = babyName.trimmingCharacters(in: .whitespaces)

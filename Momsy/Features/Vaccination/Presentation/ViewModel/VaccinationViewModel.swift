@@ -78,7 +78,7 @@ final class VaccinationViewModel: ObservableObject {
 
     private func ageLabel(months: Int, lang: Language) -> String {
         switch lang {
-        case .english:
+        case .english, .spanish, .portuguese:
             if months == 0   { return "Birth" }
             if months == 999 { return "Additional" }
             return months == 1 ? "1 month" : "\(months) months"

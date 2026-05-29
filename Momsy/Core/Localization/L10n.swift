@@ -7,9 +7,10 @@ struct L10n {
 
     private func s(_ en: String, _ ru: String, _ de: String) -> String {
         switch lang {
-        case .english: return en
-        case .russian: return ru
-        case .german:  return de
+        case .english:    return en
+        case .russian:    return ru
+        case .german:     return de
+        case .spanish, .portuguese: return en
         }
     }
 
@@ -513,7 +514,7 @@ struct L10n {
     var madeWithLove: String    { s("Made with love","Сделано с любовью","Mit Liebe gemacht") }
     var forMoms: String         { s("for moms",      "для мам",       "für Mütter") }
     var privacy: String         { s("Privacy",       "Конфиденциальность","Datenschutz") }
-    var contactUs: String       { s("Contact Us",    "Написать нам",  "Kontakt") }
+    var feedback: String        { s("Feedback",      "Обратная связь", "Feedback") }
     var themeSystem: String     { s("System",        "Системная",     "System") }
     var themeLight: String      { s("Light",         "Светлая",       "Hell") }
     var themeDark: String       { s("Dark",          "Тёмная",        "Dunkel") }
@@ -711,4 +712,14 @@ struct L10n {
     var waterNoEntries: String         { s("No logs today",              "Записей нет",                   "Keine Einträge") }
     var waterWeekLabel: String         { s("LAST 7 DAYS",                "ПОСЛЕДНИЕ 7 ДНЕЙ",              "LETZTE 7 TAGE") }
     var waterTodayEntriesLabel: String { s("TODAY",                      "СЕГОДНЯ",                       "HEUTE") }
+
+    // MARK: — Auth / Sign-In
+    var authStepTitle: String      { s("Create Account",                   "Создай аккаунт",                    "Konto erstellen") }
+    var authStepSubtitle: String   { s("Back up your data & restore it\non any device",
+                                       "Сохрани данные и восстанови\nна любом устройстве",
+                                       "Daten sichern & auf jedem\nGerät wiederherstellen") }
+    var signInWithApple: String    { s("Sign in with Apple",               "Войти через Apple",                 "Mit Apple anmelden") }
+    var signInWithGoogle: String   { s("Sign in with Google",              "Войти через Google",                "Mit Google anmelden") }
+    var mayBeLater: String         { s("Maybe Later",                      "Позже",                             "Vielleicht später") }
+    var authSignedIn: String       { s("Signed in ✓",                      "Вы вошли ✓",                        "Angemeldet ✓") }
 }

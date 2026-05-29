@@ -16,6 +16,7 @@ struct OnboardingViewModelTests {
         let vm = OnboardingViewModel(
             saveBabyProfile: SaveBabyProfileUseCase(repository: repo),
             appState: state,
+            authManager: AuthManager(),
             analytics: analytics,
             pushNotifications: push,
             onDone: onDone
@@ -49,10 +50,10 @@ struct OnboardingViewModelTests {
         #expect(vm.canContinue)
     }
 
-    @Test("canContinue is true on role and ready steps")
+    @Test("canContinue is true on role, auth, and ready steps")
     func canContinueTrueOnLaterSteps() {
         let (vm, _, _, _) = makeVM()
-        for s in [OBStep.role, OBStep.ready] {
+        for s in [OBStep.role, OBStep.auth, OBStep.ready] {
             vm.step = s
             #expect(vm.canContinue)
         }
@@ -77,6 +78,8 @@ struct OnboardingViewModelTests {
         #expect(vm.step == .profile)
         vm.advance()
         #expect(vm.step == .role)
+        vm.advance()
+        #expect(vm.step == .auth)
         vm.advance()
         #expect(vm.step == .ready)
     }

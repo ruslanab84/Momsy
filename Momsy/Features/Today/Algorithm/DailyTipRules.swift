@@ -22,7 +22,7 @@ enum AlertRules {
         switch ctx.language {
         case .russian:
             text = "Прошло уже \(hours) ч с кормления. Для \(ctx.ageMonths) мес обычный интервал до \(maxHours) ч — если \(ctx.babyName) не просит сам, попробуйте предложить грудь."
-        case .english:
+        case .english, .spanish, .portuguese:
             text = "It's been \(hours) hours since the last feed. For \(ctx.ageMonths) months, the usual interval is up to \(maxHours) h — if \(ctx.babyName) hasn't asked, try offering."
         case .german:
             text = "Es sind bereits \(hours) Stunden seit der letzten Mahlzeit vergangen. Für \(ctx.ageMonths) Monate ist das Intervall normalerweise bis zu \(maxHours) h — biete \(ctx.babyName) die Brust an."
@@ -37,7 +37,7 @@ enum AlertRules {
         switch ctx.language {
         case .russian:
             text = "Сегодня пока \(ctx.diaperCount) подгузника — для \(ctx.ageMonths) мес норма 6–8 в день. Это сигнал о недостаточном питье. Предложите грудь или смесь чаще обычного."
-        case .english:
+        case .english, .spanish, .portuguese:
             text = "Only \(ctx.diaperCount) wet diapers so far today — for \(ctx.ageMonths) months the norm is 6–8 per day. This signals insufficient fluid. Offer the breast or formula more often."
         case .german:
             text = "Heute bisher nur \(ctx.diaperCount) Windeln — für \(ctx.ageMonths) Monate sind 6–8 pro Tag normal. Das ist ein Zeichen für zu wenig Trinken. Biete öfter Brust oder Fläschchen an."
@@ -53,7 +53,7 @@ enum AlertRules {
         switch ctx.language {
         case .russian:
             text = "Стула не было \(ctx.daysSinceLastStool) дн. Попробуйте «велосипед»: положите \(ctx.babyName) на спину и аккуратно сгибайте ножки к животику 10–15 раз."
-        case .english:
+        case .english, .spanish, .portuguese:
             text = "No stool for \(ctx.daysSinceLastStool) days. Try the bicycle exercise: lay \(ctx.babyName) on their back and gently cycle their legs toward the tummy 10–15 times."
         case .german:
             text = "Seit \(ctx.daysSinceLastStool) Tagen kein Stuhl. Versuche die Fahrrad-Übung: Lege \(ctx.babyName) auf den Rücken und beuge die Beinchen sanft zum Bauch, 10–15 Mal."
@@ -73,7 +73,7 @@ enum AlertRules {
         switch ctx.language {
         case .russian:
             text = "Сегодня \(ctx.babyName) спал всего \(sleptH) ч — это на \(deficit) ч меньше нормы. Постарайтесь уложить пораньше — к 19:30–20:00."
-        case .english:
+        case .english, .spanish, .portuguese:
             text = "\(ctx.babyName) has only slept \(sleptH) h today — \(deficit) h less than the norm. Try an earlier bedtime — around 19:30–20:00."
         case .german:
             text = "\(ctx.babyName) hat heute nur \(sleptH) Std. geschlafen — \(deficit) Std. weniger als normal. Versuche, früher ins Bett zu gehen — gegen 19:30–20:00."
@@ -104,7 +104,7 @@ enum SituationalRules {
         switch ctx.language {
         case .russian:
             text = "После кормления подержите \(ctx.babyName) столбиком 10–15 мин — это помогает выйти воздуху и предотвращает срыгивание. Прижмите вертикально к плечу и слегка похлопайте по спинке."
-        case .english:
+        case .english, .spanish, .portuguese:
             text = "Hold \(ctx.babyName) upright for 10–15 min after feeding — this helps air escape and prevents spit-up. Press them vertically against your shoulder and gently pat the back."
         case .german:
             text = "Halte \(ctx.babyName) nach dem Stillen 10–15 Min. aufrecht — das hilft, die Luft herauszulassen und verhindert Spucken. Drücke das Baby senkrecht an deine Schulter und klopfe sanft auf den Rücken."
@@ -123,7 +123,7 @@ enum SituationalRules {
             switch ctx.language {
             case .russian:
                 text = "\(ctx.babyName) уже \(awakeMins) мин бодрствует — пора укладывать. Зевота, потирание глаз, взгляд «в никуда» — не пропустите окно засыпания."
-            case .english:
+            case .english, .spanish, .portuguese:
                 text = "\(ctx.babyName) has been awake for \(awakeMins) min — time to settle down. Watch for yawning, eye-rubbing, or a glazed stare — don't miss the sleep window."
             case .german:
                 text = "\(ctx.babyName) ist seit \(awakeMins) Min. wach — es ist Zeit zum Einschlafen. Achte auf Gähnen, Augenreiben oder einen leeren Blick — verpasse das Einschlafffenster nicht."
@@ -132,7 +132,7 @@ enum SituationalRules {
             switch ctx.language {
             case .russian:
                 text = "Окно засыпания уже пропущено — \(ctx.babyName) бодрствует \(awakeMins) мин. Переутомление затрудняет засыпание. Приглушите свет, уберите игрушки, начните ритуал сейчас."
-            case .english:
+            case .english, .spanish, .portuguese:
                 text = "The sleep window has passed — \(ctx.babyName) has been awake \(awakeMins) min. Overtiredness makes sleep harder. Dim the lights, put toys away, and start the bedtime routine now."
             case .german:
                 text = "Das Einschlafffenster ist verpasst — \(ctx.babyName) ist seit \(awakeMins) Min. wach. Übermüdung erschwert das Einschlafen. Licht dämpfen, Spielzeug wegräumen, Routine jetzt beginnen."
@@ -150,7 +150,7 @@ enum SituationalRules {
         switch ctx.language {
         case .russian:
             text = "Вечернее купание — мощный ритуал сна. Температура воды 36–37°C, длительность 5–10 мин. После купания кожа охлаждается и мелатонин вырабатывается быстрее."
-        case .english:
+        case .english, .spanish, .portuguese:
             text = "Evening bath is a powerful sleep ritual. Water temperature 36–37°C, duration 5–10 min. After bathing, the skin cools and melatonin is produced faster."
         case .german:
             text = "Das Abendbad ist ein starkes Einschlafritual. Wassertemperatur 36–37°C, Dauer 5–10 Min. Nach dem Bad kühlt die Haut ab und Melatonin wird schneller produziert."
@@ -169,7 +169,7 @@ enum SituationalRules {
         switch ctx.language {
         case .russian:
             text = "Первый утренний сон — самый важный для \(ctx.babyName). Для \(ctx.ageMonths) мес он должен начинаться примерно через \(awakeMax) мин после пробуждения. Следите за первыми зевками."
-        case .english:
+        case .english, .spanish, .portuguese:
             text = "The first morning nap is the most important for \(ctx.babyName). For \(ctx.ageMonths) months it should start about \(awakeMax) min after waking up. Watch for the first yawns."
         case .german:
             text = "Der erste Morgenschlaf ist für \(ctx.babyName) der wichtigste. Mit \(ctx.ageMonths) Monaten sollte er etwa \(awakeMax) Min. nach dem Aufwachen beginnen. Achte auf die ersten Gähnzeichen."
@@ -190,7 +190,7 @@ enum SituationalRules {
         case .russian:
             let other = isLeft ? "правую" : "левую"
             text = "Последние 3 кормления с одной стороны. Предложите \(other) грудь — равномерная нагрузка поддерживает лактацию и предотвращает застой."
-        case .english:
+        case .english, .spanish, .portuguese:
             let other = isLeft ? "right" : "left"
             text = "The last 3 feeds were from the same side. Try the \(other) breast — balanced feeding supports lactation and prevents engorgement."
         case .german:
@@ -209,7 +209,7 @@ enum SituationalRules {
         switch ctx.language {
         case .russian:
             text = "Прогулка на свежем воздухе регулирует циркадные ритмы \(ctx.babyName). Дневной свет снижает выработку мелатонина и улучшает ночной сон. Даже 20–30 минут на улице дают эффект."
-        case .english:
+        case .english, .spanish, .portuguese:
             text = "Fresh air walks regulate \(ctx.babyName)'s circadian rhythm. Daylight suppresses melatonin and improves night sleep. Even 20–30 minutes outside makes a difference."
         case .german:
             text = "Spaziergänge an der frischen Luft regulieren den Tagesrhythmus von \(ctx.babyName). Tageslicht unterdrückt Melatonin und verbessert den Nachtschlaf. Schon 20–30 Minuten draußen helfen."
@@ -252,7 +252,7 @@ enum CareRules {
             "Пеленание помогает некоторым новорождённым спать дольше — руки вдоль тела, бёдра свободно, не туго.",
             "Контакт кожа-к-коже 1–2 часа в день стабилизирует температуру, дыхание и сердцебиение [name]."
         ]
-        case .english: return [
+        case .english, .spanish, .portuguese: return [
             "The umbilical wound heals in 10–14 days. Clean with chlorhexidine 1–2 times a day after bathing and keep it dry.",
             "Newborns recognise mum's voice from birth — talking in a calm tone builds neural connections.",
             "Tummy time 2–3 times a day for 1–2 min while [name] is awake strengthens the neck and prepares for rolling.",
@@ -278,7 +278,7 @@ enum CareRules {
             "Колики чаще всего достигают пика в 6 нед. Белый шум, покачивание и поза на животе хорошо помогают.",
             "Чёрно-белые книжки и карточки — идеальная игрушка для [name]. Контраст стимулирует зрительную кору."
         ]
-        case .english: return [
+        case .english, .spanish, .portuguese: return [
             "Gas is normal. A gentle clockwise tummy massage and the tiger-on-the-branch position (tummy on arm) help.",
             "For bowel movements try the bicycle exercise: gently pedal [name]'s legs in the air 10–15 times.",
             "The sucking reflex is at its peak now. A pacifier between feeds supports self-soothing.",
@@ -305,7 +305,7 @@ enum CareRules {
             "Погремушки и хватательные игрушки тренируют моторику. Меняйте руку при подаче игрушки — обе стороны должны работать.",
             "Для развития концентрации покажите [name] собственное отражение в зеркале — в этом возрасте это вызывает живой интерес."
         ]
-        case .english: return [
+        case .english, .spanish, .portuguese: return [
             "Black-and-white cards and books stimulate the visual cortex. 10–15 minutes of looking at pictures is excellent training.",
             "A 5–10 min full-body massage before the bath improves [name]'s sleep. Move from the centre out to the limbs.",
             "Tummy time up to 30 min per day in total. Roll a towel under the chest — it makes holding the head up easier.",
@@ -333,7 +333,7 @@ enum CareRules {
             "Пинцетный захват (большой + указательный) формируется в 8–9 мес. Предлагайте маленькие мягкие кусочки еды для тренировки.",
             "Игра в «ку-ку» — не просто веселье. Она учит [name] концепции постоянства объектов: «мама уходит и возвращается»."
         ]
-        case .english: return [
+        case .english, .spanish, .portuguese: return [
             "Introduce solids gradually: one new food every 3 days in small portions. Vegetables before fruit is a good starting order.",
             "Encourage crawling: place a toy just out of [name]'s reach. Crawling develops both hemispheres simultaneously.",
             "Speech development: narrate everything you do. We're eating now, picking up the spoon — vocabulary builds from 6 months.",
@@ -359,7 +359,7 @@ enum CareRules {
             "Стаканчик с носиком — хорошее время вводить. В 12 мес ВОЗ рекомендует отказаться от ночного кормления при нормальном весе.",
             "Сортеры, стаканчики, коробки с крышками — лучшие игрушки для [name]. Концепция «внутри/снаружи» активно формируется."
         ]
-        case .english: return [
+        case .english, .spanish, .portuguese: return [
             "First steps begin with cruising along furniture. Don't always hold [name]'s hands — independent balance needs practice.",
             "Speech: comprehension precedes production. At 9–10 months [name] understands no, give, come. Speak slowly and clearly.",
             "Night wakings at 9–10 months are a normal sleep regression linked to new motor skills. It passes in 2–4 weeks.",
@@ -384,7 +384,7 @@ enum CareRules {
             "Один дневной сон — переход обычно в 15–18 мес. Не торопите: ранний переход ведёт к перевозбуждению и плохому ночному сну.",
             "Рисование пальцами, лепка из теста развивают мелкую моторику и речь одновременно. 10 мин в день достаточно."
         ]
-        case .english: return [
+        case .english, .spanish, .portuguese: return [
             "The one-year crisis is normal. Tantrums come from frustration, not manipulation. A calm parental response is the best reply.",
             "Vocabulary: 1–3 words at 12 months, 10–50 words at 18 months. Fewer than 10 words by 18 months: consult a speech therapist.",
             "The transition to one nap usually happens at 15–18 months. Don't rush it — early transition leads to over-stimulation.",
@@ -406,7 +406,7 @@ enum CareRules {
             "2-словные фразы к 2 годам — ориентир развития речи. «Мама, дай», «хочу пить» — хороший знак. Нет фраз — к логопеду.",
             "Готовность к горшку появляется в 18–24 мес. Признаки: сухой подгузник 2 ч подряд, [name] указывает на горшок."
         ]
-        case .english: return [
+        case .english, .spanish, .portuguese: return [
             "Parallel play (near but not together) is normal at [name]'s age. Social play with peers develops later, around 3 years.",
             "Two-word phrases by age 2 are a speech milestone. Mummy give, want drink are good signs. No phrases: see a speech therapist.",
             "Potty readiness appears at 18–24 months. Signs: dry nappy for 2 h in a row, [name] points to the potty."
@@ -433,7 +433,7 @@ enum DevelopmentRules {
     private static func leapTip(for leapName: String, name: String, language: Language) -> String {
         switch language {
         case .russian:  return russianLeapTip(leapName: leapName, name: name)
-        case .english:  return englishLeapTip(leapName: leapName, name: name)
+        case .english, .spanish, .portuguese:  return englishLeapTip(leapName: leapName, name: name)
         case .german:   return germanLeapTip(leapName: leapName, name: name)
         }
     }
@@ -532,7 +532,7 @@ enum DefaultTips {
             "Читайте вслух с первых дней. Ритм речи и интонации строят основу для будущего чтения и развития речи.",
             "Называйте эмоции [name]: «ты расстроен», «ты радуешься» — эмоциональный интеллект начинается с первых месяцев жизни."
         ]
-        case .english: return [
+        case .english, .spanish, .portuguese: return [
             "Eye contact during feeding strengthens attachment and stimulates [name]'s brain development.",
             "Singing lullabies builds musical hearing and speech centres. Rhythm and melody matter more than a perfect voice.",
             "Hugs and touch lower cortisol levels. The best medicine today is simply holding [name] in your arms.",

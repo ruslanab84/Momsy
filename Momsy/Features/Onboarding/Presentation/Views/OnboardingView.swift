@@ -91,6 +91,15 @@ struct OnboardingView: View {
                         lang: loc.lang, canContinue: vm.canContinue, onContinue: vm.advance)
         case .role:
             RoleStep(parentName: $vm.parentName, selectedRole: $vm.parentRole, lang: loc.lang, onContinue: vm.advance)
+        case .auth:
+            AuthStep(
+                isSigningIn: vm.isSigningIn,
+                authError: vm.authError,
+                prepareAppleRequest: vm.authManager.prepareAppleRequest,
+                onAppleCompletion: vm.handleAppleCompletion,
+                onGoogle: vm.signInWithGoogle,
+                onSkip: vm.skipAuth
+            )
         case .ready:
             ReadyStep(
                 babyName: vm.babyName,

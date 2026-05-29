@@ -89,7 +89,7 @@ private struct VaccinationRowView: View {
 
     private var name: String {
         switch lm.current {
-        case .english: return status.item.nameEN
+        case .english, .spanish, .portuguese: return status.item.nameEN
         case .german:  return status.item.nameDE
         case .russian: return status.item.nameRU
         }
@@ -153,7 +153,7 @@ private struct MarkDoneSheet: View {
 
     private var name: String {
         switch lm.current {
-        case .english: return status.item.nameEN
+        case .english, .spanish, .portuguese: return status.item.nameEN
         case .german:  return status.item.nameDE
         case .russian: return status.item.nameRU
         }
@@ -225,7 +225,7 @@ private struct AddCustomVaccinationSheet: View {
 
     private var title: String {
         switch lm.current {
-        case .english: return "Add vaccine"
+        case .english, .spanish, .portuguese: return "Add vaccine"
         case .german:  return "Impfung hinzufügen"
         case .russian: return "Добавить прививку"
         }
@@ -233,7 +233,7 @@ private struct AddCustomVaccinationSheet: View {
 
     private var namePlaceholder: String {
         switch lm.current {
-        case .english: return "Vaccine name"
+        case .english, .spanish, .portuguese: return "Vaccine name"
         case .german:  return "Name der Impfung"
         case .russian: return "Название прививки"
         }
@@ -241,7 +241,7 @@ private struct AddCustomVaccinationSheet: View {
 
     private var saveLabel: String {
         switch lm.current {
-        case .english: return "Save"
+        case .english, .spanish, .portuguese: return "Save"
         case .german:  return "Speichern"
         case .russian: return "Сохранить"
         }

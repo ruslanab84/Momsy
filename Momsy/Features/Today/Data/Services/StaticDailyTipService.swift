@@ -16,7 +16,7 @@ final class StaticDailyTipService: DailyTipService {
     private static func tips(for language: Language) -> [String] {
         switch language {
         case .russian:  return russianTips
-        case .english:  return englishTips
+        case .english, .spanish, .portuguese:  return englishTips
         case .german:   return germanTips
         }
     }
