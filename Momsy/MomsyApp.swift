@@ -9,6 +9,7 @@ struct MomsyApp: App {
 
     private let container = AppContainer()
     private let localization = LocalizationManager.shared
+    private let unitSystem   = UnitSystemManager.shared
     private var appState: AppState { container.appState }
 
     private var resolvedColorScheme: ColorScheme? {
@@ -28,6 +29,7 @@ struct MomsyApp: App {
             ContentView()
                 .withContainer(container)
                 .environmentObject(localization)
+                .environmentObject(unitSystem)
                 .environmentObject(appState)
                 .withLocalization(localization)
                 .preferredColorScheme(resolvedColorScheme)

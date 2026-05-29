@@ -1,8 +1,9 @@
 import Foundation
 
 struct UserPreferences {
-    var appTheme: String
+    var appTheme:    String
     var appLanguage: String
+    var unitSystem:  String   // "metric" | "imperial"
 }
 
 protocol UserPreferencesRepository {

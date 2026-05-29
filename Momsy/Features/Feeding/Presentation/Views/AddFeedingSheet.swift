@@ -4,6 +4,7 @@ struct AddFeedingSheet: View {
     @ObservedObject var vm: FeedingViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject var units: UnitSystemManager
 
     @State private var startTime = Date().addingTimeInterval(-600)   // 10 min ago default
     @State private var endTime   = Date()
@@ -82,7 +83,8 @@ struct AddFeedingSheet: View {
                         fieldSection(label: loc.strings.bottleVolume) {
                             HStack(spacing: 20) {
                                 Button {
-                                    if bottleML > 10 { bottleML -= 10 }
+                                    let step = units.isImperial ? 30 : 10
+                                    if bottleML > step { bottleML -= step }
                                 } label: {
                                     Image(systemName: "minus.circle.fill")
                                         .font(.system(size: 28))
@@ -90,7 +92,7 @@ struct AddFeedingSheet: View {
                                 }
                                 .buttonStyle(.plain)
 
-                                Text("\(bottleML) \(loc.strings.mlUnit)")
+                                Text(units.displayVolume(fromMl: bottleML))
                                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                                     .foregroundColor(.bbInk)
                                     .frame(minWidth: 80, alignment: .center)
@@ -98,7 +100,8 @@ struct AddFeedingSheet: View {
                                     .animation(.spring(response: 0.25), value: bottleML)
 
                                 Button {
-                                    if bottleML < 500 { bottleML += 10 }
+                                    let step = units.isImperial ? 30 : 10
+                                    if bottleML < 500 { bottleML += step }
                                 } label: {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.system(size: 28))
@@ -170,4 +173,5 @@ struct AddFeedingSheet: View {
 #Preview {
     AddFeedingSheet(vm: AppContainer().makeFeedingViewModel())
         .environmentObject(LocalizationManager.shared)
+        .environmentObject(UnitSystemManager.shared)
 }

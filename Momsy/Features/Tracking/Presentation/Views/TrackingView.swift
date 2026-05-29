@@ -5,6 +5,7 @@ import SwiftUI
 struct TrackingView: View {
     @StateObject private var vm: TrackingViewModel
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject var units: UnitSystemManager
 
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeTrackingViewModel())
@@ -93,10 +94,42 @@ struct TrackingView: View {
     }
 
     private var currentChartConfig: ChartConfig {
-        switch vm.selectedTab {
-        case 1: return ChartConfig(title: loc.strings.heightCm,   unit: "cm", data: whoHeightData, gridVals: [50, 65, 80, 95], babyPoints: vm.babyHeightPoints)
-        case 2: return ChartConfig(title: loc.strings.headCircCm, unit: "cm", data: whoHeadData,   gridVals: [33, 38, 43, 48], babyPoints: vm.babyHeadPoints)
-        default: return ChartConfig(title: loc.strings.weightKg,  unit: "kg", data: whoWeightData,  gridVals: [4, 7, 10, 13],  babyPoints: vm.babyWeightPoints)
+        if units.isImperial {
+            switch vm.selectedTab {
+            case 1:
+                return ChartConfig(
+                    title: "Height, in", unit: "in",
+                    data:  whoHeightData.scaledBy(units.heightChartFactor),
+                    gridVals: [20, 26, 31, 37],
+                    babyPoints: vm.babyHeightPoints.map {
+                        BabyGrowthPoint(month: $0.month, value: $0.value * units.heightChartFactor)
+                    }
+                )
+            case 2:
+                return ChartConfig(
+                    title: "Head circ., in", unit: "in",
+                    data:  whoHeadData.scaledBy(units.heightChartFactor),
+                    gridVals: [13, 15, 17, 19],
+                    babyPoints: vm.babyHeadPoints.map {
+                        BabyGrowthPoint(month: $0.month, value: $0.value * units.heightChartFactor)
+                    }
+                )
+            default:
+                return ChartConfig(
+                    title: "Weight, lb", unit: "lb",
+                    data:  whoWeightData.scaledBy(units.weightChartFactor),
+                    gridVals: [9, 15, 22, 29],
+                    babyPoints: vm.babyWeightPoints.map {
+                        BabyGrowthPoint(month: $0.month, value: $0.value * units.weightChartFactor)
+                    }
+                )
+            }
+        } else {
+            switch vm.selectedTab {
+            case 1: return ChartConfig(title: loc.strings.heightCm,   unit: "cm", data: whoHeightData, gridVals: [50, 65, 80, 95], babyPoints: vm.babyHeightPoints)
+            case 2: return ChartConfig(title: loc.strings.headCircCm, unit: "cm", data: whoHeadData,   gridVals: [33, 38, 43, 48], babyPoints: vm.babyHeadPoints)
+            default: return ChartConfig(title: loc.strings.weightKg,  unit: "kg", data: whoWeightData,  gridVals: [4, 7, 10, 13],  babyPoints: vm.babyWeightPoints)
+            }
         }
     }
 
@@ -204,9 +237,12 @@ struct TrackingView: View {
 
     private func growthValue(_ m: MeasurementEntry) -> String {
         switch vm.selectedTab {
-        case 1: return m.height
-        case 2: return m.headCirc
-        default: return "\(m.weight) · \(m.height)"
+        case 1: return units.displayHeightFromStored(m.height)
+        case 2: return units.displayHeightFromStored(m.headCirc)
+        default:
+            let w = units.displayWeightFromStored(m.weight)
+            let h = units.displayHeightFromStored(m.height)
+            return "\(w) · \(h)"
         }
     }
 
@@ -224,7 +260,7 @@ struct TrackingView: View {
                             .foregroundColor(.bbInkMute)
                     }
                     .frame(width: 50, alignment: .leading)
-                    Text(String(format: "%.1f°C", entry.value))
+                    Text(String(format: "%.1f%@", units.displayTemp(fromCelsius: entry.value), units.tempUnit))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundColor(tempValueColor(entry.value))
                     if !entry.note.isEmpty {

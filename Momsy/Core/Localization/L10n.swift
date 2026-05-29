@@ -500,6 +500,12 @@ struct L10n {
     var autoThemeHint: String   { s("Auto follows the system appearance.", "Авто — следует системной теме устройства.", "Auto folgt der Systemdarstellung.") }
     var appLanguage: String     { s("App Language",  "Язык приложения","App-Sprache") }
     var languageComingSoon: String { s("More languages coming soon.", "Больше языков — скоро.", "Weitere Sprachen folgen bald.") }
+    var unitSystem: String      { s("Units",           "Единицы",       "Einheiten") }
+    var unitMetric: String      { s("Metric",          "Метрическая",   "Metrisch") }
+    var unitImperial: String    { s("Imperial",        "Имперская",     "Imperial") }
+    var unitSystemHint: String  { s("Metric: kg, cm, °C, ml · Imperial: lb, in, °F, oz",
+                                     "Метр.: кг, см, °C, мл · Импер.: lb, in, °F, oz",
+                                     "Metrisch: kg, cm, °C, ml · Imperial: lb, in, °F, oz") }
     var about: String           { s("About",         "О приложении",  "Über") }
     var version: String         { s("Version",       "Версия",        "Version") }
     var madeWithLove: String    { s("Made with love","Сделано с любовью","Mit Liebe gemacht") }

@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @StateObject private var vm: SettingsViewModel
     @EnvironmentObject private var lm: LocalizationManager
+    @EnvironmentObject private var units: UnitSystemManager
 
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeSettingsViewModel())
@@ -17,6 +18,7 @@ struct SettingsView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
                 themeSection
+                unitsSection
                 languageSection
                 aboutSection
 #if DEBUG
@@ -60,6 +62,55 @@ struct SettingsView: View {
                 ZStack {
                     Circle()
                         .fill(selected ? accent : Color.bbCream)
+                        .frame(width: 52, height: 52)
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(selected ? .bbInk : .bbInkSoft)
+                }
+                Text(label)
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundColor(selected ? .bbCoralDeep : .bbInkSoft)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .strokeBorder(selected ? Color.bbCoralDeep : Color.clear, lineWidth: 2.5)
+            )
+            .bbShadow()
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Units
+
+    private var unitsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BBSectionLabel(text: lm.strings.unitSystem)
+
+            HStack(spacing: 10) {
+                unitCard(id: "metric",   icon: "scalemass",  label: lm.strings.unitMetric)
+                unitCard(id: "imperial", icon: "ruler",       label: lm.strings.unitImperial)
+            }
+
+            Text(lm.strings.unitSystemHint)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .padding(.horizontal, 2)
+        }
+    }
+
+    private func unitCard(id: String, icon: String, label: String) -> some View {
+        let selected = vm.unitSystem == id
+        return Button {
+            vm.setUnitSystem(id)
+        } label: {
+            VStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(selected ? Color.bbSky : Color.bbCream)
                         .frame(width: 52, height: 52)
                     Image(systemName: icon)
                         .font(.system(size: 20, weight: .semibold))
@@ -230,4 +281,5 @@ struct SettingsView: View {
 #Preview {
     NavigationStack { SettingsView(container: AppContainer()) }
         .environmentObject(LocalizationManager.shared)
+        .environmentObject(UnitSystemManager.shared)
 }

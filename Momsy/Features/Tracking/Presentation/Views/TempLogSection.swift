@@ -6,15 +6,16 @@ struct TempBarChart: View {
     let entries: [TemperatureEntry]
     let lang: String
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject var units: UnitSystemManager
 
-    private func barColor(_ v: Double) -> Color {
-        v >= 38.5 ? .bbCoralDeep : v >= 37.5 ? .bbButterDeep : .bbMintDeep
+    private func barColor(_ celsius: Double) -> Color {
+        celsius >= 38.5 ? .bbCoralDeep : celsius >= 37.5 ? .bbButterDeep : .bbMintDeep
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(loc.strings.temperatureCelsius)
+                Text("Temperature, \(units.tempUnit)")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
@@ -38,7 +39,7 @@ struct TempBarChart: View {
                         ForEach(entries) { entry in
                             let ratio = max(0.05, min(1, (entry.value - 36.0) / 4.0))
                             VStack(spacing: 3) {
-                                Text(String(format: "%.1f°", entry.value))
+                                Text(String(format: "%.1f°", units.displayTemp(fromCelsius: entry.value)))
                                     .font(.system(size: 9, weight: .heavy, design: .monospaced))
                                     .foregroundColor(barColor(entry.value))
                                     .minimumScaleFactor(0.7)
@@ -60,9 +61,9 @@ struct TempBarChart: View {
             }
 
             HStack(spacing: 12) {
-                legendDot(color: .bbMintDeep,   label: loc.strings.tempNormalRange)
-                legendDot(color: .bbButterDeep, label: loc.strings.tempSubfebrRange)
-                legendDot(color: .bbCoralDeep,  label: loc.strings.tempHighRange)
+                legendDot(color: .bbMintDeep,   label: units.tempNormalLabel)
+                legendDot(color: .bbButterDeep, label: units.tempSubfebrLabel)
+                legendDot(color: .bbCoralDeep,  label: units.tempHighLabel)
             }
         }
         .bbCard(pad: 14)
@@ -83,38 +84,38 @@ struct TempBarChart: View {
 struct AddTempSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject var units: UnitSystemManager
     let onAdd: (TemperatureEntry) -> Void
 
     @State private var tempStr = ""
     @State private var note = ""
 
-    private var parsedTemp: Double? {
+    private var parsedInput: Double? {
         Double(tempStr.replacingOccurrences(of: ",", with: "."))
     }
-    private var isValid: Bool { parsedTemp != nil }
+    private var parsedCelsius: Double? {
+        parsedInput.map { units.toCelsius($0) }
+    }
+    private var isValid: Bool { parsedInput != nil }
 
-    private func valueColor(_ v: Double) -> Color {
-        v >= 38.5 ? .bbCoralDeep : v >= 37.5 ? .bbButterDeep : .bbMintDeep
-    }
-    private func valueLabel(_ v: Double) -> String {
-        v >= 38.5 ? loc.strings.highTemp : v >= 37.5 ? loc.strings.subfebrLabel : loc.strings.normalOk
-    }
+    private func valueColor(_ celsius: Double) -> Color { units.tempCategory(celsius).color }
+    private func valueLabel(_ celsius: Double) -> String { units.tempCategory(celsius).label(loc: loc.strings) }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section(loc.strings.temperature) {
                     HStack {
-                        Text("°C").foregroundColor(.bbInkSoft)
-                        TextField(loc.strings.tempPlaceholder, text: $tempStr)
+                        Text(units.tempUnit).foregroundColor(.bbInkSoft)
+                        TextField(units.tempPlaceholder, text: $tempStr)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
-                    if let v = parsedTemp {
+                    if let celsius = parsedCelsius {
                         HStack {
-                            Text(valueLabel(v))
+                            Text(valueLabel(celsius))
                                 .font(.system(size: 13, weight: .bold, design: .rounded))
-                                .foregroundColor(valueColor(v))
+                                .foregroundColor(valueColor(celsius))
                             Spacer()
                         }
                     }
@@ -139,7 +140,8 @@ struct AddTempSheet: View {
     }
 
     private func save() {
-        guard let v = parsedTemp else { return }
+        guard let input = parsedInput else { return }
+        let celsius = units.toCelsius(input)
         let now = Date()
         let df = DateFormatter()
         df.dateFormat = "d MMM"
@@ -148,7 +150,7 @@ struct AddTempSheet: View {
         onAdd(TemperatureEntry(
             dateLabel: df.string(from: now),
             timeLabel: tf.string(from: now),
-            value: v,
+            value: celsius,
             note: note
         ))
         dismiss()
