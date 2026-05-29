@@ -25,7 +25,7 @@ final class FamilyManager: ObservableObject {
     @Published private(set) var familyId: String?
     @Published private(set) var isReady = false
 
-    private let db = Firestore.firestore()
+    private var db: Firestore { Firestore.firestore() }
 
     private init() {
         familyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey)

@@ -5,7 +5,7 @@ import FirebaseAuth
 /// Firestore-backed invite service. Synchronous protocol methods read from UserDefaults cache;
 /// Firestore writes happen asynchronously in the background.
 final class FirestoreInviteService: InviteServiceProtocol {
-    private let db = Firestore.firestore()
+    private var db: Firestore { Firestore.firestore() }
     private let codeKey   = "firestore_invite_code_v1"
     private let expiryKey = "firestore_invite_expiry_v1"
     private let defaults  = UserDefaults.standard

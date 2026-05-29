@@ -2,7 +2,7 @@ import Foundation
 import FirebaseFirestore
 
 final class FirestoreFamilyRepository: FamilyRepository {
-    private let db = Firestore.firestore()
+    private var db: Firestore { Firestore.firestore() }
 
     private func col() throws -> CollectionReference {
         guard let id = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey) else {

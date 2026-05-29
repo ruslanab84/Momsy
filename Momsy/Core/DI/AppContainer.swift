@@ -30,10 +30,10 @@ final class AppContainer {
     lazy var momSleepRepository: any MomSleepRepository                         = SwiftDataMomSleepRepository(context: context)
     lazy var waterIntakeRepository: any WaterIntakeRepository                    = SwiftDataWaterIntakeRepository(context: context)
 
-    let familyRepository: any FamilyRepository        = FirestoreFamilyRepository()
+    lazy var familyRepository: any FamilyRepository   = FirestoreFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
     let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
-    let inviteService: any InviteServiceProtocol       = FirestoreInviteService()
+    lazy var inviteService: any InviteServiceProtocol  = FirestoreInviteService()
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let authManager                                    = AuthManager()
