@@ -45,6 +45,7 @@ final class ReportViewModel: ObservableObject {
     }
 
     private var lm: LocalizationManager { .shared }
+    private var units: UnitSystemManager { .shared }
 
     var displayName: String { appState.displayName }
 
@@ -162,14 +163,17 @@ final class ReportViewModel: ObservableObject {
             Double((s.components(separatedBy: " ").first ?? s).replacingOccurrences(of: ",", with: "."))
         }
         if let last = sortedMeasurements.last, !last.weight.isEmpty, last.weight != "—" {
-            weightValue = last.weight
+            weightValue = units.displayWeightFromStored(last.weight, localizedMetricUnit: lm.strings.unitKg)
             if let first = sortedMeasurements.first, first.id != last.id,
                let fw = numericPart(first.weight),
                let lw = numericPart(last.weight) {
-                let d = lw - fw
-                weightSub = String(format: d >= 0 ? "+%.2f кг" : "%.2f кг", d)
+                let dKg = lw - fw
+                let dDisplay = units.isImperial ? dKg * 2.20462 : dKg
+                let unit = units.isImperial ? "lb" : lm.strings.unitKg
+                weightSub = String(format: dDisplay >= 0 ? "+%.2f \(unit)" : "%.2f \(unit)", dDisplay)
             } else {
-                weightSub = last.height.isEmpty || last.height == "—" ? lm.strings.noData : last.height
+                weightSub = last.height.isEmpty || last.height == "—" ? lm.strings.noData
+                    : units.displayHeightFromStored(last.height, localizedMetricUnit: lm.strings.unitCm)
             }
         } else {
             weightValue = "—"
@@ -197,7 +201,7 @@ final class ReportViewModel: ObservableObject {
             ),
             (
                 lm.strings.reportStatTempLabel,
-                maxTemp > 0 ? String(format: "%.1f°", maxTemp) : "—",
+                maxTemp > 0 ? String(format: "%.1f%@", units.displayTemp(fromCelsius: maxTemp), units.tempUnit) : "—",
                 maxTemp > 0
                     ? (peakCount > 0 ? lm.strings.reportTempPeakSub(n: peakCount) : lm.strings.reportTempNormal)
                     : lm.strings.noData,
@@ -237,16 +241,16 @@ final class ReportViewModel: ObservableObject {
                 diaperPerDay.max().map { String(format: "%.0f", $0) } ?? "—"
             ),
             (
-                lm.strings.reportSparkTempLabel,
+                lm.strings.reportSparkTempDynamicLabel(unit: units.tempUnit),
                 tempForChart.isEmpty ? [36.6] : tempForChart,
                 .bbCoralDeep,
                 tempPeakStr
             ),
             (
-                lm.strings.reportSparkWeightLabel,
-                weightValues.isEmpty ? [0] : weightValues,
+                lm.strings.reportSparkWeightDynamicLabel(unit: units.isImperial ? "lb" : lm.strings.unitKg),
+                weightValues.isEmpty ? [0] : weightValues.map { units.isImperial ? $0 * 2.20462 : $0 },
                 .bbMintDeep,
-                weightValues.last.map { String(format: "%.1f", $0) } ?? "—"
+                weightValues.last.map { String(format: "%.1f", units.isImperial ? $0 * 2.20462 : $0) } ?? "—"
             ),
         ]
     }

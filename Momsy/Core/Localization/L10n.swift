@@ -426,9 +426,11 @@ struct L10n {
     var reportTempNormal: String       { s("normal",       "норма",                   "normal") }
     var reportStatWeightLabel: String  { s("Weight & Height", "Вес и рост",           "Gewicht & Größe") }
     var reportSparkWeightLabel: String { s("Weight, kg",      "Вес, кг",              "Gewicht, kg") }
+    func reportSparkWeightDynamicLabel(unit: String) -> String { s("Weight, \(unit)", "Вес, \(unit)", "Gewicht, \(unit)") }
     var reportSparkFeedingsLabel: String { s("Feedings / day",  "Кормления / сут",    "Mahlzeiten / Tag") }
     var reportSparkSleepLabel: String  { s("Sleep / day (h)",   "Сон / сут (ч)",      "Schlaf / Tag (h)") }
     var reportSparkTempLabel: String   { s("Temperature °C",    "Температура °C",     "Temperatur °C") }
+    func reportSparkTempDynamicLabel(unit: String) -> String { s("Temperature \(unit)", "Температура \(unit)", "Temperatur \(unit)") }
     var reportSparkDiapersLabel: String { s("Diapers / day",   "Подгузники / сут",   "Windeln / Tag") }
     func reportPreviewPeriod(label: String) -> String { s("Period: \(label)", "Период: \(label)", "Zeitraum: \(label)") }
     var reportPreviewNotes: String     { s("NOTES",         "ЗАМЕТКИ",                 "NOTIZEN") }

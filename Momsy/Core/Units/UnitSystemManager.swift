@@ -67,11 +67,13 @@ final class UnitSystemManager: ObservableObject {
     var heightChartFactor: Double { isImperial ? 1.0 / 2.54 : 1.0 }
 
     // MARK: Metric → display strings
-    func displayWeight(fromKg kg: Double) -> String {
-        isImperial ? String(format: "%.1f lb", kg * 2.20462) : String(format: "%.1f kg", kg)
+    func displayWeight(fromKg kg: Double, localizedMetricUnit: String = "kg") -> String {
+        isImperial ? String(format: "%.1f lb", kg * 2.20462)
+                   : String(format: "%.1f \(localizedMetricUnit)", kg)
     }
-    func displayHeight(fromCm cm: Double) -> String {
-        isImperial ? String(format: "%.1f in", cm / 2.54) : String(format: "%.1f cm", cm)
+    func displayHeight(fromCm cm: Double, localizedMetricUnit: String = "cm") -> String {
+        isImperial ? String(format: "%.1f in", cm / 2.54)
+                   : String(format: "%.1f \(localizedMetricUnit)", cm)
     }
     func displayTemp(fromCelsius c: Double) -> Double {
         isImperial ? c * 9 / 5 + 32 : c
@@ -86,13 +88,13 @@ final class UnitSystemManager: ObservableObject {
     func toCelsius(_ v: Double) -> Double { isImperial ? (v - 32) * 5 / 9 : v }
 
     // MARK: Parse stored "6.5 kg" → display in current unit
-    func displayWeightFromStored(_ s: String) -> String {
+    func displayWeightFromStored(_ s: String, localizedMetricUnit: String = "kg") -> String {
         guard s != "—", let v = parseNum(s) else { return s }
-        return displayWeight(fromKg: v)
+        return displayWeight(fromKg: v, localizedMetricUnit: localizedMetricUnit)
     }
-    func displayHeightFromStored(_ s: String) -> String {
+    func displayHeightFromStored(_ s: String, localizedMetricUnit: String = "cm") -> String {
         guard s != "—", let v = parseNum(s) else { return s }
-        return displayHeight(fromCm: v)
+        return displayHeight(fromCm: v, localizedMetricUnit: localizedMetricUnit)
     }
 
     // MARK: Temperature category (always in Celsius)

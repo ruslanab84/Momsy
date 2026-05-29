@@ -237,11 +237,11 @@ struct TrackingView: View {
 
     private func growthValue(_ m: MeasurementEntry) -> String {
         switch vm.selectedTab {
-        case 1: return units.displayHeightFromStored(m.height)
-        case 2: return units.displayHeightFromStored(m.headCirc)
+        case 1: return units.displayHeightFromStored(m.height, localizedMetricUnit: loc.strings.unitCm)
+        case 2: return units.displayHeightFromStored(m.headCirc, localizedMetricUnit: loc.strings.unitCm)
         default:
-            let w = units.displayWeightFromStored(m.weight)
-            let h = units.displayHeightFromStored(m.height)
+            let w = units.displayWeightFromStored(m.weight, localizedMetricUnit: loc.strings.unitKg)
+            let h = units.displayHeightFromStored(m.height, localizedMetricUnit: loc.strings.unitCm)
             return "\(w) · \(h)"
         }
     }
