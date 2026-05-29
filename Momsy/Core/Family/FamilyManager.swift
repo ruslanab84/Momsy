@@ -26,6 +26,7 @@ final class FamilyManager: ObservableObject {
     @Published private(set) var isReady = false
 
     private var db: Firestore { Firestore.firestore() }
+    private var isSettingUp = false
 
     private init() {
         familyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey)
@@ -35,6 +36,13 @@ final class FamilyManager: ObservableObject {
     /// Called by AuthManager's state listener on every sign-in / app launch with existing session.
     /// Reads the user's familyId from Firestore; creates a new family if none exists.
     func setup(uid: String, displayName: String) async throws {
+        // Cached familyId is already sufficient — skip remote setup
+        if familyId != nil { isReady = true; return }
+        // Prevent concurrent invocations (e.g. state listener fires on launch + sign-in)
+        guard !isSettingUp else { return }
+        isSettingUp = true
+        defer { isSettingUp = false }
+
         let userRef = db.collection("users").document(uid)
         let userDoc = try await userRef.getDocument()
 

@@ -114,7 +114,7 @@ struct SharingView: View {
 
     private var joinCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BBSectionLabel(text: "Присоединиться к семье")
+            BBSectionLabel(text: loc.strings.joinFamilyTitle)
             HStack(spacing: 10) {
                 TextField("MOMSY-XXXX", text: $vm.joinCode)
                     .textInputAutocapitalization(.characters)
@@ -131,7 +131,7 @@ struct SharingView: View {
                         ProgressView()
                             .frame(width: 56, height: 44)
                     } else {
-                        Text("Войти")
+                        Text(loc.strings.joinAction)
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
                             .frame(width: 56, height: 44)
@@ -147,7 +147,7 @@ struct SharingView: View {
                     .foregroundColor(.red)
             }
             if vm.joinSuccess {
-                Text("Вы успешно присоединились к семье!")
+                Text(loc.strings.joinSuccessMessage)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbMintDeep)
             }

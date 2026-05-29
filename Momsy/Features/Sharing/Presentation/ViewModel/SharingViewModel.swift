@@ -16,6 +16,8 @@ final class SharingViewModel: ObservableObject {
     private let repo: any FamilyRepository
     private let inviteService: any InviteServiceProtocol
     private let appState: AppState
+    // Preserves full StoredFamilyMember (including uid) across round-trips
+    private var storedMembers: [StoredFamilyMember] = []
 
     private var lm: LocalizationManager { .shared }
 
@@ -39,25 +41,36 @@ final class SharingViewModel: ObservableObject {
 
     func loadMembers() async {
         let stored = (try? await repo.getMembers()) ?? []
+        storedMembers = stored
         members = stored.map { $0.toFamilyMember() }
+        // Ensure any pending invite-code Firestore write completes before user can share
+        await (inviteService as? FirestoreInviteService)?.awaitSync()
     }
 
     func addMember(_ member: FamilyMember) {
         withAnimation(.spring(response: 0.38, dampingFraction: 0.8)) {
             members.append(member)
         }
+        let stored = member.toStored()
+        storedMembers.append(stored)
         Task {
-            do { try await repo.add(member.toStored()) }
+            do { try await repo.add(stored) }
             catch { saveError = error.localizedDescription }
         }
     }
 
     func changeRole(id: UUID, to newRole: FamilyRole) {
-        guard let idx = members.firstIndex(where: { $0.id == id }) else { return }
+        guard
+            let idx = members.firstIndex(where: { $0.id == id }),
+            let storedIdx = storedMembers.firstIndex(where: { $0.id == id })
+        else { return }
         withAnimation { members[idx].role = newRole }
-        let stored = members[idx].toStored()
+        // Update the stored member in-place so uid and other fields are preserved
+        var updated = storedMembers[storedIdx]
+        updated.roleRaw = newRole.rawValue
+        storedMembers[storedIdx] = updated
         Task {
-            do { try await repo.update(stored) }
+            do { try await repo.update(updated) }
             catch { saveError = error.localizedDescription }
         }
     }
@@ -66,6 +79,7 @@ final class SharingViewModel: ObservableObject {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             members.removeAll { $0.id == id }
         }
+        storedMembers.removeAll { $0.id == id }
         Task {
             do { try await repo.remove(id: id) }
             catch { saveError = error.localizedDescription }
@@ -90,6 +104,11 @@ final class SharingViewModel: ObservableObject {
                 joinError = error.localizedDescription
             }
             isJoining = false
+            // Auto-dismiss success banner after 3 seconds
+            if joinSuccess {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                joinSuccess = false
+            }
         }
     }
 }

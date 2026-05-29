@@ -366,6 +366,9 @@ struct L10n {
     var matrixPhotosDiary: String  { s("Photos & diary", "Фото и дневник", "Fotos & Tagebuch") }
     var matrixPaedsReport: String  { s("Paediatric report", "Отчёт педиатру", "Kinderbericht") }
     var whatEachRoleSees: String{ s("What each role sees", "Что видит каждая роль", "Was jede Rolle sieht") }
+    var joinFamilyTitle: String { s("Join a Family",    "Присоединиться к семье", "Familie beitreten") }
+    var joinAction: String      { s("Join",             "Войти",                  "Beitreten") }
+    var joinSuccessMessage: String { s("You joined the family!", "Вы присоединились к семье!", "Du bist der Familie beigetreten!") }
     var roleLabel: String       { s("ROLE",          "РОЛЬ",          "ROLLE") }
     var saveRole: String        { s("Save role",     "Сохранить роль","Rolle speichern") }
     var removeFromTeamAction: String { s("Remove from team", "Удалить из команды", "Aus Team entfernen") }

@@ -25,14 +25,22 @@ final class FirestoreInviteService: InviteServiceProtocol {
         (defaults.object(forKey: expiryKey) as? Date) ?? Date().addingTimeInterval(86400)
     }
 
+    private var pendingWrite: Task<Void, Never>?
+
     @discardableResult
     func regenerate() -> String {
         let code = generateCode()
         let exp = Date().addingTimeInterval(86400)
         defaults.set(code, forKey: codeKey)
         defaults.set(exp, forKey: expiryKey)
-        Task { await self.writeToFirestore(code: code, expiry: exp) }
+        pendingWrite = Task { await self.writeToFirestore(code: code, expiry: exp) }
         return code
+    }
+
+    /// Awaits the pending Firestore write so the invite code is guaranteed to exist
+    /// before the user can share it. Call this from SharingViewModel before showing InviteSheet.
+    func awaitSync() async {
+        await pendingWrite?.value
     }
 
     private func writeToFirestore(code: String, expiry: Date) async {
