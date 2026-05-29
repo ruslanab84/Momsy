@@ -179,7 +179,7 @@ struct SettingsView: View {
                 Divider().opacity(0.2).padding(.leading, 60)
                 chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: lm.strings.privacy)
                 Divider().opacity(0.2).padding(.leading, 60)
-                chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.contactUs)
+                chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.feedback)
             }
             .background(Color.bbCard)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))

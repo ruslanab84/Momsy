@@ -3,8 +3,7 @@ import FirebaseAI
 
 final class GeminiDailyTipService: DailyTipService {
 
-    // gemini-2.0-flash-lite: 1500 RPD free tier (vs 20 RPD for 2.5-flash-lite)
-    private let modelName = "gemini-2.0-flash-lite"
+    private let modelName = "gemini-3.1-flash-lite"
     private let maxOutputTokens = 150
 
     func fetch(context: DailyContext) async throws -> String {
