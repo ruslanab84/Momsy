@@ -42,14 +42,8 @@ final class FeedingLiveActivityManager {
 
     func endActivity() {
         guard let activity else { return }
-        let state = FeedingActivityAttributes.ContentState(
-            effectiveStartDate: Date(), isPaused: false, pausedSeconds: 0
-        )
         Task {
-            await activity.end(
-                ActivityContent(state: state, staleDate: nil),
-                dismissalPolicy: .default
-            )
+            await activity.end(nil, dismissalPolicy: .immediate)
             self.activity = nil
         }
     }
