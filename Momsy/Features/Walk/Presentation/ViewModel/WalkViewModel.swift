@@ -12,6 +12,7 @@ final class WalkViewModel: ObservableObject {
     private var timerCancellable: AnyCancellable?
     private var lm: LocalizationManager { .shared }
 
+    private let liveActivity = WalkLiveActivityManager()
     private let walkRepository: any WalkRepository
     private let quickLogRepo: QuickLogRepository
     private let addManualWalkUC: AddManualWalkUseCase
@@ -25,6 +26,7 @@ final class WalkViewModel: ObservableObject {
             await loadTodayEntries()
             if let open = todayEntries.first(where: { $0.endDate == nil }) {
                 if case .active = WidgetDataStore.shared.walkState {
+                    liveActivity.reattachIfNeeded()
                     activateTimer(entry: open)
                 } else {
                     // Stale open entry — async stop() didn't complete before kill
@@ -79,6 +81,7 @@ final class WalkViewModel: ObservableObject {
         timerCancellable = nil
         isWalkActive = false
         activeWalkEntry = nil
+        liveActivity.endActivity()
         WidgetDataStore.shared.clearWalk(lastDurationSeconds: walkSeconds)
         Task {
             do {
@@ -98,6 +101,7 @@ final class WalkViewModel: ObservableObject {
         isWalkActive = true
         walkSeconds = Int(Date().timeIntervalSince(entry.startDate))
         WidgetDataStore.shared.setWalkActive(startDate: entry.startDate)
+        liveActivity.startActivity(startDate: entry.startDate, babyName: WidgetDataStore.shared.babyName)
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in

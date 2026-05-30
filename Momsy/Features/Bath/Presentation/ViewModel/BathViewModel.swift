@@ -12,6 +12,7 @@ final class BathViewModel: ObservableObject {
     private var timerCancellable: AnyCancellable?
     private var lm: LocalizationManager { .shared }
 
+    private let liveActivity = BathLiveActivityManager()
     private let bathRepository: any BathRepository
     private let quickLogRepo: QuickLogRepository
     private let addManualBathUC: AddManualBathUseCase
@@ -25,6 +26,7 @@ final class BathViewModel: ObservableObject {
             await loadTodayEntries()
             if let open = todayEntries.first(where: { $0.endDate == nil }) {
                 if case .active = WidgetDataStore.shared.bathState {
+                    liveActivity.reattachIfNeeded()
                     activateTimer(entry: open)
                 } else {
                     // Stale open entry — async stop() didn't complete before kill
@@ -79,6 +81,7 @@ final class BathViewModel: ObservableObject {
         timerCancellable = nil
         isBathActive = false
         activeBathEntry = nil
+        liveActivity.endActivity()
         WidgetDataStore.shared.clearBath(lastDurationSeconds: bathSeconds)
         Task {
             do {
@@ -98,6 +101,7 @@ final class BathViewModel: ObservableObject {
         isBathActive = true
         bathSeconds = Int(Date().timeIntervalSince(entry.startDate))
         WidgetDataStore.shared.setBathActive(startDate: entry.startDate)
+        liveActivity.startActivity(startDate: entry.startDate, babyName: WidgetDataStore.shared.babyName)
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in

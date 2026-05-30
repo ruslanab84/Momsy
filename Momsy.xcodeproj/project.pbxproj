@@ -33,6 +33,15 @@
 		A63165E2B06D8E9D3DC6D060 /* MockDailyTipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */; };
 		AA001122CC33DD44EE55FF65 /* FeedingLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */; };
 		AA001122CC33DD44EE55FF67 /* FeedingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001122CC33DD44EE55FF66 /* FeedingActivityAttributes.swift */; };
+		BB001122CC33DD44EE55FF80 /* SleepActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF81 /* SleepActivityAttributes.swift */; };
+		BB001122CC33DD44EE55FF82 /* WalkActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF83 /* WalkActivityAttributes.swift */; };
+		BB001122CC33DD44EE55FF84 /* BathActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF85 /* BathActivityAttributes.swift */; };
+		BB001122CC33DD44EE55FF86 /* PumpingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF87 /* PumpingActivityAttributes.swift */; };
+		CC001122CC33DD44EE55FF70 /* SharedActivityUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF71 /* SharedActivityUI.swift */; };
+		CC001122CC33DD44EE55FF72 /* SleepLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF73 /* SleepLiveActivityView.swift */; };
+		CC001122CC33DD44EE55FF74 /* WalkLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF75 /* WalkLiveActivityView.swift */; };
+		CC001122CC33DD44EE55FF76 /* BathLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF77 /* BathLiveActivityView.swift */; };
+		CC001122CC33DD44EE55FF78 /* PumpingLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF79 /* PumpingLiveActivityView.swift */; };
 		AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */; };
 		AA9D8473BEC847159E9AAAA4 /* MomMoodViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */; };
 		B24FC7CC0D782B29188B1E9F /* TodayViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */; };
@@ -147,6 +156,15 @@
 		A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
 		AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingLiveActivityView.swift; sourceTree = "<group>"; };
 		AA001122CC33DD44EE55FF66 /* FeedingActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingActivityAttributes.swift; path = Momsy/Core/Widget/FeedingActivityAttributes.swift; sourceTree = "<group>"; };
+		BB001122CC33DD44EE55FF81 /* SleepActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SleepActivityAttributes.swift; path = Momsy/Core/Widget/SleepActivityAttributes.swift; sourceTree = "<group>"; };
+		BB001122CC33DD44EE55FF83 /* WalkActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WalkActivityAttributes.swift; path = Momsy/Core/Widget/WalkActivityAttributes.swift; sourceTree = "<group>"; };
+		BB001122CC33DD44EE55FF85 /* BathActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BathActivityAttributes.swift; path = Momsy/Core/Widget/BathActivityAttributes.swift; sourceTree = "<group>"; };
+		BB001122CC33DD44EE55FF87 /* PumpingActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PumpingActivityAttributes.swift; path = Momsy/Core/Widget/PumpingActivityAttributes.swift; sourceTree = "<group>"; };
+		CC001122CC33DD44EE55FF71 /* SharedActivityUI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedActivityUI.swift; sourceTree = "<group>"; };
+		CC001122CC33DD44EE55FF73 /* SleepLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepLiveActivityView.swift; sourceTree = "<group>"; };
+		CC001122CC33DD44EE55FF75 /* WalkLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WalkLiveActivityView.swift; sourceTree = "<group>"; };
+		CC001122CC33DD44EE55FF77 /* BathLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BathLiveActivityView.swift; sourceTree = "<group>"; };
+		CC001122CC33DD44EE55FF79 /* PumpingLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PumpingLiveActivityView.swift; sourceTree = "<group>"; };
 		AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockMomMoodRepository.swift; sourceTree = "<group>"; };
 		AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomMoodViewModelTests.swift; sourceTree = "<group>"; };
 		B0D4B0BAEF83286E9732D9C9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
@@ -492,6 +510,10 @@
 				4820A4E27274110E9256D2F7 /* SwiftUI.framework */,
 				D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */,
 				AA001122CC33DD44EE55FF66 /* FeedingActivityAttributes.swift */,
+				BB001122CC33DD44EE55FF81 /* SleepActivityAttributes.swift */,
+				BB001122CC33DD44EE55FF83 /* WalkActivityAttributes.swift */,
+				BB001122CC33DD44EE55FF85 /* BathActivityAttributes.swift */,
+				BB001122CC33DD44EE55FF87 /* PumpingActivityAttributes.swift */,
 				8A26529C0EE91CE92E3207E5 /* Momsy */,
 			);
 			sourceTree = "<group>";
@@ -560,6 +582,11 @@
 				BB001122CC33DD44EE55FF60 /* MomsySleepWidgetView.swift */,
 				BB001122CC33DD44EE55FF62 /* MomsySummaryWidgetView.swift */,
 				AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */,
+				CC001122CC33DD44EE55FF71 /* SharedActivityUI.swift */,
+				CC001122CC33DD44EE55FF73 /* SleepLiveActivityView.swift */,
+				CC001122CC33DD44EE55FF75 /* WalkLiveActivityView.swift */,
+				CC001122CC33DD44EE55FF77 /* BathLiveActivityView.swift */,
+				CC001122CC33DD44EE55FF79 /* PumpingLiveActivityView.swift */,
 				1C50DB4AF650A300CDE7D8BA /* MomsyWidget.entitlements */,
 				3BBE7E66563E0F26A2DFF70C /* Info.plist */,
 			);
@@ -759,6 +786,15 @@
 				BB001122CC33DD44EE55FF63 /* MomsySummaryWidgetView.swift in Sources */,
 				AA001122CC33DD44EE55FF65 /* FeedingLiveActivityView.swift in Sources */,
 				AA001122CC33DD44EE55FF67 /* FeedingActivityAttributes.swift in Sources */,
+				BB001122CC33DD44EE55FF80 /* SleepActivityAttributes.swift in Sources */,
+				BB001122CC33DD44EE55FF82 /* WalkActivityAttributes.swift in Sources */,
+				BB001122CC33DD44EE55FF84 /* BathActivityAttributes.swift in Sources */,
+				BB001122CC33DD44EE55FF86 /* PumpingActivityAttributes.swift in Sources */,
+				CC001122CC33DD44EE55FF70 /* SharedActivityUI.swift in Sources */,
+				CC001122CC33DD44EE55FF72 /* SleepLiveActivityView.swift in Sources */,
+				CC001122CC33DD44EE55FF74 /* WalkLiveActivityView.swift in Sources */,
+				CC001122CC33DD44EE55FF76 /* BathLiveActivityView.swift in Sources */,
+				CC001122CC33DD44EE55FF78 /* PumpingLiveActivityView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

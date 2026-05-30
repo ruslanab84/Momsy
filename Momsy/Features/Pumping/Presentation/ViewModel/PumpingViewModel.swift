@@ -14,6 +14,7 @@ final class PumpingViewModel: ObservableObject {
     private var timerCancellable: AnyCancellable?
     private var lm: LocalizationManager { .shared }
 
+    private let liveActivity = PumpingLiveActivityManager()
     private let repository: any PumpingRepository
     private let quickLogRepo: QuickLogRepository
 
@@ -48,6 +49,7 @@ final class PumpingViewModel: ObservableObject {
         timerCancellable?.cancel()
         timerCancellable = nil
         isPumpingActive = false
+        liveActivity.endActivity()
         let savedML = volumeML
         activeEntry = nil
         Task {
@@ -108,6 +110,8 @@ final class PumpingViewModel: ObservableObject {
     private func activateTimer(from startDate: Date) {
         isPumpingActive = true
         pumpingSeconds = Int(Date().timeIntervalSince(startDate))
+        liveActivity.startActivity(side: selectedSide.rawValue, startDate: startDate,
+                                   babyName: WidgetDataStore.shared.babyName)
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in

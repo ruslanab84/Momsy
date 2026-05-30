@@ -8,6 +8,10 @@ struct MomsyWidgetBundle: WidgetBundle {
         MomsySleepWidget()
         MomsySummaryWidget()
         FeedingLiveActivity()
+        SleepLiveActivity()
+        WalkLiveActivity()
+        BathLiveActivity()
+        PumpingLiveActivity()
     }
 }
 

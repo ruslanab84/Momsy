@@ -16,6 +16,7 @@ final class SleepViewModel: ObservableObject {
     private var chartPeriodCancellable: AnyCancellable?
     private var lm: LocalizationManager { .shared }
 
+    private let liveActivity = SleepLiveActivityManager()
     private let startSleepUC: StartSleepUseCase
     private let stopSleepUC: StopSleepUseCase
     private let getSleepUC: GetSleepEntriesUseCase
@@ -35,6 +36,7 @@ final class SleepViewModel: ObservableObject {
                 // Cross-check WidgetDataStore: if it says idle, the session was stopped
                 // but the async DB write didn't complete before the app was killed.
                 if case .active = WidgetDataStore.shared.sleepState {
+                    liveActivity.reattachIfNeeded()
                     activateTimer(entry: open)
                 } else {
                     // Stale open entry — clean it up silently
@@ -126,6 +128,7 @@ final class SleepViewModel: ObservableObject {
         isSleepActive = true
         sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
         WidgetDataStore.shared.setSleepActive(startDate: entry.startDate)
+        liveActivity.startActivity(startDate: entry.startDate, babyName: appState.babyProfile?.name ?? "")
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
@@ -148,6 +151,7 @@ final class SleepViewModel: ObservableObject {
         }
         isSleepActive = false
         activeSleepEntry = nil
+        liveActivity.endActivity()
         WidgetDataStore.shared.setLastSleepEnd(Date())
         WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds)
         Task {
