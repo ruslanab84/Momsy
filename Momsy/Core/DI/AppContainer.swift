@@ -34,6 +34,10 @@ final class AppContainer {
     let soundRepository: any SoundRepository           = LocalSoundRepository()
     let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
     lazy var inviteService: any InviteServiceProtocol  = FirestoreInviteService()
+    lazy var babySyncRepository: any BabySyncRepositoryProtocol = {
+        let babyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey) ?? ""
+        return BabySyncRepository(service: BabySyncService(babyId: babyId))
+    }()
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let authManager                                    = AuthManager()
@@ -143,7 +147,8 @@ final class AppContainer {
             stoolRepo: stoolRepository,
             quickLogRepo: quickLogRepository,
             tipRepository: dailyTipRepository,
-            appState: appState
+            appState: appState,
+            syncRepo: babySyncRepository
         )
     }
 

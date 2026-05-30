@@ -1,0 +1,15 @@
+import Foundation
+
+protocol BabySyncRepositoryProtocol {
+    var feedingLogs: AsyncStream<[FeedingLog]> { get }
+    var sleepLogs:   AsyncStream<[SleepLog]>   { get }
+    var diaperLogs:  AsyncStream<[DiaperLog]>  { get }
+
+    func addFeedingLog(_ log: FeedingLog)  async throws
+    func addSleepLog(_ log: SleepLog)      async throws
+    func addDiaperLog(_ log: DiaperLog)    async throws
+    func addSymptomLog(_ log: SymptomLog)  async throws
+
+    func fetchTodayFeedings() async throws -> [FeedingLog]
+    func fetchTodaySleep()    async throws -> [SleepLog]
+}

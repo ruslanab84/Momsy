@@ -8,6 +8,8 @@ final class TodayViewModel: ObservableObject {
     @Published var saveError: String?
     @Published var dailyTip: DailyTip?
     @Published var isTipLoading: Bool = false
+    @Published var syncedFeedingLogs: [FeedingLog] = []
+    @Published var syncedSleepLogs: [SleepLog] = []
 
     private let getFeeding: GetFeedingEntriesUseCase
     private let getSleep: GetSleepEntriesUseCase
@@ -16,6 +18,8 @@ final class TodayViewModel: ObservableObject {
     private let quickLogRepo: QuickLogRepository
     private let tipRepository: DailyTipRepository
     private let appState: AppState
+    private let syncRepo: any BabySyncRepositoryProtocol
+    private var syncTasks: [Task<Void, Never>] = []
     private var hasFetchedThisSession = false
 
     init(
@@ -25,7 +29,8 @@ final class TodayViewModel: ObservableObject {
         stoolRepo: any StoolRepository,
         quickLogRepo: QuickLogRepository,
         tipRepository: DailyTipRepository,
-        appState: AppState
+        appState: AppState,
+        syncRepo: any BabySyncRepositoryProtocol
     ) {
         self.getFeeding = getFeeding
         self.getSleep = getSleep
@@ -34,7 +39,38 @@ final class TodayViewModel: ObservableObject {
         self.quickLogRepo = quickLogRepo
         self.tipRepository = tipRepository
         self.appState = appState
+        self.syncRepo = syncRepo
+        startSyncListeners()
         Task { await loadDiaperCount() }
+    }
+
+    private func startSyncListeners() {
+        syncTasks.append(Task {
+            for await logs in syncRepo.feedingLogs {
+                self.syncedFeedingLogs = logs
+            }
+        })
+        syncTasks.append(Task {
+            for await logs in syncRepo.sleepLogs {
+                self.syncedSleepLogs = logs
+            }
+        })
+    }
+
+    func addSyncedFeeding(side: FeedingSide, durationMin: Int, amountMl: Int? = nil) {
+        let uid = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = FeedingLog(
+            id: UUID().uuidString,
+            startedAt: Date(),
+            endedAt: Date(),
+            durationMin: durationMin,
+            side: side,
+            amountMl: amountMl,
+            addedBy: uid,
+            addedByName: name
+        )
+        Task { try? await syncRepo.addFeedingLog(log) }
     }
 
     private func loadDiaperCount() async {
