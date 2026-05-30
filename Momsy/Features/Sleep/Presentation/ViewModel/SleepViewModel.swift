@@ -156,11 +156,28 @@ final class SleepViewModel: ObservableObject {
                 if let idx = todayEntries.firstIndex(where: { $0.id == saved.id }) {
                     todayEntries[idx] = saved
                 }
+                pushSleepToFirestore(saved)
             } catch {
                 todayEntries.removeAll { $0.id == completed.id }
                 saveError = error.localizedDescription
             }
         }
+    }
+
+    private func pushSleepToFirestore(_ entry: SleepEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = SleepLog(
+            id:          entry.id.uuidString,
+            startedAt:   entry.startDate,
+            endedAt:     entry.endDate,
+            durationMin: entry.durationMinutes,
+            quality:     entry.quality,
+            addedBy:     uid,
+            addedByName: name
+        )
+        Task { try? await BabySyncService().addLog(SleepLogDTO(from: log), to: "sleepLogs") }
     }
 
     func logManualEntry(startDate: Date, endDate: Date, quality: SleepQuality, note: String) {

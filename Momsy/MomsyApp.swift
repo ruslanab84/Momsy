@@ -2,6 +2,9 @@ import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
 import WidgetKit
+#if canImport(GoogleSignIn)
+import GoogleSignIn
+#endif
 
 @main
 struct MomsyApp: App {
@@ -41,6 +44,11 @@ struct MomsyApp: App {
                     container.runMigrationIfNeeded()
                     await appState.load()
                     await setupNotificationsOnLaunch(appState: appState)
+                }
+                .onOpenURL { url in
+#if canImport(GoogleSignIn)
+                    GIDSignIn.sharedInstance.handle(url)
+#endif
                 }
         }
         .onChange(of: scenePhase) { _, phase in

@@ -7,6 +7,7 @@ struct TodayView: View {
     @StateObject private var walkVM: WalkViewModel
     @StateObject private var bathVM: BathViewModel
     @StateObject private var vitaminVM: VitaminViewModel
+    @StateObject private var pumpingVM: PumpingViewModel
     @State private var showFeeding = false
     @State private var showSymptom = false
     @State private var showSleep = false
@@ -14,6 +15,7 @@ struct TodayView: View {
     @State private var showBath = false
     @State private var showVitamins = false
     @State private var showStool = false
+    @State private var showPumping = false
     @State private var showAllEntries = false
     @State private var now = Date()
 
@@ -27,6 +29,7 @@ struct TodayView: View {
         _walkVM     = StateObject(wrappedValue: container.makeWalkViewModel())
         _bathVM     = StateObject(wrappedValue: container.makeBathViewModel())
         _vitaminVM  = StateObject(wrappedValue: container.makeVitaminViewModel())
+        _pumpingVM  = StateObject(wrappedValue: container.makePumpingViewModel())
     }
 
     @Environment(\.scenePhase) private var scenePhase
@@ -72,7 +75,10 @@ struct TodayView: View {
         .task { feedingVM.restoreOrStartFeeding(side: .left) }
         .onChange(of: loc.current) { _, _ in Task { await vm.refreshTip() } }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { feedingVM.syncTimerWithStartDate() }
+            if phase == .active {
+                feedingVM.syncTimerWithStartDate()
+                pumpingVM.syncTimerWithStartDate()
+            }
         }
         .onChange(of: feedingVM.todayEntries.count) { _, _ in
             Task { await vm.loadTodayEntries() }
@@ -117,6 +123,11 @@ struct TodayView: View {
         .sheet(isPresented: $showAllEntries) {
             AllTodayEntriesView(entries: vm.logEntries)
                 .environmentObject(loc)
+        }
+        .sheet(isPresented: $showPumping) {
+            PumpingView(vm: pumpingVM)
+                .environmentObject(loc)
+                .onDisappear { Task { await vm.loadTodayEntries() } }
         }
         .errorToast($vm.saveError)
     }
@@ -491,6 +502,7 @@ struct TodayView: View {
             QuickItem(kind: .walk,    tone: .bbMint,   label: loc.strings.walk)        { showWalk = true },
             QuickItem(kind: .bath,    tone: .bbSky,    label: loc.strings.bath)        { showBath = true },
             QuickItem(kind: .vitamin, tone: .bbButter, label: loc.strings.vitamins)    { showVitamins = true },
+            QuickItem(kind: .pump,    tone: .bbRose,   label: loc.strings.pumping)     { showPumping = true },
         ]
     }
 

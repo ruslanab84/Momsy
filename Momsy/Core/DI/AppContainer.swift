@@ -29,15 +29,13 @@ final class AppContainer {
     lazy var stoolRepository: any StoolRepository                               = SwiftDataStoolRepository(context: context)
     lazy var momSleepRepository: any MomSleepRepository                         = SwiftDataMomSleepRepository(context: context)
     lazy var waterIntakeRepository: any WaterIntakeRepository                    = SwiftDataWaterIntakeRepository(context: context)
+    lazy var pumpingRepository: any PumpingRepository                            = SwiftDataPumpingRepository(context: context)
 
     lazy var familyRepository: any FamilyRepository   = FirestoreFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
     let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
     lazy var inviteService: any InviteServiceProtocol  = FirestoreInviteService()
-    lazy var babySyncRepository: any BabySyncRepositoryProtocol = {
-        let babyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey) ?? ""
-        return BabySyncRepository(service: BabySyncService(babyId: babyId))
-    }()
+    lazy var babySyncRepository: any BabySyncRepositoryProtocol = BabySyncRepository(service: BabySyncService())
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let authManager                                    = AuthManager()
@@ -228,6 +226,10 @@ final class AppContainer {
 
     func makeVitaminViewModel() -> VitaminViewModel {
         VitaminViewModel(quickLogRepo: quickLogRepository)
+    }
+
+    func makePumpingViewModel() -> PumpingViewModel {
+        PumpingViewModel(repository: pumpingRepository, quickLogRepo: quickLogRepository)
     }
 
     func makeLeapsViewModel() -> LeapsViewModel {

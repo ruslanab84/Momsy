@@ -18,6 +18,7 @@ final class FeedingViewModel: ObservableObject {
     private let timerService: FeedingTimerService
     private let analytics: any AnalyticsServiceProtocol
     private let pushNotifications: any PushNotificationServiceProtocol
+    private let liveActivity = FeedingLiveActivityManager()
     private var lm: LocalizationManager { .shared }
 
     init(
@@ -79,6 +80,8 @@ final class FeedingViewModel: ObservableObject {
         timerService.start(from: startDate) { [weak self] secs in
             Task { @MainActor [weak self] in self?.feedingSeconds = secs }
         }
+        liveActivity.startActivity(side: side.rawValue, startDate: startDate,
+                                   babyName: WidgetDataStore.shared.babyName)
     }
 
     func pauseFeeding() {
@@ -87,6 +90,7 @@ final class FeedingViewModel: ObservableObject {
         pausedFeedingSeconds = feedingSeconds
         timerService.stop()
         WidgetDataStore.shared.setFeedingPaused(elapsedSeconds: pausedFeedingSeconds, side: feedingSide.rawValue)
+        liveActivity.pauseActivity(pausedSeconds: pausedFeedingSeconds)
     }
 
     func resumeFeeding() {
@@ -97,6 +101,7 @@ final class FeedingViewModel: ObservableObject {
         timerService.start(from: effectiveStart) { [weak self] secs in
             Task { @MainActor [weak self] in self?.feedingSeconds = secs }
         }
+        liveActivity.resumeActivity(effectiveStartDate: effectiveStart)
     }
 
     func stopFeeding(mood: String? = nil, milliliters: Int? = nil) {
@@ -105,6 +110,7 @@ final class FeedingViewModel: ObservableObject {
         feedingSessionExists = false
         timerService.stop()
         WidgetDataStore.shared.clearFeeding(lastFeedingDate: Date())
+        liveActivity.endActivity()
         let dur = max(1, feedingSeconds / 60)
         let secs = feedingSeconds
         let s = feedingSide
@@ -115,10 +121,28 @@ final class FeedingViewModel: ObservableObject {
                 let saved = try await logFeeding.execute(durationSeconds: secs, side: s,
                                                          mood: mood, milliliters: milliliters)
                 todayEntries.append(saved)
+                pushFeedingToFirestore(saved)
             } catch {
                 saveError = error.localizedDescription
             }
         }
+    }
+
+    private func pushFeedingToFirestore(_ entry: FeedingEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = FeedingLog(
+            id:          entry.id.uuidString,
+            startedAt:   entry.date,
+            endedAt:     nil,
+            durationMin: entry.durationMinutes,
+            side:        entry.side,
+            amountMl:    entry.milliliters,
+            addedBy:     uid,
+            addedByName: name
+        )
+        Task { try? await BabySyncService().addLog(FeedingLogDTO(from: log), to: "feedingLogs") }
     }
 
     func logManualEntry(date: Date, durationMinutes: Int, side: FeedingSide,
@@ -156,12 +180,14 @@ final class FeedingViewModel: ObservableObject {
             timerService.start(from: effectiveStartDate) { [weak self] secs in
                 Task { @MainActor [weak self] in self?.feedingSeconds = secs }
             }
+            liveActivity.reattachIfNeeded()
         case .paused(let elapsedSeconds, let sideRaw):
             feedingSide = FeedingSide(rawValue: sideRaw) ?? side
             isFeedingActive = false
             feedingSessionExists = true
             feedingSeconds = elapsedSeconds
             pausedFeedingSeconds = elapsedSeconds
+            liveActivity.reattachIfNeeded()
         default:
             break  // Idle — don't auto-start; user must explicitly tap Start
         }

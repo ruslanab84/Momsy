@@ -30,7 +30,7 @@ struct AuthStep: View {
                 }
 
                 if let error = authError {
-                    Text(error.localizedDescription)
+                    Text((error as? AuthError)?.localizedDescription ?? loc.strings.signInFailed)
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundColor(.red.opacity(0.8))
                         .multilineTextAlignment(.center)
@@ -84,7 +84,7 @@ struct AuthStep: View {
     }
 
     private var googleButton: some View {
-        Button(action: onGoogle) {
+        Button { onGoogle() } label: {
             HStack(spacing: 10) {
                 Image(systemName: "g.circle.fill")
                     .font(.system(size: 20, weight: .semibold))

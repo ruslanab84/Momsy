@@ -4,15 +4,21 @@ import FirebaseAuth
 import FirebaseCore
 import AuthenticationServices
 import CryptoKit
+#if canImport(GoogleSignIn)
+import UIKit
+import GoogleSignIn
+#endif
 
 enum AuthError: LocalizedError {
     case tokenMissing
     case notImplemented
+    case appleSignInUnavailable
 
     var errorDescription: String? {
         switch self {
-        case .tokenMissing:   return "Apple Sign-In failed. Please try again."
-        case .notImplemented: return "Google Sign-In is coming soon."
+        case .tokenMissing:          return "Apple Sign-In failed. Please try again."
+        case .notImplemented:        return "Google Sign-In is coming soon."
+        case .appleSignInUnavailable: return "To use Sign in with Apple, open Settings → [Your Name] and sign in with your Apple ID."
         }
     }
 }
@@ -69,12 +75,35 @@ final class AuthManager: ObservableObject {
     }
 
     // MARK: — Google Sign-In
-    // To enable: add GoogleSignIn-iOS SPM package (https://github.com/google/GoogleSignIn-iOS),
-    // enable Google Sign-In in Firebase Console, and add the reversed client ID URL scheme to Info.plist.
 
     @MainActor
     func signInWithGoogle() async throws {
+#if canImport(GoogleSignIn)
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            throw AuthError.tokenMissing
+        }
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+
+        guard
+            let windowScene = UIApplication.shared.connectedScenes
+                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+            let rootVC = windowScene.windows.first?.rootViewController
+        else { throw AuthError.tokenMissing }
+
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+
+        guard let idToken = result.user.idToken?.tokenString else {
+            throw AuthError.tokenMissing
+        }
+        let credential = GoogleAuthProvider.credential(
+            withIDToken: idToken,
+            accessToken: result.user.accessToken.tokenString
+        )
+        let authResult = try await Auth.auth().signIn(with: credential)
+        firebaseUser = authResult.user
+#else
         throw AuthError.notImplemented
+#endif
     }
 
     // MARK: — Sign out

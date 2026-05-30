@@ -146,6 +146,16 @@ final class TodayViewModel: ObservableObject {
         quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .drop, label: label))
         addEntry(LogEntry(time: Date(), kind: .drop, label: label))
         Task { try? await diaperRepo.add(DiaperEntry()) }
+        pushDiaperToFirestore()
+    }
+
+    private func pushDiaperToFirestore() {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = DiaperLog(id: UUID().uuidString, loggedAt: Date(),
+                            type: .wet, addedBy: uid, addedByName: name)
+        Task { try? await syncRepo.addDiaperLog(log) }
     }
 
     func removeDiaper() {

@@ -1,18 +1,17 @@
 import FirebaseFirestore
 
 final class BabySyncService {
-    private let db = Firestore.firestore()
-    private let babyId: String
+    private var db: Firestore { Firestore.firestore() }
+    private var babyId: String { FamilyManager.shared.familyId ?? "" }
 
-    init(babyId: String) {
-        self.babyId = babyId
-    }
+    init() {}
 
     private func collection(_ name: String) -> CollectionReference {
         db.collection("babies").document(babyId).collection(name)
     }
 
     func addLog<T: Encodable>(_ log: T, to subcollection: String) async throws {
+        guard !babyId.isEmpty else { return }
         let ref = collection(subcollection).document()
         try ref.setData(from: log)
     }

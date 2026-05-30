@@ -87,6 +87,9 @@ final class OnboardingViewModel: ObservableObject {
                 advance()
             } catch let error as ASAuthorizationError where error.code == .canceled {
                 // User cancelled — no error shown
+            } catch let asError as ASAuthorizationError where asError.code == .unknown {
+                // Error 1000 — Apple ID not signed in on device / Simulator
+                authError = AuthError.appleSignInUnavailable
             } catch {
                 authError = error
             }

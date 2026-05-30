@@ -1,0 +1,46 @@
+import SwiftData
+import Foundation
+
+final class SwiftDataPumpingRepository: PumpingRepository {
+    private let context: ModelContext
+
+    init(context: ModelContext) { self.context = context }
+
+    func start(side: PumpingSide) async throws -> PumpingEntry {
+        let entry = PumpingEntry(
+            id: UUID(),
+            date: Date(),
+            durationSeconds: 0,
+            side: side,
+            volumeML: 0,
+            endDate: nil
+        )
+        context.insert(PumpingRecord(entry))
+        try context.save()
+        return entry
+    }
+
+    func stop(_ entry: PumpingEntry, volumeML: Int) async throws -> PumpingEntry {
+        var finished = entry
+        let now = Date()
+        finished.endDate = now
+        finished.durationSeconds = max(1, Int(now.timeIntervalSince(entry.date)))
+        finished.volumeML = volumeML
+        let all = try context.fetch(FetchDescriptor<PumpingRecord>())
+        if let record = all.first(where: { $0.id == entry.id }) {
+            record.endDate = finished.endDate
+            record.durationSeconds = finished.durationSeconds
+            record.volumeML = volumeML
+            try context.save()
+        }
+        return finished
+    }
+
+    func getEntries(from: Date, to: Date) async throws -> [PumpingEntry] {
+        let all = try context.fetch(FetchDescriptor<PumpingRecord>())
+        return all
+            .filter { $0.date >= from && $0.date < to && $0.endDate != nil }
+            .map { $0.toDomain() }
+            .sorted { $0.date < $1.date }
+    }
+}

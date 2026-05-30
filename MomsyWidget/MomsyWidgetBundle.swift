@@ -7,6 +7,7 @@ struct MomsyWidgetBundle: WidgetBundle {
         MomsyFeedingWidget()
         MomsySleepWidget()
         MomsySummaryWidget()
+        FeedingLiveActivity()
     }
 }
 

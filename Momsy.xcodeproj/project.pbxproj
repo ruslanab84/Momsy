@@ -37,6 +37,8 @@
 		AA9D8473BEC847159E9AAAA4 /* MomMoodViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */; };
 		B24FC7CC0D782B29188B1E9F /* TodayViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */; };
 		B5191FCCF0C277E193F33888 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
+		B72786A82FCAC408006EB6DF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B72786A72FCAC408006EB6DF /* GoogleSignIn */; };
+		B72786AA2FCAC408006EB6DF /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B72786A92FCAC408006EB6DF /* GoogleSignInSwift */; };
 		B7318C7B2FBBA132003CCB0B /* ARCHITECTURE.md in Resources */ = {isa = PBXBuildFile; fileRef = B7318C752FBBA132003CCB0B /* ARCHITECTURE.md */; };
 		B7318C7C2FBBA132003CCB0B /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = B7318C762FBBA132003CCB0B /* CLAUDE.md */; };
 		B7318C7D2FBBA132003CCB0B /* LOCALIZATION_RULES.md in Resources */ = {isa = PBXBuildFile; fileRef = B7318C772FBBA132003CCB0B /* LOCALIZATION_RULES.md */; };
@@ -190,9 +192,22 @@
 		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B72786B02FCB0225006EB6DF /* Exceptions for "Momsy" folder in "Momsy" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = B7318B462FB8F473003CCB0B /* Momsy */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B7318B492FB8F473003CCB0B /* Momsy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B72786B02FCB0225006EB6DF /* Exceptions for "Momsy" folder in "Momsy" target */,
+			);
 			path = Momsy;
 			sourceTree = "<group>";
 		};
@@ -221,9 +236,11 @@
 				B7318F4B2FBCEA96003CCB0B /* FirebaseAnalytics in Frameworks */,
 				B7318F4D2FBCEA96003CCB0B /* FirebaseAuth in Frameworks */,
 				B7318F4F2FBCEA96003CCB0B /* FirebaseDatabase in Frameworks */,
+				B72786AA2FCAC408006EB6DF /* GoogleSignInSwift in Frameworks */,
 				B7318F512FBCEA96003CCB0B /* FirebaseFirestore in Frameworks */,
 				B7318F492FBCEA96003CCB0B /* FirebaseAI in Frameworks */,
 				B7318F532FBCEA96003CCB0B /* FirebaseStorage in Frameworks */,
+				B72786A82FCAC408006EB6DF /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -613,6 +630,8 @@
 				B7318F4E2FBCEA96003CCB0B /* FirebaseDatabase */,
 				B7318F502FBCEA96003CCB0B /* FirebaseFirestore */,
 				B7318F522FBCEA96003CCB0B /* FirebaseStorage */,
+				B72786A72FCAC408006EB6DF /* GoogleSignIn */,
+				B72786A92FCAC408006EB6DF /* GoogleSignInSwift */,
 			);
 			productName = Momsy;
 			productReference = B7318B472FB8F473003CCB0B /* Momsy.app */;
@@ -630,6 +649,11 @@
 				TargetAttributes = {
 					B7318B462FB8F473003CCB0B = {
 						CreatedOnToolsVersion = 26.5;
+						SystemCapabilities = {
+							com.apple.AppleID = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -644,6 +668,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				B7318F472FBCEA96003CCB0B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				B72786A62FCAC408006EB6DF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B7318B482FB8F473003CCB0B /* Products */;
@@ -1015,6 +1040,7 @@
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Momsy/Info.plist;
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1054,6 +1080,7 @@
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Momsy/Info.plist;
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1124,6 +1151,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B72786A62FCAC408006EB6DF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
 		B7318F472FBCEA96003CCB0B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -1135,6 +1170,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B72786A72FCAC408006EB6DF /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B72786A62FCAC408006EB6DF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		B72786A92FCAC408006EB6DF /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B72786A62FCAC408006EB6DF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
 		B7318F482FBCEA96003CCB0B /* FirebaseAI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B7318F472FBCEA96003CCB0B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

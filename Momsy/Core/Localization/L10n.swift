@@ -145,6 +145,23 @@ struct L10n {
     var noBathYet: String    { s("no bath yet",      "ещё не купались",       "noch nicht gebadet") }
     var addBathTitle: String { s("Add Bath",         "Добавить купание",      "Bad erfassen") }
     func bathLogEntry(dur: Int) -> String { s("Bath · \(dur) min", "Купание · \(dur) мин", "Bad · \(dur) min") }
+
+    var pumping: String         { s("Pumping",          "Сцеживание",          "Pumpen") }
+    var pumpingSideLabel: String { s("SIDE",            "СТОРОНА",             "SEITE") }
+    var pumpingLeft: String     { s("Left",             "Левая",               "Links") }
+    var pumpingRight: String    { s("Right",            "Правая",              "Rechts") }
+    var pumpingBoth: String     { s("Both",             "Обе",                 "Beide") }
+    var pumpingVolume: String   { s("VOLUME (ML)",      "ОБЪЁМ (МЛ)",          "MENGE (ML)") }
+    var pumpingStart: String    { s("Start",            "Начать",              "Starten") }
+    var pumpingStop: String     { s("Done",             "Готово",              "Fertig") }
+    var noPumpingYet: String    { s("No pumping today", "Сцеживаний ещё нет",  "Noch kein Pumpen") }
+    var pumpingTracker: String  { s("PUMPING TRACKER",  "ТРЕКЕР СЦЕЖИВАНИЯ",   "PUMPEN-TRACKER") }
+    func pumpingLogEntry(dur: Int, ml: Int) -> String {
+        ml > 0
+            ? s("Pumping · \(dur) min · \(ml) ml",   "Сцеживание · \(dur) мин · \(ml) мл",   "Pumpen · \(dur) min · \(ml) ml")
+            : s("Pumping · \(dur) min",               "Сцеживание · \(dur) мин",               "Pumpen · \(dur) min")
+    }
+
     var mood: String         { s("Mood",         "Настроение",   "Stimmung") }
     var feedLabel: String    { s("Feed",         "Еда",          "Essen") }
     var sleeping: String     { s("sleeping…",    "спит…",        "schläft…") }
@@ -725,4 +742,11 @@ struct L10n {
     var signInWithGoogle: String   { s("Sign in with Google",              "Войти через Google",                "Mit Google anmelden") }
     var mayBeLater: String         { s("Maybe Later",                      "Позже",                             "Vielleicht später") }
     var authSignedIn: String       { s("Signed in ✓",                      "Вы вошли ✓",                        "Angemeldet ✓") }
+    var signInFailed: String       { s("Sign in failed. Please try again.",
+                                       "Не удалось войти. Попробуйте ещё раз.",
+                                       "Anmeldung fehlgeschlagen. Bitte erneut versuchen.") }
+    var googleComingSoon: String   { s("Google Sign-In is coming soon.",    "Вход через Google скоро появится.", "Google-Anmeldung kommt bald.") }
+    var appleSignInHint: String    { s("Please sign in with your Apple ID in Settings → [Your Name] to use Sign in with Apple.",
+                                       "Войдите в Apple ID в Настройках → [Ваше имя], чтобы использовать Sign in with Apple.",
+                                       "Bitte melde dich in Einstellungen → [Dein Name] mit deiner Apple ID an.") }
 }

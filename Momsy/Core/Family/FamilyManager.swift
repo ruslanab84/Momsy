@@ -48,8 +48,7 @@ final class FamilyManager: ObservableObject {
 
         if let existingId = userDoc.data()?["familyId"] as? String {
             persist(familyId: existingId)
-            let syncService = BabySyncService(babyId: existingId)
-            try await syncService.setupBabyProfile(uid: uid, displayName: displayName)
+            try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
         } else {
             let newId = try await createFamily(for: uid)
             try await db.collection("families").document(newId)
@@ -60,8 +59,7 @@ final class FamilyManager: ObservableObject {
                 merge: true
             )
             persist(familyId: newId)
-            let syncService = BabySyncService(babyId: newId)
-            try await syncService.setupBabyProfile(uid: uid, displayName: displayName)
+            try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
         }
         isReady = true
     }
