@@ -59,7 +59,6 @@ struct SplashView: View {
             Circle()
                 .fill(Color.white.opacity(0.55))
                 .frame(width: 234, height: 234)
-                .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 6)
 
             // ─ Sun ─
             Image(systemName: "sun.max.fill")
@@ -91,6 +90,9 @@ struct SplashView: View {
             // ─ Z letters ─
             zLetters
         }
+        .frame(width: 234, height: 234)
+        .clipShape(Circle())
+        .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 6)
         .scaleEffect(sceneScale)
         .opacity(sceneOpacity)
     }
