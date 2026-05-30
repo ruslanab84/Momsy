@@ -43,4 +43,19 @@ final class SwiftDataPumpingRepository: PumpingRepository {
             .map { $0.toDomain() }
             .sorted { $0.date < $1.date }
     }
+
+    func logManual(date: Date, durationMinutes: Int, side: PumpingSide, volumeML: Int) async throws -> PumpingEntry {
+        let duration = max(1, durationMinutes) * 60
+        let entry = PumpingEntry(
+            id: UUID(),
+            date: date,
+            durationSeconds: duration,
+            side: side,
+            volumeML: volumeML,
+            endDate: date.addingTimeInterval(TimeInterval(duration))
+        )
+        context.insert(PumpingRecord(entry))
+        try context.save()
+        return entry
+    }
 }

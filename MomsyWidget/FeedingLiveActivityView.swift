@@ -3,55 +3,127 @@ import Foundation
 import SwiftUI
 import WidgetKit
 
-private func sideIcon(_ side: String) -> String {
-    switch side {
-    case "left": return "arrow.left.circle.fill"
-    case "right": return "arrow.right.circle.fill"
-    default: return "drop.fill"
+// MARK: - Mini Bottle Icon
+
+private struct MiniBottleIcon: View {
+    var size: CGFloat = 18
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: size * 0.18, style: .continuous)
+                .fill(Color.white)
+                .frame(width: size * 0.52, height: size * 0.72)
+                .offset(y: size * 0.06)
+            RoundedRectangle(cornerRadius: size * 0.10, style: .continuous)
+                .fill(Color(red: 1.0, green: 0.945, blue: 0.87))
+                .frame(width: size * 0.40, height: size * 0.30)
+                .offset(y: size * 0.20)
+            RoundedRectangle(cornerRadius: size * 0.06, style: .continuous)
+                .fill(Color(red: 0.941, green: 0.541, blue: 0.431))
+                .frame(width: size * 0.36, height: size * 0.16)
+                .offset(y: -size * 0.30)
+        }
+        .frame(width: size, height: size)
     }
 }
 
-private func sideLabel(_ side: String) -> String {
-    switch side {
-    case "left": return NSLocalizedString("Left", comment: "")
-    case "right": return NSLocalizedString("Right", comment: "")
-    default: return NSLocalizedString("Bottle", comment: "")
+// MARK: - Baby Pattern Background
+
+private struct BabyPatternBackground: View {
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.90, green: 0.95, blue: 1.0),
+                    Color(red: 1.0,  green: 0.94, blue: 0.92)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            ZStack {
+                iconAt("star.fill",  8,  x: -110, y: -16, r: -15)
+                iconAt("heart.fill", 9,  x:  -65, y:  14, r:  10)
+                iconAt("drop.fill",  7,  x:  -20, y: -20, r:   5)
+                iconAt("sparkle",    9,  x:   30, y:  18, r: -10)
+                iconAt("moon.fill",  8,  x:   75, y:  -8, r:  20)
+                iconAt("star.fill",  7,  x:  115, y:  16, r: -20)
+                iconAt("heart.fill", 8,  x:  -90, y:  24, r:  25)
+                iconAt("drop.fill",  9,  x:   50, y: -22, r:  -5)
+            }
+            .foregroundStyle(.pink.opacity(0.13))
+        }
+    }
+
+    @ViewBuilder
+    private func iconAt(_ name: String, _ pt: CGFloat,
+                        x: CGFloat, y: CGFloat, r: Double) -> some View {
+        Image(systemName: name)
+            .font(.system(size: pt))
+            .offset(x: x, y: y)
+            .rotationEffect(.degrees(r))
     }
 }
+
+// MARK: - Side helpers
+
+private func sideLabel(_ side: String) -> String {
+    switch side {
+    case "left":  return NSLocalizedString("Left", comment: "")
+    case "right": return NSLocalizedString("Right", comment: "")
+    default:      return NSLocalizedString("Bottle", comment: "")
+    }
+}
+
+@ViewBuilder
+private func sideIconView(_ side: String, size: CGFloat = 16) -> some View {
+    switch side {
+    case "left":
+        Image(systemName: "arrow.left.circle.fill")
+            .foregroundStyle(.pink)
+    case "right":
+        Image(systemName: "arrow.right.circle.fill")
+            .foregroundStyle(.pink)
+    default:
+        MiniBottleIcon(size: size)
+    }
+}
+
+// MARK: - Lock Screen View
 
 struct FeedingLockScreenView: View {
     let context: ActivityViewContext<FeedingActivityAttributes>
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "heart.fill")
-                    .foregroundStyle(.pink)
-                Text(context.attributes.babyName.isEmpty
-                     ? NSLocalizedString("Feeding", comment: "")
-                     : context.attributes.babyName)
-                    .font(.headline)
-                    .bold()
-                Spacer()
-                Text(NSLocalizedString("Feeding", comment: ""))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            HStack {
-                Label {
-                    Text(sideLabel(context.attributes.side))
-                        .font(.subheadline)
-                } icon: {
-                    Image(systemName: sideIcon(context.attributes.side))
+        ZStack {
+            BabyPatternBackground()
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Image(systemName: "heart.fill")
                         .foregroundStyle(.pink)
+                    Text(context.attributes.babyName.isEmpty
+                         ? NSLocalizedString("Feeding", comment: "")
+                         : context.attributes.babyName)
+                        .font(.headline)
+                        .bold()
+                    Spacer()
+                    Text(NSLocalizedString("Feeding", comment: ""))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-                Spacer()
-                timerView
+
+                HStack {
+                    Label {
+                        Text(sideLabel(context.attributes.side))
+                            .font(.subheadline)
+                    } icon: {
+                        sideIconView(context.attributes.side, size: 18)
+                    }
+                    Spacer()
+                    timerView
+                }
             }
+            .padding()
         }
-        .padding()
-        .activityBackgroundTint(Color.pink.opacity(0.08))
+        .activityBackgroundTint(.clear)
     }
 
     @ViewBuilder
@@ -84,6 +156,8 @@ struct FeedingLockScreenView: View {
     }
 }
 
+// MARK: - Live Activity Widget
+
 struct FeedingLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: FeedingActivityAttributes.self) { context in
@@ -91,10 +165,13 @@ struct FeedingLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label(sideLabel(context.attributes.side),
-                          systemImage: sideIcon(context.attributes.side))
-                        .font(.caption)
-                        .foregroundStyle(.pink)
+                    Label {
+                        Text(sideLabel(context.attributes.side))
+                    } icon: {
+                        sideIconView(context.attributes.side, size: 14)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.pink)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     expandedTimerView(context: context)
@@ -117,8 +194,7 @@ struct FeedingLiveActivity: Widget {
                     .foregroundStyle(context.state.isPaused ? .orange : .pink)
                 }
             } compactLeading: {
-                Image(systemName: sideIcon(context.attributes.side))
-                    .foregroundStyle(.pink)
+                sideIconView(context.attributes.side, size: 14)
             } compactTrailing: {
                 compactTimerView(context: context)
                     .monospacedDigit()

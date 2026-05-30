@@ -211,6 +211,8 @@ struct L10n {
     var feedingEndedLabel: String    { s("ENDED",          "КОНЕЦ",               "ENDE") }
     var feedingSideLabel: String     { s("SIDE",           "СТОРОНА",             "SEITE") }
     var enterManuallyLabel: String   { s("enter manually", "ввести вручную",      "manuell eingeben") }
+    var addPumpingTitle: String      { s("Add Pumping",    "Добавить сцеживание", "Pumpen eintragen") }
+    var pumpingTypicalDuration: String { s("of ≈ 20 min typical", "из ≈ 20 мин обычно", "von ≈ 20 min üblich") }
 
     // MARK: — Sleep
     var sleepStart: String   { s("Start sleep",   "Начать сон",    "Schlaf starten") }

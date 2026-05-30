@@ -77,6 +77,22 @@ final class PumpingViewModel: ObservableObject {
         }
     }
 
+    func logManualEntry(date: Date, durationMinutes: Int, side: PumpingSide, volumeML: Int) {
+        Task {
+            do {
+                let entry = try await repository.logManual(
+                    date: date, durationMinutes: durationMinutes,
+                    side: side, volumeML: volumeML)
+                if Calendar.current.isDateInToday(entry.date) {
+                    todayEntries.append(entry)
+                    todayEntries.sort { $0.date < $1.date }
+                }
+            } catch {
+                saveError = error.localizedDescription
+            }
+        }
+    }
+
     private func activateTimer(from startDate: Date) {
         isPumpingActive = true
         pumpingSeconds = Int(Date().timeIntervalSince(startDate))
