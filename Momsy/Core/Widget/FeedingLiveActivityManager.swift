@@ -7,6 +7,10 @@ final class FeedingLiveActivityManager {
 
     func startActivity(side: String, startDate: Date, babyName: String) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        for existing in Activity<FeedingActivityAttributes>.activities {
+            Task { await existing.end(nil, dismissalPolicy: .immediate) }
+        }
+        activity = nil
         let attributes = FeedingActivityAttributes(side: side, babyName: babyName)
         let state = FeedingActivityAttributes.ContentState(
             effectiveStartDate: startDate, isPaused: false, pausedSeconds: 0

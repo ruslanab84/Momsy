@@ -33,8 +33,8 @@ private struct BabyPatternBackground: View {
         ZStack {
             LinearGradient(
                 colors: [
-                    Color(red: 0.90, green: 0.95, blue: 1.0),
-                    Color(red: 1.0,  green: 0.94, blue: 0.92)
+                    Color(red: 0.08, green: 0.08, blue: 0.18),
+                    Color(red: 0.18, green: 0.08, blue: 0.24)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -49,7 +49,7 @@ private struct BabyPatternBackground: View {
                 iconAt("heart.fill", 8,  x:  -90, y:  24, r:  25)
                 iconAt("drop.fill",  9,  x:   50, y: -22, r:  -5)
             }
-            .foregroundStyle(.pink.opacity(0.13))
+            .foregroundStyle(.white.opacity(0.10))
         }
     }
 
@@ -104,16 +104,18 @@ struct FeedingLockScreenView: View {
                          : context.attributes.babyName)
                         .font(.headline)
                         .bold()
+                        .foregroundStyle(.white)
                     Spacer()
                     Text(NSLocalizedString("Feeding", comment: ""))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.6))
                 }
 
                 HStack {
                     Label {
                         Text(sideLabel(context.attributes.side))
                             .font(.subheadline)
+                            .foregroundStyle(.white)
                     } icon: {
                         sideIconView(context.attributes.side, size: 18)
                     }
@@ -131,7 +133,7 @@ struct FeedingLockScreenView: View {
         if context.isStale {
             Text(NSLocalizedString("Updating…", comment: ""))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.5))
         } else if context.state.isPaused {
             HStack(spacing: 4) {
                 Image(systemName: "pause.fill")
@@ -140,12 +142,14 @@ struct FeedingLockScreenView: View {
                 Text(pausedTimeString)
                     .monospacedDigit()
                     .font(.title3.bold())
+                    .foregroundStyle(.white)
             }
         } else {
             Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
                  countsDown: false)
                 .monospacedDigit()
                 .font(.title3.bold())
+                .foregroundStyle(.white)
         }
     }
 
