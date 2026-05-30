@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("onboardingDone") private var onboardingDone = false
-    @AppStorage("paywallShown") private var paywallShown = false
+    @State private var paywallShown = UserDefaults.standard.bool(forKey: "paywallShown")
     @Environment(\.appContainer) private var container
     @State private var showSplash = true
 
@@ -18,7 +18,10 @@ struct ContentView: View {
             } else if !paywallShown {
                 PaywallView(
                     subscriptionManager: container.subscriptionManager,
-                    onComplete: { withAnimation(.easeInOut(duration: 0.35)) { paywallShown = true } }
+                    onComplete: {
+                        UserDefaults.standard.set(true, forKey: "paywallShown")
+                        withAnimation(.easeInOut(duration: 0.35)) { paywallShown = true }
+                    }
                 )
                 .transition(.opacity)
             } else {
