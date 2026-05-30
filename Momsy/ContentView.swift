@@ -18,7 +18,7 @@ struct ContentView: View {
             } else if !paywallShown {
                 PaywallView(
                     subscriptionManager: container.subscriptionManager,
-                    onComplete: { paywallShown = true }
+                    onComplete: { withAnimation(.easeInOut(duration: 0.35)) { paywallShown = true } }
                 )
                 .transition(.opacity)
             } else {
@@ -28,7 +28,6 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: onboardingDone)
-        .animation(.easeInOut(duration: 0.35), value: paywallShown)
         .task {
             try? await Task.sleep(for: .seconds(2.2))
             showSplash = false
