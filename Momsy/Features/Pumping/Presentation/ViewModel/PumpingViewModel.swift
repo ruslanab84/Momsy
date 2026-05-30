@@ -56,11 +56,23 @@ final class PumpingViewModel: ObservableObject {
                 let dur = finished.durationMinutes
                 let label = lm.strings.pumpingLogEntry(dur: dur, ml: savedML)
                 quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .pump, label: label))
+                pushPumpingToFirestore(entry: finished)
                 await loadTodayEntries()
             } catch {
                 saveError = error.localizedDescription
             }
         }
+    }
+
+    private func pushPumpingToFirestore(entry: PumpingEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let label = lm.strings.pumpingLogEntry(dur: entry.durationMinutes, ml: entry.volumeML)
+        let log = QuickEventLog(id: entry.id.uuidString, kind: "pump",
+                                loggedAt: entry.date, label: label,
+                                addedBy: uid, addedByName: name)
+        Task { try? await BabySyncService().addLog(QuickEventLogDTO(from: log), to: "pumpingLogs") }
     }
 
     func syncTimerWithStartDate() {

@@ -208,7 +208,15 @@ final class TodayViewModel: ObservableObject {
         let log = QuickEventLog(id: UUID().uuidString, kind: kind.rawValue,
                                 loggedAt: date, label: label,
                                 addedBy: uid, addedByName: name)
-        Task { try? await syncRepo.addQuickEventLog(log) }
+        let collection: String
+        switch kind {
+        case .walk:    collection = "walkLogs"
+        case .bath:    collection = "bathLogs"
+        case .vitamin: collection = "vitaminLogs"
+        case .stool:   collection = "stoolLogs"
+        default:       collection = "quickLogs"
+        }
+        Task { try? await BabySyncService().addLog(QuickEventLogDTO(from: log), to: collection) }
     }
 
     func logSymptom() {
