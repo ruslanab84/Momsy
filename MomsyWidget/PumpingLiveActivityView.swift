@@ -19,8 +19,7 @@ struct PumpingLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Image(systemName: "drop.circle.fill")
-                        .foregroundStyle(.pink)
+                    BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
                          ? NSLocalizedString("Pumping", comment: "")
                          : context.attributes.babyName)
@@ -39,8 +38,7 @@ struct PumpingLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        Image(systemName: "drop.circle.fill")
-                            .foregroundStyle(.pink)
+                        BabyFaceIcon(size: 16)
                     }
                     Spacer()
                     timerView
@@ -77,8 +75,7 @@ struct PumpingLiveActivity: Widget {
                     Label {
                         Text(pumpSideLabel(context.attributes.side))
                     } icon: {
-                        Image(systemName: "drop.circle.fill")
-                            .foregroundStyle(.pink)
+                        BabyFaceIcon(size: 14)
                     }
                     .font(.caption)
                     .foregroundStyle(.pink)
@@ -96,14 +93,16 @@ struct PumpingLiveActivity: Widget {
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Label(NSLocalizedString("Pumping…", comment: ""),
-                          systemImage: "drop.circle.fill")
-                        .font(.caption)
-                        .foregroundStyle(.pink)
+                    Label {
+                        Text(NSLocalizedString("Pumping…", comment: ""))
+                    } icon: {
+                        BabyFaceIcon(size: 14)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.pink)
                 }
             } compactLeading: {
-                Image(systemName: "drop.circle.fill")
-                    .foregroundStyle(.pink)
+                BabyFaceIcon(size: 14)
             } compactTrailing: {
                 Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
                      countsDown: false)
@@ -111,8 +110,7 @@ struct PumpingLiveActivity: Widget {
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                Image(systemName: "drop.circle.fill")
-                    .foregroundStyle(.pink)
+                BabyFaceIcon(size: 14)
             }
             .keylineTint(.pink)
         }

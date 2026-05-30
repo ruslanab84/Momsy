@@ -11,8 +11,7 @@ struct BathLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Image(systemName: "drop.fill")
-                        .foregroundStyle(.cyan)
+                    BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
                          ? NSLocalizedString("Bath", comment: "")
                          : context.attributes.babyName)
@@ -31,8 +30,7 @@ struct BathLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        Image(systemName: "drop.fill")
-                            .foregroundStyle(.cyan)
+                        BabyFaceIcon(size: 16)
                     }
                     Spacer()
                     timerView
@@ -69,8 +67,7 @@ struct BathLiveActivity: Widget {
                     Label {
                         Text(NSLocalizedString("Bath", comment: ""))
                     } icon: {
-                        Image(systemName: "drop.fill")
-                            .foregroundStyle(.cyan)
+                        BabyFaceIcon(size: 14)
                     }
                     .font(.caption)
                     .foregroundStyle(.cyan)
@@ -88,14 +85,16 @@ struct BathLiveActivity: Widget {
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Label(NSLocalizedString("Bathing…", comment: ""),
-                          systemImage: "drop.fill")
-                        .font(.caption)
-                        .foregroundStyle(.cyan)
+                    Label {
+                        Text(NSLocalizedString("Bathing…", comment: ""))
+                    } icon: {
+                        BabyFaceIcon(size: 14)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.cyan)
                 }
             } compactLeading: {
-                Image(systemName: "drop.fill")
-                    .foregroundStyle(.cyan)
+                BabyFaceIcon(size: 14)
             } compactTrailing: {
                 Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
                      countsDown: false)
@@ -103,8 +102,7 @@ struct BathLiveActivity: Widget {
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                Image(systemName: "drop.fill")
-                    .foregroundStyle(.cyan)
+                BabyFaceIcon(size: 14)
             }
             .keylineTint(.cyan)
         }

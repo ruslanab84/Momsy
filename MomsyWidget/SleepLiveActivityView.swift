@@ -11,8 +11,7 @@ struct SleepLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Image(systemName: "moon.fill")
-                        .foregroundStyle(.purple)
+                    BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
                          ? NSLocalizedString("Sleep", comment: "")
                          : context.attributes.babyName)
@@ -31,8 +30,7 @@ struct SleepLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        Image(systemName: "moon.fill")
-                            .foregroundStyle(.purple)
+                        BabyFaceIcon(size: 16)
                     }
                     Spacer()
                     timerView
@@ -69,8 +67,7 @@ struct SleepLiveActivity: Widget {
                     Label {
                         Text(NSLocalizedString("Sleep", comment: ""))
                     } icon: {
-                        Image(systemName: "moon.fill")
-                            .foregroundStyle(.purple)
+                        BabyFaceIcon(size: 14)
                     }
                     .font(.caption)
                     .foregroundStyle(.purple)
@@ -88,14 +85,16 @@ struct SleepLiveActivity: Widget {
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Label(NSLocalizedString("Sleeping…", comment: ""),
-                          systemImage: "moon.fill")
-                        .font(.caption)
-                        .foregroundStyle(.purple)
+                    Label {
+                        Text(NSLocalizedString("Sleeping…", comment: ""))
+                    } icon: {
+                        BabyFaceIcon(size: 14)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.purple)
                 }
             } compactLeading: {
-                Image(systemName: "moon.fill")
-                    .foregroundStyle(.purple)
+                BabyFaceIcon(size: 14)
             } compactTrailing: {
                 Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
                      countsDown: false)
@@ -103,8 +102,7 @@ struct SleepLiveActivity: Widget {
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                Image(systemName: "moon.fill")
-                    .foregroundStyle(.purple)
+                BabyFaceIcon(size: 14)
             }
             .keylineTint(.purple)
         }

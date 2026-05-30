@@ -11,8 +11,7 @@ struct WalkLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Image(systemName: "figure.walk")
-                        .foregroundStyle(.green)
+                    BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
                          ? NSLocalizedString("Walk", comment: "")
                          : context.attributes.babyName)
@@ -31,8 +30,7 @@ struct WalkLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        Image(systemName: "figure.walk")
-                            .foregroundStyle(.green)
+                        BabyFaceIcon(size: 16)
                     }
                     Spacer()
                     timerView
@@ -69,8 +67,7 @@ struct WalkLiveActivity: Widget {
                     Label {
                         Text(NSLocalizedString("Walk", comment: ""))
                     } icon: {
-                        Image(systemName: "figure.walk")
-                            .foregroundStyle(.green)
+                        BabyFaceIcon(size: 14)
                     }
                     .font(.caption)
                     .foregroundStyle(.green)
@@ -88,14 +85,16 @@ struct WalkLiveActivity: Widget {
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Label(NSLocalizedString("Walking…", comment: ""),
-                          systemImage: "figure.walk")
-                        .font(.caption)
-                        .foregroundStyle(.green)
+                    Label {
+                        Text(NSLocalizedString("Walking…", comment: ""))
+                    } icon: {
+                        BabyFaceIcon(size: 14)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.green)
                 }
             } compactLeading: {
-                Image(systemName: "figure.walk")
-                    .foregroundStyle(.green)
+                BabyFaceIcon(size: 14)
             } compactTrailing: {
                 Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
                      countsDown: false)
@@ -103,8 +102,7 @@ struct WalkLiveActivity: Widget {
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                Image(systemName: "figure.walk")
-                    .foregroundStyle(.green)
+                BabyFaceIcon(size: 14)
             }
             .keylineTint(.green)
         }

@@ -60,8 +60,7 @@ struct FeedingLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(.pink)
+                    BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
                          ? NSLocalizedString("Feeding", comment: "")
                          : context.attributes.babyName)
@@ -135,7 +134,7 @@ struct FeedingLiveActivity: Widget {
                     Label {
                         Text(sideLabel(context.attributes.side))
                     } icon: {
-                        sideIconView(context.attributes.side, size: 14)
+                        BabyFaceIcon(size: 14)
                     }
                     .font(.caption)
                     .foregroundStyle(.pink)
@@ -161,15 +160,14 @@ struct FeedingLiveActivity: Widget {
                     .foregroundStyle(context.state.isPaused ? .orange : .pink)
                 }
             } compactLeading: {
-                sideIconView(context.attributes.side, size: 14)
+                BabyFaceIcon(size: 14)
             } compactTrailing: {
                 compactTimerView(context: context)
                     .monospacedDigit()
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                Image(systemName: "heart.fill")
-                    .foregroundStyle(.pink)
+                BabyFaceIcon(size: 14)
             }
             .keylineTint(.pink)
         }
