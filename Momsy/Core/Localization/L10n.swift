@@ -743,6 +743,32 @@ struct L10n {
     var signInWithApple: String    { s("Sign in with Apple",               "Войти через Apple",                 "Mit Apple anmelden") }
     var signInWithGoogle: String   { s("Sign in with Google",              "Войти через Google",                "Mit Google anmelden") }
     var mayBeLater: String         { s("Maybe Later",                      "Позже",                             "Vielleicht später") }
+
+    // MARK: — Paywall
+    var trialBadge: String         { s("7 days free",
+                                       "7 дней бесплатно",
+                                       "7 Tage gratis") }
+    var startTrial: String         { s("Start Free Trial",
+                                       "Начать бесплатно на 7 дней",
+                                       "7 Tage gratis starten") }
+    var paywallPriceNote: String   { s("Then $4.99/month · Cancel anytime",
+                                       "Затем 299 ₽/мес · Отменить в любое время",
+                                       "Dann 4,99 €/Monat · Jederzeit kündbar") }
+    var restorePurchases: String   { s("Restore Purchases",
+                                       "Восстановить покупки",
+                                       "Käufe wiederherstellen") }
+    var featureAll: String         { s("All features, no limits",
+                                       "Все функции без ограничений",
+                                       "Alle Funktionen ohne Limits") }
+    var featureSync: String        { s("Family sync across devices",
+                                       "Синхронизация и семейный доступ",
+                                       "Familiensync über Geräte hinweg") }
+    var featureAI: String          { s("Daily AI tips for your baby",
+                                       "ИИ-советы каждый день",
+                                       "Tägliche KI-Tipps für dein Baby") }
+    var featureDiary: String       { s("Unlimited diary & statistics",
+                                       "Журнал и статистика без лимитов",
+                                       "Unbegrenzte Statistiken") }
     var authSignedIn: String       { s("Signed in ✓",                      "Вы вошли ✓",                        "Angemeldet ✓") }
     var signInFailed: String       { s("Sign in failed. Please try again.",
                                        "Не удалось войти. Попробуйте ещё раз.",

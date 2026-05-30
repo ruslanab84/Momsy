@@ -39,6 +39,7 @@ final class AppContainer {
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let authManager                                    = AuthManager()
+    let subscriptionManager                            = SubscriptionManager()
     let diaperUseCase                                   = DiaperUseCase()
     let quickLogRepository                              = QuickLogRepository()
     let aiChatService: any AIChatService               = GeminiChatService()
