@@ -175,12 +175,25 @@ final class DiaryViewModel: ObservableObject {
                 let stored = toStored(item, date: date)
                 do {
                     try await repo.add(stored)
+                    pushDiaryToFirestore(stored)
                 } catch {
                     rollbackItem(item)
                     saveError = error.localizedDescription
                 }
             }
         }
+    }
+
+    private func pushDiaryToFirestore(_ item: StoredDiaryItem) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = DiaryLog(
+            id: item.id.uuidString, date: item.date,
+            kind: item.kind.rawValue, text: item.text,
+            iconName: item.iconName, addedBy: uid, addedByName: name
+        )
+        Task { try? await BabySyncService().addLog(DiaryLogDTO(from: log), to: "diaryLogs") }
     }
 
     private func rollbackItem(_ item: DiaryItem) {

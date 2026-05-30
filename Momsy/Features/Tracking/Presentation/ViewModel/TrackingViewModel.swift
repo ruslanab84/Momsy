@@ -141,6 +141,19 @@ final class TrackingViewModel: ObservableObject {
             do { try await measurementRepo.add(entry) }
             catch { saveError = error.localizedDescription }
         }
+        pushMeasurementToFirestore(entry)
+    }
+
+    private func pushMeasurementToFirestore(_ entry: MeasurementEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = MeasurementLog(
+            id: entry.id.uuidString, date: entry.date,
+            weight: entry.weight, height: entry.height,
+            headCirc: entry.headCirc, addedBy: uid, addedByName: name
+        )
+        Task { try? await BabySyncService().addLog(MeasurementLogDTO(from: log), to: "measurementLogs") }
     }
 
     func addTemp(_ entry: TemperatureEntry) {

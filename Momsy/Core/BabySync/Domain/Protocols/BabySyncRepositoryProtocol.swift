@@ -5,10 +5,14 @@ protocol BabySyncRepositoryProtocol {
     var sleepLogs:   AsyncStream<[SleepLog]>   { get }
     var diaperLogs:  AsyncStream<[DiaperLog]>  { get }
 
-    func addFeedingLog(_ log: FeedingLog)  async throws
-    func addSleepLog(_ log: SleepLog)      async throws
-    func addDiaperLog(_ log: DiaperLog)    async throws
-    func addSymptomLog(_ log: SymptomLog)  async throws
+    func addFeedingLog(_ log: FeedingLog)          async throws
+    func addSleepLog(_ log: SleepLog)              async throws
+    func addDiaperLog(_ log: DiaperLog)            async throws
+    func addSymptomLog(_ log: SymptomLog)          async throws
+    func addQuickEventLog(_ log: QuickEventLog)    async throws
+    func addDiaryLog(_ log: DiaryLog)              async throws
+    func addMeasurementLog(_ log: MeasurementLog)  async throws
+    func addVaccinationLog(_ log: VaccinationLog)  async throws
 
     func fetchTodayFeedings() async throws -> [FeedingLog]
     func fetchTodaySleep()    async throws -> [SleepLog]

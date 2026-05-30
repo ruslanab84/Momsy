@@ -175,18 +175,21 @@ final class TodayViewModel: ObservableObject {
         let label = LocalizationManager.shared.strings.walkLogged
         quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .walk, label: label))
         addEntry(LogEntry(time: Date(), kind: .walk, label: label))
+        pushQuickEventToFirestore(kind: .walk, label: label)
     }
 
     func logBath() {
         let label = LocalizationManager.shared.strings.bathLogged
         quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .bath, label: label))
         addEntry(LogEntry(time: Date(), kind: .bath, label: label))
+        pushQuickEventToFirestore(kind: .bath, label: label)
     }
 
     func logVitamins() {
         let label = LocalizationManager.shared.strings.vitaminsGiven
         quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .vitamin, label: label))
         addEntry(LogEntry(time: Date(), kind: .vitamin, label: label))
+        pushQuickEventToFirestore(kind: .vitamin, label: label)
     }
 
     func logStool(date: Date) {
@@ -195,6 +198,17 @@ final class TodayViewModel: ObservableObject {
         quickLogRepo.append(QuickLogEntry(id: UUID(), time: date, kind: .stool, label: label))
         addEntry(LogEntry(time: date, kind: .stool, label: label))
         Task { try? await stoolRepo.add(date: date) }
+        pushQuickEventToFirestore(kind: .stool, label: label, at: date)
+    }
+
+    private func pushQuickEventToFirestore(kind: BlobKind, label: String, at date: Date = Date()) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = QuickEventLog(id: UUID().uuidString, kind: kind.rawValue,
+                                loggedAt: date, label: label,
+                                addedBy: uid, addedByName: name)
+        Task { try? await syncRepo.addQuickEventLog(log) }
     }
 
     func logSymptom() {

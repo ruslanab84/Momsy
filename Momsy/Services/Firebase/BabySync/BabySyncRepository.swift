@@ -35,6 +35,22 @@ final class BabySyncRepository: BabySyncRepositoryProtocol {
         try await service.addLog(SymptomLogDTO(from: log), to: "symptomLogs")
     }
 
+    func addQuickEventLog(_ log: QuickEventLog) async throws {
+        try await service.addLog(QuickEventLogDTO(from: log), to: "quickLogs")
+    }
+
+    func addDiaryLog(_ log: DiaryLog) async throws {
+        try await service.addLog(DiaryLogDTO(from: log), to: "diaryLogs")
+    }
+
+    func addMeasurementLog(_ log: MeasurementLog) async throws {
+        try await service.addLog(MeasurementLogDTO(from: log), to: "measurementLogs")
+    }
+
+    func addVaccinationLog(_ log: VaccinationLog) async throws {
+        try await service.addLog(VaccinationLogDTO(from: log), to: "vaccinationLogs")
+    }
+
     func fetchTodayFeedings() async throws -> [FeedingLog] {
         let dtos: [FeedingLogDTO] = try await service.fetchToday(from: "feedingLogs")
         return dtos.map(\.domain)
