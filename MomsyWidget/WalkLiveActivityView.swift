@@ -30,7 +30,9 @@ struct WalkLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        BabyFaceIcon(size: 16)
+                        Image(systemName: "stroller.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.green)
                     }
                     Spacer()
                     timerView
@@ -88,7 +90,8 @@ struct WalkLiveActivity: Widget {
                     Label {
                         Text(NSLocalizedString("Walking…", comment: ""))
                     } icon: {
-                        BabyFaceIcon(size: 14)
+                        Image(systemName: "stroller.fill")
+                            .foregroundStyle(.green)
                     }
                     .font(.caption)
                     .foregroundStyle(.green)

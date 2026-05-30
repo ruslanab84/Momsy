@@ -38,7 +38,9 @@ struct PumpingLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        BabyFaceIcon(size: 16)
+                        Image(systemName: "drop.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.pink)
                     }
                     Spacer()
                     timerView
@@ -96,7 +98,8 @@ struct PumpingLiveActivity: Widget {
                     Label {
                         Text(NSLocalizedString("Pumping…", comment: ""))
                     } icon: {
-                        BabyFaceIcon(size: 14)
+                        Image(systemName: "drop.fill")
+                            .foregroundStyle(.pink)
                     }
                     .font(.caption)
                     .foregroundStyle(.pink)

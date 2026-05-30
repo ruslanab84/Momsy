@@ -79,7 +79,7 @@ struct FeedingLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        sideIconView(context.attributes.side, size: 18)
+                        MiniBottleIcon(size: 18)
                     }
                     Spacer()
                     timerView
@@ -150,12 +150,18 @@ struct FeedingLiveActivity: Widget {
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Label(
-                        context.state.isPaused
-                            ? NSLocalizedString("Paused", comment: "")
-                            : NSLocalizedString("Feeding…", comment: ""),
-                        systemImage: context.state.isPaused ? "pause.circle" : "heart.fill"
-                    )
+                    Label {
+                        Text(context.state.isPaused
+                             ? NSLocalizedString("Paused", comment: "")
+                             : NSLocalizedString("Feeding…", comment: ""))
+                    } icon: {
+                        if context.state.isPaused {
+                            Image(systemName: "pause.circle")
+                                .foregroundStyle(.orange)
+                        } else {
+                            MiniBottleIcon(size: 14)
+                        }
+                    }
                     .font(.caption)
                     .foregroundStyle(context.state.isPaused ? .orange : .pink)
                 }

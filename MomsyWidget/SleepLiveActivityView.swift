@@ -30,7 +30,9 @@ struct SleepLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        BabyFaceIcon(size: 16)
+                        Image(systemName: "moon.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.purple)
                     }
                     Spacer()
                     timerView
@@ -88,7 +90,8 @@ struct SleepLiveActivity: Widget {
                     Label {
                         Text(NSLocalizedString("Sleeping…", comment: ""))
                     } icon: {
-                        BabyFaceIcon(size: 14)
+                        Image(systemName: "moon.fill")
+                            .foregroundStyle(.purple)
                     }
                     .font(.caption)
                     .foregroundStyle(.purple)

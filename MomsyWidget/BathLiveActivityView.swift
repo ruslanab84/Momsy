@@ -30,7 +30,9 @@ struct BathLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        BabyFaceIcon(size: 16)
+                        Image(systemName: "drop.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.cyan)
                     }
                     Spacer()
                     timerView
@@ -88,7 +90,8 @@ struct BathLiveActivity: Widget {
                     Label {
                         Text(NSLocalizedString("Bathing…", comment: ""))
                     } icon: {
-                        BabyFaceIcon(size: 14)
+                        Image(systemName: "drop.fill")
+                            .foregroundStyle(.cyan)
                     }
                     .font(.caption)
                     .foregroundStyle(.cyan)
