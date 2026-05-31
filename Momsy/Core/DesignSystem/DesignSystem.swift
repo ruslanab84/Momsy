@@ -5,30 +5,30 @@ import UIKit
 
 extension Color {
     // Adaptive neutral tokens — flip between light and dark based on color scheme
-    static let bbCream     = Color(UIColor(light: UIColor(bbHex: "FFF6EC"), dark: UIColor(bbHex: "1C1008")))
-    static let bbCreamSoft = Color(UIColor(light: UIColor(bbHex: "FFFAF2"), dark: UIColor(bbHex: "241A10")))
-    static let bbCard      = Color(UIColor(light: .white,                   dark: UIColor(bbHex: "30221A")))
-    static let bbInk       = Color(UIColor(light: UIColor(bbHex: "3D2A20"), dark: UIColor(bbHex: "F0E4D8")))
-    static let bbInkSoft   = Color(UIColor(light: UIColor(bbHex: "6B5446"), dark: UIColor(bbHex: "C4A890")))
-    static let bbInkMute   = Color(UIColor(light: UIColor(bbHex: "A89484"), dark: UIColor(bbHex: "9A7868")))
+    static let bbCream     = Color(UIColor(light: UIColor(bbHex: "FFF6EC"), dark: UIColor(bbHex: "0C0804")))
+    static let bbCreamSoft = Color(UIColor(light: UIColor(bbHex: "FFFAF2"), dark: UIColor(bbHex: "120C07")))
+    static let bbCard      = Color(UIColor(light: .white,                   dark: UIColor(bbHex: "1A1109")))
+    static let bbInk       = Color(UIColor(light: UIColor(bbHex: "3D2A20"), dark: UIColor(bbHex: "F8F2EC")))
+    static let bbInkSoft   = Color(UIColor(light: UIColor(bbHex: "6B5446"), dark: UIColor(bbHex: "CCAA8A")))
+    static let bbInkMute   = Color(UIColor(light: UIColor(bbHex: "A89484"), dark: UIColor(bbHex: "8A6A58")))
 
     // Fixed dark surface — always warm dark brown regardless of color scheme.
     // Use for elements that are intentionally dark: now-playing card, action buttons, disclaimer banners.
-    static let bbSurface   = Color(bbHex: "3D2A20")
+    static let bbSurface   = Color(bbHex: "2C1C12")
 
-    // Accent colors — unchanged in both modes
-    static let bbCoral      = Color(bbHex: "FFB39E")
-    static let bbCoralDeep  = Color(bbHex: "F08A6E")
-    static let bbMint       = Color(bbHex: "A8DDCB")
-    static let bbMintDeep   = Color(bbHex: "5FB99B")
-    static let bbButter     = Color(bbHex: "FFE0A3")
-    static let bbButterDeep = Color(bbHex: "F2B85C")
-    static let bbLilac      = Color(bbHex: "D5C4F0")
-    static let bbLilacDeep  = Color(bbHex: "9F82D8")
-    static let bbSky        = Color(bbHex: "BBDDF0")
-    static let bbSkyDeep    = Color(bbHex: "6FA8CE")
-    static let bbRose       = Color(bbHex: "F8C9D6")
-    static let bbRoseDeep   = Color(bbHex: "E089A3")
+    // Accent colors — more vibrant for punch on both light and dark backgrounds
+    static let bbCoral      = Color(bbHex: "FF8C72")
+    static let bbCoralDeep  = Color(bbHex: "E8582A")
+    static let bbMint       = Color(bbHex: "78D4B8")
+    static let bbMintDeep   = Color(bbHex: "30A882")
+    static let bbButter     = Color(bbHex: "FFD070")
+    static let bbButterDeep = Color(bbHex: "F09418")
+    static let bbLilac      = Color(bbHex: "C0A4F8")
+    static let bbLilacDeep  = Color(bbHex: "7C4ED8")
+    static let bbSky        = Color(bbHex: "88CCEC")
+    static let bbSkyDeep    = Color(bbHex: "3A8EC8")
+    static let bbRose       = Color(bbHex: "F898BE")
+    static let bbRoseDeep   = Color(bbHex: "D44088")
 
     init(bbHex hex: String) {
         var n: UInt64 = 0

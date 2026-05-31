@@ -137,20 +137,21 @@ private struct LeapInfoBlock: View {
     let accent: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 5) {
             Text(title)
                 .font(.system(size: 10, weight: .heavy, design: .rounded))
                 .foregroundColor(accent)
-                .kerning(0.4)
+                .kerning(0.6)
             ForEach(items, id: \.self) { item in
                 Text("· \(item)")
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundColor(.bbInk)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(bbHex: "2A1A12"))
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.8))
+        .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }

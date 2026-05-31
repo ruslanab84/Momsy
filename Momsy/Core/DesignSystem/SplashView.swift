@@ -14,10 +14,19 @@ struct SplashView: View {
     @State private var cloudFloat: CGFloat = 0
     @State private var breathe = false
 
-    // Stars
+    // In-bubble stars
     @State private var s1: Double = 0.35
     @State private var s2: Double = 0.70
     @State private var s3: Double = 0.25
+
+    // Full-screen background stars (3 twinkling groups)
+    @State private var twA: Double = 0.20
+    @State private var twB: Double = 0.50
+    @State private var twC: Double = 0.10
+
+    // Floating hearts
+    @State private var h1Y: CGFloat = 0; @State private var h1Op: Double = 0
+    @State private var h2Y: CGFloat = 0; @State private var h2Op: Double = 0
 
     // Z letters (one-shot rise + fade over 2.2s window)
     @State private var z1Y: CGFloat = 0;  @State private var z1Op: Double = 0
@@ -29,17 +38,49 @@ struct SplashView: View {
     @State private var taglineOpacity: Double = 0
 
     // Palette
-    private let skyTop  = Color(red: 0.87, green: 0.94, blue: 1.00)
-    private let skyBot  = Color(red: 1.00, green: 0.96, blue: 0.93)
+    private let skyTop  = Color(red: 0.83, green: 0.92, blue: 1.00)
+    private let skyMid  = Color(red: 0.95, green: 0.91, blue: 1.00)
+    private let skyBot  = Color(red: 1.00, green: 0.93, blue: 0.91)
     private let sunCol  = Color(red: 1.00, green: 0.80, blue: 0.28)
     private let moonCol = Color(red: 0.65, green: 0.78, blue: 0.92)
     private let starCol = Color(red: 0.68, green: 0.83, blue: 0.95)
     private let zCol    = Color(red: 0.58, green: 0.77, blue: 0.95)
+    private let heartCol = Color(red: 1.00, green: 0.70, blue: 0.75)
+
+    // Star positions: (xFraction, yFraction, size, group 0/1/2, useSparkle)
+    private let bgStars: [(CGFloat, CGFloat, CGFloat, Int, Bool)] = [
+        (0.07, 0.05, 6, 0, true),  (0.25, 0.09, 4, 1, false), (0.88, 0.07, 7, 0, true),
+        (0.95, 0.18, 4, 2, false), (0.05, 0.24, 5, 1, true),  (0.74, 0.13, 5, 2, false),
+        (0.46, 0.04, 4, 0, false), (0.63, 0.11, 6, 1, true),  (0.15, 0.38, 4, 2, false),
+        (0.91, 0.40, 5, 0, true),  (0.03, 0.58, 4, 1, false), (0.97, 0.55, 6, 2, true),
+        (0.11, 0.75, 5, 0, false), (0.87, 0.72, 4, 1, true),  (0.32, 0.87, 6, 2, false),
+        (0.70, 0.84, 4, 0, true),  (0.55, 0.94, 5, 1, false), (0.19, 0.96, 4, 2, true),
+        (0.80, 0.92, 5, 0, false), (0.50, 0.98, 4, 2, true),  (0.42, 0.17, 5, 1, true),
+        (0.58, 0.78, 4, 0, false), (0.78, 0.55, 5, 2, true),  (0.35, 0.62, 4, 1, false),
+    ]
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [skyTop, skyBot], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            LinearGradient(
+                colors: [skyTop, skyMid, skyBot],
+                startPoint: .top, endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            // ── Full-screen scattered stars ──
+            GeometryReader { geo in
+                ForEach(bgStars.indices, id: \.self) { i in
+                    let (xf, yf, sz, grp, spark) = bgStars[i]
+                    Image(systemName: spark ? "sparkle" : "star.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: sz, height: sz)
+                        .foregroundStyle(starCol)
+                        .opacity(grp == 0 ? twA : grp == 1 ? twB : twC)
+                        .position(x: geo.size.width * xf, y: geo.size.height * yf)
+                }
+            }
+            .ignoresSafeArea()
 
             VStack(spacing: 22) {
                 Spacer()
@@ -58,7 +99,7 @@ struct SplashView: View {
             // Stage circle
             Circle()
                 .fill(Color.white.opacity(0.55))
-                .frame(width: 234, height: 234)
+                .frame(width: 244, height: 244)
 
             // ─ Sun ─
             Image(systemName: "sun.max.fill")
@@ -87,10 +128,22 @@ struct SplashView: View {
             }
             .offset(y: cloudFloat + 18)
 
+            // ─ Floating hearts ─
+            Image(systemName: "heart.fill")
+                .font(.system(size: 10))
+                .foregroundStyle(heartCol.opacity(0.80))
+                .offset(x: -50, y: h1Y - 30)
+                .opacity(h1Op)
+            Image(systemName: "heart.fill")
+                .font(.system(size: 7))
+                .foregroundStyle(heartCol.opacity(0.60))
+                .offset(x: 55, y: h2Y - 20)
+                .opacity(h2Op)
+
             // ─ Z letters ─
             zLetters
         }
-        .frame(width: 234, height: 234)
+        .frame(width: 244, height: 244)
         .clipShape(Circle())
         .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 6)
         .scaleEffect(sceneScale)
@@ -169,10 +222,24 @@ struct SplashView: View {
         withAnimation(.easeInOut(duration: 3.6).repeatForever(autoreverses: true).delay(0.4)) {
             breathe = true
         }
-        // Stars twinkle
+        // In-bubble stars twinkle
         withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { s1 = 1.0 }
         withAnimation(.easeInOut(duration: 2.1).repeatForever(autoreverses: true).delay(0.45)) { s2 = 0.30 }
         withAnimation(.easeInOut(duration: 1.9).repeatForever(autoreverses: true).delay(0.85)) { s3 = 0.90 }
+
+        // Full-screen background stars (3 groups, staggered)
+        withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) { twA = 0.90 }
+        withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: true).delay(0.7)) { twB = 0.45 }
+        withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true).delay(1.2)) { twC = 0.85 }
+
+        // Floating hearts (looping rise + fade)
+        withAnimation(.easeIn(duration: 0.30).delay(0.90))  { h1Op = 0.85 }
+        withAnimation(.linear(duration: 1.80).delay(0.90))  { h1Y  = -48 }
+        withAnimation(.easeOut(duration: 0.55).delay(1.90)) { h1Op = 0 }
+
+        withAnimation(.easeIn(duration: 0.28).delay(1.30))  { h2Op = 0.70 }
+        withAnimation(.linear(duration: 1.60).delay(1.30))  { h2Y  = -42 }
+        withAnimation(.easeOut(duration: 0.50).delay(2.15)) { h2Op = 0 }
 
         // Z1 – first sleep puff
         withAnimation(.easeIn(duration:  0.22).delay(0.72)) { z1Op = 0.85 }
