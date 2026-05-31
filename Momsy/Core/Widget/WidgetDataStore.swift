@@ -192,5 +192,12 @@ final class WidgetDataStore {
 
     private func reload() {
         WidgetCenter.shared.reloadAllTimelines()
+        NotificationCenter.default.post(name: .widgetDataDidChange, object: nil)
     }
+}
+
+extension Notification.Name {
+    /// Posted whenever any tracked state in `WidgetDataStore` changes, so the
+    /// Watch link can push fresh state to the paired Apple Watch.
+    static let widgetDataDidChange = Notification.Name("WidgetDataStore.didChange")
 }

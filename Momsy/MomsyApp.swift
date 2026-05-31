@@ -14,6 +14,7 @@ struct MomsyApp: App {
     private let container = AppContainer()
     private let localization = LocalizationManager.shared
     private let unitSystem   = UnitSystemManager.shared
+    private let phoneSession: PhoneSessionManager
     private var appState: AppState { container.appState }
 
     private var resolvedColorScheme: ColorScheme? {
@@ -29,6 +30,18 @@ struct MomsyApp: App {
         let settings = FirestoreSettings()
         settings.cacheSettings = PersistentCacheSettings()
         Firestore.firestore().settings = settings
+
+        let coordinator = QuickLogCoordinator(
+            logFeeding:        container.logFeeding,
+            startSleep:        container.startSleep,
+            stopSleep:         container.stopSleep,
+            getSleep:          container.getSleepEntries,
+            diaperRepo:        container.diaperRepository,
+            appState:          container.appState,
+            analytics:         container.analytics,
+            pushNotifications: container.pushNotifications
+        )
+        phoneSession = PhoneSessionManager(coordinator: coordinator, appState: container.appState)
     }
 
     var body: some Scene {
@@ -43,6 +56,7 @@ struct MomsyApp: App {
                 .task {
                     container.runMigrationIfNeeded()
                     await appState.load()
+                    phoneSession.activate()
                     await container.cloudSyncDownloader.downloadAndMergeWhenReady()
                     await setupNotificationsOnLaunch(appState: appState)
                 }
