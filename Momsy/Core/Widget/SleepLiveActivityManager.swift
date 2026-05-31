@@ -1,12 +1,17 @@
 import ActivityKit
 import Foundation
+import os
 
 @MainActor
 final class SleepLiveActivityManager {
     private var activity: Activity<SleepActivityAttributes>?
+    private let logger = Logger(subsystem: "RuslanAbd.Momsy", category: "LiveActivity")
 
     func startActivity(startDate: Date, babyName: String) {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            logger.error("Sleep: Live Activities disabled in Settings (areActivitiesEnabled=false)")
+            return
+        }
         for existing in Activity<SleepActivityAttributes>.activities {
             Task { await existing.end(nil, dismissalPolicy: .immediate) }
         }
@@ -19,7 +24,10 @@ final class SleepLiveActivityManager {
                 content: ActivityContent(state: state, staleDate: nil, relevanceScore: 75),
                 pushType: nil
             )
-        } catch {}
+            logger.log("Sleep: started activity \(self.activity?.id ?? "nil")")
+        } catch {
+            logger.error("Sleep: Activity.request failed: \(error.localizedDescription)")
+        }
     }
 
     func endActivity() {

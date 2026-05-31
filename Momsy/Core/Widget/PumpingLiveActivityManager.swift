@@ -1,12 +1,17 @@
 import ActivityKit
 import Foundation
+import os
 
 @MainActor
 final class PumpingLiveActivityManager {
     private var activity: Activity<PumpingActivityAttributes>?
+    private let logger = Logger(subsystem: "RuslanAbd.Momsy", category: "LiveActivity")
 
     func startActivity(side: String, startDate: Date, babyName: String) {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            logger.error("Pumping: Live Activities disabled in Settings (areActivitiesEnabled=false)")
+            return
+        }
         for existing in Activity<PumpingActivityAttributes>.activities {
             Task { await existing.end(nil, dismissalPolicy: .immediate) }
         }
@@ -19,7 +24,10 @@ final class PumpingLiveActivityManager {
                 content: ActivityContent(state: state, staleDate: nil, relevanceScore: 75),
                 pushType: nil
             )
-        } catch {}
+            logger.log("Pumping: started activity \(self.activity?.id ?? "nil")")
+        } catch {
+            logger.error("Pumping: Activity.request failed: \(error.localizedDescription)")
+        }
     }
 
     func endActivity() {

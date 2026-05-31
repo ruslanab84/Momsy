@@ -1,12 +1,17 @@
 import ActivityKit
 import Foundation
+import os
 
 @MainActor
 final class FeedingLiveActivityManager {
     private var activity: Activity<FeedingActivityAttributes>?
+    private let logger = Logger(subsystem: "RuslanAbd.Momsy", category: "LiveActivity")
 
     func startActivity(side: String, startDate: Date, babyName: String) {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            logger.error("Feeding: Live Activities disabled in Settings (areActivitiesEnabled=false)")
+            return
+        }
         for existing in Activity<FeedingActivityAttributes>.activities {
             Task { await existing.end(nil, dismissalPolicy: .immediate) }
         }
@@ -21,7 +26,10 @@ final class FeedingLiveActivityManager {
                 content: ActivityContent(state: state, staleDate: nil, relevanceScore: 75),
                 pushType: nil
             )
-        } catch {}
+            logger.log("Feeding: started activity \(self.activity?.id ?? "nil")")
+        } catch {
+            logger.error("Feeding: Activity.request failed: \(error.localizedDescription)")
+        }
     }
 
     func pauseActivity(pausedSeconds: Int) {

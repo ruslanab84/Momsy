@@ -1,12 +1,17 @@
 import ActivityKit
 import Foundation
+import os
 
 @MainActor
 final class WalkLiveActivityManager {
     private var activity: Activity<WalkActivityAttributes>?
+    private let logger = Logger(subsystem: "RuslanAbd.Momsy", category: "LiveActivity")
 
     func startActivity(startDate: Date, babyName: String) {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            logger.error("Walk: Live Activities disabled in Settings (areActivitiesEnabled=false)")
+            return
+        }
         for existing in Activity<WalkActivityAttributes>.activities {
             Task { await existing.end(nil, dismissalPolicy: .immediate) }
         }
@@ -19,7 +24,10 @@ final class WalkLiveActivityManager {
                 content: ActivityContent(state: state, staleDate: nil, relevanceScore: 75),
                 pushType: nil
             )
-        } catch {}
+            logger.log("Walk: started activity \(self.activity?.id ?? "nil")")
+        } catch {
+            logger.error("Walk: Activity.request failed: \(error.localizedDescription)")
+        }
     }
 
     func endActivity() {

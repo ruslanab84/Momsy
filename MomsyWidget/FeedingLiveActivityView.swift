@@ -79,7 +79,7 @@ struct FeedingLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        MiniBottleIcon(size: 18)
+                        sideIconView(context.attributes.side, size: 18)
                     }
                     Spacer()
                     timerView
@@ -159,7 +159,7 @@ struct FeedingLiveActivity: Widget {
                             Image(systemName: "pause.circle")
                                 .foregroundStyle(.orange)
                         } else {
-                            MiniBottleIcon(size: 14)
+                            sideIconView(context.attributes.side, size: 14)
                         }
                     }
                     .font(.caption)

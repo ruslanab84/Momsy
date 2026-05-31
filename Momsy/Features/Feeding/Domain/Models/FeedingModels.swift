@@ -12,6 +12,17 @@ enum FeedingSide: String, CaseIterable, Codable {
         case .bottle: return lang == "en" ? "Bottle" : rawValue
         }
     }
+
+    /// Stable, non-localized identifier passed to the Live Activity. The
+    /// rawValue is a localized (Russian) display string, so it must not be
+    /// used for matching in the widget.
+    var token: String {
+        switch self {
+        case .left:   return "left"
+        case .right:  return "right"
+        case .bottle: return "bottle"
+        }
+    }
 }
 
 struct FeedingEntry: Identifiable, Codable {

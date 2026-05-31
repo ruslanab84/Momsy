@@ -80,7 +80,7 @@ final class FeedingViewModel: ObservableObject {
         timerService.start(from: startDate) { [weak self] secs in
             Task { @MainActor [weak self] in self?.feedingSeconds = secs }
         }
-        liveActivity.startActivity(side: side.rawValue, startDate: startDate,
+        liveActivity.startActivity(side: side.token, startDate: startDate,
                                    babyName: WidgetDataStore.shared.babyName)
     }
 
