@@ -26,6 +26,14 @@ final class QuickLogRepository {
         persist(current)
     }
 
+    /// Inserts only if no entry with the same id exists yet (used by cloud download/merge).
+    func appendUnique(_ entry: QuickLogEntry) {
+        var current = load()
+        guard !current.contains(where: { $0.id == entry.id }) else { return }
+        current.insert(entry, at: 0)
+        persist(current)
+    }
+
     func removeLast(kind: BlobKind) {
         var current = load()
         if let idx = current.firstIndex(where: { $0.kind == kind }) {

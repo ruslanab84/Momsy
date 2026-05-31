@@ -142,7 +142,7 @@ final class FeedingViewModel: ObservableObject {
             addedBy:     uid,
             addedByName: name
         )
-        Task { try? await BabySyncService().addLog(FeedingLogDTO(from: log), to: "feedingLogs") }
+        Task { try? await BabySyncService().setLog(FeedingLogDTO(from: log), id: log.id, to: "feedingLogs") }
     }
 
     func logManualEntry(date: Date, durationMinutes: Int, side: FeedingSide,

@@ -31,6 +31,10 @@ final class FirestoreFeedingRepository: FeedingRepository {
         try await col().document(entry.id.uuidString).setData(entry.toFirestoreData())
     }
 
+    func upsert(_ entries: [FeedingEntry]) async throws {
+        for entry in entries { try await add(entry) }
+    }
+
     func delete(id: UUID) async throws {
         try await col().document(id.uuidString).delete()
     }

@@ -4,6 +4,7 @@ import Foundation
 final class FirestoreSleepRepository: SleepRepository {
     func getEntries(from: Date, to: Date) async throws -> [SleepEntry] { throw RepositoryError.notImplemented }
     func add(_ entry: SleepEntry) async throws { throw RepositoryError.notImplemented }
+    func upsert(_ entries: [SleepEntry]) async throws { throw RepositoryError.notImplemented }
     func update(_ entry: SleepEntry) async throws { throw RepositoryError.notImplemented }
     func delete(id: UUID) async throws { throw RepositoryError.notImplemented }
 }

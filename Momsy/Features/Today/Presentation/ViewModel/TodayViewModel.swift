@@ -21,6 +21,7 @@ final class TodayViewModel: ObservableObject {
     private let syncRepo: any BabySyncRepositoryProtocol
     private var syncTasks: [Task<Void, Never>] = []
     private var hasFetchedThisSession = false
+    private var mergeObserver: NSObjectProtocol?
 
     init(
         getFeeding: GetFeedingEntriesUseCase,
@@ -42,6 +43,20 @@ final class TodayViewModel: ObservableObject {
         self.syncRepo = syncRepo
         startSyncListeners()
         Task { await loadDiaperCount() }
+        mergeObserver = NotificationCenter.default.addObserver(
+            forName: .cloudSyncDidMerge, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { await self?.reloadAfterMerge() }
+        }
+    }
+
+    deinit {
+        if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
+    }
+
+    private func reloadAfterMerge() async {
+        await loadTodayEntries()
+        await loadDiaperCount()
     }
 
     private func startSyncListeners() {
@@ -143,19 +158,20 @@ final class TodayViewModel: ObservableObject {
         diaperCount = newCount
         WidgetDataStore.shared.updateDiaperCount(newCount)
         let label = lm.strings.diaperLogEntry(count: newCount)
-        quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .drop, label: label))
-        addEntry(LogEntry(time: Date(), kind: .drop, label: label))
-        Task { try? await diaperRepo.add(DiaperEntry()) }
-        pushDiaperToFirestore()
+        let entry = DiaperEntry()
+        quickLogRepo.append(QuickLogEntry(id: entry.id, time: entry.date, kind: .drop, label: label))
+        addEntry(LogEntry(time: entry.date, kind: .drop, label: label))
+        Task { try? await diaperRepo.add(entry) }
+        pushDiaperToFirestore(entry)
     }
 
-    private func pushDiaperToFirestore() {
+    private func pushDiaperToFirestore(_ entry: DiaperEntry) {
         guard FamilyManager.shared.familyId != nil else { return }
         let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
         let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
-        let log = DiaperLog(id: UUID().uuidString, loggedAt: Date(),
+        let log = DiaperLog(id: entry.id.uuidString, loggedAt: entry.date,
                             type: .wet, addedBy: uid, addedByName: name)
-        Task { try? await syncRepo.addDiaperLog(log) }
+        Task { try? await BabySyncService().setLog(DiaperLogDTO(from: log), id: log.id, to: "diaperLogs") }
     }
 
     func removeDiaper() {
@@ -172,40 +188,44 @@ final class TodayViewModel: ObservableObject {
     }
 
     func logWalk() {
+        let id = UUID()
         let label = LocalizationManager.shared.strings.walkLogged
-        quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .walk, label: label))
+        quickLogRepo.append(QuickLogEntry(id: id, time: Date(), kind: .walk, label: label))
         addEntry(LogEntry(time: Date(), kind: .walk, label: label))
-        pushQuickEventToFirestore(kind: .walk, label: label)
+        pushQuickEventToFirestore(id: id, kind: .walk, label: label)
     }
 
     func logBath() {
+        let id = UUID()
         let label = LocalizationManager.shared.strings.bathLogged
-        quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .bath, label: label))
+        quickLogRepo.append(QuickLogEntry(id: id, time: Date(), kind: .bath, label: label))
         addEntry(LogEntry(time: Date(), kind: .bath, label: label))
-        pushQuickEventToFirestore(kind: .bath, label: label)
+        pushQuickEventToFirestore(id: id, kind: .bath, label: label)
     }
 
     func logVitamins() {
+        let id = UUID()
         let label = LocalizationManager.shared.strings.vitaminsGiven
-        quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .vitamin, label: label))
+        quickLogRepo.append(QuickLogEntry(id: id, time: Date(), kind: .vitamin, label: label))
         addEntry(LogEntry(time: Date(), kind: .vitamin, label: label))
-        pushQuickEventToFirestore(kind: .vitamin, label: label)
+        pushQuickEventToFirestore(id: id, kind: .vitamin, label: label)
     }
 
     func logStool(date: Date) {
+        let id = UUID()
         let lm = LocalizationManager.shared
         let label = lm.strings.stoolLogged
-        quickLogRepo.append(QuickLogEntry(id: UUID(), time: date, kind: .stool, label: label))
+        quickLogRepo.append(QuickLogEntry(id: id, time: date, kind: .stool, label: label))
         addEntry(LogEntry(time: date, kind: .stool, label: label))
-        Task { try? await stoolRepo.add(date: date) }
-        pushQuickEventToFirestore(kind: .stool, label: label, at: date)
+        Task { try? await stoolRepo.add(id: id, date: date) }
+        pushQuickEventToFirestore(id: id, kind: .stool, label: label, at: date)
     }
 
-    private func pushQuickEventToFirestore(kind: BlobKind, label: String, at date: Date = Date()) {
+    private func pushQuickEventToFirestore(id: UUID, kind: BlobKind, label: String, at date: Date = Date()) {
         guard FamilyManager.shared.familyId != nil else { return }
         let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
         let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
-        let log = QuickEventLog(id: UUID().uuidString, kind: kind.rawValue,
+        let log = QuickEventLog(id: id.uuidString, kind: kind.rawValue,
                                 loggedAt: date, label: label,
                                 addedBy: uid, addedByName: name)
         let collection: String
@@ -216,7 +236,7 @@ final class TodayViewModel: ObservableObject {
         case .stool:   collection = "stoolLogs"
         default:       collection = "quickLogs"
         }
-        Task { try? await BabySyncService().addLog(QuickEventLogDTO(from: log), to: collection) }
+        Task { try? await BabySyncService().setLog(QuickEventLogDTO(from: log), id: log.id, to: collection) }
     }
 
     func logSymptom() {

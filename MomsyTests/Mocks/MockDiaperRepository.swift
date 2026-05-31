@@ -15,6 +15,12 @@ final class MockDiaperRepository: DiaperRepository {
         entries.append(entry)
     }
 
+    func upsert(_ newEntries: [DiaperEntry]) async throws {
+        if shouldThrow { throw TestError.mock }
+        let existing = Set(entries.map(\.id))
+        entries.append(contentsOf: newEntries.filter { !existing.contains($0.id) })
+    }
+
     func removeLatest(on day: Date) async throws {
         if shouldThrow { throw TestError.mock }
         let cal = Calendar.current

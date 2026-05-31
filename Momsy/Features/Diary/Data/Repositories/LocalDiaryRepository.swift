@@ -22,6 +22,14 @@ final class LocalDiaryRepository: DiaryRepository {
         try save(items)
     }
 
+    func upsert(_ newItems: [StoredDiaryItem]) async throws {
+        guard !newItems.isEmpty else { return }
+        var items = try load()
+        let existing = Set(items.map(\.id))
+        items.append(contentsOf: newItems.filter { !existing.contains($0.id) })
+        try save(items)
+    }
+
     func update(_ item: StoredDiaryItem) async throws {
         var items = try load()
         if let idx = items.firstIndex(where: { $0.id == item.id }) { items[idx] = item }

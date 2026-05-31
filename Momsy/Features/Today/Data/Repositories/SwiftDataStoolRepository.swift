@@ -11,6 +11,22 @@ final class SwiftDataStoolRepository: StoolRepository {
         try context.save()
     }
 
+    func add(id: UUID, date: Date) async throws {
+        context.insert(StoolRecord(id: id, date: date))
+        try context.save()
+    }
+
+    func upsert(_ entries: [StoolEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<StoolRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(StoolRecord(id: entry.id, date: entry.date))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func getEntries(from: Date, to: Date) async throws -> [Date] {
         let all = try context.fetch(FetchDescriptor<StoolRecord>())
         return all

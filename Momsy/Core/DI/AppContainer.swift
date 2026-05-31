@@ -36,6 +36,15 @@ final class AppContainer {
     let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
     lazy var inviteService: any InviteServiceProtocol  = FirestoreInviteService()
     lazy var babySyncRepository: any BabySyncRepositoryProtocol = BabySyncRepository(service: BabySyncService())
+    lazy var cloudSyncDownloader: any CloudSyncDownloaderProtocol = CloudSyncDownloader(
+        service: BabySyncService(),
+        feedingRepo: feedingRepository,
+        sleepRepo: sleepRepository,
+        diaperRepo: diaperRepository,
+        stoolRepo: stoolRepository,
+        diaryRepo: diaryRepository,
+        quickLogRepo: quickLogRepository
+    )
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let authManager                                    = AuthManager()

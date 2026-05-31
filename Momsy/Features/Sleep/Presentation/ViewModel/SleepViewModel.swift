@@ -181,7 +181,7 @@ final class SleepViewModel: ObservableObject {
             addedBy:     uid,
             addedByName: name
         )
-        Task { try? await BabySyncService().addLog(SleepLogDTO(from: log), to: "sleepLogs") }
+        Task { try? await BabySyncService().setLog(SleepLogDTO(from: log), id: log.id, to: "sleepLogs") }
     }
 
     func logManualEntry(startDate: Date, endDate: Date, quality: SleepQuality, note: String) {

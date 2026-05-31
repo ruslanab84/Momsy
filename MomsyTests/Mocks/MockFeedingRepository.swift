@@ -21,6 +21,12 @@ final class MockFeedingRepository: FeedingRepository {
         entries.append(entry)
     }
 
+    func upsert(_ newEntries: [FeedingEntry]) async throws {
+        if shouldThrow { throw TestError.mock }
+        let existing = Set(entries.map(\.id))
+        entries.append(contentsOf: newEntries.filter { !existing.contains($0.id) })
+    }
+
     func delete(id: UUID) async throws {
         entries.removeAll { $0.id == id }
     }

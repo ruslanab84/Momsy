@@ -27,6 +27,14 @@ final class LocalFeedingRepository: FeedingRepository {
         try save(entries)
     }
 
+    func upsert(_ newEntries: [FeedingEntry]) async throws {
+        guard !newEntries.isEmpty else { return }
+        var entries = try load()
+        let existing = Set(entries.map(\.id))
+        entries.append(contentsOf: newEntries.filter { !existing.contains($0.id) })
+        try save(entries)
+    }
+
     func delete(id: UUID) async throws {
         var entries = try load()
         entries.removeAll { $0.id == id }

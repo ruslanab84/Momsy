@@ -11,6 +11,7 @@ final class DiaryViewModel: ObservableObject {
     private let repo: any DiaryRepository
     private let analytics: any AnalyticsServiceProtocol
     private let appState: AppState
+    private var mergeObserver: NSObjectProtocol?
 
     private var lm: LocalizationManager { .shared }
 
@@ -43,6 +44,15 @@ final class DiaryViewModel: ObservableObject {
         self.analytics = analytics
         self.appState = appState
         Task { await loadEntries() }
+        mergeObserver = NotificationCenter.default.addObserver(
+            forName: .cloudSyncDidMerge, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { await self?.loadEntries() }
+        }
+    }
+
+    deinit {
+        if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
 
     func loadEntries() async {
@@ -193,7 +203,7 @@ final class DiaryViewModel: ObservableObject {
             kind: item.kind.rawValue, text: item.text,
             iconName: item.iconName, addedBy: uid, addedByName: name
         )
-        Task { try? await BabySyncService().addLog(DiaryLogDTO(from: log), to: "diaryLogs") }
+        Task { try? await BabySyncService().setLog(DiaryLogDTO(from: log), id: log.id, to: "diaryLogs") }
     }
 
     private func rollbackItem(_ item: DiaryItem) {

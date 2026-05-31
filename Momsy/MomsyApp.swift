@@ -43,6 +43,7 @@ struct MomsyApp: App {
                 .task {
                     container.runMigrationIfNeeded()
                     await appState.load()
+                    await container.cloudSyncDownloader.downloadAndMergeWhenReady()
                     await setupNotificationsOnLaunch(appState: appState)
                 }
                 .onOpenURL { url in

@@ -22,6 +22,17 @@ final class SwiftDataFeedingRepository: FeedingRepository {
         try context.save()
     }
 
+    func upsert(_ entries: [FeedingEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<FeedingRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(FeedingRecord(entry))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func delete(id: UUID) async throws {
         let all = try context.fetch(FetchDescriptor<FeedingRecord>())
         if let record = all.first(where: { $0.id == id }) {

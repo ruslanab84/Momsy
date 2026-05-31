@@ -2,6 +2,24 @@ import Testing
 @testable import Momsy
 import Foundation
 
+final class MockBabySyncRepository: BabySyncRepositoryProtocol {
+    var feedingLogs: AsyncStream<[FeedingLog]> { AsyncStream { $0.finish() } }
+    var sleepLogs: AsyncStream<[SleepLog]>     { AsyncStream { $0.finish() } }
+    var diaperLogs: AsyncStream<[DiaperLog]>   { AsyncStream { $0.finish() } }
+
+    func addFeedingLog(_ log: FeedingLog) async throws {}
+    func addSleepLog(_ log: SleepLog) async throws {}
+    func addDiaperLog(_ log: DiaperLog) async throws {}
+    func addSymptomLog(_ log: SymptomLog) async throws {}
+    func addQuickEventLog(_ log: QuickEventLog) async throws {}
+    func addDiaryLog(_ log: DiaryLog) async throws {}
+    func addMeasurementLog(_ log: MeasurementLog) async throws {}
+    func addVaccinationLog(_ log: VaccinationLog) async throws {}
+
+    func fetchTodayFeedings() async throws -> [FeedingLog] { [] }
+    func fetchTodaySleep() async throws -> [SleepLog] { [] }
+}
+
 @Suite("TodayViewModel", .serialized)
 @MainActor
 struct TodayViewModelTests {
@@ -46,7 +64,8 @@ struct TodayViewModelTests {
             stoolRepo: stoolRepo,
             quickLogRepo: QuickLogRepository(),
             tipRepository: tipRepo,
-            appState: makeAppState()
+            appState: makeAppState(),
+            syncRepo: MockBabySyncRepository()
         )
     }
 

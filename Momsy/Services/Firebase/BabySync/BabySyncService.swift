@@ -16,6 +16,14 @@ final class BabySyncService {
         try ref.setData(from: log)
     }
 
+    /// Writes a log using the supplied stable id as the Firestore document id.
+    /// Making the doc id == local UUID keeps re-pushes idempotent (overwrite, not duplicate)
+    /// and lets the download path dedup entries by id.
+    func setLog<T: Encodable>(_ log: T, id: String, to subcollection: String) async throws {
+        guard !babyId.isEmpty, !id.isEmpty else { return }
+        try collection(subcollection).document(id).setData(from: log, merge: true)
+    }
+
     func streamLogs<T: Decodable>(
         from subcollection: String,
         limit: Int = 50
@@ -60,6 +68,26 @@ final class BabySyncService {
             .whereField(dateField, isGreaterThanOrEqualTo: Timestamp(date: start))
             .order(by: dateField, descending: true)
             .getDocuments()
+        return snapshot.documents.compactMap { try? $0.data(as: T.self) }
+    }
+
+    /// Fetches all docs from a subcollection (newest first), optionally limited to those
+    /// at/after `since`. Used by the launch-time download/merge path.
+    func fetchAll<T: Decodable>(from subcollection: String,
+                                dateField: String,
+                                since: Date? = nil,
+                                limit: Int = 500) async throws -> [T] {
+        guard !babyId.isEmpty else { return [] }
+        var query: Query = collection(subcollection)
+            .order(by: dateField, descending: true)
+            .limit(to: limit)
+        if let since {
+            query = collection(subcollection)
+                .whereField(dateField, isGreaterThanOrEqualTo: Timestamp(date: since))
+                .order(by: dateField, descending: true)
+                .limit(to: limit)
+        }
+        let snapshot = try await query.getDocuments()
         return snapshot.documents.compactMap { try? $0.data(as: T.self) }
     }
 

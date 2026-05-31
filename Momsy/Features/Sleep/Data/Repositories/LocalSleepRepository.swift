@@ -22,6 +22,14 @@ final class LocalSleepRepository: SleepRepository {
         try save(entries)
     }
 
+    func upsert(_ newEntries: [SleepEntry]) async throws {
+        guard !newEntries.isEmpty else { return }
+        var entries = try load()
+        let existing = Set(entries.map(\.id))
+        entries.append(contentsOf: newEntries.filter { !existing.contains($0.id) })
+        try save(entries)
+    }
+
     func update(_ entry: SleepEntry) async throws {
         var entries = try load()
         if let idx = entries.firstIndex(where: { $0.id == entry.id }) { entries[idx] = entry }

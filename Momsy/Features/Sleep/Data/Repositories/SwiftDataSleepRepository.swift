@@ -16,6 +16,17 @@ final class SwiftDataSleepRepository: SleepRepository {
         try context.save()
     }
 
+    func upsert(_ entries: [SleepEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<SleepRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(SleepRecord(entry))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func update(_ entry: SleepEntry) async throws {
         let all = try context.fetch(FetchDescriptor<SleepRecord>())
         guard let record = all.first(where: { $0.id == entry.id }) else { return }

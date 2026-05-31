@@ -16,6 +16,17 @@ final class SwiftDataDiaryRepository: DiaryRepository {
         try context.save()
     }
 
+    func upsert(_ items: [StoredDiaryItem]) async throws {
+        guard !items.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<DiaryItemRecord>()).map(\.id))
+        var inserted = false
+        for item in items where !existing.contains(item.id) {
+            context.insert(DiaryItemRecord(item))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func update(_ item: StoredDiaryItem) async throws {
         let all = try context.fetch(FetchDescriptor<DiaryItemRecord>())
         guard let record = all.first(where: { $0.id == item.id }) else { return }

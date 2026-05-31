@@ -16,6 +16,17 @@ final class SwiftDataDiaperRepository: DiaperRepository {
         try context.save()
     }
 
+    func upsert(_ entries: [DiaperEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<DiaperRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(DiaperRecord(id: entry.id, date: entry.date))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func removeLatest(on day: Date) async throws {
         let all = try context.fetch(FetchDescriptor<DiaperRecord>())
         let cal = Calendar.current

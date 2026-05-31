@@ -18,6 +18,15 @@ final class MockDiaryRepository: DiaryRepository {
         items.append(item)
     }
 
+    func upsert(_ newItems: [StoredDiaryItem]) async throws {
+        if shouldThrow { throw TestError.mock }
+        let existing = Set(items.map(\.id))
+        for item in newItems where !existing.contains(item.id) {
+            addedItems.append(item)
+            items.append(item)
+        }
+    }
+
     func update(_ item: StoredDiaryItem) async throws {
         if let idx = items.firstIndex(where: { $0.id == item.id }) {
             items[idx] = item
