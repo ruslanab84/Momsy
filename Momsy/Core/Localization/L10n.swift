@@ -537,6 +537,12 @@ struct L10n {
     var forMoms: String         { s("for moms",      "для мам",       "für Mütter") }
     var privacy: String         { s("Privacy",       "Конфиденциальность","Datenschutz") }
     var feedback: String        { s("Feedback",      "Обратная связь", "Feedback") }
+    var icloudSyncTitle: String { s("iCloud Sync",   "Синхронизация iCloud", "iCloud-Synchronisierung") }
+    var icloudSyncDisclosure: String {
+        s("Your baby's health records and your well-being entries (including the EPDS screening) are kept on this device and synced to your private, encrypted iCloud across your devices. They are never shared with us or used for ads.",
+          "Записи о здоровье малыша и ваши записи о самочувствии (включая скрининг EPDS) хранятся на этом устройстве и синхронизируются с вашим личным зашифрованным iCloud между вашими устройствами. Они не передаются нам и не используются для рекламы.",
+          "Die Gesundheitsdaten deines Babys und deine Wohlbefinden-Einträge (einschließlich des EPDS-Screenings) bleiben auf diesem Gerät und werden mit deiner privaten, verschlüsselten iCloud über deine Geräte synchronisiert. Sie werden nie mit uns geteilt oder für Werbung verwendet.")
+    }
     var themeSystem: String     { s("System",        "Системная",     "System") }
     var themeLight: String      { s("Light",         "Светлая",       "Hell") }
     var themeDark: String       { s("Dark",          "Тёмная",        "Dunkel") }
@@ -604,8 +610,6 @@ struct L10n {
     var noteSymptoms: String    { s("Note symptoms — get guidance. Not a diagnosis, just navigation.", "Отметьте симптомы — подскажем, что делать. Не диагноз, только навигация.", "Symptome notieren — Orientierung erhalten. Keine Diagnose.") }
 
     // MARK: — Doctor Menu
-    var askMomsyAI: String      { s("Ask Momsy AI",  "Спросить ИИ",   "Momsy KI fragen") }
-    var aiMenuSub: String       { s("Sleep, feeding, development — ask anything", "Сон, кормление, развитие — спросите всё", "Schlaf, Ernährung, Entwicklung — alles fragen") }
     var pediatricianReport: String { s("Pediatrician Report","Отчёт для педиатра","Kinderarztbericht") }
     var pdfForWeek: String      { s("PDF for the week — sleep, feeding, weight", "PDF за неделю — сон, кормление, вес", "PDF für die Woche — Schlaf, Ernährung, Gewicht") }
     var whoPercentileChart: String { s("WHO percentile chart", "График по перцентилям ВОЗ", "WHO-Perzentilkurve") }
@@ -643,25 +647,6 @@ struct L10n {
     var lullabiesSounds: String { s("Lullabies & Sounds", "Колыбельные и шум", "Lieder & Klänge") }
     var lullabiesHint: String   { s("White noise, melodies, timer", "Белый шум, мелодии, таймер", "Weißes Rauschen, Melodien, Timer") }
     var settingsHint: String    { s("Theme, language",  "Тема, язык",    "Design, Sprache") }
-
-    // MARK: — AI Chat
-    var aiChatTitle: String     { s("Ask Momsy AI", "Спросить ИИ",   "Momsy KI fragen") }
-    var momsyAI: String         { s("Momsy AI",     "Momsy ИИ",      "Momsy KI") }
-    var aiChatSubtitle: String  { s("Ask about sleep, feeding, development,\nor anything on your mind.", "Спросите о сне, кормлении, развитии\nили о том, что вас беспокоит.", "Fragen zu Schlaf, Ernährung, Entwicklung\noder allem, was Sie beschäftigt.") }
-    var askAnything: String     { s("Ask anything…","Спросить…",     "Alles fragen…") }
-    var tryAgain: String        { s("Try again",    "Повторить",      "Erneut versuchen") }
-    var aiChatErrorGeneric: String { s("Something went wrong. Please try again.",
-                                       "Что-то пошло не так. Пожалуйста, попробуйте ещё раз.",
-                                       "Etwas ist schiefgelaufen. Bitte versuche es erneut.") }
-    var aiChatErrorNoInternet: String { s("No internet connection.",
-                                          "Нет подключения к интернету.",
-                                          "Keine Internetverbindung.") }
-    var aiChatErrorLocation: String { s("AI service is not available in your region.",
-                                        "ИИ-сервис недоступен в вашем регионе.",
-                                        "KI-Dienst ist in Ihrer Region nicht verfügbar.") }
-    var aiChatErrorBusy: String     { s("AI is busy right now. Please try again in a moment.",
-                                        "ИИ сейчас занят. Попробуйте чуть позже.",
-                                        "KI ist gerade beschäftigt. Bitte versuche es gleich erneut.") }
 
     // MARK: — Mom Mood Tracker
     var momMoodTitle: String          { s("My Wellbeing",            "Моё самочувствие",           "Mein Wohlbefinden") }
@@ -763,9 +748,6 @@ struct L10n {
     var featureSync: String        { s("Family sync across devices",
                                        "Синхронизация и семейный доступ",
                                        "Familiensync über Geräte hinweg") }
-    var featureAI: String          { s("Daily AI tips for your baby",
-                                       "ИИ-советы каждый день",
-                                       "Tägliche KI-Tipps für dein Baby") }
     var featureDiary: String       { s("Unlimited diary & statistics",
                                        "Журнал и статистика без лимитов",
                                        "Unbegrenzte Statistiken") }

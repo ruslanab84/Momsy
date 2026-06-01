@@ -26,6 +26,19 @@ final class LocalLeapsRepository: LeapsRepository {
         try save(items)
     }
 
+    func upsert(_ entries: [LeapProgress]) async throws {
+        guard !entries.isEmpty else { return }
+        var items = try load()
+        for progress in entries {
+            if let idx = items.firstIndex(where: { $0.id == progress.id }) {
+                items[idx] = progress
+            } else {
+                items.append(progress)
+            }
+        }
+        try save(items)
+    }
+
     func resetProgress(id: Int) async throws {
         var items = try load()
         items.removeAll { $0.id == id }

@@ -21,6 +21,17 @@ final class SwiftDataTemperatureRepository: TemperatureRepository {
         try context.save()
     }
 
+    func upsert(_ entries: [TemperatureEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<TemperatureRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(TemperatureRecord(entry))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func delete(id: UUID) async throws {
         let all = try context.fetch(FetchDescriptor<TemperatureRecord>())
         if let record = all.first(where: { $0.id == id }) {

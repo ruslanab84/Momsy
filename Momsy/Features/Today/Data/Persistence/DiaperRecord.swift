@@ -3,8 +3,8 @@ import Foundation
 
 @Model
 final class DiaperRecord {
-    var id: UUID
-    var date: Date
+    var id: UUID = UUID()
+    var date: Date = Date()
 
     init(id: UUID = UUID(), date: Date = Date()) {
         self.id = id

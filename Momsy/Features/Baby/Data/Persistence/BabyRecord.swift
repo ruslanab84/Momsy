@@ -3,11 +3,11 @@ import Foundation
 
 @Model
 final class BabyRecord {
-    var id: UUID
-    var name: String
-    var birthDate: Date
-    var stage: String
-    var gender: String
+    var id: UUID = UUID()
+    var name: String = ""
+    var birthDate: Date = Date()
+    var stage: String = ""
+    var gender: String = ""
 
     init(_ profile: BabyProfile) {
         id        = profile.id

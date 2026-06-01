@@ -27,17 +27,20 @@ final class OnboardingViewModel: ObservableObject {
     private let appState: AppState
     private let analytics: any AnalyticsServiceProtocol
     private let pushNotifications: any PushNotificationServiceProtocol
+    private let syncRepo: any BabySyncRepositoryProtocol
     private let onDone: () -> Void
 
     init(saveBabyProfile: SaveBabyProfileUseCase,
          appState: AppState,
          authManager: AuthManager,
+         syncRepo: any BabySyncRepositoryProtocol,
          analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
          pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared,
          onDone: @escaping () -> Void) {
         self.saveBabyProfileUC = saveBabyProfile
         self.appState = appState
         self.authManager = authManager
+        self.syncRepo = syncRepo
         self.analytics = analytics
         self.pushNotifications = pushNotifications
         self.onDone = onDone
@@ -121,6 +124,9 @@ final class OnboardingViewModel: ObservableObject {
         Task {
             try? await saveBabyProfileUC.execute(profile)
             appState.update(profile)
+            // Push to Firestore so a signed-in user's baby shows up in the cloud
+            // immediately (otherwise it only lands on the next launch sync).
+            try? await syncRepo.syncBabyProfile(profile)
             onDone()
         }
     }

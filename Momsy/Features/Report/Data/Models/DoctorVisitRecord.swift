@@ -3,8 +3,8 @@ import Foundation
 
 @Model
 final class DoctorVisitRecord {
-    var id: UUID
-    var date: Date
+    var id: UUID = UUID()
+    var date: Date = Date()
 
     init(id: UUID, date: Date) {
         self.id = id

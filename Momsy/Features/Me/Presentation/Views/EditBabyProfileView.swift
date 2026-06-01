@@ -219,6 +219,7 @@ struct EditBabyProfileView: View {
             do {
                 try await container.saveBabyProfile.execute(updated)
                 appState.update(updated)
+                try? await container.babySyncRepository.syncBabyProfile(updated)
                 dismiss()
             } catch {
                 saveError = error.localizedDescription

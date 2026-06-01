@@ -24,6 +24,23 @@ final class BabySyncService {
         try collection(subcollection).document(id).setData(from: log, merge: true)
     }
 
+    /// Deletes every document in a subcollection (batched). Used to purge a
+    /// retired collection such as the legacy `quickLogs`.
+    func deleteAll(in subcollection: String) async throws {
+        guard !babyId.isEmpty else { return }
+        let snapshot = try await collection(subcollection).getDocuments()
+        let docs = snapshot.documents
+        guard !docs.isEmpty else { return }
+        // Firestore caps a WriteBatch at 500 ops; chunk well under that.
+        for chunk in stride(from: 0, to: docs.count, by: 400) {
+            let batch = db.batch()
+            for doc in docs[chunk..<min(chunk + 400, docs.count)] {
+                batch.deleteDocument(doc.reference)
+            }
+            try await batch.commit()
+        }
+    }
+
     func streamLogs<T: Decodable>(
         from subcollection: String,
         limit: Int = 50
@@ -89,6 +106,23 @@ final class BabySyncService {
         }
         let snapshot = try await query.getDocuments()
         return snapshot.documents.compactMap { try? $0.data(as: T.self) }
+    }
+
+    /// Writes the baby profile to the `babies/{babyId}` PARENT document. This is the
+    /// document Firestore otherwise shows as "does not exist" (a ghost parent created by
+    /// its subcollections). `merge: true` keeps it alongside any other parent fields.
+    func setBabyProfile(_ profile: BabyProfile) async throws {
+        guard !babyId.isEmpty else { return }
+        try db.collection("babies").document(babyId)
+            .setData(from: BabyProfileDTO(from: profile), merge: true)
+    }
+
+    /// Reads the baby profile from the `babies/{babyId}` parent document, if present.
+    func fetchBabyProfile() async throws -> BabyProfileDTO? {
+        guard !babyId.isEmpty else { return nil }
+        let snapshot = try await db.collection("babies").document(babyId).getDocument()
+        guard snapshot.exists else { return nil }
+        return try? snapshot.data(as: BabyProfileDTO.self)
     }
 
     func setupBabyProfile(uid: String, displayName: String) async throws {

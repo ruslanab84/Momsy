@@ -122,11 +122,11 @@ struct SplashView: View {
             starDot(size:  8, x: -74, y: -14).opacity(s3)
 
             // ─ Baby on cloud ─
-            VStack(spacing: -8) {
+            VStack(spacing: -24) {
                 SleepingBabyView(breathe: breathe)
                 BabyCloudView()
             }
-            .offset(y: cloudFloat + 18)
+            .offset(y: cloudFloat + 16)
 
             // ─ Floating hearts ─
             Image(systemName: "heart.fill")
@@ -349,24 +349,24 @@ struct SmileArcShape: Shape {
 // MARK: - Fluffy Cloud
 
 struct BabyCloudView: View {
+    private let puff = Color.white.opacity(0.96)
+
     var body: some View {
         ZStack {
-            Circle()
-                .fill(Color.white.opacity(0.96))
-                .frame(width: 82, height: 82)
-                .offset(x: -30, y: 10)
-            Circle()
-                .fill(Color.white.opacity(0.96))
-                .frame(width: 104, height: 104)
-                .offset(y: 10)
-            Circle()
-                .fill(Color.white.opacity(0.96))
-                .frame(width: 78, height: 78)
-                .offset(x: 32, y: 13)
-            Rectangle()
-                .fill(Color.white.opacity(0.96))
-                .frame(width: 164, height: 42)
-                .offset(y: 33)
+            // Rounded base — behind the puffs, all curved edges (no rectangle).
+            // Its flat top is covered by the puffs above; its bottom is clipped
+            // by the round scene bubble.
+            Capsule(style: .continuous)
+                .fill(puff)
+                .frame(width: 150, height: 56)
+                .offset(y: 24)
+
+            // Bumpy top puffs
+            Circle().fill(puff).frame(width: 82, height: 82).offset(x: -34, y: 12)
+            Circle().fill(puff).frame(width: 104, height: 104).offset(y: 8)
+            Circle().fill(puff).frame(width: 78, height: 78).offset(x: 34, y: 13)
+            Circle().fill(puff).frame(width: 52, height: 52).offset(x: -8, y: -10)
+            Circle().fill(puff).frame(width: 46, height: 46).offset(x: 22, y: -6)
         }
         .shadow(color: .black.opacity(0.07), radius: 10, x: 0, y: 5)
         .frame(width: 168, height: 74)

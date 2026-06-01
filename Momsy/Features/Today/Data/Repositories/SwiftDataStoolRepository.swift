@@ -30,6 +30,7 @@ final class SwiftDataStoolRepository: StoolRepository {
     func getEntries(from: Date, to: Date) async throws -> [Date] {
         let all = try context.fetch(FetchDescriptor<StoolRecord>())
         return all
+            .uniqued(by: { $0.id })
             .filter { $0.date >= from && $0.date <= to }
             .map(\.date)
             .sorted()

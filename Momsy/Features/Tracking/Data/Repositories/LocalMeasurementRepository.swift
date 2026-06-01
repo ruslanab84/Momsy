@@ -22,6 +22,18 @@ final class LocalMeasurementRepository: MeasurementRepository {
         try save(entries)
     }
 
+    func upsert(_ entries: [MeasurementEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        var all = try load()
+        let existing = Set(all.map(\.id))
+        var changed = false
+        for entry in entries where !existing.contains(entry.id) {
+            all.append(entry)
+            changed = true
+        }
+        if changed { try save(all) }
+    }
+
     func delete(id: UUID) async throws {
         var entries = try load()
         entries.removeAll { $0.id == id }

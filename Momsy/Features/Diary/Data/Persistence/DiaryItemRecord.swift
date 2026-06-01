@@ -3,13 +3,13 @@ import Foundation
 
 @Model
 final class DiaryItemRecord {
-    var id: UUID
-    var date: Date
-    var kindRaw: String
-    var text: String
-    var toneHex: String
-    var isMilestone: Bool
-    var iconName: String
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var kindRaw: String = ""
+    var text: String = ""
+    var toneHex: String = ""
+    var isMilestone: Bool = false
+    var iconName: String = ""
     var photoPath: String?
 
     init(_ item: StoredDiaryItem) {

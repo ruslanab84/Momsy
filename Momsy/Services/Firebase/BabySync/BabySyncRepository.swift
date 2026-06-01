@@ -35,20 +35,20 @@ final class BabySyncRepository: BabySyncRepositoryProtocol {
         try await service.addLog(SymptomLogDTO(from: log), to: "symptomLogs")
     }
 
-    func addQuickEventLog(_ log: QuickEventLog) async throws {
-        try await service.addLog(QuickEventLogDTO(from: log), to: "quickLogs")
-    }
-
     func addDiaryLog(_ log: DiaryLog) async throws {
         try await service.addLog(DiaryLogDTO(from: log), to: "diaryLogs")
     }
 
     func addMeasurementLog(_ log: MeasurementLog) async throws {
-        try await service.addLog(MeasurementLogDTO(from: log), to: "measurementLogs")
+        try await service.setLog(MeasurementLogDTO(from: log), id: log.id, to: "measurementLogs")
     }
 
     func addVaccinationLog(_ log: VaccinationLog) async throws {
-        try await service.addLog(VaccinationLogDTO(from: log), to: "vaccinationLogs")
+        try await service.setLog(VaccinationLogDTO(from: log), id: log.id, to: "vaccinationLogs")
+    }
+
+    func addFoodDiaryLog(_ log: FoodDiaryLog) async throws {
+        try await service.setLog(FoodDiaryLogDTO(from: log), id: log.id, to: "foodDiaryLogs")
     }
 
     func fetchTodayFeedings() async throws -> [FeedingLog] {
@@ -59,6 +59,14 @@ final class BabySyncRepository: BabySyncRepositoryProtocol {
     func fetchTodaySleep() async throws -> [SleepLog] {
         let dtos: [SleepLogDTO] = try await service.fetchToday(from: "sleepLogs")
         return dtos.map(\.domain)
+    }
+
+    func syncBabyProfile(_ profile: BabyProfile) async throws {
+        try await service.setBabyProfile(profile)
+    }
+
+    func fetchBabyProfile() async throws -> BabyProfile? {
+        try await service.fetchBabyProfile()?.domain
     }
 
     private func map<DTO: Decodable, Model>(

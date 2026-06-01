@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import os
 import FirebaseAuth
 import FirebaseCore
 import AuthenticationServices
@@ -26,9 +27,13 @@ enum AuthError: LocalizedError {
 final class AuthManager: ObservableObject {
     @Published private(set) var firebaseUser: FirebaseAuth.User?
 
-    var isSignedIn: Bool { firebaseUser != nil }
+    /// A user is "really" signed in only with a provider account. An anonymous
+    /// user exists purely to give the device a stable uid/familyId for sync.
+    var isSignedIn: Bool { firebaseUser != nil && firebaseUser?.isAnonymous == false }
 
     private(set) var currentNonce: String?
+
+    private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "Auth")
 
     init() {
         guard FirebaseApp.app() != nil else { return }
@@ -38,12 +43,55 @@ final class AuthManager: ObservableObject {
             if let user {
                 Task { @MainActor in
                     let name = user.displayName ?? user.email ?? "User"
-                    try? await FamilyManager.shared.setup(uid: user.uid, displayName: name)
+                    do {
+                        try await FamilyManager.shared.setup(uid: user.uid, displayName: name)
+                    } catch {
+                        // Don't fail silently — a denied write here (rules/permissions)
+                        // means the user/family/baby never reach Firestore.
+                        AuthManager.log.error("FamilyManager.setup failed: \(error.localizedDescription, privacy: .public)")
+                    }
                 }
             } else {
                 Task { @MainActor in FamilyManager.shared.reset() }
             }
         }
+    }
+
+    // MARK: — Anonymous fallback
+
+    /// Ensures a Firebase user always exists so the device has a stable uid and a
+    /// `familyId` for Firestore sync — even before the user signs in with a provider.
+    /// CloudKit previously gave login-free cross-device sync; anonymous auth restores
+    /// that guarantee now that Firebase is the single backend.
+    @MainActor
+    func signInAnonymouslyIfNeeded() async {
+        guard FirebaseApp.app() != nil else { return }
+        guard Auth.auth().currentUser == nil else { return }
+        do {
+            let result = try await Auth.auth().signInAnonymously()
+            firebaseUser = result.user
+        } catch {
+            AuthManager.log.error("Anonymous sign-in failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Promotes the current (possibly anonymous) user to a provider credential.
+    /// Linking preserves the existing uid → `familyId` → data; a fresh sign-in would
+    /// orphan anything logged anonymously. Falls back to a plain sign-in when the
+    /// credential already belongs to another account (that account's data is then
+    /// adopted on next launch via CloudSyncDownloader).
+    @MainActor
+    private func linkOrSignIn(with credential: AuthCredential) async throws -> FirebaseAuth.User {
+        if let current = Auth.auth().currentUser, current.isAnonymous {
+            do {
+                return try await current.link(with: credential).user
+            } catch let error as NSError where error.code == AuthErrorCode.credentialAlreadyInUse.rawValue
+                || error.code == AuthErrorCode.emailAlreadyInUse.rawValue {
+                // Credential belongs to an existing account → sign into it directly.
+                return try await Auth.auth().signIn(with: credential).user
+            }
+        }
+        return try await Auth.auth().signIn(with: credential).user
     }
 
     // MARK: — Apple Sign-In
@@ -70,8 +118,7 @@ final class AuthManager: ObservableObject {
             rawNonce: nonce,
             fullName: cred.fullName
         )
-        let authResult = try await Auth.auth().signIn(with: credential)
-        firebaseUser = authResult.user
+        firebaseUser = try await linkOrSignIn(with: credential)
     }
 
     // MARK: — Google Sign-In
@@ -99,8 +146,7 @@ final class AuthManager: ObservableObject {
             withIDToken: idToken,
             accessToken: result.user.accessToken.tokenString
         )
-        let authResult = try await Auth.auth().signIn(with: credential)
-        firebaseUser = authResult.user
+        firebaseUser = try await linkOrSignIn(with: credential)
 #else
         throw AuthError.notImplemented
 #endif

@@ -32,6 +32,18 @@ final class LocalWalkRepository: WalkRepository {
         persist(all)
     }
 
+    func upsert(_ entries: [WalkEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        var all = load()
+        let existing = Set(all.map(\.id))
+        var changed = false
+        for entry in entries where !existing.contains(entry.id) {
+            all.append(entry)
+            changed = true
+        }
+        if changed { persist(all) }
+    }
+
     private func load() -> [WalkEntry] {
         guard let data = UserDefaults.standard.data(forKey: key),
               let entries = try? JSONDecoder().decode([WalkEntry].self, from: data)

@@ -10,7 +10,7 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
 
     func getAll() async throws -> [VaccinationEntry] {
         let records = try context.fetch(FetchDescriptor<VaccinationRecord>())
-        return records.map { $0.toDomain() }
+        return records.uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func save(_ entry: VaccinationEntry) async throws {
@@ -23,6 +23,19 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
                                           doneDate: entry.doneDate, notes: entry.notes,
                                           customName: entry.customName))
         try context.save()
+    }
+
+    func upsert(_ entries: [VaccinationEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<VaccinationRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(VaccinationRecord(id: entry.id, catalogId: entry.catalogId,
+                                             doneDate: entry.doneDate, notes: entry.notes,
+                                             customName: entry.customName))
+            inserted = true
+        }
+        if inserted { try context.save() }
     }
 
     func delete(id: UUID) async throws {

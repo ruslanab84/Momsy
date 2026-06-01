@@ -29,6 +29,17 @@ final class SwiftDataMomSleepRepository: MomSleepRepository {
         }
     }
 
+    func upsert(_ entries: [SleepEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<MomSleepRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(MomSleepRecord(entry))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func delete(id: UUID) async throws {
         let all = try context.fetch(FetchDescriptor<MomSleepRecord>())
         if let record = all.first(where: { $0.id == id }) {

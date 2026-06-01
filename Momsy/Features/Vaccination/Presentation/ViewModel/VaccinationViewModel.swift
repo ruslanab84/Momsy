@@ -46,14 +46,13 @@ final class VaccinationViewModel: ObservableObject {
     }
 
     func confirmDone(_ status: VaccinationStatus) async {
-        await markDone.execute(catalogId: status.item.id, doneDate: doneDate)
+        let entry = await markDone.execute(catalogId: status.item.id, doneDate: doneDate)
         pushNotifications.cancelVaccinationReminder(catalogId: status.item.id)
         let lm = LocalizationManager.shared
         let vName = lm.current == .english ? status.item.nameEN
                   : lm.current == .german  ? status.item.nameDE
                   : status.item.nameRU
-        pushVaccinationToFirestore(catalogId: status.item.id, doneDate: doneDate,
-                                   vaccineName: vName, notes: "")
+        pushVaccinationToFirestore(entry: entry, vaccineName: vName)
         await load()
         showMarkDone = nil
     }
@@ -77,23 +76,22 @@ final class VaccinationViewModel: ObservableObject {
     }
 
     func saveCustomVaccination(name: String, date: Date) async {
-        await addCustom.execute(name: name, date: date)
-        pushVaccinationToFirestore(catalogId: -1, doneDate: date, vaccineName: name, notes: "")
+        let entry = await addCustom.execute(name: name, date: date)
+        pushVaccinationToFirestore(entry: entry, vaccineName: name)
         await load()
         showAddCustom = false
     }
 
-    private func pushVaccinationToFirestore(catalogId: Int, doneDate: Date,
-                                            vaccineName: String, notes: String) {
+    private func pushVaccinationToFirestore(entry: VaccinationEntry, vaccineName: String) {
         guard FamilyManager.shared.familyId != nil else { return }
         let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
         let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = VaccinationLog(
-            id: UUID().uuidString, catalogId: catalogId,
-            doneDate: doneDate, vaccineName: vaccineName,
-            notes: notes, addedBy: uid, addedByName: name
+            id: entry.id.uuidString, catalogId: entry.catalogId,
+            doneDate: entry.doneDate, vaccineName: vaccineName,
+            notes: entry.notes, addedBy: uid, addedByName: name
         )
-        Task { try? await BabySyncService().addLog(VaccinationLogDTO(from: log), to: "vaccinationLogs") }
+        Task { try? await BabySyncService().setLog(VaccinationLogDTO(from: log), id: log.id, to: "vaccinationLogs") }
     }
 
     private func ageLabel(months: Int, lang: Language) -> String {

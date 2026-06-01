@@ -22,6 +22,21 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
         try context.save()
     }
 
+    func upsert(_ entries: [ComplementaryFoodEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<ComplementaryFoodRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(ComplementaryFoodRecord(
+                id: entry.id, date: entry.date, foodName: entry.foodName,
+                category: entry.category.rawValue, reaction: entry.reaction.rawValue,
+                isAllergen: entry.isAllergen, notes: entry.notes, photoPath: entry.photoPath
+            ))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func update(_ entry: ComplementaryFoodEntry) async throws {
         let all = try context.fetch(FetchDescriptor<ComplementaryFoodRecord>())
         guard let rec = all.first(where: { $0.id == entry.id }) else { return }

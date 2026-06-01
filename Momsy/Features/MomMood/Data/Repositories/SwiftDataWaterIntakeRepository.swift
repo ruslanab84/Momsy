@@ -11,6 +11,17 @@ final class SwiftDataWaterIntakeRepository: WaterIntakeRepository {
         try context.save()
     }
 
+    func upsert(_ entries: [WaterIntakeEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<WaterIntakeRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(WaterIntakeRecord(entry))
+            inserted = true
+        }
+        if inserted { try context.save() }
+    }
+
     func getEntries(from: Date, to: Date) async throws -> [WaterIntakeEntry] {
         let all = try context.fetch(FetchDescriptor<WaterIntakeRecord>())
         return all

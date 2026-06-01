@@ -40,6 +40,7 @@ final class SwiftDataPumpingRepository: PumpingRepository {
         let all = try context.fetch(FetchDescriptor<PumpingRecord>())
         return all
             .filter { $0.date >= from && $0.date < to && $0.endDate != nil }
+            .uniqued(by: { $0.id })
             .map { $0.toDomain() }
             .sorted { $0.date < $1.date }
     }
@@ -57,5 +58,16 @@ final class SwiftDataPumpingRepository: PumpingRepository {
         context.insert(PumpingRecord(entry))
         try context.save()
         return entry
+    }
+
+    func upsert(_ entries: [PumpingEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<PumpingRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(PumpingRecord(entry))
+            inserted = true
+        }
+        if inserted { try context.save() }
     }
 }

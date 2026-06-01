@@ -3,8 +3,8 @@ import Foundation
 
 @Model
 final class WalkRecord {
-    var id: UUID
-    var startDate: Date
+    var id: UUID = UUID()
+    var startDate: Date = Date()
     var endDate: Date?
 
     init(_ entry: WalkEntry) {

@@ -19,6 +19,17 @@ final class MockLeapsRepository: LeapsRepository {
         }
     }
 
+    func upsert(_ entries: [LeapProgress]) async throws {
+        if shouldThrow { throw TestError.mock }
+        for p in entries {
+            if let idx = progress.firstIndex(where: { $0.id == p.id }) {
+                progress[idx] = p
+            } else {
+                progress.append(p)
+            }
+        }
+    }
+
     func resetProgress(id: Int) async throws {
         progress.removeAll { $0.id == id }
     }

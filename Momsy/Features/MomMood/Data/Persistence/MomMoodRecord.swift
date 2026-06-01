@@ -3,11 +3,11 @@ import Foundation
 
 @Model
 final class MomMoodRecord {
-    var id: UUID
-    var date: Date
-    var mood: Int
-    var energy: Int
-    var note: String
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var mood: Int = 0
+    var energy: Int = 0
+    var note: String = ""
     var epdsScore: Int?
 
     init(id: UUID = UUID(), date: Date = Date(),

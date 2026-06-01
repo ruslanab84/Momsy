@@ -26,6 +26,16 @@ final class LocalTemperatureRepository: TemperatureRepository {
         try save(entries)
     }
 
+    func upsert(_ newEntries: [TemperatureEntry]) async throws {
+        guard !newEntries.isEmpty else { return }
+        var entries = try load()
+        let existing = Set(entries.map(\.id))
+        let added = newEntries.filter { !existing.contains($0.id) }
+        guard !added.isEmpty else { return }
+        entries.append(contentsOf: added)
+        try save(entries)
+    }
+
     func delete(id: UUID) async throws {
         var entries = try load()
         entries.removeAll { $0.id == id }

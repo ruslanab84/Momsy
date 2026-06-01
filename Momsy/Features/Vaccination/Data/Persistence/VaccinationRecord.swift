@@ -3,10 +3,10 @@ import Foundation
 
 @Model
 final class VaccinationRecord {
-    var id: UUID
-    var catalogId: Int
-    var doneDate: Date
-    var notes: String
+    var id: UUID = UUID()
+    var catalogId: Int = 0
+    var doneDate: Date = Date()
+    var notes: String = ""
     var customName: String?
 
     init(id: UUID = UUID(), catalogId: Int, doneDate: Date, notes: String = "", customName: String? = nil) {

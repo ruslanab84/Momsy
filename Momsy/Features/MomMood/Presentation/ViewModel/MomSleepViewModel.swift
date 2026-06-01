@@ -141,6 +141,7 @@ final class MomSleepViewModel: ObservableObject {
                 if let idx = todayEntries.firstIndex(where: { $0.id == saved.id }) {
                     todayEntries[idx] = saved
                 }
+                pushMomSleepToFirestore(saved)
             } catch {
                 todayEntries.removeAll { $0.id == completed.id }
                 saveError = error.localizedDescription
@@ -157,11 +158,26 @@ final class MomSleepViewModel: ObservableObject {
                     todayEntries.append(saved)
                     todayEntries.sort { $0.startDate < $1.startDate }
                 }
+                pushMomSleepToFirestore(saved)
                 await loadChartData()
             } catch {
                 saveError = error.localizedDescription
             }
         }
+    }
+
+    /// Mom's sleep syncs to its own `momSleepLogs` subcollection (reusing the SleepLog
+    /// shape) so it round-trips across devices without colliding with the baby's sleep.
+    private func pushMomSleepToFirestore(_ entry: SleepEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = SleepLog(
+            id: entry.id.uuidString, startedAt: entry.startDate,
+            endedAt: entry.endDate, durationMin: entry.durationMinutes,
+            quality: entry.quality, addedBy: uid, addedByName: name
+        )
+        Task { try? await BabySyncService().setLog(SleepLogDTO(from: log), id: log.id, to: "momSleepLogs") }
     }
 
     func loadTodayEntries() async {

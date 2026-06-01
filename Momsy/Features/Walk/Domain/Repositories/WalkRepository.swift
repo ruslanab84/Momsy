@@ -5,4 +5,5 @@ protocol WalkRepository {
     func stop(_ entry: WalkEntry) async throws -> WalkEntry
     func getEntries(from: Date, to: Date) async throws -> [WalkEntry]
     func add(_ entry: WalkEntry) async throws
+    func upsert(_ entries: [WalkEntry]) async throws
 }

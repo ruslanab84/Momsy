@@ -86,7 +86,6 @@ struct PaywallView: View {
         VStack(alignment: .leading, spacing: 18) {
             featureRow(icon: "infinity", text: lm.featureAll)
             featureRow(icon: "person.2.fill", text: lm.featureSync)
-            featureRow(icon: "sparkles", text: lm.featureAI)
             featureRow(icon: "book.fill", text: lm.featureDiary)
         }
         .padding(.horizontal, 40)

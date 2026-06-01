@@ -47,7 +47,20 @@ final class LeapsViewModel: ObservableObject {
 
     func markComplete(id: Int) async {
         try? await markLeapCompleteUC.execute(leapId: id)
+        pushLeapToFirestore(LeapProgress(id: id, isDone: true, completedDate: Date()))
         await loadLeaps()
+    }
+
+    private func pushLeapToFirestore(_ progress: LeapProgress) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = LeapLog(
+            id: String(progress.id), leapId: progress.id,
+            isDone: progress.isDone, completedDate: progress.completedDate,
+            addedBy: uid, addedByName: name
+        )
+        Task { try? await BabySyncService().setLog(LeapLogDTO(from: log), id: log.id, to: "leapLogs") }
     }
 
     func toggleExpand(_ id: Int) {

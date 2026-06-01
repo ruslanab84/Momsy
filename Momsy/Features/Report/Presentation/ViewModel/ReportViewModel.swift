@@ -84,9 +84,22 @@ final class ReportViewModel: ObservableObject {
     }
 
     func saveVisitDate(_ date: Date) async {
-        try? await doctorVisitRepo.save(DoctorVisit(id: UUID(), date: date))
+        let visit = DoctorVisit(id: UUID(), date: date)
+        try? await doctorVisitRepo.save(visit)
+        pushDoctorVisitToFirestore(visit)
         lastVisitDate = date
         await loadData()
+    }
+
+    private func pushDoctorVisitToFirestore(_ visit: DoctorVisit) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = DoctorVisitLog(
+            id: visit.id.uuidString, date: visit.date,
+            addedBy: uid, addedByName: name
+        )
+        Task { try? await BabySyncService().setLog(DoctorVisitLogDTO(from: log), id: log.id, to: "doctorVisitLogs") }
     }
 
     // MARK: - Data loading

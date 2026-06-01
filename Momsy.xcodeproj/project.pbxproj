@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */; };
-		069763CA9C87B826640F4A60 /* MockAIChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C89620DBC5A4E8DF0169200 /* MockAIChatService.swift */; };
-		1C2C05E640CD3141B7AFA19F /* MockChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEAA5B698775CAA6B42D47F /* MockChatRepository.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
 		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
@@ -19,7 +17,6 @@
 		443C7EF01C216B989D605CE2 /* MockBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50479E8852BDAA636377733 /* MockBabyRepository.swift */; };
 		4BACDEB740F77369DB5F5A01 /* MockAnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */; };
 		56A4C28EC62F43A96F2D8DA4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
-		628E743BEB94F3AB623133EF /* AIChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3629953DE09AA74C6D2F44 /* AIChatViewModelTests.swift */; };
 		802A6938D28AA6A793B23C06 /* MockFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */; };
 		85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */; };
 		880ACB76F459C0F289D9A8A4 /* MomsyWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4F159218252E2FF5857958F7 /* MomsyWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -122,11 +119,9 @@
 		322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetEntry.swift; sourceTree = "<group>"; };
 		33A740574DACB7A766F4A51D /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		3BBE7E66563E0F26A2DFF70C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3C3629953DE09AA74C6D2F44 /* AIChatViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatViewModelTests.swift; sourceTree = "<group>"; };
 		480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaperRepository.swift; sourceTree = "<group>"; };
 		4820A4E27274110E9256D2F7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		482ADA73C55024953C8197D9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
-		4C89620DBC5A4E8DF0169200 /* MockAIChatService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAIChatService.swift; sourceTree = "<group>"; };
 		4F159218252E2FF5857958F7 /* MomsyWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MomsyWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDailyTipService.swift; sourceTree = "<group>"; };
 		53A0E7913296744B89DD122D /* DiaryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryViewModelTests.swift; sourceTree = "<group>"; };
@@ -142,14 +137,11 @@
 		772F05E6F2F8A790BB660917 /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
 		777A2D15DFB6A97CB572C749 /* DailyTipRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipRepository.swift; sourceTree = "<group>"; };
 		7BE6CCCC6E58B3B71587C901 /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
-		7BEAA5B698775CAA6B42D47F /* MockChatRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockChatRepository.swift; sourceTree = "<group>"; };
-		836D5C82D29DCC728C9D4597 /* MockChatRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockChatRepository.swift; sourceTree = "<group>"; };
 		84C118A36FCB09993B8CBD0D /* DiaryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryViewModelTests.swift; sourceTree = "<group>"; };
 		8637519A9E26B4D5A7849327 /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		89316574BE009A52297A40D5 /* DiaryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryViewModelTests.swift; sourceTree = "<group>"; };
 		899719668465504148CFB39B /* MockDiaryRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaryRepository.swift; sourceTree = "<group>"; };
 		9475DD524688A6F70C04B3C7 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
-		97DB3E7B730E66559F754EC5 /* MockChatRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockChatRepository.swift; sourceTree = "<group>"; };
 		990B4C0F2CAF36C3F93A25A2 /* DailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipService.swift; sourceTree = "<group>"; };
 		99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
@@ -178,9 +170,7 @@
 		C0DFCA599DD5851314281335 /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		C0ED0FC63356D42900B3E456 /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		C37279E74C1D7F7DFA7CED64 /* MockLeapsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockLeapsRepository.swift; sourceTree = "<group>"; };
-		C4E36BC92317DCE26D417F61 /* MockAIChatService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAIChatService.swift; sourceTree = "<group>"; };
 		C50479E8852BDAA636377733 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
-		C83EB46AD280B60D75F99514 /* MockAIChatService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAIChatService.swift; sourceTree = "<group>"; };
 		CAADDB368FFD0B2A73ADFB21 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		CC001122CC33DD44EE55FF71 /* SharedActivityUI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedActivityUI.swift; sourceTree = "<group>"; };
 		CC001122CC33DD44EE55FF73 /* SleepLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepLiveActivityView.swift; sourceTree = "<group>"; };
@@ -192,7 +182,6 @@
 		D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WidgetDataStore.swift; path = Momsy/Core/Widget/WidgetDataStore.swift; sourceTree = "<group>"; };
 		D45F950517BF58D078B26608 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		D5F6EA2A332CF39167F1C2CB /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
-		D793B1E582AA51EFE6BE28F1 /* AIChatViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatViewModelTests.swift; sourceTree = "<group>"; };
 		D8E2302C2FFD377BB31E23DD /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
 		DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		DED78F3E8524577CFF50864B /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -206,7 +195,6 @@
 		F9F1F99234A1F4FCB8840C13 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA16402FBC4C3F01E5573DB2 /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		FB2828F5A5DB44A9E2563938 /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
-		FC577BE621E9EC76A891B30B /* AIChatViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatViewModelTests.swift; sourceTree = "<group>"; };
 		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -334,16 +322,6 @@
 			name = Today;
 			sourceTree = "<group>";
 		};
-		3D5E9099F7CEDDD83E5D9539 /* AIChat */ = {
-			isa = PBXGroup;
-			children = (
-				D793B1E582AA51EFE6BE28F1 /* AIChatViewModelTests.swift */,
-				FC577BE621E9EC76A891B30B /* AIChatViewModelTests.swift */,
-				3C3629953DE09AA74C6D2F44 /* AIChatViewModelTests.swift */,
-			);
-			path = AIChat;
-			sourceTree = "<group>";
-		};
 		479F984578780BA8520D9CC7 /* Prompts */ = {
 			isa = PBXGroup;
 			children = (
@@ -434,30 +412,24 @@
 		ABCCB7544C43D5D7725CF1CA /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
-				C4E36BC92317DCE26D417F61 /* MockAIChatService.swift */,
 				D2D8FBFA13BEAB5198BAAF2E /* MockAnalyticsService.swift */,
 				F9447E2BE7AA19806CCDF9B8 /* MockBabyRepository.swift */,
-				97DB3E7B730E66559F754EC5 /* MockChatRepository.swift */,
 				899719668465504148CFB39B /* MockDiaryRepository.swift */,
 				27CCA3ED5F2ECE7D8505B730 /* MockFeedingRepository.swift */,
 				53F845EB5F589FB39171B36B /* MockLeapsRepository.swift */,
 				33A740574DACB7A766F4A51D /* MockPushNotificationService.swift */,
 				FB2828F5A5DB44A9E2563938 /* MockSleepRepository.swift */,
 				FA16402FBC4C3F01E5573DB2 /* TestHelpers.swift */,
-				C83EB46AD280B60D75F99514 /* MockAIChatService.swift */,
 				7BE6CCCC6E58B3B71587C901 /* MockAnalyticsService.swift */,
 				0A46ABCF5A1A31976CF2C739 /* MockBabyRepository.swift */,
-				836D5C82D29DCC728C9D4597 /* MockChatRepository.swift */,
 				0B6D62B0527D4EA67A8EB2FC /* MockDiaryRepository.swift */,
 				D5F6EA2A332CF39167F1C2CB /* MockFeedingRepository.swift */,
 				CC3164FDFBF5812A759E9204 /* MockLeapsRepository.swift */,
 				D45F950517BF58D078B26608 /* MockPushNotificationService.swift */,
 				64F261A70D74866E7728C38F /* MockSleepRepository.swift */,
 				8637519A9E26B4D5A7849327 /* TestHelpers.swift */,
-				4C89620DBC5A4E8DF0169200 /* MockAIChatService.swift */,
 				3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */,
 				C50479E8852BDAA636377733 /* MockBabyRepository.swift */,
-				7BEAA5B698775CAA6B42D47F /* MockChatRepository.swift */,
 				6D7744983E8EF2AF6D12E3DE /* MockDiaryRepository.swift */,
 				DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */,
 				C37279E74C1D7F7DFA7CED64 /* MockLeapsRepository.swift */,
@@ -551,7 +523,6 @@
 		CF188E3D6A5F475289D564B6 /* Features */ = {
 			isa = PBXGroup;
 			children = (
-				3D5E9099F7CEDDD83E5D9539 /* AIChat */,
 				945C65C48948BC238DDFA608 /* Diary */,
 				6CD81E05E696492F92ABC1E4 /* Feeding */,
 				BF481C984AA7F1A163924A81 /* Leaps */,
@@ -744,7 +715,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				628E743BEB94F3AB623133EF /* AIChatViewModelTests.swift in Sources */,
 				DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */,
 				2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */,
 				3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */,
@@ -754,10 +724,8 @@
 				E3D39EF3449D3301F24E663A /* MockSoundRepository.swift in Sources */,
 				FF93FE7B3A6F5DDA40F2B2D6 /* SoundsViewModelTests.swift in Sources */,
 				B24FC7CC0D782B29188B1E9F /* TodayViewModelTests.swift in Sources */,
-				069763CA9C87B826640F4A60 /* MockAIChatService.swift in Sources */,
 				4BACDEB740F77369DB5F5A01 /* MockAnalyticsService.swift in Sources */,
 				443C7EF01C216B989D605CE2 /* MockBabyRepository.swift in Sources */,
-				1C2C05E640CD3141B7AFA19F /* MockChatRepository.swift in Sources */,
 				FC2E77342D0D91D52C40605A /* MockDiaryRepository.swift in Sources */,
 				802A6938D28AA6A793B23C06 /* MockFeedingRepository.swift in Sources */,
 				8872BBDA2E0981A7146C21CC /* MockLeapsRepository.swift in Sources */,
@@ -1110,7 +1078,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.Release.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;

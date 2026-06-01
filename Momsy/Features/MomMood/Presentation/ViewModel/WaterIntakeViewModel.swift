@@ -55,8 +55,20 @@ final class WaterIntakeViewModel: ObservableObject {
             if weeklyDayTotals.count == 7 {
                 weeklyDayTotals[6] = todayEntries.map(\.amountMl).reduce(0, +)
             }
+            pushWaterIntakeToFirestore(saved)
         } catch {
             saveError = error.localizedDescription
         }
+    }
+
+    private func pushWaterIntakeToFirestore(_ entry: WaterIntakeEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = WaterIntakeLog(
+            id: entry.id.uuidString, date: entry.date,
+            amountMl: entry.amountMl, addedBy: uid, addedByName: name
+        )
+        Task { try? await BabySyncService().setLog(WaterIntakeLogDTO(from: log), id: log.id, to: "waterIntakeLogs") }
     }
 }

@@ -21,15 +21,18 @@ final class FoodDiaryViewModel: ObservableObject {
     private let get: GetFoodEntriesUseCase
     private let delete: DeleteFoodEntryUseCase
     private let photoStorage: any PhotoStorageService
+    private let syncRepo: any BabySyncRepositoryProtocol
 
     init(add: AddFoodEntryUseCase,
          get: GetFoodEntriesUseCase,
          delete: DeleteFoodEntryUseCase,
-         photoStorage: any PhotoStorageService) {
+         photoStorage: any PhotoStorageService,
+         syncRepo: any BabySyncRepositoryProtocol) {
         self.add = add
         self.get = get
         self.delete = delete
         self.photoStorage = photoStorage
+        self.syncRepo = syncRepo
     }
 
     var allergens: [ComplementaryFoodEntry] { entries.filter(\.isAllergen) }
@@ -58,10 +61,11 @@ final class FoodDiaryViewModel: ObservableObject {
             photoPath = try? await photoStorage.save(img, forID: UUID())
         }
         do {
-            try await add.execute(
+            let entry = try await add.execute(
                 name: name, category: newCategory, reaction: newReaction,
                 isAllergen: newIsAllergen, notes: newNotes, photoPath: photoPath
             )
+            pushFoodEntryToFirestore(entry)
             resetForm()
             showAddEntry = false
             await load()
@@ -77,6 +81,23 @@ final class FoodDiaryViewModel: ObservableObject {
         await delete.execute(id: entry.id)
         photosByID.removeValue(forKey: entry.id)
         await load()
+    }
+
+    private func pushFoodEntryToFirestore(_ entry: ComplementaryFoodEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let log = FoodDiaryLog(
+            id: entry.id.uuidString,
+            date: entry.date,
+            foodName: entry.foodName,
+            category: entry.category.rawValue,
+            reaction: entry.reaction.rawValue,
+            isAllergen: entry.isAllergen,
+            notes: entry.notes,
+            photoPath: entry.photoPath,
+            addedBy: UserDefaults.standard.string(forKey: "uid") ?? "",
+            addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
+        )
+        Task { try? await syncRepo.addFoodDiaryLog(log) }
     }
 
     private func loadPhotos() async {

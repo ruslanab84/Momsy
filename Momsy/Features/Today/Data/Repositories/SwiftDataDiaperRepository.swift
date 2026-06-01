@@ -8,7 +8,8 @@ final class SwiftDataDiaperRepository: DiaperRepository {
 
     func getEntries(from: Date, to: Date) async throws -> [DiaperEntry] {
         let all = try context.fetch(FetchDescriptor<DiaperRecord>())
-        return all.filter { $0.date >= from && $0.date <= to }.map { $0.toDomain() }
+        return all.filter { $0.date >= from && $0.date <= to }
+            .uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func add(_ entry: DiaperEntry) async throws {
@@ -38,6 +39,6 @@ final class SwiftDataDiaperRepository: DiaperRepository {
 
     func countToday() async throws -> Int {
         let all = try context.fetch(FetchDescriptor<DiaperRecord>())
-        return all.filter { Calendar.current.isDateInToday($0.date) }.count
+        return all.uniqued(by: { $0.id }).filter { Calendar.current.isDateInToday($0.date) }.count
     }
 }

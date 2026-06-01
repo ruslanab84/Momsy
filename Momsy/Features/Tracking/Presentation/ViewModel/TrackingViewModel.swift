@@ -153,7 +153,7 @@ final class TrackingViewModel: ObservableObject {
             weight: entry.weight, height: entry.height,
             headCirc: entry.headCirc, addedBy: uid, addedByName: name
         )
-        Task { try? await BabySyncService().addLog(MeasurementLogDTO(from: log), to: "measurementLogs") }
+        Task { try? await BabySyncService().setLog(MeasurementLogDTO(from: log), id: log.id, to: "measurementLogs") }
     }
 
     func addTemp(_ entry: TemperatureEntry) {
@@ -162,5 +162,18 @@ final class TrackingViewModel: ObservableObject {
             do { try await temperatureRepo.add(entry) }
             catch { saveError = error.localizedDescription }
         }
+        pushTemperatureToFirestore(entry)
+    }
+
+    private func pushTemperatureToFirestore(_ entry: TemperatureEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = TemperatureLog(
+            id: entry.id.uuidString, date: entry.date,
+            value: entry.value, note: entry.note,
+            addedBy: uid, addedByName: name
+        )
+        Task { try? await BabySyncService().setLog(TemperatureLogDTO(from: log), id: log.id, to: "temperatureLogs") }
     }
 }

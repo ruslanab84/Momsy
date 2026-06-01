@@ -33,6 +33,151 @@ struct CuteBlobView: View {
         case .vitamin: VitaminBlob(s: size)
         case .stool:   StoolBlob(s: size)
         case .pump:    PumpBlob(s: size)
+        case .mom:     MomBlob(s: size)
+        case .dad:     DadBlob(s: size)
+        case .nanny:   NannyBlob(s: size)
+        case .other:   OtherBlob(s: size)
+        }
+    }
+}
+
+// MARK: - People (shared)
+
+private enum BlobFace {
+    static let skin = Color(bbHex: "FFD9B8")
+    static let ink  = Color(bbHex: "3D2A20")
+}
+
+private struct BlobSmile: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        p.addQuadCurve(to: CGPoint(x: rect.maxX, y: rect.minY),
+                       control: CGPoint(x: rect.midX, y: rect.maxY * 1.7))
+        return p
+    }
+}
+
+// MARK: - Mom (woman, long hair)
+
+private struct MomBlob: View {
+    let s: CGFloat
+    var body: some View {
+        let f = s * 0.52
+        let hair = Color(bbHex: "6B4423")
+        ZStack {
+            // long hair framing the face
+            RoundedRectangle(cornerRadius: f * 0.5, style: .continuous)
+                .fill(hair)
+                .frame(width: f * 1.18, height: f * 1.34)
+                .offset(y: f * 0.08)
+            // face
+            Ellipse().fill(BlobFace.skin).frame(width: f, height: f * 1.06)
+            // bangs over forehead
+            Ellipse().fill(hair).frame(width: f * 1.02, height: f * 0.58).offset(y: -f * 0.42)
+            // eyes
+            Circle().fill(BlobFace.ink).frame(width: f * 0.1, height: f * 0.1).offset(x: -f * 0.17, y: -f * 0.02)
+            Circle().fill(BlobFace.ink).frame(width: f * 0.1, height: f * 0.1).offset(x:  f * 0.17, y: -f * 0.02)
+            // cheeks
+            Circle().fill(Color.bbCoral).opacity(0.55).frame(width: f * 0.2, height: f * 0.2).offset(x: -f * 0.26, y: f * 0.15)
+            Circle().fill(Color.bbCoral).opacity(0.55).frame(width: f * 0.2, height: f * 0.2).offset(x:  f * 0.26, y: f * 0.15)
+            // smile
+            BlobSmile()
+                .stroke(BlobFace.ink, style: StrokeStyle(lineWidth: f * 0.05, lineCap: .round))
+                .frame(width: f * 0.22, height: f * 0.1).offset(y: f * 0.2)
+        }
+    }
+}
+
+// MARK: - Dad (man, short hair, mustache)
+
+private struct DadBlob: View {
+    let s: CGFloat
+    var body: some View {
+        let f = s * 0.52
+        let hair = Color(bbHex: "4A3325")
+        ZStack {
+            // short hair cap
+            Ellipse().fill(hair).frame(width: f * 1.04, height: f * 0.64).offset(y: -f * 0.38)
+            // face
+            Ellipse().fill(BlobFace.skin).frame(width: f, height: f * 1.04)
+            // eyes
+            Circle().fill(BlobFace.ink).frame(width: f * 0.1, height: f * 0.1).offset(x: -f * 0.17, y: -f * 0.08)
+            Circle().fill(BlobFace.ink).frame(width: f * 0.1, height: f * 0.1).offset(x:  f * 0.17, y: -f * 0.08)
+            // cheeks
+            Circle().fill(Color.bbCoral).opacity(0.5).frame(width: f * 0.18, height: f * 0.18).offset(x: -f * 0.27, y: f * 0.08)
+            Circle().fill(Color.bbCoral).opacity(0.5).frame(width: f * 0.18, height: f * 0.18).offset(x:  f * 0.27, y: f * 0.08)
+            // mustache
+            Capsule().fill(hair).frame(width: f * 0.3, height: f * 0.07).offset(y: f * 0.12)
+            // smile
+            BlobSmile()
+                .stroke(BlobFace.ink, style: StrokeStyle(lineWidth: f * 0.05, lineCap: .round))
+                .frame(width: f * 0.2, height: f * 0.08).offset(y: f * 0.26)
+        }
+    }
+}
+
+// MARK: - Nanny (grandma, grey bun + glasses)
+
+private struct NannyBlob: View {
+    let s: CGFloat
+    var body: some View {
+        let f = s * 0.52
+        let hair = Color(bbHex: "DAD5CF")
+        let frame = Color(bbHex: "5A4A40")
+        ZStack {
+            // hair frame
+            Ellipse().fill(hair).frame(width: f * 1.12, height: f * 0.72).offset(y: -f * 0.34)
+            // bun on top
+            Circle().fill(hair).frame(width: f * 0.34, height: f * 0.34).offset(y: -f * 0.56)
+            // face
+            Ellipse().fill(BlobFace.skin).frame(width: f, height: f * 1.05)
+            // glasses
+            Circle().stroke(frame, lineWidth: f * 0.045).frame(width: f * 0.3, height: f * 0.3).offset(x: -f * 0.18, y: -f * 0.02)
+            Circle().stroke(frame, lineWidth: f * 0.045).frame(width: f * 0.3, height: f * 0.3).offset(x:  f * 0.18, y: -f * 0.02)
+            Capsule().fill(frame).frame(width: f * 0.08, height: f * 0.035).offset(y: -f * 0.02)
+            // eyes inside glasses
+            Circle().fill(BlobFace.ink).frame(width: f * 0.07, height: f * 0.07).offset(x: -f * 0.18, y: -f * 0.02)
+            Circle().fill(BlobFace.ink).frame(width: f * 0.07, height: f * 0.07).offset(x:  f * 0.18, y: -f * 0.02)
+            // rosy cheeks
+            Circle().fill(Color.bbCoral).opacity(0.6).frame(width: f * 0.19, height: f * 0.19).offset(x: -f * 0.27, y: f * 0.18)
+            Circle().fill(Color.bbCoral).opacity(0.6).frame(width: f * 0.19, height: f * 0.19).offset(x:  f * 0.27, y: f * 0.18)
+            // smile
+            BlobSmile()
+                .stroke(BlobFace.ink, style: StrokeStyle(lineWidth: f * 0.05, lineCap: .round))
+                .frame(width: f * 0.2, height: f * 0.09).offset(y: f * 0.24)
+        }
+    }
+}
+
+// MARK: - Other (generic person avatar)
+
+private struct OtherBlob: View {
+    let s: CGFloat
+    var body: some View {
+        let f = s * 0.5
+        let hair = Color(bbHex: "6E5B4E")
+        ZStack {
+            // shoulders
+            RoundedRectangle(cornerRadius: f * 0.55, style: .continuous)
+                .fill(Color.white)
+                .frame(width: f * 1.2, height: f * 0.72).offset(y: f * 0.64)
+            // hair behind head
+            Ellipse().fill(hair).frame(width: f * 0.66, height: f * 0.4).offset(y: -f * 0.34)
+            // head
+            Circle().fill(BlobFace.skin).frame(width: f * 0.62, height: f * 0.62).offset(y: -f * 0.16)
+            // hair fringe over forehead
+            Ellipse().fill(hair).frame(width: f * 0.66, height: f * 0.26).offset(y: -f * 0.38)
+            // eyes
+            Circle().fill(BlobFace.ink).frame(width: f * 0.08, height: f * 0.08).offset(x: -f * 0.13, y: -f * 0.18)
+            Circle().fill(BlobFace.ink).frame(width: f * 0.08, height: f * 0.08).offset(x:  f * 0.13, y: -f * 0.18)
+            // cheeks
+            Circle().fill(Color.bbCoral).opacity(0.45).frame(width: f * 0.14, height: f * 0.14).offset(x: -f * 0.2, y: -f * 0.08)
+            Circle().fill(Color.bbCoral).opacity(0.45).frame(width: f * 0.14, height: f * 0.14).offset(x:  f * 0.2, y: -f * 0.08)
+            // smile
+            BlobSmile()
+                .stroke(BlobFace.ink, style: StrokeStyle(lineWidth: f * 0.045, lineCap: .round))
+                .frame(width: f * 0.16, height: f * 0.07).offset(y: -f * 0.02)
         }
     }
 }

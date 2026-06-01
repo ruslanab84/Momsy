@@ -3,13 +3,13 @@ import Foundation
 
 @Model
 final class MeasurementRecord {
-    var id: UUID
-    var date: Date
-    var dateLabel: String
-    var weight: String
-    var height: String
-    var headCirc: String
-    var delta: String
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var dateLabel: String = ""
+    var weight: String = ""
+    var height: String = ""
+    var headCirc: String = ""
+    var delta: String = ""
     var visitLabel: String?
 
     init(_ entry: MeasurementEntry) {

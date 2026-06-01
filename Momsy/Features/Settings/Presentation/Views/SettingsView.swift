@@ -4,6 +4,10 @@ struct SettingsView: View {
     @StateObject private var vm: SettingsViewModel
     @EnvironmentObject private var lm: LocalizationManager
     @EnvironmentObject private var units: UnitSystemManager
+    @Environment(\.openURL) private var openURL
+
+    // TODO: replace with the public URL hosting PRIVACY.md before release.
+    private let privacyPolicyURL = URL(string: "https://momsy.app/privacy")
 
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeSettingsViewModel())
@@ -177,14 +181,39 @@ struct SettingsView: View {
                 Divider().opacity(0.2).padding(.leading, 60)
                 infoRow(icon: "heart.fill",        bg: .bbRose,   title: lm.strings.madeWithLove,  value: lm.strings.forMoms)
                 Divider().opacity(0.2).padding(.leading, 60)
-                chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: lm.strings.privacy)
+                Button(action: openPrivacyPolicy) {
+                    chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: lm.strings.privacy)
+                }
+                .buttonStyle(.plain)
                 Divider().opacity(0.2).padding(.leading, 60)
                 chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.feedback)
             }
             .background(Color.bbCard)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .bbShadow()
+
+            icloudSyncDisclosure
         }
+    }
+
+    private var icloudSyncDisclosure: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label(lm.strings.icloudSyncTitle, systemImage: "icloud.fill")
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(.bbInk)
+            Text(lm.strings.icloudSyncDisclosure)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 4)
+        .padding(.top, 4)
+    }
+
+    private func openPrivacyPolicy() {
+        guard let privacyPolicyURL else { return }
+        openURL(privacyPolicyURL)
     }
 
     private func infoRow(icon: String, bg: Color, title: String, value: String) -> some View {

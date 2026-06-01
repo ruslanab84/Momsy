@@ -3,8 +3,8 @@ import Foundation
 
 @Model
 final class LeapProgressRecord {
-    var leapID: Int
-    var isDone: Bool
+    var leapID: Int = 0
+    var isDone: Bool = false
     var completedDate: Date?
 
     init(_ progress: LeapProgress) {

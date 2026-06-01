@@ -225,17 +225,19 @@ final class TodayViewModel: ObservableObject {
         guard FamilyManager.shared.familyId != nil else { return }
         let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
         let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
-        let log = QuickEventLog(id: id.uuidString, kind: kind.rawValue,
-                                loggedAt: date, label: label,
-                                addedBy: uid, addedByName: name)
+        // Only quick events with a dedicated collection are synced. Anything else
+        // is intentionally not written (the old `quickLogs` catch-all is removed).
         let collection: String
         switch kind {
         case .walk:    collection = "walkLogs"
         case .bath:    collection = "bathLogs"
         case .vitamin: collection = "vitaminLogs"
         case .stool:   collection = "stoolLogs"
-        default:       collection = "quickLogs"
+        default:       return
         }
+        let log = QuickEventLog(id: id.uuidString, kind: kind.rawValue,
+                                loggedAt: date, label: label,
+                                addedBy: uid, addedByName: name)
         Task { try? await BabySyncService().setLog(QuickEventLogDTO(from: log), id: log.id, to: collection) }
     }
 

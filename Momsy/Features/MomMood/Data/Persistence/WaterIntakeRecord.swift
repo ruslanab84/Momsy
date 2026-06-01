@@ -3,9 +3,9 @@ import Foundation
 
 @Model
 final class WaterIntakeRecord {
-    var id: UUID
-    var date: Date
-    var amountMl: Int
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var amountMl: Int = 0
 
     init(_ entry: WaterIntakeEntry) {
         id       = entry.id

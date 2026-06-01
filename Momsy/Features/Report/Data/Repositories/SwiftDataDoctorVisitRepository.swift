@@ -17,4 +17,13 @@ final class SwiftDataDoctorVisitRepository: DoctorVisitRepository {
         context.insert(DoctorVisitRecord(id: visit.id, date: visit.date))
         try context.save()
     }
+
+    /// Only the most recent visit is kept locally. Adopt the newest downloaded
+    /// visit when it is later than what we already have.
+    func upsert(_ visits: [DoctorVisit]) async throws {
+        guard let newest = visits.max(by: { $0.date < $1.date }) else { return }
+        let current = try await getLast()
+        if let current, current.date >= newest.date { return }
+        try await save(newest)
+    }
 }

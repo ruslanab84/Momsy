@@ -3,11 +3,11 @@ import SwiftData
 
 @Model
 final class PumpingRecord {
-    var id: UUID
-    var date: Date
-    var durationSeconds: Int
-    var sideRaw: String
-    var volumeML: Int
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var durationSeconds: Int = 0
+    var sideRaw: String = ""
+    var volumeML: Int = 0
     var endDate: Date?
 
     init(_ entry: PumpingEntry) {

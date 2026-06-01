@@ -34,9 +34,10 @@ struct ReadyStep: View {
 
     private var roleBlob: BlobKind {
         switch role {
-        case "dad":   return .bear
-        case "nanny": return .sun
-        default:      return .baby
+        case "dad":   return .dad
+        case "nanny": return .nanny
+        case "other": return .other
+        default:      return .mom
         }
     }
 

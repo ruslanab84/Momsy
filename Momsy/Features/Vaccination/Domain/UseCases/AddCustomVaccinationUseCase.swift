@@ -3,7 +3,8 @@ import Foundation
 struct AddCustomVaccinationUseCase {
     let repository: any VaccinationRepository
 
-    func execute(name: String, date: Date) async {
+    @discardableResult
+    func execute(name: String, date: Date) async -> VaccinationEntry {
         // Use a unique negative Int as catalogId so it never clashes with catalog (1–20)
         // and stays unique across multiple custom entries.
         let uniqueId = -abs(UUID().uuidString.hashValue)
@@ -15,5 +16,6 @@ struct AddCustomVaccinationUseCase {
             customName: name
         )
         try? await repository.save(entry)
+        return entry
     }
 }

@@ -13,10 +13,10 @@ struct RoleStep: View {
 
     private var roles: [(String, String, BlobKind, Color)] {
         [
-            ("mom",   loc.strings.roleMom,    .baby, .bbCoral),
-            ("dad",   loc.strings.roleDad,    .bear, .bbSky),
-            ("nanny", loc.strings.roleNanny,  .sun,  .bbMint),
-            ("other", loc.strings.roleOther,  .star, .bbButter),
+            ("mom",   loc.strings.roleMom,    .mom,   .bbCoral),
+            ("dad",   loc.strings.roleDad,    .dad,   .bbSky),
+            ("nanny", loc.strings.roleNanny,  .nanny, .bbMint),
+            ("other", loc.strings.roleOther,  .other, .bbButter),
         ]
     }
 

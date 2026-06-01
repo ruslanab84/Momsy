@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import os
 import FirebaseFirestore
 import FirebaseAuth
 
@@ -27,6 +28,7 @@ final class FamilyManager: ObservableObject {
 
     private var db: Firestore { Firestore.firestore() }
     private var isSettingUp = false
+    private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "Family")
 
     private init() {
         familyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey)
@@ -60,6 +62,7 @@ final class FamilyManager: ObservableObject {
             )
             persist(familyId: newId)
             try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
+            Self.log.info("Created new family \(newId, privacy: .public) for user")
         }
         isReady = true
     }

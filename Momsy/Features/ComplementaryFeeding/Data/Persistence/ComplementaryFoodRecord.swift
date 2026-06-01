@@ -3,13 +3,13 @@ import Foundation
 
 @Model
 final class ComplementaryFoodRecord {
-    var id: UUID
-    var date: Date
-    var foodName: String
-    var category: String
-    var reaction: String
-    var isAllergen: Bool
-    var notes: String
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var foodName: String = ""
+    var category: String = ""
+    var reaction: String = ""
+    var isAllergen: Bool = false
+    var notes: String = ""
     var photoPath: String?
 
     init(id: UUID = UUID(), date: Date, foodName: String,

@@ -8,7 +8,8 @@ final class SwiftDataSleepRepository: SleepRepository {
 
     func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
         let all = try context.fetch(FetchDescriptor<SleepRecord>())
-        return all.filter { $0.startDate >= from && $0.startDate <= to }.map { $0.toDomain() }
+        return all.filter { $0.startDate >= from && $0.startDate <= to }
+            .uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func add(_ entry: SleepEntry) async throws {

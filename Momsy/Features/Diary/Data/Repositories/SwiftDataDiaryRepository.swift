@@ -8,7 +8,8 @@ final class SwiftDataDiaryRepository: DiaryRepository {
 
     func getEntries(from: Date, to: Date) async throws -> [StoredDiaryItem] {
         let all = try context.fetch(FetchDescriptor<DiaryItemRecord>())
-        return all.filter { $0.date >= from && $0.date <= to }.map { $0.toDomain() }
+        return all.filter { $0.date >= from && $0.date <= to }
+            .uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func add(_ item: StoredDiaryItem) async throws {

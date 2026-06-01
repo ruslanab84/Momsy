@@ -19,7 +19,6 @@ enum UserDefaultsMigration {
         migrateMeasurements(context: context)
         migrateTemperature(context: context)
         migrateLeaps(context: context)
-        migrateChat(context: context)
         migrateDiary(context: context)
         try? context.save()
     }
@@ -78,13 +77,6 @@ enum UserDefaultsMigration {
               let items = try? JSONDecoder().decode([LeapProgress].self, from: data)
         else { return }
         items.forEach { context.insert(LeapProgressRecord($0)) }
-    }
-
-    private static func migrateChat(context: ModelContext) {
-        guard let data = UserDefaults.standard.data(forKey: "local_chat_history"),
-              let messages = try? JSONDecoder().decode([ChatMessage].self, from: data)
-        else { return }
-        messages.forEach { context.insert(ChatMessageRecord($0)) }
     }
 
     private static func migrateDiary(context: ModelContext) {

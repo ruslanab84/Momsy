@@ -18,7 +18,6 @@ final class AppContainer {
     lazy var measurementRepository: any MeasurementRepository = SwiftDataMeasurementRepository(context: context)
     lazy var temperatureRepository: any TemperatureRepository = SwiftDataTemperatureRepository(context: context)
     lazy var leapsRepository: any LeapsRepository          = SwiftDataLeapsRepository(context: context)
-    lazy var chatRepository: any ChatRepository            = SwiftDataChatRepository(context: context)
     lazy var walkRepository: any WalkRepository            = SwiftDataWalkRepository(context: context)
     lazy var bathRepository: any BathRepository             = SwiftDataBathRepository(context: context)
     lazy var doctorVisitRepository: any DoctorVisitRepository = SwiftDataDoctorVisitRepository(context: context)
@@ -43,7 +42,19 @@ final class AppContainer {
         diaperRepo: diaperRepository,
         stoolRepo: stoolRepository,
         diaryRepo: diaryRepository,
-        quickLogRepo: quickLogRepository
+        walkRepo: walkRepository,
+        bathRepo: bathRepository,
+        pumpingRepo: pumpingRepository,
+        measurementRepo: measurementRepository,
+        vaccinationRepo: vaccinationRepository,
+        foodDiaryRepo: complementaryFeedingRepository,
+        quickLogRepo: quickLogRepository,
+        babyRepo: babyRepository,
+        temperatureRepo: temperatureRepository,
+        momSleepRepo: momSleepRepository,
+        waterIntakeRepo: waterIntakeRepository,
+        leapsRepo: leapsRepository,
+        doctorVisitRepo: doctorVisitRepository
     )
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
@@ -51,7 +62,6 @@ final class AppContainer {
     let subscriptionManager                            = SubscriptionManager()
     let diaperUseCase                                   = DiaperUseCase()
     let quickLogRepository                              = QuickLogRepository()
-    let aiChatService: any AIChatService               = GeminiChatService()
     let preferencesRepository: any UserPreferencesRepository = LocalUserPreferencesRepository()
     let dailyTipRepository                             = DailyTipRepository()
 
@@ -123,12 +133,6 @@ final class AppContainer {
     lazy var getFoodEntries = GetFoodEntriesUseCase(repository: complementaryFeedingRepository)
     lazy var deleteFoodEntry = DeleteFoodEntryUseCase(repository: complementaryFeedingRepository)
 
-    // MARK: — Use Cases — Chat
-
-    lazy var getChatHistory    = GetChatHistoryUseCase(repository: chatRepository)
-    lazy var appendChatMessage = AppendChatMessageUseCase(repository: chatRepository)
-    lazy var clearChatHistory  = ClearChatHistoryUseCase(repository: chatRepository)
-
     // MARK: — Migration
 
     func runMigrationIfNeeded() {
@@ -165,6 +169,7 @@ final class AppContainer {
             saveBabyProfile: saveBabyProfile,
             appState: appState,
             authManager: authManager,
+            syncRepo: babySyncRepository,
             analytics: analytics,
             pushNotifications: pushNotifications,
             onDone: onDone
@@ -195,17 +200,6 @@ final class AppContainer {
     func makeSleepViewModel() -> SleepViewModel {
         SleepViewModel(startSleep: startSleep, stopSleep: stopSleep,
                        getSleep: getSleepEntries, addManualSleep: addManualSleep, appState: appState)
-    }
-
-    func makeAIChatViewModel() -> AIChatViewModel {
-        AIChatViewModel(
-            getChatHistory: getChatHistory,
-            appendMessage: appendChatMessage,
-            clearChat: clearChatHistory,
-            chatService: aiChatService,
-            appState: appState,
-            getLeaps: getLeaps
-        )
     }
 
     func makeReportViewModel() -> ReportViewModel {
@@ -262,12 +256,13 @@ final class AppContainer {
             add: addFoodEntry,
             get: getFoodEntries,
             delete: deleteFoodEntry,
-            photoStorage: photoStorage
+            photoStorage: photoStorage,
+            syncRepo: babySyncRepository
         )
     }
 
     func makeSymptomViewModel() -> SymptomViewModel {
-        SymptomViewModel(appState: appState, addDiaryEntry: addDiaryEntry)
+        SymptomViewModel(appState: appState, addDiaryEntry: addDiaryEntry, syncRepo: babySyncRepository)
     }
 
     func makeSettingsViewModel() -> SettingsViewModel {

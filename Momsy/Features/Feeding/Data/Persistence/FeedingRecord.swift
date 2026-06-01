@@ -3,10 +3,10 @@ import Foundation
 
 @Model
 final class FeedingRecord {
-    var id: UUID
-    var date: Date
-    var durationSeconds: Int
-    var sideRaw: String
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var durationSeconds: Int = 0
+    var sideRaw: String = ""
     var mood: String?
     var milliliters: Int?
 

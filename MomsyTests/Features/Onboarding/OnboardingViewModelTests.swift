@@ -17,6 +17,7 @@ struct OnboardingViewModelTests {
             saveBabyProfile: SaveBabyProfileUseCase(repository: repo),
             appState: state,
             authManager: AuthManager(),
+            syncRepo: MockBabySyncRepository(),
             analytics: analytics,
             pushNotifications: push,
             onDone: onDone

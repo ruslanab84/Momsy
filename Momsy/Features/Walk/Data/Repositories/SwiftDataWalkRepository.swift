@@ -26,11 +26,23 @@ final class SwiftDataWalkRepository: WalkRepository {
 
     func getEntries(from: Date, to: Date) async throws -> [WalkEntry] {
         let all = try context.fetch(FetchDescriptor<WalkRecord>())
-        return all.filter { $0.startDate >= from && $0.startDate < to }.map { $0.toDomain() }
+        return all.filter { $0.startDate >= from && $0.startDate < to }
+            .uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func add(_ entry: WalkEntry) async throws {
         context.insert(WalkRecord(entry))
         try context.save()
+    }
+
+    func upsert(_ entries: [WalkEntry]) async throws {
+        guard !entries.isEmpty else { return }
+        let existing = Set(try context.fetch(FetchDescriptor<WalkRecord>()).map(\.id))
+        var inserted = false
+        for entry in entries where !existing.contains(entry.id) {
+            context.insert(WalkRecord(entry))
+            inserted = true
+        }
+        if inserted { try context.save() }
     }
 }

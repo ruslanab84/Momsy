@@ -9,12 +9,14 @@ final class SwiftDataFeedingRepository: FeedingRepository {
 
     func getEntries(for date: Date) async throws -> [FeedingEntry] {
         let all = try context.fetch(FetchDescriptor<FeedingRecord>())
-        return all.filter { calendar.isDate($0.date, inSameDayAs: date) }.map { $0.toDomain() }
+        return all.filter { calendar.isDate($0.date, inSameDayAs: date) }
+            .uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func getEntries(from: Date, to: Date) async throws -> [FeedingEntry] {
         let all = try context.fetch(FetchDescriptor<FeedingRecord>())
-        return all.filter { $0.date >= from && $0.date <= to }.map { $0.toDomain() }
+        return all.filter { $0.date >= from && $0.date <= to }
+            .uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func add(_ entry: FeedingEntry) async throws {

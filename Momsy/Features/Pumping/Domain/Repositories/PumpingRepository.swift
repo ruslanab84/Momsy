@@ -5,4 +5,5 @@ protocol PumpingRepository {
     func stop(_ entry: PumpingEntry, volumeML: Int) async throws -> PumpingEntry
     func getEntries(from: Date, to: Date) async throws -> [PumpingEntry]
     func logManual(date: Date, durationMinutes: Int, side: PumpingSide, volumeML: Int) async throws -> PumpingEntry
+    func upsert(_ entries: [PumpingEntry]) async throws
 }

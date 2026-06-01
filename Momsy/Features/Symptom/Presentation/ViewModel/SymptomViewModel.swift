@@ -53,11 +53,15 @@ final class SymptomViewModel: ObservableObject {
 
     private let appState: AppState
     private let addDiaryEntry: AddDiaryEntryUseCase
+    private let syncRepo: any BabySyncRepositoryProtocol
     private var lm: LocalizationManager { .shared }
 
-    init(appState: AppState, addDiaryEntry: AddDiaryEntryUseCase) {
+    init(appState: AppState,
+         addDiaryEntry: AddDiaryEntryUseCase,
+         syncRepo: any BabySyncRepositoryProtocol) {
         self.appState = appState
         self.addDiaryEntry = addDiaryEntry
+        self.syncRepo = syncRepo
     }
 
     var displayName: String { appState.displayName }
@@ -197,16 +201,36 @@ final class SymptomViewModel: ObservableObject {
 
     func logToDiary() {
         let symptomLabels = symptoms.filter(\.isOn).map(\.label).joined(separator: ", ")
+        let currentResult = result
         let noteText = symptomLabels.isEmpty
-            ? "🩺 \(result.title)"
-            : "🩺 \(result.title)\n\(symptomLabels)"
+            ? "🩺 \(currentResult.title)"
+            : "🩺 \(currentResult.title)\n\(symptomLabels)"
         let item = StoredDiaryItem(kind: .note, text: noteText)
+
+        let symptomLog = SymptomLog(
+            id: UUID().uuidString,
+            loggedAt: Date(),
+            description: symptomLabels.isEmpty ? currentResult.title
+                                              : "\(currentResult.title): \(symptomLabels)",
+            severity: Self.severity(for: currentResult.urgency),
+            addedBy: UserDefaults.standard.string(forKey: "uid") ?? "",
+            addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
+        )
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { diaryLogged = true }
         Task {
             try? await addDiaryEntry.execute(item)
+            try? await syncRepo.addSymptomLog(symptomLog)
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             await MainActor.run { withAnimation { diaryLogged = false } }
+        }
+    }
+
+    private static func severity(for urgency: SymptomUrgency) -> SymptomSeverity {
+        switch urgency {
+        case .calm:     return .mild
+        case .watchful: return .moderate
+        case .urgent:   return .high
         }
     }
 }

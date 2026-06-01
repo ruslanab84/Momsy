@@ -57,6 +57,7 @@ struct MomsyApp: App {
                     container.runMigrationIfNeeded()
                     await appState.load()
                     phoneSession.activate()
+                    await container.authManager.signInAnonymouslyIfNeeded()
                     await container.cloudSyncDownloader.downloadAndMergeWhenReady()
                     await setupNotificationsOnLaunch(appState: appState)
                 }
