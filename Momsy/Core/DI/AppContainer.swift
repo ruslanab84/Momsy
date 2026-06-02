@@ -64,6 +64,8 @@ final class AppContainer {
     let quickLogRepository                              = QuickLogRepository()
     let preferencesRepository: any UserPreferencesRepository = LocalUserPreferencesRepository()
     let dailyTipRepository                             = DailyTipRepository()
+    lazy var weeklyInsightRepository: any WeeklyInsightRepository = SwiftDataWeeklyInsightRepository(context: context)
+    lazy var weeklyInsightService: any WeeklyInsightService       = GeminiWeeklyInsightService()
 
     // MARK: — Use Cases — Baby
 
@@ -133,6 +135,20 @@ final class AppContainer {
     lazy var getFoodEntries = GetFoodEntriesUseCase(repository: complementaryFeedingRepository)
     lazy var deleteFoodEntry = DeleteFoodEntryUseCase(repository: complementaryFeedingRepository)
 
+    // MARK: — Use Cases — Weekly Insights
+
+    lazy var generateWeeklyInsight = GenerateWeeklyInsightUseCase(
+        sleepRepo: sleepRepository,
+        feedingRepo: feedingRepository,
+        foodRepo: complementaryFeedingRepository,
+        diaperRepo: diaperRepository,
+        repo: weeklyInsightRepository,
+        service: weeklyInsightService,
+        fallback: StaticWeeklyInsightService(),
+        appState: appState
+    )
+    lazy var getWeeklyInsights = GetWeeklyInsightsUseCase(repository: weeklyInsightRepository)
+
     // MARK: — GDPR erasure
 
     /// Wipes every on-device trace: all SwiftData records, the launch-routing and
@@ -158,6 +174,7 @@ final class AppContainer {
         try context.delete(model: WaterIntakeRecord.self)
         try context.delete(model: MomSleepRecord.self)
         try context.delete(model: PumpingRecord.self)
+        try context.delete(model: WeeklyInsightRecord.self)
         try context.save()
 
         let defaults = UserDefaults.standard
@@ -326,6 +343,10 @@ final class AppContainer {
 
     func makeWaterIntakeViewModel() -> WaterIntakeViewModel {
         WaterIntakeViewModel(log: logWaterIntake, get: getWaterIntake)
+    }
+
+    func makeWeeklyInsightViewModel() -> WeeklyInsightViewModel {
+        WeeklyInsightViewModel(generate: generateWeeklyInsight, get: getWeeklyInsights)
     }
 }
 

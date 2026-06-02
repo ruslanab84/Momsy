@@ -9,6 +9,7 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
     private enum ID {
         static let feeding = "momsy.feeding.reminder"
         static let diary   = "momsy.diary.morning"
+        static let weeklyReport = "momsy.weeklyreport"
         static func leap(_ id: Int) -> String { "momsy.leap.\(id)" }
         static func vaccination(_ id: Int) -> String { "momsy.vaccination.\(id)" }
     }
@@ -95,5 +96,27 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     func cancelVaccinationReminder(catalogId: Int) {
         center.removePendingNotificationRequests(withIdentifiers: [ID.vaccination(catalogId)])
+    }
+
+    /// Recurring Sunday reminder that the weekly AI report is ready.
+    func scheduleWeeklyReport(hour: Int = 18, minute: Int = 0) {
+        center.removePendingNotificationRequests(withIdentifiers: [ID.weeklyReport])
+        let strings = LocalizationManager.shared.strings
+
+        let content = UNMutableNotificationContent()
+        content.title = strings.weeklyReportNotificationTitle
+        content.body  = strings.weeklyReportNotificationBody
+        content.sound = .default
+
+        var comps = DateComponents()
+        comps.weekday = 1   // Sunday
+        comps.hour    = hour
+        comps.minute  = minute
+        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+        center.add(UNNotificationRequest(identifier: ID.weeklyReport, content: content, trigger: trigger), withCompletionHandler: nil)
+    }
+
+    func cancelWeeklyReport() {
+        center.removePendingNotificationRequests(withIdentifiers: [ID.weeklyReport])
     }
 }

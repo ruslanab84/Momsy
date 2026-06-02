@@ -46,6 +46,15 @@ struct DoctorMenuView: View {
 
                 VStack(spacing: 1) {
                     DoctorMenuRow(
+                        destination: WeeklyInsightView(container: container),
+                        icon: "sparkles",
+                        iconColor: .bbLilacDeep,
+                        iconBg: Color.bbLilac.opacity(0.3),
+                        title: lm.strings.weeklyInsightTitle,
+                        sub: lm.strings.weeklyInsightSub
+                    )
+                    Divider().padding(.leading, 60)
+                    DoctorMenuRow(
                         destination: ReportView(container: container),
                         icon: "doc.text.fill",
                         iconColor: .bbSkyDeep,

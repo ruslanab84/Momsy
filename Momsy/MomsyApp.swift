@@ -60,6 +60,7 @@ struct MomsyApp: App {
                     await container.authManager.signInAnonymouslyIfNeeded()
                     await container.cloudSyncDownloader.downloadAndMergeWhenReady()
                     await setupNotificationsOnLaunch(appState: appState)
+                    await maybeGenerateWeeklyReport()
                 }
                 .onOpenURL { url in
 #if canImport(GoogleSignIn)
@@ -70,14 +71,24 @@ struct MomsyApp: App {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 WidgetCenter.shared.reloadAllTimelines()
+                Task { await maybeGenerateWeeklyReport() }
             }
         }
+    }
+
+    /// Generates the weekly AI report for the last completed week (Premium only).
+    /// No-ops if a report already exists for that week.
+    @MainActor
+    private func maybeGenerateWeeklyReport() async {
+        guard container.subscriptionManager.isPremium else { return }
+        _ = await container.generateWeeklyInsight.generateIfNeeded()
     }
 }
 
 private func setupNotificationsOnLaunch(appState: AppState) async {
     let push = LocalPushNotificationService.shared
     await push.requestPermission()
+    push.scheduleWeeklyReport(hour: 18, minute: 0)
 
     guard let birth = appState.babyProfile?.birthDate else { return }
     for leap in DevelopmentLeap.catalog {

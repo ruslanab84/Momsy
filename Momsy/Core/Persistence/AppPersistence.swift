@@ -33,6 +33,7 @@ enum AppPersistence {
             WaterIntakeRecord.self,
             MomSleepRecord.self,
             PumpingRecord.self,
+            WeeklyInsightRecord.self,
         ])
 
         // Local-only SwiftData store. Cross-device sync is handled entirely by

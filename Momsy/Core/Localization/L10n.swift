@@ -28,6 +28,52 @@ struct L10n {
     var add: String         { s("Add",           "Добавить",     "Hinzufügen",   "Añadir") }
     var close: String       { s("Close",         "Закрыть",      "Schließen",    "Cerrar") }
     var confirm: String     { s("Confirm",       "Подтвердить",  "Bestätigen",   "Confirmar") }
+
+    // MARK: — Weekly Insights (AI weekly report)
+    var weeklyInsightTitle: String {
+        s("Weekly Report", "Отчёт за неделю", "Wochenbericht", "Informe semanal")
+    }
+    var weeklyInsightSub: String {
+        s("AI summary of sleep & feeding", "AI-сводка сна и кормления",
+          "KI-Zusammenfassung Schlaf & Ernährung", "Resumen IA de sueño y alimentación")
+    }
+    var weeklyInsightSleepHeader: String {
+        s("Sleep", "Сон", "Schlaf", "Sueño")
+    }
+    var weeklyInsightFeedingHeader: String {
+        s("Feeding & solids", "Кормление и прикорм", "Ernährung & Beikost", "Alimentación y sólidos")
+    }
+    var weeklyInsightEmpty: String {
+        s("Your first weekly report will appear here after a full week of tracking.",
+          "Ваш первый недельный отчёт появится здесь после недели записей.",
+          "Dein erster Wochenbericht erscheint hier nach einer Woche mit Einträgen.",
+          "Tu primer informe semanal aparecerá aquí tras una semana de registros.")
+    }
+    var weeklyInsightLocked: String {
+        s("Weekly AI reports are a Premium feature.",
+          "Недельные AI-отчёты доступны в Premium.",
+          "Wöchentliche KI-Berichte sind eine Premium-Funktion.",
+          "Los informes semanales con IA son una función Premium.")
+    }
+    var weeklyInsightError: String {
+        s("Couldn't load the report. Please try again.",
+          "Не удалось загрузить отчёт. Попробуйте ещё раз.",
+          "Bericht konnte nicht geladen werden. Bitte erneut versuchen.",
+          "No se pudo cargar el informe. Inténtalo de nuevo.")
+    }
+    var unlockPremium: String {
+        s("Unlock Premium", "Открыть Premium", "Premium freischalten", "Desbloquear Premium")
+    }
+    var weeklyReportNotificationTitle: String {
+        s("Your weekly report is ready", "Ваш недельный отчёт готов",
+          "Dein Wochenbericht ist fertig", "Tu informe semanal está listo")
+    }
+    var weeklyReportNotificationBody: String {
+        s("See how your baby slept and ate this week",
+          "Посмотрите, как малыш спал и ел на этой неделе",
+          "Sieh, wie dein Baby diese Woche geschlafen und gegessen hat",
+          "Mira cómo durmió y comió tu bebé esta semana")
+    }
     var note: String        { s("NOTE",          "ЗАМЕТКА",      "NOTIZ",        "NOTA") }
     var history: String     { s("History",       "История",      "Verlauf",      "Historial") }
     var remove: String      { s("Remove",        "Удалить",      "Entfernen",    "Quitar") }
