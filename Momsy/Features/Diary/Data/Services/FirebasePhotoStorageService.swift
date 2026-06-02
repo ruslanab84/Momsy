@@ -66,4 +66,16 @@ final class FirebasePhotoStorageService: PhotoStorageService, @unchecked Sendabl
     func delete(atPath path: String) async throws {
         try await Storage.storage().reference().child(path).delete()
     }
+
+    func deleteAll() async throws {
+        let uid = Auth.auth().currentUser?.uid ?? "anonymous"
+        // Storage has no folder delete — list every object under the user's diary
+        // path and remove them one by one.
+        let folder = Storage.storage().reference().child("users/\(uid)/diary")
+        let listing = try await folder.listAll()
+        for item in listing.items {
+            try await item.delete()
+        }
+        cache.removeAllObjects()
+    }
 }

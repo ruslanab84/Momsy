@@ -31,12 +31,11 @@ final class VaccinationViewModel: ObservableObject {
         self.appState = appState
     }
 
-    var grouped: [(ageMonths: Int, label: String, items: [VaccinationStatus])] {
+    var grouped: [(timing: VaccinationTiming, label: String, items: [VaccinationStatus])] {
         let lm = LocalizationManager.shared
-        let dict = Dictionary(grouping: statuses, by: { $0.item.ageMonths })
-        return dict.keys.sorted().map { months in
-            let label = ageLabel(months: months, lang: lm.current)
-            return (ageMonths: months, label: label, items: dict[months] ?? [])
+        let dict = Dictionary(grouping: statuses, by: { $0.item.timing })
+        return dict.keys.sorted { $0.sortKeyDays < $1.sortKeyDays }.map { timing in
+            (timing: timing, label: timing.label(lm.current), items: dict[timing] ?? [])
         }
     }
 
@@ -48,10 +47,7 @@ final class VaccinationViewModel: ObservableObject {
     func confirmDone(_ status: VaccinationStatus) async {
         let entry = await markDone.execute(catalogId: status.item.id, doneDate: doneDate)
         pushNotifications.cancelVaccinationReminder(catalogId: status.item.id)
-        let lm = LocalizationManager.shared
-        let vName = lm.current == .english ? status.item.nameEN
-                  : lm.current == .german  ? status.item.nameDE
-                  : status.item.nameRU
+        let vName = status.item.name(for: LocalizationManager.shared.current)
         pushVaccinationToFirestore(entry: entry, vaccineName: vName)
         await load()
         showMarkDone = nil
@@ -62,13 +58,9 @@ final class VaccinationViewModel: ObservableObject {
         await unmark.execute(entryId: entry.id)
         // Only reschedule reminders for catalog vaccinations, not custom ones
         if !entry.isCustom {
-            let lm = LocalizationManager.shared
-            let name = lm.current == .english ? status.item.nameEN
-                     : lm.current == .german  ? status.item.nameDE
-                     : status.item.nameRU
             pushNotifications.scheduleVaccinationReminder(
                 catalogId: status.item.id,
-                name: name,
+                name: status.item.name(for: LocalizationManager.shared.current),
                 dueDate: status.dueDate
             )
         }
@@ -92,24 +84,5 @@ final class VaccinationViewModel: ObservableObject {
             notes: entry.notes, addedBy: uid, addedByName: name
         )
         Task { try? await BabySyncService().setLog(VaccinationLogDTO(from: log), id: log.id, to: "vaccinationLogs") }
-    }
-
-    private func ageLabel(months: Int, lang: Language) -> String {
-        switch lang {
-        case .english, .spanish, .portuguese:
-            if months == 0   { return "Birth" }
-            if months == 999 { return "Additional" }
-            return months == 1 ? "1 month" : "\(months) months"
-        case .german:
-            if months == 0   { return "Geburt" }
-            if months == 999 { return "Weitere" }
-            return months == 1 ? "1 Monat" : "\(months) Monate"
-        case .russian:
-            if months == 0   { return "Рождение" }
-            if months == 999 { return "Дополнительные" }
-            if months == 1   { return "1 месяц" }
-            if months < 5    { return "\(months) месяца" }
-            return "\(months) месяцев"
-        }
     }
 }

@@ -85,4 +85,35 @@ enum UserDefaultsMigration {
         else { return }
         items.forEach { context.insert(DiaryItemRecord($0)) }
     }
+
+    // MARK: - Vaccination schedule remap (legacy RU catalog → WHO)
+
+    private static let vaccineRemapFlag = "vaccination_schedule_remap_v1_done"
+
+    /// Maps the legacy Russian National Calendar catalog ids (1–20) to the WHO schedule
+    /// ids (100+). The RU pentavalent components (DTP / HepB / Hib) collapse onto the WHO
+    /// combined pentavalent shot, which is medically correct.
+    static let legacyRUToWHO: [Int: Int] = [
+        1: 101, 2: 100, 3: 103, 4: 103, 5: 104, 6: 105, 7: 107, 8: 108, 9: 103, 10: 111,
+        11: 112, 12: 107, 13: 109, 14: 111, 15: 115, 16: 114, 17: 117, 18: 112, 19: 117, 20: 112
+    ]
+
+    /// Runs once after the WHO schedule rollout so existing users keep their marked
+    /// vaccinations instead of losing them when the catalog ids change.
+    static func runVaccinationRemapIfNeeded(context: ModelContext) {
+        guard !UserDefaults.standard.bool(forKey: vaccineRemapFlag) else { return }
+        remapVaccinations(context: context)
+        UserDefaults.standard.set(true, forKey: vaccineRemapFlag)
+    }
+
+    private static func remapVaccinations(context: ModelContext) {
+        guard let records = try? context.fetch(FetchDescriptor<VaccinationRecord>()) else { return }
+        var changed = false
+        for rec in records where rec.customName == nil && (1...20).contains(rec.catalogId) {
+            guard let whoId = legacyRUToWHO[rec.catalogId] else { continue }
+            rec.catalogId = whoId
+            changed = true
+        }
+        if changed { try? context.save() }
+    }
 }

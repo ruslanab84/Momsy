@@ -13,6 +13,8 @@ struct SettingsView: View {
         _vm = StateObject(wrappedValue: container.makeSettingsViewModel())
     }
 
+    @State private var showDeleteConfirm = false
+
 #if DEBUG
     @State private var iconShareItems: [Any] = []
     @State private var showIconShare = false
@@ -24,7 +26,9 @@ struct SettingsView: View {
                 themeSection
                 unitsSection
                 languageSection
+                vaccinationScheduleSection
                 aboutSection
+                dangerSection
 #if DEBUG
                 debugSection
 #endif
@@ -36,6 +40,40 @@ struct SettingsView: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.settings)
         .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog(
+            lm.strings.deleteAllDataConfirm,
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(lm.strings.deleteAllData, role: .destructive) {
+                Task { await vm.deleteAllData() }
+            }
+            Button(lm.strings.cancel, role: .cancel) {}
+        }
+        .alert(lm.strings.deleteFailed, isPresented: Binding(
+            get: { vm.deletionError != nil },
+            set: { if !$0 { vm.deletionError = nil } }
+        )) {
+            Button("OK", role: .cancel) { vm.deletionError = nil }
+        }
+        .overlay {
+            if vm.isDeleting {
+                ZStack {
+                    Color.black.opacity(0.35).ignoresSafeArea()
+                    VStack(spacing: 14) {
+                        ProgressView().tint(.white)
+                        Text(lm.strings.deleting)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    .padding(28)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                }
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: vm.isDeleting)
     }
 
     // MARK: - Theme
@@ -171,6 +209,39 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Vaccination schedule
+
+    private var vaccinationScheduleSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BBSectionLabel(text: lm.strings.vaccinationSchedule)
+
+            HStack(spacing: 14) {
+                iconSquare(systemName: "syringe.fill", bg: .bbLilac)
+                Text(lm.strings.vaccinationCalendar)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInk)
+                Spacer()
+                Picker("", selection: $vm.vaccinationScheduleKey) {
+                    ForEach(vm.availableScheduleKeys) { key in
+                        Text(key.displayName).tag(key.rawValue)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(.bbCoralDeep)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .bbShadow()
+
+            Text(lm.strings.vaccinationScheduleHint)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .padding(.horizontal, 2)
+        }
+    }
+
     // MARK: - About
 
     private var aboutSection: some View {
@@ -197,9 +268,44 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Data & Privacy
+
+    private var dangerSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BBSectionLabel(text: lm.strings.dangerZone)
+
+            Button {
+                showDeleteConfirm = true
+            } label: {
+                HStack(spacing: 14) {
+                    iconSquare(systemName: "trash.fill", bg: .bbCoral)
+                    Text(lm.strings.deleteAllData)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbCoralDeep)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.bbInkMute)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .buttonStyle(.plain)
+            .disabled(vm.isDeleting)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .bbShadow()
+
+            Text(lm.strings.deleteAllDataConfirm)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .padding(.horizontal, 2)
+        }
+    }
+
     private var icloudSyncDisclosure: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Label(lm.strings.icloudSyncTitle, systemImage: "icloud.fill")
+            Label(lm.strings.icloudSyncTitle, systemImage: "lock.shield.fill")
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundColor(.bbInk)
             Text(lm.strings.icloudSyncDisclosure)

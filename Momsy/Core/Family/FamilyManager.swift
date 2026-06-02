@@ -98,6 +98,21 @@ final class FamilyManager: ObservableObject {
         isReady = true
     }
 
+    /// GDPR erasure of the family/user graph: every `families/{familyId}/members`
+    /// doc, the family doc itself, and the caller's `users/{uid}` doc. Call while
+    /// still authenticated (Firestore rules require it) and before `reset()`.
+    func deleteFamilyAndUserDocs(uid: String) async throws {
+        if let familyId {
+            let members = try await db.collection("families").document(familyId)
+                .collection("members").getDocuments()
+            for doc in members.documents {
+                try await doc.reference.delete()
+            }
+            try await db.collection("families").document(familyId).delete()
+        }
+        try await db.collection("users").document(uid).delete()
+    }
+
     func reset() {
         familyId = nil
         isReady = false

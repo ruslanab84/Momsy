@@ -1,6 +1,6 @@
 # Momsy Privacy Policy
 
-**Effective date:** 1 June 2026
+**Effective date:** 2 June 2026
 
 Momsy ("the app", "we", "us") helps parents track their baby's care and the
 parent's own well-being. We take the privacy of your family's data seriously.
@@ -10,15 +10,15 @@ tracking or advertising.
 
 ## 1. Information we process
 
-| Category | Examples | Stored on device | Synced to your private iCloud | Sent to Firebase / Google |
-|----------|----------|:---:|:---:|:---:|
-| Baby profile | Baby's name, birth date, gender | ✓ | ✓ | Firestore (if signed in) |
-| Baby health & care | Feeding, sleep, diaper & stool logs, temperature, growth measurements, vaccinations, bath, walks, pumping | ✓ | ✓ | Firestore (if signed in) |
-| Parent well-being | Mood and energy entries, sleep, water intake, and the **EPDS postpartum-depression screening score** | ✓ | ✓ | — |
-| Diary photos | Photos you attach to diary entries | ✓ | ✓ | Firebase Storage |
-| AI chat | Messages you send to the in-app assistant | ✓ | ✓ | Google AI (Gemini) |
-| Family sharing | Invite codes, family/member records | — | — | Firestore |
-| Account | Sign in with Apple / Google identity | — | — | Firebase Authentication |
+| Category | Examples | Stored on device | Synced to your private cloud |
+|----------|----------|:---:|:---:|
+| Baby profile | Baby's name, birth date, gender | ✓ | Firestore |
+| Baby health & care | Feeding, sleep, diaper & stool logs, temperature, growth measurements, vaccinations, bath, walks, pumping | ✓ | Firestore |
+| Parent well-being | Mood and energy entries, sleep, water intake, and the **EPDS postpartum-depression screening score** | ✓ | Firestore |
+| Diary photos | Photos you attach to diary entries | ✓ | Firebase Storage |
+| AI daily tips | A short summary of your baby's age and care context used to generate the daily tip | — | Google AI (Gemini) |
+| Family sharing | Invite codes, family/member records | — | Firestore |
+| Account | Anonymous device identity, or Sign in with Apple / Google identity | — | Firebase Authentication |
 
 **Sensitive data notice.** Baby health records and the parent's EPDS
 mental-health screening are health-related and sensitive. We process them only
@@ -29,35 +29,40 @@ listed below.
 ## 2. Where your data is stored
 
 - **On your device.** All entries are stored locally on your iPhone.
-- **Your private iCloud (Apple CloudKit).** When you are signed in to iCloud,
-  your data — including baby health records and your EPDS / well-being entries —
-  is mirrored to your **private, Apple-encrypted CloudKit database** so it stays
-  in sync across your own Apple devices. This database is tied to your Apple ID;
-  we cannot read it, and it is not shared with other users. Apple's handling of
-  this data is governed by [Apple's Privacy Policy](https://www.apple.com/legal/privacy/).
-- **Firebase (Google).** If you create an account or use family sharing, profile
-  and log data is stored in Google Firebase (Firestore, Storage, Authentication)
-  to enable multi-device and family sync.
-- **Google AI (Gemini).** Messages you send to the in-app assistant are
-  processed by Google's Gemini model to generate a response.
+- **Firebase (Google).** Momsy uses Google Firebase as its single cloud backend.
+  Your data — including baby health records and your EPDS / well-being entries —
+  is stored in **Firebase Firestore** (and diary photos in **Firebase Storage**)
+  under a private account so it stays in sync across your own devices and any
+  family members you invite. To give you sync without a mandatory login, the app
+  signs in **anonymously** by default; you can optionally link a Sign in with
+  Apple or Google account. We cannot use your data for any purpose other than
+  operating the app. Google's handling of this infrastructure is governed by
+  [Google's Privacy Policy](https://policies.google.com/privacy).
+- **Google AI (Gemini).** To generate the daily tip, a short, non-identifying
+  summary of your baby's age and care context is sent to Google's Gemini model.
+  No diary photos, EPDS scores, or account identifiers are sent.
 
 ## 3. How we use your data
 
 - To provide core functionality: tracking, charts, reminders, and the daily tip.
 - To sync your data across your own devices and, optionally, with family members
   you invite.
-- To generate AI assistant responses and personalized tips.
+- To generate the AI daily tip.
 
 We do **not** use your data for advertising and we do **not** track you across
-other apps or websites (`NSPrivacyTracking = false`).
+other apps or websites (`NSPrivacyTracking = false`). We do **not** share your
+data with third parties other than the infrastructure providers named above.
 
 ## 4. Data retention and deletion
 
-- Local and iCloud data remain until you delete entries in the app, delete the
-  app, or remove the app's data from your iCloud account (Settings → your name →
-  iCloud → Manage Storage).
-- Account-linked data in Firebase is retained while your account is active. To
-  request deletion of cloud-stored data, contact us at the address below.
+- Local data remains until you delete entries in the app or delete the app.
+- Cloud data in Firebase is retained while your account is active.
+- **Delete everything yourself, anytime.** Open **Settings → Data & Privacy →
+  Delete all data**. This permanently erases your account and every record — on
+  this device and in the cloud — including health and well-being data and diary
+  photos. The action cannot be undone, and the app returns to its first-launch
+  state.
+- You may also email us (below) to request deletion.
 
 ## 5. Children's data
 
@@ -67,10 +72,10 @@ that family. The app is not directed at children.
 
 ## 6. Your choices
 
-- Use the app without signing in to keep data on-device and in your private
-  iCloud only.
-- Sign out of iCloud to stop CloudKit sync.
-- Delete individual entries or the whole app at any time.
+- Use the app with the default anonymous account to avoid linking your identity.
+- Link or unlink a Sign in with Apple / Google account at any time.
+- Delete individual entries, or erase all data and your account, from
+  **Settings → Data & Privacy → Delete all data**.
 
 ## 7. Contact
 

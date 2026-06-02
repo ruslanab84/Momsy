@@ -14,12 +14,14 @@ enum AuthError: LocalizedError {
     case tokenMissing
     case notImplemented
     case appleSignInUnavailable
+    case reauthRequired
 
     var errorDescription: String? {
         switch self {
         case .tokenMissing:          return "Apple Sign-In failed. Please try again."
         case .notImplemented:        return "Google Sign-In is coming soon."
         case .appleSignInUnavailable: return "To use Sign in with Apple, open Settings → [Your Name] and sign in with your Apple ID."
+        case .reauthRequired:        return "Please sign in again to delete your account."
         }
     }
 }
@@ -158,6 +160,22 @@ final class AuthManager: ObservableObject {
     func signOut() throws {
         try Auth.auth().signOut()
         firebaseUser = nil
+    }
+
+    // MARK: — Account deletion (GDPR)
+
+    /// Deletes the Firebase Auth account. Anonymous users delete cleanly; a provider
+    /// account that hasn't authenticated recently throws `requiresRecentLogin`, which
+    /// we surface as `.reauthRequired` so the caller can fall back to `signOut()`.
+    @MainActor
+    func deleteAccount() async throws {
+        guard let user = Auth.auth().currentUser else { return }
+        do {
+            try await user.delete()
+            firebaseUser = nil
+        } catch let error as NSError where error.code == AuthErrorCode.requiresRecentLogin.rawValue {
+            throw AuthError.reauthRequired
+        }
     }
 
     // MARK: — Helpers

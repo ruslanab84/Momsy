@@ -6,23 +6,24 @@ struct GetVaccinationStatusUseCase {
     func execute(birthDate: Date) async -> [VaccinationStatus] {
         let entries = (try? await repository.getAll()) ?? []
         let cal = Calendar.current
+        let items = VaccinationScheduleProvider.shared.items()
 
-        // Standard catalog vaccinations
-        let catalogStatuses: [VaccinationStatus] = VaccinationCatalog.items.map { item in
-            let dueDate = cal.date(byAdding: .month, value: item.ageMonths, to: birthDate) ?? birthDate
+        // Scheduled vaccinations from the active schedule.
+        let catalogStatuses: [VaccinationStatus] = items.map { item in
+            let dueDate = item.timing.dueDate(from: birthDate, cal)
             let entry = entries.first { $0.catalogId == item.id && !$0.isCustom }
             return VaccinationStatus(item: item, entry: entry, dueDate: dueDate)
         }
 
-        // Custom (user-added) vaccinations — each has a synthetic VaccinationScheduleItem
+        // Custom (user-added) vaccinations — each has a synthetic schedule item.
         let customStatuses: [VaccinationStatus] = entries
             .filter { $0.isCustom }
             .map { entry in
                 let name = entry.customName ?? ""
                 let syntheticItem = VaccinationScheduleItem(
                     id: entry.catalogId,
-                    nameEN: name, nameRU: name, nameDE: name,
-                    ageMonths: 999,
+                    names: [.english: name],
+                    timing: .additional,
                     isOptional: false
                 )
                 return VaccinationStatus(item: syntheticItem, entry: entry, dueDate: entry.doneDate)

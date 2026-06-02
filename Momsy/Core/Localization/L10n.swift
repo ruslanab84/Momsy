@@ -539,13 +539,23 @@ struct L10n {
     var forMoms: String         { s("for moms",      "для мам",       "für Mütter",    "para mamás") }
     var privacy: String         { s("Privacy",       "Конфиденциальность","Datenschutz", "Privacidad") }
     var feedback: String        { s("Feedback",      "Обратная связь", "Feedback",      "Comentarios") }
-    var icloudSyncTitle: String { s("iCloud Sync",   "Синхронизация iCloud", "iCloud-Synchronisierung", "Sincronización iCloud") }
+    var icloudSyncTitle: String { s("Cloud Sync",    "Облачная синхронизация", "Cloud-Synchronisierung", "Sincronización en la nube") }
     var icloudSyncDisclosure: String {
-        s("Your baby's health records and your well-being entries (including the EPDS screening) are kept on this device and synced to your private, encrypted iCloud across your devices. They are never shared with us or used for ads.",
-          "Записи о здоровье малыша и ваши записи о самочувствии (включая скрининг EPDS) хранятся на этом устройстве и синхронизируются с вашим личным зашифрованным iCloud между вашими устройствами. Они не передаются нам и не используются для рекламы.",
-          "Die Gesundheitsdaten deines Babys und deine Wohlbefinden-Einträge (einschließlich des EPDS-Screenings) bleiben auf diesem Gerät und werden mit deiner privaten, verschlüsselten iCloud über deine Geräte synchronisiert. Sie werden nie mit uns geteilt oder für Werbung verwendet.",
-          "Los registros de salud de tu bebé y tus entradas de bienestar (incluido el cribado EPDS) se guardan en este dispositivo y se sincronizan con tu iCloud privado y cifrado entre tus dispositivos. Nunca se comparten con nosotros ni se usan para publicidad.")
+        s("Your baby's health records and your well-being entries (including the EPDS screening) are stored on this device and synced through your private Firebase account so they stay in sync across your devices. They are never shared with third parties or used for ads.",
+          "Записи о здоровье малыша и ваши записи о самочувствии (включая скрининг EPDS) хранятся на этом устройстве и синхронизируются через ваш личный аккаунт Firebase, чтобы данные совпадали на всех ваших устройствах. Они никогда не передаются третьим лицам и не используются для рекламы.",
+          "Die Gesundheitsdaten deines Babys und deine Wohlbefinden-Einträge (einschließlich des EPDS-Screenings) werden auf diesem Gerät gespeichert und über dein privates Firebase-Konto synchronisiert, damit sie auf deinen Geräten übereinstimmen. Sie werden nie an Dritte weitergegeben oder für Werbung verwendet.",
+          "Los registros de salud de tu bebé y tus entradas de bienestar (incluido el cribado EPDS) se guardan en este dispositivo y se sincronizan a través de tu cuenta privada de Firebase para mantenerlos sincronizados entre tus dispositivos. Nunca se comparten con terceros ni se usan para publicidad.")
     }
+    var dangerZone: String      { s("Data & Privacy", "Данные и конфиденциальность", "Daten & Datenschutz", "Datos y privacidad") }
+    var deleteAllData: String   { s("Delete all data", "Удалить все данные", "Alle Daten löschen", "Eliminar todos los datos") }
+    var deleteAllDataConfirm: String {
+        s("This permanently deletes your account and every record — on this device and in the cloud — including health and well-being data and diary photos. This cannot be undone.",
+          "Это навсегда удалит ваш аккаунт и все записи — на этом устройстве и в облаке — включая данные о здоровье и самочувствии и фото из дневника. Это действие необратимо.",
+          "Dies löscht dauerhaft dein Konto und alle Einträge – auf diesem Gerät und in der Cloud – einschließlich Gesundheits- und Wohlbefindensdaten sowie Tagebuchfotos. Dies kann nicht rückgängig gemacht werden.",
+          "Esto elimina permanentemente tu cuenta y todos los registros — en este dispositivo y en la nube — incluidos los datos de salud y bienestar y las fotos del diario. Esto no se puede deshacer.")
+    }
+    var deleting: String        { s("Deleting…",     "Удаление…",     "Wird gelöscht…", "Eliminando…") }
+    var deleteFailed: String    { s("Couldn't delete your data. Please try again.", "Не удалось удалить данные. Попробуйте ещё раз.", "Daten konnten nicht gelöscht werden. Bitte versuche es erneut.", "No se pudieron eliminar los datos. Inténtalo de nuevo.") }
     var themeSystem: String     { s("System",        "Системная",     "System",        "Sistema") }
     var themeLight: String      { s("Light",         "Светлая",       "Hell",          "Claro") }
     var themeDark: String       { s("Dark",          "Тёмная",        "Dunkel",        "Oscuro") }
@@ -619,6 +629,8 @@ struct L10n {
     var vaccinations: String            { s("Vaccinations",          "Прививки",                     "Impfungen", "Vacunas") }
     var vaccinationCalendar: String     { s("Vaccination calendar",   "Календарь прививок",           "Impfkalender", "Calendario de vacunas") }
     var vaccinationCalendarSub: String  { s("Schedule & reminders",   "Расписание и напоминания",     "Zeitplan & Erinnerungen", "Calendario y recordatorios") }
+    var vaccinationSchedule: String     { s("Vaccination schedule",   "Календарь прививок",           "Impfkalender", "Calendario de vacunación") }
+    var vaccinationScheduleHint: String { s("Based on your region. The WHO international schedule is used by default.", "На основе вашего региона. По умолчанию используется международный календарь ВОЗ.", "Basierend auf Ihrer Region. Standardmäßig wird der internationale WHO-Impfkalender verwendet.", "Según tu región. Se usa el calendario internacional de la OMS por defecto.") }
     var vaccinationMarkDone: String     { s("Mark as done",           "Отметить выполненной",         "Als erledigt markieren", "Marcar como hecha") }
     var vaccinationUndo: String         { s("Undo",                   "Отменить",                     "Rückgängig", "Deshacer") }
 

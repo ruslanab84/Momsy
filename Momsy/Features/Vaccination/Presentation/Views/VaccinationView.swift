@@ -11,7 +11,7 @@ struct VaccinationView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 12, pinnedViews: .sectionHeaders) {
-                ForEach(vm.grouped, id: \.ageMonths) { group in
+                ForEach(vm.grouped, id: \.timing) { group in
                     Section {
                         VStack(spacing: 0) {
                             ForEach(Array(group.items.enumerated()), id: \.element.id) { idx, status in
@@ -87,13 +87,7 @@ private struct VaccinationRowView: View {
         return "clock.fill"
     }
 
-    private var name: String {
-        switch lm.current {
-        case .english, .spanish, .portuguese: return status.item.nameEN
-        case .german:  return status.item.nameDE
-        case .russian: return status.item.nameRU
-        }
-    }
+    private var name: String { status.item.name(for: lm.current) }
 
     private var isCustom: Bool { status.entry?.isCustom == true }
 
@@ -151,13 +145,7 @@ private struct MarkDoneSheet: View {
     let status: VaccinationStatus
     let lm: LocalizationManager
 
-    private var name: String {
-        switch lm.current {
-        case .english, .spanish, .portuguese: return status.item.nameEN
-        case .german:  return status.item.nameDE
-        case .russian: return status.item.nameRU
-        }
-    }
+    private var name: String { status.item.name(for: lm.current) }
 
     var body: some View {
         NavigationStack {

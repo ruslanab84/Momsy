@@ -15,6 +15,8 @@ protocol PhotoStorageService: Sendable {
     func saveWithProgress(_ image: UIImage, forID id: UUID) -> AsyncThrowingStream<PhotoUploadEvent, Error>
     func load(atPath path: String) async -> UIImage?
     func delete(atPath path: String) async throws
+    /// Removes every photo this user has stored. Used for GDPR account erasure.
+    func deleteAll() async throws
 }
 
 extension PhotoStorageService {
@@ -58,5 +60,10 @@ actor LocalPhotoStorageService: PhotoStorageService {
 
     func delete(atPath path: String) async throws {
         try FileManager.default.removeItem(atPath: path)
+    }
+
+    func deleteAll() async throws {
+        try? FileManager.default.removeItem(at: directory)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     }
 }

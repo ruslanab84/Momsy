@@ -65,6 +65,8 @@
 		E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */; };
 		EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */; };
 		FC2E77342D0D91D52C40605A /* MockDiaryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7744983E8EF2AF6D12E3DE /* MockDiaryRepository.swift */; };
+		FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */; };
+		AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */; };
 		FF136D2C455F9FBD0E166DED /* MockSleepRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0ED0FC63356D42900B3E456 /* MockSleepRepository.swift */; };
 		FF93FE7B3A6F5DDA40F2B2D6 /* SoundsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */; };
 /* End PBXBuildFile section */
@@ -196,6 +198,8 @@
 		FA16402FBC4C3F01E5573DB2 /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		FB2828F5A5DB44A9E2563938 /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
+		FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationScheduleTests.swift; sourceTree = "<group>"; };
+		AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -523,6 +527,7 @@
 		CF188E3D6A5F475289D564B6 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				AC11AA03AC11AA03AC11AA03 /* Account */,
 				945C65C48948BC238DDFA608 /* Diary */,
 				6CD81E05E696492F92ABC1E4 /* Feeding */,
 				BF481C984AA7F1A163924A81 /* Leaps */,
@@ -531,6 +536,7 @@
 				594ADF75F51FCB61A1675525 /* Sleep */,
 				093C86EC881A5CA51A49035D /* Sounds */,
 				040A2B934577228C40866FB2 /* Today */,
+				FE11AA03FE11AA03FE11AA03 /* Vaccination */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -562,6 +568,22 @@
 				3BBE7E66563E0F26A2DFF70C /* Info.plist */,
 			);
 			path = MomsyWidget;
+			sourceTree = "<group>";
+		};
+		FE11AA03FE11AA03FE11AA03 /* Vaccination */ = {
+			isa = PBXGroup;
+			children = (
+				FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */,
+			);
+			path = Vaccination;
+			sourceTree = "<group>";
+		};
+		AC11AA03AC11AA03AC11AA03 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */,
+			);
+			path = Account;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -718,6 +740,8 @@
 				DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */,
 				2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */,
 				3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */,
+				FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */,
+				AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */,
 				EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */,
 				27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */,
 				A5522FF4A6C0AF27DC5EF07E /* MockSoundEngine.swift in Sources */,

@@ -1,12 +1,102 @@
 import Foundation
 
+/// When a vaccination is due, relative to the baby's birth date.
+/// Replaces the old `ageMonths: Int` field and its magic numbers (0 = birth, 999 = additional)
+/// so that week-based primary series (used by the WHO/EPI schedule) can be represented accurately.
+enum VaccinationTiming: Hashable {
+    case atBirth
+    case weeks(Int)
+    case months(Int)
+    case additional   // user-added vaccines that don't belong to a scheduled milestone
+
+    /// Canonical, sortable key in days from birth (used for grouping/ordering).
+    var sortKeyDays: Int {
+        switch self {
+        case .atBirth:       return 0
+        case .weeks(let w):  return w * 7
+        case .months(let m): return m * 30
+        case .additional:    return Int.max
+        }
+    }
+
+    func dueDate(from birth: Date, _ cal: Calendar = .current) -> Date {
+        switch self {
+        case .atBirth:       return birth
+        case .weeks(let w):  return cal.date(byAdding: .weekOfYear, value: w, to: birth) ?? birth
+        case .months(let m): return cal.date(byAdding: .month, value: m, to: birth) ?? birth
+        case .additional:    return birth
+        }
+    }
+
+    func label(_ lang: Language) -> String {
+        switch self {
+        case .atBirth:
+            switch lang {
+            case .russian: return "Рождение"
+            case .german:  return "Geburt"
+            case .spanish: return "Nacimiento"
+            default:       return "Birth"
+            }
+        case .weeks(let w):
+            switch lang {
+            case .russian: return "\(w) \(Self.ruWeeks(w))"
+            case .german:  return w == 1 ? "1 Woche"  : "\(w) Wochen"
+            case .spanish: return w == 1 ? "1 semana" : "\(w) semanas"
+            default:       return w == 1 ? "1 week"   : "\(w) weeks"
+            }
+        case .months(let m):
+            switch lang {
+            case .russian: return "\(m) \(Self.ruMonths(m))"
+            case .german:  return m == 1 ? "1 Monat" : "\(m) Monate"
+            case .spanish: return m == 1 ? "1 mes"   : "\(m) meses"
+            default:       return m == 1 ? "1 month" : "\(m) months"
+            }
+        case .additional:
+            switch lang {
+            case .russian: return "Дополнительные"
+            case .german:  return "Weitere"
+            case .spanish: return "Adicionales"
+            default:       return "Additional"
+            }
+        }
+    }
+
+    private static func ruMonths(_ n: Int) -> String {
+        if n % 10 == 1 && n % 100 != 11 { return "месяц" }
+        if (2...4).contains(n % 10) && !(12...14).contains(n % 100) { return "месяца" }
+        return "месяцев"
+    }
+
+    private static func ruWeeks(_ n: Int) -> String {
+        if n % 10 == 1 && n % 100 != 11 { return "неделя" }
+        if (2...4).contains(n % 10) && !(12...14).contains(n % 100) { return "недели" }
+        return "недель"
+    }
+}
+
 struct VaccinationScheduleItem: Identifiable {
     let id: Int
-    let nameEN: String
-    let nameRU: String
-    let nameDE: String
-    let ageMonths: Int
+    let names: [Language: String]
+    let timing: VaccinationTiming
     let isOptional: Bool
+
+    func name(for lang: Language) -> String {
+        names[lang] ?? names[.english] ?? names.first?.value ?? ""
+    }
+}
+
+extension VaccinationScheduleItem {
+    /// Convenience initializer for authoring schedule data files compactly.
+    /// Portuguese falls back to English via `name(for:)`.
+    init(id: Int, en: String, ru: String, de: String, es: String,
+         timing: VaccinationTiming, isOptional: Bool = false) {
+        self.init(
+            id: id,
+            names: [.english: en, .russian: ru, .german: de, .spanish: es],
+            timing: timing,
+            isOptional: isOptional
+        )
+    }
 }
 
 struct VaccinationEntry: Identifiable {

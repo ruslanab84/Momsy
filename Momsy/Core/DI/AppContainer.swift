@@ -133,10 +133,47 @@ final class AppContainer {
     lazy var getFoodEntries = GetFoodEntriesUseCase(repository: complementaryFeedingRepository)
     lazy var deleteFoodEntry = DeleteFoodEntryUseCase(repository: complementaryFeedingRepository)
 
+    // MARK: — GDPR erasure
+
+    /// Wipes every on-device trace: all SwiftData records, the launch-routing and
+    /// sync UserDefaults flags, and the in-memory baby profile. Cloud + auth erasure
+    /// is handled by `DeleteAccountUseCase` before this runs.
+    @MainActor
+    func eraseLocalData() throws {
+        try context.delete(model: SleepRecord.self)
+        try context.delete(model: FeedingRecord.self)
+        try context.delete(model: WalkRecord.self)
+        try context.delete(model: BathRecord.self)
+        try context.delete(model: BabyRecord.self)
+        try context.delete(model: MeasurementRecord.self)
+        try context.delete(model: TemperatureRecord.self)
+        try context.delete(model: LeapProgressRecord.self)
+        try context.delete(model: DiaryItemRecord.self)
+        try context.delete(model: DoctorVisitRecord.self)
+        try context.delete(model: VaccinationRecord.self)
+        try context.delete(model: ComplementaryFoodRecord.self)
+        try context.delete(model: DiaperRecord.self)
+        try context.delete(model: MomMoodRecord.self)
+        try context.delete(model: StoolRecord.self)
+        try context.delete(model: WaterIntakeRecord.self)
+        try context.delete(model: MomSleepRecord.self)
+        try context.delete(model: PumpingRecord.self)
+        try context.save()
+
+        let defaults = UserDefaults.standard
+        for key in ["onboardingDone", "paywallShown", kFamilyIdDefaultsKey,
+                    "AppPersistence.schemaVersion"] {
+            defaults.removeObject(forKey: key)
+        }
+
+        appState.babyProfile = nil
+    }
+
     // MARK: — Migration
 
     func runMigrationIfNeeded() {
         UserDefaultsMigration.runIfNeeded(context: context)
+        UserDefaultsMigration.runVaccinationRemapIfNeeded(context: context)
     }
 
     // MARK: — ViewModel Factories
@@ -265,8 +302,17 @@ final class AppContainer {
         SymptomViewModel(appState: appState, addDiaryEntry: addDiaryEntry, syncRepo: babySyncRepository)
     }
 
+    func makeDeleteAccountUseCase() -> DeleteAccountUseCase {
+        DeleteAccountUseCase(
+            cloudEraser: FirestoreAccountEraser(babySync: BabySyncService()),
+            photoStorage: photoStorage,
+            auth: authManager,
+            eraseLocal: { [unowned self] in try self.eraseLocalData() }
+        )
+    }
+
     func makeSettingsViewModel() -> SettingsViewModel {
-        SettingsViewModel(repo: preferencesRepository)
+        SettingsViewModel(repo: preferencesRepository, deleteAccount: makeDeleteAccountUseCase())
     }
 
     func makeMomMoodViewModel() -> MomMoodViewModel {

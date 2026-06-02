@@ -4,6 +4,16 @@ final class BabySyncService {
     private var db: Firestore { Firestore.firestore() }
     private var babyId: String { FamilyManager.shared.familyId ?? "" }
 
+    /// Every log subcollection ever written under `babies/{babyId}`. Kept in sync
+    /// with the set `CloudSyncDownloader` reads, plus the legacy `quickLogs`. Used by
+    /// `deleteAllData()` for full GDPR erasure.
+    static let allSubcollections = [
+        "feeding", "sleep", "diaper", "stool", "diary", "walk", "bath",
+        "pumping", "vaccination", "complementaryFood", "temperature",
+        "measurement", "doctorVisit", "momMood", "momSleep", "waterIntake",
+        "leaps", "quickLogs",
+    ]
+
     init() {}
 
     private func collection(_ name: String) -> CollectionReference {
@@ -39,6 +49,18 @@ final class BabySyncService {
             }
             try await batch.commit()
         }
+    }
+
+    /// Full GDPR erasure of this baby's cloud tree: every log subcollection, the
+    /// `profile/info` doc, and the `babies/{babyId}` parent document itself.
+    func deleteAllData() async throws {
+        guard !babyId.isEmpty else { return }
+        for sub in Self.allSubcollections {
+            try await deleteAll(in: sub)
+        }
+        try await db.collection("babies").document(babyId)
+            .collection("profile").document("info").delete()
+        try await db.collection("babies").document(babyId).delete()
     }
 
     func streamLogs<T: Decodable>(
