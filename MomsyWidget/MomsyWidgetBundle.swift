@@ -7,6 +7,7 @@ struct MomsyWidgetBundle: WidgetBundle {
         MomsyFeedingWidget()
         MomsySleepWidget()
         MomsySummaryWidget()
+        MomsyStandByWidget()
         FeedingLiveActivity()
         SleepLiveActivity()
         WalkLiveActivity()
@@ -51,5 +52,18 @@ struct MomsySummaryWidget: Widget {
         .configurationDisplayName("Сводка дня")
         .description("Кормление, сон и подгузники")
         .supportedFamilies([.systemMedium])
+    }
+}
+
+struct MomsyStandByWidget: Widget {
+    let kind = "MomsyStandByWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: MomsyWidgetProvider()) { entry in
+            MomsyStandByWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Ночной режим")
+        .description("Последнее кормление и сон для StandBy")
+        .supportedFamilies([.systemSmall])
     }
 }

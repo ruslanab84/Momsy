@@ -23,6 +23,7 @@
 		8872BBDA2E0981A7146C21CC /* MockLeapsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37279E74C1D7F7DFA7CED64 /* MockLeapsRepository.swift */; };
 		8A1C80ECC1124FCF9CAA91E2 /* MockStoolRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B117796E1BA4881A6B15248 /* MockStoolRepository.swift */; };
 		8FF13D35CD4F298D09319CE3 /* MomsyWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */; };
+		D7C1A0B2E3F40516A7B8C9D0 /* MomsyStandByWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C1A0B2E3F40516A7B8C9D1 /* MomsyStandByWidgetView.swift */; };
 		8FF4DECAE6F4B06FFD6E7189 /* MockPushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */; };
 		9CBCB9DF036CA6355130F76C /* MomsyWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */; };
 		9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */; };
@@ -191,6 +192,7 @@
 		E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		E89BA45A7EB93E4CF6AA23BA /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetView.swift; sourceTree = "<group>"; };
+		D7C1A0B2E3F40516A7B8C9D1 /* MomsyStandByWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyStandByWidgetView.swift; sourceTree = "<group>"; };
 		E9B50B0C5B463D402F0ABBAD /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingViewModelTests.swift; sourceTree = "<group>"; };
 		F9447E2BE7AA19806CCDF9B8 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
@@ -556,6 +558,7 @@
 				322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */,
 				153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */,
 				E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */,
+				D7C1A0B2E3F40516A7B8C9D1 /* MomsyStandByWidgetView.swift */,
 				BB001122CC33DD44EE55FF60 /* MomsySleepWidgetView.swift */,
 				BB001122CC33DD44EE55FF62 /* MomsySummaryWidgetView.swift */,
 				AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */,
@@ -773,6 +776,7 @@
 				85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */,
 				CFE0C4DB867A5136830C1D5A /* MomsyWidgetProvider.swift in Sources */,
 				8FF13D35CD4F298D09319CE3 /* MomsyWidgetView.swift in Sources */,
+				D7C1A0B2E3F40516A7B8C9D0 /* MomsyStandByWidgetView.swift in Sources */,
 				03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */,
 				BB001122CC33DD44EE55FF61 /* MomsySleepWidgetView.swift in Sources */,
 				BB001122CC33DD44EE55FF63 /* MomsySummaryWidgetView.swift in Sources */,
