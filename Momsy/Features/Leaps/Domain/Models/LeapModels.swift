@@ -3,6 +3,8 @@ import Foundation
 struct DevelopmentLeap: Identifiable {
     let id: Int
     let week: Int
+    /// Typical length of this leap's fussy / "stormy" stretch, in days.
+    let hardDays: Int
     let name: String
     let nameEn: String
     let semanticColor: SemanticColor
@@ -21,7 +23,7 @@ struct DevelopmentLeap: Identifiable {
 extension DevelopmentLeap {
     static let catalog: [DevelopmentLeap] = [
     DevelopmentLeap(
-        id: 1, week: 5,
+        id: 1, week: 5, hardDays: 7,
         name: "Мир ощущений", nameEn: "World of Senses",
         semanticColor: .rose, isDone: true, isCurrent: false,
         description: "учится обрабатывать сигналы от органов чувств — звуки, свет, прикосновения воспринимаются по-новому.",
@@ -34,7 +36,7 @@ extension DevelopmentLeap {
         tipEn: "Speak in a calm voice and avoid sudden sounds — the auditory system is still calibrating."
     ),
     DevelopmentLeap(
-        id: 2, week: 8,
+        id: 2, week: 8, hardDays: 7,
         name: "Мир узоров", nameEn: "World of Patterns",
         semanticColor: .butter, isDone: true, isCurrent: false,
         description: "начинает распознавать регулярные образы — черты лица, ритмы, простые геометрические формы.",
@@ -47,7 +49,7 @@ extension DevelopmentLeap {
         tipEn: "Show black-and-white pictures — contrast stimulates the visual cortex."
     ),
     DevelopmentLeap(
-        id: 3, week: 12,
+        id: 3, week: 12, hardDays: 7,
         name: "Плавные движения", nameEn: "Smooth Transitions",
         semanticColor: .mint, isDone: true, isCurrent: false,
         description: "обнаруживает, что может управлять своим телом — руки, ноги, голова начинают двигаться плавно и осознанно.",
@@ -60,7 +62,7 @@ extension DevelopmentLeap {
         tipEn: "Daily tummy time strengthens the neck and back — the foundation for rolling over."
     ),
     DevelopmentLeap(
-        id: 4, week: 17,
+        id: 4, week: 17, hardDays: 28,
         name: "Мир событий", nameEn: "World of Events",
         semanticColor: .coral, isDone: false, isCurrent: true,
         description: "начинает понимать, что одно действие приводит к другому. Это огромная работа для мозга — отсюда плач и плохой сон.",
@@ -73,7 +75,7 @@ extension DevelopmentLeap {
         tipEn: "Show a press-toy or black-and-white book — cause and effect is especially fascinating during this leap."
     ),
     DevelopmentLeap(
-        id: 5, week: 26,
+        id: 5, week: 26, hardDays: 28,
         name: "Отношения", nameEn: "Relationships",
         semanticColor: .lilac, isDone: false, isCurrent: false,
         description: "открывает мир связей между людьми и предметами. Тревога разлуки — нормальное и важное явление этого этапа.",
@@ -86,7 +88,7 @@ extension DevelopmentLeap {
         tipEn: "Peek-a-boo helps master object permanence — the key skill of this leap."
     ),
     DevelopmentLeap(
-        id: 6, week: 36,
+        id: 6, week: 36, hardDays: 35,
         name: "Категории", nameEn: "Categories",
         semanticColor: .sky, isDone: false, isCurrent: false,
         description: "начинает группировать вещи по свойствам: цвет, форма, размер. Активно изучает мир через классификацию.",

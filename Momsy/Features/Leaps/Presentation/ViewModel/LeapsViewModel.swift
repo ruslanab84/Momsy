@@ -22,19 +22,22 @@ final class LeapsViewModel: ObservableObject {
         leaps.first(where: { $0.isCurrent }) ?? leaps.first(where: { !$0.isDone }) ?? leaps[3]
     }
 
+    /// Phase of the genuinely-current leap, or nil when no leap is active (newborn).
+    var leapPhase: BabyAgeContext.LeapPhase? {
+        guard let leap = leaps.first(where: { $0.isCurrent }) else { return nil }
+        let days = BabyAgeContext.ageDays(birthDate: appState.babyProfile?.birthDate)
+        return BabyAgeContext.leapPhase(for: leap, ageDays: days)
+    }
+
     func loadLeaps() async {
         let progress = (try? await getLeapsUC.execute()) ?? []
         let doneIDs = Set(progress.filter(\.isDone).map(\.id))
-        let ageWeeks = appState.babyProfile.map {
-            max(0, Calendar.current.dateComponents([.weekOfYear], from: $0.birthDate, to: Date()).weekOfYear ?? 0)
-        } ?? 0
-        let current = DevelopmentLeap.catalog
-            .first(where: { !doneIDs.contains($0.id) && $0.week <= ageWeeks + 4 })
-            ?? DevelopmentLeap.catalog.last(where: { $0.week <= ageWeeks })
+        let ageWeeks = BabyAgeContext.ageWeeks(birthDate: appState.babyProfile?.birthDate)
+        let current = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, completedIDs: doneIDs)
         leaps = DevelopmentLeap.catalog.map { leap in
             var copy = leap
-            copy.isDone = doneIDs.contains(leap.id)
             copy.isCurrent = leap.id == current?.id
+            copy.isDone = doneIDs.contains(leap.id) || (!copy.isCurrent && leap.week <= ageWeeks)
             return copy
         }
     }

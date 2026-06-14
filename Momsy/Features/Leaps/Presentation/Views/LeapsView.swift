@@ -32,8 +32,17 @@ struct LeapsView: View {
             Text(loc.strings.currentLeapTitle(id: vm.currentLeap.id))
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
+            leapSubtitle
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private var leapSubtitle: some View {
+        switch vm.leapPhase {
+        case .stormy(let day, let total):
             HStack(spacing: 4) {
-                Text(loc.strings.day3HardDays)
+                Text(loc.strings.hardDaysProgress(day: day, total: total))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                 Text(loc.strings.hangInThere)
@@ -41,8 +50,14 @@ struct LeapsView: View {
                     .italic()
                     .foregroundColor(.bbCoralDeep)
             }
+        case .settled:
+            Text(loc.strings.leapSettled)
+                .font(.custom("Georgia", size: 17))
+                .italic()
+                .foregroundColor(.bbCoralDeep)
+        case nil:
+            EmptyView()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Current Leap Card
@@ -78,7 +93,7 @@ struct LeapsView: View {
                 )
             }
 
-            Text(loc.strings.leapWillPass)
+            Text(loc.strings.leapWillPass(hardDays: vm.currentLeap.hardDays))
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)

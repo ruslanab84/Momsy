@@ -192,11 +192,6 @@ enum DailyContextBuilder {
     }
 
     private static func currentLeap(ageWeeks weeks: Int) -> String? {
-        let catalog = DevelopmentLeap.catalog
-        let lang = LocalizationManager.shared.lang
-        let leap = catalog.first(where: { !$0.isDone && $0.week <= weeks + 4 })
-            ?? catalog.last(where: { $0.week <= weeks })
-        guard let leap else { return nil }
-        return lang == "en" ? leap.nameEn : leap.name
+        BabyAgeContext.currentLeapName(ageWeeks: weeks, lang: LocalizationManager.shared.lang)
     }
 }

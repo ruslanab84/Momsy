@@ -48,6 +48,43 @@ struct LeapsViewModelTests {
         #expect(currentCount == 1)
     }
 
+    @Test("9-week-old baby is in leap #2, leap #1 shows as passed")
+    func nineWeekBabyIsInLeapTwo() async throws {
+        let repo = MockLeapsRepository()                 // no manual completions
+        let birth = Calendar.current.date(byAdding: .day, value: -65, to: Date())! // ~9w2d
+        let profile = BabyProfile(name: "Test", birthDate: birth)
+        let vm = try await makeVM(repo: repo, profile: profile)
+        #expect(vm.currentLeap.id == 2)
+        #expect(vm.leaps.first { $0.id == 1 }?.isDone == true)
+        #expect(vm.leaps.first { $0.id == 1 }?.isCurrent == false)
+    }
+
+    @Test("leapPhase is stormy on day 1 at a leap's onset")
+    func leapPhaseStormyAtOnset() async throws {
+        let repo = MockLeapsRepository()
+        // Leap 1 (week 5) surfaces 1 week early → onset at day 28.
+        let birth = Calendar.current.date(byAdding: .day, value: -28, to: Date())!
+        let vm = try await makeVM(repo: repo, profile: BabyProfile(name: "Test", birthDate: birth))
+        let leap1HardDays = DevelopmentLeap.catalog.first { $0.id == 1 }!.hardDays
+        #expect(vm.currentLeap.id == 1)
+        #expect(vm.leapPhase == .stormy(day: 1, total: leap1HardDays))
+    }
+
+    @Test("leapPhase is settled once the hard window has passed")
+    func leapPhaseSettledMidLeap() async throws {
+        let repo = MockLeapsRepository()
+        let birth = Calendar.current.date(byAdding: .day, value: -65, to: Date())! // ~9w2d, mid leap #2
+        let vm = try await makeVM(repo: repo, profile: BabyProfile(name: "Test", birthDate: birth))
+        #expect(vm.currentLeap.id == 2)
+        #expect(vm.leapPhase == .settled)
+    }
+
+    @Test("leapPhase is nil for a newborn with no active leap")
+    func leapPhaseNilForNewborn() async throws {
+        let vm = try await makeVM(profile: BabyProfile(name: "Test", birthDate: Date()))
+        #expect(vm.leapPhase == nil)
+    }
+
     @Test("loadLeaps sets isCurrent = false for all when no leap matches age")
     func loadLeapsHandlesNoCurrentLeap() async throws {
         let repo = MockLeapsRepository()

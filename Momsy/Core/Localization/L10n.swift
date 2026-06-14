@@ -339,11 +339,35 @@ struct L10n {
     var leapInProgress: String  { s("In progress",       "В процессе",       "Im Gange",        "En curso") }
     var leapUpcoming: String    { s("Upcoming",          "Предстоит",        "Bevorstehend",    "Próximo") }
     var markDone: String        { s("Mark complete",     "Отметить",         "Abschließen",     "Marcar hecho") }
-    var day3HardDays: String    { s("Day 3 of ~5 hard days.", "День 3 из ~5 трудных.", "Tag 3 von ~5 schweren.", "Día 3 de ~5 días difíciles.") }
     var hangInThere: String     { s("hang in there, mama ✿", "держитесь, мама ✿", "Haltet durch, Mama ✿", "ánimo, mamá ✿") }
+    var leapSettled: String     { s("calmer days now — new skills emerging ✿", "сейчас спокойнее — появляются новые навыки ✿", "ruhigere Tage — neue Fähigkeiten zeigen sich ✿", "días más tranquilos — surgen nuevas habilidades ✿") }
     var whatYouNotice: String   { s("WHAT YOU NOTICE",   "ЧТО ЗАМЕТНО",      "WAS SIE BEMERKEN", "LO QUE NOTAS") }
     var comingSoon: String      { s("COMING SOON",       "СКОРО НАУЧИТСЯ",   "KOMMT BALD",      "PRONTO") }
-    var leapWillPass: String    { s("✿ This will pass. Usually lasts ~1 week. Hold them more — it doesn't spoil.", "✿ Это пройдёт. Обычно длится ~1 неделю. Чаще берите на руки — это не балует.", "✿ Das geht vorüber. Dauert ~1 Woche. Öfter auf den Arm nehmen.", "✿ Esto pasará. Suele durar ~1 semana. Cógelo más en brazos — no lo malcría.") }
+    /// Approximate duration in weeks, pluralized per language. `days` rounds to weeks (min 1).
+    private func weeksApprox(days: Int) -> String {
+        let w = max(1, Int((Double(days) / 7.0).rounded()))
+        let ru: String = {
+            let n = w % 100, d = w % 10
+            let unit: String
+            if n >= 11 && n <= 14 { unit = "недель" }
+            else if d == 1        { unit = "неделю" }
+            else if d >= 2 && d <= 4 { unit = "недели" }
+            else                  { unit = "недель" }
+            return "~\(w) \(unit)"
+        }()
+        return s(w == 1 ? "~1 week" : "~\(w) weeks",
+                 ru,
+                 w == 1 ? "~1 Woche" : "~\(w) Wochen",
+                 w == 1 ? "~1 semana" : "~\(w) semanas")
+    }
+
+    func leapWillPass(hardDays: Int) -> String {
+        let dur = weeksApprox(days: hardDays)
+        return s("✿ This will pass. Usually lasts \(dur). Hold them more — it doesn't spoil.",
+                 "✿ Это пройдёт. Обычно длится \(dur). Чаще берите на руки — это не балует.",
+                 "✿ Das geht vorüber. Dauert \(dur). Öfter auf den Arm nehmen.",
+                 "✿ Esto pasará. Suele durar \(dur). Cógelo más en brazos — no lo malcría.")
+    }
     var leapCalendar: String    { s("Leap Calendar",     "Календарь скачков","Schub-Kalender",  "Calendario de saltos") }
     var tipOfTheDay: String     { s("TIP OF THE DAY",    "СОВЕТ НА СЕГОДНЯ", "TIPP DES TAGES",  "CONSEJO DEL DÍA") }
     var leapInProgressStatus: String { s("in progress",  "идёт сейчас",      "im Gange",        "en curso") }
@@ -351,6 +375,7 @@ struct L10n {
     var notice: String          { s("notice",            "замечают",         "bemerken",        "notas") }
     var willLearn: String       { s("will learn",        "научится",         "wird lernen",     "aprenderá") }
 
+    func hardDaysProgress(day: Int, total: Int) -> String { s("Day \(day) of ~\(total) hard days.", "День \(day) из ~\(total) трудных.", "Tag \(day) von ~\(total) schweren.", "Día \(day) de ~\(total) días difíciles.") }
     func currentLeapTitle(id: Int) -> String { s("Now — leap #\(id)", "Сейчас — скачок №\(id)", "Jetzt — Schub №\(id)", "Ahora — salto n.º \(id)") }
     func weekPill(n: Int) -> String { s("week \(n)", "\(n)-я неделя", "Woche \(n)", "semana \(n)") }
     func weekRow(n: Int) -> String  { s("\(n) wk",   "\(n) нед",     "\(n) W",      "\(n) sem") }
