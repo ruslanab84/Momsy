@@ -10,9 +10,12 @@ final class TodayViewModel: ObservableObject {
     @Published var isTipLoading: Bool = false
     @Published var syncedFeedingLogs: [FeedingLog] = []
     @Published var syncedSleepLogs: [SleepLog] = []
+    @Published private(set) var currentLeap: DevelopmentLeap?
+    @Published private(set) var leapPhase: BabyAgeContext.LeapPhase?
 
     private let getFeeding: GetFeedingEntriesUseCase
     private let getSleep: GetSleepEntriesUseCase
+    private let getLeaps: GetLeapsUseCase
     private let diaperRepo: any DiaperRepository
     private let stoolRepo: any StoolRepository
     private let quickLogRepo: QuickLogRepository
@@ -26,6 +29,7 @@ final class TodayViewModel: ObservableObject {
     init(
         getFeeding: GetFeedingEntriesUseCase,
         getSleep: GetSleepEntriesUseCase,
+        getLeaps: GetLeapsUseCase,
         diaperRepo: any DiaperRepository,
         stoolRepo: any StoolRepository,
         quickLogRepo: QuickLogRepository,
@@ -35,6 +39,7 @@ final class TodayViewModel: ObservableObject {
     ) {
         self.getFeeding = getFeeding
         self.getSleep = getSleep
+        self.getLeaps = getLeaps
         self.diaperRepo = diaperRepo
         self.stoolRepo = stoolRepo
         self.quickLogRepo = quickLogRepo
@@ -43,6 +48,7 @@ final class TodayViewModel: ObservableObject {
         self.syncRepo = syncRepo
         startSyncListeners()
         Task { await loadDiaperCount() }
+        Task { await loadLeap() }
         mergeObserver = NotificationCenter.default.addObserver(
             forName: .cloudSyncDidMerge, object: nil, queue: .main
         ) { [weak self] _ in
@@ -57,6 +63,31 @@ final class TodayViewModel: ObservableObject {
     private func reloadAfterMerge() async {
         await loadTodayEntries()
         await loadDiaperCount()
+        await loadLeap()
+    }
+
+    // MARK: - Developmental leap
+
+    /// Derives the baby's current developmental leap by age, mirroring
+    /// `LeapsViewModel.loadLeaps()` so the Today screen and Leaps tab agree.
+    /// `currentLeap` is nil for newborns / the calm gap between leaps, which
+    /// hides the badge and card.
+    func loadLeap() async {
+        let progress = (try? await getLeaps.execute()) ?? []
+        let doneIDs = Set(progress.filter(\.isDone).map(\.id))
+        let birth = appState.babyProfile?.birthDate
+        let ageWeeks = BabyAgeContext.ageWeeks(birthDate: birth)
+        let leap = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, completedIDs: doneIDs)
+        currentLeap = leap
+        leapPhase = leap.map {
+            BabyAgeContext.leapPhase(for: $0, ageDays: BabyAgeContext.ageDays(birthDate: birth))
+        }
+    }
+
+    /// Localized name of the current leap, or nil when no leap is active.
+    var currentLeapName: String? {
+        guard let leap = currentLeap else { return nil }
+        return LocalizationManager.shared.lang == "en" ? leap.nameEn : leap.name
     }
 
     private func startSyncListeners() {
@@ -116,8 +147,10 @@ final class TodayViewModel: ObservableObject {
 
     func fetchDailyTipIfNeeded() async {
         guard !hasFetchedThisSession else { return }
-        await updateTip()
         hasFetchedThisSession = true
+        await loadDiaperCount()
+        if logEntries.isEmpty { await loadTodayEntries() }
+        await updateTip()
     }
 
     func refreshTip() async {
@@ -163,6 +196,7 @@ final class TodayViewModel: ObservableObject {
         addEntry(LogEntry(time: entry.date, kind: .drop, label: label))
         Task { try? await diaperRepo.add(entry) }
         pushDiaperToFirestore(entry)
+        if hasFetchedThisSession { Task { await updateTip() } }
     }
 
     private func pushDiaperToFirestore(_ entry: DiaperEntry) {
@@ -185,6 +219,7 @@ final class TodayViewModel: ObservableObject {
             }
         }
         Task { try? await diaperRepo.removeLatest(on: Date()) }
+        if hasFetchedThisSession { Task { await updateTip() } }
     }
 
     func logWalk() {

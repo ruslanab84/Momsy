@@ -35,15 +35,20 @@ struct TodayViewModelTests {
         UserDefaults.standard.removeObject(forKey: "quick_log_today_date")
     }
 
-    private func makeAppState() -> AppState {
-        let profile = BabyProfile(
+    private func makeAppState(profile: BabyProfile? = nil) -> AppState {
+        let resolved = profile ?? BabyProfile(
             id: UUID(),
             name: "Тест",
             birthDate: Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date(),
             gender: "girl"
         )
-        let repo = MockBabyRepository(initialProfile: profile)
-        return AppState(getBabyProfile: GetBabyProfileUseCase(repository: repo))
+        let repo = MockBabyRepository(initialProfile: resolved)
+        let state = AppState(getBabyProfile: GetBabyProfileUseCase(repository: repo))
+        // Set synchronously only when a test passes an explicit profile (e.g. leap
+        // tests that read babyProfile immediately). The default path keeps the
+        // original async-load timing the daily-tip tests were written against.
+        if profile != nil { state.babyProfile = resolved }
+        return state
     }
 
     private func makeTipRepository() -> DailyTipRepository {
@@ -57,17 +62,20 @@ struct TodayViewModelTests {
         sleepRepo: MockSleepRepository = MockSleepRepository(),
         diaperRepo: MockDiaperRepository = MockDiaperRepository(),
         stoolRepo: MockStoolRepository = MockStoolRepository(),
-        tipRepository: DailyTipRepository? = nil
+        leapsRepo: MockLeapsRepository = MockLeapsRepository(),
+        tipRepository: DailyTipRepository? = nil,
+        profile: BabyProfile? = nil
     ) -> TodayViewModel {
         let tipRepo = tipRepository ?? makeTipRepository()
         return TodayViewModel(
             getFeeding: GetFeedingEntriesUseCase(repository: repo),
             getSleep: GetSleepEntriesUseCase(repository: sleepRepo),
+            getLeaps: GetLeapsUseCase(repository: leapsRepo),
             diaperRepo: diaperRepo,
             stoolRepo: stoolRepo,
             quickLogRepo: QuickLogRepository(),
             tipRepository: tipRepo,
-            appState: makeAppState(),
+            appState: makeAppState(profile: profile),
             syncRepo: MockBabySyncRepository()
         )
     }
@@ -179,6 +187,21 @@ struct TodayViewModelTests {
         #expect(vm.isTipLoading == false)
     }
 
+    @Test("tip is built from loaded diaper count, not a stale 0")
+    func tipReflectsLoadedDiaperCount() async {
+        let diaperRepo = MockDiaperRepository()
+        diaperRepo.entries = (0..<6).map { _ in DiaperEntry() }   // 6 today
+        // Stool logged today so the unrelated "no stool" alert doesn't fire and
+        // the assertion can focus on the diaper-driven tip.
+        let stoolRepo = MockStoolRepository()
+        stoolRepo.entries = [Date()]
+        let vm = makeVM(diaperRepo: diaperRepo, stoolRepo: stoolRepo)
+        await vm.fetchDailyTipIfNeeded()
+        #expect(vm.diaperCount == 6)
+        // false "insufficient fluid" alert must not be shown for 6 diapers
+        #expect(vm.dailyTip?.text.contains("0") != true || vm.dailyTip?.category != .alert)
+    }
+
     @Test("fetchDailyTipIfNeeded does not recompute on second call in same session")
     func fetchDailyTipIfNeeded_skipsSecondCall_withinSession() async {
         let vm = makeVM()
@@ -202,5 +225,38 @@ struct TodayViewModelTests {
         #expect(vm.isTipLoading == false)
         await vm.fetchDailyTipIfNeeded()
         #expect(vm.isTipLoading == false)
+    }
+
+    // MARK: - Developmental leap
+
+    @Test("9-week-old baby resolves to leap #2 on the Today screen, not hardcoded #4")
+    func nineWeekBabyResolvesToLeapTwo() async throws {
+        let birth = Calendar.current.date(byAdding: .day, value: -65, to: Date())! // ~9w2d
+        let profile = BabyProfile(name: "Test", birthDate: birth)
+        let vm = makeVM(profile: profile)
+        await vm.loadLeap()
+        #expect(vm.currentLeap?.id == 2)
+        #expect(vm.leapPhase == .settled) // hard window of leap #2 has passed by 9w
+    }
+
+    @Test("newborn has no active leap, so the badge and card are hidden")
+    func newbornHasNoActiveLeap() async throws {
+        let profile = BabyProfile(name: "Test", birthDate: Date())
+        let vm = makeVM(profile: profile)
+        await vm.loadLeap()
+        #expect(vm.currentLeap == nil)
+        #expect(vm.leapPhase == nil)
+        #expect(vm.currentLeapName == nil)
+    }
+
+    @Test("a baby at a leap's onset is in the stormy phase on day 1")
+    func babyAtOnsetIsStormy() async throws {
+        // Leap 1 (week 5) surfaces 1 week early → onset at day 28.
+        let birth = Calendar.current.date(byAdding: .day, value: -28, to: Date())!
+        let vm = makeVM(profile: BabyProfile(name: "Test", birthDate: birth))
+        await vm.loadLeap()
+        let leap1HardDays = DevelopmentLeap.catalog.first { $0.id == 1 }!.hardDays
+        #expect(vm.currentLeap?.id == 1)
+        #expect(vm.leapPhase == .stormy(day: 1, total: leap1HardDays))
     }
 }

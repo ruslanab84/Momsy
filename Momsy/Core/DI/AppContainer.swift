@@ -209,6 +209,7 @@ final class AppContainer {
         TodayViewModel(
             getFeeding: getFeedingEntries,
             getSleep: getSleepEntries,
+            getLeaps: getLeaps,
             diaperRepo: diaperRepository,
             stoolRepo: stoolRepository,
             quickLogRepo: quickLogRepository,

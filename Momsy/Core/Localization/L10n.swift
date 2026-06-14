@@ -218,10 +218,12 @@ struct L10n {
     var tipOfDay: String     { s("Tip of the day",   "Подсказка дня",      "Tipp des Tages", "Consejo del día") }
     var todaySoFar: String   { s("Today so far",     "Сегодня уже было",   "Heute bisher",   "Hoy hasta ahora") }
     var todayUpper: String   { s("TODAY",            "СЕГОДНЯ",            "HEUTE",          "HOY") }
-    var leapPillLabel: String { s("Leap #4",         "Скачок №4",          "Schub #4",       "Salto n.º 4") }
-    var leapDayCard: String  { s("LEAP #4 · DAY 3 OF ~5", "СКАЧОК №4 · ДЕНЬ 3 ИЗ ~5", "SCHUB #4 · TAG 3 VON ~5", "SALTO N.º 4 · DÍA 3 DE ~5") }
-    var worldOfEventsLabel: String { s("«World of Events» — this is normal", "«Мир событий» — это нормально", "«Welt der Ereignisse» — das ist normal", "«El mundo de los eventos» — es normal") }
+    func leapPill(_ n: Int) -> String { s("Leap #\(n)", "Скачок №\(n)", "Schub #\(n)", "Salto n.º \(n)") }
+    func leapDayCard(n: Int, day: Int, total: Int) -> String { s("LEAP #\(n) · DAY \(day) OF ~\(total)", "СКАЧОК №\(n) · ДЕНЬ \(day) ИЗ ~\(total)", "SCHUB #\(n) · TAG \(day) VON ~\(total)", "SALTO N.º \(n) · DÍA \(day) DE ~\(total)") }
+    func leapNumberCard(_ n: Int) -> String { s("LEAP #\(n)", "СКАЧОК №\(n)", "SCHUB #\(n)", "SALTO N.º \(n)") }
+    func leapNormalLabel(name: String) -> String { s("«\(name)» — this is normal", "«\(name)» — это нормально", "«\(name)» — das ist normal", "«\(name)» — es normal") }
     var leapCryingNote: String { s("Crying, poor sleep, wants to be held. Not sick — growing.", "Плачет, плохо спит, просит руки. Он не болен — он растёт.", "Weint, schläft schlecht, will gehalten werden. Nicht krank — wächst.", "Llora, duerme mal, quiere brazos. No está enfermo — está creciendo.") }
+    var leapSettledNote: String { s("The hard part has passed — practicing new skills.", "Самое сложное позади — осваивает новые навыки.", "Das Schwerste ist vorbei — übt neue Fähigkeiten.", "Lo más difícil ya pasó — practica nuevas habilidades.") }
 
     func howDidSleep(name: String) -> String { s("how did \(name) sleep?", "как \(name) спал?", "wie hat \(name) geschlafen?", "¿cómo durmió \(name)?") }
     func feedingActiveLabel(side: String) -> String { s("active · \(side)", "идёт · \(side)", "aktiv · \(side)", "activo · \(side)") }

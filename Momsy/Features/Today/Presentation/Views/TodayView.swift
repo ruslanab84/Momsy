@@ -60,7 +60,7 @@ struct TodayView: View {
                 greetingBlock
                 mainCards
                 dailyTipCard
-                leapCard
+                if vm.currentLeap != nil { leapCard }
                 quickLogSection
                 historyCard
             }
@@ -148,7 +148,9 @@ struct TodayView: View {
                 }
             }
             Spacer()
-            BBPill(text: loc.strings.leapPillLabel, color: Color.bbLilac.opacity(0.6), fg: .bbLilacDeep, size: 12)
+            if let leap = vm.currentLeap {
+                BBPill(text: loc.strings.leapPill(leap.id), color: Color.bbLilac.opacity(0.6), fg: .bbLilacDeep, size: 12)
+            }
         }
         .padding(.top, 8)
     }
@@ -463,24 +465,41 @@ struct TodayView: View {
 
     // MARK: - Leap Card
 
-    private var leapCard: some View {
-        HStack(spacing: 12) {
-            CuteBlobView(kind: .moon, size: 48, tone: .bbLilac)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(loc.strings.leapDayCard)
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbLilacDeep)
-                    .kerning(0.4)
-                Text(loc.strings.worldOfEventsLabel)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInk)
-                Text(loc.strings.leapCryingNote)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(.bbInkSoft)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+    private func leapTitle(for leap: DevelopmentLeap) -> String {
+        if case .stormy(let day, let total) = vm.leapPhase {
+            return loc.strings.leapDayCard(n: leap.id, day: day, total: total)
         }
-        .bbCard(pad: 14, bg: Color.bbLilac.opacity(0.3))
+        return loc.strings.leapNumberCard(leap.id)
+    }
+
+    private var leapNote: String {
+        if case .stormy = vm.leapPhase { return loc.strings.leapCryingNote }
+        return loc.strings.leapSettledNote
+    }
+
+    @ViewBuilder
+    private var leapCard: some View {
+        if let leap = vm.currentLeap {
+            let title = leapTitle(for: leap)
+            let note = leapNote
+            HStack(spacing: 12) {
+                CuteBlobView(kind: .moon, size: 48, tone: .bbLilac)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .foregroundColor(.bbLilacDeep)
+                        .kerning(0.4)
+                    Text(loc.strings.leapNormalLabel(name: vm.currentLeapName ?? ""))
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Text(note)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(.bbInkSoft)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .bbCard(pad: 14, bg: Color.bbLilac.opacity(0.3))
+        }
     }
 
     // MARK: - Quick Log
