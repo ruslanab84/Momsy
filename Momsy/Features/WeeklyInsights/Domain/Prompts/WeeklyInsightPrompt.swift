@@ -33,6 +33,14 @@ enum WeeklyInsightPrompt {
             Antworte NUR mit einem JSON-Objekt mit genau diesen Schlüsseln: \(jsonKeys).
             Jeder Wert sind 1–2 warme Sätze auf Deutsch. Kein Markdown, keine zusätzlichen Schlüssel, kein Text außerhalb des JSON.
             """
+        case .french:
+            return """
+            Tu es une assistante pédiatrique chaleureuse et bienveillante pour les mamans. Analyse les statistiques hebdomadaires d’un bébé.
+            Compare aux normes de l’OMS selon l’âge. Sois encourageante, ne pose jamais de diagnostic médical et ne recommande JAMAIS
+            de réintroduire un aliment signalé comme allergène ou ayant provoqué une réaction.
+            Réponds UNIQUEMENT par un objet JSON contenant exactement ces clés : \(jsonKeys).
+            Chaque valeur est composée de 1 à 2 phrases chaleureuses en français. Pas de markdown, pas de clés supplémentaires, aucun texte hors du JSON.
+            """
         }
     }
 
@@ -41,12 +49,13 @@ enum WeeklyInsightPrompt {
         case .english, .spanish, .portuguese: return build(ctx: ctx, l: .en)
         case .russian: return build(ctx: ctx, l: .ru)
         case .german:  return build(ctx: ctx, l: .de)
+        case .french:  return build(ctx: ctx, l: .fr)
         }
     }
 
     // MARK: - Builder
 
-    private enum Loc { case en, ru, de }
+    private enum Loc { case en, ru, de, fr }
 
     private static func build(ctx: WeeklyInsightContext, l: Loc) -> String {
         let s = ctx.stats
@@ -87,6 +96,14 @@ enum WeeklyInsightPrompt {
             lines.append("Mahlzeiten diese Woche: \(feeds)/Tag, gesamt \(s.totalFeedings). Windelwechsel: \(s.totalDiapers).")
             lines.append("Neue Lebensmittel: \(foods). Allergen/Reaktion: \(allergens).")
             lines.append("Gib JSON {\(jsonKeys)} zurück, vergleiche mit WHO-Normen, je eine praktische Empfehlung.")
+        case .fr:
+            lines.append("Âge du bébé : \(s.ageMonths) mois (\(s.ageWeeks) semaines).")
+            if let leap { lines.append("Bond de développement : \(leap).") }
+            lines.append("OMS : objectif de sommeil total ≥ \(whoH)/jour ; fenêtre d’éveil max. ~\(s.whoAwakeWindowMax) min.")
+            lines.append("Sommeil cette semaine : moy. \(sleepH)/jour (nuit \(nightH), jour \(dayH), \(naps) siestes/jour), \(trend).")
+            lines.append("Tétées cette semaine : \(feeds)/jour, \(s.totalFeedings) au total. Changes de couche : \(s.totalDiapers).")
+            lines.append("Nouveaux aliments introduits : \(foods). Allergène/réaction signalé : \(allergens).")
+            lines.append("Renvoie un JSON {\(jsonKeys)} comparant aux normes de l’OMS, avec une recommandation pratique pour chaque champ.")
         }
         return lines.joined(separator: "\n")
     }
@@ -111,6 +128,9 @@ enum WeeklyInsightPrompt {
         case .de:
             if absMin < 10 { return "etwa wie letzte Woche" }
             return delta > 0 ? "+\(absMin) Min/Tag vs. letzte Woche" : "-\(absMin) Min/Tag vs. letzte Woche"
+        case .fr:
+            if absMin < 10 { return "à peu près comme la semaine dernière" }
+            return delta > 0 ? "+\(absMin) min/jour vs. semaine dernière" : "-\(absMin) min/jour vs. semaine dernière"
         }
     }
 }

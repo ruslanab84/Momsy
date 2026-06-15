@@ -9,6 +9,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
         switch context.language {
         case .russian: return ru(s)
         case .german:  return de(s)
+        case .french:  return fr(s)
         default:       return en(s)
         }
     }
@@ -87,6 +88,27 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             feedingSummary: "Etwa \(feeds) Mahlzeiten pro Tag. Neue Lebensmittel diese Woche: \(foods).",
             feedingRecommendation: feedingRec,
             overallSummary: "Eine ruhige Woche — \(hEn(s.avgSleepMinutesPerDay)) Schlaf/Tag und \(feeds) Mahlzeiten/Tag. Du machst das toll."
+        )
+    }
+
+    // MARK: - French
+
+    private func fr(_ s: WeeklyStats) -> WeeklyInsightAI {
+        let enough = s.avgSleepMinutesPerDay >= s.whoMinSleepMinutes
+        let sleepRec = enough
+            ? "Le sommeil est sain pour cet âge — gardez le rythme actuel."
+            : "Essayez un coucher plus tôt et surveillez les fenêtres d’éveil (~\(s.whoAwakeWindowMax) min) pour ajouter du repos."
+        let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
+        let foods = s.newFoodsIntroduced.isEmpty ? "aucun nouvel aliment" : s.newFoodsIntroduced.joined(separator: ", ")
+        let feedingRec = s.allergensFlagged.isEmpty
+            ? "Introduisez un seul nouvel aliment à la fois et surveillez les réactions."
+            : "Évitez de réintroduire les aliments signalés (\(s.allergensFlagged.joined(separator: ", "))) et consultez votre pédiatre."
+        return WeeklyInsightAI(
+            sleepSummary: "Cette semaine, bébé a dormi en moyenne \(hEn(s.avgSleepMinutesPerDay)) par jour (\(String(format: "%.1f", s.avgNapsPerDay)) siestes). L’OMS recommande ≥ \(hEn(s.whoMinSleepMinutes)).",
+            sleepRecommendation: sleepRec,
+            feedingSummary: "Environ \(feeds) tétées par jour. Nouveaux aliments cette semaine : \(foods).",
+            feedingRecommendation: feedingRec,
+            overallSummary: "Une semaine régulière — \(hEn(s.avgSleepMinutesPerDay)) de sommeil/jour et \(feeds) tétées/jour. Vous faites un travail formidable."
         )
     }
 }

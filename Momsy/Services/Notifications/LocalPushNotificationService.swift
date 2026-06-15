@@ -20,14 +20,12 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     func scheduleFeedingReminder(afterMinutes minutes: Int) {
         center.removePendingNotificationRequests(withIdentifiers: [ID.feeding])
-        let isEn = LocalizationManager.shared.current == .english
+        let str = LocalizationManager.shared.strings
         let hours = minutes / 60
 
         let content = UNMutableNotificationContent()
-        content.title = isEn ? "Feeding reminder" : "Напоминание о кормлении"
-        content.body  = isEn
-            ? "Baby hasn't eaten in \(hours)+ hours. Time to feed?"
-            : "Малыш не ел уже \(hours)+ ч. Пора покормить?"
+        content.title = str.notifFeedingTitle
+        content.body  = str.notifFeedingBody(hours: hours)
         content.sound = .default
 
         let trigger = UNTimeIntervalNotificationTrigger(
@@ -42,13 +40,11 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     func scheduleMorningDiary(hour: Int = 9, minute: Int = 0) {
         center.removePendingNotificationRequests(withIdentifiers: [ID.diary])
-        let isEn = LocalizationManager.shared.current == .english
+        let str = LocalizationManager.shared.strings
 
         let content = UNMutableNotificationContent()
-        content.title = isEn ? "Daily diary" : "Дневник малыша"
-        content.body  = isEn
-            ? "Write down today's special moments"
-            : "Запишите сегодняшние моменты в дневник малыша"
+        content.title = str.notifDiaryTitle
+        content.body  = str.notifDiaryBody
         content.sound = .default
 
         var comps = DateComponents()
@@ -60,13 +56,12 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     func scheduleLeapNotification(leapID: Int, name: String, nameEn: String, startDate: Date) {
         guard startDate > Date() else { return }
-        let isEn = LocalizationManager.shared.current == .english
+        let str = LocalizationManager.shared.strings
+        let leapName = LocalizationManager.shared.current == .english ? nameEn : name
 
         let content = UNMutableNotificationContent()
-        content.title = isEn ? "Development leap" : "Скачок развития"
-        content.body  = isEn
-            ? "«\(nameEn)» leap begins — your baby is reaching a new stage"
-            : "Начинается «\(name)» — малыш переходит на новый этап"
+        content.title = str.notifLeapTitle
+        content.body  = str.notifLeapBody(name: leapName)
         content.sound = .default
 
         let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: startDate)
@@ -82,11 +77,11 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
         center.removePendingNotificationRequests(withIdentifiers: [ID.vaccination(catalogId)])
         guard let fireDate = Calendar.current.date(byAdding: .day, value: -7, to: dueDate),
               fireDate > Date() else { return }
-        let isEn = LocalizationManager.shared.current == .english
+        let str = LocalizationManager.shared.strings
 
         let content = UNMutableNotificationContent()
-        content.title = isEn ? "Vaccination reminder" : "Напоминание о прививке"
-        content.body  = isEn ? "\(name) — in 7 days" : "\(name) — через 7 дней"
+        content.title = str.notifVaccinationTitle
+        content.body  = str.notifVaccinationBody(name: name)
         content.sound = .default
 
         let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
@@ -99,7 +94,7 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
     }
 
     /// Recurring Sunday reminder that the weekly AI report is ready.
-    func scheduleWeeklyReport(hour: Int = 18, minute: Int = 0) {
+    func scheduleWeeklyReport(hour: Int = 7, minute: Int = 0) {
         center.removePendingNotificationRequests(withIdentifiers: [ID.weeklyReport])
         let strings = LocalizationManager.shared.strings
 

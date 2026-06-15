@@ -35,6 +35,7 @@ enum VaccinationTiming: Hashable {
             case .russian: return "Рождение"
             case .german:  return "Geburt"
             case .spanish: return "Nacimiento"
+            case .french:  return "Naissance"
             default:       return "Birth"
             }
         case .weeks(let w):
@@ -42,6 +43,7 @@ enum VaccinationTiming: Hashable {
             case .russian: return "\(w) \(Self.ruWeeks(w))"
             case .german:  return w == 1 ? "1 Woche"  : "\(w) Wochen"
             case .spanish: return w == 1 ? "1 semana" : "\(w) semanas"
+            case .french:  return w == 1 ? "1 semaine": "\(w) semaines"
             default:       return w == 1 ? "1 week"   : "\(w) weeks"
             }
         case .months(let m):
@@ -49,6 +51,7 @@ enum VaccinationTiming: Hashable {
             case .russian: return "\(m) \(Self.ruMonths(m))"
             case .german:  return m == 1 ? "1 Monat" : "\(m) Monate"
             case .spanish: return m == 1 ? "1 mes"   : "\(m) meses"
+            case .french:  return m == 1 ? "1 mois"  : "\(m) mois"
             default:       return m == 1 ? "1 month" : "\(m) months"
             }
         case .additional:
@@ -56,6 +59,7 @@ enum VaccinationTiming: Hashable {
             case .russian: return "Дополнительные"
             case .german:  return "Weitere"
             case .spanish: return "Adicionales"
+            case .french:  return "Supplémentaires"
             default:       return "Additional"
             }
         }
@@ -88,11 +92,11 @@ struct VaccinationScheduleItem: Identifiable {
 extension VaccinationScheduleItem {
     /// Convenience initializer for authoring schedule data files compactly.
     /// Portuguese falls back to English via `name(for:)`.
-    init(id: Int, en: String, ru: String, de: String, es: String,
+    init(id: Int, en: String, ru: String, de: String, es: String, fr: String,
          timing: VaccinationTiming, isOptional: Bool = false) {
         self.init(
             id: id,
-            names: [.english: en, .russian: ru, .german: de, .spanish: es],
+            names: [.english: en, .russian: ru, .german: de, .spanish: es, .french: fr],
             timing: timing,
             isOptional: isOptional
         )

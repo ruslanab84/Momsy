@@ -27,6 +27,13 @@ enum DailyTipPrompt {
             Erwähne nicht, dass du eine KI bist. Keine Aufzählungen, Überschriften oder Listen.
             Verwende den Namen des Babys, wenn er angegeben ist.
             """
+        case .french:
+            return """
+            Tu es une assistante douce et bienveillante pour les mamans. Réponds UNIQUEMENT aux sujets sur les soins du bébé.
+            Réponse : 1 à 2 phrases, ton chaleureux, pas de diagnostic médical, en français.
+            Ne mentionne pas que tu es une IA. Pas de puces, de titres ni de listes.
+            Utilise le prénom du bébé s’il est indiqué.
+            """
         }
     }
 
@@ -35,6 +42,7 @@ enum DailyTipPrompt {
         case .english, .spanish, .portuguese: return buildEN(ctx: ctx)
         case .russian: return buildRU(ctx: ctx)
         case .german:  return buildDE(ctx: ctx)
+        case .french:  return buildFR(ctx: ctx)
         }
     }
 
@@ -109,6 +117,30 @@ enum DailyTipPrompt {
         lines.append("- Windeln: \(ctx.diaperCount)")
         lines.append("")
         lines.append("Gib einen praktischen Tipp für jetzt. Maximal 2 Sätze.")
+        return lines.joined(separator: "\n")
+    }
+
+    private static func buildFR(ctx: DailyContext) -> String {
+        var lines: [String] = ["Bébé : \(ctx.babyName), \(ctx.ageMonths) mois \(ctx.ageDays) j."]
+        if let leap = ctx.currentLeapName { lines.append("Bond de développement : \(leap).") }
+        lines.append("Moment de la journée : \(ctx.timeOfDay.displayName(for: .french)).")
+        lines.append("")
+        lines.append("Aujourd’hui :")
+        var feedLine = "- Tétées : \(ctx.feedingCount)"
+        if ctx.totalFeedingMinutes > 0 { feedLine += ", total \(ctx.totalFeedingMinutes) min" }
+        if let m = ctx.minutesSinceLastFeed { feedLine += ", dernière il y a \(m) min" }
+        lines.append(feedLine)
+        if let side = ctx.lastFeedSide, !side.isEmpty { lines.append("  Côté : \(side)") }
+        var sleepLine = "- Sommeil : \(ctx.sleepCount) fois"
+        if ctx.totalSleepMinutes > 0 {
+            let h = ctx.totalSleepMinutes / 60
+            let m = ctx.totalSleepMinutes % 60
+            sleepLine += ", total \(h > 0 ? "\(h)h " : "")\(m > 0 ? "\(m)min" : "")".trimmingCharacters(in: .whitespaces)
+        }
+        lines.append(sleepLine)
+        lines.append("- Couches : \(ctx.diaperCount)")
+        lines.append("")
+        lines.append("Donne un conseil pratique pour maintenant. Maximum 2 phrases.")
         return lines.joined(separator: "\n")
     }
 }

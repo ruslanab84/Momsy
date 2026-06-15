@@ -216,6 +216,7 @@ private struct AddCustomVaccinationSheet: View {
         case .english, .spanish, .portuguese: return "Add vaccine"
         case .german:  return "Impfung hinzufügen"
         case .russian: return "Добавить прививку"
+        case .french:  return "Ajouter un vaccin"
         }
     }
 
@@ -224,6 +225,7 @@ private struct AddCustomVaccinationSheet: View {
         case .english, .spanish, .portuguese: return "Vaccine name"
         case .german:  return "Name der Impfung"
         case .russian: return "Название прививки"
+        case .french:  return "Nom du vaccin"
         }
     }
 
@@ -232,6 +234,7 @@ private struct AddCustomVaccinationSheet: View {
         case .english, .spanish, .portuguese: return "Save"
         case .german:  return "Speichern"
         case .russian: return "Сохранить"
+        case .french:  return "Enregistrer"
         }
     }
 

@@ -38,6 +38,13 @@ enum TimeOfDay: String {
             case .evening:   return "Abend"
             case .night:     return "Nacht"
             }
+        case .french:
+            switch self {
+            case .morning:   return "matin"
+            case .afternoon: return "après-midi"
+            case .evening:   return "soir"
+            case .night:     return "nuit"
+            }
         }
     }
 }

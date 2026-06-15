@@ -28,6 +28,8 @@ enum AlertRules {
             text = "Han pasado \(hours) horas desde la última toma. Para \(ctx.ageMonths) meses, el intervalo habitual es de hasta \(maxHours) h — si \(ctx.babyName) no la pide, prueba a ofrecerle el pecho."
         case .german:
             text = "Es sind bereits \(hours) Stunden seit der letzten Mahlzeit vergangen. Für \(ctx.ageMonths) Monate ist das Intervall normalerweise bis zu \(maxHours) h — biete \(ctx.babyName) die Brust an."
+        case .french:
+            text = "Cela fait déjà \(hours) h depuis la dernière tétée. Pour \(ctx.ageMonths) mois, l’intervalle habituel va jusqu’à \(maxHours) h — si \(ctx.babyName) ne réclame pas, proposez-lui le sein."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }
@@ -45,6 +47,8 @@ enum AlertRules {
             text = "Solo \(ctx.diaperCount) pañales mojados hoy — para \(ctx.ageMonths) meses lo normal son 6–8 al día. Es señal de poca ingesta de líquido. Ofrece el pecho o la fórmula más a menudo."
         case .german:
             text = "Heute bisher nur \(ctx.diaperCount) Windeln — für \(ctx.ageMonths) Monate sind 6–8 pro Tag normal. Das ist ein Zeichen für zu wenig Trinken. Biete öfter Brust oder Fläschchen an."
+        case .french:
+            text = "Seulement \(ctx.diaperCount) couches mouillées aujourd’hui — pour \(ctx.ageMonths) mois, la norme est de 6 à 8 par jour. C’est le signe d’un apport en liquide insuffisant. Proposez le sein ou le biberon plus souvent."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }
@@ -63,6 +67,8 @@ enum AlertRules {
             text = "Sin deposiciones desde hace \(ctx.daysSinceLastStool) días. Prueba el ejercicio de la bicicleta: pon a \(ctx.babyName) bocarriba y mueve sus piernas suavemente hacia la tripita 10–15 veces."
         case .german:
             text = "Seit \(ctx.daysSinceLastStool) Tagen kein Stuhl. Versuche die Fahrrad-Übung: Lege \(ctx.babyName) auf den Rücken und beuge die Beinchen sanft zum Bauch, 10–15 Mal."
+        case .french:
+            text = "Pas de selles depuis \(ctx.daysSinceLastStool) jours. Essayez l’exercice du vélo : allongez \(ctx.babyName) sur le dos et ramenez doucement ses jambes vers le ventre 10 à 15 fois."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }
@@ -85,6 +91,8 @@ enum AlertRules {
             text = "\(ctx.babyName) solo ha dormido \(sleptH) h hoy — \(deficit) h menos de lo normal. Intenta acostarlo antes — sobre las 19:30–20:00."
         case .german:
             text = "\(ctx.babyName) hat heute nur \(sleptH) Std. geschlafen — \(deficit) Std. weniger als normal. Versuche, früher ins Bett zu gehen — gegen 19:30–20:00."
+        case .french:
+            text = "\(ctx.babyName) n’a dormi que \(sleptH) h aujourd’hui — soit \(deficit) h de moins que la norme. Essayez un coucher plus tôt — vers 19h30–20h00."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }
@@ -118,6 +126,8 @@ enum SituationalRules {
             text = "Mantén a \(ctx.babyName) erguido 10–15 min después de comer — ayuda a expulsar el aire y evita las regurgitaciones. Apóyalo en vertical sobre tu hombro y dale palmaditas suaves en la espalda."
         case .german:
             text = "Halte \(ctx.babyName) nach dem Stillen 10–15 Min. aufrecht — das hilft, die Luft herauszulassen und verhindert Spucken. Drücke das Baby senkrecht an deine Schulter und klopfe sanft auf den Rücken."
+        case .french:
+            text = "Tenez \(ctx.babyName) droit pendant 10 à 15 min après la tétée — cela aide à évacuer l’air et évite les régurgitations. Calez-le verticalement contre votre épaule et tapotez doucement son dos."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -139,6 +149,8 @@ enum SituationalRules {
                 text = "\(ctx.babyName) lleva \(awakeMins) min despierto — es hora de dormir. Atenta a bostezos, frotarse los ojos o mirada perdida — no pierdas la ventana de sueño."
             case .german:
                 text = "\(ctx.babyName) ist seit \(awakeMins) Min. wach — es ist Zeit zum Einschlafen. Achte auf Gähnen, Augenreiben oder einen leeren Blick — verpasse das Einschlafffenster nicht."
+            case .french:
+                text = "\(ctx.babyName) est éveillé depuis \(awakeMins) min — il est temps de le coucher. Guettez les bâillements, les yeux frottés ou le regard dans le vague — ne manquez pas la fenêtre de sommeil."
             }
         } else {
             switch ctx.language {
@@ -150,6 +162,8 @@ enum SituationalRules {
                 text = "La ventana de sueño ya pasó — \(ctx.babyName) lleva \(awakeMins) min despierto. El sobrecansancio dificulta el sueño. Atenúa las luces, recoge los juguetes y empieza ya la rutina de dormir."
             case .german:
                 text = "Das Einschlafffenster ist verpasst — \(ctx.babyName) ist seit \(awakeMins) Min. wach. Übermüdung erschwert das Einschlafen. Licht dämpfen, Spielzeug wegräumen, Routine jetzt beginnen."
+            case .french:
+                text = "La fenêtre de sommeil est passée — \(ctx.babyName) est éveillé depuis \(awakeMins) min. La surfatigue rend l’endormissement plus difficile. Tamisez la lumière, rangez les jouets et commencez le rituel du coucher maintenant."
             }
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
@@ -170,6 +184,8 @@ enum SituationalRules {
             text = "El baño de la tarde es un potente ritual de sueño. Temperatura del agua 36–37 °C, duración 5–10 min. Tras el baño, la piel se enfría y la melatonina se produce más rápido."
         case .german:
             text = "Das Abendbad ist ein starkes Einschlafritual. Wassertemperatur 36–37°C, Dauer 5–10 Min. Nach dem Bad kühlt die Haut ab und Melatonin wird schneller produziert."
+        case .french:
+            text = "Le bain du soir est un puissant rituel de sommeil. Température de l’eau 36–37 °C, durée 5 à 10 min. Après le bain, la peau se refroidit et la mélatonine est produite plus rapidement."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -191,6 +207,8 @@ enum SituationalRules {
             text = "La primera siesta de la mañana es la más importante para \(ctx.babyName). Para \(ctx.ageMonths) meses debería empezar unos \(awakeMax) min después de despertarse. Atenta a los primeros bostezos."
         case .german:
             text = "Der erste Morgenschlaf ist für \(ctx.babyName) der wichtigste. Mit \(ctx.ageMonths) Monaten sollte er etwa \(awakeMax) Min. nach dem Aufwachen beginnen. Achte auf die ersten Gähnzeichen."
+        case .french:
+            text = "La première sieste du matin est la plus importante pour \(ctx.babyName). À \(ctx.ageMonths) mois, elle devrait commencer environ \(awakeMax) min après le réveil. Guettez les premiers bâillements."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -217,6 +235,9 @@ enum SituationalRules {
         case .german:
             let other = isLeft ? "rechte" : "linke"
             text = "Die letzten 3 Stillmahlzeiten waren auf der gleichen Seite. Biete die \(other) Brust an — gleichmäßiges Stillen unterstützt die Laktation und verhindert Stauungen."
+        case .french:
+            let other = isLeft ? "droit" : "gauche"
+            text = "Les 3 dernières tétées étaient du même côté. Proposez le sein \(other) — un allaitement équilibré favorise la lactation et évite l’engorgement."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -236,6 +257,8 @@ enum SituationalRules {
             text = "Pasear al aire libre regula el ritmo circadiano de \(ctx.babyName). La luz del día reduce la melatonina y mejora el sueño nocturno. Incluso 20–30 minutos fuera marcan la diferencia."
         case .german:
             text = "Spaziergänge an der frischen Luft regulieren den Tagesrhythmus von \(ctx.babyName). Tageslicht unterdrückt Melatonin und verbessert den Nachtschlaf. Schon 20–30 Minuten draußen helfen."
+        case .french:
+            text = "Les promenades au grand air régulent le rythme circadien de \(ctx.babyName). La lumière du jour réduit la mélatonine et améliore le sommeil nocturne. Même 20 à 30 minutes dehors font la différence."
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -296,6 +319,13 @@ enum CareRules {
             "Pucken kann manchen Neugeborenen helfen, länger zu schlafen — Arme am Körper, Hüften frei, nicht zu fest.",
             "Hautkontakt 1–2 Stunden täglich stabilisiert die Temperatur, Atmung und den Herzrhythmus von [name]."
         ]
+        case .french: return [
+            "La plaie du cordon ombilical cicatrise en 10 à 14 jours. Nettoyez-la 1 à 2 fois par jour après le bain à la chlorhexidine et gardez-la sèche.",
+            "Les nouveau-nés reconnaissent la voix de maman dès la naissance — lui parler d’une voix calme crée des connexions neuronales.",
+            "Le temps sur le ventre 2 à 3 fois par jour pendant 1 à 2 min, seulement quand [name] est éveillé, renforce le cou et prépare au retournement.",
+            "L’emmaillotage aide certains nouveau-nés à dormir plus longtemps — bras le long du corps, hanches libres, pas trop serré.",
+            "Le contact peau à peau 1 à 2 heures par jour stabilise la température, la respiration et le rythme cardiaque de [name]."
+        ]
         }
     }
 
@@ -328,6 +358,13 @@ enum CareRules {
             "Der Saugreflex ist jetzt am stärksten. Ein Schnuller zwischen den Mahlzeiten unterstützt die Selbstberuhigung.",
             "Koliken erreichen häufig in der 6. Woche ihren Höhepunkt. Weißes Rauschen, Schaukeln und Bauchlage helfen gut.",
             "Schwarz-weiße Bücher und Karten sind das ideale Spielzeug für [name] — Kontrast regt die Sehrinde stark an."
+        ]
+        case .french: return [
+            "Les gaz sont normaux. Un massage doux du ventre dans le sens des aiguilles d’une montre et la position du tigre sur la branche (sur le ventre, sur le bras) aident.",
+            "Pour les selles, essayez l’exercice du vélo : pédalez doucement les jambes de [name] en l’air 10 à 15 fois.",
+            "Le réflexe de succion est à son maximum maintenant. Une tétine entre les tétées favorise l’auto-apaisement.",
+            "Les coliques atteignent souvent leur pic vers 6 semaines. Le bruit blanc, le bercement et la position sur le ventre fonctionnent bien.",
+            "Les livres et cartes en noir et blanc sont le jouet idéal pour [name] — le contraste stimule fortement le cortex visuel."
         ]
         }
     }
@@ -366,6 +403,14 @@ enum CareRules {
             "Rasseln und Greifspielzeug trainieren die Motorik. Wechsle die Hand beim Anbieten von Spielzeug — beide Seiten brauchen Übung.",
             "Zeige [name] sein Spiegelbild — in diesem Alter weckt das sofort Interesse und fördert die Konzentration."
         ]
+        case .french: return [
+            "Les cartes et livres en noir et blanc stimulent le cortex visuel. 10 à 15 minutes à regarder des images sont un excellent entraînement.",
+            "Un massage du corps entier de 5 à 10 min avant le bain améliore le sommeil de [name]. Allez du centre vers les membres.",
+            "Le temps sur le ventre jusqu’à 30 min par jour au total. Roulez une serviette sous la poitrine — cela facilite le maintien de la tête.",
+            "Les anneaux de dentition seront bientôt utiles — rafraîchissez-en un en silicone au réfrigérateur (pas au congélateur). Les premières dents apparaissent souvent à 4–7 mois.",
+            "Les hochets et jouets à saisir entraînent la motricité. Alternez la main avec laquelle vous tendez les jouets — les deux côtés ont besoin de pratique.",
+            "Montrez à [name] son reflet dans un miroir — à cet âge, cela éveille un intérêt immédiat et développe la concentration."
+        ]
         }
     }
 
@@ -398,6 +443,13 @@ enum CareRules {
             "Sprachentwicklung: kommentiere alles laut. Jetzt essen wir, nehmen den Löffel — der Wortschatz baut sich ab 6 Mon. auf.",
             "Der Pinzettengriff (Daumen + Zeigefinger) entwickelt sich mit 8–9 Mon. Biete kleine, weiche Bissen zum Üben an.",
             "Kuckuckspiele sind mehr als Spaß. Sie lehren [name] Objektpermanenz: Mama geht weg und kommt zurück."
+        ]
+        case .french: return [
+            "Introduisez la diversification progressivement : un nouvel aliment tous les 3 jours en petites portions. Les légumes avant les fruits sont un bon ordre de départ.",
+            "Encouragez le quatre pattes : placez un jouet juste hors de portée de [name]. Ramper développe les deux hémisphères simultanément.",
+            "Développement du langage : commentez tout ce que vous faites à voix haute. « On mange », « on prend la cuillère » — le vocabulaire se construit dès 6 mois.",
+            "La pince (pouce + index) se développe à 8–9 mois. Proposez de petits morceaux mous à manipuler pour s’entraîner.",
+            "Le jeu du coucou est bien plus qu’un jeu. Il apprend à [name] la permanence de l’objet : maman s’en va et revient."
         ]
         }
     }
@@ -432,6 +484,13 @@ enum CareRules {
             "Ein Schnabelbecher eignet sich jetzt gut. Ab 12 Mon. empfiehlt die WHO, bei normalem Gewicht auf Nachtmahlzeiten zu verzichten.",
             "Sortierer, Stapelbecher, Dosen mit Deckel — die besten Spielzeuge für [name]. Das Konzept innen/außen entwickelt sich gerade."
         ]
+        case .french: return [
+            "Les premiers pas commencent en marchant le long des meubles. Ne tenez pas toujours [name] par les mains — l’équilibre autonome a besoin de pratique.",
+            "Langage : la compréhension précède la production. À 9–10 mois, [name] comprend « non », « donne », « viens ». Parlez lentement et clairement.",
+            "Les réveils nocturnes à 9–10 mois sont une régression du sommeil normale liée aux nouvelles habiletés motrices. Cela passe en 2 à 4 semaines.",
+            "C’est un bon moment pour introduire le gobelet à bec. Vers 12 mois, l’OMS recommande d’arrêter les tétées nocturnes si le poids est normal.",
+            "Boîtes à formes, gobelets à empiler, boîtes à couvercle — les meilleurs jouets pour [name] en ce moment. La notion dedans/dehors se construit."
+        ]
         }
     }
 
@@ -461,6 +520,12 @@ enum CareRules {
             "Der Übergang zu einem Mittagsschlaf erfolgt meist mit 15–18 Mon. Nicht überstürzen — zu früher Übergang führt zu Überreizung.",
             "Malen mit Fingern und Kneten mit Teig entwickeln Feinmotorik und Sprache gleichzeitig. Zehn Minuten täglich genügen."
         ]
+        case .french: return [
+            "La crise de la première année est normale. Les colères viennent de la frustration, non de la manipulation. Une réponse parentale calme est la meilleure.",
+            "Vocabulaire : 1 à 3 mots à 12 mois, 10 à 50 mots à 18 mois. Moins de 10 mots à 18 mois : consultez un orthophoniste.",
+            "Le passage à une seule sieste se produit généralement à 15–18 mois. Ne le précipitez pas — une transition trop précoce mène à la surexcitation.",
+            "Peindre avec les doigts et modeler de la pâte développent la motricité fine et le langage en même temps. Dix minutes par jour suffisent."
+        ]
         }
     }
 
@@ -486,6 +551,11 @@ enum CareRules {
             "Zweiwortsätze bis zum 2. Geburtstag sind ein Sprachmeilenstein. Mama gib, will trinken sind gute Zeichen. Keine Sätze: Logopäden aufsuchen.",
             "Die Töpfchenbereitschaft zeigt sich mit 18–24 Mon. Zeichen: trockene Windel 2 Std. am Stück, [name] zeigt auf den Topf."
         ]
+        case .french: return [
+            "Le jeu en parallèle (à côté, mais pas ensemble) est normal à l’âge de [name]. Le jeu social avec les pairs vient plus tard, vers 3 ans.",
+            "Les phrases de deux mots vers 2 ans sont un jalon du langage. « Maman donne », « veux boire » sont de bons signes. Pas de phrases : consultez un orthophoniste.",
+            "Le signe de propreté apparaît à 18–24 mois. Indices : couche sèche 2 h d’affilée, [name] montre le pot."
+        ]
         }
     }
 }
@@ -506,6 +576,34 @@ enum DevelopmentRules {
         case .english, .portuguese:  return englishLeapTip(leapName: leapName, name: name)
         case .spanish:  return spanishLeapTip(leapName: leapName, name: name)
         case .german:   return germanLeapTip(leapName: leapName, name: name)
+        case .french:   return frenchLeapTip(leapName: leapName, name: name)
+        }
+    }
+
+    private static func frenchLeapTip(leapName: String, name: String) -> String {
+        switch leapName {
+        case _ where leapName.contains("Sense") || leapName.contains("ощущен") || leapName.contains("ressenti"):
+            return "Parlez d’une voix calme et évitez les bruits soudains — le système auditif de \(name) se calibre encore."
+        case _ where leapName.contains("Pattern") || leapName.contains("узор") || leapName.contains("motif"):
+            return "Montrez à \(name) des cartes géométriques en noir et blanc. Le cerveau cherche des motifs — le contraste stimule le cortex visuel avec le plus de force."
+        case _ where leapName.contains("Transition") || leapName.contains("движен") || leapName.contains("mouvement"):
+            return "Du temps sur le ventre chaque jour — \(name) s’exerce au contrôle de son corps. Roulez une couverture sous la poitrine pour le soutenir."
+        case _ where leapName.contains("Event") || leapName.contains("событ") || leapName.contains("événement"):
+            return "Pendant ce bond de cause à effet, les jouets à presser et à sonner sont les meilleurs. \(name) découvre : mes actions changent le monde."
+        case _ where leapName.contains("Relation") || leapName.contains("отношен"):
+            return "L’angoisse de séparation n’est pas un caprice maintenant — c’est normal. Le jeu du coucou aide \(name) à comprendre : maman s’en va et revient."
+        case _ where leapName.contains("Categor") || leapName.contains("категор") || leapName.contains("catégor"):
+            return "Les boîtes à formes et gobelets à empiler de tailles différentes sont des jouets idéaux. \(name) classe le monde : grand/petit, dedans/dehors."
+        case _ where leapName.contains("Sequence") || leapName.contains("последоват") || leapName.contains("séquence"):
+            return "Les rituels simples aident \(name) à anticiper ce qui vient. Une séquence constante avant le coucher réduit l’anxiété."
+        case _ where leapName.contains("Program") || leapName.contains("програм"):
+            return "Les premiers « non » et protestations sont un signe d’indépendance saine. Donnez à \(name) des choix simples : gobelet rouge ou bleu ?"
+        case _ where leapName.contains("Principle") || leapName.contains("принцип"):
+            return "« Pourquoi » et « non » sont les mots clés de cette étape. Expliquez avec des phrases courtes : c’est chaud — interdit, ça fait mal."
+        case _ where leapName.contains("System") || leapName.contains("систем"):
+            return "Le jeu de rôle s’épanouit maintenant. Une petite cuisine ou des outils-jouets — \(name) construit un modèle du monde."
+        default:
+            return "Un bond de développement est passager. Câlinez \(name) plus souvent et répondez à ses signaux — c’est le meilleur soutien."
         }
     }
 
@@ -650,6 +748,13 @@ enum DefaultTips {
             "Umarmungen und Körperkontakt senken den Cortisolspiegel. Das beste Medikament heute ist, [name] einfach auf dem Arm zu halten.",
             "Vorlesen von den ersten Tagen an — der Sprachrhythmus und Intonationen legen das Fundament für zukünftiges Lesen.",
             "[name]s Gefühle benennen: du bist traurig, du freust dich — emotionale Intelligenz beginnt in den ersten Lebensmonaten."
+        ]
+        case .french: return [
+            "Le contact visuel pendant la tétée renforce l’attachement et stimule le développement cérébral de [name].",
+            "Chanter des berceuses développe l’oreille musicale et les centres du langage. Le rythme et la mélodie comptent plus qu’une voix parfaite.",
+            "Les câlins et le contact font baisser le cortisol. Le meilleur remède aujourd’hui est simplement de tenir [name] dans vos bras.",
+            "Lisez à voix haute dès les premiers jours. Le rythme de la parole et l’intonation posent les bases de la future lecture.",
+            "Nommez les émotions de [name] : tu es contrarié, tu es content — l’intelligence émotionnelle commence dès les premiers mois de la vie."
         ]
         }
     }

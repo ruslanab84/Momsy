@@ -55,10 +55,11 @@ struct VaccinationScheduleItemTests {
     @Test("name(for:) returns the localized value, falling back to English")
     func nameLookup() {
         let item = VaccinationScheduleItem(
-            id: 1, en: "BCG", ru: "БЦЖ", de: "BCG", es: "BCG", timing: .atBirth
+            id: 1, en: "BCG", ru: "БЦЖ", de: "BCG", es: "BCG", fr: "BCG", timing: .atBirth
         )
         #expect(item.name(for: .russian) == "БЦЖ")
         #expect(item.name(for: .english) == "BCG")
+        #expect(item.name(for: .french) == "BCG")
         // Portuguese isn't in the dictionary → English fallback.
         #expect(item.name(for: .portuguese) == "BCG")
     }

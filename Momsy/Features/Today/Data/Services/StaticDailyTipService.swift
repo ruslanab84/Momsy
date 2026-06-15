@@ -18,6 +18,7 @@ final class StaticDailyTipService: DailyTipService {
         case .russian:  return russianTips
         case .english, .spanish, .portuguese:  return englishTips
         case .german:   return germanTips
+        case .french:   return frenchTips
         }
     }
 
@@ -58,5 +59,18 @@ final class StaticDailyTipService: DailyTipService {
         "Vergessen Sie nicht, sich auszuruhen — ein ausgeruhter Elternteil ist ein ruhigerer und aufmerksamerer Elternteil.",
         "Achten Sie auf Müdigkeitssignale: Gähnen und Augenreiben bedeuten, dass es Zeit für die Schlafroutine ist.",
         "Kontrastreiche Gegenstände in 20–30 cm Entfernung regen in den ersten Monaten das Sehvermögen hervorragend an.",
+    ]
+
+    private static let frenchTips: [String] = [
+        "Un doux massage des jambes avant le coucher aide votre bébé à se détendre et à s’endormir plus facilement.",
+        "Même une promenade de 20 minutes en plein air améliore le sommeil et renforce le système immunitaire de votre bébé.",
+        "Parlez à votre bébé pendant le change — votre voix est le meilleur stimulant pour le développement du langage.",
+        "Tenez votre bébé droit pendant 10 à 15 minutes après la tétée pour soulager l’inconfort lié aux gaz.",
+        "Une musique douce ou un bruit blanc aide à instaurer un rituel d’endormissement régulier dès les premières semaines.",
+        "Faites confiance à votre instinct — vous êtes la meilleure experte de votre propre bébé.",
+        "C’est le moment idéal pour les jeux de contact : les câlins et le peau à peau renforcent votre lien.",
+        "Pensez à vous reposer quand vous le pouvez — un parent reposé est plus calme et plus attentif.",
+        "Repérez les signes de fatigue : bâillements et frottement des yeux signifient qu’il est temps de commencer le rituel du coucher.",
+        "Les objets très contrastés à 20–30 cm de distance stimulent excellemment la vision durant les premiers mois.",
     ]
 }

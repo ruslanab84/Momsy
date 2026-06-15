@@ -15,11 +15,6 @@ struct SettingsView: View {
 
     @State private var showDeleteConfirm = false
 
-#if DEBUG
-    @State private var iconShareItems: [Any] = []
-    @State private var showIconShare = false
-#endif
-
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
@@ -29,9 +24,6 @@ struct SettingsView: View {
                 vaccinationScheduleSection
                 aboutSection
                 dangerSection
-#if DEBUG
-                debugSection
-#endif
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -183,18 +175,16 @@ struct SettingsView: View {
 
             HStack(spacing: 14) {
                 iconSquare(systemName: "globe", bg: .bbMint)
-                Text(lm.strings.appLanguage)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInk)
-                Spacer()
                 Picker("", selection: $vm.appLanguage) {
                     Text("🇬🇧 English").tag("en")
                     Text("🇷🇺 Русский").tag("ru")
                     Text("🇩🇪 Deutsch").tag("de")
                     Text("🇪🇸 Español").tag("es")
+                    Text("🇫🇷 Français").tag("fr")
                 }
                 .pickerStyle(.menu)
                 .tint(.bbCoralDeep)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -217,10 +207,6 @@ struct SettingsView: View {
 
             HStack(spacing: 14) {
                 iconSquare(systemName: "syringe.fill", bg: .bbLilac)
-                Text(lm.strings.vaccinationCalendar)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInk)
-                Spacer()
                 Picker("", selection: $vm.vaccinationScheduleKey) {
                     ForEach(vm.availableScheduleKeys) { key in
                         Text(key.displayName).tag(key.rawValue)
@@ -228,6 +214,7 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.menu)
                 .tint(.bbCoralDeep)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -251,8 +238,6 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 infoRow(icon: "info.circle.fill",  bg: .bbSky,    title: lm.strings.version,       value: "1.0.0 (1)")
                 Divider().opacity(0.2).padding(.leading, 60)
-                infoRow(icon: "heart.fill",        bg: .bbRose,   title: lm.strings.madeWithLove,  value: lm.strings.forMoms)
-                Divider().opacity(0.2).padding(.leading, 60)
                 Button(action: openPrivacyPolicy) {
                     chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: lm.strings.privacy)
                 }
@@ -263,8 +248,6 @@ struct SettingsView: View {
             .background(Color.bbCard)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .bbShadow()
-
-            icloudSyncDisclosure
         }
     }
 
@@ -301,21 +284,6 @@ struct SettingsView: View {
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)
         }
-    }
-
-    private var icloudSyncDisclosure: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Label(lm.strings.icloudSyncTitle, systemImage: "lock.shield.fill")
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(.bbInk)
-            Text(lm.strings.icloudSyncDisclosure)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundColor(.bbInkMute)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
     }
 
     private func openPrivacyPolicy() {
@@ -363,55 +331,6 @@ struct SettingsView: View {
                     .foregroundColor(.white)
             )
     }
-
-#if DEBUG
-    // MARK: - Debug
-
-    private var debugSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            BBSectionLabel(text: "Debug")
-
-            Button {
-                exportAppIcon()
-            } label: {
-                HStack(spacing: 14) {
-                    iconSquare(systemName: "square.and.arrow.up", bg: .bbCoral)
-                    Text("Export App Icon PNG")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(.bbInk)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.bbInkMute)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-            }
-            .buttonStyle(.plain)
-            .background(Color.bbCard)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .bbShadow()
-            .sheet(isPresented: $showIconShare) {
-                ActivityView(items: iconShareItems)
-            }
-
-            Text("Renders AppIconView at 1024×1024 — share to Mac and drop into AppIcon.appiconset.")
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundColor(.bbInkMute)
-                .padding(.horizontal, 2)
-        }
-    }
-
-    @MainActor
-    private func exportAppIcon() {
-        let renderer = ImageRenderer(content: AppIconView())
-        renderer.scale = 1.0
-        renderer.proposedSize = .init(width: 1024, height: 1024)
-        guard let uiImage = renderer.uiImage else { return }
-        iconShareItems = [uiImage]
-        showIconShare = true
-    }
-#endif
 }
 
 #Preview {
