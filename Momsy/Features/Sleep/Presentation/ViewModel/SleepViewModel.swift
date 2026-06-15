@@ -17,18 +17,25 @@ final class SleepViewModel: ObservableObject {
     private var lm: LocalizationManager { .shared }
 
     private let liveActivity = SleepLiveActivityManager()
+    /// Longest plausible single sleep; anything beyond this is treated as a corrupt
+    /// recovered end and the orphan is discarded instead of closed.
+    private static let maxPlausibleSleep: TimeInterval = 24 * 3600
+
     private let startSleepUC: StartSleepUseCase
     private let stopSleepUC: StopSleepUseCase
     private let getSleepUC: GetSleepEntriesUseCase
     private let addManualSleepUC: AddManualSleepUseCase
+    private let reconcileStaleSleepUC: ReconcileStaleSleepUseCase
     private let appState: AppState
 
     init(startSleep: StartSleepUseCase, stopSleep: StopSleepUseCase,
-         getSleep: GetSleepEntriesUseCase, addManualSleep: AddManualSleepUseCase, appState: AppState) {
+         getSleep: GetSleepEntriesUseCase, addManualSleep: AddManualSleepUseCase,
+         reconcileStaleSleep: ReconcileStaleSleepUseCase, appState: AppState) {
         self.startSleepUC = startSleep
         self.stopSleepUC = stopSleep
         self.getSleepUC = getSleep
         self.addManualSleepUC = addManualSleep
+        self.reconcileStaleSleepUC = reconcileStaleSleep
         self.appState = appState
         Task {
             await loadTodayEntries()
@@ -39,8 +46,10 @@ final class SleepViewModel: ObservableObject {
                     liveActivity.reattachIfNeeded()
                     activateTimer(entry: open)
                 } else {
-                    // Stale open entry — clean it up silently
-                    Task { try? await stopSleepUC.execute(open) }
+                    // Orphaned open entry: recover its real end (or discard) — never
+                    // stamp `now`, which would record a phantom multi-hour/day sleep.
+                    await self.reconcileStaleSleep(open)
+                    await loadTodayEntries()
                 }
             }
             await loadChartData()
@@ -207,6 +216,20 @@ final class SleepViewModel: ObservableObject {
         let end = cal.date(byAdding: .day, value: 1, to: start) ?? Date()
         if let entries = try? await getSleepUC.execute(from: start, to: end) {
             todayEntries = entries.sorted { $0.startDate < $1.startDate }
+        }
+    }
+
+    /// Closes an orphaned open sleep at the end time the widget recorded when `stop()`
+    /// ran, or discards it when that end is unknown / implausible.
+    private func reconcileStaleSleep(_ entry: SleepEntry) async {
+        let resolution = StaleSessionReconciler.resolve(
+            start: entry.startDate,
+            recoveredEnd: WidgetDataStore.shared.lastSleepEndDate,
+            maxDuration: Self.maxPlausibleSleep
+        )
+        switch resolution {
+        case .close(let end): try? await reconcileStaleSleepUC.execute(entry, end: end)
+        case .discard:        try? await reconcileStaleSleepUC.execute(entry, end: nil)
         }
     }
 

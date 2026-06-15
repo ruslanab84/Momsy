@@ -45,4 +45,15 @@ final class SwiftDataBathRepository: BathRepository {
         }
         if inserted { try context.save() }
     }
+
+    func resolveOrphan(id: UUID, endDate: Date?) async throws {
+        let all = try context.fetch(FetchDescriptor<BathRecord>())
+        guard let record = all.first(where: { $0.id == id }) else { return }
+        if let endDate {
+            record.endDate = endDate
+        } else {
+            context.delete(record)
+        }
+        try context.save()
+    }
 }

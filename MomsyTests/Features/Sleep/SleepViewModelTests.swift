@@ -14,6 +14,7 @@ struct SleepViewModelTests {
             stopSleep: StopSleepUseCase(repository: repo),
             getSleep: GetSleepEntriesUseCase(repository: repo),
             addManualSleep: AddManualSleepUseCase(repository: repo),
+            reconcileStaleSleep: ReconcileStaleSleepUseCase(repository: repo),
             appState: appState
         )
     }
@@ -185,6 +186,7 @@ struct SleepViewModelTests {
             stopSleep: StopSleepUseCase(repository: MockSleepRepository()),
             getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
             addManualSleep: AddManualSleepUseCase(repository: MockSleepRepository()),
+            reconcileStaleSleep: ReconcileStaleSleepUseCase(repository: MockSleepRepository()),
             appState: appState
         )
         #expect(vm.sleepNorm.min == 14)
@@ -201,9 +203,107 @@ struct SleepViewModelTests {
             stopSleep: StopSleepUseCase(repository: MockSleepRepository()),
             getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
             addManualSleep: AddManualSleepUseCase(repository: MockSleepRepository()),
+            reconcileStaleSleep: ReconcileStaleSleepUseCase(repository: MockSleepRepository()),
             appState: appState
         )
         #expect(vm.sleepNorm.min == 12)
         #expect(vm.sleepNorm.max == 14)
+    }
+}
+
+// MARK: - Stale open-session recovery (bug #1 — phantom multi-hour sessions)
+
+@Suite("StaleSessionReconciler")
+struct StaleSessionReconcilerTests {
+
+    private let start = Date(timeIntervalSinceReferenceDate: 1_000_000)
+
+    @Test("discards when no recovered end is known")
+    func discardsWhenNil() {
+        let r = StaleSessionReconciler.resolve(
+            start: start, recoveredEnd: nil, maxDuration: 24 * 3600, now: start.addingTimeInterval(3600)
+        )
+        #expect(r == .discard)
+    }
+
+    @Test("discards when recovered end is before start")
+    func discardsWhenBeforeStart() {
+        let r = StaleSessionReconciler.resolve(
+            start: start, recoveredEnd: start.addingTimeInterval(-60),
+            maxDuration: 24 * 3600, now: start.addingTimeInterval(3600)
+        )
+        #expect(r == .discard)
+    }
+
+    @Test("discards when recovered end equals start (zero-length)")
+    func discardsWhenEqualsStart() {
+        let r = StaleSessionReconciler.resolve(
+            start: start, recoveredEnd: start, maxDuration: 24 * 3600, now: start.addingTimeInterval(3600)
+        )
+        #expect(r == .discard)
+    }
+
+    @Test("discards when recovered end is in the future")
+    func discardsWhenFuture() {
+        let now = start.addingTimeInterval(1800)
+        let r = StaleSessionReconciler.resolve(
+            start: start, recoveredEnd: now.addingTimeInterval(60), maxDuration: 24 * 3600, now: now
+        )
+        #expect(r == .discard)
+    }
+
+    @Test("discards when duration exceeds the plausible cap")
+    func discardsWhenTooLong() {
+        let end = start.addingTimeInterval(25 * 3600) // 25h > 24h cap
+        let r = StaleSessionReconciler.resolve(
+            start: start, recoveredEnd: end, maxDuration: 24 * 3600, now: end.addingTimeInterval(60)
+        )
+        #expect(r == .discard)
+    }
+
+    @Test("closes at the recovered end for a plausible session")
+    func closesWhenValid() {
+        let end = start.addingTimeInterval(2 * 3600) // 2h nap
+        let r = StaleSessionReconciler.resolve(
+            start: start, recoveredEnd: end, maxDuration: 24 * 3600, now: end.addingTimeInterval(86_400)
+        )
+        #expect(r == .close(at: end))
+    }
+
+    @Test("closes at exactly the cap boundary")
+    func closesAtCapBoundary() {
+        let end = start.addingTimeInterval(24 * 3600) // == cap
+        let r = StaleSessionReconciler.resolve(
+            start: start, recoveredEnd: end, maxDuration: 24 * 3600, now: end.addingTimeInterval(1)
+        )
+        #expect(r == .close(at: end))
+    }
+}
+
+@Suite("ReconcileStaleSleepUseCase")
+struct ReconcileStaleSleepUseCaseTests {
+
+    @Test("closes the orphan at the recovered end")
+    func closesOrphan() async throws {
+        let repo = MockSleepRepository()
+        let start = Date(timeIntervalSinceReferenceDate: 1_000_000)
+        repo.entries = [SleepEntry(id: UUID(), startDate: start, endDate: nil)]
+        let end = start.addingTimeInterval(3600)
+
+        try await ReconcileStaleSleepUseCase(repository: repo).execute(repo.entries[0], end: end)
+
+        #expect(repo.entries.count == 1)
+        #expect(repo.entries.first?.endDate == end)
+        #expect(repo.entries.first?.durationMinutes == 60)
+    }
+
+    @Test("deletes the orphan when no end is recoverable")
+    func deletesOrphan() async throws {
+        let repo = MockSleepRepository()
+        repo.entries = [SleepEntry(id: UUID(), startDate: Date(), endDate: nil)]
+
+        try await ReconcileStaleSleepUseCase(repository: repo).execute(repo.entries[0], end: nil)
+
+        #expect(repo.entries.isEmpty)
     }
 }

@@ -44,6 +44,17 @@ final class LocalWalkRepository: WalkRepository {
         if changed { persist(all) }
     }
 
+    func resolveOrphan(id: UUID, endDate: Date?) async throws {
+        var all = load()
+        guard let idx = all.firstIndex(where: { $0.id == id }) else { return }
+        if let endDate {
+            all[idx].endDate = endDate
+        } else {
+            all.remove(at: idx)
+        }
+        persist(all)
+    }
+
     private func load() -> [WalkEntry] {
         guard let data = UserDefaults.standard.data(forKey: key),
               let entries = try? JSONDecoder().decode([WalkEntry].self, from: data)

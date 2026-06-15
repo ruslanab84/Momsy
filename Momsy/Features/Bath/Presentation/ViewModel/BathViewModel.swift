@@ -29,11 +29,33 @@ final class BathViewModel: ObservableObject {
                     liveActivity.reattachIfNeeded()
                     activateTimer(entry: open)
                 } else {
-                    // Stale open entry — async stop() didn't complete before kill
-                    Task { try? await bathRepository.stop(open) }
+                    // Orphaned open entry: recover its real end (or discard) — never
+                    // stamp `now`, which would record a phantom multi-hour/day bath.
+                    await reconcileStaleBath(open)
+                    await loadTodayEntries()
                 }
             }
         }
+    }
+
+    /// Longest plausible single bath; beyond this the recovered end is untrusted.
+    private static let maxPlausibleBath: TimeInterval = 6 * 3600
+
+    /// Closes an orphaned open bath at the end derived from the widget's last recorded
+    /// duration, or discards it when that is unknown / implausible.
+    private func reconcileStaleBath(_ entry: BathEntry) async {
+        var recoveredEnd: Date?
+        if case .idle(let secs) = WidgetDataStore.shared.bathState, let secs, secs > 0 {
+            recoveredEnd = entry.startDate.addingTimeInterval(TimeInterval(secs))
+        }
+        let end: Date?
+        switch StaleSessionReconciler.resolve(
+            start: entry.startDate, recoveredEnd: recoveredEnd, maxDuration: Self.maxPlausibleBath
+        ) {
+        case .close(let at): end = at
+        case .discard:       end = nil
+        }
+        try? await bathRepository.resolveOrphan(id: entry.id, endDate: end)
     }
 
     var bathTimerString: String {

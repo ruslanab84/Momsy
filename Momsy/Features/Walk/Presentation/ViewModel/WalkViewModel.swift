@@ -29,11 +29,33 @@ final class WalkViewModel: ObservableObject {
                     liveActivity.reattachIfNeeded()
                     activateTimer(entry: open)
                 } else {
-                    // Stale open entry — async stop() didn't complete before kill
-                    Task { try? await walkRepository.stop(open) }
+                    // Orphaned open entry: recover its real end (or discard) — never
+                    // stamp `now`, which would record a phantom multi-hour/day walk.
+                    await reconcileStaleWalk(open)
+                    await loadTodayEntries()
                 }
             }
         }
+    }
+
+    /// Longest plausible single walk; beyond this the recovered end is untrusted.
+    private static let maxPlausibleWalk: TimeInterval = 12 * 3600
+
+    /// Closes an orphaned open walk at the end derived from the widget's last recorded
+    /// duration, or discards it when that is unknown / implausible.
+    private func reconcileStaleWalk(_ entry: WalkEntry) async {
+        var recoveredEnd: Date?
+        if case .idle(let secs) = WidgetDataStore.shared.walkState, let secs, secs > 0 {
+            recoveredEnd = entry.startDate.addingTimeInterval(TimeInterval(secs))
+        }
+        let end: Date?
+        switch StaleSessionReconciler.resolve(
+            start: entry.startDate, recoveredEnd: recoveredEnd, maxDuration: Self.maxPlausibleWalk
+        ) {
+        case .close(let at): end = at
+        case .discard:       end = nil
+        }
+        try? await walkRepository.resolveOrphan(id: entry.id, endDate: end)
     }
 
     var walkTimerString: String {
