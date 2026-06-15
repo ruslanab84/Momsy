@@ -16,9 +16,10 @@ final class StaticDailyTipService: DailyTipService {
     private static func tips(for language: Language) -> [String] {
         switch language {
         case .russian:  return russianTips
-        case .english, .spanish, .portuguese:  return englishTips
+        case .english, .spanish:  return englishTips
         case .german:   return germanTips
         case .french:   return frenchTips
+        case .portuguese: return portugueseTips
         }
     }
 
@@ -72,5 +73,18 @@ final class StaticDailyTipService: DailyTipService {
         "Pensez à vous reposer quand vous le pouvez — un parent reposé est plus calme et plus attentif.",
         "Repérez les signes de fatigue : bâillements et frottement des yeux signifient qu’il est temps de commencer le rituel du coucher.",
         "Les objets très contrastés à 20–30 cm de distance stimulent excellemment la vision durant les premiers mois.",
+    ]
+
+    private static let portugueseTips: [String] = [
+        "Uma massagem suave nas perninhas antes de dormir ajuda o seu bebé a relaxar e a adormecer mais facilmente.",
+        "Mesmo um passeio de 20 minutos ao ar livre melhora a qualidade do sono e reforça o sistema imunitário do seu bebé.",
+        "Fale com o seu bebé durante a muda da fralda — a sua voz é o melhor estímulo para o desenvolvimento da linguagem.",
+        "Mantenha o seu bebé na vertical durante 10–15 minutos após a mamada para aliviar o desconforto dos gases.",
+        "Música suave ou ruído branco ajudam a criar um ritual de sono constante desde as primeiras semanas.",
+        "Confie no seu instinto — é a melhor especialista no seu próprio bebé.",
+        "Agora é uma ótima altura para brincadeiras de toque: festinhas e o contacto pele com pele fortalecem a vossa ligação.",
+        "Não se esqueça de descansar quando puder — uma mãe descansada é mais calma e mais atenta.",
+        "Esteja atenta aos sinais de cansaço: bocejos e esfregar dos olhos indicam que é hora de começar o ritual do sono.",
+        "Objetos de alto contraste a 20–30 cm de distância são excelentes para estimular a visão nos primeiros meses.",
     ]
 }

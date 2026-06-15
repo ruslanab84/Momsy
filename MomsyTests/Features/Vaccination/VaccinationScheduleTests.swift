@@ -37,8 +37,9 @@ struct VaccinationTimingTests {
         #expect(VaccinationTiming.months(1).label(.spanish) == "1 mes")
         #expect(VaccinationTiming.months(9).label(.spanish) == "9 meses")
         #expect(VaccinationTiming.additional.label(.german) == "Weitere")
-        // Portuguese falls back to English.
-        #expect(VaccinationTiming.months(9).label(.portuguese) == "9 months")
+        #expect(VaccinationTiming.months(9).label(.portuguese) == "9 meses")
+        #expect(VaccinationTiming.months(1).label(.portuguese) == "1 mês")
+        #expect(VaccinationTiming.atBirth.label(.portuguese) == "Nascimento")
     }
 
     @Test("Russian plural forms")
@@ -55,13 +56,12 @@ struct VaccinationScheduleItemTests {
     @Test("name(for:) returns the localized value, falling back to English")
     func nameLookup() {
         let item = VaccinationScheduleItem(
-            id: 1, en: "BCG", ru: "БЦЖ", de: "BCG", es: "BCG", fr: "BCG", timing: .atBirth
+            id: 1, en: "BCG", ru: "БЦЖ", de: "BCG", es: "BCG", fr: "BCG", pt: "BCG (tuberculose)", timing: .atBirth
         )
         #expect(item.name(for: .russian) == "БЦЖ")
         #expect(item.name(for: .english) == "BCG")
         #expect(item.name(for: .french) == "BCG")
-        // Portuguese isn't in the dictionary → English fallback.
-        #expect(item.name(for: .portuguese) == "BCG")
+        #expect(item.name(for: .portuguese) == "BCG (tuberculose)")
     }
 
     @Test("name(for:) of a custom synthetic item falls back to English for any language")

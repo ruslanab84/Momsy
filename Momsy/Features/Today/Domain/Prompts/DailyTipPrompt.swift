@@ -6,12 +6,19 @@ enum DailyTipPrompt {
 
     static func system(for language: Language) -> String {
         switch language {
-        case .english, .spanish, .portuguese:
+        case .english, .spanish:
             return """
             You are a warm and caring assistant for mothers. ONLY answer questions about baby care.
             Response: 1–2 sentences, warm tone, no medical diagnoses, in English.
             Do not mention that you are AI. No bullet points, headings, or lists.
             Use the baby's name if provided.
+            """
+        case .portuguese:
+            return """
+            És uma assistente meiga e carinhosa para mães. Responde APENAS a temas de cuidados com o bebé.
+            Resposta: 1–2 frases, tom caloroso, sem diagnósticos médicos, em português.
+            Não menciones que és uma IA. Sem tópicos, títulos ou listas.
+            Usa o nome do bebé, se for indicado.
             """
         case .russian:
             return """
@@ -39,10 +46,11 @@ enum DailyTipPrompt {
 
     static func user(ctx: DailyContext) -> String {
         switch ctx.language {
-        case .english, .spanish, .portuguese: return buildEN(ctx: ctx)
+        case .english, .spanish: return buildEN(ctx: ctx)
         case .russian: return buildRU(ctx: ctx)
         case .german:  return buildDE(ctx: ctx)
         case .french:  return buildFR(ctx: ctx)
+        case .portuguese: return buildPT(ctx: ctx)
         }
     }
 
@@ -141,6 +149,30 @@ enum DailyTipPrompt {
         lines.append("- Couches : \(ctx.diaperCount)")
         lines.append("")
         lines.append("Donne un conseil pratique pour maintenant. Maximum 2 phrases.")
+        return lines.joined(separator: "\n")
+    }
+
+    private static func buildPT(ctx: DailyContext) -> String {
+        var lines: [String] = ["Bebé: \(ctx.babyName), \(ctx.ageMonths) meses \(ctx.ageDays) dias."]
+        if let leap = ctx.currentLeapName { lines.append("Salto de desenvolvimento: \(leap).") }
+        lines.append("Período do dia: \(ctx.timeOfDay.displayName(for: .portuguese)).")
+        lines.append("")
+        lines.append("Hoje:")
+        var feedLine = "- Mamadas: \(ctx.feedingCount)"
+        if ctx.totalFeedingMinutes > 0 { feedLine += ", total \(ctx.totalFeedingMinutes) min" }
+        if let m = ctx.minutesSinceLastFeed { feedLine += ", última há \(m) min" }
+        lines.append(feedLine)
+        if let side = ctx.lastFeedSide, !side.isEmpty { lines.append("  Lado: \(side)") }
+        var sleepLine = "- Sono: \(ctx.sleepCount) vezes"
+        if ctx.totalSleepMinutes > 0 {
+            let h = ctx.totalSleepMinutes / 60
+            let m = ctx.totalSleepMinutes % 60
+            sleepLine += ", total \(h > 0 ? "\(h)h " : "")\(m > 0 ? "\(m)min" : "")".trimmingCharacters(in: .whitespaces)
+        }
+        lines.append(sleepLine)
+        lines.append("- Fraldas: \(ctx.diaperCount)")
+        lines.append("")
+        lines.append("Dá um conselho prático para agora. No máximo 2 frases.")
         return lines.joined(separator: "\n")
     }
 }

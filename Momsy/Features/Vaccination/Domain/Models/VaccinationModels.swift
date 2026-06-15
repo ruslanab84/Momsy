@@ -36,6 +36,7 @@ enum VaccinationTiming: Hashable {
             case .german:  return "Geburt"
             case .spanish: return "Nacimiento"
             case .french:  return "Naissance"
+            case .portuguese: return "Nascimento"
             default:       return "Birth"
             }
         case .weeks(let w):
@@ -44,6 +45,7 @@ enum VaccinationTiming: Hashable {
             case .german:  return w == 1 ? "1 Woche"  : "\(w) Wochen"
             case .spanish: return w == 1 ? "1 semana" : "\(w) semanas"
             case .french:  return w == 1 ? "1 semaine": "\(w) semaines"
+            case .portuguese: return w == 1 ? "1 semana" : "\(w) semanas"
             default:       return w == 1 ? "1 week"   : "\(w) weeks"
             }
         case .months(let m):
@@ -52,6 +54,7 @@ enum VaccinationTiming: Hashable {
             case .german:  return m == 1 ? "1 Monat" : "\(m) Monate"
             case .spanish: return m == 1 ? "1 mes"   : "\(m) meses"
             case .french:  return m == 1 ? "1 mois"  : "\(m) mois"
+            case .portuguese: return m == 1 ? "1 mês" : "\(m) meses"
             default:       return m == 1 ? "1 month" : "\(m) months"
             }
         case .additional:
@@ -60,6 +63,7 @@ enum VaccinationTiming: Hashable {
             case .german:  return "Weitere"
             case .spanish: return "Adicionales"
             case .french:  return "Supplémentaires"
+            case .portuguese: return "Adicionais"
             default:       return "Additional"
             }
         }
@@ -91,12 +95,11 @@ struct VaccinationScheduleItem: Identifiable {
 
 extension VaccinationScheduleItem {
     /// Convenience initializer for authoring schedule data files compactly.
-    /// Portuguese falls back to English via `name(for:)`.
-    init(id: Int, en: String, ru: String, de: String, es: String, fr: String,
+    init(id: Int, en: String, ru: String, de: String, es: String, fr: String, pt: String,
          timing: VaccinationTiming, isOptional: Bool = false) {
         self.init(
             id: id,
-            names: [.english: en, .russian: ru, .german: de, .spanish: es, .french: fr],
+            names: [.english: en, .russian: ru, .german: de, .spanish: es, .french: fr, .portuguese: pt],
             timing: timing,
             isOptional: isOptional
         )

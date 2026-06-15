@@ -181,6 +181,7 @@ struct SettingsView: View {
                     Text("🇩🇪 Deutsch").tag("de")
                     Text("🇪🇸 Español").tag("es")
                     Text("🇫🇷 Français").tag("fr")
+                    Text("🇵🇹 Português").tag("pt")
                 }
                 .pickerStyle(.menu)
                 .tint(.bbCoralDeep)

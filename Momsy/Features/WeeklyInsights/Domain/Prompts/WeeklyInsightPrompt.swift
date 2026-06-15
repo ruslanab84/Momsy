@@ -9,13 +9,21 @@ enum WeeklyInsightPrompt {
 
     static func system(for language: Language) -> String {
         switch language {
-        case .english, .spanish, .portuguese:
+        case .english, .spanish:
             return """
             You are a warm, caring pediatric assistant for mothers. Analyze a baby's weekly stats.
             Compare to WHO age norms. Be encouraging, never give medical diagnoses, and NEVER recommend
             re-introducing a food that is flagged as an allergen or caused a reaction.
             Reply ONLY with a JSON object with exactly these keys: \(jsonKeys).
             Each value is 1–2 warm sentences in English. No markdown, no extra keys, no text outside the JSON.
+            """
+        case .portuguese:
+            return """
+            És uma assistente pediátrica meiga e carinhosa para mães. Analisa as estatísticas semanais de um bebé.
+            Compara com as normas da OMS para a idade. Sê encorajadora, nunca dês diagnósticos médicos e NUNCA recomendes
+            reintroduzir um alimento assinalado como alergénio ou que tenha causado uma reação.
+            Responde APENAS com um objeto JSON com exatamente estas chaves: \(jsonKeys).
+            Cada valor são 1–2 frases calorosas em português. Sem markdown, sem chaves extra, sem texto fora do JSON.
             """
         case .russian:
             return """
@@ -46,16 +54,17 @@ enum WeeklyInsightPrompt {
 
     static func user(ctx: WeeklyInsightContext) -> String {
         switch ctx.language {
-        case .english, .spanish, .portuguese: return build(ctx: ctx, l: .en)
+        case .english, .spanish: return build(ctx: ctx, l: .en)
         case .russian: return build(ctx: ctx, l: .ru)
         case .german:  return build(ctx: ctx, l: .de)
         case .french:  return build(ctx: ctx, l: .fr)
+        case .portuguese: return build(ctx: ctx, l: .pt)
         }
     }
 
     // MARK: - Builder
 
-    private enum Loc { case en, ru, de, fr }
+    private enum Loc { case en, ru, de, fr, pt }
 
     private static func build(ctx: WeeklyInsightContext, l: Loc) -> String {
         let s = ctx.stats
@@ -104,6 +113,14 @@ enum WeeklyInsightPrompt {
             lines.append("Tétées cette semaine : \(feeds)/jour, \(s.totalFeedings) au total. Changes de couche : \(s.totalDiapers).")
             lines.append("Nouveaux aliments introduits : \(foods). Allergène/réaction signalé : \(allergens).")
             lines.append("Renvoie un JSON {\(jsonKeys)} comparant aux normes de l’OMS, avec une recommandation pratique pour chaque champ.")
+        case .pt:
+            lines.append("Idade do bebé: \(s.ageMonths) meses (\(s.ageWeeks) semanas).")
+            if let leap { lines.append("Salto de desenvolvimento: \(leap).") }
+            lines.append("OMS: objetivo de sono total ≥ \(whoH)/dia; janela máxima de vigília ~\(s.whoAwakeWindowMax) min.")
+            lines.append("Sono esta semana: média \(sleepH)/dia (noite \(nightH), dia \(dayH), \(naps) sestas/dia), \(trend).")
+            lines.append("Mamadas esta semana: \(feeds)/dia, \(s.totalFeedings) no total. Mudas de fralda: \(s.totalDiapers).")
+            lines.append("Alimentos novos introduzidos: \(foods). Alergénio/reação assinalado: \(allergens).")
+            lines.append("Devolve um JSON {\(jsonKeys)} comparando com as normas da OMS, com uma recomendação prática em cada campo.")
         }
         return lines.joined(separator: "\n")
     }
@@ -131,6 +148,9 @@ enum WeeklyInsightPrompt {
         case .fr:
             if absMin < 10 { return "à peu près comme la semaine dernière" }
             return delta > 0 ? "+\(absMin) min/jour vs. semaine dernière" : "-\(absMin) min/jour vs. semaine dernière"
+        case .pt:
+            if absMin < 10 { return "praticamente igual à semana passada" }
+            return delta > 0 ? "+\(absMin) min/dia vs. semana passada" : "-\(absMin) min/dia vs. semana passada"
         }
     }
 }

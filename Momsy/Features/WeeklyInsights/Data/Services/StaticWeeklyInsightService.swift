@@ -10,6 +10,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
         case .russian: return ru(s)
         case .german:  return de(s)
         case .french:  return fr(s)
+        case .portuguese: return pt(s)
         default:       return en(s)
         }
     }
@@ -109,6 +110,27 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             feedingSummary: "Environ \(feeds) tétées par jour. Nouveaux aliments cette semaine : \(foods).",
             feedingRecommendation: feedingRec,
             overallSummary: "Une semaine régulière — \(hEn(s.avgSleepMinutesPerDay)) de sommeil/jour et \(feeds) tétées/jour. Vous faites un travail formidable."
+        )
+    }
+
+    // MARK: - Portuguese
+
+    private func pt(_ s: WeeklyStats) -> WeeklyInsightAI {
+        let enough = s.avgSleepMinutesPerDay >= s.whoMinSleepMinutes
+        let sleepRec = enough
+            ? "O sono está saudável para esta idade — mantenha o ritmo atual."
+            : "Experimente uma hora de deitar mais cedo e observe as janelas de sono (~\(s.whoAwakeWindowMax) min) para acrescentar descanso."
+        let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
+        let foods = s.newFoodsIntroduced.isEmpty ? "nenhum alimento novo" : s.newFoodsIntroduced.joined(separator: ", ")
+        let feedingRec = s.allergensFlagged.isEmpty
+            ? "Introduza um novo alimento de cada vez e observe possíveis reações."
+            : "Evite reintroduzir os alimentos assinalados (\(s.allergensFlagged.joined(separator: ", "))) e consulte o seu pediatra."
+        return WeeklyInsightAI(
+            sleepSummary: "Esta semana o bebé dormiu em média \(hEn(s.avgSleepMinutesPerDay)) por dia (\(String(format: "%.1f", s.avgNapsPerDay)) sestas). A OMS recomenda ≥ \(hEn(s.whoMinSleepMinutes)).",
+            sleepRecommendation: sleepRec,
+            feedingSummary: "Cerca de \(feeds) mamadas por dia. Alimentos novos esta semana: \(foods).",
+            feedingRecommendation: feedingRec,
+            overallSummary: "Uma semana estável — \(hEn(s.avgSleepMinutesPerDay)) de sono/dia e \(feeds) mamadas/dia. Está a fazer um ótimo trabalho."
         )
     }
 }
