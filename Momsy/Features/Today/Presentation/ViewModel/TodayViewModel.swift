@@ -286,7 +286,7 @@ final class TodayViewModel: ObservableObject {
         if let mins = entry.durationMinutes {
             let h = mins / 60, m = mins % 60
             let dur = lm.strings.sleepDurationFormatted(h: h, m: m)
-            label = lm.lang == "en" ? "Sleep · \(dur)" : "Сон · \(dur)"
+            label = lm.strings.sleepLogEntry(dur: dur)
         } else {
             label = lm.strings.sleepStarted
         }

@@ -142,6 +142,7 @@ struct L10n {
     }
     func diaperLogEntry(count: Int) -> String { s("Diaper #\(count) · wet", "Подгузник #\(count) · мокрый", "Windel #\(count) · nass", "Pañal #\(count) · mojado", "Couche #\(count) · mouillée", "Fralda #\(count) · molhada") }
     func feedingLogEntry(dur: Int, side: String) -> String { s("Feeding · \(dur) min · \(side)", "Кормление · \(dur) мин · \(side)", "Fütterung · \(dur) min · \(side)", "Toma · \(dur) min · \(side)", "Tétée · \(dur) min · \(side)", "Mamada · \(dur) min · \(side)") }
+    func sleepLogEntry(dur: String) -> String { s("Sleep · \(dur)", "Сон · \(dur)", "Schlaf · \(dur)", "Sueño · \(dur)", "Sommeil · \(dur)", "Sono · \(dur)") }
     func todayEntry(_ date: String) -> String { s("Today · \(date)", "Сегодня · \(date)", "Heute · \(date)", "Hoy · \(date)", "Aujourd’hui · \(date)", "Hoje · \(date)") }
     func yesterdayEntry(_ date: String) -> String { s("Yesterday · \(date)", "Вчера · \(date)", "Gestern · \(date)", "Ayer · \(date)", "Hier · \(date)", "Ontem · \(date)") }
 
