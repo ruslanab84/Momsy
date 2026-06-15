@@ -88,7 +88,7 @@ struct MomsyApp: App {
 private func setupNotificationsOnLaunch(appState: AppState) async {
     let push = LocalPushNotificationService.shared
     await push.requestPermission()
-    push.scheduleWeeklyReport(hour: 18, minute: 0)
+    push.scheduleWeeklyReport(hour: 7, minute: 0)
 
     guard let birth = appState.babyProfile?.birthDate else { return }
     for leap in DevelopmentLeap.catalog {

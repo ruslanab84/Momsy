@@ -65,11 +65,19 @@ final class GenerateWeeklyInsightUseCase {
         return WeeklyInsight(stats: stats, ai: ai, isAIGenerated: false, generatedAt: Date())
     }
 
-    /// Most recent completed week: [start, end) where end = start of the current week.
+    /// Most recent completed Sunday–Saturday week, released each Sunday at 07:00 local time.
+    /// Returns [start, end) where start is a Sunday 00:00 and end is the following Sunday 00:00.
+    /// Sunday-anchored regardless of the locale's first weekday; before 07:00 Sunday the
+    /// previous week is kept so the new report appears exactly at the 07:00 release.
     static func weekBounds(now: Date) -> (start: Date, end: Date)? {
-        let cal = Calendar.current
+        var cal = Calendar.current
+        cal.firstWeekday = 1   // Sunday
         guard let thisWeek = cal.dateInterval(of: .weekOfYear, for: now) else { return nil }
-        let weekEnd = thisWeek.start
+        let thisSunday = thisWeek.start
+        guard let release = cal.date(byAdding: .hour, value: 7, to: thisSunday) else { return nil }
+        let weekEnd = now >= release
+            ? thisSunday
+            : (cal.date(byAdding: .day, value: -7, to: thisSunday) ?? thisSunday)
         guard let weekStart = cal.date(byAdding: .day, value: -7, to: weekEnd) else { return nil }
         return (weekStart, weekEnd)
     }
