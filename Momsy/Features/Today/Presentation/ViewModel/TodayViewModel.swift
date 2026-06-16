@@ -218,7 +218,11 @@ final class TodayViewModel: ObservableObject {
                 logEntries.remove(at: idx)
             }
         }
-        Task { try? await diaperRepo.removeLatest(on: Date()) }
+        Task {
+            if let removedId = (try? await diaperRepo.removeLatest(on: Date())).flatMap({ $0 }) {
+                BabySyncService().propagateDelete(id: removedId, in: "diaperLogs")
+            }
+        }
         if hasFetchedThisSession { Task { await updateTip() } }
     }
 

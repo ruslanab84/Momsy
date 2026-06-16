@@ -56,4 +56,12 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
             try context.save()
         }
     }
+
+    func applyDeletions(_ ids: Set<UUID>) async throws {
+        guard !ids.isEmpty else { return }
+        let matches = try context.fetch(FetchDescriptor<VaccinationRecord>()).filter { ids.contains($0.id) }
+        guard !matches.isEmpty else { return }
+        matches.forEach { context.delete($0) }
+        try context.save()
+    }
 }

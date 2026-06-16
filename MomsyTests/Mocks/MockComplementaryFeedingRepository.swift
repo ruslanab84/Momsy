@@ -28,4 +28,8 @@ final class MockComplementaryFeedingRepository: ComplementaryFeedingRepository {
     func delete(id: UUID) async throws {
         entries.removeAll { $0.id == id }
     }
+
+    func applyDeletions(_ ids: Set<UUID>) async throws {
+        entries.removeAll { ids.contains($0.id) }
+    }
 }

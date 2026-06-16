@@ -353,3 +353,38 @@ struct SyncMergeTests {
         #expect(SyncMerge.decide(localExists: true, localUpdatedAt: nil, incomingUpdatedAt: nil) == .skip)
     }
 }
+
+@Suite("PendingDeletionsStore")
+struct PendingDeletionsStoreTests {
+    private func freshStore() -> PendingDeletionsStore {
+        let defaults = UserDefaults(suiteName: "test_pending_\(UUID().uuidString)")!
+        return PendingDeletionsStore(defaults: defaults)
+    }
+
+    @Test("records a pending deletion with its collection")
+    func recordsPending() {
+        let store = freshStore()
+        let id = UUID()
+        store.add(id: id, collection: "foodDiaryLogs")
+        #expect(store.ids() == [id])
+        #expect(store.all()[id.uuidString] == "foodDiaryLogs")
+    }
+
+    @Test("removing a deletion clears it")
+    func removesPending() {
+        let store = freshStore()
+        let id = UUID()
+        store.add(id: id, collection: "vaccinationLogs")
+        store.remove(id: id)
+        #expect(store.ids().isEmpty)
+        #expect(store.all().isEmpty)
+    }
+
+    @Test("persists across instances backed by the same defaults")
+    func persists() {
+        let defaults = UserDefaults(suiteName: "test_pending_\(UUID().uuidString)")!
+        let id = UUID()
+        PendingDeletionsStore(defaults: defaults).add(id: id, collection: "diaperLogs")
+        #expect(PendingDeletionsStore(defaults: defaults).ids() == [id])
+    }
+}

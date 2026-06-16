@@ -79,6 +79,7 @@ final class FoodDiaryViewModel: ObservableObject {
             try? await photoStorage.delete(atPath: path)
         }
         await delete.execute(id: entry.id)
+        BabySyncService().propagateDelete(id: entry.id, in: "foodDiaryLogs")
         photosByID.removeValue(forKey: entry.id)
         await load()
     }

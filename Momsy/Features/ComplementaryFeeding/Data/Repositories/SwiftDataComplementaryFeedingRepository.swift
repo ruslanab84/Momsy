@@ -63,4 +63,12 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
         context.delete(rec)
         try context.save()
     }
+
+    func applyDeletions(_ ids: Set<UUID>) async throws {
+        guard !ids.isEmpty else { return }
+        let matches = try context.fetch(FetchDescriptor<ComplementaryFoodRecord>()).filter { ids.contains($0.id) }
+        guard !matches.isEmpty else { return }
+        matches.forEach { context.delete($0) }
+        try context.save()
+    }
 }

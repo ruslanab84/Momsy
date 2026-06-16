@@ -39,17 +39,28 @@ final class SwiftDataDiaperRepository: DiaperRepository {
         if changed { try context.save() }
     }
 
-    func removeLatest(on day: Date) async throws {
+    @discardableResult
+    func removeLatest(on day: Date) async throws -> UUID? {
         let all = try context.fetch(FetchDescriptor<DiaperRecord>())
         let cal = Calendar.current
         let todayEntries = all.filter { cal.isDate($0.date, inSameDayAs: day) }
-        guard let latest = todayEntries.max(by: { $0.date < $1.date }) else { return }
+        guard let latest = todayEntries.max(by: { $0.date < $1.date }) else { return nil }
+        let removedId = latest.id
         context.delete(latest)
         try context.save()
+        return removedId
     }
 
     func countToday() async throws -> Int {
         let all = try context.fetch(FetchDescriptor<DiaperRecord>())
         return all.uniqued(by: { $0.id }).filter { Calendar.current.isDateInToday($0.date) }.count
+    }
+
+    func applyDeletions(_ ids: Set<UUID>) async throws {
+        guard !ids.isEmpty else { return }
+        let matches = try context.fetch(FetchDescriptor<DiaperRecord>()).filter { ids.contains($0.id) }
+        guard !matches.isEmpty else { return }
+        matches.forEach { context.delete($0) }
+        try context.save()
     }
 }

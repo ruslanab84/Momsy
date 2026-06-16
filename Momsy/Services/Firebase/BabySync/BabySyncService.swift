@@ -11,7 +11,7 @@ final class BabySyncService {
         "feeding", "sleep", "diaper", "stool", "diary", "walk", "bath",
         "pumping", "vaccination", "complementaryFood", "temperature",
         "measurement", "doctorVisit", "momMood", "momSleep", "waterIntake",
-        "leaps", "quickLogs",
+        "leaps", "quickLogs", "deletions",
     ]
 
     init() {}
@@ -32,6 +32,57 @@ final class BabySyncService {
     func setLog<T: Encodable>(_ log: T, id: String, to subcollection: String) async throws {
         guard !babyId.isEmpty, !id.isEmpty else { return }
         try collection(subcollection).document(id).setData(from: log, merge: true)
+    }
+
+    // MARK: - Deletes & tombstones
+
+    /// Deletes a single log document by its stable id.
+    func deleteLog(id: String, from subcollection: String) async throws {
+        guard !babyId.isEmpty, !id.isEmpty else { return }
+        try await collection(subcollection).document(id).delete()
+    }
+
+    /// Records a tombstone so other devices remove the entry and the launch merge
+    /// never resurrects it. Keyed by the entry's stable id; collection-agnostic.
+    func writeTombstone(id: String) async throws {
+        guard !babyId.isEmpty, !id.isEmpty else { return }
+        try await collection("deletions").document(id).setData(["deletedAt": Timestamp(date: Date())])
+    }
+
+    /// Reads tombstoned ids (entries deleted on any device).
+    func fetchTombstones(limit: Int = 1000) async throws -> [String] {
+        guard !babyId.isEmpty else { return [] }
+        let snapshot = try await collection("deletions").limit(to: limit).getDocuments()
+        return snapshot.documents.map(\.documentID)
+    }
+
+    /// Propagates a local delete to the cloud: removes the doc and writes a tombstone,
+    /// recording the id locally first so an offline delete is retried on next launch.
+    func propagateDelete(id: UUID, in subcollection: String) {
+        guard !babyId.isEmpty else { return }
+        PendingDeletionsStore.shared.add(id: id, collection: subcollection)
+        Task {
+            do {
+                try await deleteLog(id: id.uuidString, from: subcollection)
+                try await writeTombstone(id: id.uuidString)
+                PendingDeletionsStore.shared.remove(id: id)
+            } catch {
+                // Leave it pending; the launch merge will retry.
+            }
+        }
+    }
+
+    /// Retries cloud deletes that didn't complete earlier (e.g. made while offline).
+    func retryPendingDeletions() async {
+        for (idStr, collection) in PendingDeletionsStore.shared.all() {
+            do {
+                try await deleteLog(id: idStr, from: collection)
+                try await writeTombstone(id: idStr)
+                if let id = UUID(uuidString: idStr) { PendingDeletionsStore.shared.remove(id: id) }
+            } catch {
+                // keep pending
+            }
+        }
     }
 
     /// Deletes every document in a subcollection (batched). Used to purge a

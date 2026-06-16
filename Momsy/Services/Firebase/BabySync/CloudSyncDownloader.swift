@@ -153,6 +153,14 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         async let leapDTOs:    [LeapLogDTO]         = fetch("leapLogs",        dateField: "completedDate")
         async let visitDTOs:   [DoctorVisitLogDTO]  = fetch("doctorVisitLogs", dateField: "date")
 
+        // Reconcile deletes before merging: retry our own unsent deletes, then gather
+        // every tombstoned id so the merge neither resurrects nor re-inserts a deleted
+        // entry. Pending-local ids are unioned in so an in-flight delete is honoured
+        // even before its tombstone round-trips.
+        await service.retryPendingDeletions()
+        let tombstonedIds = Set((try? await service.fetchTombstones())?.compactMap(UUID.init) ?? [])
+        let deletedIds = tombstonedIds.union(PendingDeletionsStore.shared.ids())
+
         let feedings = await feedingDTOs.compactMap(Self.feedingEntry)
         let sleeps   = await sleepDTOs.compactMap(Self.sleepEntry)
         let diapers  = await diaperDTOs.compactMap(Self.diaperEntry)
@@ -175,21 +183,29 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         // Merge into SwiftData on the main actor (shared context is main-actor owned).
         try? await feedingRepo.upsert(feedings)
         try? await sleepRepo.upsert(sleeps)
-        try? await diaperRepo.upsert(diapers)
+        try? await diaperRepo.upsert(diapers.filter { !deletedIds.contains($0.id) })
         try? await stoolRepo.upsert(stools)
         try? await diaryRepo.upsert(diaries)
         try? await walkRepo.upsert(walks)
         try? await bathRepo.upsert(baths)
         try? await pumpingRepo.upsert(pumpings)
         try? await measurementRepo.upsert(measures)
-        try? await vaccinationRepo.upsert(vaccines)
-        try? await foodDiaryRepo.upsert(foods)
+        try? await vaccinationRepo.upsert(vaccines.filter { !deletedIds.contains($0.id) })
+        try? await foodDiaryRepo.upsert(foods.filter { !deletedIds.contains($0.id) })
         try? await temperatureRepo.upsert(temps)
         try? await momSleepRepo.upsert(momSleeps)
         try? await waterIntakeRepo.upsert(waters)
         try? await leapsRepo.upsert(leaps)
         try? await doctorVisitRepo.upsert(visits)
         quickToday.forEach { quickLogRepo.appendUnique($0) }
+
+        // Propagate deletes made on other devices: remove any local row whose id was
+        // explicitly tombstoned. Only ever deletes ids we have a tombstone for.
+        if !deletedIds.isEmpty {
+            try? await diaperRepo.applyDeletions(deletedIds)
+            try? await vaccinationRepo.applyDeletions(deletedIds)
+            try? await foodDiaryRepo.applyDeletions(deletedIds)
+        }
 
         NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
     }

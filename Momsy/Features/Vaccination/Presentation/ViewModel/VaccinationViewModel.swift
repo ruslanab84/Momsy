@@ -56,6 +56,7 @@ final class VaccinationViewModel: ObservableObject {
     func undone(_ status: VaccinationStatus) async {
         guard let entry = status.entry else { return }
         await unmark.execute(entryId: entry.id)
+        BabySyncService().propagateDelete(id: entry.id, in: "vaccinationLogs")
         // Only reschedule reminders for catalog vaccinations, not custom ones
         if !entry.isCustom {
             pushNotifications.scheduleVaccinationReminder(
