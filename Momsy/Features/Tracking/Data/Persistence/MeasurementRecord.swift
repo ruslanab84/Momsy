@@ -11,9 +11,14 @@ final class MeasurementRecord {
     var headCirc: String = ""
     var delta: String = ""
     var visitLabel: String?
+    var updatedAt: Date?
 
     init(_ entry: MeasurementEntry) {
-        id         = entry.id
+        id = entry.id
+        apply(entry)
+    }
+
+    func apply(_ entry: MeasurementEntry) {
         date       = entry.date
         dateLabel  = entry.dateLabel
         weight     = entry.weight
@@ -21,6 +26,17 @@ final class MeasurementRecord {
         headCirc   = entry.headCirc
         delta      = entry.delta
         visitLabel = entry.visitLabel
+        updatedAt  = entry.updatedAt
+    }
+
+    /// Cloud-merge update: overwrites only the fields the synced DTO carries.
+    /// `delta` and `visitLabel` are local-only, so they are preserved.
+    func merge(_ entry: MeasurementEntry) {
+        date      = entry.date
+        weight    = entry.weight
+        height    = entry.height
+        headCirc  = entry.headCirc
+        updatedAt = entry.updatedAt
     }
 
     func toDomain() -> MeasurementEntry {
@@ -30,7 +46,8 @@ final class MeasurementRecord {
         let label = fmt.string(from: date)
         return MeasurementEntry(
             id: id, date: date, dateLabel: label, weight: weight,
-            height: height, headCirc: headCirc, delta: delta, visitLabel: visitLabel
+            height: height, headCirc: headCirc, delta: delta, visitLabel: visitLabel,
+            updatedAt: updatedAt
         )
     }
 }

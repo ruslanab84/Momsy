@@ -8,6 +8,7 @@ struct SleepLogDTO: Codable {
     let quality: String
     let addedBy: String
     let addedByName: String
+    var updatedAt: Timestamp?
 
     init(from model: SleepLog) {
         self.startedAt   = Timestamp(date: model.startedAt)
@@ -16,6 +17,7 @@ struct SleepLogDTO: Codable {
         self.quality     = Self.firestoreKey(for: model.quality)
         self.addedBy     = model.addedBy
         self.addedByName = model.addedByName
+        self.updatedAt   = Timestamp(date: model.updatedAt)
     }
 
     var domain: SleepLog {
@@ -26,7 +28,8 @@ struct SleepLogDTO: Codable {
             durationMin: durationMin,
             quality:     Self.sleepQuality(from: quality),
             addedBy:     addedBy,
-            addedByName: addedByName
+            addedByName: addedByName,
+            updatedAt:   updatedAt?.dateValue() ?? .distantPast
         )
     }
 

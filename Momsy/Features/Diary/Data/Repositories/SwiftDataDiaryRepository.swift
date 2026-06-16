@@ -19,25 +19,28 @@ final class SwiftDataDiaryRepository: DiaryRepository {
 
     func upsert(_ items: [StoredDiaryItem]) async throws {
         guard !items.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<DiaryItemRecord>()).map(\.id))
-        var inserted = false
-        for item in items where !existing.contains(item.id) {
-            context.insert(DiaryItemRecord(item))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<DiaryItemRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for item in items {
+            let record = byId[item.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: item.updatedAt) {
+            case .insert: context.insert(DiaryItemRecord(item)); changed = true
+            case .update: record?.merge(item); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func update(_ item: StoredDiaryItem) async throws {
         let all = try context.fetch(FetchDescriptor<DiaryItemRecord>())
         guard let record = all.first(where: { $0.id == item.id }) else { return }
-        record.date        = item.date
-        record.kindRaw     = item.kind.rawValue
-        record.text        = item.text
-        record.toneHex     = item.toneHex
-        record.isMilestone = item.isMilestone
-        record.iconName    = item.iconName
-        record.photoPath   = item.photoPath
+        record.apply(item)
         try context.save()
     }
 

@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseFirestore
 
 extension Notification.Name {
     /// Posted after a cloud → local merge completes so view models can reload.
@@ -204,19 +205,20 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         let log = dto.domain
         return FeedingEntry(id: uuid, date: log.startedAt,
                             durationSeconds: log.durationMin * 60,
-                            side: log.side, milliliters: log.amountMl)
+                            side: log.side, milliliters: log.amountMl,
+                            updatedAt: dto.updatedAt?.dateValue())
     }
 
     private static func sleepEntry(_ dto: SleepLogDTO) -> SleepEntry? {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
         let log = dto.domain
         return SleepEntry(id: uuid, startDate: log.startedAt, endDate: log.endedAt,
-                          note: "", quality: log.quality)
+                          note: "", quality: log.quality, updatedAt: log.updatedAt)
     }
 
     private static func diaperEntry(_ dto: DiaperLogDTO) -> DiaperEntry? {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
-        return DiaperEntry(id: uuid, date: dto.domain.loggedAt)
+        return DiaperEntry(id: uuid, date: dto.domain.loggedAt, updatedAt: dto.updatedAt?.dateValue())
     }
 
     private static func stoolEntry(_ dto: QuickEventLogDTO) -> StoolEntry? {
@@ -240,7 +242,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         let log = dto.domain
         return PumpingEntry(id: uuid, date: log.date, durationSeconds: log.durationSeconds,
                             side: PumpingSide(rawValue: log.side) ?? .both,
-                            volumeML: log.volumeML, endDate: log.endDate ?? log.date)
+                            volumeML: log.volumeML, endDate: log.endDate ?? log.date,
+                            updatedAt: dto.updatedAt?.dateValue())
     }
 
     private static func measurementEntry(_ dto: MeasurementLogDTO) -> MeasurementEntry? {
@@ -251,7 +254,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         fmt.locale = Locale.current
         return MeasurementEntry(id: uuid, date: log.date, dateLabel: fmt.string(from: log.date),
                                 weight: log.weight, height: log.height, headCirc: log.headCirc,
-                                delta: "", visitLabel: nil)
+                                delta: "", visitLabel: nil, updatedAt: dto.updatedAt?.dateValue())
     }
 
     private static func vaccinationEntry(_ dto: VaccinationLogDTO) -> VaccinationEntry? {
@@ -260,7 +263,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         // Custom vaccines use a negative catalogId; catalog ones are 1–20.
         let customName = log.catalogId < 0 ? log.vaccineName : nil
         return VaccinationEntry(id: uuid, catalogId: log.catalogId, doneDate: log.doneDate,
-                                notes: log.notes, customName: customName)
+                                notes: log.notes, customName: customName,
+                                updatedAt: dto.updatedAt?.dateValue())
     }
 
     private static func foodEntry(_ dto: FoodDiaryLogDTO) -> ComplementaryFoodEntry? {
@@ -270,7 +274,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
             id: uuid, date: log.date, foodName: log.foodName,
             category: FoodCategory(rawValue: log.category) ?? .other,
             reaction: FoodReaction(rawValue: log.reaction) ?? .none,
-            isAllergen: log.isAllergen, notes: log.notes, photoPath: log.photoPath
+            isAllergen: log.isAllergen, notes: log.notes, photoPath: log.photoPath,
+            updatedAt: dto.updatedAt?.dateValue()
         )
     }
 
@@ -282,20 +287,22 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         return TemperatureEntry(id: uuid, date: log.date,
                                 dateLabel: dateFmt.string(from: log.date),
                                 timeLabel: timeFmt.string(from: log.date),
-                                value: log.value, note: log.note)
+                                value: log.value, note: log.note,
+                                updatedAt: dto.updatedAt?.dateValue())
     }
 
     private static func momSleepEntry(_ dto: SleepLogDTO) -> SleepEntry? {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
         let log = dto.domain
         return SleepEntry(id: uuid, startDate: log.startedAt, endDate: log.endedAt,
-                          note: "", quality: log.quality)
+                          note: "", quality: log.quality, updatedAt: log.updatedAt)
     }
 
     private static func waterIntakeEntry(_ dto: WaterIntakeLogDTO) -> WaterIntakeEntry? {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
         let log = dto.domain
-        return WaterIntakeEntry(id: uuid, date: log.date, amountMl: log.amountMl)
+        return WaterIntakeEntry(id: uuid, date: log.date, amountMl: log.amountMl,
+                                updatedAt: dto.updatedAt?.dateValue())
     }
 
     // Leaps are keyed by an Int leapId (not a UUID), so no UUID guard here.
@@ -314,7 +321,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         let log = dto.domain
         let kind = StoredDiaryItemKind(rawValue: log.kind) ?? .note
         return StoredDiaryItem(id: uuid, date: log.date, kind: kind, text: log.text,
-                               isMilestone: kind == .milestone, iconName: log.iconName)
+                               isMilestone: kind == .milestone, iconName: log.iconName,
+                               updatedAt: dto.updatedAt?.dateValue())
     }
 
     /// QuickLogRepository is UserDefaults + today-only, so we only merge today's quick events.

@@ -112,6 +112,7 @@ struct VaccinationEntry: Identifiable {
     var doneDate: Date
     var notes: String
     var customName: String?
+    var updatedAt: Date? = Date()
 
     var isCustom: Bool { customName != nil }
 }

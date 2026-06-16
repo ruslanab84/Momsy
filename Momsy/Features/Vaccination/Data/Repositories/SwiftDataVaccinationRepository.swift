@@ -21,21 +21,32 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
         }
         context.insert(VaccinationRecord(id: entry.id, catalogId: entry.catalogId,
                                           doneDate: entry.doneDate, notes: entry.notes,
-                                          customName: entry.customName))
+                                          customName: entry.customName, updatedAt: entry.updatedAt))
         try context.save()
     }
 
     func upsert(_ entries: [VaccinationEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<VaccinationRecord>()).map(\.id))
-        var inserted = false
-        for entry in entries where !existing.contains(entry.id) {
-            context.insert(VaccinationRecord(id: entry.id, catalogId: entry.catalogId,
-                                             doneDate: entry.doneDate, notes: entry.notes,
-                                             customName: entry.customName))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<VaccinationRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for entry in entries {
+            let record = byId[entry.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: entry.updatedAt) {
+            case .insert:
+                context.insert(VaccinationRecord(id: entry.id, catalogId: entry.catalogId,
+                                                 doneDate: entry.doneDate, notes: entry.notes,
+                                                 customName: entry.customName, updatedAt: entry.updatedAt))
+                changed = true
+            case .update: record?.apply(entry); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func delete(id: UUID) async throws {

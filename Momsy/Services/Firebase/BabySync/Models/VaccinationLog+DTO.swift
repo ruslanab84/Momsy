@@ -8,6 +8,7 @@ struct VaccinationLogDTO: Codable {
     let notes: String
     let addedBy: String
     let addedByName: String
+    var updatedAt: Timestamp? = Timestamp(date: Date())
 
     init(from model: VaccinationLog) {
         self.catalogId   = model.catalogId

@@ -19,6 +19,8 @@ struct PumpingEntry: Identifiable, Codable {
     var side: PumpingSide
     var volumeML: Int
     var endDate: Date?
+    /// Last local mutation time, carried through Firestore for last-write-wins merge.
+    var updatedAt: Date? = Date()
 
     var durationMinutes: Int { max(1, durationSeconds / 60) }
 }

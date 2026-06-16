@@ -23,13 +23,22 @@ final class SwiftDataTemperatureRepository: TemperatureRepository {
 
     func upsert(_ entries: [TemperatureEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<TemperatureRecord>()).map(\.id))
-        var inserted = false
-        for entry in entries where !existing.contains(entry.id) {
-            context.insert(TemperatureRecord(entry))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<TemperatureRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for entry in entries {
+            let record = byId[entry.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: entry.updatedAt) {
+            case .insert: context.insert(TemperatureRecord(entry)); changed = true
+            case .update: record?.apply(entry); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func delete(id: UUID) async throws {

@@ -17,35 +17,43 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
         context.insert(ComplementaryFoodRecord(
             id: entry.id, date: entry.date, foodName: entry.foodName,
             category: entry.category.rawValue, reaction: entry.reaction.rawValue,
-            isAllergen: entry.isAllergen, notes: entry.notes, photoPath: entry.photoPath
+            isAllergen: entry.isAllergen, notes: entry.notes, photoPath: entry.photoPath,
+            updatedAt: entry.updatedAt
         ))
         try context.save()
     }
 
     func upsert(_ entries: [ComplementaryFoodEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<ComplementaryFoodRecord>()).map(\.id))
-        var inserted = false
-        for entry in entries where !existing.contains(entry.id) {
-            context.insert(ComplementaryFoodRecord(
-                id: entry.id, date: entry.date, foodName: entry.foodName,
-                category: entry.category.rawValue, reaction: entry.reaction.rawValue,
-                isAllergen: entry.isAllergen, notes: entry.notes, photoPath: entry.photoPath
-            ))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<ComplementaryFoodRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for entry in entries {
+            let record = byId[entry.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: entry.updatedAt) {
+            case .insert:
+                context.insert(ComplementaryFoodRecord(
+                    id: entry.id, date: entry.date, foodName: entry.foodName,
+                    category: entry.category.rawValue, reaction: entry.reaction.rawValue,
+                    isAllergen: entry.isAllergen, notes: entry.notes, photoPath: entry.photoPath,
+                    updatedAt: entry.updatedAt
+                ))
+                changed = true
+            case .update: record?.apply(entry); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func update(_ entry: ComplementaryFoodEntry) async throws {
         let all = try context.fetch(FetchDescriptor<ComplementaryFoodRecord>())
         guard let rec = all.first(where: { $0.id == entry.id }) else { return }
-        rec.foodName = entry.foodName
-        rec.category = entry.category.rawValue
-        rec.reaction = entry.reaction.rawValue
-        rec.isAllergen = entry.isAllergen
-        rec.notes = entry.notes
-        rec.photoPath = entry.photoPath
+        rec.apply(entry)
         try context.save()
     }
 

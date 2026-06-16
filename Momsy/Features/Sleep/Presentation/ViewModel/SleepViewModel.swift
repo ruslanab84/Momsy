@@ -188,7 +188,8 @@ final class SleepViewModel: ObservableObject {
             durationMin: entry.durationMinutes,
             quality:     entry.quality,
             addedBy:     uid,
-            addedByName: name
+            addedByName: name,
+            updatedAt:   entry.updatedAt ?? Date()
         )
         Task { try? await BabySyncService().setLog(SleepLogDTO(from: log), id: log.id, to: "sleepLogs") }
     }

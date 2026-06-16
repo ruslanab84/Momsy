@@ -9,6 +9,7 @@ struct ComplementaryFoodEntry: Identifiable, Codable {
     var isAllergen: Bool
     var notes: String
     var photoPath: String?
+    var updatedAt: Date? = Date()
 }
 
 enum FoodCategory: String, Codable, CaseIterable {

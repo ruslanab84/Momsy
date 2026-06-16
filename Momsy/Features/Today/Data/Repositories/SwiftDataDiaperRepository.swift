@@ -13,19 +13,30 @@ final class SwiftDataDiaperRepository: DiaperRepository {
     }
 
     func add(_ entry: DiaperEntry) async throws {
-        context.insert(DiaperRecord(id: entry.id, date: entry.date))
+        context.insert(DiaperRecord(id: entry.id, date: entry.date, updatedAt: entry.updatedAt))
         try context.save()
     }
 
     func upsert(_ entries: [DiaperEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<DiaperRecord>()).map(\.id))
-        var inserted = false
-        for entry in entries where !existing.contains(entry.id) {
-            context.insert(DiaperRecord(id: entry.id, date: entry.date))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<DiaperRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for entry in entries {
+            let record = byId[entry.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: entry.updatedAt) {
+            case .insert:
+                context.insert(DiaperRecord(id: entry.id, date: entry.date, updatedAt: entry.updatedAt))
+                changed = true
+            case .update: record?.apply(entry); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func removeLatest(on day: Date) async throws {

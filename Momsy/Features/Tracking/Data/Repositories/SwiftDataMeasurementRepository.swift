@@ -18,13 +18,22 @@ final class SwiftDataMeasurementRepository: MeasurementRepository {
 
     func upsert(_ entries: [MeasurementEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<MeasurementRecord>()).map(\.id))
-        var inserted = false
-        for entry in entries where !existing.contains(entry.id) {
-            context.insert(MeasurementRecord(entry))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<MeasurementRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for entry in entries {
+            let record = byId[entry.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: entry.updatedAt) {
+            case .insert: context.insert(MeasurementRecord(entry)); changed = true
+            case .update: record?.merge(entry); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func delete(id: UUID) async throws {

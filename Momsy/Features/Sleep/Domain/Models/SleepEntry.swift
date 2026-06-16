@@ -28,6 +28,9 @@ struct SleepEntry: Identifiable, Codable {
     var endDate: Date?
     var note: String
     var quality: SleepQuality
+    /// Last local mutation time, carried through Firestore for last-write-wins merge.
+    /// Optional so old persisted JSON (which predates this field) still decodes.
+    var updatedAt: Date?
 
     var durationMinutes: Int? {
         guard let end = endDate else { return nil }
@@ -35,11 +38,12 @@ struct SleepEntry: Identifiable, Codable {
     }
 
     init(id: UUID = UUID(), startDate: Date = Date(), endDate: Date? = nil,
-         note: String = "", quality: SleepQuality = .normal) {
+         note: String = "", quality: SleepQuality = .normal, updatedAt: Date? = Date()) {
         self.id = id
         self.startDate = startDate
         self.endDate = endDate
         self.note = note
         self.quality = quality
+        self.updatedAt = updatedAt
     }
 }

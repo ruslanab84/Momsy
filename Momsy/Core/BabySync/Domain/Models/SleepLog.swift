@@ -8,4 +8,5 @@ struct SleepLog: Identifiable, Equatable {
     let quality: SleepQuality
     let addedBy: String
     let addedByName: String
+    var updatedAt: Date = Date()
 }

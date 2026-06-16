@@ -22,22 +22,29 @@ final class SwiftDataMomSleepRepository: MomSleepRepository {
     func update(_ entry: SleepEntry) async throws {
         let all = try context.fetch(FetchDescriptor<MomSleepRecord>())
         if let record = all.first(where: { $0.id == entry.id }) {
-            record.endDate    = entry.endDate
-            record.note       = entry.note
-            record.qualityRaw = entry.quality.rawValue
+            record.apply(entry)
             try context.save()
         }
     }
 
     func upsert(_ entries: [SleepEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<MomSleepRecord>()).map(\.id))
-        var inserted = false
-        for entry in entries where !existing.contains(entry.id) {
-            context.insert(MomSleepRecord(entry))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<MomSleepRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for entry in entries {
+            let record = byId[entry.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: entry.updatedAt) {
+            case .insert: context.insert(MomSleepRecord(entry)); changed = true
+            case .update: record?.merge(entry); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func delete(id: UUID) async throws {

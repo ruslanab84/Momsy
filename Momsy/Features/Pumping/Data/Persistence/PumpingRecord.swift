@@ -9,14 +9,20 @@ final class PumpingRecord {
     var sideRaw: String = ""
     var volumeML: Int = 0
     var endDate: Date?
+    var updatedAt: Date?
 
     init(_ entry: PumpingEntry) {
         self.id = entry.id
-        self.date = entry.date
-        self.durationSeconds = entry.durationSeconds
-        self.sideRaw = entry.side.rawValue
-        self.volumeML = entry.volumeML
-        self.endDate = entry.endDate
+        apply(entry)
+    }
+
+    func apply(_ entry: PumpingEntry) {
+        date = entry.date
+        durationSeconds = entry.durationSeconds
+        sideRaw = entry.side.rawValue
+        volumeML = entry.volumeML
+        endDate = entry.endDate
+        updatedAt = entry.updatedAt
     }
 
     func toDomain() -> PumpingEntry {
@@ -26,7 +32,8 @@ final class PumpingRecord {
             durationSeconds: durationSeconds,
             side: PumpingSide(rawValue: sideRaw) ?? .left,
             volumeML: volumeML,
-            endDate: endDate
+            endDate: endDate,
+            updatedAt: updatedAt
         )
     }
 }

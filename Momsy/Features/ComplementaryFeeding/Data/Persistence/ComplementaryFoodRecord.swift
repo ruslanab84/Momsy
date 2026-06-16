@@ -11,10 +11,11 @@ final class ComplementaryFoodRecord {
     var isAllergen: Bool = false
     var notes: String = ""
     var photoPath: String?
+    var updatedAt: Date?
 
     init(id: UUID = UUID(), date: Date, foodName: String,
          category: String, reaction: String,
-         isAllergen: Bool, notes: String, photoPath: String?) {
+         isAllergen: Bool, notes: String, photoPath: String?, updatedAt: Date? = nil) {
         self.id = id
         self.date = date
         self.foodName = foodName
@@ -23,6 +24,18 @@ final class ComplementaryFoodRecord {
         self.isAllergen = isAllergen
         self.notes = notes
         self.photoPath = photoPath
+        self.updatedAt = updatedAt
+    }
+
+    func apply(_ entry: ComplementaryFoodEntry) {
+        date = entry.date
+        foodName = entry.foodName
+        category = entry.category.rawValue
+        reaction = entry.reaction.rawValue
+        isAllergen = entry.isAllergen
+        notes = entry.notes
+        photoPath = entry.photoPath
+        updatedAt = entry.updatedAt
     }
 
     func toDomain() -> ComplementaryFoodEntry {
@@ -30,7 +43,8 @@ final class ComplementaryFoodRecord {
             id: id, date: date, foodName: foodName,
             category: FoodCategory(rawValue: category) ?? .other,
             reaction: FoodReaction(rawValue: reaction) ?? .none,
-            isAllergen: isAllergen, notes: notes, photoPath: photoPath
+            isAllergen: isAllergen, notes: notes, photoPath: photoPath,
+            updatedAt: updatedAt
         )
     }
 }

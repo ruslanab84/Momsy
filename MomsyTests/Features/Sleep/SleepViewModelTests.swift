@@ -307,3 +307,49 @@ struct ReconcileStaleSleepUseCaseTests {
         #expect(repo.entries.isEmpty)
     }
 }
+
+@Suite("SyncMerge last-write-wins")
+struct SyncMergeTests {
+    private let t0 = Date(timeIntervalSinceReferenceDate: 1_000_000)
+    private let t1 = Date(timeIntervalSinceReferenceDate: 2_000_000)
+
+    @Test("inserts when the row does not exist locally")
+    func insertsWhenAbsent() {
+        #expect(SyncMerge.decide(localExists: false, localUpdatedAt: nil, incomingUpdatedAt: t1) == .insert)
+    }
+
+    @Test("inserts when absent even if the incoming stamp is nil")
+    func insertsWhenAbsentNilStamp() {
+        #expect(SyncMerge.decide(localExists: false, localUpdatedAt: nil, incomingUpdatedAt: nil) == .insert)
+    }
+
+    @Test("updates when the incoming copy is strictly newer")
+    func updatesWhenNewer() {
+        #expect(SyncMerge.decide(localExists: true, localUpdatedAt: t0, incomingUpdatedAt: t1) == .update)
+    }
+
+    @Test("skips when the incoming copy is older")
+    func skipsWhenOlder() {
+        #expect(SyncMerge.decide(localExists: true, localUpdatedAt: t1, incomingUpdatedAt: t0) == .skip)
+    }
+
+    @Test("skips on an equal timestamp (the originating device's round-trip)")
+    func skipsWhenEqual() {
+        #expect(SyncMerge.decide(localExists: true, localUpdatedAt: t1, incomingUpdatedAt: t1) == .skip)
+    }
+
+    @Test("a missing local stamp is treated as oldest, so a stamped cloud edit wins")
+    func nilLocalLosesToStampedIncoming() {
+        #expect(SyncMerge.decide(localExists: true, localUpdatedAt: nil, incomingUpdatedAt: t0) == .update)
+    }
+
+    @Test("a missing incoming stamp never clobbers an existing stamped local row")
+    func nilIncomingDoesNotClobber() {
+        #expect(SyncMerge.decide(localExists: true, localUpdatedAt: t0, incomingUpdatedAt: nil) == .skip)
+    }
+
+    @Test("both stamps missing is non-destructive (keeps local)")
+    func bothNilSkips() {
+        #expect(SyncMerge.decide(localExists: true, localUpdatedAt: nil, incomingUpdatedAt: nil) == .skip)
+    }
+}

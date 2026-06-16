@@ -7,6 +7,7 @@ final class StopSleepUseCase {
     func execute(_ entry: SleepEntry) async throws -> SleepEntry {
         var updated = entry
         updated.endDate = Date()
+        updated.updatedAt = Date()
         try await repository.update(updated)
         return updated
     }

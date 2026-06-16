@@ -6,6 +6,7 @@ struct DiaperLogDTO: Codable {
     let type: String
     let addedBy: String
     let addedByName: String
+    var updatedAt: Timestamp? = Timestamp(date: Date())
 
     init(from model: DiaperLog) {
         self.loggedAt    = Timestamp(date: model.loggedAt)

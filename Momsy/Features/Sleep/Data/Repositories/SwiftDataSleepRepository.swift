@@ -19,22 +19,28 @@ final class SwiftDataSleepRepository: SleepRepository {
 
     func upsert(_ entries: [SleepEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<SleepRecord>()).map(\.id))
-        var inserted = false
-        for entry in entries where !existing.contains(entry.id) {
-            context.insert(SleepRecord(entry))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<SleepRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for entry in entries {
+            let record = byId[entry.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: entry.updatedAt) {
+            case .insert: context.insert(SleepRecord(entry)); changed = true
+            case .update: record?.merge(entry); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func update(_ entry: SleepEntry) async throws {
         let all = try context.fetch(FetchDescriptor<SleepRecord>())
         guard let record = all.first(where: { $0.id == entry.id }) else { return }
-        record.startDate  = entry.startDate
-        record.endDate    = entry.endDate
-        record.note       = entry.note
-        record.qualityRaw = entry.quality.rawValue
+        record.apply(entry)
         try context.save()
     }
 

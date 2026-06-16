@@ -90,6 +90,7 @@ struct MeasurementEntry: Identifiable, Codable {
     var headCirc: String
     var delta: String
     var visitLabel: String?
+    var updatedAt: Date? = Date()
 }
 
 struct TemperatureEntry: Identifiable, Codable {
@@ -99,4 +100,5 @@ struct TemperatureEntry: Identifiable, Codable {
     var timeLabel: String
     var value: Double
     var note: String
+    var updatedAt: Date? = Date()
 }

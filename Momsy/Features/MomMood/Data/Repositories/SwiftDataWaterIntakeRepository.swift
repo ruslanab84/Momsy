@@ -13,13 +13,22 @@ final class SwiftDataWaterIntakeRepository: WaterIntakeRepository {
 
     func upsert(_ entries: [WaterIntakeEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<WaterIntakeRecord>()).map(\.id))
-        var inserted = false
-        for entry in entries where !existing.contains(entry.id) {
-            context.insert(WaterIntakeRecord(entry))
-            inserted = true
+        let byId = Dictionary(
+            try context.fetch(FetchDescriptor<WaterIntakeRecord>()).map { ($0.id, $0) },
+            uniquingKeysWith: { a, _ in a }
+        )
+        var changed = false
+        for entry in entries {
+            let record = byId[entry.id]
+            switch SyncMerge.decide(localExists: record != nil,
+                                    localUpdatedAt: record?.updatedAt,
+                                    incomingUpdatedAt: entry.updatedAt) {
+            case .insert: context.insert(WaterIntakeRecord(entry)); changed = true
+            case .update: record?.apply(entry); changed = true
+            case .skip:   break
+            }
         }
-        if inserted { try context.save() }
+        if changed { try context.save() }
     }
 
     func getEntries(from: Date, to: Date) async throws -> [WaterIntakeEntry] {
