@@ -12,6 +12,7 @@ final class TodayViewModel: ObservableObject {
     @Published var syncedSleepLogs: [SleepLog] = []
     @Published private(set) var currentLeap: DevelopmentLeap?
     @Published private(set) var leapPhase: BabyAgeContext.LeapPhase?
+    @Published private(set) var nextSleep: SleepPrediction?
 
     private let getFeeding: GetFeedingEntriesUseCase
     private let getSleep: GetSleepEntriesUseCase
@@ -22,6 +23,7 @@ final class TodayViewModel: ObservableObject {
     private let tipRepository: DailyTipRepository
     private let appState: AppState
     private let syncRepo: any BabySyncRepositoryProtocol
+    private let predictNextSleep: PredictNextSleepUseCase
     private var syncTasks: [Task<Void, Never>] = []
     private var hasFetchedThisSession = false
     private var mergeObserver: NSObjectProtocol?
@@ -35,7 +37,8 @@ final class TodayViewModel: ObservableObject {
         quickLogRepo: QuickLogRepository,
         tipRepository: DailyTipRepository,
         appState: AppState,
-        syncRepo: any BabySyncRepositoryProtocol
+        syncRepo: any BabySyncRepositoryProtocol,
+        predictNextSleep: PredictNextSleepUseCase
     ) {
         self.getFeeding = getFeeding
         self.getSleep = getSleep
@@ -46,6 +49,7 @@ final class TodayViewModel: ObservableObject {
         self.tipRepository = tipRepository
         self.appState = appState
         self.syncRepo = syncRepo
+        self.predictNextSleep = predictNextSleep
         startSyncListeners()
         Task { await loadDiaperCount() }
         Task { await loadLeap() }
@@ -64,6 +68,12 @@ final class TodayViewModel: ObservableObject {
         await loadTodayEntries()
         await loadDiaperCount()
         await loadLeap()
+        await refreshForecast()
+    }
+
+    func refreshForecast() async {
+        guard let birth = appState.babyProfile?.birthDate else { nextSleep = nil; return }
+        nextSleep = try? await predictNextSleep.execute(birthDate: birth)
     }
 
     // MARK: - Developmental leap

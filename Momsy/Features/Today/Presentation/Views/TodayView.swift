@@ -58,6 +58,9 @@ struct TodayView: View {
             VStack(spacing: 12) {
                 headerRow
                 greetingBlock
+                if let prediction = vm.nextSleep {
+                    NextSleepCard(prediction: prediction)
+                }
                 mainCards
                 dailyTipCard
                 if vm.currentLeap != nil { leapCard }
@@ -72,16 +75,21 @@ struct TodayView: View {
         .task { await vm.loadTodayEntries() }
         .task { await feedingVM.loadTodayEntries() }
         .task { await vm.fetchDailyTipIfNeeded() }
+        .task { await vm.refreshForecast() }
         .task { feedingVM.restoreOrStartFeeding(side: .left) }
         .onChange(of: loc.current) { _, _ in Task { await vm.refreshTip() } }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 feedingVM.syncTimerWithStartDate()
                 pumpingVM.syncTimerWithStartDate()
+                Task { await vm.refreshForecast() }
             }
         }
         .onChange(of: feedingVM.todayEntries.count) { _, _ in
             Task { await vm.loadTodayEntries() }
+        }
+        .onChange(of: sleepVM.todayEntries.count) { _, _ in
+            Task { await vm.refreshForecast() }
         }
         .task {
             while !Task.isCancelled {

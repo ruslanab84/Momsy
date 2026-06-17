@@ -76,7 +76,11 @@ struct TodayViewModelTests {
             quickLogRepo: QuickLogRepository(),
             tipRepository: tipRepo,
             appState: makeAppState(profile: profile),
-            syncRepo: MockBabySyncRepository()
+            syncRepo: MockBabySyncRepository(),
+            predictNextSleep: PredictNextSleepUseCase(
+                getSleep: GetSleepEntriesUseCase(repository: sleepRepo),
+                engine: DeterministicSleepForecastEngine()
+            )
         )
     }
 

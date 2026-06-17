@@ -80,6 +80,8 @@ final class AppContainer {
     lazy var getSleepEntries    = GetSleepEntriesUseCase(repository: sleepRepository)
     lazy var addManualSleep     = AddManualSleepUseCase(repository: sleepRepository)
     lazy var reconcileStaleSleep = ReconcileStaleSleepUseCase(repository: sleepRepository)
+    let sleepForecastEngine: any SleepForecastEngine = DeterministicSleepForecastEngine()
+    lazy var predictNextSleep   = PredictNextSleepUseCase(getSleep: getSleepEntries, engine: sleepForecastEngine)
 
     // MARK: — Use Cases — Mom Sleep
     lazy var startMomSleep      = StartMomSleepUseCase(repository: momSleepRepository)
@@ -216,7 +218,8 @@ final class AppContainer {
             quickLogRepo: quickLogRepository,
             tipRepository: dailyTipRepository,
             appState: appState,
-            syncRepo: babySyncRepository
+            syncRepo: babySyncRepository,
+            predictNextSleep: predictNextSleep
         )
     }
 
@@ -256,7 +259,8 @@ final class AppContainer {
     func makeSleepViewModel() -> SleepViewModel {
         SleepViewModel(startSleep: startSleep, stopSleep: stopSleep,
                        getSleep: getSleepEntries, addManualSleep: addManualSleep,
-                       reconcileStaleSleep: reconcileStaleSleep, appState: appState)
+                       reconcileStaleSleep: reconcileStaleSleep, appState: appState,
+                       predictNextSleep: predictNextSleep)
     }
 
     func makeReportViewModel() -> ReportViewModel {

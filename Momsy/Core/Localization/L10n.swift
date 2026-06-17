@@ -293,6 +293,38 @@ struct L10n {
     var qualityNormal: String  { s("😐 Normal",    "😐 Нормально",  "😐 Normal",     "😐 Normal",  "😐 Normal", "😐 Normal") }
     var qualityRestless: String{ s("😣 Restless",  "😣 Беспокойно", "😣 Unruhig",    "😣 Inquieto","😣 Agité", "😣 Agitado") }
 
+    // MARK: — Sleep forecast
+    var sleepForecastNapTitle: String {
+        s("Next sleep", "Следующий сон", "Nächster Schlaf", "Próximo sueño", "Prochain sommeil", "Próximo sono")
+    }
+    var sleepForecastBedtimeTitle: String {
+        s("Time for bedtime", "Пора укладывать на ночь", "Zeit fürs Schlafengehen",
+          "Hora de dormir", "L’heure du coucher", "Hora de deitar")
+    }
+    func sleepForecastRange(_ start: String, _ end: String) -> String {
+        s("Window \(start)–\(end)", "Окно \(start)–\(end)", "Fenster \(start)–\(end)",
+          "Ventana \(start)–\(end)", "Fenêtre \(start)–\(end)", "Janela \(start)–\(end)")
+    }
+    var sleepForecastConfidenceLow: String {
+        s("Low confidence", "Низкая точность", "Geringe Sicherheit",
+          "Confianza baja", "Confiance faible", "Confiança baixa")
+    }
+    var sleepForecastConfidenceMedium: String {
+        s("Medium confidence", "Средняя точность", "Mittlere Sicherheit",
+          "Confianza media", "Confiance moyenne", "Confiança média")
+    }
+    var sleepForecastConfidenceHigh: String {
+        s("High confidence", "Высокая точность", "Hohe Sicherheit",
+          "Confianza alta", "Confiance élevée", "Confiança alta")
+    }
+    var sleepForecastBasisAge: String {
+        s("by age", "по возрасту", "nach Alter", "por edad", "selon l’âge", "por idade")
+    }
+    var sleepForecastBasisPersonalized: String {
+        s("from your data", "по вашим данным", "aus deinen Daten",
+          "según tus datos", "d’après vos données", "com base nos seus dados")
+    }
+
     var feedingChartTitle: String  { s("Feeding",          "Кормление",             "Stillen",        "Tomas",   "Tétées", "Mamadas") }
     var feedingPeriodWeek: String  { s("7 days",           "7 дней",                "7 Tage",         "7 días",  "7 jours", "7 dias") }
     var feedingPeriodMonth: String { s("30 days",          "30 дней",               "30 Tage",        "30 días", "30 jours", "30 dias") }

@@ -10,6 +10,7 @@ final class SleepViewModel: ObservableObject {
     @Published var saveError: String?
     @Published var selectedChartPeriod = 0
     @Published var sleepDays: [SleepDayPoint] = []
+    @Published private(set) var nextSleep: SleepPrediction?
 
     private var activeSleepEntry: SleepEntry?
     private var timerTask: Task<Void, Never>?
@@ -25,16 +26,19 @@ final class SleepViewModel: ObservableObject {
     private let getSleepUC: GetSleepEntriesUseCase
     private let addManualSleepUC: AddManualSleepUseCase
     private let reconcileStaleSleepUC: ReconcileStaleSleepUseCase
+    private let predictNextSleepUC: PredictNextSleepUseCase
     private let appState: AppState
 
     init(startSleep: StartSleepUseCase, stopSleep: StopSleepUseCase,
          getSleep: GetSleepEntriesUseCase, addManualSleep: AddManualSleepUseCase,
-         reconcileStaleSleep: ReconcileStaleSleepUseCase, appState: AppState) {
+         reconcileStaleSleep: ReconcileStaleSleepUseCase, appState: AppState,
+         predictNextSleep: PredictNextSleepUseCase) {
         self.startSleepUC = startSleep
         self.stopSleepUC = stopSleep
         self.getSleepUC = getSleep
         self.addManualSleepUC = addManualSleep
         self.reconcileStaleSleepUC = reconcileStaleSleep
+        self.predictNextSleepUC = predictNextSleep
         self.appState = appState
         Task {
             await loadTodayEntries()
@@ -52,10 +56,16 @@ final class SleepViewModel: ObservableObject {
                 }
             }
             await loadChartData()
+            await refreshForecast()
         }
     }
 
     deinit { timerTask?.cancel() }
+
+    func refreshForecast() async {
+        guard let birth = appState.babyProfile?.birthDate else { nextSleep = nil; return }
+        nextSleep = try? await predictNextSleepUC.execute(birthDate: birth)
+    }
 
     var sleepNorm: (min: Double, max: Double) {
         guard let birth = appState.babyProfile?.birthDate else { return (12, 14) }
@@ -170,6 +180,7 @@ final class SleepViewModel: ObservableObject {
                     todayEntries[idx] = saved
                 }
                 pushSleepToFirestore(saved)
+                await refreshForecast()
             } catch {
                 todayEntries.removeAll { $0.id == completed.id }
                 saveError = error.localizedDescription
@@ -205,6 +216,7 @@ final class SleepViewModel: ObservableObject {
                     todayEntries.sort { $0.startDate < $1.startDate }
                 }
                 await loadChartData()
+                await refreshForecast()
             } catch {
                 saveError = error.localizedDescription
             }

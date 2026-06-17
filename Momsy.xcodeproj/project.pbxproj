@@ -16,6 +16,7 @@
 		3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */; };
 		443C7EF01C216B989D605CE2 /* MockBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50479E8852BDAA636377733 /* MockBabyRepository.swift */; };
 		4BACDEB740F77369DB5F5A01 /* MockAnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */; };
+		5147AD29220EE4C99A2BADF1 /* SleepForecastEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B580BA4F6EA3262893A194D /* SleepForecastEngineTests.swift */; };
 		56A4C28EC62F43A96F2D8DA4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
 		802A6938D28AA6A793B23C06 /* MockFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */; };
 		85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */; };
@@ -141,6 +142,7 @@
 		6284D94988BAA9F30D148420 /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
 		64F261A70D74866E7728C38F /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		6B117796E1BA4881A6B15248 /* MockStoolRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockStoolRepository.swift; sourceTree = "<group>"; };
+		6B580BA4F6EA3262893A194D /* SleepForecastEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepForecastEngineTests.swift; sourceTree = "<group>"; };
 		6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		6D7744983E8EF2AF6D12E3DE /* MockDiaryRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaryRepository.swift; sourceTree = "<group>"; };
 		6DEF29B80396B5A8C06CB2DE /* DailyTip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTip.swift; sourceTree = "<group>"; };
@@ -239,6 +241,8 @@
 		};
 		B7318F872FBE4210003CCB0B /* models */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = models;
 			sourceTree = "<group>";
 		};
@@ -356,6 +360,7 @@
 				482ADA73C55024953C8197D9 /* SleepViewModelTests.swift */,
 				B0D4B0BAEF83286E9732D9C9 /* SleepViewModelTests.swift */,
 				E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */,
+				6B580BA4F6EA3262893A194D /* SleepForecastEngineTests.swift */,
 			);
 			path = Sleep;
 			sourceTree = "<group>";
@@ -801,6 +806,7 @@
 				E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */,
 				A63165E2B06D8E9D3DC6D060 /* MockDailyTipService.swift in Sources */,
 				2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */,
+				5147AD29220EE4C99A2BADF1 /* SleepForecastEngineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

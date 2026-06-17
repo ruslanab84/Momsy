@@ -15,7 +15,11 @@ struct SleepViewModelTests {
             getSleep: GetSleepEntriesUseCase(repository: repo),
             addManualSleep: AddManualSleepUseCase(repository: repo),
             reconcileStaleSleep: ReconcileStaleSleepUseCase(repository: repo),
-            appState: appState
+            appState: appState,
+            predictNextSleep: PredictNextSleepUseCase(
+                getSleep: GetSleepEntriesUseCase(repository: repo),
+                engine: DeterministicSleepForecastEngine()
+            )
         )
     }
 
@@ -187,7 +191,11 @@ struct SleepViewModelTests {
             getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
             addManualSleep: AddManualSleepUseCase(repository: MockSleepRepository()),
             reconcileStaleSleep: ReconcileStaleSleepUseCase(repository: MockSleepRepository()),
-            appState: appState
+            appState: appState,
+            predictNextSleep: PredictNextSleepUseCase(
+                getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
+                engine: DeterministicSleepForecastEngine()
+            )
         )
         #expect(vm.sleepNorm.min == 14)
         #expect(vm.sleepNorm.max == 17)
@@ -204,7 +212,11 @@ struct SleepViewModelTests {
             getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
             addManualSleep: AddManualSleepUseCase(repository: MockSleepRepository()),
             reconcileStaleSleep: ReconcileStaleSleepUseCase(repository: MockSleepRepository()),
-            appState: appState
+            appState: appState,
+            predictNextSleep: PredictNextSleepUseCase(
+                getSleep: GetSleepEntriesUseCase(repository: MockSleepRepository()),
+                engine: DeterministicSleepForecastEngine()
+            )
         )
         #expect(vm.sleepNorm.min == 12)
         #expect(vm.sleepNorm.max == 14)

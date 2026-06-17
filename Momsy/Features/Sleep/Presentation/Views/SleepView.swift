@@ -14,6 +14,9 @@ struct SleepView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
                     topBar
+                    if let prediction = vm.nextSleep {
+                        NextSleepCard(prediction: prediction)
+                    }
                     statsRow
                     timerBlock
                     if vm.isSleepActive { qualityPicker }
@@ -32,8 +35,12 @@ struct SleepView: View {
             }
         }
         .errorToast($vm.saveError)
+        .task { await vm.refreshForecast() }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { vm.syncTimerWithStartDate() }
+            if phase == .active {
+                vm.syncTimerWithStartDate()
+                Task { await vm.refreshForecast() }
+            }
         }
         .onChange(of: vm.selectedChartPeriod) {
             Task { await vm.loadChartData() }
