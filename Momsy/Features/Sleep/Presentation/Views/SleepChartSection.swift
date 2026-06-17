@@ -43,9 +43,10 @@ struct SleepChartSection: View {
     }
 
     private var normBadge: some View {
+        let h = loc.strings.unitHourShort
         let label = lang == "en"
-            ? "\(Int(normMin))–\(Int(normMax))h"
-            : "\(Int(normMin))–\(Int(normMax)) ч"
+            ? "\(Int(normMin))–\(Int(normMax))\(h)"
+            : "\(Int(normMin))–\(Int(normMax)) \(h)"
         return Text(label)
             .font(.system(size: 10, weight: .bold, design: .rounded))
             .foregroundColor(.bbMintDeep)
@@ -153,11 +154,12 @@ struct SleepChartSection: View {
         let diff = avg - normMid
         let isIn = avg >= normMin && avg <= normMax
 
-        let avgTxt = lang == "en" ? String(format: "%.1fh", avg) : String(format: "%.1f ч", avg)
-        let normTxt = lang == "en" ? "\(Int(normMin))–\(Int(normMax))h" : "\(Int(normMin))–\(Int(normMax)) ч"
+        let h = loc.strings.unitHourShort
+        let avgTxt = lang == "en" ? String(format: "%.1f\(h)", avg) : String(format: "%.1f \(h)", avg)
+        let normTxt = lang == "en" ? "\(Int(normMin))–\(Int(normMax))\(h)" : "\(Int(normMin))–\(Int(normMax)) \(h)"
         let diffTxt = lang == "en"
-            ? String(format: "%+.1fh", diff)
-            : String(format: "%+.1f ч", diff)
+            ? String(format: "%+.1f\(h)", diff)
+            : String(format: "%+.1f \(h)", diff)
         let statusTxt = isIn ? loc.strings.sleepInNorm
             : (diff < 0 ? loc.strings.sleepBelowNorm : loc.strings.sleepAboveNorm)
         let diffColor: Color = isIn ? .bbMintDeep : (diff < 0 ? Color(UIColor.systemOrange) : .bbMintDeep)

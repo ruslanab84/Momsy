@@ -14,10 +14,14 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
     }
 
     func save(_ entry: VaccinationEntry) async throws {
-        let all = try context.fetch(FetchDescriptor<VaccinationRecord>())
         // Dedup only for catalog entries — custom vaccines (isCustom) each have a unique catalogId
-        if !entry.isCustom, let existing = all.first(where: { $0.catalogId == entry.catalogId }) {
-            context.delete(existing)
+        if !entry.isCustom {
+            let catalogId = entry.catalogId
+            var descriptor = FetchDescriptor<VaccinationRecord>(predicate: #Predicate { $0.catalogId == catalogId })
+            descriptor.fetchLimit = 1
+            if let existing = try context.fetch(descriptor).first {
+                context.delete(existing)
+            }
         }
         context.insert(VaccinationRecord(id: entry.id, catalogId: entry.catalogId,
                                           doneDate: entry.doneDate, notes: entry.notes,
@@ -27,8 +31,11 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
 
     func upsert(_ entries: [VaccinationEntry]) async throws {
         guard !entries.isEmpty else { return }
+        let incomingIds = entries.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<VaccinationRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<VaccinationRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false
@@ -50,8 +57,9 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
     }
 
     func delete(id: UUID) async throws {
-        let all = try context.fetch(FetchDescriptor<VaccinationRecord>())
-        if let rec = all.first(where: { $0.id == id }) {
+        var descriptor = FetchDescriptor<VaccinationRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let rec = try context.fetch(descriptor).first {
             context.delete(rec)
             try context.save()
         }
@@ -59,7 +67,10 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
 
     func applyDeletions(_ ids: Set<UUID>) async throws {
         guard !ids.isEmpty else { return }
-        let matches = try context.fetch(FetchDescriptor<VaccinationRecord>()).filter { ids.contains($0.id) }
+        let idArray = Array(ids)
+        let matches = try context.fetch(
+            FetchDescriptor<VaccinationRecord>(predicate: #Predicate { idArray.contains($0.id) })
+        )
         guard !matches.isEmpty else { return }
         matches.forEach { context.delete($0) }
         try context.save()

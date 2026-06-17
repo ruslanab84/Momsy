@@ -26,12 +26,6 @@
 		8FF4DECAE6F4B06FFD6E7189 /* MockPushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */; };
 		9CBCB9DF036CA6355130F76C /* MomsyWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */; };
 		9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */; };
-		DEADBEEF0000000000000012 /* MockComplementaryFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000011 /* MockComplementaryFeedingRepository.swift */; };
-		DEADBEEF0000000000000014 /* MockWeeklyInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000013 /* MockWeeklyInsight.swift */; };
-		DEADBEEF0000000000000016 /* WeeklyInsightContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000015 /* WeeklyInsightContextBuilderTests.swift */; };
-		DEADBEEF0000000000000018 /* GenerateWeeklyInsightUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000017 /* GenerateWeeklyInsightUseCaseTests.swift */; };
-		DEADBEEF000000000000001A /* StaticWeeklyInsightServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000019 /* StaticWeeklyInsightServiceTests.swift */; };
-		DEADBEEF000000000000001C /* WeeklyInsightViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF000000000000001B /* WeeklyInsightViewModelTests.swift */; };
 		A5522FF4A6C0AF27DC5EF07E /* MockSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */; };
 		A63165E2B06D8E9D3DC6D060 /* MockDailyTipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */; };
 		AA001122CC33DD44EE55FF65 /* FeedingLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */; };
@@ -55,6 +49,7 @@
 		B7318F4F2FBCEA96003CCB0B /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = B7318F4E2FBCEA96003CCB0B /* FirebaseDatabase */; };
 		B7318F512FBCEA96003CCB0B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B7318F502FBCEA96003CCB0B /* FirebaseFirestore */; };
 		B7318F532FBCEA96003CCB0B /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = B7318F522FBCEA96003CCB0B /* FirebaseStorage */; };
+		B7C8ED222FE2F6C800A0906E /* SLEEP_FORECAST_ENGINE.md in Resources */ = {isa = PBXBuildFile; fileRef = B7C8ED212FE2F6C800A0906E /* SLEEP_FORECAST_ENGINE.md */; };
 		BB001122CC33DD44EE55FF61 /* MomsySleepWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF60 /* MomsySleepWidgetView.swift */; };
 		BB001122CC33DD44EE55FF63 /* MomsySummaryWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF62 /* MomsySummaryWidgetView.swift */; };
 		BB001122CC33DD44EE55FF80 /* SleepActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF81 /* SleepActivityAttributes.swift */; };
@@ -69,6 +64,12 @@
 		CFE0C4DB867A5136830C1D5A /* MomsyWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */; };
 		D7C1A0B2E3F40516A7B8C9D0 /* MomsyStandByWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C1A0B2E3F40516A7B8C9D1 /* MomsyStandByWidgetView.swift */; };
 		DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C118A36FCB09993B8CBD0D /* DiaryViewModelTests.swift */; };
+		DEADBEEF0000000000000012 /* MockComplementaryFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000011 /* MockComplementaryFeedingRepository.swift */; };
+		DEADBEEF0000000000000014 /* MockWeeklyInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000013 /* MockWeeklyInsight.swift */; };
+		DEADBEEF0000000000000016 /* WeeklyInsightContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000015 /* WeeklyInsightContextBuilderTests.swift */; };
+		DEADBEEF0000000000000018 /* GenerateWeeklyInsightUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000017 /* GenerateWeeklyInsightUseCaseTests.swift */; };
+		DEADBEEF000000000000001A /* StaticWeeklyInsightServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000019 /* StaticWeeklyInsightServiceTests.swift */; };
+		DEADBEEF000000000000001C /* WeeklyInsightViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF000000000000001B /* WeeklyInsightViewModelTests.swift */; };
 		E3D39EF3449D3301F24E663A /* MockSoundRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */; };
 		E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */; };
 		EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */; };
@@ -129,12 +130,6 @@
 		33A740574DACB7A766F4A51D /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		3BBE7E66563E0F26A2DFF70C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaperRepository.swift; sourceTree = "<group>"; };
-		DEADBEEF0000000000000011 /* MockComplementaryFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockComplementaryFeedingRepository.swift; sourceTree = "<group>"; };
-		DEADBEEF0000000000000013 /* MockWeeklyInsight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockWeeklyInsight.swift; sourceTree = "<group>"; };
-		DEADBEEF0000000000000015 /* WeeklyInsightContextBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeeklyInsightContextBuilderTests.swift; sourceTree = "<group>"; };
-		DEADBEEF0000000000000017 /* GenerateWeeklyInsightUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GenerateWeeklyInsightUseCaseTests.swift; sourceTree = "<group>"; };
-		DEADBEEF0000000000000019 /* StaticWeeklyInsightServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StaticWeeklyInsightServiceTests.swift; sourceTree = "<group>"; };
-		DEADBEEF000000000000001B /* WeeklyInsightViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeeklyInsightViewModelTests.swift; sourceTree = "<group>"; };
 		4820A4E27274110E9256D2F7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		482ADA73C55024953C8197D9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		4F159218252E2FF5857958F7 /* MomsyWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MomsyWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -177,6 +172,7 @@
 		B7318C792FBBA132003CCB0B /* software-design-and-architecture-analysis.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "software-design-and-architecture-analysis.md"; sourceTree = "<group>"; };
 		B7318C7A2FBBA132003CCB0B /* SWIFTUI_COMPONENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SWIFTUI_COMPONENTS.md; sourceTree = "<group>"; };
 		B799069C9AF12C7D74CD4BC3 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
+		B7C8ED212FE2F6C800A0906E /* SLEEP_FORECAST_ENGINE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SLEEP_FORECAST_ENGINE.md; sourceTree = "<group>"; };
 		BB001122CC33DD44EE55FF60 /* MomsySleepWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsySleepWidgetView.swift; sourceTree = "<group>"; };
 		BB001122CC33DD44EE55FF62 /* MomsySummaryWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsySummaryWidgetView.swift; sourceTree = "<group>"; };
 		BB001122CC33DD44EE55FF81 /* SleepActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SleepActivityAttributes.swift; path = Momsy/Core/Widget/SleepActivityAttributes.swift; sourceTree = "<group>"; };
@@ -201,6 +197,12 @@
 		D7C1A0B2E3F40516A7B8C9D1 /* MomsyStandByWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyStandByWidgetView.swift; sourceTree = "<group>"; };
 		D8E2302C2FFD377BB31E23DD /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
 		DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
+		DEADBEEF0000000000000011 /* MockComplementaryFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockComplementaryFeedingRepository.swift; sourceTree = "<group>"; };
+		DEADBEEF0000000000000013 /* MockWeeklyInsight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockWeeklyInsight.swift; sourceTree = "<group>"; };
+		DEADBEEF0000000000000015 /* WeeklyInsightContextBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeeklyInsightContextBuilderTests.swift; sourceTree = "<group>"; };
+		DEADBEEF0000000000000017 /* GenerateWeeklyInsightUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GenerateWeeklyInsightUseCaseTests.swift; sourceTree = "<group>"; };
+		DEADBEEF0000000000000019 /* StaticWeeklyInsightServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StaticWeeklyInsightServiceTests.swift; sourceTree = "<group>"; };
+		DEADBEEF000000000000001B /* WeeklyInsightViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeeklyInsightViewModelTests.swift; sourceTree = "<group>"; };
 		DED78F3E8524577CFF50864B /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetBundle.swift; sourceTree = "<group>"; };
 		E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
@@ -496,6 +498,7 @@
 			children = (
 				B7318F872FBE4210003CCB0B /* models */,
 				B7318C752FBBA132003CCB0B /* ARCHITECTURE.md */,
+				B7C8ED212FE2F6C800A0906E /* SLEEP_FORECAST_ENGINE.md */,
 				B7318C762FBBA132003CCB0B /* CLAUDE.md */,
 				B7318C772FBBA132003CCB0B /* LOCALIZATION_RULES.md */,
 				B7318C782FBBA132003CCB0B /* readme.md */,
@@ -744,6 +747,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B7318C7B2FBBA132003CCB0B /* ARCHITECTURE.md in Resources */,
+				B7C8ED222FE2F6C800A0906E /* SLEEP_FORECAST_ENGINE.md in Resources */,
 				B7318C7C2FBBA132003CCB0B /* CLAUDE.md in Resources */,
 				B7318C7D2FBBA132003CCB0B /* LOCALIZATION_RULES.md in Resources */,
 				B7318C7E2FBBA132003CCB0B /* SWIFTUI_COMPONENTS.md in Resources */,

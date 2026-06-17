@@ -9,7 +9,7 @@ final class WalkViewModel: ObservableObject {
     @Published var saveError: String?
 
     private var activeWalkEntry: WalkEntry?
-    private var timerCancellable: AnyCancellable?
+    private var timerTask: Task<Void, Never>?
     private var lm: LocalizationManager { .shared }
 
     private let liveActivity = WalkLiveActivityManager()
@@ -37,6 +37,8 @@ final class WalkViewModel: ObservableObject {
             }
         }
     }
+
+    deinit { timerTask?.cancel() }
 
     /// Longest plausible single walk; beyond this the recovered end is untrusted.
     private static let maxPlausibleWalk: TimeInterval = 12 * 3600
@@ -99,8 +101,8 @@ final class WalkViewModel: ObservableObject {
 
     func stop() {
         guard isWalkActive, let entry = activeWalkEntry else { return }
-        timerCancellable?.cancel()
-        timerCancellable = nil
+        timerTask?.cancel()
+        timerTask = nil
         isWalkActive = false
         activeWalkEntry = nil
         liveActivity.endActivity()
@@ -124,12 +126,14 @@ final class WalkViewModel: ObservableObject {
         walkSeconds = Int(Date().timeIntervalSince(entry.startDate))
         WidgetDataStore.shared.setWalkActive(startDate: entry.startDate)
         liveActivity.startActivity(startDate: entry.startDate, babyName: WidgetDataStore.shared.babyName)
-        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self, let entry = self.activeWalkEntry else { return }
+        timerTask?.cancel()
+        timerTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard let self, !Task.isCancelled, let entry = self.activeWalkEntry else { return }
                 self.walkSeconds = Int(Date().timeIntervalSince(entry.startDate))
             }
+        }
     }
 
     func syncTimerWithStartDate() {

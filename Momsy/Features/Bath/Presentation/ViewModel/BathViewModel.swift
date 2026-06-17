@@ -9,7 +9,7 @@ final class BathViewModel: ObservableObject {
     @Published var saveError: String?
 
     private var activeBathEntry: BathEntry?
-    private var timerCancellable: AnyCancellable?
+    private var timerTask: Task<Void, Never>?
     private var lm: LocalizationManager { .shared }
 
     private let liveActivity = BathLiveActivityManager()
@@ -37,6 +37,8 @@ final class BathViewModel: ObservableObject {
             }
         }
     }
+
+    deinit { timerTask?.cancel() }
 
     /// Longest plausible single bath; beyond this the recovered end is untrusted.
     private static let maxPlausibleBath: TimeInterval = 6 * 3600
@@ -99,8 +101,8 @@ final class BathViewModel: ObservableObject {
 
     func stop() {
         guard isBathActive, let entry = activeBathEntry else { return }
-        timerCancellable?.cancel()
-        timerCancellable = nil
+        timerTask?.cancel()
+        timerTask = nil
         isBathActive = false
         activeBathEntry = nil
         liveActivity.endActivity()
@@ -124,12 +126,14 @@ final class BathViewModel: ObservableObject {
         bathSeconds = Int(Date().timeIntervalSince(entry.startDate))
         WidgetDataStore.shared.setBathActive(startDate: entry.startDate)
         liveActivity.startActivity(startDate: entry.startDate, babyName: WidgetDataStore.shared.babyName)
-        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self, let entry = self.activeBathEntry else { return }
+        timerTask?.cancel()
+        timerTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard let self, !Task.isCancelled, let entry = self.activeBathEntry else { return }
                 self.bathSeconds = Int(Date().timeIntervalSince(entry.startDate))
             }
+        }
     }
 
     func logManualEntry(startDate: Date, endDate: Date, note: String) {

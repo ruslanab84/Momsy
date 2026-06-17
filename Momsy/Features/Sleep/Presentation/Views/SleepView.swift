@@ -35,6 +35,9 @@ struct SleepView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { vm.syncTimerWithStartDate() }
         }
+        .onChange(of: vm.selectedChartPeriod) {
+            Task { await vm.loadChartData() }
+        }
         .sheet(isPresented: $showAddManual) {
             AddSleepEntrySheet(vm: vm)
                 .environmentObject(loc)

@@ -8,15 +8,21 @@ final class SwiftDataFeedingRepository: FeedingRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(for date: Date) async throws -> [FeedingEntry] {
-        let all = try context.fetch(FetchDescriptor<FeedingRecord>())
-        return all.filter { calendar.isDate($0.date, inSameDayAs: date) }
-            .uniqued(by: { $0.id }).map { $0.toDomain() }
+        let start = calendar.startOfDay(for: date)
+        guard let next = calendar.date(byAdding: .day, value: 1, to: start) else { return [] }
+        var descriptor = FetchDescriptor<FeedingRecord>(
+            predicate: #Predicate { $0.date >= start && $0.date < next }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date)]
+        return try context.fetch(descriptor).uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func getEntries(from: Date, to: Date) async throws -> [FeedingEntry] {
-        let all = try context.fetch(FetchDescriptor<FeedingRecord>())
-        return all.filter { $0.date >= from && $0.date <= to }
-            .uniqued(by: { $0.id }).map { $0.toDomain() }
+        var descriptor = FetchDescriptor<FeedingRecord>(
+            predicate: #Predicate { $0.date >= from && $0.date <= to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date)]
+        return try context.fetch(descriptor).uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func add(_ entry: FeedingEntry) async throws {
@@ -26,8 +32,11 @@ final class SwiftDataFeedingRepository: FeedingRepository {
 
     func upsert(_ entries: [FeedingEntry]) async throws {
         guard !entries.isEmpty else { return }
+        let incomingIds = entries.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<FeedingRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<FeedingRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false
@@ -45,8 +54,9 @@ final class SwiftDataFeedingRepository: FeedingRepository {
     }
 
     func delete(id: UUID) async throws {
-        let all = try context.fetch(FetchDescriptor<FeedingRecord>())
-        if let record = all.first(where: { $0.id == id }) {
+        var descriptor = FetchDescriptor<FeedingRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             context.delete(record)
             try context.save()
         }

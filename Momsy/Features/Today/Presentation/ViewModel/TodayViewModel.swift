@@ -87,7 +87,7 @@ final class TodayViewModel: ObservableObject {
     /// Localized name of the current leap, or nil when no leap is active.
     var currentLeapName: String? {
         guard let leap = currentLeap else { return nil }
-        return LocalizationManager.shared.lang == "en" ? leap.nameEn : leap.name
+        return leap.name(for: LocalizationManager.shared.current)
     }
 
     private func startSyncListeners() {
@@ -125,9 +125,17 @@ final class TodayViewModel: ObservableObject {
     }
 
     func loadTodayEntries() async {
+        let lm = LocalizationManager.shared
         let feedings = (try? await getFeeding.execute(for: Date())) ?? []
         let feedingEntries: [LogEntry] = feedings.map {
-            LogEntry(time: $0.date, kind: .bottle, label: feedingLabel($0))
+            LogEntry(
+                time: $0.date,
+                kind: .bottle,
+                label: feedingLabel($0),
+                durationMinutes: $0.durationMinutes,
+                feedSide: $0.side.displayName(lang: lm.lang).lowercased(),
+                isBottleFeed: $0.side == .bottle
+            )
         }
         let cal = Calendar.current
         let startOfDay = cal.startOfDay(for: Date())
@@ -294,7 +302,7 @@ final class TodayViewModel: ObservableObject {
         } else {
             label = lm.strings.sleepStarted
         }
-        return LogEntry(time: entry.startDate, kind: .sleep, label: label)
+        return LogEntry(time: entry.startDate, kind: .sleep, label: label, durationMinutes: entry.durationMinutes)
     }
 
     private func feedingLabel(_ entry: FeedingEntry) -> String {

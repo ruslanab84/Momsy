@@ -13,6 +13,14 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
         return records.map { $0.toDomain() }.sorted { $0.date > $1.date }
     }
 
+    func getEntries(from: Date, to: Date) async throws -> [ComplementaryFoodEntry] {
+        var descriptor = FetchDescriptor<ComplementaryFoodRecord>(
+            predicate: #Predicate { $0.date >= from && $0.date < to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date)]
+        return try context.fetch(descriptor).map { $0.toDomain() }
+    }
+
     func add(_ entry: ComplementaryFoodEntry) async throws {
         context.insert(ComplementaryFoodRecord(
             id: entry.id, date: entry.date, foodName: entry.foodName,
@@ -25,8 +33,11 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
 
     func upsert(_ entries: [ComplementaryFoodEntry]) async throws {
         guard !entries.isEmpty else { return }
+        let incomingIds = entries.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<ComplementaryFoodRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<ComplementaryFoodRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false
@@ -51,22 +62,28 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
     }
 
     func update(_ entry: ComplementaryFoodEntry) async throws {
-        let all = try context.fetch(FetchDescriptor<ComplementaryFoodRecord>())
-        guard let rec = all.first(where: { $0.id == entry.id }) else { return }
+        let id = entry.id
+        var descriptor = FetchDescriptor<ComplementaryFoodRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        guard let rec = try context.fetch(descriptor).first else { return }
         rec.apply(entry)
         try context.save()
     }
 
     func delete(id: UUID) async throws {
-        let all = try context.fetch(FetchDescriptor<ComplementaryFoodRecord>())
-        guard let rec = all.first(where: { $0.id == id }) else { return }
+        var descriptor = FetchDescriptor<ComplementaryFoodRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        guard let rec = try context.fetch(descriptor).first else { return }
         context.delete(rec)
         try context.save()
     }
 
     func applyDeletions(_ ids: Set<UUID>) async throws {
         guard !ids.isEmpty else { return }
-        let matches = try context.fetch(FetchDescriptor<ComplementaryFoodRecord>()).filter { ids.contains($0.id) }
+        let idArray = Array(ids)
+        let matches = try context.fetch(
+            FetchDescriptor<ComplementaryFoodRecord>(predicate: #Predicate { idArray.contains($0.id) })
+        )
         guard !matches.isEmpty else { return }
         matches.forEach { context.delete($0) }
         try context.save()

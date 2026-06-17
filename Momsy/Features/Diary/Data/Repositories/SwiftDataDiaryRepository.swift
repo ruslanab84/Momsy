@@ -7,8 +7,11 @@ final class SwiftDataDiaryRepository: DiaryRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(from: Date, to: Date) async throws -> [StoredDiaryItem] {
-        let all = try context.fetch(FetchDescriptor<DiaryItemRecord>())
-        return all.filter { $0.date >= from && $0.date <= to }
+        var descriptor = FetchDescriptor<DiaryItemRecord>(
+            predicate: #Predicate { $0.date >= from && $0.date <= to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date)]
+        return try context.fetch(descriptor)
             .uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
@@ -19,8 +22,11 @@ final class SwiftDataDiaryRepository: DiaryRepository {
 
     func upsert(_ items: [StoredDiaryItem]) async throws {
         guard !items.isEmpty else { return }
+        let incomingIds = items.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<DiaryItemRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<DiaryItemRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false
@@ -38,15 +44,18 @@ final class SwiftDataDiaryRepository: DiaryRepository {
     }
 
     func update(_ item: StoredDiaryItem) async throws {
-        let all = try context.fetch(FetchDescriptor<DiaryItemRecord>())
-        guard let record = all.first(where: { $0.id == item.id }) else { return }
+        let id = item.id
+        var descriptor = FetchDescriptor<DiaryItemRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        guard let record = try context.fetch(descriptor).first else { return }
         record.apply(item)
         try context.save()
     }
 
     func delete(id: UUID) async throws {
-        let all = try context.fetch(FetchDescriptor<DiaryItemRecord>())
-        if let record = all.first(where: { $0.id == id }) {
+        var descriptor = FetchDescriptor<DiaryItemRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             context.delete(record)
             try context.save()
         }

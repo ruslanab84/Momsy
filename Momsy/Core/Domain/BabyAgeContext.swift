@@ -57,6 +57,6 @@ enum BabyAgeContext {
     /// Name of the current developmental leap for the given age, localized.
     static func currentLeapName(ageWeeks weeks: Int, lang: String) -> String? {
         guard let leap = currentLeap(ageWeeks: weeks) else { return nil }
-        return lang == "en" ? leap.nameEn : leap.name
+        return leap.name(for: Language(rawValue: lang) ?? .english)
     }
 }

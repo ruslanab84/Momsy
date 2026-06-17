@@ -1,0 +1,108 @@
+{
+  "identifier" : "6F5F727C-CF3E-4A1F-95A7-FEE2FD04A258",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "58ZSRJHNGW",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "E6AF0276-D7E0-4B06-8971-9607D11F6137",
+      "localizations" : [
+
+      ],
+      "name" : "Momsy Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "21138FF6-6BC2-4904-95A2-C23DAD70EE32",
+          "introductoryOffer" : {
+            "internalID" : "14025D1B-6CF8-466F-BAF8-FD76853B720D",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Unlock all Momsy Premium features",
+              "displayName" : "Momsy Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.ruslanabdulov.momsy.premium.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Momsy Premium Monthly",
+          "subscriptionGroupID" : "E6AF0276-D7E0-4B06-8971-9607D11F6137",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

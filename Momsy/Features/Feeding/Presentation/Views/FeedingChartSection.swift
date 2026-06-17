@@ -124,7 +124,7 @@ struct FeedingChartSection: View {
 
         let avgTxt = String(format: "%.1f", avgPerDay)
         let totalTxt = "\(total)"
-        let durTxt = lang == "en" ? "\(avgDur) min" : "\(avgDur) мин"
+        let durTxt = "\(avgDur) \(loc.strings.unitMinShort)"
 
         return HStack(spacing: 0) {
             miniStat(top: loc.strings.feedingAvgPerDay, value: avgTxt, valueColor: .bbCoralDeep)

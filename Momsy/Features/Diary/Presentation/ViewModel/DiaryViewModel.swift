@@ -105,7 +105,7 @@ final class DiaryViewModel: ObservableObject {
         let comps = cal.dateComponents([.month, .day], from: birth, to: day)
         let months = max(0, comps.month ?? 0)
         let days = max(0, comps.day ?? 0)
-        return lm.lang == "en" ? "\(months) mo \(days) d" : "\(months) мес \(days) дн"
+        return "\(months) \(lm.strings.ageMonthShort) \(days) \(lm.strings.ageDayShort)"
     }
 
     private func toDiaryItem(_ stored: StoredDiaryItem) -> DiaryItem {

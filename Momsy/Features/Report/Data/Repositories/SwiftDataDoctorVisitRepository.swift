@@ -7,8 +7,11 @@ final class SwiftDataDoctorVisitRepository: DoctorVisitRepository {
     init(context: ModelContext) { self.context = context }
 
     func getLast() async throws -> DoctorVisit? {
-        let all = try context.fetch(FetchDescriptor<DoctorVisitRecord>())
-        return all.sorted { $0.date > $1.date }.first?.toDomain()
+        var descriptor = FetchDescriptor<DoctorVisitRecord>(
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first?.toDomain()
     }
 
     func save(_ visit: DoctorVisit) async throws {

@@ -26,8 +26,10 @@ final class SwiftDataPumpingRepository: PumpingRepository {
         finished.endDate = now
         finished.durationSeconds = max(1, Int(now.timeIntervalSince(entry.date)))
         finished.volumeML = volumeML
-        let all = try context.fetch(FetchDescriptor<PumpingRecord>())
-        if let record = all.first(where: { $0.id == entry.id }) {
+        let id = entry.id
+        var descriptor = FetchDescriptor<PumpingRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             record.endDate = finished.endDate
             record.durationSeconds = finished.durationSeconds
             record.volumeML = volumeML
@@ -37,12 +39,13 @@ final class SwiftDataPumpingRepository: PumpingRepository {
     }
 
     func getEntries(from: Date, to: Date) async throws -> [PumpingEntry] {
-        let all = try context.fetch(FetchDescriptor<PumpingRecord>())
-        return all
-            .filter { $0.date >= from && $0.date < to && $0.endDate != nil }
+        var descriptor = FetchDescriptor<PumpingRecord>(
+            predicate: #Predicate { $0.date >= from && $0.date < to && $0.endDate != nil }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date)]
+        return try context.fetch(descriptor)
             .uniqued(by: { $0.id })
             .map { $0.toDomain() }
-            .sorted { $0.date < $1.date }
     }
 
     func logManual(date: Date, durationMinutes: Int, side: PumpingSide, volumeML: Int) async throws -> PumpingEntry {
@@ -62,8 +65,11 @@ final class SwiftDataPumpingRepository: PumpingRepository {
 
     func upsert(_ entries: [PumpingEntry]) async throws {
         guard !entries.isEmpty else { return }
+        let incomingIds = entries.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<PumpingRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<PumpingRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false

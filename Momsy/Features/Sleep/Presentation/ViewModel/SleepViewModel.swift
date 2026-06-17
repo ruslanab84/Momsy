@@ -12,8 +12,7 @@ final class SleepViewModel: ObservableObject {
     @Published var sleepDays: [SleepDayPoint] = []
 
     private var activeSleepEntry: SleepEntry?
-    private var timerCancellable: AnyCancellable?
-    private var chartPeriodCancellable: AnyCancellable?
+    private var timerTask: Task<Void, Never>?
     private var lm: LocalizationManager { .shared }
 
     private let liveActivity = SleepLiveActivityManager()
@@ -54,10 +53,9 @@ final class SleepViewModel: ObservableObject {
             }
             await loadChartData()
         }
-        chartPeriodCancellable = $selectedChartPeriod
-            .dropFirst()
-            .sink { [weak self] _ in Task { [weak self] in await self?.loadChartData() } }
     }
+
+    deinit { timerTask?.cancel() }
 
     var sleepNorm: (min: Double, max: Double) {
         guard let birth = appState.babyProfile?.birthDate else { return (12, 14) }
@@ -138,18 +136,20 @@ final class SleepViewModel: ObservableObject {
         sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
         WidgetDataStore.shared.setSleepActive(startDate: entry.startDate)
         liveActivity.startActivity(startDate: entry.startDate, babyName: appState.babyProfile?.name ?? "")
-        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self, let entry = self.activeSleepEntry else { return }
+        timerTask?.cancel()
+        timerTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard let self, !Task.isCancelled, let entry = self.activeSleepEntry else { return }
                 self.sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
             }
+        }
     }
 
     func stop() {
         guard isSleepActive, var entry = activeSleepEntry else { return }
-        timerCancellable?.cancel()
-        timerCancellable = nil
+        timerTask?.cancel()
+        timerTask = nil
         entry.quality = selectedQuality
         var completed = entry
         completed.endDate = Date()

@@ -131,48 +131,7 @@ struct EPDSSheet: View {
     }
 
     private func answerRow(question: Int, option: Int) -> some View {
-        let labels: [[String]] = [
-            [lm.lang == "en" ? "As much as I always could" : "Так же, как всегда",
-             lm.lang == "en" ? "Not quite so much now" : "Немного меньше, чем обычно",
-             lm.lang == "en" ? "Definitely not so much now" : "Значительно меньше, чем обычно",
-             lm.lang == "en" ? "Not at all" : "Совсем нет"],
-            [lm.lang == "en" ? "As much as I ever did" : "Так же, как и всегда",
-             lm.lang == "en" ? "Rather less than I used to" : "Меньше, чем прежде",
-             lm.lang == "en" ? "Definitely less than I used to" : "Намного меньше, чем прежде",
-             lm.lang == "en" ? "Hardly at all" : "Почти не ждала"],
-            [lm.lang == "en" ? "No, never" : "Нет, никогда",
-             lm.lang == "en" ? "Not very often" : "Не очень часто",
-             lm.lang == "en" ? "Yes, some of the time" : "Да, иногда",
-             lm.lang == "en" ? "Yes, most of the time" : "Да, большую часть времени"],
-            [lm.lang == "en" ? "No, not at all" : "Нет, совсем нет",
-             lm.lang == "en" ? "Hardly ever" : "Очень редко",
-             lm.lang == "en" ? "Yes, sometimes" : "Да, иногда",
-             lm.lang == "en" ? "Yes, very often" : "Да, очень часто"],
-            [lm.lang == "en" ? "No, not at all" : "Нет, совсем нет",
-             lm.lang == "en" ? "No, not much" : "Нет, не очень",
-             lm.lang == "en" ? "Yes, sometimes" : "Да, иногда",
-             lm.lang == "en" ? "Yes, quite a lot" : "Да, довольно часто"],
-            [lm.lang == "en" ? "No, I have been coping as well as ever" : "Нет, я справлялась так же хорошо",
-             lm.lang == "en" ? "No, most of the time I have coped quite well" : "Нет, в основном справлялась",
-             lm.lang == "en" ? "Yes, sometimes I haven't been coping as well as usual" : "Да, иногда хуже, чем обычно",
-             lm.lang == "en" ? "Yes, I have not been coping at all" : "Да, совсем не справлялась"],
-            [lm.lang == "en" ? "No, not at all" : "Нет, совсем",
-             lm.lang == "en" ? "Not very often" : "Не очень часто",
-             lm.lang == "en" ? "Yes, sometimes" : "Да, иногда",
-             lm.lang == "en" ? "Yes, most of the time" : "Да, большую часть времени"],
-            [lm.lang == "en" ? "No, not at all" : "Нет, совсем",
-             lm.lang == "en" ? "Not very often" : "Не очень часто",
-             lm.lang == "en" ? "Yes, quite often" : "Да, довольно часто",
-             lm.lang == "en" ? "Yes, most of the time" : "Да, почти всё время"],
-            [lm.lang == "en" ? "No, never" : "Нет, никогда",
-             lm.lang == "en" ? "Only occasionally" : "Лишь иногда",
-             lm.lang == "en" ? "Yes, quite often" : "Да, довольно часто",
-             lm.lang == "en" ? "Yes, most of the time" : "Да, большую часть времени"],
-            [lm.lang == "en" ? "Never" : "Никогда",
-             lm.lang == "en" ? "Hardly ever" : "Почти никогда",
-             lm.lang == "en" ? "Sometimes" : "Иногда",
-             lm.lang == "en" ? "Yes, quite often" : "Да, довольно часто"],
-        ]
+        let labels = lm.strings.epdsOptions
         let label = labels[min(question, labels.count - 1)][option]
         let isSelected = answers[question] == option
         return Button {

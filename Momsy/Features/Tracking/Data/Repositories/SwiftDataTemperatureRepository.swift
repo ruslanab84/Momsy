@@ -12,8 +12,11 @@ final class SwiftDataTemperatureRepository: TemperatureRepository {
     }
 
     func getEntries(from: Date, to: Date) async throws -> [TemperatureEntry] {
-        let all = try context.fetch(FetchDescriptor<TemperatureRecord>())
-        return all.filter { $0.date >= from && $0.date <= to }.map { $0.toDomain() }
+        var descriptor = FetchDescriptor<TemperatureRecord>(
+            predicate: #Predicate { $0.date >= from && $0.date <= to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date)]
+        return try context.fetch(descriptor).map { $0.toDomain() }
     }
 
     func add(_ entry: TemperatureEntry) async throws {
@@ -23,8 +26,11 @@ final class SwiftDataTemperatureRepository: TemperatureRepository {
 
     func upsert(_ entries: [TemperatureEntry]) async throws {
         guard !entries.isEmpty else { return }
+        let incomingIds = entries.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<TemperatureRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<TemperatureRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false
@@ -42,8 +48,9 @@ final class SwiftDataTemperatureRepository: TemperatureRepository {
     }
 
     func delete(id: UUID) async throws {
-        let all = try context.fetch(FetchDescriptor<TemperatureRecord>())
-        if let record = all.first(where: { $0.id == id }) {
+        var descriptor = FetchDescriptor<TemperatureRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             context.delete(record)
             try context.save()
         }

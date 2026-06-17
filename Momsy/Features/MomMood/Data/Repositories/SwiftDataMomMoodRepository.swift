@@ -7,10 +7,11 @@ final class SwiftDataMomMoodRepository: MomMoodRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(from: Date, to: Date) async throws -> [MomMoodEntry] {
-        let all = try context.fetch(FetchDescriptor<MomMoodRecord>())
-        return all.filter { $0.date >= from && $0.date <= to }
-                  .sorted { $0.date > $1.date }
-                  .map { $0.toDomain() }
+        var descriptor = FetchDescriptor<MomMoodRecord>(
+            predicate: #Predicate { $0.date >= from && $0.date <= to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date, order: .reverse)]
+        return try context.fetch(descriptor).map { $0.toDomain() }
     }
 
     func add(_ entry: MomMoodEntry) async throws {

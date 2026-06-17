@@ -18,7 +18,10 @@ final class SwiftDataStoolRepository: StoolRepository {
 
     func upsert(_ entries: [StoolEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<StoolRecord>()).map(\.id))
+        let incomingIds = entries.map(\.id)
+        let existing = Set(try context.fetch(
+            FetchDescriptor<StoolRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+        ).map(\.id))
         var inserted = false
         for entry in entries where !existing.contains(entry.id) {
             context.insert(StoolRecord(id: entry.id, date: entry.date))
@@ -28,11 +31,12 @@ final class SwiftDataStoolRepository: StoolRepository {
     }
 
     func getEntries(from: Date, to: Date) async throws -> [Date] {
-        let all = try context.fetch(FetchDescriptor<StoolRecord>())
-        return all
+        var descriptor = FetchDescriptor<StoolRecord>(
+            predicate: #Predicate { $0.date >= from && $0.date <= to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date)]
+        return try context.fetch(descriptor)
             .uniqued(by: { $0.id })
-            .filter { $0.date >= from && $0.date <= to }
             .map(\.date)
-            .sorted()
     }
 }

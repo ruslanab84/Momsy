@@ -23,7 +23,9 @@ struct DailyContextBuilderTests {
         LogEntry(
             time: Date().addingTimeInterval(-TimeInterval(minutesAgo * 60)),
             kind: .bottle,
-            label: "Кормление · \(durationMin) мин · \(side)"
+            label: "Кормление · \(durationMin) мин · \(side)",
+            durationMinutes: durationMin,
+            feedSide: side
         )
     }
 
@@ -31,7 +33,8 @@ struct DailyContextBuilderTests {
         LogEntry(
             time: Date().addingTimeInterval(-TimeInterval(minutesAgo * 60)),
             kind: .sleep,
-            label: "Сон · \(durationH) ч \(durationM) м"
+            label: "Сон · \(durationH) ч \(durationM) м",
+            durationMinutes: durationH * 60 + durationM
         )
     }
 

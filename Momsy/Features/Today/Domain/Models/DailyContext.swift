@@ -103,14 +103,14 @@ enum DailyContextBuilder {
         let sleepEntries   = entries.filter { $0.kind == .sleep }
 
         let feedingCount        = feedingEntries.count
-        let totalFeedingMinutes = feedingEntries.reduce(0) { $0 + parseFeedingMinutes($1.label) }
+        let totalFeedingMinutes = feedingEntries.reduce(0) { $0 + ($1.durationMinutes ?? 0) }
         let minutesSinceLastFeed = feedingEntries.first.map {
             max(0, Int(-$0.time.timeIntervalSinceNow / 60))
         }
-        let lastFeedSide = feedingEntries.first.flatMap { parseFeedSide($0.label) }
+        let lastFeedSide = feedingEntries.first?.feedSide
 
         let sleepCount        = sleepEntries.count
-        let totalSleepMinutes = sleepEntries.reduce(0) { $0 + parseSleepMinutes($1.label) }
+        let totalSleepMinutes = sleepEntries.reduce(0) { $0 + ($1.durationMinutes ?? 0) }
 
         let (ageMonths, ageDays) = babyAge(appState: appState)
         let currentLeapName = currentLeap(ageWeeks: ageWeeks(appState: appState))
@@ -120,9 +120,10 @@ enum DailyContextBuilder {
         let walkCount = entries.filter { $0.kind == .walk }.count
         let bathCount = entries.filter { $0.kind == .bath }.count
         let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
-        let lastFeedDurationMinutes = feedingEntries.first.map { parseFeedingMinutes($0.label) } ?? 0
-        let recentFeedSides = feedingEntries.prefix(3).compactMap { parseFeedSide($0.label) }
-            .filter { !$0.lowercased().contains("bottle") && !$0.contains("Бутылка") }
+        let lastFeedDurationMinutes = feedingEntries.first?.durationMinutes ?? 0
+        let recentFeedSides = feedingEntries.prefix(3)
+            .filter { !$0.isBottleFeed }
+            .compactMap { $0.feedSide }
         let minutesSinceLastSleepEnd = computeMinutesSinceSleepEnd(from: sleepEntries)
 
         return DailyContext(
@@ -150,43 +151,11 @@ enum DailyContextBuilder {
         )
     }
 
-    // MARK: - Private helpers (existing)
-
-    private static func parseFeedingMinutes(_ label: String) -> Int {
-        let pattern = #"·\s*(\d+)\s*(?:min|мин)"#
-        guard let regex = try? NSRegularExpression(pattern: pattern),
-              let match = regex.firstMatch(in: label, range: NSRange(label.startIndex..., in: label)),
-              let range = Range(match.range(at: 1), in: label) else { return 0 }
-        return Int(label[range]) ?? 0
-    }
-
-    private static func parseFeedSide(_ label: String) -> String? {
-        let parts = label.components(separatedBy: " · ")
-        return parts.last.flatMap { $0.isEmpty ? nil : $0 }
-    }
-
-    private static func parseSleepMinutes(_ label: String) -> Int {
-        if let enMatch = try? NSRegularExpression(pattern: #"(\d+)h(?:\s*(\d+)m)?"#),
-           let m = enMatch.firstMatch(in: label, range: NSRange(label.startIndex..., in: label)) {
-            let hours   = m.range(at: 1).location != NSNotFound ? Int((label as NSString).substring(with: m.range(at: 1))) ?? 0 : 0
-            let minutes = m.range(at: 2).location != NSNotFound ? Int((label as NSString).substring(with: m.range(at: 2))) ?? 0 : 0
-            if hours > 0 || minutes > 0 { return hours * 60 + minutes }
-        }
-        if let ruMatch = try? NSRegularExpression(pattern: #"(\d+)\s*ч(?:\s*(\d+)\s*м)?"#),
-           let m = ruMatch.firstMatch(in: label, range: NSRange(label.startIndex..., in: label)) {
-            let hours   = m.range(at: 1).location != NSNotFound ? Int((label as NSString).substring(with: m.range(at: 1))) ?? 0 : 0
-            let minutes = m.range(at: 2).location != NSNotFound ? Int((label as NSString).substring(with: m.range(at: 2))) ?? 0 : 0
-            return hours * 60 + minutes
-        }
-        return 0
-    }
-
-    // MARK: - New helper
+    // MARK: - Sleep helper
 
     private static func computeMinutesSinceSleepEnd(from sleepEntries: [LogEntry]) -> Int? {
         guard let latest = sleepEntries.first else { return nil }
-        let durationMinutes = parseSleepMinutes(latest.label)
-        if durationMinutes == 0 { return 0 } // currently sleeping
+        guard let durationMinutes = latest.durationMinutes, durationMinutes > 0 else { return 0 } // currently sleeping
         let endTime = latest.time.addingTimeInterval(TimeInterval(durationMinutes * 60))
         return max(0, Int(-endTime.timeIntervalSinceNow / 60))
     }

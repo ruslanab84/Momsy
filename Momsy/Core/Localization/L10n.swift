@@ -853,6 +853,58 @@ struct L10n {
                              "L’idée de me faire du mal m’est venue à l’esprit.",
                              "Ocorreu-me a ideia de me fazer mal.") }
 
+    /// Answer options for each of the 10 EPDS questions (4 options each), in display order.
+    var epdsOptions: [[String]] {
+        [
+            [s("As much as I always could", "Так же, как всегда", "So viel wie immer", "Tanto como siempre", "Autant que d’habitude", "Tanto como sempre"),
+             s("Not quite so much now", "Немного меньше, чем обычно", "Etwas weniger als sonst", "Ahora no tanto", "Un peu moins que d’habitude", "Não tanto como antes"),
+             s("Definitely not so much now", "Значительно меньше, чем обычно", "Deutlich weniger als sonst", "Claramente menos ahora", "Nettement moins que d’habitude", "Claramente menos agora"),
+             s("Not at all", "Совсем нет", "Überhaupt nicht", "En absoluto", "Pas du tout", "De todo")],
+            [s("As much as I ever did", "Так же, как и всегда", "So sehr wie immer", "Tanto como siempre", "Autant que d’habitude", "Tanto como sempre"),
+             s("Rather less than I used to", "Меньше, чем прежде", "Etwas weniger als früher", "Algo menos que antes", "Plutôt moins qu’avant", "Um pouco menos do que antes"),
+             s("Definitely less than I used to", "Намного меньше, чем прежде", "Deutlich weniger als früher", "Claramente menos que antes", "Nettement moins qu’avant", "Claramente menos do que antes"),
+             s("Hardly at all", "Почти не ждала", "Kaum noch", "Casi nada", "Presque pas", "Quase nada")],
+            [s("No, never", "Нет, никогда", "Nein, nie", "No, nunca", "Non, jamais", "Não, nunca"),
+             s("Not very often", "Не очень часто", "Nicht sehr oft", "No muy a menudo", "Pas très souvent", "Não muito frequentemente"),
+             s("Yes, some of the time", "Да, иногда", "Ja, manchmal", "Sí, a veces", "Oui, parfois", "Sim, às vezes"),
+             s("Yes, most of the time", "Да, большую часть времени", "Ja, meistens", "Sí, la mayor parte del tiempo", "Oui, la plupart du temps", "Sim, a maior parte do tempo")],
+            [s("No, not at all", "Нет, совсем нет", "Nein, überhaupt nicht", "No, en absoluto", "Non, pas du tout", "Não, de todo"),
+             s("Hardly ever", "Очень редко", "Fast nie", "Casi nunca", "Presque jamais", "Quase nunca"),
+             s("Yes, sometimes", "Да, иногда", "Ja, manchmal", "Sí, a veces", "Oui, parfois", "Sim, às vezes"),
+             s("Yes, very often", "Да, очень часто", "Ja, sehr oft", "Sí, muy a menudo", "Oui, très souvent", "Sim, muito frequentemente")],
+            [s("No, not at all", "Нет, совсем нет", "Nein, überhaupt nicht", "No, en absoluto", "Non, pas du tout", "Não, de todo"),
+             s("No, not much", "Нет, не очень", "Nein, kaum", "No, no mucho", "Non, pas beaucoup", "Não, não muito"),
+             s("Yes, sometimes", "Да, иногда", "Ja, manchmal", "Sí, a veces", "Oui, parfois", "Sim, às vezes"),
+             s("Yes, quite a lot", "Да, довольно часто", "Ja, ziemlich oft", "Sí, bastante", "Oui, assez souvent", "Sim, bastante")],
+            [s("No, I have been coping as well as ever", "Нет, я справлялась так же хорошо", "Nein, ich komme so gut zurecht wie immer", "No, me he desenvuelto tan bien como siempre", "Non, je gère aussi bien que d’habitude", "Não, tenho lidado tão bem como sempre"),
+             s("No, most of the time I have coped quite well", "Нет, в основном справлялась", "Nein, meistens komme ich recht gut zurecht", "No, la mayor parte del tiempo me he desenvuelto bastante bien", "Non, la plupart du temps je gère plutôt bien", "Não, a maior parte do tempo tenho lidado muito bem"),
+             s("Yes, sometimes I haven't been coping as well as usual", "Да, иногда хуже, чем обычно", "Ja, manchmal komme ich nicht so gut zurecht wie sonst", "Sí, a veces no me he desenvuelto tan bien como de costumbre", "Oui, parfois je gère moins bien que d’habitude", "Sim, às vezes não tenho lidado tão bem como o costume"),
+             s("Yes, I have not been coping at all", "Да, совсем не справлялась", "Ja, ich komme überhaupt nicht zurecht", "Sí, no me he desenvuelto en absoluto", "Oui, je n’arrive plus du tout à gérer", "Sim, não tenho conseguido lidar de todo")],
+            [s("No, not at all", "Нет, совсем", "Nein, überhaupt nicht", "No, en absoluto", "Non, pas du tout", "Não, de todo"),
+             s("Not very often", "Не очень часто", "Nicht sehr oft", "No muy a menudo", "Pas très souvent", "Não muito frequentemente"),
+             s("Yes, sometimes", "Да, иногда", "Ja, manchmal", "Sí, a veces", "Oui, parfois", "Sim, às vezes"),
+             s("Yes, most of the time", "Да, большую часть времени", "Ja, meistens", "Sí, la mayor parte del tiempo", "Oui, la plupart du temps", "Sim, a maior parte do tempo")],
+            [s("No, not at all", "Нет, совсем", "Nein, überhaupt nicht", "No, en absoluto", "Non, pas du tout", "Não, de todo"),
+             s("Not very often", "Не очень часто", "Nicht sehr oft", "No muy a menudo", "Pas très souvent", "Não muito frequentemente"),
+             s("Yes, quite often", "Да, довольно часто", "Ja, ziemlich oft", "Sí, bastante a menudo", "Oui, assez souvent", "Sim, bastante vezes"),
+             s("Yes, most of the time", "Да, почти всё время", "Ja, meistens", "Sí, la mayor parte del tiempo", "Oui, la plupart du temps", "Sim, quase sempre")],
+            [s("No, never", "Нет, никогда", "Nein, nie", "No, nunca", "Non, jamais", "Não, nunca"),
+             s("Only occasionally", "Лишь иногда", "Nur gelegentlich", "Solo de vez en cuando", "Seulement de temps en temps", "Apenas ocasionalmente"),
+             s("Yes, quite often", "Да, довольно часто", "Ja, ziemlich oft", "Sí, bastante a menudo", "Oui, assez souvent", "Sim, bastante vezes"),
+             s("Yes, most of the time", "Да, большую часть времени", "Ja, meistens", "Sí, la mayor parte del tiempo", "Oui, la plupart du temps", "Sim, a maior parte do tempo")],
+            [s("Never", "Никогда", "Nie", "Nunca", "Jamais", "Nunca"),
+             s("Hardly ever", "Почти никогда", "Fast nie", "Casi nunca", "Presque jamais", "Quase nunca"),
+             s("Sometimes", "Иногда", "Manchmal", "A veces", "Parfois", "Às vezes"),
+             s("Yes, quite often", "Да, довольно часто", "Ja, ziemlich oft", "Sí, bastante a menudo", "Oui, assez souvent", "Sim, bastante vezes")],
+        ]
+    }
+
+    // MARK: — Unit abbreviations (charts, age labels)
+    var unitHourShort: String  { s("h",   "ч",   "Std", "h",   "h",    "h") }
+    var unitMinShort: String   { s("min", "мин", "Min", "min", "min",  "min") }
+    var ageMonthShort: String  { s("mo",  "мес", "Mon", "m",   "mois", "m") }
+    var ageDayShort: String    { s("d",   "дн",  "T",   "d",   "j",    "d") }
+
     // MARK: — Water Intake
     var waterIntakeTitle: String       { s("Water Intake",               "Жидкость мамы",                "Flüssigkeit", "Hidratación", "Hydratation", "Hidratação") }
     var waterIntakeLabel: String       { s("HYDRATION",                  "ГИДРАТАЦИЯ",                   "HYDRATION", "HIDRATACIÓN", "HYDRATATION", "HIDRATAÇÃO") }

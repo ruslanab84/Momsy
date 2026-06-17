@@ -7,11 +7,11 @@ final class SwiftDataMomSleepRepository: MomSleepRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
-        let all = try context.fetch(FetchDescriptor<MomSleepRecord>())
-        return all
-            .map { $0.toDomain() }
-            .filter { $0.startDate >= from && $0.startDate <= to }
-            .sorted { $0.startDate < $1.startDate }
+        var descriptor = FetchDescriptor<MomSleepRecord>(
+            predicate: #Predicate { $0.startDate >= from && $0.startDate <= to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.startDate)]
+        return try context.fetch(descriptor).map { $0.toDomain() }
     }
 
     func add(_ entry: SleepEntry) async throws {
@@ -20,8 +20,10 @@ final class SwiftDataMomSleepRepository: MomSleepRepository {
     }
 
     func update(_ entry: SleepEntry) async throws {
-        let all = try context.fetch(FetchDescriptor<MomSleepRecord>())
-        if let record = all.first(where: { $0.id == entry.id }) {
+        let id = entry.id
+        var descriptor = FetchDescriptor<MomSleepRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             record.apply(entry)
             try context.save()
         }
@@ -29,8 +31,11 @@ final class SwiftDataMomSleepRepository: MomSleepRepository {
 
     func upsert(_ entries: [SleepEntry]) async throws {
         guard !entries.isEmpty else { return }
+        let incomingIds = entries.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<MomSleepRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<MomSleepRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false
@@ -48,8 +53,9 @@ final class SwiftDataMomSleepRepository: MomSleepRepository {
     }
 
     func delete(id: UUID) async throws {
-        let all = try context.fetch(FetchDescriptor<MomSleepRecord>())
-        if let record = all.first(where: { $0.id == id }) {
+        var descriptor = FetchDescriptor<MomSleepRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             context.delete(record)
             try context.save()
         }

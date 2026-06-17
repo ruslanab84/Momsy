@@ -16,7 +16,8 @@ final class StaticDailyTipService: DailyTipService {
     private static func tips(for language: Language) -> [String] {
         switch language {
         case .russian:  return russianTips
-        case .english, .spanish:  return englishTips
+        case .english:  return englishTips
+        case .spanish:  return spanishTips
         case .german:   return germanTips
         case .french:   return frenchTips
         case .portuguese: return portugueseTips
@@ -47,6 +48,19 @@ final class StaticDailyTipService: DailyTipService {
         "Remember to rest when you can — a rested parent is a calmer, more attentive parent.",
         "Watch for tiredness cues: yawning and eye-rubbing mean it's time to start the sleep routine.",
         "High-contrast objects at 20–30 cm distance are excellent for stimulating vision in the first months.",
+    ]
+
+    private static let spanishTips: [String] = [
+        "Un suave masaje en las piernas antes de dormir ayuda a tu bebé a relajarse y conciliar el sueño con más facilidad.",
+        "Incluso un paseo de 20 minutos al aire libre mejora la calidad del sueño y refuerza el sistema inmunitario de tu bebé.",
+        "Habla con tu bebé durante el cambio de pañal: tu voz es el mejor estímulo para el desarrollo del lenguaje.",
+        "Mantén a tu bebé erguido durante 10–15 minutos después de la toma para aliviar las molestias por gases.",
+        "La música suave o el ruido blanco ayudan a crear una rutina de sueño constante desde las primeras semanas.",
+        "Confía en tu instinto: eres la mejor experta en tu propio bebé.",
+        "Ahora es un momento ideal para el juego táctil: las caricias y el contacto piel con piel fortalecen vuestro vínculo.",
+        "No olvides descansar cuando puedas: una madre descansada está más tranquila y atenta.",
+        "Atenta a las señales de cansancio: los bostezos y el frotarse los ojos indican que es hora de iniciar la rutina de sueño.",
+        "Los objetos de alto contraste a 20–30 cm de distancia son excelentes para estimular la visión en los primeros meses.",
     ]
 
     private static let germanTips: [String] = [

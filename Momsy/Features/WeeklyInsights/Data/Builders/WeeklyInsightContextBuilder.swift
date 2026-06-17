@@ -47,8 +47,7 @@ enum WeeklyInsightContextBuilder {
         let avgFeedsPerDay = Double(weekFeeds.count) / 7.0
 
         // Complementary foods introduced this week + allergen/reaction flags.
-        let allFoods = (try? await foodRepo.getAll()) ?? []
-        let weekFoods = allFoods.filter { $0.date >= weekStart && $0.date < weekEnd }
+        let weekFoods = (try? await foodRepo.getEntries(from: weekStart, to: weekEnd)) ?? []
         let newFoods = orderedUnique(weekFoods.map(\.foodName))
         let flagged = orderedUnique(weekFoods.filter { $0.isAllergen || $0.reaction != .none }.map(\.foodName))
 

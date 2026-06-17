@@ -7,12 +7,15 @@ final class SwiftDataBabyRepository: BabyRepository {
     init(context: ModelContext) { self.context = context }
 
     func getProfile() async throws -> BabyProfile? {
-        try context.fetch(FetchDescriptor<BabyRecord>()).first?.toDomain()
+        var descriptor = FetchDescriptor<BabyRecord>()
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first?.toDomain()
     }
 
     func saveProfile(_ profile: BabyProfile) async throws {
-        let all = try context.fetch(FetchDescriptor<BabyRecord>())
-        if let record = all.first {
+        var descriptor = FetchDescriptor<BabyRecord>()
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             record.id        = profile.id
             record.name      = profile.name
             record.birthDate = profile.birthDate

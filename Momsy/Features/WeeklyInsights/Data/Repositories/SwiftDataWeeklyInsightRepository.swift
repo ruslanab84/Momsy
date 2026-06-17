@@ -14,7 +14,11 @@ final class SwiftDataWeeklyInsightRepository: WeeklyInsightRepository {
     }
 
     func latest() async throws -> WeeklyInsight? {
-        try await all().first
+        var descriptor = FetchDescriptor<WeeklyInsightRecord>(
+            sortBy: [SortDescriptor(\.weekStart, order: .reverse)]
+        )
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first?.toDomain()
     }
 
     func report(forWeekStarting weekStart: Date) async throws -> WeeklyInsight? {

@@ -7,9 +7,11 @@ final class SwiftDataSleepRepository: SleepRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
-        let all = try context.fetch(FetchDescriptor<SleepRecord>())
-        return all.filter { $0.startDate >= from && $0.startDate <= to }
-            .uniqued(by: { $0.id }).map { $0.toDomain() }
+        var descriptor = FetchDescriptor<SleepRecord>(
+            predicate: #Predicate { $0.startDate >= from && $0.startDate <= to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.startDate)]
+        return try context.fetch(descriptor).uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func add(_ entry: SleepEntry) async throws {
@@ -19,8 +21,11 @@ final class SwiftDataSleepRepository: SleepRepository {
 
     func upsert(_ entries: [SleepEntry]) async throws {
         guard !entries.isEmpty else { return }
+        let incomingIds = entries.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<SleepRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<SleepRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false
@@ -38,15 +43,18 @@ final class SwiftDataSleepRepository: SleepRepository {
     }
 
     func update(_ entry: SleepEntry) async throws {
-        let all = try context.fetch(FetchDescriptor<SleepRecord>())
-        guard let record = all.first(where: { $0.id == entry.id }) else { return }
+        let id = entry.id
+        var descriptor = FetchDescriptor<SleepRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        guard let record = try context.fetch(descriptor).first else { return }
         record.apply(entry)
         try context.save()
     }
 
     func delete(id: UUID) async throws {
-        let all = try context.fetch(FetchDescriptor<SleepRecord>())
-        if let record = all.first(where: { $0.id == id }) {
+        var descriptor = FetchDescriptor<SleepRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             context.delete(record)
             try context.save()
         }

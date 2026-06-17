@@ -54,14 +54,13 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
         center.add(UNNotificationRequest(identifier: ID.diary, content: content, trigger: trigger), withCompletionHandler: nil)
     }
 
-    func scheduleLeapNotification(leapID: Int, name: String, nameEn: String, startDate: Date) {
+    func scheduleLeapNotification(leapID: Int, name: String, startDate: Date) {
         guard startDate > Date() else { return }
         let str = LocalizationManager.shared.strings
-        let leapName = LocalizationManager.shared.current == .english ? nameEn : name
 
         let content = UNMutableNotificationContent()
         content.title = str.notifLeapTitle
-        content.body  = str.notifLeapBody(name: leapName)
+        content.body  = str.notifLeapBody(name: name)
         content.sound = .default
 
         let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: startDate)

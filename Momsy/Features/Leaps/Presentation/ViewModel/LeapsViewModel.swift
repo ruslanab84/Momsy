@@ -42,11 +42,11 @@ final class LeapsViewModel: ObservableObject {
         }
     }
 
-    func leapName(_ l: DevelopmentLeap) -> String { lm.lang == "en" ? l.nameEn : l.name }
-    func leapDesc(_ l: DevelopmentLeap) -> String { lm.lang == "en" ? l.descriptionEn : l.description }
-    func leapSigns(_ l: DevelopmentLeap) -> [String] { lm.lang == "en" ? l.signsEn : l.signs }
-    func leapSkills(_ l: DevelopmentLeap) -> [String] { lm.lang == "en" ? l.skillsEn : l.skills }
-    func leapTip(_ l: DevelopmentLeap) -> String { lm.lang == "en" ? l.tipEn : l.tip }
+    func leapName(_ l: DevelopmentLeap) -> String { l.name(for: lm.current) }
+    func leapDesc(_ l: DevelopmentLeap) -> String { l.description(for: lm.current) }
+    func leapSigns(_ l: DevelopmentLeap) -> [String] { l.signs(for: lm.current) }
+    func leapSkills(_ l: DevelopmentLeap) -> [String] { l.skills(for: lm.current) }
+    func leapTip(_ l: DevelopmentLeap) -> String { l.tip(for: lm.current) }
 
     func markComplete(id: Int) async {
         try? await markLeapCompleteUC.execute(leapId: id)

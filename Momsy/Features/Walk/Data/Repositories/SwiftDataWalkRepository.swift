@@ -16,8 +16,10 @@ final class SwiftDataWalkRepository: WalkRepository {
     func stop(_ entry: WalkEntry) async throws -> WalkEntry {
         var finished = entry
         finished.endDate = Date()
-        let all = try context.fetch(FetchDescriptor<WalkRecord>())
-        if let record = all.first(where: { $0.id == entry.id }) {
+        let id = entry.id
+        var descriptor = FetchDescriptor<WalkRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        if let record = try context.fetch(descriptor).first {
             record.endDate = finished.endDate
             try context.save()
         }
@@ -25,9 +27,11 @@ final class SwiftDataWalkRepository: WalkRepository {
     }
 
     func getEntries(from: Date, to: Date) async throws -> [WalkEntry] {
-        let all = try context.fetch(FetchDescriptor<WalkRecord>())
-        return all.filter { $0.startDate >= from && $0.startDate < to }
-            .uniqued(by: { $0.id }).map { $0.toDomain() }
+        var descriptor = FetchDescriptor<WalkRecord>(
+            predicate: #Predicate { $0.startDate >= from && $0.startDate < to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.startDate)]
+        return try context.fetch(descriptor).uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func add(_ entry: WalkEntry) async throws {
@@ -37,7 +41,10 @@ final class SwiftDataWalkRepository: WalkRepository {
 
     func upsert(_ entries: [WalkEntry]) async throws {
         guard !entries.isEmpty else { return }
-        let existing = Set(try context.fetch(FetchDescriptor<WalkRecord>()).map(\.id))
+        let incomingIds = entries.map(\.id)
+        let existing = Set(try context.fetch(
+            FetchDescriptor<WalkRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+        ).map(\.id))
         var inserted = false
         for entry in entries where !existing.contains(entry.id) {
             context.insert(WalkRecord(entry))
@@ -47,8 +54,9 @@ final class SwiftDataWalkRepository: WalkRepository {
     }
 
     func resolveOrphan(id: UUID, endDate: Date?) async throws {
-        let all = try context.fetch(FetchDescriptor<WalkRecord>())
-        guard let record = all.first(where: { $0.id == id }) else { return }
+        var descriptor = FetchDescriptor<WalkRecord>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        guard let record = try context.fetch(descriptor).first else { return }
         if let endDate {
             record.endDate = endDate
         } else {

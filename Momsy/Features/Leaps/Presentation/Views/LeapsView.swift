@@ -180,11 +180,11 @@ private struct LeapTimelineRow: View {
     let onTap: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
-    private var leapName: String { loc.lang == "en" ? leap.nameEn : leap.name }
-    private var leapDesc: String { loc.lang == "en" ? leap.descriptionEn : leap.description }
-    private var leapSigns: [String] { loc.lang == "en" ? leap.signsEn : leap.signs }
-    private var leapSkills: [String] { loc.lang == "en" ? leap.skillsEn : leap.skills }
-    private var leapTip: String { loc.lang == "en" ? leap.tipEn : leap.tip }
+    private var leapName: String { leap.name(for: loc.current) }
+    private var leapDesc: String { leap.description(for: loc.current) }
+    private var leapSigns: [String] { leap.signs(for: loc.current) }
+    private var leapSkills: [String] { leap.skills(for: loc.current) }
+    private var leapTip: String { leap.tip(for: loc.current) }
 
     private var dotFill: Color {
         if leap.isDone    { return .bbMint }

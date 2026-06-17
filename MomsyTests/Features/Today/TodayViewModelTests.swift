@@ -195,7 +195,12 @@ struct TodayViewModelTests {
         // the assertion can focus on the diaper-driven tip.
         let stoolRepo = MockStoolRepository()
         stoolRepo.entries = [Date()]
-        let vm = makeVM(diaperRepo: diaperRepo, stoolRepo: stoolRepo)
+        // Adequate sleep logged so the evening sleep-deficit alert (hour >= 19)
+        // can't fire with "slept 0 h" — keeps this test independent of wall-clock time.
+        let sleepRepo = MockSleepRepository()
+        let dayStart = Calendar.current.startOfDay(for: Date())
+        sleepRepo.entries = [SleepEntry(startDate: dayStart, endDate: dayStart.addingTimeInterval(16 * 3600))]
+        let vm = makeVM(sleepRepo: sleepRepo, diaperRepo: diaperRepo, stoolRepo: stoolRepo)
         await vm.fetchDailyTipIfNeeded()
         #expect(vm.diaperCount == 6)
         // false "insufficient fluid" alert must not be shown for 6 diapers

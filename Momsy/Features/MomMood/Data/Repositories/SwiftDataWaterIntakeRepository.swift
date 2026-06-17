@@ -13,8 +13,11 @@ final class SwiftDataWaterIntakeRepository: WaterIntakeRepository {
 
     func upsert(_ entries: [WaterIntakeEntry]) async throws {
         guard !entries.isEmpty else { return }
+        let incomingIds = entries.map(\.id)
         let byId = Dictionary(
-            try context.fetch(FetchDescriptor<WaterIntakeRecord>()).map { ($0.id, $0) },
+            try context.fetch(
+                FetchDescriptor<WaterIntakeRecord>(predicate: #Predicate { incomingIds.contains($0.id) })
+            ).map { ($0.id, $0) },
             uniquingKeysWith: { a, _ in a }
         )
         var changed = false
@@ -32,10 +35,10 @@ final class SwiftDataWaterIntakeRepository: WaterIntakeRepository {
     }
 
     func getEntries(from: Date, to: Date) async throws -> [WaterIntakeEntry] {
-        let all = try context.fetch(FetchDescriptor<WaterIntakeRecord>())
-        return all
-            .map { $0.toDomain() }
-            .filter { $0.date >= from && $0.date <= to }
-            .sorted { $0.date < $1.date }
+        var descriptor = FetchDescriptor<WaterIntakeRecord>(
+            predicate: #Predicate { $0.date >= from && $0.date <= to }
+        )
+        descriptor.sortBy = [SortDescriptor(\.date)]
+        return try context.fetch(descriptor).map { $0.toDomain() }
     }
 }
