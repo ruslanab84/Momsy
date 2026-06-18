@@ -1,0 +1,88 @@
+rules_version = '2';
+
+// Firestore security rules for Momsy.
+//
+// Data model:
+//   users/{uid}                                   -> per-user doc, carries familyId
+//   families/{familyId}                           -> family doc (createdBy)
+//   families/{familyId}/members/{uid}             -> member roster
+//   families/{familyId}/babies/{babyId}/**        -> baby profile + per-baby log tree (current)
+//   invites/{code}                                -> short-lived join codes (familyId)
+//   babies/{familyId}/**                          -> LEGACY family-keyed log tree (pre-migration)
+//
+// Membership is derived from the caller's own users/{uid}.familyId field so a member can
+// be authorised without first reading the members subcollection. The family creator is
+// authorised separately for the brief window during family setup when the members doc is
+// written before users/{uid}.familyId has been committed (see FamilyManager.setup).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasUserDoc() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function callerFamilyId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.familyId;
+    }
+
+    function isFamilyMember(familyId) {
+      return hasUserDoc() && callerFamilyId() == familyId;
+    }
+
+    // True during family setup: the caller created families/{familyId} (createdBy == uid)
+    // but has not yet written users/{uid}.familyId.
+    function isFamilyCreator(familyId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/families/$(familyId))
+        && get(/databases/$(database)/documents/families/$(familyId)).data.createdBy == request.auth.uid;
+    }
+
+    function belongsToFamily(familyId) {
+      return isFamilyMember(familyId) || isFamilyCreator(familyId);
+    }
+
+    // Each user owns only their own doc.
+    match /users/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Any signed-in user may read an invite to discover the familyId to join.
+    // Only members of the referenced family may create/replace or delete a code.
+    match /invites/{code} {
+      allow read:          if isSignedIn();
+      allow create, update: if isFamilyMember(request.resource.data.familyId);
+      allow delete:        if isFamilyMember(resource.data.familyId);
+    }
+
+    match /families/{familyId} {
+      allow read:          if belongsToFamily(familyId);
+      allow create:        if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if belongsToFamily(familyId);
+
+      // Members roster. A joining member may write their own membership doc; the family
+      // creator may write during setup; existing members may manage the roster.
+      match /members/{memberId} {
+        allow read:  if belongsToFamily(familyId);
+        allow write: if belongsToFamily(familyId)
+                     || (isSignedIn() && memberId == request.auth.uid && isFamilyMember(familyId));
+      }
+
+      // Per-baby tree: profile parent doc + every log subcollection.
+      match /babies/{babyId}/{document=**} {
+        allow read, write: if belongsToFamily(familyId);
+      }
+    }
+
+    // LEGACY family-keyed log tree, still read/written during the per-baby migration
+    // rollout. Remove this block once all clients have migrated to the per-baby path.
+    match /babies/{familyId}/{document=**} {
+      allow read, write: if belongsToFamily(familyId);
+    }
+  }
+}
