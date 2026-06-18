@@ -241,8 +241,6 @@
 		};
 		B7318F872FBE4210003CCB0B /* models */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = models;
 			sourceTree = "<group>";
 		};
