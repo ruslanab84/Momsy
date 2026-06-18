@@ -1,10 +1,13 @@
 import Foundation
 import FirebaseAI
+import os
 
 /// Shared retry/backoff for Firebase AI Logic (Gemini) calls.
 /// Mirrors the resilience logic proven in `GeminiDailyTipService`: 3 attempts,
 /// exponential backoff, retry only on transient (429/500/503/network) errors.
 enum GeminiRetry {
+
+    private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "GeminiRetry")
 
     static func run<T>(
         maxAttempts: Int = 3,
@@ -44,9 +47,9 @@ enum GeminiRetry {
         if let genError = error as? GenerateContentError,
            case .internalError(let underlying) = genError {
             let ns = underlying as NSError
-            print("[\(label)] attempt \(attempt) internalError — domain: \(ns.domain), code: \(ns.code), desc: \(ns.localizedDescription)")
+            log.error("[\(label, privacy: .public)] attempt \(attempt, privacy: .public) internalError — domain: \(ns.domain, privacy: .public), code: \(ns.code, privacy: .public), desc: \(ns.localizedDescription, privacy: .private)")
         } else {
-            print("[\(label)] attempt \(attempt) failed: \(error)")
+            log.error("[\(label, privacy: .public)] attempt \(attempt, privacy: .public) failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 }

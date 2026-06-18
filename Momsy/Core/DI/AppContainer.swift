@@ -5,6 +5,12 @@ import SwiftData
 @MainActor
 final class AppContainer {
 
+    /// Fallback used only to satisfy the environment default. Real views receive
+    /// the instance injected at the view-tree root via `withContainer(_:)`; this is
+    /// lazily built (Swift `static let`) so its ModelContainer is created only if the
+    /// default is ever actually read.
+    static let shared = AppContainer()
+
     // MARK: — Persistence
 
     let modelContainer: ModelContainer = AppPersistence.makeContainer()
@@ -361,10 +367,15 @@ final class AppContainer {
 // MARK: — Environment
 
 private struct AppContainerKey: EnvironmentKey {
-    // Never used at runtime — withContainer(_:) always injects the real instance.
-    // AppContainer is @MainActor; SwiftUI reads environment defaults on the main
-    // actor, so the (never-taken) lazy init is asserted onto it.
-    nonisolated static let defaultValue: AppContainer = MainActor.assumeIsolated { AppContainer() }
+    // SwiftUI may evaluate this default while seeding/diffing the environment even
+    // though withContainer(_:) injects the real instance at the root, so it must not
+    // crash. `defaultValue` is a nonisolated requirement while AppContainer is
+    // @MainActor; environment reads happen on the main thread, so assumeIsolated is
+    // safe here. Returns the shared fallback rather than a fresh instance to avoid
+    // building a second ModelContainer per access.
+    nonisolated static var defaultValue: AppContainer {
+        MainActor.assumeIsolated { AppContainer.shared }
+    }
 }
 
 extension EnvironmentValues {

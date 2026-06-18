@@ -28,11 +28,13 @@ Handles networking, analytics, logging, and external services.
 
 ## AI Architecture
 
-AI assistant isolated into:
-- Prompt Builder
-- Moderation Engine
-- Memory Context
-- Response Formatter
+Gemini (via FirebaseAI) is used for non-interactive generation only — daily tips
+and weekly insights. There is no free-form user chat. Each request is composed of:
+- Prompt Builder — app-built system instruction + context-derived user prompt
+- Safety Filters — Gemini `safetySettings` (harassment, hate speech, sexually
+  explicit, dangerous content) block harmful generations at the model backend,
+  independent of the prompt
+- Response Formatter — tolerant decode of model output
 
 ## Firebase Architecture
 
@@ -47,7 +49,7 @@ Services used:
 
 - Protected Firestore rules
 - Secure API key storage
-- Content moderation
+- Backend-enforced Gemini safety filters on all AI generation
 - User data isolation
 
 ## Scalability

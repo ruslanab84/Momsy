@@ -14,6 +14,7 @@ final class GeminiWeeklyInsightService: WeeklyInsightService {
             let model = FirebaseAI.firebaseAI(backend: .googleAI()).generativeModel(
                 modelName: modelName,
                 generationConfig: config,
+                safetySettings: GeminiSafety.settings,
                 systemInstruction: ModelContent(role: "system", parts: WeeklyInsightPrompt.system(for: context.language))
             )
             let response = try await model.generateContent(WeeklyInsightPrompt.user(ctx: context))

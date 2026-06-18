@@ -74,11 +74,11 @@ final class DiaryViewModel: ObservableObject {
             grouped[day, default: []].append(item)
         }
 
-        return grouped.keys.sorted { $0 > $1 }.map { day in
+        return grouped.sorted { $0.key > $1.key }.map { day, dayItems in
             DiaryDay(
                 dateLabel: makeDateLabel(day, today: today),
                 ageLabel: birth.map { makeAgeLabel(day, birth: $0) } ?? "",
-                items: grouped[day]!.map { toDiaryItem($0) }
+                items: dayItems.map { toDiaryItem($0) }
             )
         }
     }

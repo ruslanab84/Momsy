@@ -41,8 +41,8 @@ final class FoodDiaryViewModel: ObservableObject {
         let dict = Dictionary(grouping: entries) {
             Calendar.current.startOfDay(for: $0.date)
         }
-        return dict.keys.sorted(by: >).map {
-            (date: $0, items: dict[$0]!.sorted { $0.date > $1.date })
+        return dict.sorted { $0.key > $1.key }.map { date, items in
+            (date: date, items: items.sorted { $0.date > $1.date })
         }
     }
 

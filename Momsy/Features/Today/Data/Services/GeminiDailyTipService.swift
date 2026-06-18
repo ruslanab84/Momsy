@@ -1,7 +1,10 @@
 import Foundation
 import FirebaseAI
+import os
 
 final class GeminiDailyTipService: DailyTipService {
+
+    private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "GeminiDailyTip")
 
     private let modelName = "gemini-3.1-flash-lite"
     private let maxOutputTokens = 150
@@ -15,6 +18,7 @@ final class GeminiDailyTipService: DailyTipService {
                 let model = FirebaseAI.firebaseAI(backend: .googleAI()).generativeModel(
                     modelName: modelName,
                     generationConfig: config,
+                    safetySettings: GeminiSafety.settings,
                     systemInstruction: ModelContent(role: "system", parts: DailyTipPrompt.system(for: context.language))
                 )
                 let response = try await model.generateContent(DailyTipPrompt.user(ctx: context))
@@ -58,9 +62,9 @@ private extension GeminiDailyTipService {
         if let genError = error as? GenerateContentError,
            case .internalError(let underlying) = genError {
             let ns = underlying as NSError
-            print("[GeminiDailyTipService] attempt \(attempt) internalError — domain: \(ns.domain), code: \(ns.code), desc: \(ns.localizedDescription)")
+            log.error("attempt \(attempt, privacy: .public) internalError — domain: \(ns.domain, privacy: .public), code: \(ns.code, privacy: .public), desc: \(ns.localizedDescription, privacy: .private)")
         } else {
-            print("[GeminiDailyTipService] attempt \(attempt) failed: \(error)")
+            log.error("attempt \(attempt, privacy: .public) failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 }
