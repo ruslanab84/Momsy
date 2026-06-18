@@ -4,14 +4,18 @@ final class BabySyncService {
     private var db: Firestore { Firestore.firestore() }
     private var babyId: String { FamilyManager.shared.familyId ?? "" }
 
-    /// Every log subcollection ever written under `babies/{babyId}`. Kept in sync
-    /// with the set `CloudSyncDownloader` reads, plus the legacy `quickLogs`. Used by
-    /// `deleteAllData()` for full GDPR erasure.
+    /// Every log subcollection ever written under `babies/{babyId}`. Must match the
+    /// `…Logs` names actually written by the view models / `BabySyncRepository` and read
+    /// by `CloudSyncDownloader`, plus the legacy `quickLogs` and the `deletions`
+    /// tombstones. Used by `deleteAllData()` for full GDPR erasure — a name that does
+    /// not match a real collection silently erases nothing. (`momMood` is local-only and
+    /// never reaches Firestore, so it is intentionally absent.)
     static let allSubcollections = [
-        "feeding", "sleep", "diaper", "stool", "diary", "walk", "bath",
-        "pumping", "vaccination", "complementaryFood", "temperature",
-        "measurement", "doctorVisit", "momMood", "momSleep", "waterIntake",
-        "leaps", "quickLogs", "deletions",
+        "feedingLogs", "sleepLogs", "diaperLogs", "stoolLogs", "diaryLogs",
+        "walkLogs", "bathLogs", "vitaminLogs", "pumpingLogs", "vaccinationLogs",
+        "foodDiaryLogs", "temperatureLogs", "measurementLogs", "doctorVisitLogs",
+        "momSleepLogs", "waterIntakeLogs", "leapLogs", "symptomLogs",
+        "quickLogs", "deletions",
     ]
 
     init() {}
