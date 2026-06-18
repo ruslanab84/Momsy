@@ -1,11 +1,11 @@
 import FirebaseFirestore
 
-/// Firestore representation of the baby profile, stored as the `babies/{familyId}`
-/// PARENT document (not a subcollection) so the document is real rather than a ghost
-/// parent, and the baby's identity (name/birthDate/gender/stage) is available for
-/// cross-device sync.
+/// Firestore representation of the baby profile, stored as the
+/// `families/{familyId}/babies/{babyId}` PARENT document (not a subcollection) so the
+/// document is real rather than a ghost parent, and the baby's identity
+/// (name/birthDate/gender/stage) is available for cross-device sync.
 struct BabyProfileDTO: Codable {
-    let id: String          // local BabyProfile.id (UUID); doc id is the familyId
+    let id: String          // local BabyProfile.id (UUID); also the babyId path component
     let name: String
     let birthDate: Timestamp
     let stage: String

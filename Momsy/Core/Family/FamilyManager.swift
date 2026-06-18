@@ -4,8 +4,9 @@ import os
 import FirebaseFirestore
 import FirebaseAuth
 
-// UserDefaults key shared across module so repos can read without actor hopping
+// UserDefaults keys shared across module so repos can read without actor hopping
 let kFamilyIdDefaultsKey = "familyId_v1"
+let kBabyIdDefaultsKey = "babyId_v1"
 
 enum FamilyError: LocalizedError {
     case noFamilyId
@@ -117,6 +118,7 @@ final class FamilyManager: ObservableObject {
         familyId = nil
         isReady = false
         UserDefaults.standard.removeObject(forKey: kFamilyIdDefaultsKey)
+        UserDefaults.standard.removeObject(forKey: kBabyIdDefaultsKey)
     }
 
     private func persist(familyId id: String) {

@@ -182,7 +182,7 @@ final class AppContainer {
 
         let defaults = UserDefaults.standard
         for key in ["onboardingDone", "paywallShown", kFamilyIdDefaultsKey,
-                    "AppPersistence.schemaVersion"] {
+                    kBabyIdDefaultsKey, "AppPersistence.schemaVersion"] {
             defaults.removeObject(forKey: key)
         }
 

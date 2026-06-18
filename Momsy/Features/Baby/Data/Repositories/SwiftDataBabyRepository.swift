@@ -25,5 +25,9 @@ final class SwiftDataBabyRepository: BabyRepository {
             context.insert(BabyRecord(profile))
         }
         try context.save()
+        // Mirror the baby id for non-actor cloud-path resolution (see BabySyncService).
+        // This is the single chokepoint for every local save: onboarding, profile edit,
+        // and cloud-profile adoption all route through here.
+        UserDefaults.standard.set(profile.id.uuidString, forKey: kBabyIdDefaultsKey)
     }
 }

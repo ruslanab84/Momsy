@@ -79,6 +79,11 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         }
         guard FamilyManager.shared.familyId != nil else { return }
         hasRun = true
+        // Resolve the per-baby path before any read/write: migrate the old family-keyed
+        // tree (deriving the canonical babyId), then discover it from the roster for a
+        // device that joined an already-migrated family with no local baby yet.
+        await service.migrateFromFamilyPathIfNeeded()
+        await service.discoverAndPersistBabyId()
         await syncBabyProfile()
         await downloadAndMerge()
         await purgeLegacyQuickLogsOnce()
