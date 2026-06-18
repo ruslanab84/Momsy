@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataStoolRepository: StoolRepository {
     private let context: ModelContext
 

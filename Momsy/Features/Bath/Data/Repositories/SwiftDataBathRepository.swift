@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataBathRepository: BathRepository {
     private let context: ModelContext
 

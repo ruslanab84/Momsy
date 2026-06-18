@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataSleepRepository: SleepRepository {
     private let context: ModelContext
 

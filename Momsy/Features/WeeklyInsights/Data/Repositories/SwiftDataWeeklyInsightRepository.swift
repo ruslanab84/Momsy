@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataWeeklyInsightRepository: WeeklyInsightRepository {
     private let context: ModelContext
 

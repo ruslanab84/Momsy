@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataVaccinationRepository: VaccinationRepository {
     private let context: ModelContext
 

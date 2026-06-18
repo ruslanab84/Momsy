@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataFeedingRepository: FeedingRepository {
     private let context: ModelContext
     private let calendar = Calendar.current

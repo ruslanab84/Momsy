@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataMomMoodRepository: MomMoodRepository {
     private let context: ModelContext
 

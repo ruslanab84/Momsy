@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingRepository {
     private let context: ModelContext
 

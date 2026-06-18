@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataWalkRepository: WalkRepository {
     private let context: ModelContext
 

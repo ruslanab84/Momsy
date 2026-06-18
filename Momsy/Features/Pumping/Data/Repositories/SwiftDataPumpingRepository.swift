@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataPumpingRepository: PumpingRepository {
     private let context: ModelContext
 

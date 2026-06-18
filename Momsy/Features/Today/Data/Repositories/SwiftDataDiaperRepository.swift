@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataDiaperRepository: DiaperRepository {
     private let context: ModelContext
 

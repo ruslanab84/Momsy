@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataTemperatureRepository: TemperatureRepository {
     private let context: ModelContext
 

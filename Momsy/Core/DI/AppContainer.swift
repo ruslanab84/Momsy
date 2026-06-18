@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import SwiftData
 
+@MainActor
 final class AppContainer {
 
     // MARK: — Persistence
@@ -361,7 +362,9 @@ final class AppContainer {
 
 private struct AppContainerKey: EnvironmentKey {
     // Never used at runtime — withContainer(_:) always injects the real instance.
-    nonisolated(unsafe) static let defaultValue = AppContainer()
+    // AppContainer is @MainActor; SwiftUI reads environment defaults on the main
+    // actor, so the (never-taken) lazy init is asserted onto it.
+    nonisolated static let defaultValue: AppContainer = MainActor.assumeIsolated { AppContainer() }
 }
 
 extension EnvironmentValues {

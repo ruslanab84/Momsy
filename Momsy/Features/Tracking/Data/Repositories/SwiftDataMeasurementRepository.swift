@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataMeasurementRepository: MeasurementRepository {
     private let context: ModelContext
 

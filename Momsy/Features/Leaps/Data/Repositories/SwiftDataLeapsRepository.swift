@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataLeapsRepository: LeapsRepository {
     private let context: ModelContext
 

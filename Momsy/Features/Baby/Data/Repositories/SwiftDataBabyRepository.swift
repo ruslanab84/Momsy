@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class SwiftDataBabyRepository: BabyRepository {
     private let context: ModelContext
 
