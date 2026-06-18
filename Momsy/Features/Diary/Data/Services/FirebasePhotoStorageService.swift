@@ -1,5 +1,5 @@
 import UIKit
-import FirebaseStorage
+@preconcurrency import FirebaseStorage
 import FirebaseAuth
 
 final class FirebasePhotoStorageService: PhotoStorageService, @unchecked Sendable {
@@ -15,29 +15,50 @@ final class FirebasePhotoStorageService: PhotoStorageService, @unchecked Sendabl
                 continuation.finish(throwing: PhotoStorageError.encodingFailed)
                 return
             }
-            let uid = Auth.auth().currentUser?.uid ?? "anonymous"
-            let path = "users/\(uid)/diary/\(id.uuidString).jpg"
-            let ref = Storage.storage().reference().child(path)
-            let metadata = StorageMetadata()
-            metadata.contentType = "image/jpeg"
-
-            let task = ref.putData(data, metadata: metadata) { _, error in
-                if let error {
+            // Resolving the uid is async (it may sign in anonymously first), so the
+            // upload is kicked off from a Task. onTermination cancels the uid-resolve
+            // work until the real upload handle exists, then the upload itself.
+            let work = Task {
+                let uid: String
+                do {
+                    uid = try await self.resolveUID()
+                } catch {
                     continuation.finish(throwing: error)
-                } else {
-                    continuation.yield(.completed(path))
-                    continuation.finish()
+                    return
                 }
+                let path = "users/\(uid)/diary/\(id.uuidString).jpg"
+                let ref = Storage.storage().reference().child(path)
+                let metadata = StorageMetadata()
+                metadata.contentType = "image/jpeg"
+
+                let task = ref.putData(data, metadata: metadata) { _, error in
+                    if let error {
+                        continuation.finish(throwing: error)
+                    } else {
+                        continuation.yield(.completed(path))
+                        continuation.finish()
+                    }
+                }
+
+                task.observe(.progress) { snapshot in
+                    guard let progress = snapshot.progress, progress.totalUnitCount > 0 else { return }
+                    let fraction = Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
+                    continuation.yield(.progress(fraction))
+                }
+
+                continuation.onTermination = { _ in task.cancel() }
             }
 
-            task.observe(.progress) { snapshot in
-                guard let progress = snapshot.progress, progress.totalUnitCount > 0 else { return }
-                let fraction = Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
-                continuation.yield(.progress(fraction))
-            }
-
-            continuation.onTermination = { _ in task.cancel() }
+            continuation.onTermination = { _ in work.cancel() }
         }
+    }
+
+    /// Returns the current Firebase uid, signing in anonymously on demand.
+    /// Never falls back to a shared literal: an unauthenticated upload would pool
+    /// every user's photos under `users/anonymous/`, with zero per-user isolation.
+    private func resolveUID() async throws -> String {
+        if let uid = Auth.auth().currentUser?.uid { return uid }
+        return try await Auth.auth().signInAnonymously().user.uid
     }
 
     func save(_ image: UIImage, forID id: UUID) async throws -> String {
@@ -68,7 +89,9 @@ final class FirebasePhotoStorageService: PhotoStorageService, @unchecked Sendabl
     }
 
     func deleteAll() async throws {
-        let uid = Auth.auth().currentUser?.uid ?? "anonymous"
+        // No signed-in user ⇒ this device owns no isolated bucket to clear. Never
+        // reach into the shared `users/anonymous/` path — it isn't ours to delete.
+        guard let uid = Auth.auth().currentUser?.uid else { return }
         // Storage has no folder delete — list every object under the user's diary
         // path and remove them one by one.
         let folder = Storage.storage().reference().child("users/\(uid)/diary")
