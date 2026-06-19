@@ -4,6 +4,7 @@ import Foundation
 @Model
 final class FeedingRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var date: Date = Date()
     var durationSeconds: Int = 0
     var sideRaw: String = ""
@@ -13,6 +14,7 @@ final class FeedingRecord {
 
     init(_ entry: FeedingEntry) {
         id = entry.id
+        babyId = ActiveBaby.scope
         apply(entry)
     }
 

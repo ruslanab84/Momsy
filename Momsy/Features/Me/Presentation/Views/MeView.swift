@@ -11,6 +11,10 @@ struct MeView: View {
             VStack(spacing: 12) {
                 babyProfileCard
                 meSection(rows: [
+                    MeRow(destination: ManageChildrenView(),
+                          icon: "figure.2.and.child.holdinghands", bg: .bbMint,
+                          title: lm.lang == "ru" ? "Дети" : "Children",
+                          sub: lm.lang == "ru" ? "Профили детей" : "Children’s profiles"),
                     MeRow(destination: SharingView(container: container),
                           icon: "person.3.fill", bg: .bbCoral,
                           title: lm.strings.family,

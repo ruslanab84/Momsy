@@ -40,8 +40,9 @@ final class SwiftDataPumpingRepository: PumpingRepository {
     }
 
     func getEntries(from: Date, to: Date) async throws -> [PumpingEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<PumpingRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date < to && $0.endDate != nil }
+            predicate: #Predicate { $0.date >= from && $0.date < to && $0.endDate != nil && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor)

@@ -4,6 +4,7 @@ import SwiftData
 @Model
 final class PumpingRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var date: Date = Date()
     var durationSeconds: Int = 0
     var sideRaw: String = ""
@@ -13,6 +14,7 @@ final class PumpingRecord {
 
     init(_ entry: PumpingEntry) {
         self.id = entry.id
+        self.babyId = ActiveBaby.scope
         apply(entry)
     }
 

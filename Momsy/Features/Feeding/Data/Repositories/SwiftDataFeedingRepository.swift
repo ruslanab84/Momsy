@@ -11,16 +11,18 @@ final class SwiftDataFeedingRepository: FeedingRepository {
     func getEntries(for date: Date) async throws -> [FeedingEntry] {
         let start = calendar.startOfDay(for: date)
         guard let next = calendar.date(byAdding: .day, value: 1, to: start) else { return [] }
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<FeedingRecord>(
-            predicate: #Predicate { $0.date >= start && $0.date < next }
+            predicate: #Predicate { $0.date >= start && $0.date < next && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor).uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
     func getEntries(from: Date, to: Date) async throws -> [FeedingEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<FeedingRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date <= to }
+            predicate: #Predicate { $0.date >= from && $0.date <= to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor).uniqued(by: { $0.id }).map { $0.toDomain() }

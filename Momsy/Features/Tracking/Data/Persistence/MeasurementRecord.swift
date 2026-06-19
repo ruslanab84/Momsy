@@ -4,6 +4,7 @@ import Foundation
 @Model
 final class MeasurementRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var date: Date = Date()
     var dateLabel: String = ""
     var weight: String = ""
@@ -15,6 +16,7 @@ final class MeasurementRecord {
 
     init(_ entry: MeasurementEntry) {
         id = entry.id
+        babyId = ActiveBaby.scope
         apply(entry)
     }
 

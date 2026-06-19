@@ -14,7 +14,8 @@ struct DailyContextBuilderTests {
             gender: "boy"
         )
         let repo = MockBabyRepository(initialProfile: profile)
-        let state = AppState(getBabyProfile: GetBabyProfileUseCase(repository: repo))
+        let state = AppState(getBabyProfile: GetBabyProfileUseCase(repository: repo),
+                             getAllBabies: GetAllBabiesUseCase(repository: repo))
         state.babyProfile = profile
         return state
     }

@@ -4,6 +4,7 @@ import Foundation
 @Model
 final class ComplementaryFoodRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var date: Date = Date()
     var foodName: String = ""
     var category: String = ""
@@ -17,6 +18,7 @@ final class ComplementaryFoodRecord {
          category: String, reaction: String,
          isAllergen: Bool, notes: String, photoPath: String?, updatedAt: Date? = nil) {
         self.id = id
+        self.babyId = ActiveBaby.scope
         self.date = date
         self.foodName = foodName
         self.category = category

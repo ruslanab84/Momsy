@@ -4,12 +4,14 @@ import Foundation
 @Model
 final class WaterIntakeRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var date: Date = Date()
     var amountMl: Int = 0
     var updatedAt: Date?
 
     init(_ entry: WaterIntakeEntry) {
         id = entry.id
+        babyId = ActiveBaby.scope
         apply(entry)
     }
 

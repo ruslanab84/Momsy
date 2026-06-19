@@ -36,8 +36,9 @@ final class SwiftDataWaterIntakeRepository: WaterIntakeRepository {
     }
 
     func getEntries(from: Date, to: Date) async throws -> [WaterIntakeEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<WaterIntakeRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date <= to }
+            predicate: #Predicate { $0.date >= from && $0.date <= to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor).map { $0.toDomain() }

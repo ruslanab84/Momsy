@@ -9,7 +9,8 @@ enum TestError: Error {
 func makeAppState(profile: BabyProfile? = nil) -> AppState {
     let repo = MockBabyRepository(initialProfile: profile)
     let uc = GetBabyProfileUseCase(repository: repo)
-    let state = AppState(getBabyProfile: uc)
+    let all = GetAllBabiesUseCase(repository: repo)
+    let state = AppState(getBabyProfile: uc, getAllBabies: all)
     state.babyProfile = profile
     return state
 }

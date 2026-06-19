@@ -4,6 +4,7 @@ import Foundation
 @Model
 final class MomMoodRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var date: Date = Date()
     var mood: Int = 0
     var energy: Int = 0
@@ -13,6 +14,7 @@ final class MomMoodRecord {
     init(id: UUID = UUID(), date: Date = Date(),
          mood: Int, energy: Int, note: String, epdsScore: Int? = nil) {
         self.id = id
+        self.babyId = ActiveBaby.scope
         self.date = date
         self.mood = mood
         self.energy = energy

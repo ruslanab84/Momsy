@@ -8,8 +8,9 @@ final class SwiftDataDiaperRepository: DiaperRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(from: Date, to: Date) async throws -> [DiaperEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<DiaperRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date <= to }
+            predicate: #Predicate { $0.date >= from && $0.date <= to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor)
@@ -51,8 +52,9 @@ final class SwiftDataDiaperRepository: DiaperRepository {
         let cal = Calendar.current
         let start = cal.startOfDay(for: day)
         guard let next = cal.date(byAdding: .day, value: 1, to: start) else { return nil }
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<DiaperRecord>(
-            predicate: #Predicate { $0.date >= start && $0.date < next }
+            predicate: #Predicate { $0.date >= start && $0.date < next && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date, order: .reverse)]
         descriptor.fetchLimit = 1
@@ -67,8 +69,9 @@ final class SwiftDataDiaperRepository: DiaperRepository {
         let cal = Calendar.current
         let start = cal.startOfDay(for: Date())
         guard let next = cal.date(byAdding: .day, value: 1, to: start) else { return 0 }
+        let scope = ActiveBaby.scope
         let descriptor = FetchDescriptor<DiaperRecord>(
-            predicate: #Predicate { $0.date >= start && $0.date < next }
+            predicate: #Predicate { $0.date >= start && $0.date < next && $0.babyId == scope }
         )
         return try context.fetchCount(descriptor)
     }

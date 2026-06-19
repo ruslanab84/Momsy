@@ -77,8 +77,43 @@ final class AppContainer {
     // MARK: — Use Cases — Baby
 
     lazy var getBabyProfile   = GetBabyProfileUseCase(repository: babyRepository)
+    lazy var getAllBabies     = GetAllBabiesUseCase(repository: babyRepository)
     lazy var saveBabyProfile  = SaveBabyProfileUseCase(repository: babyRepository)
-    lazy var appState         = AppState(getBabyProfile: getBabyProfile)
+    lazy var appState         = AppState(getBabyProfile: getBabyProfile, getAllBabies: getAllBabies)
+
+    // MARK: — Multi-child lifecycle
+
+    /// Add a child to the roster (cap-enforced), switch focus to it, push to cloud.
+    @MainActor
+    func addChild(_ profile: BabyProfile) async throws {
+        try await saveBabyProfile.execute(profile)
+        appState.update(profile)
+        await switchActiveBaby(to: profile.id)
+        try? await babySyncRepository.syncBabyProfile(profile)
+    }
+
+    /// Point the whole app at a different child and re-pull its cloud logs.
+    @MainActor
+    func switchActiveBaby(to id: UUID) async {
+        appState.setActive(id)
+        await cloudSyncDownloader.resyncActiveBaby()
+        NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
+    }
+
+    /// Remove a child: cascade-delete its logs, drop the profile, re-point active.
+    @MainActor
+    func deleteChild(id: UUID) async throws {
+        BabyLogBackfill.deleteLogs(forBaby: id, context: context)
+        try context.save()
+        try await babyRepository.deleteProfile(id: id)
+        if ActiveBaby.currentId == id {
+            let remaining = (try? await babyRepository.getAllProfiles()) ?? []
+            ActiveBaby.currentId = remaining.first?.id
+        }
+        await appState.load()
+        if ActiveBaby.currentId != nil { await cloudSyncDownloader.resyncActiveBaby() }
+        NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
+    }
 
     // MARK: — Use Cases — Sleep
 
@@ -201,6 +236,7 @@ final class AppContainer {
     func runMigrationIfNeeded() {
         UserDefaultsMigration.runIfNeeded(context: context)
         UserDefaultsMigration.runVaccinationRemapIfNeeded(context: context)
+        BabyLogBackfill.run(context: context)
     }
 
     // MARK: — ViewModel Factories

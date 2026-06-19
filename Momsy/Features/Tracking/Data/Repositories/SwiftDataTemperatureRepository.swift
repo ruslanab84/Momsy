@@ -8,13 +8,15 @@ final class SwiftDataTemperatureRepository: TemperatureRepository {
     init(context: ModelContext) { self.context = context }
 
     func getAll() async throws -> [TemperatureEntry] {
-        let all = try context.fetch(FetchDescriptor<TemperatureRecord>())
+        let scope = ActiveBaby.scope
+        let all = try context.fetch(FetchDescriptor<TemperatureRecord>(predicate: #Predicate { $0.babyId == scope }))
         return all.map { $0.toDomain() }.sorted { $0.date > $1.date }
     }
 
     func getEntries(from: Date, to: Date) async throws -> [TemperatureEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<TemperatureRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date <= to }
+            predicate: #Predicate { $0.date >= from && $0.date <= to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor).map { $0.toDomain() }

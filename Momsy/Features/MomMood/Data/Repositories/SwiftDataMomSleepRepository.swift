@@ -8,8 +8,9 @@ final class SwiftDataMomSleepRepository: MomSleepRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<MomSleepRecord>(
-            predicate: #Predicate { $0.startDate >= from && $0.startDate <= to }
+            predicate: #Predicate { $0.startDate >= from && $0.startDate <= to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.startDate)]
         return try context.fetch(descriptor).map { $0.toDomain() }

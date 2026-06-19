@@ -323,5 +323,7 @@ private struct MiniList: View {
 #Preview {
     LeapsView(container: AppContainer())
         .environmentObject(LocalizationManager.shared)
-        .environmentObject(AppState(getBabyProfile: GetBabyProfileUseCase(repository: LocalBabyRepository())))
+        .environmentObject(AppState(
+            getBabyProfile: GetBabyProfileUseCase(repository: LocalBabyRepository()),
+            getAllBabies: GetAllBabiesUseCase(repository: LocalBabyRepository())))
 }

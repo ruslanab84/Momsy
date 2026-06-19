@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0BABF11E0000000000000001 /* MultiChildFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */; };
 		03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
@@ -112,6 +113,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MultiChildFoundationTests.swift; sourceTree = "<group>"; };
 		04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
 		0A46ABCF5A1A31976CF2C739 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
@@ -554,9 +556,18 @@
 			path = Leaps;
 			sourceTree = "<group>";
 		};
+		0BABF11E0000000000000003 /* Baby */ = {
+			isa = PBXGroup;
+			children = (
+				0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */,
+			);
+			path = Baby;
+			sourceTree = "<group>";
+		};
 		CF188E3D6A5F475289D564B6 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				0BABF11E0000000000000003 /* Baby */,
 				AC11AA03AC11AA03AC11AA03 /* Account */,
 				945C65C48948BC238DDFA608 /* Diary */,
 				6CD81E05E696492F92ABC1E4 /* Feeding */,
@@ -805,6 +816,7 @@
 				A63165E2B06D8E9D3DC6D060 /* MockDailyTipService.swift in Sources */,
 				2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */,
 				5147AD29220EE4C99A2BADF1 /* SleepForecastEngineTests.swift in Sources */,
+				0BABF11E0000000000000001 /* MultiChildFoundationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

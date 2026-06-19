@@ -10,13 +10,15 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
     }
 
     func getAll() async throws -> [ComplementaryFoodEntry] {
-        let records = try context.fetch(FetchDescriptor<ComplementaryFoodRecord>())
+        let scope = ActiveBaby.scope
+        let records = try context.fetch(FetchDescriptor<ComplementaryFoodRecord>(predicate: #Predicate { $0.babyId == scope }))
         return records.map { $0.toDomain() }.sorted { $0.date > $1.date }
     }
 
     func getEntries(from: Date, to: Date) async throws -> [ComplementaryFoodEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<ComplementaryFoodRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date < to }
+            predicate: #Predicate { $0.date >= from && $0.date < to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor).map { $0.toDomain() }

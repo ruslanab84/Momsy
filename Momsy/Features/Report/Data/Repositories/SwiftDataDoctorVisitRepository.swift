@@ -8,7 +8,9 @@ final class SwiftDataDoctorVisitRepository: DoctorVisitRepository {
     init(context: ModelContext) { self.context = context }
 
     func getLast() async throws -> DoctorVisit? {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<DoctorVisitRecord>(
+            predicate: #Predicate { $0.babyId == scope },
             sortBy: [SortDescriptor(\.date, order: .reverse)]
         )
         descriptor.fetchLimit = 1
@@ -16,7 +18,9 @@ final class SwiftDataDoctorVisitRepository: DoctorVisitRepository {
     }
 
     func save(_ visit: DoctorVisit) async throws {
-        let existing = try context.fetch(FetchDescriptor<DoctorVisitRecord>())
+        // Only the active child's single kept visit is replaced.
+        let scope = ActiveBaby.scope
+        let existing = try context.fetch(FetchDescriptor<DoctorVisitRecord>(predicate: #Predicate { $0.babyId == scope }))
         existing.forEach { context.delete($0) }
         context.insert(DoctorVisitRecord(id: visit.id, date: visit.date))
         try context.save()

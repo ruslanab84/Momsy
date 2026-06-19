@@ -4,6 +4,7 @@ import Foundation
 @Model
 final class VaccinationRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var catalogId: Int = 0
     var doneDate: Date = Date()
     var notes: String = ""
@@ -13,6 +14,7 @@ final class VaccinationRecord {
     init(id: UUID = UUID(), catalogId: Int, doneDate: Date, notes: String = "",
          customName: String? = nil, updatedAt: Date? = nil) {
         self.id = id
+        self.babyId = ActiveBaby.scope
         self.catalogId = catalogId
         self.doneDate = doneDate
         self.notes = notes

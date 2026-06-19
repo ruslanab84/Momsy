@@ -4,6 +4,7 @@ import Foundation
 @Model
 final class DiaryItemRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var date: Date = Date()
     var kindRaw: String = ""
     var text: String = ""
@@ -15,6 +16,7 @@ final class DiaryItemRecord {
 
     init(_ item: StoredDiaryItem) {
         id = item.id
+        babyId = ActiveBaby.scope
         apply(item)
     }
 

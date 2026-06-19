@@ -8,13 +8,15 @@ final class SwiftDataMeasurementRepository: MeasurementRepository {
     init(context: ModelContext) { self.context = context }
 
     func getAll() async throws -> [MeasurementEntry] {
-        let all = try context.fetch(FetchDescriptor<MeasurementRecord>())
+        let scope = ActiveBaby.scope
+        let all = try context.fetch(FetchDescriptor<MeasurementRecord>(predicate: #Predicate { $0.babyId == scope }))
         return all.uniqued(by: { $0.id }).map { $0.toDomain() }.sorted { $0.date > $1.date }
     }
 
     func getEntries(from: Date, to: Date) async throws -> [MeasurementEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<MeasurementRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date <= to }
+            predicate: #Predicate { $0.date >= from && $0.date <= to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor).uniqued(by: { $0.id }).map { $0.toDomain() }

@@ -89,6 +89,16 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         await purgeLegacyQuickLogsOnce()
     }
 
+    /// Re-pull the now-active child's logs after a profile switch. Skips the one-time
+    /// path migration/discovery — those already ran on first launch. The repositories
+    /// read the active babyId at query time, so the merge targets the new child.
+    @MainActor
+    func resyncActiveBaby() async {
+        guard FamilyManager.shared.familyId != nil else { return }
+        await syncBabyProfile()
+        await downloadAndMerge()
+    }
+
     /// Two-way reconcile of the baby profile against the `babies/{familyId}` parent doc.
     /// - Backfill: a baby created locally (e.g. before this fix, or before the family was
     ///   ready) is uploaded so the previously-empty parent document gets populated.

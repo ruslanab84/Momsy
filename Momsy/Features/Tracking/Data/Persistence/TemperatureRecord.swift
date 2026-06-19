@@ -4,6 +4,7 @@ import Foundation
 @Model
 final class TemperatureRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var date: Date = Date()
     var dateLabel: String = ""
     var timeLabel: String = ""
@@ -13,6 +14,7 @@ final class TemperatureRecord {
 
     init(_ entry: TemperatureEntry) {
         id = entry.id
+        babyId = ActiveBaby.scope
         apply(entry)
     }
 

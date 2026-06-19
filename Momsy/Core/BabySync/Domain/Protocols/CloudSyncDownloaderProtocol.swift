@@ -6,4 +6,6 @@ import Foundation
 protocol CloudSyncDownloaderProtocol {
     /// Waits (briefly) for the family to be ready, then runs the merge once per session.
     func downloadAndMergeWhenReady() async
+    /// Re-pulls the now-active child's logs after switching the active baby.
+    func resyncActiveBaby() async
 }

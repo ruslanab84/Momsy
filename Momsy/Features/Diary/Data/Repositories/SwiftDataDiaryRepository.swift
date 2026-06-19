@@ -8,8 +8,9 @@ final class SwiftDataDiaryRepository: DiaryRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(from: Date, to: Date) async throws -> [StoredDiaryItem] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<DiaryItemRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date <= to }
+            predicate: #Predicate { $0.date >= from && $0.date <= to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor)

@@ -8,15 +8,17 @@ final class SwiftDataLeapsRepository: LeapsRepository {
     init(context: ModelContext) { self.context = context }
 
     func getAllProgress() async throws -> [LeapProgress] {
-        try context.fetch(FetchDescriptor<LeapProgressRecord>())
+        let scope = ActiveBaby.scope
+        return try context.fetch(FetchDescriptor<LeapProgressRecord>(predicate: #Predicate { $0.babyId == scope }))
             .uniqued(by: { $0.leapID }).map { $0.toDomain() }
     }
 
     func saveProgress(_ progress: LeapProgress) async throws {
         let leapID = progress.id
-        // Duplicate rows per leapID can exist defensively; update them all.
+        let scope = ActiveBaby.scope
+        // Duplicate rows per leapID can exist defensively; update them all (active child only).
         let matches = try context.fetch(
-            FetchDescriptor<LeapProgressRecord>(predicate: #Predicate { $0.leapID == leapID })
+            FetchDescriptor<LeapProgressRecord>(predicate: #Predicate { $0.leapID == leapID && $0.babyId == scope })
         )
         if matches.isEmpty {
             context.insert(LeapProgressRecord(progress))
@@ -34,8 +36,9 @@ final class SwiftDataLeapsRepository: LeapsRepository {
     func upsert(_ entries: [LeapProgress]) async throws {
         guard !entries.isEmpty else { return }
         let incomingIDs = entries.map(\.id)
+        let scope = ActiveBaby.scope
         let scoped = try context.fetch(
-            FetchDescriptor<LeapProgressRecord>(predicate: #Predicate { incomingIDs.contains($0.leapID) })
+            FetchDescriptor<LeapProgressRecord>(predicate: #Predicate { incomingIDs.contains($0.leapID) && $0.babyId == scope })
         )
         var changed = false
         for progress in entries {
@@ -56,8 +59,9 @@ final class SwiftDataLeapsRepository: LeapsRepository {
     }
 
     func resetProgress(id: Int) async throws {
+        let scope = ActiveBaby.scope
         let matches = try context.fetch(
-            FetchDescriptor<LeapProgressRecord>(predicate: #Predicate { $0.leapID == id })
+            FetchDescriptor<LeapProgressRecord>(predicate: #Predicate { $0.leapID == id && $0.babyId == scope })
         )
         guard !matches.isEmpty else { return }
         matches.forEach { context.delete($0) }

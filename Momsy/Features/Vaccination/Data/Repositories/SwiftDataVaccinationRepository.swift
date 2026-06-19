@@ -10,7 +10,8 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
     }
 
     func getAll() async throws -> [VaccinationEntry] {
-        let records = try context.fetch(FetchDescriptor<VaccinationRecord>())
+        let scope = ActiveBaby.scope
+        let records = try context.fetch(FetchDescriptor<VaccinationRecord>(predicate: #Predicate { $0.babyId == scope }))
         return records.uniqued(by: { $0.id }).map { $0.toDomain() }
     }
 
@@ -18,7 +19,8 @@ final class SwiftDataVaccinationRepository: VaccinationRepository {
         // Dedup only for catalog entries — custom vaccines (isCustom) each have a unique catalogId
         if !entry.isCustom {
             let catalogId = entry.catalogId
-            var descriptor = FetchDescriptor<VaccinationRecord>(predicate: #Predicate { $0.catalogId == catalogId })
+            let scope = ActiveBaby.scope
+            var descriptor = FetchDescriptor<VaccinationRecord>(predicate: #Predicate { $0.catalogId == catalogId && $0.babyId == scope })
             descriptor.fetchLimit = 1
             if let existing = try context.fetch(descriptor).first {
                 context.delete(existing)

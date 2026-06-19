@@ -43,7 +43,8 @@ struct TodayViewModelTests {
             gender: "girl"
         )
         let repo = MockBabyRepository(initialProfile: resolved)
-        let state = AppState(getBabyProfile: GetBabyProfileUseCase(repository: repo))
+        let state = AppState(getBabyProfile: GetBabyProfileUseCase(repository: repo),
+                             getAllBabies: GetAllBabiesUseCase(repository: repo))
         // Set synchronously only when a test passes an explicit profile (e.g. leap
         // tests that read babyProfile immediately). The default path keeps the
         // original async-load timing the daily-tip tests were written against.

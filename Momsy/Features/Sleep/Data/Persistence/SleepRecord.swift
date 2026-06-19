@@ -4,6 +4,7 @@ import Foundation
 @Model
 final class SleepRecord {
     var id: UUID = UUID()
+    var babyId: UUID = ActiveBaby.unassigned
     var startDate: Date = Date()
     var endDate: Date?
     var note: String = ""
@@ -12,6 +13,7 @@ final class SleepRecord {
 
     init(_ entry: SleepEntry) {
         id = entry.id
+        babyId = ActiveBaby.scope
         apply(entry)
     }
 

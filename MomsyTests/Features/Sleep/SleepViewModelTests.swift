@@ -8,7 +8,8 @@ struct SleepViewModelTests {
 
     func makeVM(repo: MockSleepRepository = MockSleepRepository(),
                 babyRepo: MockBabyRepository = MockBabyRepository()) -> SleepViewModel {
-        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: babyRepo))
+        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: babyRepo),
+                                getAllBabies: GetAllBabiesUseCase(repository: babyRepo))
         return SleepViewModel(
             startSleep: StartSleepUseCase(repository: repo),
             stopSleep: StopSleepUseCase(repository: repo),
@@ -183,7 +184,8 @@ struct SleepViewModelTests {
 
     @Test("sleepNorm returns 14-17h for newborn")
     func normForNewborn() {
-        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: MockBabyRepository()))
+        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: MockBabyRepository()),
+                                getAllBabies: GetAllBabiesUseCase(repository: MockBabyRepository()))
         appState.update(BabyProfile(name: "Test", birthDate: Date(), stage: "newborn", gender: "boy"))
         let vm = SleepViewModel(
             startSleep: StartSleepUseCase(repository: MockSleepRepository()),
@@ -204,7 +206,8 @@ struct SleepViewModelTests {
     @Test("sleepNorm returns 12-14h for 6-month-old")
     func normForSixMonths() {
         let birth = Calendar.current.date(byAdding: .month, value: -6, to: Date())!
-        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: MockBabyRepository()))
+        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: MockBabyRepository()),
+                                getAllBabies: GetAllBabiesUseCase(repository: MockBabyRepository()))
         appState.update(BabyProfile(name: "Test", birthDate: birth, stage: "newborn", gender: "boy"))
         let vm = SleepViewModel(
             startSleep: StartSleepUseCase(repository: MockSleepRepository()),

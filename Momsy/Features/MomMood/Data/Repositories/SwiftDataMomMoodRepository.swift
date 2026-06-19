@@ -8,8 +8,9 @@ final class SwiftDataMomMoodRepository: MomMoodRepository {
     init(context: ModelContext) { self.context = context }
 
     func getEntries(from: Date, to: Date) async throws -> [MomMoodEntry] {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<MomMoodRecord>(
-            predicate: #Predicate { $0.date >= from && $0.date <= to }
+            predicate: #Predicate { $0.date >= from && $0.date <= to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.date, order: .reverse)]
         return try context.fetch(descriptor).map { $0.toDomain() }
@@ -28,7 +29,9 @@ final class SwiftDataMomMoodRepository: MomMoodRepository {
     }
 
     func latestEntry() async throws -> MomMoodEntry? {
+        let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<MomMoodRecord>(
+            predicate: #Predicate { $0.babyId == scope },
             sortBy: [SortDescriptor(\.date, order: .reverse)]
         )
         descriptor.fetchLimit = 1
