@@ -17,6 +17,7 @@ struct TodayView: View {
     @State private var showStool = false
     @State private var showPumping = false
     @State private var showAllEntries = false
+    @State private var showAddChild = false
     @State private var now = Date()
 
     private let container: AppContainer
@@ -137,6 +138,12 @@ struct TodayView: View {
                 .environmentObject(loc)
                 .onDisappear { Task { await vm.loadTodayEntries() } }
         }
+        .sheet(isPresented: $showAddChild) {
+            AddChildSheet { profile in
+                Task { try? await container.addChild(profile) }
+            }
+            .environmentObject(loc)
+        }
         .errorToast($vm.saveError)
     }
 
@@ -144,17 +151,51 @@ struct TodayView: View {
 
     private var headerRow: some View {
         HStack(spacing: 10) {
-            CuteBlobView(kind: .baby, size: 44, tone: .bbCoral)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(appState.displayName)
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInk)
-                if !appState.babyAgeString(lang: loc.lang).isEmpty {
-                    Text(appState.babyAgeString(lang: loc.lang))
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundColor(.bbInkSoft)
+            Menu {
+                ForEach(appState.babies) { baby in
+                    Button {
+                        guard baby.id != appState.activeBabyId else { return }
+                        Task { await container.switchActiveBaby(to: baby.id) }
+                    } label: {
+                        let title = baby.name.isEmpty ? (loc.lang == "ru" ? "Малыш" : "Baby") : baby.name
+                        if baby.id == appState.activeBabyId {
+                            Label(title, systemImage: "checkmark")
+                        } else {
+                            Text(title)
+                        }
+                    }
+                }
+                if appState.babies.count < ActiveBaby.maxChildren {
+                    Divider()
+                    Button {
+                        showAddChild = true
+                    } label: {
+                        Label(loc.lang == "ru" ? "Добавить ребёнка" : "Add child", systemImage: "plus")
+                    }
+                }
+            } label: {
+                HStack(spacing: 10) {
+                    CuteBlobView(kind: .baby, size: 44, tone: .bbCoral)
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(spacing: 4) {
+                            Text(appState.displayName)
+                                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                                .foregroundColor(.bbInk)
+                            if appState.babies.count > 1 {
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(.bbInkSoft)
+                            }
+                        }
+                        if !appState.babyAgeString(lang: loc.lang).isEmpty {
+                            Text(appState.babyAgeString(lang: loc.lang))
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .foregroundColor(.bbInkSoft)
+                        }
+                    }
                 }
             }
+            .buttonStyle(.plain)
             Spacer()
             if let leap = vm.currentLeap {
                 BBPill(text: loc.strings.leapPill(leap.id), color: Color.bbLilac.opacity(0.6), fg: .bbLilacDeep, size: 12)
