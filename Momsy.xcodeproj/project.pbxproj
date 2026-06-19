@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0BABF11E0000000000000001 /* MultiChildFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */; };
 		03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */; };
+		0BABF11E0000000000000001 /* MultiChildFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
 		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
@@ -113,12 +113,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MultiChildFoundationTests.swift; sourceTree = "<group>"; };
 		04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
 		0A46ABCF5A1A31976CF2C739 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
 		0AFF57C67693A66C17AD71C6 /* DailyContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyContext.swift; sourceTree = "<group>"; };
 		0B6D62B0527D4EA67A8EB2FC /* MockDiaryRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaryRepository.swift; sourceTree = "<group>"; };
+		0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MultiChildFoundationTests.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyContextBuilderTests.swift; sourceTree = "<group>"; };
@@ -310,6 +310,14 @@
 				A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */,
 			);
 			path = Sounds;
+			sourceTree = "<group>";
+		};
+		0BABF11E0000000000000003 /* Baby */ = {
+			isa = PBXGroup;
+			children = (
+				0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */,
+			);
+			path = Baby;
 			sourceTree = "<group>";
 		};
 		100C67B934D28C1B553835F3 /* Services */ = {
@@ -554,14 +562,6 @@
 				0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */,
 			);
 			path = Leaps;
-			sourceTree = "<group>";
-		};
-		0BABF11E0000000000000003 /* Baby */ = {
-			isa = PBXGroup;
-			children = (
-				0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */,
-			);
-			path = Baby;
 			sourceTree = "<group>";
 		};
 		CF188E3D6A5F475289D564B6 /* Features */ = {
