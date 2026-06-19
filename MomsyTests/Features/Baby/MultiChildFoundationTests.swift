@@ -84,6 +84,38 @@ struct MultiChildFoundationTests {
         freshActive()
     }
 
+    // MARK: Quick-log strip scoping
+
+    /// The "Today so far" quick-log strip (diaper/walk/bath/vitamin/stool) must be
+    /// scoped per active child. Switching the active baby must not leak the previous
+    /// child's quick events into the new child's strip.
+    @Test func quickLogStripIsScopedToActiveChild() {
+        freshActive()
+        let repo = QuickLogRepository()
+        let babyA = UUID(), babyB = UUID()
+        defer {
+            for id in [babyA, babyB] {
+                UserDefaults.standard.removeObject(forKey: "quick_log_today_entries_\(id.uuidString)")
+                UserDefaults.standard.removeObject(forKey: "quick_log_today_date_\(id.uuidString)")
+            }
+            freshActive()
+        }
+
+        ActiveBaby.currentId = babyA
+        repo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .drop, label: "A diaper"))
+
+        // Switch to B → strip is empty for the freshly-selected child.
+        ActiveBaby.currentId = babyB
+        #expect(repo.load().isEmpty)
+
+        repo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .walk, label: "B walk"))
+        #expect(repo.load().map(\.label) == ["B walk"])
+
+        // Switch back to A → only A's own entry, never B's.
+        ActiveBaby.currentId = babyA
+        #expect(repo.load().map(\.label) == ["A diaper"])
+    }
+
     // MARK: Backfill
 
     @Test func backfillStampsLegacyLogsToFirstChild() async throws {

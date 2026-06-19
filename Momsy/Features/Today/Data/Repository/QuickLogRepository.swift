@@ -8,8 +8,11 @@ struct QuickLogEntry: Codable {
 }
 
 final class QuickLogRepository {
-    private let key     = "quick_log_today_entries"
-    private let dateKey = "quick_log_today_date"
+    // Scoped per active child so switching the active baby never leaks the previous
+    // child's quick events into "Today so far". `ActiveBaby.scope` is read at access
+    // time, mirroring the query-time scoping used by the SwiftData repositories.
+    private var key: String     { "quick_log_today_entries_\(ActiveBaby.scope.uuidString)" }
+    private var dateKey: String { "quick_log_today_date_\(ActiveBaby.scope.uuidString)" }
 
     func load() -> [QuickLogEntry] {
         guard let saved = UserDefaults.standard.object(forKey: dateKey) as? Date,
