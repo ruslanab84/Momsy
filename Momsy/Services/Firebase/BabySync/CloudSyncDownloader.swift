@@ -79,14 +79,46 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         }
         guard FamilyManager.shared.familyId != nil else { return }
         hasRun = true
-        // Resolve the per-baby path before any read/write: migrate the old family-keyed
-        // tree (deriving the canonical babyId), then discover it from the roster for a
-        // device that joined an already-migrated family with no local baby yet.
+        // Migrate the old family-keyed tree first (derives the canonical babyId for a
+        // pre-per-baby family), then sync every child in the roster.
         await service.migrateFromFamilyPathIfNeeded()
-        await service.discoverAndPersistBabyId()
-        await syncBabyProfile()
-        await downloadAndMerge()
+        await downloadAllBabies()
         await purgeLegacyQuickLogsOnce()
+    }
+
+    /// Pulls profile + logs for every child in the family roster. Each child is synced
+    /// with `ActiveBaby.currentId` set to its id, so the Firestore path and the babyId
+    /// stamped onto merged records both target that child. The user's active child is
+    /// synced LAST, leaving the active pointer, widget, and profile on it when done.
+    @MainActor
+    private func downloadAllBabies() async {
+        let desiredActive = ActiveBaby.currentId
+
+        var ids = await service.discoverAllBabyIds()
+        // Include a locally-known active child even if the roster read missed/lacks it
+        // (e.g. created locally and not yet uploaded — syncBabyProfile backfills it).
+        if let active = desiredActive, !ids.contains(active.uuidString) {
+            ids.append(active.uuidString)
+        }
+        guard !ids.isEmpty else {
+            // No roster yet: preserve prior single-baby behaviour.
+            await syncBabyProfile()
+            await downloadAndMerge()
+            return
+        }
+
+        // Sync the active child last so the final state lands on it. With no prior
+        // selection, the first roster entry becomes active.
+        let activeStr = desiredActive?.uuidString ?? ids.first!
+        let ordered = ids.filter { $0 != activeStr } + [activeStr]
+
+        for idStr in ordered {
+            guard let id = UUID(uuidString: idStr) else { continue }
+            ActiveBaby.currentId = id
+            await syncBabyProfile()
+            // Only the active child contributes to the in-memory "today" quick-log strip.
+            await downloadAndMerge(recordQuickLogs: idStr == activeStr)
+        }
     }
 
     /// Re-pull the now-active child's logs after a profile switch. Skips the one-time
@@ -148,7 +180,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     // MARK: - Merge
 
     @MainActor
-    private func downloadAndMerge() async {
+    private func downloadAndMerge(recordQuickLogs: Bool = true) async {
         // Fetch all collections concurrently (network runs off the main actor).
         async let feedingDTOs: [FeedingLogDTO]     = fetch("feedingLogs",     dateField: "startedAt")
         async let sleepDTOs:   [SleepLogDTO]        = fetch("sleepLogs",       dateField: "startedAt")
@@ -212,7 +244,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         try? await waterIntakeRepo.upsert(waters)
         try? await leapsRepo.upsert(leaps)
         try? await doctorVisitRepo.upsert(visits)
-        quickToday.forEach { quickLogRepo.appendUnique($0) }
+        if recordQuickLogs { quickToday.forEach { quickLogRepo.appendUnique($0) } }
 
         // Propagate deletes made on other devices: remove any local row whose id was
         // explicitly tombstoned. Only ever deletes ids we have a tombstone for.

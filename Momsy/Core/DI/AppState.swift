@@ -13,10 +13,22 @@ final class AppState: ObservableObject {
     private let getBabyProfile: GetBabyProfileUseCase
     private let getAllBabies: GetAllBabiesUseCase
     private var lm: LocalizationManager { .shared }
+    private var mergeObserver: NSObjectProtocol?
 
     init(getBabyProfile: GetBabyProfileUseCase, getAllBabies: GetAllBabiesUseCase) {
         self.getBabyProfile = getBabyProfile
         self.getAllBabies = getAllBabies
+        // The launch downloader adopts every child's profile during sync; reload the
+        // roster when it signals a merge so the switcher reflects newly-pulled children.
+        mergeObserver = NotificationCenter.default.addObserver(
+            forName: .cloudSyncDidMerge, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in await self?.load() }
+        }
+    }
+
+    deinit {
+        if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
 
     func load() async {

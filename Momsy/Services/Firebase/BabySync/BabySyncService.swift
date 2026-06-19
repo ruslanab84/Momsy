@@ -213,16 +213,14 @@ final class BabySyncService {
         }
     }
 
-    /// For a device that joined an already-migrated family and has no local baby yet:
-    /// discover the babyId from the family's baby roster and persist it so the log paths
-    /// resolve. Single-baby today, so the first roster entry is the baby.
-    func discoverAndPersistBabyId() async {
-        guard babyId.isEmpty, !familyId.isEmpty else { return }
+    /// Every babyId in the family roster (`families/{familyId}/babies`). The launch
+    /// downloader iterates these so a device pulls *all* children, not just the active
+    /// one. Empty when the family isn't set up yet.
+    func discoverAllBabyIds() async -> [String] {
+        guard !familyId.isEmpty else { return [] }
         let snap = try? await db.collection("families").document(familyId)
-            .collection("babies").limit(to: 1).getDocuments()
-        if let docId = snap?.documents.first?.documentID, !docId.isEmpty {
-            UserDefaults.standard.set(docId, forKey: kBabyIdDefaultsKey)
-        }
+            .collection("babies").getDocuments()
+        return snap?.documents.map(\.documentID).filter { !$0.isEmpty } ?? []
     }
 
     // MARK: - Reads
