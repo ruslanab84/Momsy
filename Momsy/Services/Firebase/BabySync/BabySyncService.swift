@@ -51,9 +51,16 @@ final class BabySyncService {
 
     /// Writes a log using the supplied stable id as the Firestore document id.
     /// Making the doc id == local UUID keeps re-pushes idempotent (overwrite, not duplicate)
-    /// and lets the download path dedup entries by id.
+    /// and lets the download path dedup entries by id. When the family path isn't ready yet
+    /// (onboarding window), the write is queued in `PendingWritesStore` and replayed later
+    /// instead of being silently dropped.
     func setLog<T: Encodable>(_ log: T, id: String, to subcollection: String) async throws {
-        guard hasPath, !id.isEmpty else { return }
+        guard !id.isEmpty else { return }
+        guard hasPath else {
+            let payload = try Firestore.Encoder().encode(log)
+            PendingWritesStore.shared.add(collection: subcollection, docId: id, payload: payload)
+            return
+        }
         try collection(subcollection).document(id).setData(from: log, merge: true)
     }
 
@@ -91,6 +98,22 @@ final class BabySyncService {
                 PendingDeletionsStore.shared.remove(id: id)
             } catch {
                 // Leave it pending; the launch merge will retry.
+            }
+        }
+    }
+
+    /// Replays cloud writes that were queued while the family path wasn't ready.
+    /// Each write targets the CURRENT baby path; the drop window is single-baby
+    /// onboarding, so by replay time `babyId` already points to that baby.
+    func replayPendingWrites() async {
+        guard hasPath else { return }
+        for entry in PendingWritesStore.shared.all() {
+            do {
+                try await collection(entry.collection).document(entry.docId)
+                    .setData(entry.payload, merge: true)
+                PendingWritesStore.shared.remove(docId: entry.docId)
+            } catch {
+                // Leave it pending; the next sync retries.
             }
         }
     }
