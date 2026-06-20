@@ -64,11 +64,14 @@ final class TodayViewModel: ObservableObject {
         if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
 
-    private func reloadAfterMerge() async {
+    func reloadAfterMerge() async {
         await loadTodayEntries()
         await loadDiaperCount()
         await loadLeap()
         await refreshForecast()
+        // Switching the active child reloads the data above; the daily tip is
+        // derived from it, so recompute it too or it stays stuck on the prior baby.
+        await updateTip()
     }
 
     func refreshForecast() async {

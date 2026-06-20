@@ -237,6 +237,25 @@ struct TodayViewModelTests {
         #expect(vm.isTipLoading == false)
     }
 
+    @Test("daily tip recomputes after a profile switch (cloud merge), not left stale from the prior baby")
+    func dailyTipRecomputesAfterMerge() async {
+        let diaperRepo = MockDiaperRepository()
+        diaperRepo.entries = (0..<6).map { _ in DiaperEntry() }   // baby A: 6 diapers
+        let vm = makeVM(diaperRepo: diaperRepo)
+        await vm.fetchDailyTipIfNeeded()
+        let beforeHash = vm.dailyTip?.contextHash
+        #expect(beforeHash?.hasSuffix("-6") == true)
+
+        // Switching the active child re-pulls its cloud logs and posts
+        // .cloudSyncDidMerge → reloadAfterMerge. The repos now report the new
+        // (child-less / empty) baby's data; the tip must follow.
+        diaperRepo.entries = []
+        await vm.reloadAfterMerge()
+
+        #expect(vm.dailyTip?.contextHash != beforeHash)
+        #expect(vm.dailyTip?.contextHash.hasSuffix("-0") == true)
+    }
+
     // MARK: - Developmental leap
 
     @Test("9-week-old baby resolves to leap #2 on the Today screen, not hardcoded #4")
