@@ -28,6 +28,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     private let doctorVisitRepo: any DoctorVisitRepository
 
     private var hasRun = false
+    private var isSyncing = false
+    private var lastSyncAt: Date?
 
     init(service: BabySyncService,
          feedingRepo: any FeedingRepository,
@@ -71,6 +73,16 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
 
     // MARK: - Entry point
 
+    /// Pure debounce/reentrancy decision, extracted for testability.
+    static func shouldSkipResync(isSyncing: Bool,
+                                 lastSyncAt: Date?,
+                                 now: Date,
+                                 minInterval: TimeInterval) -> Bool {
+        if isSyncing { return true }
+        if let last = lastSyncAt, now.timeIntervalSince(last) < minInterval { return true }
+        return false
+    }
+
     @MainActor
     func downloadAndMergeWhenReady() async {
         guard !hasRun else { return }
@@ -79,6 +91,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         }
         guard FamilyManager.shared.familyId != nil else { return }
         hasRun = true
+        isSyncing = true
+        defer { isSyncing = false; lastSyncAt = Date() }
         // Migrate the old family-keyed tree first (derives the canonical babyId for a
         // pre-per-baby family), then sync every child in the roster.
         await service.migrateFromFamilyPathIfNeeded()
@@ -129,6 +143,20 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard FamilyManager.shared.familyId != nil else { return }
         await syncBabyProfile()
         await downloadAndMerge()
+    }
+
+    /// Foreground / post-join refresh. Re-pulls every child in the roster, skipping the
+    /// one-time launch work (migration, legacy purge, `hasRun` gate). Debounced so a
+    /// background→foreground bounce or an overlap with launch download is a no-op.
+    @MainActor
+    func resyncAll() async {
+        if Self.shouldSkipResync(isSyncing: isSyncing, lastSyncAt: lastSyncAt,
+                                 now: Date(), minInterval: 8) { return }
+        guard FamilyManager.shared.familyId != nil else { return }
+        isSyncing = true
+        defer { isSyncing = false; lastSyncAt = Date() }
+        await service.replayPendingWrites()
+        await downloadAllBabies()
     }
 
     /// Two-way reconcile of the baby profile against the `babies/{familyId}` parent doc.

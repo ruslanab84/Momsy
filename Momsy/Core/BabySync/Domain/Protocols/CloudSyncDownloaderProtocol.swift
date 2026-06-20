@@ -8,4 +8,6 @@ protocol CloudSyncDownloaderProtocol {
     func downloadAndMergeWhenReady() async
     /// Re-pulls the now-active child's logs after switching the active baby.
     func resyncActiveBaby() async
+    /// Re-pulls every child in the roster (foreground / post-join). Debounced.
+    func resyncAll() async
 }
