@@ -12,6 +12,7 @@
 		0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */; };
 		0BABF1200000000000000001 /* BabySyncBackfillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1200000000000000002 /* BabySyncBackfillTests.swift */; };
 		0BABF1210000000000000001 /* ResyncDebounceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1210000000000000002 /* ResyncDebounceTests.swift */; };
+		0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1220000000000000002 /* JoinDeeplinkTests.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
 		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
@@ -125,6 +126,7 @@
 		0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PendingWritesStoreTests.swift; sourceTree = "<group>"; };
 		0BABF1200000000000000002 /* BabySyncBackfillTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabySyncBackfillTests.swift; sourceTree = "<group>"; };
 		0BABF1210000000000000002 /* ResyncDebounceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ResyncDebounceTests.swift; sourceTree = "<group>"; };
+		0BABF1220000000000000002 /* JoinDeeplinkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JoinDeeplinkTests.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyContextBuilderTests.swift; sourceTree = "<group>"; };
@@ -332,6 +334,7 @@
 				0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */,
 				0BABF1200000000000000002 /* BabySyncBackfillTests.swift */,
 				0BABF1210000000000000002 /* ResyncDebounceTests.swift */,
+				0BABF1220000000000000002 /* JoinDeeplinkTests.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -837,6 +840,7 @@
 				0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */,
 				0BABF1200000000000000001 /* BabySyncBackfillTests.swift in Sources */,
 				0BABF1210000000000000001 /* ResyncDebounceTests.swift in Sources */,
+				0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
