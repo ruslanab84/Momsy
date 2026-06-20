@@ -1,15 +1,22 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
+import FirebaseAuth
 import WidgetKit
 #if canImport(GoogleSignIn)
 import GoogleSignIn
 #endif
 
+private enum JoinAlert: Identifiable {
+    case success, failure
+    var id: Int { self == .success ? 0 : 1 }
+}
+
 @main
 struct MomsyApp: App {
     @AppStorage("appTheme") private var appTheme = "system"
     @Environment(\.scenePhase) private var scenePhase
+    @State private var joinAlert: JoinAlert?
 
     private let container = AppContainer()
     private let localization = LocalizationManager.shared
@@ -66,6 +73,31 @@ struct MomsyApp: App {
 #if canImport(GoogleSignIn)
                     GIDSignIn.sharedInstance.handle(url)
 #endif
+                    guard let code = JoinDeeplink.code(from: url) else { return }
+                    Task { @MainActor in
+                        await container.authManager.signInAnonymouslyIfNeeded()
+                        guard let uid = container.authManager.firebaseUser?.uid else {
+                            joinAlert = .failure; return
+                        }
+                        do {
+                            try await FamilyManager.shared.joinFamily(code: code, uid: uid)
+                            joinAlert = .success
+                        } catch {
+                            joinAlert = .failure
+                        }
+                    }
+                }
+                .alert(item: $joinAlert) { alert in
+                    switch alert {
+                    case .success:
+                        return Alert(title: Text(localization.strings.joinSuccessTitle),
+                                     message: Text(localization.strings.joinSuccessMessage),
+                                     dismissButton: .default(Text("OK")))
+                    case .failure:
+                        return Alert(title: Text(localization.strings.joinFailedTitle),
+                                     message: Text(localization.strings.joinFailedMessage),
+                                     dismissButton: .default(Text("OK")))
+                    }
                 }
         }
         .onChange(of: scenePhase) { _, phase in

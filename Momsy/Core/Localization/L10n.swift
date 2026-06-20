@@ -513,6 +513,9 @@ struct L10n {
     var joinFamilyTitle: String { s("Join a Family",    "Присоединиться к семье", "Familie beitreten", "Unirse a una familia", "Rejoindre une famille", "Juntar-se a uma família") }
     var joinAction: String      { s("Join",             "Войти",                  "Beitreten",     "Unirse", "Rejoindre", "Juntar-se") }
     var joinSuccessMessage: String { s("You joined the family!", "Вы присоединились к семье!", "Du bist der Familie beigetreten!", "¡Te uniste a la familia!", "Vous avez rejoint la famille !", "Juntou-se à família!") }
+    var joinSuccessTitle: String { s("Joined the family", "Вы в семье", "Familie beigetreten", "Te uniste a la familia", "Famille rejointe", "Entrou na família") }
+    var joinFailedTitle: String { s("Couldn’t join", "Не удалось присоединиться", "Beitritt fehlgeschlagen", "No se pudo unir", "Impossible de rejoindre", "Não foi possível entrar") }
+    var joinFailedMessage: String { s("This invite code is invalid or has expired.", "Этот код приглашения недействителен или истёк.", "Dieser Einladungscode ist ungültig oder abgelaufen.", "Este código de invitación no es válido o ha caducado.", "Ce code d’invitation est invalide ou a expiré.", "Este código de convite é inválido ou expirou.") }
     var roleLabel: String       { s("ROLE",          "РОЛЬ",          "ROLLE",         "ROL", "RÔLE", "FUNÇÃO") }
     var saveRole: String        { s("Save role",     "Сохранить роль","Rolle speichern", "Guardar rol", "Enregistrer le rôle", "Guardar função") }
     var removeFromTeamAction: String { s("Remove from team", "Удалить из команды", "Aus Team entfernen", "Quitar del equipo", "Retirer de l’équipe", "Remover da equipa") }
