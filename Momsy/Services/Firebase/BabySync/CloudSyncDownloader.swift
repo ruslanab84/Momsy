@@ -94,8 +94,10 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         isSyncing = true
         defer { isSyncing = false; lastSyncAt = Date() }
         // Migrate the old family-keyed tree first (derives the canonical babyId for a
-        // pre-per-baby family), then sync every child in the roster.
+        // pre-per-baby family), flush any writes queued before the path was ready, then
+        // sync every child in the roster.
         await service.migrateFromFamilyPathIfNeeded()
+        await service.replayPendingWrites()
         await downloadAllBabies()
         await purgeLegacyQuickLogsOnce()
     }
@@ -145,14 +147,33 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         await downloadAndMerge()
     }
 
-    /// Foreground / post-join refresh. Re-pulls every child in the roster, skipping the
-    /// one-time launch work (migration, legacy purge, `hasRun` gate). Debounced so a
-    /// background→foreground bounce or an overlap with launch download is a no-op.
+    /// Foreground refresh. Re-pulls every child in the roster, skipping the one-time
+    /// launch work (migration, legacy purge). Only runs after the launch download has
+    /// happened (`hasRun`), so the initial activation never double-syncs with the
+    /// `.task` download. Debounced so a quick background→foreground bounce is a no-op.
     @MainActor
     func resyncAll() async {
+        guard hasRun else { return }
         if Self.shouldSkipResync(isSyncing: isSyncing, lastSyncAt: lastSyncAt,
                                  now: Date(), minInterval: 8) { return }
         guard FamilyManager.shared.familyId != nil else { return }
+        isSyncing = true
+        defer { isSyncing = false; lastSyncAt = Date() }
+        await service.replayPendingWrites()
+        await downloadAllBabies()
+    }
+
+    /// Post-join refresh. Unlike `resyncAll`, this bypasses the time-debounce — a join
+    /// right after launch must pull the newly-joined family even though the launch
+    /// download just set `lastSyncAt`. It still waits out any in-flight sync (bounded)
+    /// so two `downloadAllBabies` never interleave their `ActiveBaby` mutations.
+    @MainActor
+    func forceResyncAll() async {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let deadline = Date().addingTimeInterval(8)
+        while isSyncing && Date() < deadline {
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+        }
         isSyncing = true
         defer { isSyncing = false; lastSyncAt = Date() }
         await service.replayPendingWrites()

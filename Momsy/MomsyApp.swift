@@ -92,11 +92,11 @@ struct MomsyApp: App {
                     case .success:
                         return Alert(title: Text(localization.strings.joinSuccessTitle),
                                      message: Text(localization.strings.joinSuccessMessage),
-                                     dismissButton: .default(Text("OK")))
+                                     dismissButton: .default(Text(localization.strings.done)))
                     case .failure:
                         return Alert(title: Text(localization.strings.joinFailedTitle),
                                      message: Text(localization.strings.joinFailedMessage),
-                                     dismissButton: .default(Text("OK")))
+                                     dismissButton: .default(Text(localization.strings.done)))
                     }
                 }
         }

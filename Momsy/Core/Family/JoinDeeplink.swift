@@ -9,7 +9,7 @@ enum JoinDeeplink {
             .queryItems?
             .first { $0.name == "code" }?
             .value
-        let normalized = raw?.trimmingCharacters(in: .whitespaces).uppercased()
+        let normalized = raw?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         return (normalized?.isEmpty == false) ? normalized : nil
     }
 }
