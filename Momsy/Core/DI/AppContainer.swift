@@ -74,6 +74,26 @@ final class AppContainer {
     lazy var weeklyInsightRepository: any WeeklyInsightRepository = SwiftDataWeeklyInsightRepository(context: context)
     lazy var weeklyInsightService: any WeeklyInsightService       = GeminiWeeklyInsightService()
 
+    // MARK: — Cross-device sync wiring
+
+    private var familyJoinObserver: NSObjectProtocol?
+
+    init() { observeFamilyJoin() }
+
+    /// After a join, drop the active-baby pointer so the downloader adopts the joined
+    /// family's roster, then re-pull everything.
+    private func observeFamilyJoin() {
+        familyJoinObserver = NotificationCenter.default.addObserver(
+            forName: .familyDidJoin, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                ActiveBaby.currentId = nil
+                await self.cloudSyncDownloader.resyncAll()
+                NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
+            }
+        }
+    }
+
     // MARK: — Use Cases — Baby
 
     lazy var getBabyProfile   = GetBabyProfileUseCase(repository: babyRepository)

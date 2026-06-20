@@ -8,6 +8,12 @@ import FirebaseAuth
 let kFamilyIdDefaultsKey = "familyId_v1"
 let kBabyIdDefaultsKey = "babyId_v1"
 
+extension Notification.Name {
+    /// Posted after the caller joins an existing family, so the app re-pulls that
+    /// family's data (the joined family's logs aren't local yet).
+    static let familyDidJoin = Notification.Name("familyDidJoin")
+}
+
 enum FamilyError: LocalizedError {
     case noFamilyId
     case invalidOrExpiredCode
@@ -97,6 +103,7 @@ final class FamilyManager: ObservableObject {
 
         persist(familyId: targetFamilyId)
         isReady = true
+        NotificationCenter.default.post(name: .familyDidJoin, object: nil)
     }
 
     /// GDPR erasure of the family/user graph: every `families/{familyId}/members`
