@@ -71,6 +71,7 @@ struct MomsyApp: App {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 WidgetCenter.shared.reloadAllTimelines()
+                Task { await container.cloudSyncDownloader.resyncAll() }
                 Task { await maybeGenerateWeeklyReport() }
             }
         }
