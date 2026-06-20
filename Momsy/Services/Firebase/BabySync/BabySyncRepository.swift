@@ -20,23 +20,23 @@ final class BabySyncRepository: BabySyncRepositoryProtocol {
     }
 
     func addFeedingLog(_ log: FeedingLog) async throws {
-        try await service.addLog(FeedingLogDTO(from: log), to: "feedingLogs")
+        try await service.setLog(FeedingLogDTO(from: log), id: log.id, to: "feedingLogs")
     }
 
     func addSleepLog(_ log: SleepLog) async throws {
-        try await service.addLog(SleepLogDTO(from: log), to: "sleepLogs")
+        try await service.setLog(SleepLogDTO(from: log), id: log.id, to: "sleepLogs")
     }
 
     func addDiaperLog(_ log: DiaperLog) async throws {
-        try await service.addLog(DiaperLogDTO(from: log), to: "diaperLogs")
+        try await service.setLog(DiaperLogDTO(from: log), id: log.id, to: "diaperLogs")
     }
 
     func addSymptomLog(_ log: SymptomLog) async throws {
-        try await service.addLog(SymptomLogDTO(from: log), to: "symptomLogs")
+        try await service.setLog(SymptomLogDTO(from: log), id: log.id, to: "symptomLogs")
     }
 
     func addDiaryLog(_ log: DiaryLog) async throws {
-        try await service.addLog(DiaryLogDTO(from: log), to: "diaryLogs")
+        try await service.setLog(DiaryLogDTO(from: log), id: log.id, to: "diaryLogs")
     }
 
     func addMeasurementLog(_ log: MeasurementLog) async throws {
