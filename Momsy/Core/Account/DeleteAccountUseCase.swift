@@ -8,11 +8,47 @@ protocol CloudAccountEraser {
     func deleteCloudData(uid: String) async throws
 }
 
+/// The slice of `BabySyncService` the roster-wide erase needs. `deleteAllData()` targets a
+/// single child (the path resolved from `ActiveBaby`), so the loop in `RosterErasure` calls
+/// it once per child. Abstracted so the per-child logic is unit-testable without Firestore.
+protocol BabyRosterDataEraser {
+    func discoverAllBabyIds() async -> [String]
+    func deleteAllData() async throws
+}
+
+extension BabySyncService: BabyRosterDataEraser {}
+
+/// Erases EVERY child's cloud subtree, not just the active one. Firestore keeps the per-baby
+/// trees at sibling paths (`families/{familyId}/babies/{babyId}/…`) and never cascades a parent
+/// delete into them, so erasing only the active child would orphan every sibling's health logs
+/// after "delete account" — a GDPR right-to-erasure gap. Each child is erased under a task-local
+/// override that retargets the cloud path to it (mirroring `CloudSyncDownloader`). The locally
+/// active child is always included even if the roster read missed it (created locally, not yet
+/// uploaded); with no roster discovered at all, falls back to erasing the active path once.
+enum RosterErasure {
+    static func eraseAll(using svc: BabyRosterDataEraser, locallyActiveId: UUID?) async throws {
+        var ids = await svc.discoverAllBabyIds()
+        if let active = locallyActiveId, !ids.contains(active.uuidString) {
+            ids.append(active.uuidString)
+        }
+        guard !ids.isEmpty else {
+            try await svc.deleteAllData()
+            return
+        }
+        for idStr in ids {
+            guard let id = UUID(uuidString: idStr) else { continue }
+            try await ActiveBaby.$syncTargetOverride.withValue(id) {
+                try await svc.deleteAllData()
+            }
+        }
+    }
+}
+
 struct FirestoreAccountEraser: CloudAccountEraser {
     let babySync: BabySyncService
 
     func deleteCloudData(uid: String) async throws {
-        try await babySync.deleteAllData()
+        try await RosterErasure.eraseAll(using: babySync, locallyActiveId: ActiveBaby.currentId)
         try await FamilyManager.shared.deleteFamilyAndUserDocs(uid: uid)
     }
 }

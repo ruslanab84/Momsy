@@ -15,8 +15,7 @@
 		0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1220000000000000002 /* JoinDeeplinkTests.swift */; };
 		0BABF1230000000000000001 /* ReplayRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1230000000000000002 /* ReplayRoutingTests.swift */; };
 		0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */; };
-		0BABF1250000000000000001 /* ReportViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1250000000000000002 /* ReportViewModelTests.swift */; };
-		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
+				27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
 		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
 		38944D43E482FFA7FCD38281 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4820A4E27274110E9256D2F7 /* SwiftUI.framework */; };
@@ -132,8 +131,7 @@
 		0BABF1220000000000000002 /* JoinDeeplinkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JoinDeeplinkTests.swift; sourceTree = "<group>"; };
 		0BABF1230000000000000002 /* ReplayRoutingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReplayRoutingTests.swift; sourceTree = "<group>"; };
 		0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActiveBabySyncOverrideTests.swift; sourceTree = "<group>"; };
-		0BABF1250000000000000002 /* ReportViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReportViewModelTests.swift; sourceTree = "<group>"; };
-		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
+				0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyContextBuilderTests.swift; sourceTree = "<group>"; };
 		14AB864CEE3403CD74AC9654 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
@@ -350,7 +348,6 @@
 		0BABF1250000000000000003 /* Report */ = {
 			isa = PBXGroup;
 			children = (
-				0BABF1250000000000000002 /* ReportViewModelTests.swift */,
 			);
 			path = Report;
 			sourceTree = "<group>";
@@ -860,7 +857,6 @@
 				0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */,
 				0BABF1230000000000000001 /* ReplayRoutingTests.swift in Sources */,
 				0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */,
-				0BABF1250000000000000001 /* ReportViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

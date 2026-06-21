@@ -1,6 +1,6 @@
 import Foundation
 
-enum Language: String, CaseIterable, Identifiable {
+enum Language: String, CaseIterable, Identifiable, Codable {
     case english    = "en"
     case russian    = "ru"
     case german     = "de"

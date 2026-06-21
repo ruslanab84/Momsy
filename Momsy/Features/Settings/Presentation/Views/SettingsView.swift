@@ -6,8 +6,12 @@ struct SettingsView: View {
     @EnvironmentObject private var units: UnitSystemManager
     @Environment(\.openURL) private var openURL
 
-    // TODO: replace with the public URL hosting PRIVACY.md before release.
+    // ⚠️ RELEASE BLOCKER: this page must be hosted and reachable before submitting —
+    // App Store Review (Guideline 5.1.1) rejects a privacy-policy link that 404s.
     private let privacyPolicyURL = URL(string: "https://momsy.app/privacy")
+    // Apple's standard EULA satisfies the Terms-of-Use link required for the
+    // auto-renewing subscription (Guideline 3.1.2). Always live; swap for a custom URL if hosted.
+    private let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
 
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeSettingsViewModel())
@@ -244,6 +248,11 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
                 Divider().opacity(0.2).padding(.leading, 60)
+                Button(action: openTermsOfUse) {
+                    chevronRow(icon: "doc.plaintext.fill", bg: .bbSky, title: lm.strings.termsOfUse)
+                }
+                .buttonStyle(.plain)
+                Divider().opacity(0.2).padding(.leading, 60)
                 chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.feedback)
             }
             .background(Color.bbCard)
@@ -290,6 +299,11 @@ struct SettingsView: View {
     private func openPrivacyPolicy() {
         guard let privacyPolicyURL else { return }
         openURL(privacyPolicyURL)
+    }
+
+    private func openTermsOfUse() {
+        guard let termsOfUseURL else { return }
+        openURL(termsOfUseURL)
     }
 
     private func infoRow(icon: String, bg: Color, title: String, value: String) -> some View {

@@ -73,6 +73,86 @@ struct GenerateWeeklyInsightUseCaseTests {
         #expect(repo.saveCount == 1)
     }
 
+    /// Pre-aggregated stats for a baby in the "World of Patterns" leap (week 8, id 2).
+    private func sampleStats(weekStart: Date, weekEnd: Date) -> WeeklyStats {
+        WeeklyStats(
+            weekStart: weekStart, weekEnd: weekEnd,
+            ageMonths: 2, ageWeeks: 9, currentLeapName: "World of Patterns",
+            avgSleepMinutesPerDay: 840, avgNightSleepMinutes: 600, avgDaySleepMinutes: 240,
+            avgNapsPerDay: 3, sleepTrendVsPrevWeekMinutes: 0,
+            whoMinSleepMinutes: 840, whoAwakeWindowMax: 90,
+            avgFeedingsPerDay: 6, totalFeedings: 42,
+            newFoodsIntroduced: [], allergensFlagged: [], totalDiapers: 35
+        )
+    }
+
+    @Test("relocalizes a stored report whose language differs from the app language")
+    func relocalizeOnLanguageChange() async throws {
+        let appState = makeAppState(profile: BabyProfile(name: "Mia"))
+        let repo = MockWeeklyInsightRepository()
+        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
+        let stats = sampleStats(weekStart: bounds.start, weekEnd: bounds.end)
+        let englishAI = WeeklyInsightAI(sleepSummary: "English summary", sleepRecommendation: "",
+                                        feedingSummary: "", feedingRecommendation: "", overallSummary: "")
+        try await repo.save(WeeklyInsight(stats: stats, ai: englishAI, isAIGenerated: true,
+                                          generatedAt: Date(), language: .english))
+
+        let service = MockWeeklyInsightService()
+        service.canned = WeeklyInsightAI(sleepSummary: "Русское саммари", sleepRecommendation: "",
+                                         feedingSummary: "", feedingRecommendation: "", overallSummary: "")
+        let uc = makeUseCase(repo: repo, service: service, appState: appState)
+
+        await uc.relocalizeStaleReports(to: .russian)
+
+        let stored = try await repo.all()
+        #expect(stored.count == 1)
+        #expect(stored.first?.language == .russian)
+        #expect(stored.first?.ai.sleepSummary == "Русское саммари")
+        // The stored, localized leap name must be recomputed for the new language.
+        #expect(stored.first?.stats.currentLeapName == BabyAgeContext.currentLeapName(ageWeeks: 9, lang: "ru"))
+        #expect(service.callCount == 1)
+    }
+
+    @Test("relocalize is a no-op when the stored language already matches")
+    func relocalizeNoOpSameLanguage() async throws {
+        let appState = makeAppState(profile: BabyProfile(name: "Mia"))
+        let repo = MockWeeklyInsightRepository()
+        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
+        let stats = sampleStats(weekStart: bounds.start, weekEnd: bounds.end)
+        try await repo.save(WeeklyInsight(stats: stats, ai: MockWeeklyInsightService().canned,
+                                          isAIGenerated: true, generatedAt: Date(), language: .russian))
+
+        let service = MockWeeklyInsightService()
+        let uc = makeUseCase(repo: repo, service: service, appState: appState)
+
+        await uc.relocalizeStaleReports(to: .russian)
+
+        #expect(service.callCount == 0)
+        #expect(repo.saveCount == 1)  // only the initial save
+    }
+
+    @Test("relocalize keeps a stale report when the AI service fails (no downgrade)")
+    func relocalizeKeepsStaleOnFailure() async throws {
+        let appState = makeAppState(profile: BabyProfile(name: "Mia"))
+        let repo = MockWeeklyInsightRepository()
+        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
+        let stats = sampleStats(weekStart: bounds.start, weekEnd: bounds.end)
+        let englishAI = WeeklyInsightAI(sleepSummary: "English summary", sleepRecommendation: "",
+                                        feedingSummary: "", feedingRecommendation: "", overallSummary: "")
+        try await repo.save(WeeklyInsight(stats: stats, ai: englishAI, isAIGenerated: true,
+                                          generatedAt: Date(), language: .english))
+
+        let service = MockWeeklyInsightService()
+        service.shouldThrow = true
+        let uc = makeUseCase(repo: repo, service: service, appState: appState)
+
+        await uc.relocalizeStaleReports(to: .russian)
+
+        let stored = try await repo.all()
+        #expect(stored.first?.language == .english)
+        #expect(stored.first?.ai.sleepSummary == "English summary")
+    }
+
     @Test("weekBounds returns a 7-day window ending at the current week start")
     func weekBounds() {
         let now = Date()

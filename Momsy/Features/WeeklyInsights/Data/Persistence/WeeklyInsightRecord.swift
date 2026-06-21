@@ -9,6 +9,9 @@ final class WeeklyInsightRecord {
     var weekEnd: Date = Date()
     var generatedAt: Date = Date()
     var isAIGenerated: Bool = false
+    /// Language the narrative was generated in (BCP-47 short code). Defaults to
+    /// "en" for records written before this field existed (lightweight migration).
+    var language: String = "en"
 
     // Stats
     var ageMonths: Int = 0
@@ -40,6 +43,7 @@ final class WeeklyInsightRecord {
         weekEnd = s.weekEnd
         generatedAt = insight.generatedAt
         isAIGenerated = insight.isAIGenerated
+        language = insight.language.rawValue
         ageMonths = s.ageMonths
         ageWeeks = s.ageWeeks
         currentLeapName = s.currentLeapName
@@ -89,6 +93,7 @@ final class WeeklyInsightRecord {
             feedingRecommendation: feedingRecommendation,
             overallSummary: overallSummary
         )
-        return WeeklyInsight(stats: stats, ai: ai, isAIGenerated: isAIGenerated, generatedAt: generatedAt)
+        return WeeklyInsight(stats: stats, ai: ai, isAIGenerated: isAIGenerated, generatedAt: generatedAt,
+                             language: Language(rawValue: language) ?? .english)
     }
 }

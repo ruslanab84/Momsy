@@ -139,7 +139,6 @@ struct ReportView: View {
             periodLabel: vm.periods[vm.selectedPeriod],
             stats: vm.currentStats,
             sparklines: vm.currentSparklines,
-            notes: vm.currentNotes,
             lang: loc.lang
         )
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -236,7 +235,6 @@ struct ReportPreviewContent: View {
     let periodLabel: String
     let stats: [(label: String, value: String, sub: String, tone: Color)]
     let sparklines: [(label: String, values: [Double], color: Color, peak: String)]
-    var notes: [(date: Date, text: String)] = []
     var lang: String = "en"
 
     private var lm: LocalizationManager { .shared }
@@ -246,13 +244,6 @@ struct ReportPreviewContent: View {
         f.locale = Locale(identifier: lang == "en" ? "en_US" : "ru_RU")
         f.dateFormat = "d MMMM yyyy"
         return f.string(from: Date())
-    }
-
-    private func noteDateString(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: lang == "en" ? "en_US" : "ru_RU")
-        f.setLocalizedDateFormatFromTemplate("d MMMM")
-        return f.string(from: date)
     }
 
     var body: some View {
@@ -311,27 +302,6 @@ struct ReportPreviewContent: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
             .background(Color.bbCard)
-
-            if !notes.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(lm.strings.reportPreviewNotes)
-                        .font(.system(size: 11, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbInkMute)
-                        .kerning(0.5)
-                    ForEach(notes.indices, id: \.self) { i in
-                        let note = notes[i]
-                        Text("\(noteDateString(note.date)) — \(note.text)")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(.bbInk)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.bbCard)
-            }
 
             VStack(alignment: .leading, spacing: 0) {
                 Text(lm.strings.reportPreviewDoctorNotes)

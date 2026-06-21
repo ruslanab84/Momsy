@@ -11,7 +11,6 @@ final class ReportViewModel: ObservableObject {
     @Published var showShare = false
     @Published private(set) var currentStats: [(label: String, value: String, sub: String, tone: Color)] = []
     @Published private(set) var currentSparklines: [(label: String, values: [Double], color: Color, peak: String)] = []
-    @Published private(set) var currentNotes: [(date: Date, text: String)] = []
     @Published var lastVisitDate: Date? = nil
 
     private let generateReport: GenerateReportUseCase
@@ -23,7 +22,6 @@ final class ReportViewModel: ObservableObject {
     private let temperatureRepo: any TemperatureRepository
     private let measurementRepo: any MeasurementRepository
     private let doctorVisitRepo: any DoctorVisitRepository
-    private let diaryRepo: any DiaryRepository
 
     init(
         feedingRepo: any FeedingRepository,
@@ -32,7 +30,6 @@ final class ReportViewModel: ObservableObject {
         temperatureRepo: any TemperatureRepository,
         measurementRepo: any MeasurementRepository,
         doctorVisitRepo: any DoctorVisitRepository,
-        diaryRepo: any DiaryRepository,
         appState: AppState,
         analytics: any AnalyticsServiceProtocol
     ) {
@@ -42,7 +39,6 @@ final class ReportViewModel: ObservableObject {
         self.temperatureRepo = temperatureRepo
         self.measurementRepo = measurementRepo
         self.doctorVisitRepo = doctorVisitRepo
-        self.diaryRepo = diaryRepo
         self.appState = appState
         self.analytics = analytics
         self.generateReport = GenerateReportUseCase()
@@ -131,21 +127,12 @@ final class ReportViewModel: ObservableObject {
         async let diapersResult       = diaperRepo.getEntries(from: from, to: to)
         async let tempsResult         = temperatureRepo.getEntries(from: from, to: to)
         async let measurementsResult  = measurementRepo.getEntries(from: from, to: to)
-        async let diaryResult         = diaryRepo.getEntries(from: from, to: to)
 
         let feedings     = (try? await feedingsResult)     ?? []
         let sleeps       = (try? await sleepsResult)       ?? []
         let diapers      = (try? await diapersResult)      ?? []
         let temps        = (try? await tempsResult)        ?? []
         let measurements = (try? await measurementsResult) ?? []
-        let diaryItems   = (try? await diaryResult)        ?? []
-
-        // NOTES block: the parent's written diary notes and milestones for the
-        // period (newest first). Photos and blank entries are excluded.
-        currentNotes = diaryItems
-            .filter { ($0.kind == .note || $0.kind == .milestone) && !$0.text.isEmpty }
-            .sorted { $0.date > $1.date }
-            .map { (date: $0.date, text: $0.text) }
 
         var feedPerDay    = [Double]()
         var sleepPerDay   = [Double]()
@@ -309,7 +296,6 @@ final class ReportViewModel: ObservableObject {
             periodLabel: periods[selectedPeriod],
             stats: currentStats,
             sparklines: currentSparklines,
-            notes: currentNotes,
             lang: lm.lang
         ) else { return }
         analytics.track(.reportGenerated(period: periods[selectedPeriod]))
@@ -327,7 +313,6 @@ final class ReportViewModel: ObservableObject {
             periodLabel: periods[selectedPeriod],
             stats: currentStats,
             sparklines: currentSparklines,
-            notes: currentNotes,
             lang: lm.lang
         ) else { return }
         let info = UIPrintInfo.printInfo()

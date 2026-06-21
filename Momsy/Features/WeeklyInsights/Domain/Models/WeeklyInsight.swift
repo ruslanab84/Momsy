@@ -26,6 +26,27 @@ struct WeeklyStats: Codable, Equatable {
 
     // Diapers
     let totalDiapers: Int
+
+    /// Returns a copy with the localized developmental-leap label replaced.
+    /// Used when re-localizing a stored report into a newly selected language.
+    func withLeapName(_ name: String?) -> WeeklyStats {
+        WeeklyStats(
+            weekStart: weekStart, weekEnd: weekEnd,
+            ageMonths: ageMonths, ageWeeks: ageWeeks, currentLeapName: name,
+            avgSleepMinutesPerDay: avgSleepMinutesPerDay,
+            avgNightSleepMinutes: avgNightSleepMinutes,
+            avgDaySleepMinutes: avgDaySleepMinutes,
+            avgNapsPerDay: avgNapsPerDay,
+            sleepTrendVsPrevWeekMinutes: sleepTrendVsPrevWeekMinutes,
+            whoMinSleepMinutes: whoMinSleepMinutes,
+            whoAwakeWindowMax: whoAwakeWindowMax,
+            avgFeedingsPerDay: avgFeedingsPerDay,
+            totalFeedings: totalFeedings,
+            newFoodsIntroduced: newFoodsIntroduced,
+            allergensFlagged: allergensFlagged,
+            totalDiapers: totalDiapers
+        )
+    }
 }
 
 /// AI-generated narrative sections (the only thing the model returns).
@@ -44,6 +65,9 @@ struct WeeklyInsight: Codable, Equatable, Identifiable {
     let ai: WeeklyInsightAI
     let isAIGenerated: Bool
     let generatedAt: Date
+    /// The app language the narrative was generated in. Lets us detect and
+    /// regenerate a report after the user switches languages.
+    let language: Language
 
     var weekStart: Date { stats.weekStart }
     var weekEnd: Date { stats.weekEnd }

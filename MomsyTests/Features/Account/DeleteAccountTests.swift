@@ -105,3 +105,45 @@ struct DeleteAccountTests {
         #expect(wipes() == 1)
     }
 }
+
+// MARK: - Roster-wide erasure (multi-child GDPR coverage)
+
+/// Records which child each `deleteAllData()` call targeted by reading the task-local
+/// `ActiveBaby.syncTargetOverride` that scopes the cloud path for that single erase.
+private final class MockRosterEraser: BabyRosterDataEraser, @unchecked Sendable {
+    let rosterIds: [String]
+    private(set) var erasedTargets: [String] = []
+    init(rosterIds: [String]) { self.rosterIds = rosterIds }
+    func discoverAllBabyIds() async -> [String] { rosterIds }
+    func deleteAllData() async throws {
+        erasedTargets.append(ActiveBaby.syncTargetOverride?.uuidString ?? "<active-path>")
+    }
+}
+
+@Suite("RosterErasure")
+struct RosterErasureTests {
+
+    @Test("erases every child in the family roster, not just the active one")
+    func erasesEntireRoster() async throws {
+        let a = UUID(), b = UUID(), c = UUID()
+        let mock = MockRosterEraser(rosterIds: [a, b, c].map(\.uuidString))
+        try await RosterErasure.eraseAll(using: mock, locallyActiveId: a)
+        #expect(Set(mock.erasedTargets) == Set([a, b, c].map(\.uuidString)))
+        #expect(mock.erasedTargets.count == 3)
+    }
+
+    @Test("includes a locally-active child the roster read missed")
+    func includesLocalActiveMissingFromRoster() async throws {
+        let inRoster = UUID(), localOnly = UUID()
+        let mock = MockRosterEraser(rosterIds: [inRoster.uuidString])
+        try await RosterErasure.eraseAll(using: mock, locallyActiveId: localOnly)
+        #expect(Set(mock.erasedTargets) == Set([inRoster, localOnly].map(\.uuidString)))
+    }
+
+    @Test("with an empty roster and no active child, erases the active path once")
+    func emptyRosterFallsBackToActivePath() async throws {
+        let mock = MockRosterEraser(rosterIds: [])
+        try await RosterErasure.eraseAll(using: mock, locallyActiveId: nil)
+        #expect(mock.erasedTargets == ["<active-path>"])
+    }
+}
