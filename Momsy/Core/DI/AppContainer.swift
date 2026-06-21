@@ -337,6 +337,7 @@ final class AppContainer {
             temperatureRepo: temperatureRepository,
             measurementRepo: measurementRepository,
             doctorVisitRepo: doctorVisitRepository,
+            diaryRepo: diaryRepository,
             appState: appState,
             analytics: analytics
         )
