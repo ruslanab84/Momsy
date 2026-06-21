@@ -147,39 +147,19 @@ struct SymptomView: View {
     // MARK: - Action Buttons
 
     private var actionButtons: some View {
-        HStack(spacing: 10) {
-            Button { vm.logToDiary() } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: vm.diaryLogged ? "checkmark" : "book.closed")
-                        .font(.system(size: 14, weight: .bold))
-                    Text(vm.diaryLogged ? loc.strings.saved : loc.strings.toDiary)
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                }
-                .foregroundColor(vm.diaryLogged ? .bbMintDeep : .bbInk)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.bbCard)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .bbShadowSoft()
+        Button { vm.logToDiary() } label: {
+            HStack(spacing: 6) {
+                Image(systemName: vm.diaryLogged ? "checkmark" : "book.closed")
+                    .font(.system(size: 14, weight: .bold))
+                Text(vm.diaryLogged ? loc.strings.saved : loc.strings.toDiary)
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
             }
-
-            Button {
-                if let url = URL(string: "tel://103") {
-                    UIApplication.shared.open(url)
-                }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "phone.fill")
-                        .font(.system(size: 14, weight: .bold))
-                    Text(loc.strings.call)
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.bbCoralDeep)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            }
+            .foregroundColor(vm.diaryLogged ? .bbMintDeep : .bbInk)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .bbShadowSoft()
         }
     }
 
