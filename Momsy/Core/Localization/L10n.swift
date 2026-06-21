@@ -324,6 +324,21 @@ struct L10n {
         s("from your data", "по вашим данным", "aus deinen Daten",
           "según tus datos", "d’après vos données", "com base nos seus dados")
     }
+    var sleepForecastOverdueTitle: String {
+        s("Sleep overdue", "Окно сна пропущено", "Schlaf überfällig",
+          "Sueño atrasado", "Sommeil en retard", "Sono atrasado")
+    }
+    var sleepForecastOverdueAction: String {
+        s("Settle now", "Уложить сейчас", "Jetzt hinlegen",
+          "Acostar ya", "Coucher maintenant", "Deitar agora")
+    }
+    func sleepForecastAwakeFor(_ dur: String) -> String {
+        s("awake \(dur)", "бодрствует \(dur)", "wach seit \(dur)",
+          "despierto \(dur)", "éveillé depuis \(dur)", "acordado há \(dur)")
+    }
+    var sleepForecastOverduePill: String {
+        s("overdue", "просрочено", "überfällig", "atrasado", "en retard", "atrasado")
+    }
 
     var feedingChartTitle: String  { s("Feeding",          "Кормление",             "Stillen",        "Tomas",   "Tétées", "Mamadas") }
     var feedingPeriodWeek: String  { s("7 days",           "7 дней",                "7 Tage",         "7 días",  "7 jours", "7 dias") }

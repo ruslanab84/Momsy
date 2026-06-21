@@ -24,7 +24,19 @@ struct NextSleepCard: View {
     }
 
     private var accent: Color {
-        prediction.kind == .bedtime ? .bbLilacDeep : .bbSkyDeep
+        if prediction.isOverdue { return .bbCoralDeep }
+        return prediction.kind == .bedtime ? .bbLilacDeep : .bbSkyDeep
+    }
+
+    private var icon: String {
+        if prediction.isOverdue { return "moon.zzz.fill" }
+        return prediction.kind == .bedtime ? "moon.stars.fill" : "powersleep"
+    }
+
+    private var awakeText: String? {
+        guard let mins = prediction.minutesAwake, mins > 0 else { return nil }
+        let dur = strings.sleepDurationFormatted(h: mins / 60, m: mins % 60)
+        return strings.sleepForecastAwakeFor(dur)
     }
 
     private var confidenceLabel: String {
@@ -44,13 +56,24 @@ struct NextSleepCard: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            Image(systemName: prediction.kind == .bedtime ? "moon.stars.fill" : "powersleep")
+            Image(systemName: icon)
                 .font(.system(size: 26, weight: .semibold))
                 .foregroundColor(accent)
                 .frame(width: 44, height: 44)
                 .background(accent.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
+            if prediction.isOverdue {
+                overdueContent
+            } else {
+                forecastContent
+            }
+        }
+        .bbCard()
+    }
+
+    private var forecastContent: some View {
+        Group {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
@@ -72,6 +95,27 @@ struct NextSleepCard: View {
                     .foregroundColor(.bbInkMute)
             }
         }
-        .bbCard()
+    }
+
+    private var overdueContent: some View {
+        Group {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(strings.sleepForecastOverdueTitle)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+                Text(strings.sleepForecastOverdueAction)
+                    .font(.system(size: 28, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbInk)
+                if let awakeText {
+                    Text(awakeText)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                }
+            }
+
+            Spacer(minLength: 0)
+
+            BBPill(text: strings.sleepForecastOverduePill, color: accent.opacity(0.14), fg: accent, size: 11)
+        }
     }
 }

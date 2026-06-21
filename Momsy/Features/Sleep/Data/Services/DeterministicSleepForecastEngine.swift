@@ -28,6 +28,9 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
 
         guard let kind = classify(onset: onset, entries: entries, profile: profile, now: now) else { return nil }
 
+        let asleepNow = isSleepingNow(entries)
+        let awake = asleepNow ? nil : minutesAwake(entries, now: now)
+
         return SleepPrediction(
             kind: kind,
             windowStart: onset.addingMinutes(-buffer),
@@ -35,7 +38,9 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
             windowEnd: onset.addingMinutes(buffer),
             confidence: confidence(sampleCount: samples.count),
             basis: basis,
-            napsRemaining: napsRemaining(entries, profile: profile, now: now)
+            napsRemaining: napsRemaining(entries, profile: profile, now: now),
+            isOverdue: !asleepNow && onset <= now,
+            minutesAwake: awake
         )
     }
 
@@ -126,6 +131,18 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
 
     private func napsRemaining(_ entries: [SleepEntry], profile: WakeWindowProfile, now: Date) -> Int? {
         max(0, profile.napsPerDay.upperBound - napsTakenToday(entries, now: now))
+    }
+
+    private func isSleepingNow(_ entries: [SleepEntry]) -> Bool {
+        entries.max(by: { $0.startDate < $1.startDate })?.endDate == nil && !entries.isEmpty
+    }
+
+    /// Minutes the baby has been awake since the last completed sleep ended.
+    /// `nil` when no sleep has ended yet or the timestamp is in the future.
+    private func minutesAwake(_ entries: [SleepEntry], now: Date) -> Int? {
+        guard let lastEnd = entries.compactMap(\.endDate).max() else { return nil }
+        let mins = Int(now.timeIntervalSince(lastEnd) / 60)
+        return mins >= 0 ? mins : nil
     }
 
     private func classify(onset: Date, entries: [SleepEntry], profile: WakeWindowProfile, now: Date) -> SleepPredictionKind? {

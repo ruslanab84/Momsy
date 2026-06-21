@@ -153,4 +153,44 @@ struct SleepForecastEngineTests {
         let future = try #require(cal.date(byAdding: .day, value: 10, to: today))
         #expect(engine.predict(birthDate: future, entries: [], now: today) == nil)
     }
+
+    // MARK: - 9. Elapsed window → overdue, with awake duration
+
+    @Test("an elapsed window flags overdue and reports minutes awake")
+    func elapsedWindowIsOverdue() throws {
+        let today = try makeToday()
+        // Woke at 07:00; ideal onset lands ~08:15, but it is now 11:00.
+        let entries = [entry(try at(today, 6, 0), try at(today, 7, 0))]
+        let now = try at(today, 11, 0)
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 60),
+                                               entries: entries, now: now))
+        #expect(pred.isOverdue)
+        #expect(pred.minutesAwake == 240)                     // 07:00 → 11:00
+        #expect(pred.predictedOnset < now)                    // onset stays the (past) ideal
+    }
+
+    // MARK: - 10. Window still ahead → not overdue
+
+    @Test("an upcoming window is not overdue")
+    func upcomingWindowIsNotOverdue() throws {
+        let today = try makeToday()
+        let entries = [entry(try at(today, 12, 0), try at(today, 13, 0))]
+        let now = try at(today, 13, 10)
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 60),
+                                               entries: entries, now: now))
+        #expect(pred.predictedOnset > now)
+        #expect(!pred.isOverdue)
+    }
+
+    // MARK: - 11. Sleeping now → never overdue, awake is nil
+
+    @Test("an ongoing sleep is never overdue")
+    func sleepingNowIsNotOverdue() throws {
+        let today = try makeToday()
+        let entries = [entry(try at(today, 13, 0), nil)]
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 60),
+                                               entries: entries, now: try at(today, 13, 30)))
+        #expect(!pred.isOverdue)
+        #expect(pred.minutesAwake == nil)
+    }
 }
