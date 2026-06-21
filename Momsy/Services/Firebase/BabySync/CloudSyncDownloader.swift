@@ -103,9 +103,11 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     }
 
     /// Pulls profile + logs for every child in the family roster. Each child is synced
-    /// with `ActiveBaby.currentId` set to its id, so the Firestore path and the babyId
-    /// stamped onto merged records both target that child. The user's active child is
-    /// synced LAST, leaving the active pointer, widget, and profile on it when done.
+    /// under a task-local `ActiveBaby.syncTargetOverride` so the Firestore path and the
+    /// babyId stamped onto merged records target that child — WITHOUT moving the user's
+    /// persisted selection. This way a concurrent user write (a different task tree) is
+    /// never misattributed to whichever child the loop is mid-processing. The persisted
+    /// pointer is only established here when the user has no selection yet.
     @MainActor
     private func downloadAllBabies() async {
         let desiredActive = ActiveBaby.currentId
@@ -123,17 +125,22 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
             return
         }
 
-        // Sync the active child last so the final state lands on it. With no prior
-        // selection, the first roster entry becomes active.
+        // The active child is synced last so its data lands on the in-memory "today"
+        // strip. With no prior selection, the first roster entry becomes active —
+        // persist it once (the only legitimate mutation of the global pointer here).
         let activeStr = desiredActive?.uuidString ?? ids.first!
+        if desiredActive == nil, let firstActive = UUID(uuidString: activeStr) {
+            ActiveBaby.currentId = firstActive
+        }
         let ordered = ids.filter { $0 != activeStr } + [activeStr]
 
         for idStr in ordered {
             guard let id = UUID(uuidString: idStr) else { continue }
-            ActiveBaby.currentId = id
-            await syncBabyProfile()
             // Only the active child contributes to the in-memory "today" quick-log strip.
-            await downloadAndMerge(recordQuickLogs: idStr == activeStr)
+            await ActiveBaby.$syncTargetOverride.withValue(id) {
+                await syncBabyProfile()
+                await downloadAndMerge(recordQuickLogs: idStr == activeStr)
+            }
         }
     }
 

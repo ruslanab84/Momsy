@@ -10,12 +10,24 @@ final class LeapsViewModel: ObservableObject {
     private let markLeapCompleteUC: MarkLeapCompleteUseCase
     private let appState: AppState
     private var lm: LocalizationManager { .shared }
+    private var mergeObserver: NSObjectProtocol?
 
     init(getLeaps: GetLeapsUseCase, markLeapComplete: MarkLeapCompleteUseCase, appState: AppState) {
         self.getLeapsUC = getLeaps
         self.markLeapCompleteUC = markLeapComplete
         self.appState = appState
         Task { await loadLeaps() }
+        // Switching the active child re-pulls its cloud logs and posts this; reload
+        // so the leap timeline reflects the new baby's age and progress.
+        mergeObserver = NotificationCenter.default.addObserver(
+            forName: .cloudSyncDidMerge, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in await self?.loadLeaps() }
+        }
+    }
+
+    deinit {
+        if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
 
     var currentLeap: DevelopmentLeap {

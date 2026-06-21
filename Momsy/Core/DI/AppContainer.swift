@@ -87,9 +87,9 @@ final class AppContainer {
             forName: .familyDidJoin, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in
-                // Clear the active pointer FIRST (this also clears the persisted babyId),
-                // so the queued-write replay inside forceResyncAll is a no-op until
-                // discovery adopts the joined family's roster and sets a valid babyId.
+                // Clear the active pointer FIRST (this also clears the persisted babyId)
+                // so discovery adopts the joined family's roster. Any writes still queued
+                // from a previous family are skipped by the replay's cross-family guard.
                 ActiveBaby.currentId = nil
                 await self.cloudSyncDownloader.forceResyncAll()
                 NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)

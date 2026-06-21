@@ -28,6 +28,26 @@ struct BabySyncBackfillTests {
         #expect((queued[0].payload["amountMl"] as? Int) == 120)
     }
 
+    @Test func setLogStampsKnownBabyIdSoReplayRoutesToTheRightChild() async throws {
+        // Isolated store so a parallel suite clearing the process-wide active-baby key
+        // can't race this test's known-baby setup (the service reads its path from here).
+        let suite = "BabySyncBackfillTests.stamp"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        // Baby is known early in onboarding; only the family path is still pending.
+        defaults.set("baby-42", forKey: kBabyIdDefaultsKey)
+        PendingWritesStore.shared.clear()
+        defer { PendingWritesStore.shared.clear() }
+
+        try await BabySyncService(defaults: defaults).setLog(DummyLog(id: "log-9", amountMl: 60),
+                                                             id: "log-9", to: "feedingLogs")
+
+        let queued = PendingWritesStore.shared.all()
+        #expect(queued.count == 1)
+        #expect(queued[0].babyId == "baby-42")   // stamped, so replay can't drift to another child
+        #expect(queued[0].familyId == "")
+    }
+
     @Test func addFeedingLogEnqueuesByStableIdWhenPathNotReady() async throws {
         clearPath()
         PendingWritesStore.shared.clear()

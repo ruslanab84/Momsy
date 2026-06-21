@@ -96,6 +96,39 @@ struct LeapsViewModelTests {
         #expect(currentLeaps.count <= 1)
     }
 
+    // MARK: - baby switching
+
+    @Test("reloads leaps for the new child when the active baby switches")
+    func reloadsLeapsOnBabySwitch() async throws {
+        let repo = MockLeapsRepository()
+        let babyA = BabyProfile(name: "A", birthDate: Date())                                       // newborn
+        let babyB = BabyProfile(name: "B",                                                          // ~9w2d → leap #2
+                                birthDate: Calendar.current.date(byAdding: .day, value: -65, to: Date())!)
+        let babyRepo = MockBabyRepository(initialProfiles: [babyA, babyB])
+        let state = AppState(
+            getBabyProfile: GetBabyProfileUseCase(repository: babyRepo),
+            getAllBabies: GetAllBabiesUseCase(repository: babyRepo)
+        )
+        ActiveBaby.currentId = babyA.id
+        await state.load()
+
+        let vm = LeapsViewModel(
+            getLeaps: GetLeapsUseCase(repository: repo),
+            markLeapComplete: MarkLeapCompleteUseCase(repository: repo),
+            appState: state
+        )
+        try await Task.sleep(nanoseconds: 50_000_000)
+        #expect(vm.currentLeap.isCurrent == false) // newborn A has no active leap
+
+        // Switch to child B exactly as AppContainer.switchActiveBaby does.
+        state.setActive(babyB.id)
+        NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(vm.currentLeap.id == 2)
+        #expect(vm.currentLeap.isCurrent == true)
+    }
+
     // MARK: - markComplete
 
     @Test("markComplete saves progress to repository")

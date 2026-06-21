@@ -7,8 +7,13 @@ final class BabySyncService {
     /// paths from any actor without hopping. `FamilyManager` keeps `kFamilyIdDefaultsKey`
     /// in sync; `kBabyIdDefaultsKey` is written wherever the local baby profile is saved
     /// (`SwiftDataBabyRepository.saveProfile`) and on cloud writes/discovery below.
-    private var familyId: String { UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey) ?? "" }
-    private var babyId: String { UserDefaults.standard.string(forKey: kBabyIdDefaultsKey) ?? "" }
+    private var familyId: String { defaults.string(forKey: kFamilyIdDefaultsKey) ?? "" }
+    /// Honours a background sync's task-local target so the roster download (and queued-write
+    /// replay) writes to the child being processed, not the user's currently-selected one.
+    private var babyId: String {
+        if let override = ActiveBaby.syncTargetOverride { return override.uuidString }
+        return defaults.string(forKey: kBabyIdDefaultsKey) ?? ""
+    }
 
     /// A log can only be read/written once we know BOTH the family and the baby.
     private var hasPath: Bool { !familyId.isEmpty && !babyId.isEmpty }
@@ -29,7 +34,10 @@ final class BabySyncService {
 
     private static let migrationFlagKey = "babysync_perbaby_migration_v1_done"
 
-    init() {}
+    /// The store backing the family/baby path. Injectable so tests can isolate it in a
+    /// private suite instead of racing other suites on the process-wide `.standard`.
+    private let defaults: UserDefaults
+    init(defaults: UserDefaults = .standard) { self.defaults = defaults }
 
     // MARK: - Path helpers
 
@@ -58,7 +66,10 @@ final class BabySyncService {
         guard !id.isEmpty else { return }
         guard hasPath else {
             let payload = try Firestore.Encoder().encode(log)
-            PendingWritesStore.shared.add(collection: subcollection, docId: id, payload: payload)
+            // Stamp the path known at enqueue so replay can route the write to the baby
+            // (and family) it belongs to, never to whoever is active at replay time.
+            PendingWritesStore.shared.add(collection: subcollection, docId: id,
+                                          payload: payload, familyId: familyId, babyId: babyId)
             return
         }
         try collection(subcollection).document(id).setData(from: log, merge: true)
@@ -102,15 +113,39 @@ final class BabySyncService {
         }
     }
 
-    /// Replays cloud writes that were queued while the family path wasn't ready.
-    /// Each write targets the CURRENT baby path; the drop window is single-baby
-    /// onboarding, so by replay time `babyId` already points to that baby.
+    /// Decides which baby a queued write replays into, or `nil` to skip it.
+    /// - Cross-family guard: a write stamped with a different family is never replayed
+    ///   into the current one (e.g. leftovers from a family the user has since left).
+    /// - Per-baby routing: a write stamped with a known baby replays into THAT baby;
+    ///   one queued before any baby existed falls back to the current baby (single-baby
+    ///   onboarding — the only case where the target is genuinely unknown at enqueue).
+    static func replayTargetBabyId(entryFamilyId: String, entryBabyId: String,
+                                   currentFamilyId: String, currentBabyId: String) -> String? {
+        guard !currentFamilyId.isEmpty else { return nil }
+        if !entryFamilyId.isEmpty, entryFamilyId != currentFamilyId { return nil }
+        let target = entryBabyId.isEmpty ? currentBabyId : entryBabyId
+        return target.isEmpty ? nil : target
+    }
+
+    /// Replays cloud writes that were queued while the family path wasn't ready. Each
+    /// write is routed to the baby/family it was stamped for (see `replayTargetBabyId`)
+    /// via a task-local override, so a queued log can never land under the wrong child.
     func replayPendingWrites() async {
-        guard hasPath else { return }
+        let currentFamily = familyId
+        let currentBaby = babyId
+        guard !currentFamily.isEmpty else { return }
         for entry in PendingWritesStore.shared.all() {
+            guard
+                let targetBaby = Self.replayTargetBabyId(
+                    entryFamilyId: entry.familyId, entryBabyId: entry.babyId,
+                    currentFamilyId: currentFamily, currentBabyId: currentBaby),
+                let targetUUID = UUID(uuidString: targetBaby)
+            else { continue }
             do {
-                try await collection(entry.collection).document(entry.docId)
-                    .setData(entry.payload, merge: true)
+                try await ActiveBaby.$syncTargetOverride.withValue(targetUUID) {
+                    try await collection(entry.collection).document(entry.docId)
+                        .setData(entry.payload, merge: true)
+                }
                 PendingWritesStore.shared.remove(docId: entry.docId)
             } catch {
                 // Leave it pending; the next sync retries.
@@ -188,7 +223,7 @@ final class BabySyncService {
     /// (`setData` merge); the old tree is left in place so not-yet-updated devices keep
     /// working during rollout. Erasure later cleans it via `deleteLegacyFamilyTree()`.
     func migrateFromFamilyPathIfNeeded() async {
-        guard !UserDefaults.standard.bool(forKey: Self.migrationFlagKey) else { return }
+        guard !defaults.bool(forKey: Self.migrationFlagKey) else { return }
         guard !familyId.isEmpty else { return }
 
         let oldParent = db.collection("babies").document(familyId)
@@ -203,10 +238,10 @@ final class BabySyncService {
             resolvedBabyId = babyId
         } else {
             // Nothing to migrate (fresh install, or baby not created yet).
-            UserDefaults.standard.set(true, forKey: Self.migrationFlagKey)
+            defaults.set(true, forKey: Self.migrationFlagKey)
             return
         }
-        UserDefaults.standard.set(resolvedBabyId, forKey: kBabyIdDefaultsKey)
+        defaults.set(resolvedBabyId, forKey: kBabyIdDefaultsKey)
 
         let newParent = db.collection("families").document(familyId)
             .collection("babies").document(resolvedBabyId)
@@ -218,7 +253,7 @@ final class BabySyncService {
             for sub in Self.allSubcollections {
                 try await copyDocs(from: oldParent.collection(sub), to: newParent.collection(sub))
             }
-            UserDefaults.standard.set(true, forKey: Self.migrationFlagKey)
+            defaults.set(true, forKey: Self.migrationFlagKey)
         } catch {
             // Leave the flag unset so the migration retries on a future launch.
         }
@@ -323,7 +358,7 @@ final class BabySyncService {
     /// other parent fields.
     func setBabyProfile(_ profile: BabyProfile) async throws {
         guard !familyId.isEmpty else { return }
-        UserDefaults.standard.set(profile.id.uuidString, forKey: kBabyIdDefaultsKey)
+        defaults.set(profile.id.uuidString, forKey: kBabyIdDefaultsKey)
         try babyDoc().setData(from: BabyProfileDTO(from: profile), merge: true)
     }
 

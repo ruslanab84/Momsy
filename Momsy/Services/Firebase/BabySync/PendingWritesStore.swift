@@ -15,6 +15,11 @@ final class PendingWritesStore {
         let collection: String
         let docId: String
         let payload: [String: Any]
+        /// The path the write was made for, captured at enqueue. Replay uses these to
+        /// send the write to the baby/family it actually belongs to — never to whichever
+        /// child happens to be active at replay time. Empty when unknown at enqueue.
+        let familyId: String
+        let babyId: String
     }
 
     private let key = "pending_writes_v1"
@@ -29,10 +34,12 @@ final class PendingWritesStore {
 
     /// Enqueues a write, replacing any earlier pending write with the same docId so
     /// only the latest payload for an id is kept (matches `setData(merge:)` semantics).
-    func add(collection: String, docId: String, payload: [String: Any]) {
+    func add(collection: String, docId: String, payload: [String: Any],
+             familyId: String, babyId: String) {
         let safe = (Self.plistSafe(payload) as? [String: Any]) ?? [:]
         var items = raw.filter { ($0["docId"] as? String) != docId }
-        items.append(["collection": collection, "docId": docId, "payload": safe])
+        items.append(["collection": collection, "docId": docId, "payload": safe,
+                      "familyId": familyId, "babyId": babyId])
         raw = items
     }
 
@@ -43,7 +50,9 @@ final class PendingWritesStore {
                 let docId = dict["docId"] as? String,
                 let payload = dict["payload"] as? [String: Any]
             else { return nil }
-            return Entry(collection: collection, docId: docId, payload: payload)
+            return Entry(collection: collection, docId: docId, payload: payload,
+                         familyId: dict["familyId"] as? String ?? "",
+                         babyId: dict["babyId"] as? String ?? "")
         }
     }
 
