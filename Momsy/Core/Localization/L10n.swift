@@ -599,7 +599,6 @@ struct L10n {
     func reportSparkTempDynamicLabel(unit: String) -> String { s("Temperature \(unit)", "Температура \(unit)", "Temperatur \(unit)", "Temperatura \(unit)", "Température \(unit)", "Temperatura \(unit)") }
     var reportSparkDiapersLabel: String { s("Diapers / day",   "Подгузники / сут",   "Windeln / Tag", "Pañales / día", "Couches / jour", "Fraldas / dia") }
     func reportPreviewPeriod(label: String) -> String { s("Period: \(label)", "Период: \(label)", "Zeitraum: \(label)", "Periodo: \(label)", "Période : \(label)", "Período: \(label)") }
-    var reportPreviewNotes: String     { s("NOTES",         "ЗАМЕТКИ",                 "NOTIZEN",      "NOTAS", "NOTES", "NOTAS") }
     var reportPreviewDoctorNotes: String { s("DOCTOR'S NOTES", "ЗАМЕТКИ ВРАЧА",        "ARZTNOTIZEN",  "NOTAS DEL MÉDICO", "NOTES DU MÉDECIN", "NOTAS DO MÉDICO") }
     func reportSparkPeak(value: String) -> String { s("peak: \(value)", "пик: \(value)", "Peak: \(value)", "pico: \(value)", "pic : \(value)", "pico: \(value)") }
 
