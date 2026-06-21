@@ -71,8 +71,8 @@ struct SleepView: View {
                     .foregroundColor(.bbLilacDeep)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
+                    .padding(.horizontal, 12)
+                    .frame(height: 36)
                     .background(Color.bbLilac.opacity(0.25))
                     .clipShape(Capsule())
             }
