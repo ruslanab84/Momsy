@@ -87,9 +87,13 @@ struct TodayView: View {
             }
         }
         .onChange(of: feedingVM.todayEntries.count) { _, _ in
+            // During a merge, reloadAfterMerge already reloads everything; skip the
+            // duplicate read so it doesn't race the downloader on the shared context.
+            guard !vm.isReloading else { return }
             Task { await vm.loadTodayEntries() }
         }
         .onChange(of: sleepVM.todayEntries.count) { _, _ in
+            guard !vm.isReloading else { return }
             Task { await vm.refreshForecast() }
         }
         .task {

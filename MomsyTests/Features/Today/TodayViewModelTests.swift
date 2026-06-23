@@ -132,6 +132,21 @@ struct TodayViewModelTests {
         #expect(vm.logEntries.isEmpty)
     }
 
+    @Test("diaperCount holds its last value when a reload hits a transient read failure")
+    func diaperCountSurvivesTransientReadFailure() async {
+        let diaperRepo = MockDiaperRepository()
+        diaperRepo.entries = (0..<4).map { _ in DiaperEntry() }   // 4 today
+        let vm = makeVM(diaperRepo: diaperRepo)
+        await vm.reloadAfterMerge()
+        #expect(vm.diaperCount == 4)
+
+        // A concurrent cloud merge makes the shared ModelContext throw mid-read.
+        // The count must hold at 4, not flash to 0.
+        diaperRepo.shouldThrow = true
+        await vm.reloadAfterMerge()
+        #expect(vm.diaperCount == 4)
+    }
+
     // MARK: - loadTodayEntries
 
     @Test("loadTodayEntries merges feeding entries and quick log")

@@ -13,6 +13,10 @@ final class TodayViewModel: ObservableObject {
     @Published private(set) var currentLeap: DevelopmentLeap?
     @Published private(set) var leapPhase: BabyAgeContext.LeapPhase?
     @Published private(set) var nextSleep: SleepPrediction?
+    /// True while a post-merge reload is in flight. `TodayView` reads this to skip
+    /// its own feeding/sleep-stream reload triggers during a merge, so they don't
+    /// pile a second concurrent read onto the shared `ModelContext`.
+    @Published private(set) var isReloading = false
 
     private let getFeeding: GetFeedingEntriesUseCase
     private let getSleep: GetSleepEntriesUseCase
@@ -27,6 +31,8 @@ final class TodayViewModel: ObservableObject {
     private var syncTasks: [Task<Void, Never>] = []
     private var hasFetchedThisSession = false
     private var mergeObserver: NSObjectProtocol?
+    private var reloadTask: Task<Void, Never>?
+    private var reloadGeneration = 0
 
     init(
         getFeeding: GetFeedingEntriesUseCase,
@@ -64,11 +70,35 @@ final class TodayViewModel: ObservableObject {
         if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
 
+    /// A multi-step cloud resync posts `.cloudSyncDidMerge` several times in quick
+    /// succession. Cancel-and-replace collapses that burst into a single reload so
+    /// we never run overlapping reads against the shared `ModelContext` (concurrent
+    /// reads vs. the downloader's writes are what made the counts/forecast flicker).
     func reloadAfterMerge() async {
+        reloadTask?.cancel()
+        reloadGeneration &+= 1
+        let generation = reloadGeneration
+        let task = Task { [weak self] in
+            guard let self else { return }
+            await self.performReload()
+        }
+        reloadTask = task
+        isReloading = true
+        await task.value
+        // Only the newest reload clears the gate; a superseded (cancelled) one
+        // returning here must not flip `isReloading` off while its successor runs.
+        if generation == reloadGeneration { isReloading = false }
+    }
+
+    private func performReload() async {
         await loadTodayEntries()
+        if Task.isCancelled { return }
         await loadDiaperCount()
+        if Task.isCancelled { return }
         await loadLeap()
+        if Task.isCancelled { return }
         await refreshForecast()
+        if Task.isCancelled { return }
         // Switching the active child reloads the data above; the daily tip is
         // derived from it, so recompute it too or it stays stuck on the prior baby.
         await updateTip()
@@ -76,7 +106,14 @@ final class TodayViewModel: ObservableObject {
 
     func refreshForecast() async {
         guard let birth = appState.babyProfile?.birthDate else { nextSleep = nil; return }
-        nextSleep = try? await predictNextSleep.execute(birthDate: birth)
+        do {
+            // A successful `nil` is legitimate (e.g. the next onset falls at night,
+            // so the card should hide) and must be honored. Only a thrown error —
+            // a transient read during a concurrent merge — keeps the last value.
+            nextSleep = try await predictNextSleep.execute(birthDate: birth)
+        } catch {
+            return
+        }
     }
 
     // MARK: - Developmental leap
@@ -133,13 +170,19 @@ final class TodayViewModel: ObservableObject {
     }
 
     private func loadDiaperCount() async {
-        diaperCount = (try? await diaperRepo.countToday()) ?? 0
-        WidgetDataStore.shared.updateDiaperCount(diaperCount)
+        // A legitimate 0 (no diapers today) comes back as a successful Int; only a
+        // thrown read — the context busy mid-merge — falls through and keeps the
+        // last value, instead of flashing the count to 0.
+        guard let count = try? await diaperRepo.countToday() else { return }
+        diaperCount = count
+        WidgetDataStore.shared.updateDiaperCount(count)
     }
 
     func loadTodayEntries() async {
         let lm = LocalizationManager.shared
-        let feedings = (try? await getFeeding.execute(for: Date())) ?? []
+        // Keep the last list on a thrown read (context busy mid-merge); a genuinely
+        // empty day still comes back as a successful `[]` and clears the list.
+        guard let feedings = try? await getFeeding.execute(for: Date()) else { return }
         let feedingEntries: [LogEntry] = feedings.map {
             LogEntry(
                 time: $0.date,
@@ -153,7 +196,7 @@ final class TodayViewModel: ObservableObject {
         let cal = Calendar.current
         let startOfDay = cal.startOfDay(for: Date())
         let endOfDay = cal.date(byAdding: .day, value: 1, to: startOfDay) ?? Date()
-        let sleeps = (try? await getSleep.execute(from: startOfDay, to: endOfDay)) ?? []
+        guard let sleeps = try? await getSleep.execute(from: startOfDay, to: endOfDay) else { return }
         let sleepEntries: [LogEntry] = sleeps.map { sleepLabel($0) }
         let quickEntries: [LogEntry] = quickLogRepo.load().map {
             LogEntry(time: $0.time, kind: $0.kind, label: $0.label)
