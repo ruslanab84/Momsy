@@ -7,6 +7,9 @@ import FirebaseAuth
 // UserDefaults keys shared across module so repos can read without actor hopping
 let kFamilyIdDefaultsKey = "familyId_v1"
 let kBabyIdDefaultsKey = "babyId_v1"
+// The uid that owns the cached familyId. A cached familyId is valid only for this
+// uid; a different uid means the cache is stale and must be re-read from Firestore.
+let kFamilyOwnerUidDefaultsKey = "familyOwnerUid_v1"
 
 extension Notification.Name {
     /// Posted after the caller joins an existing family, so the app re-pulls that
@@ -42,9 +45,29 @@ final class FamilyManager: ObservableObject {
         isReady = familyId != nil
     }
 
+    /// True when a cached familyId belongs to a different uid than the one now
+    /// signing in. This happens when `AuthManager.linkOrSignIn` falls back to a
+    /// plain `signIn` (the credential already belongs to an existing account):
+    /// Firebase issues a new uid, but the anonymous session's familyId is still
+    /// cached. Without invalidation, `setup` early-returns on that stale id and
+    /// strands the user in an empty anonymous family. A nil cached uid (fresh
+    /// install, or a cache written before this key existed) is treated as valid.
+    nonisolated static func cacheIsStale(cachedOwnerUid: String?, currentUid: String) -> Bool {
+        guard let cachedOwnerUid else { return false }
+        return cachedOwnerUid != currentUid
+    }
+
     /// Called by AuthManager's state listener on every sign-in / app launch with existing session.
     /// Reads the user's familyId from Firestore; creates a new family if none exists.
     func setup(uid: String, displayName: String) async throws {
+        // A uid change since the cache was written (e.g. signing into an existing
+        // account that replaced the anonymous user) invalidates the cached familyId.
+        if Self.cacheIsStale(
+            cachedOwnerUid: UserDefaults.standard.string(forKey: kFamilyOwnerUidDefaultsKey),
+            currentUid: uid
+        ) {
+            reset()
+        }
         // Cached familyId is already sufficient — skip remote setup
         if familyId != nil { isReady = true; return }
         // Prevent concurrent invocations (e.g. state listener fires on launch + sign-in)
@@ -56,7 +79,7 @@ final class FamilyManager: ObservableObject {
         let userDoc = try await userRef.getDocument()
 
         if let existingId = userDoc.data()?["familyId"] as? String {
-            persist(familyId: existingId)
+            persist(familyId: existingId, ownerUid: uid)
             try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
         } else {
             let newId = try await createFamily(for: uid)
@@ -67,7 +90,7 @@ final class FamilyManager: ObservableObject {
                 ["familyId": newId, "displayName": displayName],
                 merge: true
             )
-            persist(familyId: newId)
+            persist(familyId: newId, ownerUid: uid)
             try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
             Self.log.info("Created new family \(newId, privacy: .public) for user")
         }
@@ -101,7 +124,7 @@ final class FamilyManager: ObservableObject {
             .collection("members").document(uid)
             .setData(["name": displayName, "joinedAt": Timestamp(date: Date())], merge: true)
 
-        persist(familyId: targetFamilyId)
+        persist(familyId: targetFamilyId, ownerUid: uid)
         isReady = true
         NotificationCenter.default.post(name: .familyDidJoin, object: nil)
     }
@@ -125,11 +148,13 @@ final class FamilyManager: ObservableObject {
         familyId = nil
         isReady = false
         UserDefaults.standard.removeObject(forKey: kFamilyIdDefaultsKey)
+        UserDefaults.standard.removeObject(forKey: kFamilyOwnerUidDefaultsKey)
         UserDefaults.standard.removeObject(forKey: kBabyIdDefaultsKey)
     }
 
-    private func persist(familyId id: String) {
+    private func persist(familyId id: String, ownerUid uid: String) {
         familyId = id
         UserDefaults.standard.set(id, forKey: kFamilyIdDefaultsKey)
+        UserDefaults.standard.set(uid, forKey: kFamilyOwnerUidDefaultsKey)
     }
 }

@@ -41,6 +41,7 @@
 		AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */; };
 		AA9D8473BEC847159E9AAAA4 /* MomMoodViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */; };
 		AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */; };
+		FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */; };
 		B24FC7CC0D782B29188B1E9F /* TodayViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */; };
 		B5191FCCF0C277E193F33888 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
 		B72786A82FCAC408006EB6DF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B72786A72FCAC408006EB6DF /* GoogleSignIn */; };
@@ -177,6 +178,7 @@
 		AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockMomMoodRepository.swift; sourceTree = "<group>"; };
 		AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomMoodViewModelTests.swift; sourceTree = "<group>"; };
 		AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountTests.swift; sourceTree = "<group>"; };
+		FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyCacheReauthTests.swift; sourceTree = "<group>"; };
 		B0D4B0BAEF83286E9732D9C9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		B1AA2EA0D382D4DC3EE6C09A /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
@@ -515,6 +517,7 @@
 			isa = PBXGroup;
 			children = (
 				AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */,
+				FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */,
 			);
 			path = Account;
 			sourceTree = "<group>";
@@ -823,6 +826,7 @@
 				3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */,
 				FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */,
 				AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */,
+				FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */,
 				EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */,
 				27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */,
 				DEADBEEF0000000000000012 /* MockComplementaryFeedingRepository.swift in Sources */,
