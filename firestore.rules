@@ -68,9 +68,12 @@ service cloud.firestore {
       // Members roster. A joining member may write their own membership doc; the family
       // creator may write during setup; existing members may manage the roster.
       match /members/{memberId} {
-        allow read:  if belongsToFamily(familyId);
-        allow write: if belongsToFamily(familyId)
-                     || (isSignedIn() && memberId == request.auth.uid && isFamilyMember(familyId));
+        allow read:   if belongsToFamily(familyId);
+        // Create/update: any member (manage roster names) or the joining user themselves.
+        allow create, update: if belongsToFamily(familyId)
+                              || (isSignedIn() && memberId == request.auth.uid && isFamilyMember(familyId));
+        // Delete: only your own membership doc.
+        allow delete: if isSignedIn() && memberId == request.auth.uid;
       }
 
       // Per-baby tree: profile parent doc + every log subcollection.

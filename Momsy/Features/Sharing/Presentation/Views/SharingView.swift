@@ -155,6 +155,12 @@ struct SharingView: View {
         .padding(16)
         .background(Color.bbCreamSoft)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .alert(loc.strings.joinReplaceTitle, isPresented: $vm.showJoinConfirm) {
+            Button(loc.strings.joinReplaceConfirm, role: .destructive) { vm.confirmJoinReplacingFamily() }
+            Button(loc.strings.cancel, role: .cancel) { }
+        } message: {
+            Text(loc.strings.joinReplaceMessage)
+        }
     }
 
     // MARK: - Role matrix

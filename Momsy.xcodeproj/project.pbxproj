@@ -15,7 +15,7 @@
 		0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1220000000000000002 /* JoinDeeplinkTests.swift */; };
 		0BABF1230000000000000001 /* ReplayRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1230000000000000002 /* ReplayRoutingTests.swift */; };
 		0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */; };
-				27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
+		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
 		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
 		38944D43E482FFA7FCD38281 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4820A4E27274110E9256D2F7 /* SwiftUI.framework */; };
@@ -41,7 +41,6 @@
 		AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */; };
 		AA9D8473BEC847159E9AAAA4 /* MomMoodViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */; };
 		AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */; };
-		FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */; };
 		B24FC7CC0D782B29188B1E9F /* TodayViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */; };
 		B5191FCCF0C277E193F33888 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
 		B72786A82FCAC408006EB6DF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B72786A72FCAC408006EB6DF /* GoogleSignIn */; };
@@ -82,6 +81,9 @@
 		E3D39EF3449D3301F24E663A /* MockSoundRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */; };
 		E8EB7678A2FA08C99F609BF3 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */; };
 		EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */; };
+		FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */; };
+		5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */; };
+		5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */; };
 		FC2E77342D0D91D52C40605A /* MockDiaryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7744983E8EF2AF6D12E3DE /* MockDiaryRepository.swift */; };
 		FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */; };
 		FF136D2C455F9FBD0E166DED /* MockSleepRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0ED0FC63356D42900B3E456 /* MockSleepRepository.swift */; };
@@ -132,7 +134,7 @@
 		0BABF1220000000000000002 /* JoinDeeplinkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JoinDeeplinkTests.swift; sourceTree = "<group>"; };
 		0BABF1230000000000000002 /* ReplayRoutingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReplayRoutingTests.swift; sourceTree = "<group>"; };
 		0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActiveBabySyncOverrideTests.swift; sourceTree = "<group>"; };
-				0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
+		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyContextBuilderTests.swift; sourceTree = "<group>"; };
 		14AB864CEE3403CD74AC9654 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
@@ -178,7 +180,6 @@
 		AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockMomMoodRepository.swift; sourceTree = "<group>"; };
 		AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomMoodViewModelTests.swift; sourceTree = "<group>"; };
 		AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountTests.swift; sourceTree = "<group>"; };
-		FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyCacheReauthTests.swift; sourceTree = "<group>"; };
 		B0D4B0BAEF83286E9732D9C9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		B1AA2EA0D382D4DC3EE6C09A /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
@@ -231,6 +232,9 @@
 		F9447E2BE7AA19806CCDF9B8 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
 		F9F1F99234A1F4FCB8840C13 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA16402FBC4C3F01E5573DB2 /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
+		FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyCacheReauthTests.swift; sourceTree = "<group>"; };
+		5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountErasureGateTests.swift; sourceTree = "<group>"; };
+		5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinGuardTests.swift; sourceTree = "<group>"; };
 		FB2828F5A5DB44A9E2563938 /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
 		FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationScheduleTests.swift; sourceTree = "<group>"; };
@@ -522,6 +526,15 @@
 			path = Account;
 			sourceTree = "<group>";
 		};
+		5A11ABF0000000000000A001 /* Sharing */ = {
+			isa = PBXGroup;
+			children = (
+				5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */,
+				5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */,
+			);
+			path = Sharing;
+			sourceTree = "<group>";
+		};
 		B0F8A2BD09FB72AF53F5081C /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
@@ -605,6 +618,7 @@
 				0BABF11E0000000000000003 /* Baby */,
 				0BABF11F0000000000000003 /* Sync */,
 				AC11AA03AC11AA03AC11AA03 /* Account */,
+				5A11ABF0000000000000A001 /* Sharing */,
 				945C65C48948BC238DDFA608 /* Diary */,
 				6CD81E05E696492F92ABC1E4 /* Feeding */,
 				BF481C984AA7F1A163924A81 /* Leaps */,
@@ -827,6 +841,8 @@
 				FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */,
 				AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */,
 				FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */,
+				5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */,
+				5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */,
 				EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */,
 				27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */,
 				DEADBEEF0000000000000012 /* MockComplementaryFeedingRepository.swift in Sources */,

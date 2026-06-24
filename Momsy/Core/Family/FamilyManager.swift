@@ -20,11 +20,13 @@ extension Notification.Name {
 enum FamilyError: LocalizedError {
     case noFamilyId
     case invalidOrExpiredCode
+    case wouldAbandonExistingFamily
 
     var errorDescription: String? {
         switch self {
-        case .noFamilyId:           return "Family not set up. Please sign in."
-        case .invalidOrExpiredCode: return "This invite code is invalid or has expired."
+        case .noFamilyId:                 return "Family not set up. Please sign in."
+        case .invalidOrExpiredCode:       return "This invite code is invalid or has expired."
+        case .wouldAbandonExistingFamily: return "You already belong to a family."
         }
     }
 }
@@ -104,8 +106,17 @@ final class FamilyManager: ObservableObject {
         return ref.documentID
     }
 
+    /// Whether the caller's current family already has a child profile (data that would
+    /// be orphaned by switching families). One cheap, capped read.
+    private func currentFamilyHasData() async throws -> Bool {
+        guard let familyId else { return false }
+        let snap = try await db.collection("families").document(familyId)
+            .collection("babies").limit(to: 1).getDocuments()
+        return !snap.documents.isEmpty
+    }
+
     /// Accepts an invite code, looks it up in Firestore, and assigns this user to that family.
-    func joinFamily(code: String, uid: String) async throws {
+    func joinFamily(code: String, uid: String, force: Bool = false) async throws {
         let trimmed = code.trimmingCharacters(in: .whitespaces).uppercased()
         let inviteDoc = try await db.collection("invites").document(trimmed).getDocument()
         guard
@@ -115,10 +126,29 @@ final class FamilyManager: ObservableObject {
             expiresAt > Date()
         else { throw FamilyError.invalidOrExpiredCode }
 
+        // Already in the target family — idempotent no-op.
+        if familyId == targetFamilyId { isReady = true; return }
+
+        // Only pay for the data read when actually switching to a different family.
+        let switchingFamily = (familyId != nil && familyId != targetFamilyId)
+        let hasData = switchingFamily ? try await currentFamilyHasData() : false
+        if FamilyJoinGuard.requiresConfirmation(
+            currentFamilyId: familyId, targetFamilyId: targetFamilyId,
+            currentFamilyHasData: hasData, force: force
+        ) {
+            throw FamilyError.wouldAbandonExistingFamily
+        }
+
+        // Detach from the previous roster BEFORE repointing users/{uid}.familyId,
+        // otherwise the rules no longer authorise deleting the old membership doc.
+        if let previous = familyId, previous != targetFamilyId {
+            try? await db.collection("families").document(previous)
+                .collection("members").document(uid).delete()
+        }
+
         try await db.collection("users").document(uid)
             .setData(["familyId": targetFamilyId], merge: true)
 
-        // Also add as member in the family
         let displayName = Auth.auth().currentUser?.displayName ?? Auth.auth().currentUser?.email ?? "User"
         try await db.collection("families").document(targetFamilyId)
             .collection("members").document(uid)
@@ -129,17 +159,29 @@ final class FamilyManager: ObservableObject {
         NotificationCenter.default.post(name: .familyDidJoin, object: nil)
     }
 
-    /// GDPR erasure of the family/user graph: every `families/{familyId}/members`
-    /// doc, the family doc itself, and the caller's `users/{uid}` doc. Call while
-    /// still authenticated (Firestore rules require it) and before `reset()`.
-    func deleteFamilyAndUserDocs(uid: String) async throws {
+    /// True when the caller is the only remaining member (or the roster is empty).
+    /// Gates whether account deletion may tear down shared family data.
+    func isSoleMember(uid: String) async throws -> Bool {
+        guard let familyId else { return true }
+        let snap = try await db.collection("families").document(familyId)
+            .collection("members").getDocuments()
+        let ids = snap.documents.map { $0.documentID }
+        return AccountErasureGate.mayTearDownSharedData(memberIds: ids, callerUid: uid)
+    }
+
+    /// Removes the caller's own membership and their `users/{uid}` doc. When
+    /// `tearDownSharedFamily` is true (caller is the sole member) the family doc itself
+    /// is also deleted; otherwise the family and co-parents' memberships are left intact.
+    /// Call while still authenticated (rules require it) and before `reset()`. The order
+    /// matters: `users/{uid}` is deleted LAST so membership-based rules still authorise
+    /// the family/member deletes above it.
+    func leaveFamily(uid: String, tearDownSharedFamily: Bool) async throws {
         if let familyId {
-            let members = try await db.collection("families").document(familyId)
-                .collection("members").getDocuments()
-            for doc in members.documents {
-                try await doc.reference.delete()
+            let familyRef = db.collection("families").document(familyId)
+            try await familyRef.collection("members").document(uid).delete()
+            if tearDownSharedFamily {
+                try await familyRef.delete()
             }
-            try await db.collection("families").document(familyId).delete()
         }
         try await db.collection("users").document(uid).delete()
     }

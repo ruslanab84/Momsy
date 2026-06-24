@@ -50,7 +50,7 @@
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypeName</string>
 			<key>NSPrivacyCollectedDataTypeLinked</key>
-			<false/>
+			<true/>
 			<key>NSPrivacyCollectedDataTypeTracking</key>
 			<false/>
 			<key>NSPrivacyCollectedDataTypePurposes</key>
@@ -60,13 +60,14 @@
 		</dict>
 
 		<!-- Baby health data: feeding logs, sleep records, temperature, growth
-		     measurements, diaper/stool, vaccinations. Stored locally and mirrored
-		     to the user's private, encrypted iCloud (CloudKit private database). -->
+		     measurements, diaper/stool, vaccinations. Stored locally (SwiftData) and
+		     synced to the developer's Firebase backend (Cloud Firestore) under the
+		     user's Firebase Auth account — therefore linked to the user's identity. -->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypeHealth</string>
 			<key>NSPrivacyCollectedDataTypeLinked</key>
-			<false/>
+			<true/>
 			<key>NSPrivacyCollectedDataTypeTracking</key>
 			<false/>
 			<key>NSPrivacyCollectedDataTypePurposes</key>
@@ -77,12 +78,13 @@
 
 		<!-- Parent mental-health data: EPDS postpartum-depression screening score
 		     (MomMoodRecord.epdsScore) and mood/well-being entries. Sensitive; stored
-		     locally and mirrored to the user's private, encrypted iCloud. -->
+		     locally and synced to the developer's Firebase backend (Cloud Firestore)
+		     under the user's Firebase Auth account — linked to the user's identity. -->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypeSensitiveInfo</string>
 			<key>NSPrivacyCollectedDataTypeLinked</key>
-			<false/>
+			<true/>
 			<key>NSPrivacyCollectedDataTypeTracking</key>
 			<false/>
 			<key>NSPrivacyCollectedDataTypePurposes</key>

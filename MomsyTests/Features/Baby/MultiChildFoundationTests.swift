@@ -44,6 +44,24 @@ struct MultiChildFoundationTests {
         freshActive()
     }
 
+    /// Onboarding the first child must make it the active child even when a stale
+    /// active-baby pointer is persisted (e.g. left by a removed child or a prior
+    /// account). Otherwise the child is appended to the roster but never mirrored to
+    /// `babyProfile`, stranding the app with no active profile — the regression that
+    /// made `SleepViewModel.sleepNorm` fall back to its no-profile defaults.
+    @Test func updateAdoptsFirstChildWhenPersistedPointerIsStale() async throws {
+        freshActive()
+        ActiveBaby.currentId = UUID()   // points at a child that isn't in the roster
+        let appState = makeAppState()
+        let child = BabyProfile(name: "Solo", birthDate: Date())
+
+        appState.update(child)
+
+        #expect(appState.babyProfile?.id == child.id)
+        #expect(appState.activeBabyId == child.id)
+        freshActive()
+    }
+
     @Test func deleteRemovesChild() async throws {
         freshActive()
         let repo = MockBabyRepository()

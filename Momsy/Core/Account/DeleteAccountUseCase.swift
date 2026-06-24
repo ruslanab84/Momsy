@@ -48,8 +48,13 @@ struct FirestoreAccountEraser: CloudAccountEraser {
     let babySync: BabySyncService
 
     func deleteCloudData(uid: String) async throws {
-        try await RosterErasure.eraseAll(using: babySync, locallyActiveId: ActiveBaby.currentId)
-        try await FamilyManager.shared.deleteFamilyAndUserDocs(uid: uid)
+        // Shared baby data + the family doc are torn down ONLY when the caller is the
+        // last member. A co-parent's deletion must leave the family and its logs intact.
+        let soleMember = try await FamilyManager.shared.isSoleMember(uid: uid)
+        if soleMember {
+            try await RosterErasure.eraseAll(using: babySync, locallyActiveId: ActiveBaby.currentId)
+        }
+        try await FamilyManager.shared.leaveFamily(uid: uid, tearDownSharedFamily: soleMember)
     }
 }
 

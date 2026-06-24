@@ -39,37 +39,18 @@ final class GenerateWeeklyInsightUseCase {
     @discardableResult
     func generateIfNeeded(now: Date = Date()) async -> WeeklyInsight? {
         let language = LocalizationManager.shared.current
-        // Refresh any previously stored reports that are now in the wrong language
-        // (e.g. the user switched app language after they were generated).
-        await relocalizeStaleReports(to: language)
-
         guard let (weekStart, weekEnd) = Self.weekBounds(now: now) else { return nil }
-        // Skip only when a report for this week already exists in the current language.
-        if let existing = (try? await repo.report(forWeekStarting: weekStart)) ?? nil,
-           existing.language == language { return nil }
+        // A report for this week already exists — keep it in whatever language it was
+        // generated in. Changing the app language never re-generates or re-translates
+        // past reports (no Gemini cost on language switch); only future weeks use the
+        // new language.
+        if ((try? await repo.report(forWeekStarting: weekStart)) ?? nil) != nil { return nil }
 
         let birthDate = appState.babyProfile?.birthDate
         let insight = await generate(weekStart: weekStart, weekEnd: weekEnd,
                                      birthDate: birthDate, language: language)
         try? await repo.save(insight)
         return insight
-    }
-
-    /// Re-localizes stored reports whose language no longer matches `language`.
-    /// Stats are deterministic and already on-device, so only the AI narrative and
-    /// the localized leap label are recomputed. Skips a report when the AI call
-    /// fails so a good narrative is never downgraded to the offline fallback.
-    func relocalizeStaleReports(to language: Language) async {
-        let reports = (try? await repo.all()) ?? []
-        for report in reports where report.language != language {
-            let leap = BabyAgeContext.currentLeapName(ageWeeks: report.stats.ageWeeks, lang: language.rawValue)
-            let stats = report.stats.withLeapName(leap)
-            let ctx = WeeklyInsightContext(stats: stats, language: language)
-            guard let ai = try? await service.generate(context: ctx) else { continue }
-            let relocalized = WeeklyInsight(stats: stats, ai: ai, isAIGenerated: true,
-                                            generatedAt: report.generatedAt, language: language)
-            try? await repo.save(relocalized)
-        }
     }
 
     /// Builds stats + narrative (AI, falling back to static) without persistence — testable.

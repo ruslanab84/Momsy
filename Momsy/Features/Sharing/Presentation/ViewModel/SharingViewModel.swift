@@ -12,6 +12,7 @@ final class SharingViewModel: ObservableObject {
     @Published var isJoining = false
     @Published var joinError: String?
     @Published var joinSuccess = false
+    @Published var showJoinConfirm = false
 
     private let repo: any FamilyRepository
     private let inviteService: any InviteServiceProtocol
@@ -86,7 +87,7 @@ final class SharingViewModel: ObservableObject {
         }
     }
 
-    func joinFamily() {
+    func joinFamily(force: Bool = false) {
         guard !joinCode.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         guard let uid = Auth.auth().currentUser?.uid else {
             joinError = "Please sign in first."
@@ -96,20 +97,26 @@ final class SharingViewModel: ObservableObject {
         joinError = nil
         Task {
             do {
-                try await FamilyManager.shared.joinFamily(code: joinCode, uid: uid)
+                try await FamilyManager.shared.joinFamily(code: joinCode, uid: uid, force: force)
                 joinCode = ""
                 joinSuccess = true
                 await loadMembers()
+            } catch FamilyError.wouldAbandonExistingFamily {
+                showJoinConfirm = true   // UI confirms, then calls confirmJoinReplacingFamily()
             } catch {
                 joinError = error.localizedDescription
             }
             isJoining = false
-            // Auto-dismiss success banner after 3 seconds
             if joinSuccess {
                 try? await Task.sleep(nanoseconds: 3_000_000_000)
                 joinSuccess = false
             }
         }
+    }
+
+    func confirmJoinReplacingFamily() {
+        showJoinConfirm = false
+        joinFamily(force: true)
     }
 }
 

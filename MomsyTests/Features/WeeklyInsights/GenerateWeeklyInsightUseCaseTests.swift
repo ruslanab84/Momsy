@@ -86,70 +86,32 @@ struct GenerateWeeklyInsightUseCaseTests {
         )
     }
 
-    @Test("relocalizes a stored report whose language differs from the app language")
-    func relocalizeOnLanguageChange() async throws {
+    @Test("changing app language keeps existing reports as-is (no Gemini call)")
+    func languageChangeKeepsReportsAsIs() async throws {
+        let previous = LocalizationManager.shared.current
+        defer { LocalizationManager.shared.set(previous) }
+
+        let now = Date()
+        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: now)!
+        LocalizationManager.shared.set(.russian)            // app language is now RU…
         let appState = makeAppState(profile: BabyProfile(name: "Mia"))
         let repo = MockWeeklyInsightRepository()
-        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
-        let stats = sampleStats(weekStart: bounds.start, weekEnd: bounds.end)
         let englishAI = WeeklyInsightAI(sleepSummary: "English summary", sleepRecommendation: "",
                                         feedingSummary: "", feedingRecommendation: "", overallSummary: "")
-        try await repo.save(WeeklyInsight(stats: stats, ai: englishAI, isAIGenerated: true,
+        // …but this week's report was generated earlier in English.
+        try await repo.save(WeeklyInsight(stats: sampleStats(weekStart: bounds.start, weekEnd: bounds.end),
+                                          ai: englishAI, isAIGenerated: true,
                                           generatedAt: Date(), language: .english))
-
         let service = MockWeeklyInsightService()
-        service.canned = WeeklyInsightAI(sleepSummary: "Русское саммари", sleepRecommendation: "",
-                                         feedingSummary: "", feedingRecommendation: "", overallSummary: "")
         let uc = makeUseCase(repo: repo, service: service, appState: appState)
 
-        await uc.relocalizeStaleReports(to: .russian)
+        let result = await uc.generateIfNeeded(now: now)
 
+        #expect(result == nil)                       // existing report → not regenerated
+        #expect(service.callCount == 0)              // zero Gemini calls on language change
         let stored = try await repo.all()
         #expect(stored.count == 1)
-        #expect(stored.first?.language == .russian)
-        #expect(stored.first?.ai.sleepSummary == "Русское саммари")
-        // The stored, localized leap name must be recomputed for the new language.
-        #expect(stored.first?.stats.currentLeapName == BabyAgeContext.currentLeapName(ageWeeks: 9, lang: "ru"))
-        #expect(service.callCount == 1)
-    }
-
-    @Test("relocalize is a no-op when the stored language already matches")
-    func relocalizeNoOpSameLanguage() async throws {
-        let appState = makeAppState(profile: BabyProfile(name: "Mia"))
-        let repo = MockWeeklyInsightRepository()
-        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
-        let stats = sampleStats(weekStart: bounds.start, weekEnd: bounds.end)
-        try await repo.save(WeeklyInsight(stats: stats, ai: MockWeeklyInsightService().canned,
-                                          isAIGenerated: true, generatedAt: Date(), language: .russian))
-
-        let service = MockWeeklyInsightService()
-        let uc = makeUseCase(repo: repo, service: service, appState: appState)
-
-        await uc.relocalizeStaleReports(to: .russian)
-
-        #expect(service.callCount == 0)
-        #expect(repo.saveCount == 1)  // only the initial save
-    }
-
-    @Test("relocalize keeps a stale report when the AI service fails (no downgrade)")
-    func relocalizeKeepsStaleOnFailure() async throws {
-        let appState = makeAppState(profile: BabyProfile(name: "Mia"))
-        let repo = MockWeeklyInsightRepository()
-        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
-        let stats = sampleStats(weekStart: bounds.start, weekEnd: bounds.end)
-        let englishAI = WeeklyInsightAI(sleepSummary: "English summary", sleepRecommendation: "",
-                                        feedingSummary: "", feedingRecommendation: "", overallSummary: "")
-        try await repo.save(WeeklyInsight(stats: stats, ai: englishAI, isAIGenerated: true,
-                                          generatedAt: Date(), language: .english))
-
-        let service = MockWeeklyInsightService()
-        service.shouldThrow = true
-        let uc = makeUseCase(repo: repo, service: service, appState: appState)
-
-        await uc.relocalizeStaleReports(to: .russian)
-
-        let stored = try await repo.all()
-        #expect(stored.first?.language == .english)
+        #expect(stored.first?.language == .english)  // old report untouched
         #expect(stored.first?.ai.sleepSummary == "English summary")
     }
 

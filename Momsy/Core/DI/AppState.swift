@@ -54,6 +54,11 @@ final class AppState: ObservableObject {
             babies.append(profile)
         }
         if activeBabyId == nil { activeBabyId = ActiveBaby.currentId ?? profile.id }
+        // A persisted pointer to a child that isn't in the roster (e.g. left over from
+        // a removed child or a prior account) must not strand this upsert without an
+        // active mirror — adopt the upserted child as active in that case. This mirrors
+        // activeChild()'s fallback used by load().
+        if !babies.contains(where: { $0.id == activeBabyId }) { activeBabyId = profile.id }
         if activeBabyId == profile.id {
             babyProfile = profile
             WidgetDataStore.shared.setBabyInfo(name: profile.name, birthDate: profile.birthDate)
