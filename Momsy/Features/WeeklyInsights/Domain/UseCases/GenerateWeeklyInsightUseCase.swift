@@ -59,6 +59,13 @@ final class GenerateWeeklyInsightUseCase {
             weekStart: weekStart, weekEnd: weekEnd, birthDate: birthDate, language: language,
             sleepRepo: sleepRepo, feedingRepo: feedingRepo, foodRepo: foodRepo, diaperRepo: diaperRepo
         )
+        // No logged activity this week → don't spend a Gemini request. Emit a
+        // static, localized "no data" note so the report still reflects the gap.
+        if stats.hasNoData {
+            return WeeklyInsight(stats: stats, ai: Self.noDataAI(language: language),
+                                 isAIGenerated: false, generatedAt: Date(), language: language)
+        }
+
         let ctx = WeeklyInsightContext(stats: stats, language: language)
 
         if let ai = try? await service.generate(context: ctx) {
@@ -89,4 +96,15 @@ final class GenerateWeeklyInsightUseCase {
         sleepSummary: "", sleepRecommendation: "",
         feedingSummary: "", feedingRecommendation: "", overallSummary: ""
     )
+
+    /// Narrative for a week with no logged data. Carries the localized note in
+    /// `overallSummary` (the only field the row and detail card render), leaving
+    /// the per-section summaries empty so no stats are fabricated.
+    private static func noDataAI(language: Language) -> WeeklyInsightAI {
+        WeeklyInsightAI(
+            sleepSummary: "", sleepRecommendation: "",
+            feedingSummary: "", feedingRecommendation: "",
+            overallSummary: L10n(language).weeklyInsightNoData
+        )
+    }
 }

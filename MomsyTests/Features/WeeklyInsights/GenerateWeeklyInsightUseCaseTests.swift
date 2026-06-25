@@ -21,12 +21,23 @@ struct GenerateWeeklyInsightUseCaseTests {
         )
     }
 
+    /// A sleep repo seeded with one night session inside the given week, so the
+    /// week counts as "has data" and the AI path (not the no-data path) is taken.
+    private func seededSleepRepo(bounds: (start: Date, end: Date)) -> MockSleepRepository {
+        let repo = MockSleepRepository()
+        repo.entries = [
+            SleepEntry(startDate: bounds.start.addingTimeInterval(21 * 3600),
+                       endDate: bounds.start.addingTimeInterval(21 * 3600 + 600 * 60))
+        ]
+        return repo
+    }
+
     @Test("uses AI narrative when the service succeeds")
     func aiSuccess() async throws {
         let appState = makeAppState(profile: BabyProfile(name: "Mia"))
         let service = MockWeeklyInsightService()
-        let uc = makeUseCase(service: service, appState: appState)
         let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
+        let uc = makeUseCase(sleepRepo: seededSleepRepo(bounds: bounds), service: service, appState: appState)
 
         let insight = await uc.generate(weekStart: bounds.start, weekEnd: bounds.end,
                                         birthDate: appState.babyProfile?.birthDate, language: .english)
@@ -41,14 +52,32 @@ struct GenerateWeeklyInsightUseCaseTests {
         let appState = makeAppState(profile: BabyProfile(name: "Mia"))
         let service = MockWeeklyInsightService()
         service.shouldThrow = true
-        let uc = makeUseCase(service: service, appState: appState)
         let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
+        let uc = makeUseCase(sleepRepo: seededSleepRepo(bounds: bounds), service: service, appState: appState)
 
         let insight = await uc.generate(weekStart: bounds.start, weekEnd: bounds.end,
                                         birthDate: appState.babyProfile?.birthDate, language: .english)
 
         #expect(!insight.isAIGenerated)
         #expect(!insight.ai.sleepSummary.isEmpty)
+    }
+
+    @Test("a week with no logged data skips the AI service and reflects the gap")
+    func emptyWeekSkipsAI() async throws {
+        let appState = makeAppState(profile: BabyProfile(name: "Mia"))
+        let service = MockWeeklyInsightService()
+        // All repos are empty by default → the week has no data at all.
+        let uc = makeUseCase(service: service, appState: appState)
+        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
+
+        let insight = await uc.generate(weekStart: bounds.start, weekEnd: bounds.end,
+                                        birthDate: appState.babyProfile?.birthDate, language: .english)
+
+        #expect(service.callCount == 0)              // no Gemini request was sent
+        #expect(!insight.isAIGenerated)
+        #expect(insight.stats.hasNoData)
+        #expect(!insight.ai.overallSummary.isEmpty)  // report still reflects "no data"
+        #expect(insight.ai.sleepSummary.isEmpty)     // no fabricated stats narrative
     }
 
     @Test("generateIfNeeded creates a report then no-ops for the same week")

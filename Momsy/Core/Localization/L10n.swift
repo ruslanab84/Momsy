@@ -55,6 +55,14 @@ struct L10n {
           "Votre premier rapport hebdomadaire apparaîtra ici après une semaine de suivi.",
           "O seu primeiro relatório semanal aparecerá aqui após uma semana de registos.")
     }
+    var weeklyInsightNoData: String {
+        s("No activity was logged this week, so there's nothing to summarize. Track sleep, feeding, and diapers to get an AI report next week.",
+          "На этой неделе не было записей, поэтому обобщать нечего. Записывайте сон, кормления и подгузники, чтобы получить AI-отчёт на следующей неделе.",
+          "Diese Woche wurden keine Einträge erfasst, daher gibt es nichts zusammenzufassen. Erfasse Schlaf, Mahlzeiten und Windeln, um nächste Woche einen KI-Bericht zu erhalten.",
+          "Esta semana no se registró ninguna actividad, así que no hay nada que resumir. Registra el sueño, las tomas y los pañales para obtener un informe con IA la próxima semana.",
+          "Aucune activité n’a été enregistrée cette semaine, il n’y a donc rien à résumer. Enregistrez le sommeil, les repas et les couches pour obtenir un rapport IA la semaine prochaine.",
+          "Esta semana não foram registadas atividades, por isso não há nada a resumir. Registe o sono, as mamadas e as fraldas para receber um relatório de IA na próxima semana.")
+    }
     var weeklyInsightLocked: String {
         s("Weekly AI reports are a Premium feature.",
           "Недельные AI-отчёты доступны в Premium.",

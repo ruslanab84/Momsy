@@ -27,6 +27,16 @@ struct WeeklyStats: Codable, Equatable {
     // Diapers
     let totalDiapers: Int
 
+    /// True when the week holds no logged activity at all — no sleep, no
+    /// feedings, no solids, no diapers. Such weeks get a static "no data"
+    /// note instead of an AI narrative, and no Gemini request is made.
+    var hasNoData: Bool {
+        avgSleepMinutesPerDay == 0
+            && totalFeedings == 0
+            && newFoodsIntroduced.isEmpty
+            && totalDiapers == 0
+    }
+
     /// Returns a copy with the localized developmental-leap label replaced.
     /// Used when re-localizing a stored report into a newly selected language.
     func withLeapName(_ name: String?) -> WeeklyStats {
