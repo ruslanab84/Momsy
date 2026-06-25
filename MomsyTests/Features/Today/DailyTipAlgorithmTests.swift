@@ -70,6 +70,13 @@ struct DailyTipAlgorithmTests {
         #expect(result == nil)
     }
 
+    @Test("Alert B does not fire when no diapers logged yet (fresh install)")
+    func alertB_zeroDiapers_noFalseAlert() {
+        let ctx = makeContext(ageMonths: 3, diaperCount: 0, hour: 20)
+        let result = AlertRules.evaluate(context: ctx)
+        #expect(result == nil)
+    }
+
     @Test("Alert C fires when daysSinceLastStool >= alertDays")
     func alertC_noStool() {
         let ctx = makeContext(ageMonths: 4, daysSinceLastStool: 4, hour: 12)
@@ -84,6 +91,19 @@ struct DailyTipAlgorithmTests {
         let result = AlertRules.evaluate(context: ctx)
         #expect(result != nil)
         #expect(result?.category == .alert)
+    }
+
+    @Test("Alert D does not fire when no sleep logged yet (fresh install)")
+    func alertD_zeroSleep_noFalseAlert() {
+        let ctx = makeContext(
+            ageMonths: 4,
+            diaperCount: 7,
+            totalSleepMinutes: 0,
+            sleepCount: 0,
+            hour: 20
+        )
+        let result = AlertRules.evaluate(context: ctx)
+        #expect(result == nil)
     }
 
     // MARK: - Situational Rules
@@ -145,6 +165,27 @@ struct DailyTipAlgorithmTests {
         #expect(tip.category == .alert)
     }
 
+    @Test("fresh install in evening with no logged data is never an alarming zero tip")
+    func evaluate_freshInstall_evening_noZeroAlert() {
+        let ctx = makeContext(
+            ageMonths: 2,
+            minutesSinceLastFeed: nil,
+            diaperCount: 0,
+            totalSleepMinutes: 0,
+            sleepCount: 0,
+            feedingCount: 0,
+            minutesSinceLastSleepEnd: nil,
+            walkCount: 0,
+            bathCount: 0,
+            daysSinceLastStool: 0,
+            hour: 20
+        )
+        let tip = DailyTipAlgorithm.evaluate(context: ctx)
+        #expect(tip.category != .alert)
+        #expect(!tip.text.contains("0 ч"))
+        #expect(!tip.text.contains("0 подгузник"))
+    }
+
     @Test("evaluate returns .care when no conditions fire")
     func evaluate_careCategory_whenIdle() {
         let ctx = makeContext(
@@ -169,6 +210,8 @@ struct DailyTipAlgorithmTests {
         minutesSinceLastFeed: Int? = nil,
         diaperCount: Int = 7,
         totalSleepMinutes: Int = 750,
+        sleepCount: Int = 3,
+        feedingCount: Int = 6,
         minutesSinceLastSleepEnd: Int? = nil,
         walkCount: Int = 1,
         bathCount: Int = 0,
@@ -181,11 +224,11 @@ struct DailyTipAlgorithmTests {
             ageMonths: ageMonths,
             ageDays: 15,
             currentLeapName: nil,
-            feedingCount: 6,
+            feedingCount: feedingCount,
             totalFeedingMinutes: 90,
             minutesSinceLastFeed: minutesSinceLastFeed,
             lastFeedSide: nil,
-            sleepCount: 3,
+            sleepCount: sleepCount,
             totalSleepMinutes: totalSleepMinutes,
             diaperCount: diaperCount,
             timeOfDay: .morning,

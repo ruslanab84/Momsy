@@ -38,7 +38,9 @@ enum AlertRules {
 
     // Alert B: too few wet diapers
     private static func checkDiaperCount(_ ctx: DailyContext) -> DailyTip? {
-        guard ctx.diaperCount < 4, ctx.hour >= 18, ctx.ageMonths <= 6 else { return nil }
+        // diaperCount == 0 means nothing logged yet (fresh install / not tracking today),
+        // not a real "0 wet diapers" emergency — require ≥1 entry before warning.
+        guard ctx.diaperCount >= 1, ctx.diaperCount < 4, ctx.hour >= 18, ctx.ageMonths <= 6 else { return nil }
         let text: String
         switch ctx.language {
         case .russian:
@@ -81,7 +83,9 @@ enum AlertRules {
 
     // Alert D: critical sleep deficit (evening only)
     private static func checkSleepDeficit(_ ctx: DailyContext) -> DailyTip? {
-        guard ctx.hour >= 19 else { return nil }
+        // With no sleep logged (sleepCount == 0) totalSleepMinutes is 0 by absence,
+        // not by a real deficit — only warn once at least one sleep has been tracked.
+        guard ctx.hour >= 19, ctx.sleepCount >= 1 else { return nil }
         let minSleep = WhoNorms.minSleepMinutes(ageMonths: ctx.ageMonths)
         let threshold = minSleep - 90
         guard ctx.totalSleepMinutes < threshold else { return nil }
