@@ -11,6 +11,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
         case .german:  return de(s)
         case .french:  return fr(s)
         case .portuguese: return pt(s)
+        case .chinese: return zh(s)
         default:       return en(s)
         }
     }
@@ -131,6 +132,34 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             feedingSummary: "Cerca de \(feeds) mamadas por dia. Alimentos novos esta semana: \(foods).",
             feedingRecommendation: feedingRec,
             overallSummary: "Uma semana estável — \(hEn(s.avgSleepMinutesPerDay)) de sono/dia e \(feeds) mamadas/dia. Está a fazer um ótimo trabalho."
+        )
+    }
+
+    // MARK: - Chinese
+
+    private func hZh(_ minutes: Int) -> String {
+        let hh = minutes / 60, mm = minutes % 60
+        if hh > 0 && mm > 0 { return "\(hh) 小时 \(mm) 分钟" }
+        if hh > 0 { return "\(hh) 小时" }
+        return "\(mm) 分钟"
+    }
+
+    private func zh(_ s: WeeklyStats) -> WeeklyInsightAI {
+        let enough = s.avgSleepMinutesPerDay >= s.whoMinSleepMinutes
+        let sleepRec = enough
+            ? "这个年龄段的睡眠很健康——保持现在的节奏即可。"
+            : "试着早点哄睡，并留意清醒时长（约 \(s.whoAwakeWindowMax) 分钟），以增加休息。"
+        let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
+        let foods = s.newFoodsIntroduced.isEmpty ? "没有新食物" : s.newFoodsIntroduced.joined(separator: "、")
+        let feedingRec = s.allergensFlagged.isEmpty
+            ? "每次只引入一种新食物，并留意是否有反应。"
+            : "不要再次引入已标记的食物（\(s.allergensFlagged.joined(separator: "、"))），并咨询儿科医生。"
+        return WeeklyInsightAI(
+            sleepSummary: "本周宝宝平均每天睡 \(hZh(s.avgSleepMinutesPerDay))（\(String(format: "%.1f", s.avgNapsPerDay)) 次小睡）。世卫组织建议 ≥ \(hZh(s.whoMinSleepMinutes))。",
+            sleepRecommendation: sleepRec,
+            feedingSummary: "每天约 \(feeds) 次喂养。本周的新食物：\(foods)。",
+            feedingRecommendation: feedingRec,
+            overallSummary: "平稳的一周——每天 \(hZh(s.avgSleepMinutesPerDay)) 睡眠、\(feeds) 次喂养。你做得很棒。"
         )
     }
 }

@@ -21,6 +21,7 @@ final class StaticDailyTipService: DailyTipService {
         case .german:   return germanTips
         case .french:   return frenchTips
         case .portuguese: return portugueseTips
+        case .chinese:  return chineseTips
         }
     }
 
@@ -100,5 +101,18 @@ final class StaticDailyTipService: DailyTipService {
         "Não se esqueça de descansar quando puder — uma mãe descansada é mais calma e mais atenta.",
         "Esteja atenta aos sinais de cansaço: bocejos e esfregar dos olhos indicam que é hora de começar o ritual do sono.",
         "Objetos de alto contraste a 20–30 cm de distância são excelentes para estimular a visão nos primeiros meses.",
+    ]
+
+    private static let chineseTips: [String] = [
+        "睡前给小腿做做轻柔的按摩，能帮助宝宝放松、更快入睡。",
+        "经常到户外散步能改善睡眠、增强免疫力——哪怕只有 20 分钟也很重要。",
+        "换尿布时和宝宝说说话：你的声音是语言发展的最佳刺激。",
+        "喂奶后让宝宝竖抱 10–15 分钟，能减轻胀气带来的不适。",
+        "轻柔的音乐或白噪音从最初几周起就能帮助建立固定的入睡仪式。",
+        "相信你的直觉——你才是最了解自己宝宝的专家。",
+        "现在正是触觉游戏的好时机：轻抚和肌肤接触能增进你们之间的亲密。",
+        "别忘了照顾自己：妈妈短暂的休息会让她更专注、更平和。",
+        "留意宝宝的疲倦信号——打哈欠和揉眼睛意味着该哄睡了。",
+        "在 20–30 厘米处放置高对比度的物品，能很好地刺激出生头几个月的视觉发育。",
     ]
 }

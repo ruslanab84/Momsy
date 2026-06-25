@@ -37,6 +37,7 @@ enum VaccinationTiming: Hashable {
             case .spanish: return "Nacimiento"
             case .french:  return "Naissance"
             case .portuguese: return "Nascimento"
+            case .chinese: return "出生"
             default:       return "Birth"
             }
         case .weeks(let w):
@@ -46,6 +47,7 @@ enum VaccinationTiming: Hashable {
             case .spanish: return w == 1 ? "1 semana" : "\(w) semanas"
             case .french:  return w == 1 ? "1 semaine": "\(w) semaines"
             case .portuguese: return w == 1 ? "1 semana" : "\(w) semanas"
+            case .chinese: return "\(w) 周"
             default:       return w == 1 ? "1 week"   : "\(w) weeks"
             }
         case .months(let m):
@@ -55,6 +57,7 @@ enum VaccinationTiming: Hashable {
             case .spanish: return m == 1 ? "1 mes"   : "\(m) meses"
             case .french:  return m == 1 ? "1 mois"  : "\(m) mois"
             case .portuguese: return m == 1 ? "1 mês" : "\(m) meses"
+            case .chinese: return "\(m) 个月"
             default:       return m == 1 ? "1 month" : "\(m) months"
             }
         case .additional:
@@ -64,6 +67,7 @@ enum VaccinationTiming: Hashable {
             case .spanish: return "Adicionales"
             case .french:  return "Supplémentaires"
             case .portuguese: return "Adicionais"
+            case .chinese: return "其他"
             default:       return "Additional"
             }
         }
@@ -95,11 +99,11 @@ struct VaccinationScheduleItem: Identifiable {
 
 extension VaccinationScheduleItem {
     /// Convenience initializer for authoring schedule data files compactly.
-    init(id: Int, en: String, ru: String, de: String, es: String, fr: String, pt: String,
+    init(id: Int, en: String, ru: String, de: String, es: String, fr: String, pt: String, zh: String,
          timing: VaccinationTiming, isOptional: Bool = false) {
         self.init(
             id: id,
-            names: [.english: en, .russian: ru, .german: de, .spanish: es, .french: fr, .portuguese: pt],
+            names: [.english: en, .russian: ru, .german: de, .spanish: es, .french: fr, .portuguese: pt, .chinese: zh],
             timing: timing,
             isOptional: isOptional
         )

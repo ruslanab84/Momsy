@@ -52,6 +52,13 @@ enum TimeOfDay: String {
             case .evening:   return "soir"
             case .night:     return "nuit"
             }
+        case .chinese:
+            switch self {
+            case .morning:   return "上午"
+            case .afternoon: return "下午"
+            case .evening:   return "傍晚"
+            case .night:     return "夜晚"
+            }
         }
     }
 }

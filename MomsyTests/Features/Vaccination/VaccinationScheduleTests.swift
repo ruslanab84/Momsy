@@ -56,12 +56,13 @@ struct VaccinationScheduleItemTests {
     @Test("name(for:) returns the localized value, falling back to English")
     func nameLookup() {
         let item = VaccinationScheduleItem(
-            id: 1, en: "BCG", ru: "БЦЖ", de: "BCG", es: "BCG", fr: "BCG", pt: "BCG (tuberculose)", timing: .atBirth
+            id: 1, en: "BCG", ru: "БЦЖ", de: "BCG", es: "BCG", fr: "BCG", pt: "BCG (tuberculose)", zh: "卡介苗", timing: .atBirth
         )
         #expect(item.name(for: .russian) == "БЦЖ")
         #expect(item.name(for: .english) == "BCG")
         #expect(item.name(for: .french) == "BCG")
         #expect(item.name(for: .portuguese) == "BCG (tuberculose)")
+        #expect(item.name(for: .chinese) == "卡介苗")
     }
 
     @Test("name(for:) of a custom synthetic item falls back to English for any language")

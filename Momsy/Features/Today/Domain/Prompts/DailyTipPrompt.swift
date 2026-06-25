@@ -41,6 +41,13 @@ enum DailyTipPrompt {
             Ne mentionne pas que tu es une IA. Pas de puces, de titres ni de listes.
             Utilise le prénom du bébé s’il est indiqué.
             """
+        case .chinese:
+            return """
+            你是一位温柔体贴、专为妈妈们服务的助手。只回答与宝宝护理相关的问题。
+            回答：1–2 句话，语气温暖，不做医学诊断，用中文回答。
+            不要提及你是 AI。不要使用项目符号、标题或列表。
+            如果提供了宝宝的名字，请使用它。
+            """
         }
     }
 
@@ -51,6 +58,7 @@ enum DailyTipPrompt {
         case .german:  return buildDE(ctx: ctx)
         case .french:  return buildFR(ctx: ctx)
         case .portuguese: return buildPT(ctx: ctx)
+        case .chinese: return buildZH(ctx: ctx)
         }
     }
 
@@ -173,6 +181,30 @@ enum DailyTipPrompt {
         lines.append("- Fraldas: \(ctx.diaperCount)")
         lines.append("")
         lines.append("Dá um conselho prático para agora. No máximo 2 frases.")
+        return lines.joined(separator: "\n")
+    }
+
+    private static func buildZH(ctx: DailyContext) -> String {
+        var lines: [String] = ["宝宝：\(ctx.babyName)，\(ctx.ageMonths) 个月 \(ctx.ageDays) 天。"]
+        if let leap = ctx.currentLeapName { lines.append("发育猛长期：\(leap)。") }
+        lines.append("时段：\(ctx.timeOfDay.displayName(for: .chinese))。")
+        lines.append("")
+        lines.append("今天：")
+        var feedLine = "- 喂养：\(ctx.feedingCount) 次"
+        if ctx.totalFeedingMinutes > 0 { feedLine += "，共 \(ctx.totalFeedingMinutes) 分钟" }
+        if let m = ctx.minutesSinceLastFeed { feedLine += "，上次在 \(m) 分钟前" }
+        lines.append(feedLine)
+        if let side = ctx.lastFeedSide, !side.isEmpty { lines.append("  侧别：\(side)") }
+        var sleepLine = "- 睡眠：\(ctx.sleepCount) 次"
+        if ctx.totalSleepMinutes > 0 {
+            let h = ctx.totalSleepMinutes / 60
+            let m = ctx.totalSleepMinutes % 60
+            sleepLine += "，共 \(h > 0 ? "\(h) 小时 " : "")\(m > 0 ? "\(m) 分钟" : "")".trimmingCharacters(in: .whitespaces)
+        }
+        lines.append(sleepLine)
+        lines.append("- 尿布：\(ctx.diaperCount)")
+        lines.append("")
+        lines.append("请给出一条现在就能用的实用建议。最多 2 句话。")
         return lines.joined(separator: "\n")
     }
 }

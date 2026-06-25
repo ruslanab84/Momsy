@@ -49,6 +49,14 @@ enum WeeklyInsightPrompt {
             Réponds UNIQUEMENT par un objet JSON contenant exactement ces clés : \(jsonKeys).
             Chaque valeur est composée de 1 à 2 phrases chaleureuses en français. Pas de markdown, pas de clés supplémentaires, aucun texte hors du JSON.
             """
+        case .chinese:
+            return """
+            你是一位温暖体贴的儿科助手，专为妈妈们服务。请分析宝宝的每周统计数据。
+            与世卫组织的年龄标准对比。多给鼓励，绝不做医学诊断，并且绝不建议
+            重新引入已被标记为过敏原或曾引起反应的食物。
+            只回复一个 JSON 对象，且恰好包含这些键：\(jsonKeys)。
+            每个值为 1–2 句温暖的中文。不要 markdown，不要多余的键，JSON 之外不要有任何文字。
+            """
         }
     }
 
@@ -59,12 +67,13 @@ enum WeeklyInsightPrompt {
         case .german:  return build(ctx: ctx, l: .de)
         case .french:  return build(ctx: ctx, l: .fr)
         case .portuguese: return build(ctx: ctx, l: .pt)
+        case .chinese: return build(ctx: ctx, l: .zh)
         }
     }
 
     // MARK: - Builder
 
-    private enum Loc { case en, ru, de, fr, pt }
+    private enum Loc { case en, ru, de, fr, pt, zh }
 
     private static func build(ctx: WeeklyInsightContext, l: Loc) -> String {
         let s = ctx.stats
@@ -121,6 +130,14 @@ enum WeeklyInsightPrompt {
             lines.append("Mamadas esta semana: \(feeds)/dia, \(s.totalFeedings) no total. Mudas de fralda: \(s.totalDiapers).")
             lines.append("Alimentos novos introduzidos: \(foods). Alergénio/reação assinalado: \(allergens).")
             lines.append("Devolve um JSON {\(jsonKeys)} comparando com as normas da OMS, com uma recomendação prática em cada campo.")
+        case .zh:
+            lines.append("宝宝年龄：\(s.ageMonths) 个月（\(s.ageWeeks) 周）。")
+            if let leap { lines.append("发育猛长期：\(leap)。") }
+            lines.append("世卫组织：每日总睡眠目标 ≥ \(whoH)；最长清醒时长约 \(s.whoAwakeWindowMax) 分钟。")
+            lines.append("本周睡眠：平均 \(sleepH)/天（夜间 \(nightH)，白天 \(dayH)，每天 \(naps) 次小睡），\(trend)。")
+            lines.append("本周喂养：\(feeds)/天，共 \(s.totalFeedings) 次。换尿布：\(s.totalDiapers) 次。")
+            lines.append("引入的新食物：\(foods)。已标记过敏原/反应：\(allergens)。")
+            lines.append("返回 JSON {\(jsonKeys)}，与世卫组织标准对比，每个字段给一条实用建议。")
         }
         return lines.joined(separator: "\n")
     }
@@ -151,6 +168,9 @@ enum WeeklyInsightPrompt {
         case .pt:
             if absMin < 10 { return "praticamente igual à semana passada" }
             return delta > 0 ? "+\(absMin) min/dia vs. semana passada" : "-\(absMin) min/dia vs. semana passada"
+        case .zh:
+            if absMin < 10 { return "与上周大致相同" }
+            return delta > 0 ? "比上周每天多 \(absMin) 分钟" : "比上周每天少 \(absMin) 分钟"
         }
     }
 }

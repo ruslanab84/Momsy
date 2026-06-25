@@ -32,6 +32,8 @@ enum AlertRules {
             text = "Es sind bereits \(hours) Stunden seit der letzten Mahlzeit vergangen. Für \(ctx.ageMonths) Monate ist das Intervall normalerweise bis zu \(maxHours) h — biete \(ctx.babyName) die Brust an."
         case .french:
             text = "Cela fait déjà \(hours) h depuis la dernière tétée. Pour \(ctx.ageMonths) mois, l’intervalle habituel va jusqu’à \(maxHours) h — si \(ctx.babyName) ne réclame pas, proposez-lui le sein."
+        case .chinese:
+            text = "距离上次喂奶已经过去 \(hours) 小时了。\(ctx.ageMonths) 个月通常的间隔最多 \(maxHours) 小时——如果 \(ctx.babyName) 没有主动要，可以试着喂一下。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }
@@ -55,6 +57,8 @@ enum AlertRules {
             text = "Heute bisher nur \(ctx.diaperCount) Windeln — für \(ctx.ageMonths) Monate sind 6–8 pro Tag normal. Das ist ein Zeichen für zu wenig Trinken. Biete öfter Brust oder Fläschchen an."
         case .french:
             text = "Seulement \(ctx.diaperCount) couches mouillées aujourd’hui — pour \(ctx.ageMonths) mois, la norme est de 6 à 8 par jour. C’est le signe d’un apport en liquide insuffisant. Proposez le sein ou le biberon plus souvent."
+        case .chinese:
+            text = "今天到目前只有 \(ctx.diaperCount) 片湿尿布——\(ctx.ageMonths) 个月每天通常有 6–8 片。这说明摄入的液体不足。请比平时更频繁地喂母乳或配方奶。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }
@@ -77,6 +81,8 @@ enum AlertRules {
             text = "Seit \(ctx.daysSinceLastStool) Tagen kein Stuhl. Versuche die Fahrrad-Übung: Lege \(ctx.babyName) auf den Rücken und beuge die Beinchen sanft zum Bauch, 10–15 Mal."
         case .french:
             text = "Pas de selles depuis \(ctx.daysSinceLastStool) jours. Essayez l’exercice du vélo : allongez \(ctx.babyName) sur le dos et ramenez doucement ses jambes vers le ventre 10 à 15 fois."
+        case .chinese:
+            text = "已经 \(ctx.daysSinceLastStool) 天没有大便了。试试「蹬自行车」运动：让 \(ctx.babyName) 仰卧，轻轻把小腿朝肚子方向蹬 10–15 次。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }
@@ -105,6 +111,8 @@ enum AlertRules {
             text = "\(ctx.babyName) hat heute nur \(sleptH) Std. geschlafen — \(deficit) Std. weniger als normal. Versuche, früher ins Bett zu gehen — gegen 19:30–20:00."
         case .french:
             text = "\(ctx.babyName) n’a dormi que \(sleptH) h aujourd’hui — soit \(deficit) h de moins que la norme. Essayez un coucher plus tôt — vers 19h30–20h00."
+        case .chinese:
+            text = "\(ctx.babyName) 今天只睡了 \(sleptH) 小时——比正常少 \(deficit) 小时。试着早点哄睡——大约 19:30–20:00。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }
@@ -142,6 +150,8 @@ enum SituationalRules {
             text = "Halte \(ctx.babyName) nach dem Stillen 10–15 Min. aufrecht — das hilft, die Luft herauszulassen und verhindert Spucken. Drücke das Baby senkrecht an deine Schulter und klopfe sanft auf den Rücken."
         case .french:
             text = "Tenez \(ctx.babyName) droit pendant 10 à 15 min après la tétée — cela aide à évacuer l’air et évite les régurgitations. Calez-le verticalement contre votre épaule et tapotez doucement son dos."
+        case .chinese:
+            text = "喂奶后让 \(ctx.babyName) 竖抱 10–15 分钟——有助于排出空气、预防吐奶。让宝宝竖直靠在你的肩膀上，轻轻拍拍后背。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -167,6 +177,8 @@ enum SituationalRules {
                 text = "\(ctx.babyName) ist seit \(awakeMins) Min. wach — es ist Zeit zum Einschlafen. Achte auf Gähnen, Augenreiben oder einen leeren Blick — verpasse das Einschlafffenster nicht."
             case .french:
                 text = "\(ctx.babyName) est éveillé depuis \(awakeMins) min — il est temps de le coucher. Guettez les bâillements, les yeux frottés ou le regard dans le vague — ne manquez pas la fenêtre de sommeil."
+            case .chinese:
+                text = "\(ctx.babyName) 已经清醒 \(awakeMins) 分钟了——该准备入睡了。留意打哈欠、揉眼睛或眼神发呆——别错过入睡时机。"
             }
         } else {
             switch ctx.language {
@@ -182,6 +194,8 @@ enum SituationalRules {
                 text = "Das Einschlafffenster ist verpasst — \(ctx.babyName) ist seit \(awakeMins) Min. wach. Übermüdung erschwert das Einschlafen. Licht dämpfen, Spielzeug wegräumen, Routine jetzt beginnen."
             case .french:
                 text = "La fenêtre de sommeil est passée — \(ctx.babyName) est éveillé depuis \(awakeMins) min. La surfatigue rend l’endormissement plus difficile. Tamisez la lumière, rangez les jouets et commencez le rituel du coucher maintenant."
+            case .chinese:
+                text = "入睡时机已经错过——\(ctx.babyName) 已清醒 \(awakeMins) 分钟。过度疲劳会让入睡更难。调暗灯光、收起玩具，现在就开始睡前流程。"
             }
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
@@ -206,6 +220,8 @@ enum SituationalRules {
             text = "Das Abendbad ist ein starkes Einschlafritual. Wassertemperatur 36–37°C, Dauer 5–10 Min. Nach dem Bad kühlt die Haut ab und Melatonin wird schneller produziert."
         case .french:
             text = "Le bain du soir est un puissant rituel de sommeil. Température de l’eau 36–37 °C, durée 5 à 10 min. Après le bain, la peau se refroidit et la mélatonine est produite plus rapidement."
+        case .chinese:
+            text = "晚间洗澡是很有效的睡前仪式。水温 36–37°C，时长 5–10 分钟。洗澡后皮肤降温，褪黑素分泌更快。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -231,6 +247,8 @@ enum SituationalRules {
             text = "Der erste Morgenschlaf ist für \(ctx.babyName) der wichtigste. Mit \(ctx.ageMonths) Monaten sollte er etwa \(awakeMax) Min. nach dem Aufwachen beginnen. Achte auf die ersten Gähnzeichen."
         case .french:
             text = "La première sieste du matin est la plus importante pour \(ctx.babyName). À \(ctx.ageMonths) mois, elle devrait commencer environ \(awakeMax) min après le réveil. Guettez les premiers bâillements."
+        case .chinese:
+            text = "上午第一觉对 \(ctx.babyName) 最重要。\(ctx.ageMonths) 个月时，通常在醒来约 \(awakeMax) 分钟后开始。留意最初的哈欠。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -263,6 +281,9 @@ enum SituationalRules {
         case .french:
             let other = isLeft ? "droit" : "gauche"
             text = "Les 3 dernières tétées étaient du même côté. Proposez le sein \(other) — un allaitement équilibré favorise la lactation et évite l’engorgement."
+        case .chinese:
+            let other = isLeft ? "右侧" : "左侧"
+            text = "最近 3 次都喂的同一侧。试试\(other)乳房——两侧均衡有助于泌乳，也能预防乳房胀奶。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -286,6 +307,8 @@ enum SituationalRules {
             text = "Spaziergänge an der frischen Luft regulieren den Tagesrhythmus von \(ctx.babyName). Tageslicht unterdrückt Melatonin und verbessert den Nachtschlaf. Schon 20–30 Minuten draußen helfen."
         case .french:
             text = "Les promenades au grand air régulent le rythme circadien de \(ctx.babyName). La lumière du jour réduit la mélatonine et améliore le sommeil nocturne. Même 20 à 30 minutes dehors font la différence."
+        case .chinese:
+            text = "户外散步能调节 \(ctx.babyName) 的生物钟。日光会抑制褪黑素、改善夜间睡眠。哪怕在外面待 20–30 分钟也有效果。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .situational)
     }
@@ -360,6 +383,13 @@ enum CareRules {
             "L’emmaillotage aide certains nouveau-nés à dormir plus longtemps — bras le long du corps, hanches libres, pas trop serré.",
             "Le contact peau à peau 1 à 2 heures par jour stabilise la température, la respiration et le rythme cardiaque de [name]."
         ]
+        case .chinese: return [
+            "脐带伤口约 10–14 天愈合。洗澡后每天用氯己定消毒 1–2 次，保持干燥。",
+            "新生儿出生起就能听出妈妈的声音——用平静的语气说话，有助于建立神经连接。",
+            "趴卧时间每天 2–3 次、每次 1–2 分钟，只在 [name] 清醒时进行。能锻炼颈部，为翻身做准备。",
+            "包裹（蜡烛包）能帮助一些新生儿睡得更久——手臂沿身体放好，髋部留有活动空间，不要包太紧。",
+            "每天 1–2 小时的肌肤接触能稳定 [name] 的体温、呼吸和心跳。"
+        ]
         }
     }
 
@@ -406,6 +436,13 @@ enum CareRules {
             "Le réflexe de succion est à son maximum maintenant. Une tétine entre les tétées favorise l’auto-apaisement.",
             "Les coliques atteignent souvent leur pic vers 6 semaines. Le bruit blanc, le bercement et la position sur le ventre fonctionnent bien.",
             "Les livres et cartes en noir et blanc sont le jouet idéal pour [name] — le contraste stimule fortement le cortex visuel."
+        ]
+        case .chinese: return [
+            "胀气很正常。顺时针轻揉肚子，以及「飞机抱」（让宝宝趴在手臂上）都有帮助。",
+            "想促进排便，试试「蹬自行车」：轻轻在空中蹬 [name] 的小腿 10–15 次。",
+            "现在吸吮反射最强。两次喂奶之间用安抚奶嘴有助于自我安抚。",
+            "肠绞痛通常在 6 周龄达到高峰。白噪音、轻轻摇晃和趴卧姿势都很管用。",
+            "黑白图卡和绘本是 [name] 的理想玩具——强烈的对比能刺激视觉皮层。"
         ]
         }
     }
@@ -460,6 +497,14 @@ enum CareRules {
             "Les hochets et jouets à saisir entraînent la motricité. Alternez la main avec laquelle vous tendez les jouets — les deux côtés ont besoin de pratique.",
             "Montrez à [name] son reflet dans un miroir — à cet âge, cela éveille un intérêt immédiat et développe la concentration."
         ]
+        case .chinese: return [
+            "黑白图卡和绘本能刺激视觉皮层。看图 10–15 分钟是很好的训练。",
+            "洗澡前做 5–10 分钟全身抚触能改善 [name] 的睡眠。从身体中心向四肢方向按摩。",
+            "趴卧时间每天合计可达 30 分钟。在胸前垫一卷毛巾——更容易抬头。",
+            "很快会用到牙胶——把硅胶牙胶放冰箱冷藏（不要冷冻）。很多宝宝在 4–7 个月长第一颗牙。",
+            "摇铃和可抓握的玩具能锻炼精细动作。递玩具时左右手交替——两侧都要练习。",
+            "让 [name] 看镜子里的自己，能培养专注力——这个年龄会立刻产生浓厚兴趣。"
+        ]
         }
     }
 
@@ -506,6 +551,13 @@ enum CareRules {
             "Développement du langage : commentez tout ce que vous faites à voix haute. « On mange », « on prend la cuillère » — le vocabulaire se construit dès 6 mois.",
             "La pince (pouce + index) se développe à 8–9 mois. Proposez de petits morceaux mous à manipuler pour s’entraîner.",
             "Le jeu du coucou est bien plus qu’un jeu. Il apprend à [name] la permanence de l’objet : maman s’en va et revient."
+        ]
+        case .chinese: return [
+            "辅食循序渐进：每 3 天加一种新食物，份量要小。先蔬菜后水果是不错的顺序。",
+            "鼓励爬行：把玩具放在 [name] 刚好够不到的地方。爬行能同时发展左右脑。",
+            "语言发展：把你做的每件事说出来。「我们要吃饭啦」「拿起勺子」——词汇量从 6 个月开始积累。",
+            "钳形抓握（拇指 + 食指）在 8–9 个月形成。提供小块、软的食物让宝宝练习。",
+            "躲猫猫不只是好玩。它教会 [name] 客体永存：妈妈会离开，也会回来。"
         ]
         }
     }
@@ -554,6 +606,13 @@ enum CareRules {
             "C’est un bon moment pour introduire le gobelet à bec. Vers 12 mois, l’OMS recommande d’arrêter les tétées nocturnes si le poids est normal.",
             "Boîtes à formes, gobelets à empiler, boîtes à couvercle — les meilleurs jouets pour [name] en ce moment. La notion dedans/dehors se construit."
         ]
+        case .chinese: return [
+            "迈出第一步从扶着家具横走开始。不要一直牵着 [name] 的手——独立平衡需要练习。",
+            "语言：理解先于表达。9–10 个月时 [name] 能听懂「不」「给」「过来」。说话要慢而清晰。",
+            "9–10 个月的夜醒是正常的睡眠倒退，与新学会的动作技能有关。2–4 周会过去。",
+            "现在是引入鸭嘴杯的好时机。体重正常时，世卫组织建议 12 个月起断掉夜奶。",
+            "形状分类盒、套叠杯、带盖的盒子是 [name] 现在最好的玩具。「里面/外面」的概念正在形成。"
+        ]
         }
     }
 
@@ -595,6 +654,12 @@ enum CareRules {
             "Le passage à une seule sieste se produit généralement à 15–18 mois. Ne le précipitez pas — une transition trop précoce mène à la surexcitation.",
             "Peindre avec les doigts et modeler de la pâte développent la motricité fine et le langage en même temps. Dix minutes par jour suffisent."
         ]
+        case .chinese: return [
+            "一岁叛逆期很正常。发脾气是出于无力感，而非操控。家长保持平静是最好的回应。",
+            "词汇量：12 个月 1–3 个词，18 个月 10–50 个词。若 18 个月还不到 10 个词——请咨询言语治疗师。",
+            "并到一次午睡通常在 15–18 个月。不要操之过急——过早过渡会导致过度兴奋、夜间睡不好。",
+            "手指画、玩面团能同时锻炼精细动作和语言。每天 10 分钟就够了。"
+        ]
         }
     }
 
@@ -630,6 +695,11 @@ enum CareRules {
             "Les phrases de deux mots vers 2 ans sont un jalon du langage. « Maman donne », « veux boire » sont de bons signes. Pas de phrases : consultez un orthophoniste.",
             "Le signe de propreté apparaît à 18–24 mois. Indices : couche sèche 2 h d’affilée, [name] montre le pot."
         ]
+        case .chinese: return [
+            "平行游戏（在旁边玩但不一起玩）是 [name] 这个年龄的正常表现。与同伴的社交游戏要到 3 岁左右才会出现。",
+            "两岁会说两个词的短语是语言发展的标志。「妈妈给」「要喝水」都是好迹象。不会说短语——请看言语治疗师。",
+            "如厕准备能力在 18–24 个月出现。迹象：尿布连续 2 小时保持干燥、[name] 会指向便盆。"
+        ]
         }
     }
 }
@@ -652,6 +722,7 @@ enum DevelopmentRules {
         case .spanish:  return spanishLeapTip(leapName: leapName, name: name)
         case .german:   return germanLeapTip(leapName: leapName, name: name)
         case .french:   return frenchLeapTip(leapName: leapName, name: name)
+        case .chinese:  return chineseLeapTip(leapName: leapName, name: name)
         }
     }
 
@@ -790,6 +861,33 @@ enum DevelopmentRules {
         }
     }
 
+    private static func chineseLeapTip(leapName: String, name: String) -> String {
+        switch leapName {
+        case _ where leapName.contains("Sense") || leapName.contains("ощущен"):
+            return "用平静的声音说话，避免突然的响声——\(name) 的听觉系统还在校准中。"
+        case _ where leapName.contains("Pattern") || leapName.contains("узор"):
+            return "给 \(name) 看黑白几何图卡。大脑在寻找规律——对比最能刺激视觉皮层。"
+        case _ where leapName.contains("Transition") || leapName.contains("движен"):
+            return "每天做趴卧——\(name) 正在练习控制身体。在胸前垫一卷毯子作支撑。"
+        case _ where leapName.contains("Event") || leapName.contains("событ"):
+            return "在这个因果关系猛长期，按一下会响的玩具最合适。\(name) 正在发现：我的动作能改变世界。"
+        case _ where leapName.contains("Relation") || leapName.contains("отношен"):
+            return "现在的分离焦虑不是无理取闹——这是正常的。躲猫猫能帮 \(name) 明白：妈妈会离开，也会回来。"
+        case _ where leapName.contains("Categor") || leapName.contains("категор"):
+            return "不同大小的形状分类盒和套叠杯是理想玩具。\(name) 正在给世界分类：大/小、里面/外面。"
+        case _ where leapName.contains("Sequence") || leapName.contains("последоват"):
+            return "简单的固定流程能帮 \(name) 预测接下来会发生什么。每天一样的睡前顺序能减少焦虑。"
+        case _ where leapName.contains("Program") || leapName.contains("програм"):
+            return "最初的「不」和反抗是健康独立的表现。给 \(name) 简单的选择：红杯子还是蓝杯子？"
+        case _ where leapName.contains("Principle") || leapName.contains("принцип"):
+            return "「为什么」和「不」是这个阶段的关键词。用简短的话解释：烫——不可以，会疼。"
+        case _ where leapName.contains("System") || leapName.contains("систем"):
+            return "角色扮演现在蓬勃发展。一套玩具厨房或工具——\(name) 正在构建对世界的认知模型。"
+        default:
+            return "发育猛长期是暂时的。多抱抱 \(name)，回应他的信号——这就是最好的支持。"
+        }
+    }
+
     private static func germanLeapTip(leapName: String, name: String) -> String {
         switch leapName {
         case _ where leapName.contains("Sinne") || leapName.contains("ощущен"):
@@ -864,6 +962,13 @@ enum DefaultTips {
             "Les câlins et le contact font baisser le cortisol. Le meilleur remède aujourd’hui est simplement de tenir [name] dans vos bras.",
             "Lisez à voix haute dès les premiers jours. Le rythme de la parole et l’intonation posent les bases de la future lecture.",
             "Nommez les émotions de [name] : tu es contrarié, tu es content — l’intelligence émotionnelle commence dès les premiers mois de la vie."
+        ]
+        case .chinese: return [
+            "喂奶时的眼神交流能增强依恋，促进 [name] 的大脑发育。",
+            "唱摇篮曲能培养乐感和语言中枢。节奏和旋律比完美的嗓音更重要。",
+            "拥抱和肌肤接触能降低皮质醇。今天最好的「良药」就是把 [name] 抱在怀里。",
+            "从出生头几天就开始朗读。语言的节奏和语调为日后的阅读和语言发展打下基础。",
+            "说出 [name] 的情绪：「你不开心」「你很高兴」——情商从生命最初的几个月就开始了。"
         ]
         }
     }
