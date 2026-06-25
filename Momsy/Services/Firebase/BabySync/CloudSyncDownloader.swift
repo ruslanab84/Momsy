@@ -26,6 +26,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     private let waterIntakeRepo: any WaterIntakeRepository
     private let leapsRepo: any LeapsRepository
     private let doctorVisitRepo: any DoctorVisitRepository
+    private let watermarks: SyncWatermarkStore
 
     private var hasRun = false
     private var isSyncing = false
@@ -49,7 +50,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
          momSleepRepo: any MomSleepRepository,
          waterIntakeRepo: any WaterIntakeRepository,
          leapsRepo: any LeapsRepository,
-         doctorVisitRepo: any DoctorVisitRepository) {
+         doctorVisitRepo: any DoctorVisitRepository,
+         watermarks: SyncWatermarkStore = SyncWatermarkStore()) {
         self.service = service
         self.feedingRepo = feedingRepo
         self.sleepRepo = sleepRepo
@@ -69,6 +71,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         self.waterIntakeRepo = waterIntakeRepo
         self.leapsRepo = leapsRepo
         self.doctorVisitRepo = doctorVisitRepo
+        self.watermarks = watermarks
     }
 
     // MARK: - Entry point
@@ -81,6 +84,15 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         if isSyncing { return true }
         if let last = lastSyncAt, now.timeIntervalSince(last) < minInterval { return true }
         return false
+    }
+
+    /// Per-collection watermark math. Never moves backward; falls back to the epoch floor so an
+    /// empty/all-legacy first pull doesn't repeat a full pull forever. Pure → unit-tested.
+    static func advancedWatermark(previous: Date?, maxObserved: Date?) -> Date {
+        let floor = Date(timeIntervalSince1970: 0)
+        let candidate = maxObserved ?? previous ?? floor
+        if let previous { return max(previous, candidate) }
+        return candidate
     }
 
     @MainActor
@@ -161,8 +173,10 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     @MainActor
     func resyncAll() async {
         guard hasRun else { return }
+        // Foreground re-pull is a cheap delta now (incremental sync), but a quick
+        // background→foreground bounce still needn't re-hit Firestore: debounce wide.
         if Self.shouldSkipResync(isSyncing: isSyncing, lastSyncAt: lastSyncAt,
-                                 now: Date(), minInterval: 8) { return }
+                                 now: Date(), minInterval: 300) { return }
         guard FamilyManager.shared.familyId != nil else { return }
         isSyncing = true
         defer { isSyncing = false; lastSyncAt = Date() }
@@ -261,8 +275,21 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         // entry. Pending-local ids are unioned in so an in-flight delete is honoured
         // even before its tombstone round-trips.
         await service.retryPendingDeletions()
-        let tombstonedIds = Set((try? await service.fetchTombstones())?.compactMap(UUID.init) ?? [])
+
+        // Reconcile deletes incrementally: only pull tombstones newer than last seen. A tombstone
+        // older than the watermark was already applied on a previous sync, and `applyDeletions`
+        // is idempotent (deleting an already-absent row is a no-op).
+        let tombScope = service.currentScope()
+        let tombWatermark = watermarks.watermark(family: tombScope.familyId, baby: tombScope.babyId,
+                                                 collection: "deletions")
+        let tombstones = (try? await service.fetchTombstones(since: tombWatermark)) ?? []
+        let tombstonedIds = Set(tombstones.compactMap { UUID(uuidString: $0.id) })
         let deletedIds = tombstonedIds.union(PendingDeletionsStore.shared.ids())
+
+        let maxTomb = tombstones.map(\.deletedAt).max()
+        let nextTomb = Self.advancedWatermark(previous: tombWatermark, maxObserved: maxTomb)
+        watermarks.set(family: tombScope.familyId, baby: tombScope.babyId,
+                       collection: "deletions", to: nextTomb)
 
         let feedings = await feedingDTOs.compactMap(Self.feedingEntry)
         let sleeps   = await sleepDTOs.compactMap(Self.sleepEntry)
@@ -313,8 +340,26 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
     }
 
-    private func fetch<T: Decodable>(_ collection: String, dateField: String) async -> [T] {
-        (try? await service.fetchAll(from: collection, dateField: dateField)) ?? []
+    /// Incremental fetch: full pull on first sync of a collection (captures legacy `nil`-`updatedAt`
+    /// docs that a `>=` range query would exclude), delta thereafter. Advances the
+    /// per-`(family, baby, collection)` watermark by the max server `updatedAt` merged.
+    private func fetch<T: Decodable & CloudSyncTimestamped>(_ collection: String,
+                                                            dateField: String) async -> [T] {
+        let scope = service.currentScope()
+        let previous = watermarks.watermark(family: scope.familyId, baby: scope.babyId,
+                                            collection: collection)
+
+        let dtos: [T]
+        if let previous {
+            dtos = (try? await service.fetchChanged(from: collection, since: previous)) ?? []
+        } else {
+            dtos = (try? await service.fetchAll(from: collection, dateField: dateField)) ?? []
+        }
+
+        let maxObserved = dtos.compactMap { $0.updatedAt?.dateValue() }.max()
+        let next = Self.advancedWatermark(previous: previous, maxObserved: maxObserved)
+        watermarks.set(family: scope.familyId, baby: scope.babyId, collection: collection, to: next)
+        return dtos
     }
 
     // MARK: - DTO → local mapping (skip docs whose id isn't a UUID, e.g. legacy random ids)

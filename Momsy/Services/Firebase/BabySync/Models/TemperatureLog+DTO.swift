@@ -7,7 +7,7 @@ struct TemperatureLogDTO: Codable {
     let note: String
     let addedBy: String
     let addedByName: String
-    var updatedAt: Timestamp? = Timestamp(date: Date())
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: TemperatureLog) {
         self.date        = Timestamp(date: model.date)

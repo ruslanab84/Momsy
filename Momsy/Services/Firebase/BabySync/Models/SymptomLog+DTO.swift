@@ -7,6 +7,7 @@ struct SymptomLogDTO: Codable {
     let severity: String
     let addedBy: String
     let addedByName: String
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: SymptomLog) {
         self.loggedAt    = Timestamp(date: model.loggedAt)

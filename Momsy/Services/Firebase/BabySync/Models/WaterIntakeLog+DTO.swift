@@ -6,7 +6,7 @@ struct WaterIntakeLogDTO: Codable {
     let amountMl: Int
     let addedBy: String
     let addedByName: String
-    var updatedAt: Timestamp? = Timestamp(date: Date())
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: WaterIntakeLog) {
         self.date        = Timestamp(date: model.date)

@@ -65,9 +65,12 @@ final class BabySyncService {
     func setLog<T: Encodable>(_ log: T, id: String, to subcollection: String) async throws {
         guard !id.isEmpty else { return }
         guard hasPath else {
-            let payload = try Firestore.Encoder().encode(log)
-            // Stamp the path known at enqueue so replay can route the write to the baby
+            var payload = try Firestore.Encoder().encode(log)
+            // `@ServerTimestamp updatedAt` encodes to a `FieldValue` sentinel that `UserDefaults`
+            // can't persist; drop it here and let `replayPendingWrites` re-stamp a fresh
+            // serverTimestamp. The path is still stamped so replay routes the write to the baby
             // (and family) it belongs to, never to whoever is active at replay time.
+            payload.removeValue(forKey: "updatedAt")
             PendingWritesStore.shared.add(collection: subcollection, docId: id,
                                           payload: payload, familyId: familyId, babyId: babyId)
             return
@@ -90,11 +93,30 @@ final class BabySyncService {
         try await collection("deletions").document(id).setData(["deletedAt": Timestamp(date: Date())])
     }
 
-    /// Reads tombstoned ids (entries deleted on any device).
-    func fetchTombstones(limit: Int = 1000) async throws -> [String] {
+    /// Tombstoned ids deleted on any device, optionally only those at/after `since`.
+    /// Ordered by `deletedAt` so the caller can advance a watermark; every tombstone is
+    /// written with a `deletedAt`, so the order clause excludes nothing.
+    func fetchTombstones(since: Date?, limit: Int = 1000) async throws -> [(id: String, deletedAt: Date)] {
         guard hasPath else { return [] }
-        let snapshot = try await collection("deletions").limit(to: limit).getDocuments()
-        return snapshot.documents.map(\.documentID)
+        var query: Query = collection("deletions")
+            .order(by: "deletedAt", descending: false)
+            .limit(to: limit)
+        if let since {
+            query = collection("deletions")
+                .whereField("deletedAt", isGreaterThanOrEqualTo: Timestamp(date: since))
+                .order(by: "deletedAt", descending: false)
+                .limit(to: limit)
+        }
+        let snapshot = try await query.getDocuments()
+        return snapshot.documents.compactMap { doc in
+            guard let ts = doc.data()["deletedAt"] as? Timestamp else { return nil }
+            return (doc.documentID, ts.dateValue())
+        }
+    }
+
+    /// Back-compat: ids only, no incremental filter.
+    func fetchTombstones(limit: Int = 1000) async throws -> [String] {
+        try await fetchTombstones(since: nil, limit: limit).map(\.id)
     }
 
     /// Propagates a local delete to the cloud: removes the doc and writes a tombstone,
@@ -142,9 +164,14 @@ final class BabySyncService {
                 let targetUUID = UUID(uuidString: targetBaby)
             else { continue }
             do {
+                // Re-stamp a server `updatedAt` at replay so the watermark sees the real
+                // write time (not the offline enqueue time). The sentinel was stripped at
+                // enqueue because `UserDefaults` can't persist a `FieldValue`.
+                var payload = entry.payload
+                payload["updatedAt"] = FieldValue.serverTimestamp()
                 try await ActiveBaby.$syncTargetOverride.withValue(targetUUID) {
                     try await collection(entry.collection).document(entry.docId)
-                        .setData(entry.payload, merge: true)
+                        .setData(payload, merge: true)
                 }
                 PendingWritesStore.shared.remove(docId: entry.docId)
             } catch {
@@ -200,6 +227,9 @@ final class BabySyncService {
         try await babyDoc().collection("profile").document("info").delete()
         try await babyDoc().delete()
         try await deleteLegacyFamilyTree()
+        // Drop this scope's incremental watermarks so a re-add of the family re-seeds from a
+        // clean full pull, not an incremental query that would skip the restored docs.
+        SyncWatermarkStore().reset(family: familyId, baby: babyId)
     }
 
     /// Best-effort removal of the old family-keyed tree (`babies/{familyId}`) that the
@@ -347,6 +377,27 @@ final class BabySyncService {
                 .limit(to: limit)
         }
         let snapshot = try await query.getDocuments()
+        return snapshot.documents.compactMap { try? $0.data(as: T.self) }
+    }
+
+    // MARK: - Incremental reads
+
+    /// The `(familyId, babyId)` this service currently targets — honours a background sync's
+    /// `ActiveBaby.syncTargetOverride`. Used to scope the sync watermark to the right child.
+    func currentScope() -> (familyId: String, babyId: String) { (familyId, babyId) }
+
+    /// Fetches only documents whose server `updatedAt` is at/after `since`, oldest-first.
+    /// Single-field range+order on `updatedAt` (auto-indexed). `>=` re-reads the boundary doc;
+    /// the merge upsert is idempotent. Ascending order drains a >limit backlog forward without gaps.
+    func fetchChanged<T: Decodable>(from subcollection: String,
+                                    since: Date,
+                                    limit: Int = 500) async throws -> [T] {
+        guard hasPath else { return [] }
+        let snapshot = try await collection(subcollection)
+            .whereField("updatedAt", isGreaterThanOrEqualTo: Timestamp(date: since))
+            .order(by: "updatedAt", descending: false)
+            .limit(to: limit)
+            .getDocuments()
         return snapshot.documents.compactMap { try? $0.data(as: T.self) }
     }
 

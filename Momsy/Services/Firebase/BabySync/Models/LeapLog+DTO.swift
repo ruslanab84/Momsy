@@ -7,6 +7,7 @@ struct LeapLogDTO: Codable {
     let completedDate: Timestamp?
     let addedBy: String
     let addedByName: String
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: LeapLog) {
         self.leapId        = model.leapId

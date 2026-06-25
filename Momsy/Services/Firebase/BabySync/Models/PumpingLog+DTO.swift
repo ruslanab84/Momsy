@@ -9,7 +9,7 @@ struct PumpingLogDTO: Codable {
     let endDate: Timestamp?
     let addedBy: String
     let addedByName: String
-    var updatedAt: Timestamp? = Timestamp(date: Date())
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: PumpingLog) {
         self.date            = Timestamp(date: model.date)

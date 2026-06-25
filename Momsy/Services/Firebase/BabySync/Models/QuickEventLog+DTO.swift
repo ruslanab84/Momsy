@@ -7,6 +7,7 @@ struct QuickEventLogDTO: Codable {
     let label: String
     let addedBy: String
     let addedByName: String
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: QuickEventLog) {
         self.kind        = model.kind

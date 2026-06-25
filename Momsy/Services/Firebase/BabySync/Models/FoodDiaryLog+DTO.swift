@@ -11,7 +11,7 @@ struct FoodDiaryLogDTO: Codable {
     let photoPath: String?
     let addedBy: String
     let addedByName: String
-    var updatedAt: Timestamp? = Timestamp(date: Date())
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: FoodDiaryLog) {
         self.date        = Timestamp(date: model.date)

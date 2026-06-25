@@ -5,6 +5,7 @@ struct DoctorVisitLogDTO: Codable {
     let date: Timestamp
     let addedBy: String
     let addedByName: String
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: DoctorVisitLog) {
         self.date        = Timestamp(date: model.date)

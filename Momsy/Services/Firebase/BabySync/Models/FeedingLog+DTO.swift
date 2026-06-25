@@ -9,9 +9,9 @@ struct FeedingLogDTO: Codable {
     let amountMl: Int?
     let addedBy: String
     let addedByName: String
-    /// Last-write-wins stamp. Defaults to now on push (a local write); decodes to
-    /// nil for legacy docs written before this field existed.
-    var updatedAt: Timestamp? = Timestamp(date: Date())
+    /// Last-write-wins stamp. Server-assigned on write (`@ServerTimestamp` encodes a nil to
+    /// `FieldValue.serverTimestamp()`); decodes to nil for legacy docs written before it existed.
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: FeedingLog) {
         self.startedAt   = Timestamp(date: model.startedAt)

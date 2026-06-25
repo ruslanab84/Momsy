@@ -8,7 +8,7 @@ struct DiaryLogDTO: Codable {
     let iconName: String
     let addedBy: String
     let addedByName: String
-    var updatedAt: Timestamp? = Timestamp(date: Date())
+    @ServerTimestamp var updatedAt: Timestamp?
 
     init(from model: DiaryLog) {
         self.date        = Timestamp(date: model.date)
