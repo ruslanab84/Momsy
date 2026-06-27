@@ -19291,6 +19291,222 @@
       "norm_label": "duration"
     },
     {
+      "label": "session-1782543465849.json",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L1",
+      "id": "sessions_session_1782543465849",
+      "community": 586,
+      "norm_label": "session-1782543465849.json"
+    },
+    {
+      "label": "id",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L2",
+      "id": "sessions_session_1782543465849_id",
+      "community": 586,
+      "norm_label": "id"
+    },
+    {
+      "label": "startedAt",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L3",
+      "id": "sessions_session_1782543465849_startedat",
+      "community": 586,
+      "norm_label": "startedat"
+    },
+    {
+      "label": "cwd",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L4",
+      "id": "sessions_session_1782543465849_cwd",
+      "community": 586,
+      "norm_label": "cwd"
+    },
+    {
+      "label": "context",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L5",
+      "id": "sessions_session_1782543465849_context",
+      "community": 586,
+      "norm_label": "context"
+    },
+    {
+      "label": "metrics",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L6",
+      "id": "sessions_session_1782543465849_metrics",
+      "community": 586,
+      "norm_label": "metrics"
+    },
+    {
+      "label": "edits",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L7",
+      "id": "sessions_session_1782543465849_metrics_edits",
+      "community": 586,
+      "norm_label": "edits"
+    },
+    {
+      "label": "commands",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L8",
+      "id": "sessions_session_1782543465849_metrics_commands",
+      "community": 586,
+      "norm_label": "commands"
+    },
+    {
+      "label": "tasks",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L9",
+      "id": "sessions_session_1782543465849_metrics_tasks",
+      "community": 586,
+      "norm_label": "tasks"
+    },
+    {
+      "label": "errors",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L10",
+      "id": "sessions_session_1782543465849_metrics_errors",
+      "community": 586,
+      "norm_label": "errors"
+    },
+    {
+      "label": "endedAt",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L12",
+      "id": "sessions_session_1782543465849_endedat",
+      "community": 586,
+      "norm_label": "endedat"
+    },
+    {
+      "label": "duration",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L13",
+      "id": "sessions_session_1782543465849_duration",
+      "community": 586,
+      "norm_label": "duration"
+    },
+    {
+      "label": "session-1782548447803.json",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L1",
+      "id": "sessions_session_1782548447803",
+      "community": 604,
+      "norm_label": "session-1782548447803.json"
+    },
+    {
+      "label": "id",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L2",
+      "id": "sessions_session_1782548447803_id",
+      "community": 604,
+      "norm_label": "id"
+    },
+    {
+      "label": "startedAt",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L3",
+      "id": "sessions_session_1782548447803_startedat",
+      "community": 604,
+      "norm_label": "startedat"
+    },
+    {
+      "label": "cwd",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L4",
+      "id": "sessions_session_1782548447803_cwd",
+      "community": 604,
+      "norm_label": "cwd"
+    },
+    {
+      "label": "context",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L5",
+      "id": "sessions_session_1782548447803_context",
+      "community": 604,
+      "norm_label": "context"
+    },
+    {
+      "label": "metrics",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L6",
+      "id": "sessions_session_1782548447803_metrics",
+      "community": 604,
+      "norm_label": "metrics"
+    },
+    {
+      "label": "edits",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L7",
+      "id": "sessions_session_1782548447803_metrics_edits",
+      "community": 604,
+      "norm_label": "edits"
+    },
+    {
+      "label": "commands",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L8",
+      "id": "sessions_session_1782548447803_metrics_commands",
+      "community": 604,
+      "norm_label": "commands"
+    },
+    {
+      "label": "tasks",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L9",
+      "id": "sessions_session_1782548447803_metrics_tasks",
+      "community": 604,
+      "norm_label": "tasks"
+    },
+    {
+      "label": "errors",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L10",
+      "id": "sessions_session_1782548447803_metrics_errors",
+      "community": 604,
+      "norm_label": "errors"
+    },
+    {
+      "label": "endedAt",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L12",
+      "id": "sessions_session_1782548447803_endedat",
+      "community": 604,
+      "norm_label": "endedat"
+    },
+    {
+      "label": "duration",
+      "file_type": "code",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L13",
+      "id": "sessions_session_1782548447803_duration",
+      "community": 604,
+      "norm_label": "duration"
+    },
+    {
       "label": ".mcp.json",
       "file_type": "code",
       "source_file": ".mcp.json",
@@ -19917,7 +20133,7 @@
       "source_file": "Momsy/Core/Auth/AuthManager.swift",
       "source_location": "L13",
       "id": "auth_authmanager_autherror",
-      "community": 586,
+      "community": 83,
       "norm_label": "autherror"
     },
     {
@@ -19935,7 +20151,7 @@
       "source_file": "Momsy/Core/Auth/AuthManager.swift",
       "source_location": "L14",
       "id": "auth_authmanager_autherror_tokenmissing",
-      "community": 586,
+      "community": 83,
       "norm_label": "tokenmissing"
     },
     {
@@ -19944,7 +20160,7 @@
       "source_file": "Momsy/Core/Auth/AuthManager.swift",
       "source_location": "L15",
       "id": "auth_authmanager_autherror_notimplemented",
-      "community": 586,
+      "community": 83,
       "norm_label": "notimplemented"
     },
     {
@@ -19953,7 +20169,7 @@
       "source_file": "Momsy/Core/Auth/AuthManager.swift",
       "source_location": "L16",
       "id": "auth_authmanager_autherror_applesigninunavailable",
-      "community": 586,
+      "community": 83,
       "norm_label": "applesigninunavailable"
     },
     {
@@ -19962,7 +20178,7 @@
       "source_file": "Momsy/Core/Auth/AuthManager.swift",
       "source_location": "L17",
       "id": "auth_authmanager_autherror_reauthrequired",
-      "community": 586,
+      "community": 83,
       "norm_label": "reauthrequired"
     },
     {
@@ -19989,7 +20205,7 @@
       "source_file": "",
       "source_location": "",
       "id": "observableobject",
-      "community": 536,
+      "community": 254,
       "norm_label": "observableobject"
     },
     {
@@ -20232,7 +20448,7 @@
       "source_file": "",
       "source_location": "",
       "id": "identifiable",
-      "community": 569,
+      "community": 34,
       "norm_label": "identifiable"
     },
     {
@@ -20295,7 +20511,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/DoctorVisitLog.swift",
       "source_location": "L1",
       "id": "models_doctorvisitlog",
-      "community": 569,
+      "community": 568,
       "norm_label": "doctorvisitlog.swift"
     },
     {
@@ -20304,7 +20520,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/DoctorVisitLog.swift",
       "source_location": "L3",
       "id": "models_doctorvisitlog_doctorvisitlog",
-      "community": 569,
+      "community": 568,
       "norm_label": "doctorvisitlog"
     },
     {
@@ -20313,7 +20529,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/DoctorVisitLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_doctorvisitlog_swift_string",
-      "community": 569,
+      "community": 568,
       "norm_label": "string"
     },
     {
@@ -20322,7 +20538,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/DoctorVisitLog.swift",
       "source_location": "L5",
       "id": "momsy_core_babysync_domain_models_doctorvisitlog_swift_date",
-      "community": 569,
+      "community": 568,
       "norm_label": "date"
     },
     {
@@ -20331,7 +20547,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/FeedingLog.swift",
       "source_location": "L1",
       "id": "models_feedinglog",
-      "community": 568,
+      "community": 526,
       "norm_label": "feedinglog.swift"
     },
     {
@@ -20340,7 +20556,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/FeedingLog.swift",
       "source_location": "L3",
       "id": "models_feedinglog_feedinglog",
-      "community": 568,
+      "community": 526,
       "norm_label": "feedinglog"
     },
     {
@@ -20349,7 +20565,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/FeedingLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_feedinglog_swift_string",
-      "community": 568,
+      "community": 526,
       "norm_label": "string"
     },
     {
@@ -20358,7 +20574,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/FeedingLog.swift",
       "source_location": "L5",
       "id": "momsy_core_babysync_domain_models_feedinglog_swift_date",
-      "community": 568,
+      "community": 526,
       "norm_label": "date"
     },
     {
@@ -20367,7 +20583,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/FeedingLog.swift",
       "source_location": "L7",
       "id": "momsy_core_babysync_domain_models_feedinglog_swift_int",
-      "community": 568,
+      "community": 526,
       "norm_label": "int"
     },
     {
@@ -20376,7 +20592,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/FeedingLog.swift",
       "source_location": "L8",
       "id": "momsy_core_babysync_domain_models_feedinglog_swift_feedingside",
-      "community": 568,
+      "community": 526,
       "norm_label": "feedingside"
     },
     {
@@ -20484,7 +20700,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/MeasurementLog.swift",
       "source_location": "L1",
       "id": "models_measurementlog",
-      "community": 569,
+      "community": 568,
       "norm_label": "measurementlog.swift"
     },
     {
@@ -20493,7 +20709,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/MeasurementLog.swift",
       "source_location": "L3",
       "id": "models_measurementlog_measurementlog",
-      "community": 569,
+      "community": 568,
       "norm_label": "measurementlog"
     },
     {
@@ -20502,7 +20718,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/MeasurementLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_measurementlog_swift_string",
-      "community": 569,
+      "community": 568,
       "norm_label": "string"
     },
     {
@@ -20511,7 +20727,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/MeasurementLog.swift",
       "source_location": "L5",
       "id": "momsy_core_babysync_domain_models_measurementlog_swift_date",
-      "community": 569,
+      "community": 568,
       "norm_label": "date"
     },
     {
@@ -20520,7 +20736,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/PumpingLog.swift",
       "source_location": "L1",
       "id": "models_pumpinglog",
-      "community": 621,
+      "community": 34,
       "norm_label": "pumpinglog.swift"
     },
     {
@@ -20529,7 +20745,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/PumpingLog.swift",
       "source_location": "L3",
       "id": "models_pumpinglog_pumpinglog",
-      "community": 621,
+      "community": 34,
       "norm_label": "pumpinglog"
     },
     {
@@ -20538,7 +20754,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/PumpingLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_pumpinglog_swift_string",
-      "community": 621,
+      "community": 34,
       "norm_label": "string"
     },
     {
@@ -20547,7 +20763,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/PumpingLog.swift",
       "source_location": "L5",
       "id": "momsy_core_babysync_domain_models_pumpinglog_swift_date",
-      "community": 621,
+      "community": 34,
       "norm_label": "date"
     },
     {
@@ -20556,7 +20772,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/PumpingLog.swift",
       "source_location": "L6",
       "id": "momsy_core_babysync_domain_models_pumpinglog_swift_int",
-      "community": 621,
+      "community": 34,
       "norm_label": "int"
     },
     {
@@ -20565,7 +20781,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/QuickEventLog.swift",
       "source_location": "L1",
       "id": "models_quickeventlog",
-      "community": 569,
+      "community": 568,
       "norm_label": "quickeventlog.swift"
     },
     {
@@ -20574,7 +20790,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/QuickEventLog.swift",
       "source_location": "L3",
       "id": "models_quickeventlog_quickeventlog",
-      "community": 569,
+      "community": 568,
       "norm_label": "quickeventlog"
     },
     {
@@ -20583,7 +20799,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/QuickEventLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_quickeventlog_swift_string",
-      "community": 569,
+      "community": 568,
       "norm_label": "string"
     },
     {
@@ -20592,7 +20808,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/QuickEventLog.swift",
       "source_location": "L6",
       "id": "momsy_core_babysync_domain_models_quickeventlog_swift_date",
-      "community": 569,
+      "community": 568,
       "norm_label": "date"
     },
     {
@@ -20601,7 +20817,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/SleepLog.swift",
       "source_location": "L1",
       "id": "models_sleeplog",
-      "community": 569,
+      "community": 631,
       "norm_label": "sleeplog.swift"
     },
     {
@@ -20610,7 +20826,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/SleepLog.swift",
       "source_location": "L3",
       "id": "models_sleeplog_sleeplog",
-      "community": 569,
+      "community": 631,
       "norm_label": "sleeplog"
     },
     {
@@ -20619,7 +20835,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/SleepLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_sleeplog_swift_string",
-      "community": 569,
+      "community": 631,
       "norm_label": "string"
     },
     {
@@ -20628,7 +20844,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/SleepLog.swift",
       "source_location": "L5",
       "id": "momsy_core_babysync_domain_models_sleeplog_swift_date",
-      "community": 569,
+      "community": 631,
       "norm_label": "date"
     },
     {
@@ -20637,7 +20853,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/SleepLog.swift",
       "source_location": "L7",
       "id": "momsy_core_babysync_domain_models_sleeplog_swift_int",
-      "community": 569,
+      "community": 631,
       "norm_label": "int"
     },
     {
@@ -20646,7 +20862,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/SleepLog.swift",
       "source_location": "L8",
       "id": "momsy_core_babysync_domain_models_sleeplog_swift_sleepquality",
-      "community": 569,
+      "community": 631,
       "norm_label": "sleepquality"
     },
     {
@@ -20718,7 +20934,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/TemperatureLog.swift",
       "source_location": "L1",
       "id": "models_temperaturelog",
-      "community": 568,
+      "community": 526,
       "norm_label": "temperaturelog.swift"
     },
     {
@@ -20727,7 +20943,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/TemperatureLog.swift",
       "source_location": "L3",
       "id": "models_temperaturelog_temperaturelog",
-      "community": 568,
+      "community": 526,
       "norm_label": "temperaturelog"
     },
     {
@@ -20736,7 +20952,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/TemperatureLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_temperaturelog_swift_string",
-      "community": 568,
+      "community": 526,
       "norm_label": "string"
     },
     {
@@ -20745,7 +20961,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/TemperatureLog.swift",
       "source_location": "L5",
       "id": "momsy_core_babysync_domain_models_temperaturelog_swift_date",
-      "community": 568,
+      "community": 526,
       "norm_label": "date"
     },
     {
@@ -20754,7 +20970,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/TemperatureLog.swift",
       "source_location": "L6",
       "id": "momsy_core_babysync_domain_models_temperaturelog_swift_double",
-      "community": 568,
+      "community": 526,
       "norm_label": "double"
     },
     {
@@ -20763,7 +20979,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/VaccinationLog.swift",
       "source_location": "L1",
       "id": "models_vaccinationlog",
-      "community": 568,
+      "community": 569,
       "norm_label": "vaccinationlog.swift"
     },
     {
@@ -20772,7 +20988,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/VaccinationLog.swift",
       "source_location": "L3",
       "id": "models_vaccinationlog_vaccinationlog",
-      "community": 568,
+      "community": 569,
       "norm_label": "vaccinationlog"
     },
     {
@@ -20781,7 +20997,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/VaccinationLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_vaccinationlog_swift_string",
-      "community": 568,
+      "community": 569,
       "norm_label": "string"
     },
     {
@@ -20790,7 +21006,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/VaccinationLog.swift",
       "source_location": "L5",
       "id": "momsy_core_babysync_domain_models_vaccinationlog_swift_int",
-      "community": 568,
+      "community": 569,
       "norm_label": "int"
     },
     {
@@ -20799,7 +21015,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/VaccinationLog.swift",
       "source_location": "L6",
       "id": "momsy_core_babysync_domain_models_vaccinationlog_swift_date",
-      "community": 568,
+      "community": 569,
       "norm_label": "date"
     },
     {
@@ -20808,7 +21024,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/WaterIntakeLog.swift",
       "source_location": "L1",
       "id": "models_waterintakelog",
-      "community": 569,
+      "community": 526,
       "norm_label": "waterintakelog.swift"
     },
     {
@@ -20817,7 +21033,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/WaterIntakeLog.swift",
       "source_location": "L3",
       "id": "models_waterintakelog_waterintakelog",
-      "community": 569,
+      "community": 526,
       "norm_label": "waterintakelog"
     },
     {
@@ -20826,7 +21042,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/WaterIntakeLog.swift",
       "source_location": "L4",
       "id": "momsy_core_babysync_domain_models_waterintakelog_swift_string",
-      "community": 569,
+      "community": 526,
       "norm_label": "string"
     },
     {
@@ -20835,7 +21051,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/WaterIntakeLog.swift",
       "source_location": "L5",
       "id": "momsy_core_babysync_domain_models_waterintakelog_swift_date",
-      "community": 569,
+      "community": 526,
       "norm_label": "date"
     },
     {
@@ -20844,7 +21060,7 @@
       "source_file": "Momsy/Core/BabySync/Domain/Models/WaterIntakeLog.swift",
       "source_location": "L6",
       "id": "momsy_core_babysync_domain_models_waterintakelog_swift_int",
-      "community": 569,
+      "community": 526,
       "norm_label": "int"
     },
     {
@@ -23391,7 +23607,7 @@
       "source_file": "Momsy/Core/Domain/StaleSessionReconciler.swift",
       "source_location": "L1",
       "id": "domain_stalesessionreconciler",
-      "community": 568,
+      "community": 627,
       "norm_label": "stalesessionreconciler.swift"
     },
     {
@@ -23400,7 +23616,7 @@
       "source_file": "Momsy/Core/Domain/StaleSessionReconciler.swift",
       "source_location": "L6",
       "id": "domain_stalesessionreconciler_stalesessionresolution",
-      "community": 568,
+      "community": 627,
       "norm_label": "stalesessionresolution"
     },
     {
@@ -23409,7 +23625,7 @@
       "source_file": "Momsy/Core/Domain/StaleSessionReconciler.swift",
       "source_location": "L8",
       "id": "domain_stalesessionreconciler_stalesessionresolution_close",
-      "community": 568,
+      "community": 627,
       "norm_label": "close"
     },
     {
@@ -23418,7 +23634,7 @@
       "source_file": "Momsy/Core/Domain/StaleSessionReconciler.swift",
       "source_location": "L11",
       "id": "domain_stalesessionreconciler_stalesessionresolution_discard",
-      "community": 568,
+      "community": 627,
       "norm_label": "discard"
     },
     {
@@ -23427,7 +23643,7 @@
       "source_file": "Momsy/Core/Domain/StaleSessionReconciler.swift",
       "source_location": "L20",
       "id": "domain_stalesessionreconciler_stalesessionreconciler",
-      "community": 568,
+      "community": 627,
       "norm_label": "stalesessionreconciler"
     },
     {
@@ -23436,7 +23652,7 @@
       "source_file": "Momsy/Core/Domain/StaleSessionReconciler.swift",
       "source_location": "L29",
       "id": "domain_stalesessionreconciler_stalesessionreconciler_resolve",
-      "community": 568,
+      "community": 627,
       "norm_label": ".resolve()"
     },
     {
@@ -23445,7 +23661,7 @@
       "source_file": "Momsy/Core/Domain/StaleSessionReconciler.swift",
       "source_location": "L29",
       "id": "momsy_core_domain_stalesessionreconciler_swift_date",
-      "community": 568,
+      "community": 627,
       "norm_label": "date"
     },
     {
@@ -23454,7 +23670,7 @@
       "source_file": "Momsy/Core/Domain/StaleSessionReconciler.swift",
       "source_location": "L29",
       "id": "momsy_core_domain_stalesessionreconciler_swift_timeinterval",
-      "community": 568,
+      "community": 627,
       "norm_label": "timeinterval"
     },
     {
@@ -24712,7 +24928,7 @@
       "label": "Bool",
       "file_type": "code",
       "source_file": "Momsy/Core/Localization/Language.swift",
-      "source_location": "L26",
+      "source_location": "L38",
       "id": "momsy_core_localization_language_swift_bool",
       "community": 351,
       "norm_label": "bool"
@@ -25074,7 +25290,7 @@
       "source_file": "Momsy/Core/Units/UnitSystemManager.swift",
       "source_location": "L9",
       "id": "units_unitsystemmanager_tempcategory",
-      "community": 603,
+      "community": 57,
       "norm_label": "tempcategory"
     },
     {
@@ -25083,7 +25299,7 @@
       "source_file": "Momsy/Core/Units/UnitSystemManager.swift",
       "source_location": "L10",
       "id": "units_unitsystemmanager_tempcategory_normal",
-      "community": 603,
+      "community": 57,
       "norm_label": "normal"
     },
     {
@@ -25092,7 +25308,7 @@
       "source_file": "Momsy/Core/Units/UnitSystemManager.swift",
       "source_location": "L10",
       "id": "units_unitsystemmanager_tempcategory_subfebr",
-      "community": 603,
+      "community": 57,
       "norm_label": "subfebr"
     },
     {
@@ -25101,7 +25317,7 @@
       "source_file": "Momsy/Core/Units/UnitSystemManager.swift",
       "source_location": "L10",
       "id": "units_unitsystemmanager_tempcategory_high",
-      "community": 603,
+      "community": 57,
       "norm_label": "high"
     },
     {
@@ -25110,7 +25326,7 @@
       "source_file": "Momsy/Core/Units/UnitSystemManager.swift",
       "source_location": "L12",
       "id": "momsy_core_units_unitsystemmanager_swift_color",
-      "community": 603,
+      "community": 57,
       "norm_label": "color"
     },
     {
@@ -26973,7 +27189,7 @@
       "source_file": "Momsy/Features/Baby/Data/Persistence/BabyRecord.swift",
       "source_location": "L1",
       "id": "persistence_babyrecord",
-      "community": 466,
+      "community": 628,
       "norm_label": "babyrecord.swift"
     },
     {
@@ -26982,7 +27198,7 @@
       "source_file": "Momsy/Features/Baby/Data/Persistence/BabyRecord.swift",
       "source_location": "L4",
       "id": "persistence_babyrecord_babyrecord",
-      "community": 466,
+      "community": 628,
       "norm_label": "babyrecord"
     },
     {
@@ -26991,7 +27207,7 @@
       "source_file": "Momsy/Features/Baby/Data/Persistence/BabyRecord.swift",
       "source_location": "L6",
       "id": "momsy_features_baby_data_persistence_babyrecord_swift_uuid",
-      "community": 466,
+      "community": 628,
       "norm_label": "uuid"
     },
     {
@@ -27000,7 +27216,7 @@
       "source_file": "Momsy/Features/Baby/Data/Persistence/BabyRecord.swift",
       "source_location": "L7",
       "id": "momsy_features_baby_data_persistence_babyrecord_swift_string",
-      "community": 466,
+      "community": 628,
       "norm_label": "string"
     },
     {
@@ -27009,7 +27225,7 @@
       "source_file": "Momsy/Features/Baby/Data/Persistence/BabyRecord.swift",
       "source_location": "L8",
       "id": "momsy_features_baby_data_persistence_babyrecord_swift_date",
-      "community": 466,
+      "community": 628,
       "norm_label": "date"
     },
     {
@@ -27018,7 +27234,7 @@
       "source_file": "Momsy/Features/Baby/Data/Persistence/BabyRecord.swift",
       "source_location": "L12",
       "id": "persistence_babyrecord_babyrecord_init",
-      "community": 466,
+      "community": 628,
       "norm_label": ".init()"
     },
     {
@@ -27027,7 +27243,7 @@
       "source_file": "Momsy/Features/Baby/Data/Persistence/BabyRecord.swift",
       "source_location": "L12",
       "id": "momsy_features_baby_data_persistence_babyrecord_swift_babyprofile",
-      "community": 466,
+      "community": 628,
       "norm_label": "babyprofile"
     },
     {
@@ -27036,7 +27252,7 @@
       "source_file": "Momsy/Features/Baby/Data/Persistence/BabyRecord.swift",
       "source_location": "L20",
       "id": "persistence_babyrecord_babyrecord_todomain",
-      "community": 466,
+      "community": 628,
       "norm_label": ".todomain()"
     },
     {
@@ -29367,7 +29583,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L1",
       "id": "persistence_diaryitemrecord",
-      "community": 342,
+      "community": 620,
       "norm_label": "diaryitemrecord.swift"
     },
     {
@@ -29376,7 +29592,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L4",
       "id": "persistence_diaryitemrecord_diaryitemrecord",
-      "community": 342,
+      "community": 620,
       "norm_label": "diaryitemrecord"
     },
     {
@@ -29385,7 +29601,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L6",
       "id": "momsy_features_diary_data_persistence_diaryitemrecord_swift_uuid",
-      "community": 342,
+      "community": 620,
       "norm_label": "uuid"
     },
     {
@@ -29394,7 +29610,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L8",
       "id": "momsy_features_diary_data_persistence_diaryitemrecord_swift_date",
-      "community": 342,
+      "community": 620,
       "norm_label": "date"
     },
     {
@@ -29403,7 +29619,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L9",
       "id": "momsy_features_diary_data_persistence_diaryitemrecord_swift_string",
-      "community": 342,
+      "community": 620,
       "norm_label": "string"
     },
     {
@@ -29412,7 +29628,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L12",
       "id": "momsy_features_diary_data_persistence_diaryitemrecord_swift_bool",
-      "community": 342,
+      "community": 620,
       "norm_label": "bool"
     },
     {
@@ -29421,7 +29637,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L17",
       "id": "persistence_diaryitemrecord_diaryitemrecord_init",
-      "community": 342,
+      "community": 620,
       "norm_label": ".init()"
     },
     {
@@ -29430,7 +29646,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L17",
       "id": "momsy_features_diary_data_persistence_diaryitemrecord_swift_storeddiaryitem",
-      "community": 342,
+      "community": 620,
       "norm_label": "storeddiaryitem"
     },
     {
@@ -29439,7 +29655,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L23",
       "id": "persistence_diaryitemrecord_diaryitemrecord_apply",
-      "community": 342,
+      "community": 620,
       "norm_label": ".apply()"
     },
     {
@@ -29448,7 +29664,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L36",
       "id": "persistence_diaryitemrecord_diaryitemrecord_merge",
-      "community": 342,
+      "community": 620,
       "norm_label": ".merge()"
     },
     {
@@ -29457,7 +29673,7 @@
       "source_file": "Momsy/Features/Diary/Data/Persistence/DiaryItemRecord.swift",
       "source_location": "L45",
       "id": "persistence_diaryitemrecord_diaryitemrecord_todomain",
-      "community": 342,
+      "community": 620,
       "norm_label": ".todomain()"
     },
     {
@@ -29466,7 +29682,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L1",
       "id": "repositories_localdiaryrepository",
-      "community": 321,
+      "community": 544,
       "norm_label": "localdiaryrepository.swift"
     },
     {
@@ -29475,7 +29691,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L3",
       "id": "repositories_localdiaryrepository_localdiaryrepository",
-      "community": 321,
+      "community": 544,
       "norm_label": "localdiaryrepository"
     },
     {
@@ -29484,7 +29700,7 @@
       "source_file": "",
       "source_location": "",
       "id": "diaryrepository",
-      "community": 321,
+      "community": 617,
       "norm_label": "diaryrepository"
     },
     {
@@ -29493,7 +29709,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L6",
       "id": "repositories_localdiaryrepository_localdiaryrepository_load",
-      "community": 321,
+      "community": 544,
       "norm_label": ".load()"
     },
     {
@@ -29502,7 +29718,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L6",
       "id": "momsy_features_diary_data_repositories_localdiaryrepository_swift_storeddiaryitem",
-      "community": 321,
+      "community": 544,
       "norm_label": "storeddiaryitem"
     },
     {
@@ -29511,7 +29727,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L11",
       "id": "repositories_localdiaryrepository_localdiaryrepository_save",
-      "community": 321,
+      "community": 544,
       "norm_label": ".save()"
     },
     {
@@ -29520,7 +29736,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L15",
       "id": "repositories_localdiaryrepository_localdiaryrepository_getentries",
-      "community": 321,
+      "community": 544,
       "norm_label": ".getentries()"
     },
     {
@@ -29529,7 +29745,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L15",
       "id": "momsy_features_diary_data_repositories_localdiaryrepository_swift_date",
-      "community": 321,
+      "community": 544,
       "norm_label": "date"
     },
     {
@@ -29538,7 +29754,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L19",
       "id": "repositories_localdiaryrepository_localdiaryrepository_add",
-      "community": 321,
+      "community": 544,
       "norm_label": ".add()"
     },
     {
@@ -29547,7 +29763,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L25",
       "id": "repositories_localdiaryrepository_localdiaryrepository_upsert",
-      "community": 321,
+      "community": 544,
       "norm_label": ".upsert()"
     },
     {
@@ -29556,7 +29772,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L33",
       "id": "repositories_localdiaryrepository_localdiaryrepository_update",
-      "community": 321,
+      "community": 544,
       "norm_label": ".update()"
     },
     {
@@ -29565,7 +29781,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L39",
       "id": "repositories_localdiaryrepository_localdiaryrepository_delete",
-      "community": 321,
+      "community": 544,
       "norm_label": ".delete()"
     },
     {
@@ -29574,7 +29790,7 @@
       "source_file": "Momsy/Features/Diary/Data/Repositories/LocalDiaryRepository.swift",
       "source_location": "L39",
       "id": "momsy_features_diary_data_repositories_localdiaryrepository_swift_uuid",
-      "community": 321,
+      "community": 544,
       "norm_label": "uuid"
     },
     {
@@ -30996,7 +31212,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L1",
       "id": "persistence_feedingrecord",
-      "community": 544,
+      "community": 442,
       "norm_label": "feedingrecord.swift"
     },
     {
@@ -31005,7 +31221,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L4",
       "id": "persistence_feedingrecord_feedingrecord",
-      "community": 544,
+      "community": 442,
       "norm_label": "feedingrecord"
     },
     {
@@ -31014,7 +31230,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L6",
       "id": "momsy_features_feeding_data_persistence_feedingrecord_swift_uuid",
-      "community": 544,
+      "community": 442,
       "norm_label": "uuid"
     },
     {
@@ -31023,7 +31239,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L8",
       "id": "momsy_features_feeding_data_persistence_feedingrecord_swift_date",
-      "community": 544,
+      "community": 442,
       "norm_label": "date"
     },
     {
@@ -31032,7 +31248,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L9",
       "id": "momsy_features_feeding_data_persistence_feedingrecord_swift_int",
-      "community": 544,
+      "community": 442,
       "norm_label": "int"
     },
     {
@@ -31041,7 +31257,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L10",
       "id": "momsy_features_feeding_data_persistence_feedingrecord_swift_string",
-      "community": 544,
+      "community": 442,
       "norm_label": "string"
     },
     {
@@ -31050,7 +31266,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L15",
       "id": "persistence_feedingrecord_feedingrecord_init",
-      "community": 544,
+      "community": 442,
       "norm_label": ".init()"
     },
     {
@@ -31059,7 +31275,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L15",
       "id": "momsy_features_feeding_data_persistence_feedingrecord_swift_feedingentry",
-      "community": 544,
+      "community": 442,
       "norm_label": "feedingentry"
     },
     {
@@ -31068,7 +31284,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L21",
       "id": "persistence_feedingrecord_feedingrecord_apply",
-      "community": 544,
+      "community": 442,
       "norm_label": ".apply()"
     },
     {
@@ -31077,7 +31293,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L32",
       "id": "persistence_feedingrecord_feedingrecord_merge",
-      "community": 544,
+      "community": 442,
       "norm_label": ".merge()"
     },
     {
@@ -31086,7 +31302,7 @@
       "source_file": "Momsy/Features/Feeding/Data/Persistence/FeedingRecord.swift",
       "source_location": "L40",
       "id": "persistence_feedingrecord_feedingrecord_todomain",
-      "community": 544,
+      "community": 442,
       "norm_label": ".todomain()"
     },
     {
@@ -32175,7 +32391,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L1",
       "id": "repositories_localleapsrepository",
-      "community": 321,
+      "community": 623,
       "norm_label": "localleapsrepository.swift"
     },
     {
@@ -32184,7 +32400,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L3",
       "id": "repositories_localleapsrepository_localleapsrepository",
-      "community": 321,
+      "community": 623,
       "norm_label": "localleapsrepository"
     },
     {
@@ -32193,7 +32409,7 @@
       "source_file": "",
       "source_location": "",
       "id": "leapsrepository",
-      "community": 321,
+      "community": 626,
       "norm_label": "leapsrepository"
     },
     {
@@ -32202,7 +32418,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L6",
       "id": "repositories_localleapsrepository_localleapsrepository_load",
-      "community": 321,
+      "community": 623,
       "norm_label": ".load()"
     },
     {
@@ -32211,7 +32427,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L6",
       "id": "momsy_features_leaps_data_repositories_localleapsrepository_swift_leapprogress",
-      "community": 321,
+      "community": 623,
       "norm_label": "leapprogress"
     },
     {
@@ -32220,7 +32436,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L11",
       "id": "repositories_localleapsrepository_localleapsrepository_save",
-      "community": 321,
+      "community": 623,
       "norm_label": ".save()"
     },
     {
@@ -32229,7 +32445,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L15",
       "id": "repositories_localleapsrepository_localleapsrepository_getallprogress",
-      "community": 321,
+      "community": 623,
       "norm_label": ".getallprogress()"
     },
     {
@@ -32238,7 +32454,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L19",
       "id": "repositories_localleapsrepository_localleapsrepository_saveprogress",
-      "community": 321,
+      "community": 623,
       "norm_label": ".saveprogress()"
     },
     {
@@ -32247,7 +32463,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L29",
       "id": "repositories_localleapsrepository_localleapsrepository_upsert",
-      "community": 321,
+      "community": 623,
       "norm_label": ".upsert()"
     },
     {
@@ -32256,7 +32472,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L42",
       "id": "repositories_localleapsrepository_localleapsrepository_resetprogress",
-      "community": 321,
+      "community": 623,
       "norm_label": ".resetprogress()"
     },
     {
@@ -32265,7 +32481,7 @@
       "source_file": "Momsy/Features/Leaps/Data/Repositories/LocalLeapsRepository.swift",
       "source_location": "L42",
       "id": "momsy_features_leaps_data_repositories_localleapsrepository_swift_int",
-      "community": 321,
+      "community": 623,
       "norm_label": "int"
     },
     {
@@ -33930,7 +34146,7 @@
       "source_file": "Momsy/Features/MomMood/Domain/Models/WaterIntakeEntry.swift",
       "source_location": "L1",
       "id": "models_waterintakeentry",
-      "community": 569,
+      "community": 636,
       "norm_label": "waterintakeentry.swift"
     },
     {
@@ -33939,7 +34155,7 @@
       "source_file": "Momsy/Features/MomMood/Domain/Models/WaterIntakeEntry.swift",
       "source_location": "L3",
       "id": "models_waterintakeentry_waterintakeentry",
-      "community": 569,
+      "community": 636,
       "norm_label": "waterintakeentry"
     },
     {
@@ -33948,7 +34164,7 @@
       "source_file": "Momsy/Features/MomMood/Domain/Models/WaterIntakeEntry.swift",
       "source_location": "L4",
       "id": "momsy_features_mommood_domain_models_waterintakeentry_swift_uuid",
-      "community": 569,
+      "community": 636,
       "norm_label": "uuid"
     },
     {
@@ -33957,7 +34173,7 @@
       "source_file": "Momsy/Features/MomMood/Domain/Models/WaterIntakeEntry.swift",
       "source_location": "L5",
       "id": "momsy_features_mommood_domain_models_waterintakeentry_swift_date",
-      "community": 569,
+      "community": 636,
       "norm_label": "date"
     },
     {
@@ -33966,7 +34182,7 @@
       "source_file": "Momsy/Features/MomMood/Domain/Models/WaterIntakeEntry.swift",
       "source_location": "L6",
       "id": "momsy_features_mommood_domain_models_waterintakeentry_swift_int",
-      "community": 569,
+      "community": 636,
       "norm_label": "int"
     },
     {
@@ -34956,7 +35172,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L1",
       "id": "views_epdssheet",
-      "community": 34,
+      "community": 624,
       "norm_label": "epdssheet.swift"
     },
     {
@@ -34965,7 +35181,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L3",
       "id": "views_epdssheet_epdssheet",
-      "community": 34,
+      "community": 624,
       "norm_label": "epdssheet"
     },
     {
@@ -34974,7 +35190,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L4",
       "id": "momsy_features_mommood_presentation_views_epdssheet_swift_mommoodviewmodel",
-      "community": 34,
+      "community": 624,
       "norm_label": "mommoodviewmodel"
     },
     {
@@ -34983,7 +35199,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L5",
       "id": "momsy_features_mommood_presentation_views_epdssheet_swift_localizationmanager",
-      "community": 34,
+      "community": 624,
       "norm_label": "localizationmanager"
     },
     {
@@ -34992,7 +35208,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L9",
       "id": "momsy_features_mommood_presentation_views_epdssheet_swift_int",
-      "community": 34,
+      "community": 624,
       "norm_label": "int"
     },
     {
@@ -35001,7 +35217,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L16",
       "id": "momsy_features_mommood_presentation_views_epdssheet_swift_string",
-      "community": 34,
+      "community": 624,
       "norm_label": "string"
     },
     {
@@ -35010,7 +35226,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L23",
       "id": "views_epdssheet_epdssheet_score",
-      "community": 34,
+      "community": 624,
       "norm_label": ".score()"
     },
     {
@@ -35019,7 +35235,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L37",
       "id": "momsy_features_mommood_presentation_views_epdssheet_swift_color",
-      "community": 34,
+      "community": 624,
       "norm_label": "color"
     },
     {
@@ -35028,7 +35244,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L116",
       "id": "views_epdssheet_epdssheet_questioncard",
-      "community": 34,
+      "community": 624,
       "norm_label": ".questioncard()"
     },
     {
@@ -35037,7 +35253,7 @@
       "source_file": "Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift",
       "source_location": "L133",
       "id": "views_epdssheet_epdssheet_answerrow",
-      "community": 34,
+      "community": 624,
       "norm_label": ".answerrow()"
     },
     {
@@ -38032,7 +38248,7 @@
       "label": ".openPrivacyPolicy()",
       "file_type": "code",
       "source_file": "Momsy/Features/Settings/Presentation/Views/SettingsView.swift",
-      "source_location": "L299",
+      "source_location": "L296",
       "id": "views_settingsview_settingsview_openprivacypolicy",
       "community": 26,
       "norm_label": ".openprivacypolicy()"
@@ -38041,7 +38257,7 @@
       "label": ".openTermsOfUse()",
       "file_type": "code",
       "source_file": "Momsy/Features/Settings/Presentation/Views/SettingsView.swift",
-      "source_location": "L304",
+      "source_location": "L301",
       "id": "views_settingsview_settingsview_opentermsofuse",
       "community": 26,
       "norm_label": ".opentermsofuse()"
@@ -38050,7 +38266,7 @@
       "label": ".infoRow()",
       "file_type": "code",
       "source_file": "Momsy/Features/Settings/Presentation/Views/SettingsView.swift",
-      "source_location": "L309",
+      "source_location": "L306",
       "id": "views_settingsview_settingsview_inforow",
       "community": 26,
       "norm_label": ".inforow()"
@@ -38059,7 +38275,7 @@
       "label": ".chevronRow()",
       "file_type": "code",
       "source_file": "Momsy/Features/Settings/Presentation/Views/SettingsView.swift",
-      "source_location": "L324",
+      "source_location": "L321",
       "id": "views_settingsview_settingsview_chevronrow",
       "community": 26,
       "norm_label": ".chevronrow()"
@@ -38068,7 +38284,7 @@
       "label": ".iconSquare()",
       "file_type": "code",
       "source_file": "Momsy/Features/Settings/Presentation/Views/SettingsView.swift",
-      "source_location": "L339",
+      "source_location": "L336",
       "id": "views_settingsview_settingsview_iconsquare",
       "community": 26,
       "norm_label": ".iconsquare()"
@@ -38673,7 +38889,7 @@
       "source_file": "Momsy/Features/Sharing/Domain/Models/StoredFamilyMember.swift",
       "source_location": "L1",
       "id": "models_storedfamilymember",
-      "community": 345,
+      "community": 438,
       "norm_label": "storedfamilymember.swift"
     },
     {
@@ -38682,7 +38898,7 @@
       "source_file": "Momsy/Features/Sharing/Domain/Models/StoredFamilyMember.swift",
       "source_location": "L3",
       "id": "models_storedfamilymember_storedfamilymember",
-      "community": 345,
+      "community": 438,
       "norm_label": "storedfamilymember"
     },
     {
@@ -38691,7 +38907,7 @@
       "source_file": "Momsy/Features/Sharing/Domain/Models/StoredFamilyMember.swift",
       "source_location": "L4",
       "id": "momsy_features_sharing_domain_models_storedfamilymember_swift_uuid",
-      "community": 345,
+      "community": 438,
       "norm_label": "uuid"
     },
     {
@@ -38700,7 +38916,7 @@
       "source_file": "Momsy/Features/Sharing/Domain/Models/StoredFamilyMember.swift",
       "source_location": "L5",
       "id": "momsy_features_sharing_domain_models_storedfamilymember_swift_string",
-      "community": 345,
+      "community": 438,
       "norm_label": "string"
     },
     {
@@ -38709,7 +38925,7 @@
       "source_file": "Momsy/Features/Sharing/Domain/Models/StoredFamilyMember.swift",
       "source_location": "L7",
       "id": "momsy_features_sharing_domain_models_storedfamilymember_swift_bool",
-      "community": 345,
+      "community": 438,
       "norm_label": "bool"
     },
     {
@@ -38718,7 +38934,7 @@
       "source_file": "Momsy/Features/Sharing/Domain/Models/StoredFamilyMember.swift",
       "source_location": "L11",
       "id": "models_storedfamilymember_storedfamilymember_init",
-      "community": 345,
+      "community": 438,
       "norm_label": ".init()"
     },
     {
@@ -39483,7 +39699,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L1",
       "id": "persistence_sleeprecord",
-      "community": 444,
+      "community": 625,
       "norm_label": "sleeprecord.swift"
     },
     {
@@ -39492,7 +39708,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L4",
       "id": "persistence_sleeprecord_sleeprecord",
-      "community": 444,
+      "community": 625,
       "norm_label": "sleeprecord"
     },
     {
@@ -39501,7 +39717,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L6",
       "id": "momsy_features_sleep_data_persistence_sleeprecord_swift_uuid",
-      "community": 444,
+      "community": 625,
       "norm_label": "uuid"
     },
     {
@@ -39510,7 +39726,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L8",
       "id": "momsy_features_sleep_data_persistence_sleeprecord_swift_date",
-      "community": 444,
+      "community": 625,
       "norm_label": "date"
     },
     {
@@ -39519,7 +39735,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L10",
       "id": "momsy_features_sleep_data_persistence_sleeprecord_swift_string",
-      "community": 444,
+      "community": 625,
       "norm_label": "string"
     },
     {
@@ -39528,7 +39744,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L14",
       "id": "persistence_sleeprecord_sleeprecord_init",
-      "community": 444,
+      "community": 625,
       "norm_label": ".init()"
     },
     {
@@ -39537,7 +39753,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L14",
       "id": "momsy_features_sleep_data_persistence_sleeprecord_swift_sleepentry",
-      "community": 444,
+      "community": 625,
       "norm_label": "sleepentry"
     },
     {
@@ -39546,7 +39762,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L20",
       "id": "persistence_sleeprecord_sleeprecord_apply",
-      "community": 444,
+      "community": 625,
       "norm_label": ".apply()"
     },
     {
@@ -39555,7 +39771,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L30",
       "id": "persistence_sleeprecord_sleeprecord_merge",
-      "community": 444,
+      "community": 625,
       "norm_label": ".merge()"
     },
     {
@@ -39564,7 +39780,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Persistence/SleepRecord.swift",
       "source_location": "L37",
       "id": "persistence_sleeprecord_sleeprecord_todomain",
-      "community": 444,
+      "community": 625,
       "norm_label": ".todomain()"
     },
     {
@@ -39573,7 +39789,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L1",
       "id": "repositories_localsleeprepository",
-      "community": 444,
+      "community": 552,
       "norm_label": "localsleeprepository.swift"
     },
     {
@@ -39582,7 +39798,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L3",
       "id": "repositories_localsleeprepository_localsleeprepository",
-      "community": 444,
+      "community": 552,
       "norm_label": "localsleeprepository"
     },
     {
@@ -39600,7 +39816,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L6",
       "id": "repositories_localsleeprepository_localsleeprepository_load",
-      "community": 444,
+      "community": 552,
       "norm_label": ".load()"
     },
     {
@@ -39609,7 +39825,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L6",
       "id": "momsy_features_sleep_data_repositories_localsleeprepository_swift_sleepentry",
-      "community": 444,
+      "community": 552,
       "norm_label": "sleepentry"
     },
     {
@@ -39618,7 +39834,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L11",
       "id": "repositories_localsleeprepository_localsleeprepository_save",
-      "community": 444,
+      "community": 552,
       "norm_label": ".save()"
     },
     {
@@ -39627,7 +39843,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L15",
       "id": "repositories_localsleeprepository_localsleeprepository_getentries",
-      "community": 444,
+      "community": 552,
       "norm_label": ".getentries()"
     },
     {
@@ -39636,7 +39852,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L15",
       "id": "momsy_features_sleep_data_repositories_localsleeprepository_swift_date",
-      "community": 444,
+      "community": 552,
       "norm_label": "date"
     },
     {
@@ -39645,7 +39861,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L19",
       "id": "repositories_localsleeprepository_localsleeprepository_add",
-      "community": 444,
+      "community": 552,
       "norm_label": ".add()"
     },
     {
@@ -39654,7 +39870,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L25",
       "id": "repositories_localsleeprepository_localsleeprepository_upsert",
-      "community": 444,
+      "community": 552,
       "norm_label": ".upsert()"
     },
     {
@@ -39663,7 +39879,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L33",
       "id": "repositories_localsleeprepository_localsleeprepository_update",
-      "community": 444,
+      "community": 552,
       "norm_label": ".update()"
     },
     {
@@ -39672,7 +39888,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L39",
       "id": "repositories_localsleeprepository_localsleeprepository_delete",
-      "community": 444,
+      "community": 552,
       "norm_label": ".delete()"
     },
     {
@@ -39681,7 +39897,7 @@
       "source_file": "Momsy/Features/Sleep/Data/Repositories/LocalSleepRepository.swift",
       "source_location": "L39",
       "id": "momsy_features_sleep_data_repositories_localsleeprepository_swift_uuid",
-      "community": 444,
+      "community": 552,
       "norm_label": "uuid"
     },
     {
@@ -41967,7 +42183,7 @@
       "source_file": "Momsy/Features/Sounds/Domain/Models/SoundModels.swift",
       "source_location": "L1",
       "id": "models_soundmodels",
-      "community": 569,
+      "community": 632,
       "norm_label": "soundmodels.swift"
     },
     {
@@ -41976,7 +42192,7 @@
       "source_file": "Momsy/Features/Sounds/Domain/Models/SoundModels.swift",
       "source_location": "L3",
       "id": "models_soundmodels_sounditem",
-      "community": 569,
+      "community": 632,
       "norm_label": "sounditem"
     },
     {
@@ -41985,7 +42201,7 @@
       "source_file": "Momsy/Features/Sounds/Domain/Models/SoundModels.swift",
       "source_location": "L5",
       "id": "momsy_features_sounds_domain_models_soundmodels_swift_string",
-      "community": 569,
+      "community": 632,
       "norm_label": "string"
     },
     {
@@ -41994,7 +42210,7 @@
       "source_file": "Momsy/Features/Sounds/Domain/Models/SoundModels.swift",
       "source_location": "L9",
       "id": "momsy_features_sounds_domain_models_soundmodels_swift_bool",
-      "community": 569,
+      "community": 632,
       "norm_label": "bool"
     },
     {
@@ -42003,7 +42219,7 @@
       "source_file": "Momsy/Features/Sounds/Domain/Models/SoundModels.swift",
       "source_location": "L12",
       "id": "models_soundmodels_sounditem_displayname",
-      "community": 569,
+      "community": 632,
       "norm_label": ".displayname()"
     },
     {
@@ -42012,7 +42228,7 @@
       "source_file": "Momsy/Features/Sounds/Domain/Models/SoundModels.swift",
       "source_location": "L13",
       "id": "models_soundmodels_sounditem_displaycategory",
-      "community": 569,
+      "community": 632,
       "norm_label": ".displaycategory()"
     },
     {
@@ -43659,7 +43875,7 @@
       "source_file": "Momsy/Features/Today/Data/Persistence/StoolRecord.swift",
       "source_location": "L1",
       "id": "persistence_stoolrecord",
-      "community": 16,
+      "community": 40,
       "norm_label": "stoolrecord.swift"
     },
     {
@@ -43668,7 +43884,7 @@
       "source_file": "Momsy/Features/Today/Data/Persistence/StoolRecord.swift",
       "source_location": "L4",
       "id": "persistence_stoolrecord_stoolrecord",
-      "community": 16,
+      "community": 40,
       "norm_label": "stoolrecord"
     },
     {
@@ -43677,7 +43893,7 @@
       "source_file": "Momsy/Features/Today/Data/Persistence/StoolRecord.swift",
       "source_location": "L6",
       "id": "momsy_features_today_data_persistence_stoolrecord_swift_uuid",
-      "community": 16,
+      "community": 40,
       "norm_label": "uuid"
     },
     {
@@ -43686,7 +43902,7 @@
       "source_file": "Momsy/Features/Today/Data/Persistence/StoolRecord.swift",
       "source_location": "L8",
       "id": "momsy_features_today_data_persistence_stoolrecord_swift_date",
-      "community": 16,
+      "community": 40,
       "norm_label": "date"
     },
     {
@@ -43695,7 +43911,7 @@
       "source_file": "Momsy/Features/Today/Data/Persistence/StoolRecord.swift",
       "source_location": "L10",
       "id": "persistence_stoolrecord_stoolrecord_init",
-      "community": 16,
+      "community": 40,
       "norm_label": ".init()"
     },
     {
@@ -44685,7 +44901,7 @@
       "source_file": "Momsy/Features/Today/Domain/Models/DiaperEntry.swift",
       "source_location": "L1",
       "id": "models_diaperentry",
-      "community": 624,
+      "community": 438,
       "norm_label": "diaperentry.swift"
     },
     {
@@ -44694,7 +44910,7 @@
       "source_file": "Momsy/Features/Today/Domain/Models/DiaperEntry.swift",
       "source_location": "L3",
       "id": "models_diaperentry_diaperentry",
-      "community": 624,
+      "community": 438,
       "norm_label": "diaperentry"
     },
     {
@@ -44703,7 +44919,7 @@
       "source_file": "Momsy/Features/Today/Domain/Models/DiaperEntry.swift",
       "source_location": "L4",
       "id": "momsy_features_today_domain_models_diaperentry_swift_uuid",
-      "community": 624,
+      "community": 438,
       "norm_label": "uuid"
     },
     {
@@ -44712,7 +44928,7 @@
       "source_file": "Momsy/Features/Today/Domain/Models/DiaperEntry.swift",
       "source_location": "L5",
       "id": "momsy_features_today_domain_models_diaperentry_swift_date",
-      "community": 624,
+      "community": 438,
       "norm_label": "date"
     },
     {
@@ -44721,7 +44937,7 @@
       "source_file": "Momsy/Features/Today/Domain/Models/DiaperEntry.swift",
       "source_location": "L9",
       "id": "models_diaperentry_diaperentry_init",
-      "community": 624,
+      "community": 438,
       "norm_label": ".init()"
     },
     {
@@ -44946,7 +45162,7 @@
       "source_file": "Momsy/Features/Today/Domain/Repositories/StoolRepository.swift",
       "source_location": "L1",
       "id": "repositories_stoolrepository",
-      "community": 569,
+      "community": 637,
       "norm_label": "stoolrepository.swift"
     },
     {
@@ -44955,7 +45171,7 @@
       "source_file": "Momsy/Features/Today/Domain/Repositories/StoolRepository.swift",
       "source_location": "L3",
       "id": "repositories_stoolrepository_stoolentry",
-      "community": 569,
+      "community": 637,
       "norm_label": "stoolentry"
     },
     {
@@ -44964,7 +45180,7 @@
       "source_file": "Momsy/Features/Today/Domain/Repositories/StoolRepository.swift",
       "source_location": "L4",
       "id": "momsy_features_today_domain_repositories_stoolrepository_swift_uuid",
-      "community": 569,
+      "community": 637,
       "norm_label": "uuid"
     },
     {
@@ -44973,7 +45189,7 @@
       "source_file": "Momsy/Features/Today/Domain/Repositories/StoolRepository.swift",
       "source_location": "L5",
       "id": "momsy_features_today_domain_repositories_stoolrepository_swift_date",
-      "community": 569,
+      "community": 637,
       "norm_label": "date"
     },
     {
@@ -44982,7 +45198,7 @@
       "source_file": "Momsy/Features/Today/Domain/Repositories/StoolRepository.swift",
       "source_location": "L8",
       "id": "repositories_stoolrepository_stoolrepository",
-      "community": 569,
+      "community": 637,
       "norm_label": "stoolrepository"
     },
     {
@@ -45873,7 +46089,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L1",
       "id": "persistence_measurementrecord",
-      "community": 625,
+      "community": 11,
       "norm_label": "measurementrecord.swift"
     },
     {
@@ -45882,7 +46098,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L4",
       "id": "persistence_measurementrecord_measurementrecord",
-      "community": 625,
+      "community": 11,
       "norm_label": "measurementrecord"
     },
     {
@@ -45891,7 +46107,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L6",
       "id": "momsy_features_tracking_data_persistence_measurementrecord_swift_uuid",
-      "community": 625,
+      "community": 11,
       "norm_label": "uuid"
     },
     {
@@ -45900,7 +46116,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L8",
       "id": "momsy_features_tracking_data_persistence_measurementrecord_swift_date",
-      "community": 625,
+      "community": 11,
       "norm_label": "date"
     },
     {
@@ -45909,7 +46125,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L9",
       "id": "momsy_features_tracking_data_persistence_measurementrecord_swift_string",
-      "community": 625,
+      "community": 11,
       "norm_label": "string"
     },
     {
@@ -45918,7 +46134,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L17",
       "id": "persistence_measurementrecord_measurementrecord_init",
-      "community": 625,
+      "community": 11,
       "norm_label": ".init()"
     },
     {
@@ -45927,7 +46143,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L17",
       "id": "momsy_features_tracking_data_persistence_measurementrecord_swift_measuremententry",
-      "community": 625,
+      "community": 11,
       "norm_label": "measuremententry"
     },
     {
@@ -45936,7 +46152,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L23",
       "id": "persistence_measurementrecord_measurementrecord_apply",
-      "community": 625,
+      "community": 11,
       "norm_label": ".apply()"
     },
     {
@@ -45945,7 +46161,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L36",
       "id": "persistence_measurementrecord_measurementrecord_merge",
-      "community": 625,
+      "community": 11,
       "norm_label": ".merge()"
     },
     {
@@ -45954,7 +46170,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift",
       "source_location": "L44",
       "id": "persistence_measurementrecord_measurementrecord_todomain",
-      "community": 625,
+      "community": 11,
       "norm_label": ".todomain()"
     },
     {
@@ -45963,7 +46179,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L1",
       "id": "persistence_temperaturerecord",
-      "community": 552,
+      "community": 7,
       "norm_label": "temperaturerecord.swift"
     },
     {
@@ -45972,7 +46188,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L4",
       "id": "persistence_temperaturerecord_temperaturerecord",
-      "community": 552,
+      "community": 7,
       "norm_label": "temperaturerecord"
     },
     {
@@ -45981,7 +46197,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L6",
       "id": "momsy_features_tracking_data_persistence_temperaturerecord_swift_uuid",
-      "community": 552,
+      "community": 7,
       "norm_label": "uuid"
     },
     {
@@ -45990,7 +46206,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L8",
       "id": "momsy_features_tracking_data_persistence_temperaturerecord_swift_date",
-      "community": 552,
+      "community": 7,
       "norm_label": "date"
     },
     {
@@ -45999,7 +46215,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L9",
       "id": "momsy_features_tracking_data_persistence_temperaturerecord_swift_string",
-      "community": 552,
+      "community": 7,
       "norm_label": "string"
     },
     {
@@ -46008,7 +46224,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L11",
       "id": "momsy_features_tracking_data_persistence_temperaturerecord_swift_double",
-      "community": 552,
+      "community": 7,
       "norm_label": "double"
     },
     {
@@ -46017,7 +46233,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L15",
       "id": "persistence_temperaturerecord_temperaturerecord_init",
-      "community": 552,
+      "community": 7,
       "norm_label": ".init()"
     },
     {
@@ -46026,7 +46242,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L15",
       "id": "momsy_features_tracking_data_persistence_temperaturerecord_swift_temperatureentry",
-      "community": 552,
+      "community": 7,
       "norm_label": "temperatureentry"
     },
     {
@@ -46035,7 +46251,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L21",
       "id": "persistence_temperaturerecord_temperaturerecord_apply",
-      "community": 552,
+      "community": 7,
       "norm_label": ".apply()"
     },
     {
@@ -46044,7 +46260,7 @@
       "source_file": "Momsy/Features/Tracking/Data/Persistence/TemperatureRecord.swift",
       "source_location": "L30",
       "id": "persistence_temperaturerecord_temperaturerecord_todomain",
-      "community": 552,
+      "community": 7,
       "norm_label": ".todomain()"
     },
     {
@@ -48033,7 +48249,7 @@
       "source_file": "Momsy/Features/Vaccination/Domain/Models/VaccinationModels.swift",
       "source_location": "L22",
       "id": "calendar",
-      "community": 34,
+      "community": 345,
       "norm_label": "calendar"
     },
     {
@@ -48834,7 +49050,7 @@
       "source_file": "Momsy/Features/Walk/Data/Persistence/WalkRecord.swift",
       "source_location": "L1",
       "id": "persistence_walkrecord",
-      "community": 22,
+      "community": 16,
       "norm_label": "walkrecord.swift"
     },
     {
@@ -48843,7 +49059,7 @@
       "source_file": "Momsy/Features/Walk/Data/Persistence/WalkRecord.swift",
       "source_location": "L4",
       "id": "persistence_walkrecord_walkrecord",
-      "community": 22,
+      "community": 16,
       "norm_label": "walkrecord"
     },
     {
@@ -48852,7 +49068,7 @@
       "source_file": "Momsy/Features/Walk/Data/Persistence/WalkRecord.swift",
       "source_location": "L6",
       "id": "momsy_features_walk_data_persistence_walkrecord_swift_uuid",
-      "community": 22,
+      "community": 16,
       "norm_label": "uuid"
     },
     {
@@ -48861,7 +49077,7 @@
       "source_file": "Momsy/Features/Walk/Data/Persistence/WalkRecord.swift",
       "source_location": "L8",
       "id": "momsy_features_walk_data_persistence_walkrecord_swift_date",
-      "community": 22,
+      "community": 16,
       "norm_label": "date"
     },
     {
@@ -48870,7 +49086,7 @@
       "source_file": "Momsy/Features/Walk/Data/Persistence/WalkRecord.swift",
       "source_location": "L11",
       "id": "persistence_walkrecord_walkrecord_init",
-      "community": 22,
+      "community": 16,
       "norm_label": ".init()"
     },
     {
@@ -48879,7 +49095,7 @@
       "source_file": "Momsy/Features/Walk/Data/Persistence/WalkRecord.swift",
       "source_location": "L11",
       "id": "momsy_features_walk_data_persistence_walkrecord_swift_walkentry",
-      "community": 22,
+      "community": 16,
       "norm_label": "walkentry"
     },
     {
@@ -48888,7 +49104,7 @@
       "source_file": "Momsy/Features/Walk/Data/Persistence/WalkRecord.swift",
       "source_location": "L18",
       "id": "persistence_walkrecord_walkrecord_todomain",
-      "community": 22,
+      "community": 16,
       "norm_label": ".todomain()"
     },
     {
@@ -49140,7 +49356,7 @@
       "source_file": "Momsy/Features/Walk/Domain/Models/WalkEntry.swift",
       "source_location": "L1",
       "id": "models_walkentry",
-      "community": 438,
+      "community": 635,
       "norm_label": "walkentry.swift"
     },
     {
@@ -49149,7 +49365,7 @@
       "source_file": "Momsy/Features/Walk/Domain/Models/WalkEntry.swift",
       "source_location": "L3",
       "id": "models_walkentry_walkentry",
-      "community": 438,
+      "community": 635,
       "norm_label": "walkentry"
     },
     {
@@ -49158,7 +49374,7 @@
       "source_file": "Momsy/Features/Walk/Domain/Models/WalkEntry.swift",
       "source_location": "L4",
       "id": "momsy_features_walk_domain_models_walkentry_swift_uuid",
-      "community": 438,
+      "community": 635,
       "norm_label": "uuid"
     },
     {
@@ -49167,7 +49383,7 @@
       "source_file": "Momsy/Features/Walk/Domain/Models/WalkEntry.swift",
       "source_location": "L5",
       "id": "momsy_features_walk_domain_models_walkentry_swift_date",
-      "community": 438,
+      "community": 635,
       "norm_label": "date"
     },
     {
@@ -49176,7 +49392,7 @@
       "source_file": "Momsy/Features/Walk/Domain/Models/WalkEntry.swift",
       "source_location": "L8",
       "id": "momsy_features_walk_domain_models_walkentry_swift_int",
-      "community": 438,
+      "community": 635,
       "norm_label": "int"
     },
     {
@@ -50166,7 +50382,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L1",
       "id": "models_weeklyinsight",
-      "community": 526,
+      "community": 568,
       "norm_label": "weeklyinsight.swift"
     },
     {
@@ -50175,7 +50391,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L5",
       "id": "models_weeklyinsight_weeklystats",
-      "community": 526,
+      "community": 568,
       "norm_label": "weeklystats"
     },
     {
@@ -50184,7 +50400,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L6",
       "id": "momsy_features_weeklyinsights_domain_models_weeklyinsight_swift_date",
-      "community": 526,
+      "community": 568,
       "norm_label": "date"
     },
     {
@@ -50193,7 +50409,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L8",
       "id": "momsy_features_weeklyinsights_domain_models_weeklyinsight_swift_int",
-      "community": 526,
+      "community": 568,
       "norm_label": "int"
     },
     {
@@ -50202,7 +50418,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L10",
       "id": "momsy_features_weeklyinsights_domain_models_weeklyinsight_swift_string",
-      "community": 526,
+      "community": 568,
       "norm_label": "string"
     },
     {
@@ -50211,7 +50427,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L16",
       "id": "momsy_features_weeklyinsights_domain_models_weeklyinsight_swift_double",
-      "community": 526,
+      "community": 568,
       "norm_label": "double"
     },
     {
@@ -50220,7 +50436,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L33",
       "id": "momsy_features_weeklyinsights_domain_models_weeklyinsight_swift_bool",
-      "community": 526,
+      "community": 568,
       "norm_label": "bool"
     },
     {
@@ -50229,7 +50445,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L42",
       "id": "models_weeklyinsight_weeklystats_withleapname",
-      "community": 526,
+      "community": 568,
       "norm_label": ".withleapname()"
     },
     {
@@ -50238,7 +50454,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L63",
       "id": "models_weeklyinsight_weeklyinsightai",
-      "community": 526,
+      "community": 568,
       "norm_label": "weeklyinsightai"
     },
     {
@@ -50247,7 +50463,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L72",
       "id": "models_weeklyinsight_weeklyinsight",
-      "community": 526,
+      "community": 568,
       "norm_label": "weeklyinsight"
     },
     {
@@ -50256,7 +50472,7 @@
       "source_file": "Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift",
       "source_location": "L80",
       "id": "momsy_features_weeklyinsights_domain_models_weeklyinsight_swift_language",
-      "community": 526,
+      "community": 568,
       "norm_label": "language"
     },
     {
@@ -53181,7 +53397,7 @@
       "source_file": "Momsy/Services/Firebase/BabySync/Models/FoodDiaryLog+DTO.swift",
       "source_location": "L1",
       "id": "models_fooddiarylog_dto",
-      "community": 438,
+      "community": 630,
       "norm_label": "fooddiarylog+dto.swift"
     },
     {
@@ -53190,7 +53406,7 @@
       "source_file": "Momsy/Services/Firebase/BabySync/Models/FoodDiaryLog+DTO.swift",
       "source_location": "L3",
       "id": "models_fooddiarylog_dto_fooddiarylogdto",
-      "community": 438,
+      "community": 630,
       "norm_label": "fooddiarylogdto"
     },
     {
@@ -53199,7 +53415,7 @@
       "source_file": "Momsy/Services/Firebase/BabySync/Models/FoodDiaryLog+DTO.swift",
       "source_location": "L4",
       "id": "momsy_services_firebase_babysync_models_fooddiarylog_dto_swift_string",
-      "community": 438,
+      "community": 630,
       "norm_label": "string"
     },
     {
@@ -53208,7 +53424,7 @@
       "source_file": "Momsy/Services/Firebase/BabySync/Models/FoodDiaryLog+DTO.swift",
       "source_location": "L5",
       "id": "momsy_services_firebase_babysync_models_fooddiarylog_dto_swift_timestamp",
-      "community": 438,
+      "community": 630,
       "norm_label": "timestamp"
     },
     {
@@ -53217,7 +53433,7 @@
       "source_file": "Momsy/Services/Firebase/BabySync/Models/FoodDiaryLog+DTO.swift",
       "source_location": "L9",
       "id": "momsy_services_firebase_babysync_models_fooddiarylog_dto_swift_bool",
-      "community": 438,
+      "community": 630,
       "norm_label": "bool"
     },
     {
@@ -53226,7 +53442,7 @@
       "source_file": "Momsy/Services/Firebase/BabySync/Models/FoodDiaryLog+DTO.swift",
       "source_location": "L16",
       "id": "models_fooddiarylog_dto_fooddiarylogdto_init",
-      "community": 438,
+      "community": 630,
       "norm_label": ".init()"
     },
     {
@@ -53235,7 +53451,7 @@
       "source_file": "Momsy/Services/Firebase/BabySync/Models/FoodDiaryLog+DTO.swift",
       "source_location": "L16",
       "id": "momsy_services_firebase_babysync_models_fooddiarylog_dto_swift_fooddiarylog",
-      "community": 438,
+      "community": 630,
       "norm_label": "fooddiarylog"
     },
     {
@@ -54319,6 +54535,51 @@
       "norm_label": "pushnotificationserviceprotocol"
     },
     {
+      "label": "LanguageTests.swift",
+      "file_type": "code",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L1",
+      "id": "localization_languagetests",
+      "community": 633,
+      "norm_label": "languagetests.swift"
+    },
+    {
+      "label": "LanguageTests",
+      "file_type": "code",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L4",
+      "id": "localization_languagetests_languagetests",
+      "community": 633,
+      "norm_label": "languagetests"
+    },
+    {
+      "label": ".allCasesAreComplete()",
+      "file_type": "code",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L7",
+      "id": "localization_languagetests_languagetests_allcasesarecomplete",
+      "community": 633,
+      "norm_label": ".allcasesarecomplete()"
+    },
+    {
+      "label": ".chineseIsSelectable()",
+      "file_type": "code",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L13",
+      "id": "localization_languagetests_languagetests_chineseisselectable",
+      "community": 633,
+      "norm_label": ".chineseisselectable()"
+    },
+    {
+      "label": ".everyLanguageRenders()",
+      "file_type": "code",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L22",
+      "id": "localization_languagetests_languagetests_everylanguagerenders",
+      "community": 633,
+      "norm_label": ".everylanguagerenders()"
+    },
+    {
       "label": "DeleteAccountTests.swift",
       "file_type": "code",
       "source_file": "MomsyTests/Features/Account/DeleteAccountTests.swift",
@@ -54675,7 +54936,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L1",
       "id": "baby_multichildfoundationtests",
-      "community": 444,
+      "community": 607,
       "norm_label": "multichildfoundationtests.swift"
     },
     {
@@ -54684,7 +54945,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L8",
       "id": "baby_multichildfoundationtests_multichildfoundationtests",
-      "community": 444,
+      "community": 607,
       "norm_label": "multichildfoundationtests"
     },
     {
@@ -54693,7 +54954,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L12",
       "id": "baby_multichildfoundationtests_multichildfoundationtests_freshactive",
-      "community": 444,
+      "community": 607,
       "norm_label": ".freshactive()"
     },
     {
@@ -54702,7 +54963,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L14",
       "id": "baby_multichildfoundationtests_multichildfoundationtests_makecontext",
-      "community": 444,
+      "community": 607,
       "norm_label": ".makecontext()"
     },
     {
@@ -54711,7 +54972,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L14",
       "id": "momsytests_features_baby_multichildfoundationtests_swift_modelcontext",
-      "community": 444,
+      "community": 607,
       "norm_label": "modelcontext"
     },
     {
@@ -54720,7 +54981,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L25",
       "id": "baby_multichildfoundationtests_multichildfoundationtests_rosterupsertsortsandcapsatfive",
-      "community": 444,
+      "community": 607,
       "norm_label": ".rosterupsertsortsandcapsatfive()"
     },
     {
@@ -54729,7 +54990,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L52",
       "id": "baby_multichildfoundationtests_multichildfoundationtests_updateadoptsfirstchildwhenpersistedpointerisstale",
-      "community": 444,
+      "community": 607,
       "norm_label": ".updateadoptsfirstchildwhenpersistedpointerisstale()"
     },
     {
@@ -54738,7 +54999,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L65",
       "id": "baby_multichildfoundationtests_multichildfoundationtests_deleteremoveschild",
-      "community": 444,
+      "community": 607,
       "norm_label": ".deleteremoveschild()"
     },
     {
@@ -54747,7 +55008,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L79",
       "id": "baby_multichildfoundationtests_multichildfoundationtests_getentriesreturnsonlyactivechildlogs",
-      "community": 444,
+      "community": 607,
       "norm_label": ".getentriesreturnsonlyactivechildlogs()"
     },
     {
@@ -54756,7 +55017,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L110",
       "id": "baby_multichildfoundationtests_multichildfoundationtests_quicklogstripisscopedtoactivechild",
-      "community": 444,
+      "community": 607,
       "norm_label": ".quicklogstripisscopedtoactivechild()"
     },
     {
@@ -54765,7 +55026,7 @@
       "source_file": "MomsyTests/Features/Baby/MultiChildFoundationTests.swift",
       "source_location": "L139",
       "id": "baby_multichildfoundationtests_multichildfoundationtests_backfillstampslegacylogstofirstchild",
-      "community": 444,
+      "community": 607,
       "norm_label": ".backfillstampslegacylogstofirstchild()"
     },
     {
@@ -58041,7 +58302,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L1",
       "id": "vaccination_vaccinationscheduletests",
-      "community": 34,
+      "community": 345,
       "norm_label": "vaccinationscheduletests.swift"
     },
     {
@@ -58050,7 +58311,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L5",
       "id": "vaccination_vaccinationscheduletests_vaccinationtimingtests",
-      "community": 34,
+      "community": 345,
       "norm_label": "vaccinationtimingtests"
     },
     {
@@ -58059,7 +58320,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L8",
       "id": "vaccination_vaccinationscheduletests_vaccinationtimingtests_sortorder",
-      "community": 34,
+      "community": 345,
       "norm_label": ".sortorder()"
     },
     {
@@ -58068,7 +58329,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L18",
       "id": "vaccination_vaccinationscheduletests_vaccinationtimingtests_duedateoffsets",
-      "community": 34,
+      "community": 345,
       "norm_label": ".duedateoffsets()"
     },
     {
@@ -58077,7 +58338,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L31",
       "id": "vaccination_vaccinationscheduletests_vaccinationtimingtests_labels",
-      "community": 34,
+      "community": 345,
       "norm_label": ".labels()"
     },
     {
@@ -58086,7 +58347,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L45",
       "id": "vaccination_vaccinationscheduletests_vaccinationtimingtests_russianplurals",
-      "community": 34,
+      "community": 345,
       "norm_label": ".russianplurals()"
     },
     {
@@ -58095,7 +58356,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L53",
       "id": "vaccination_vaccinationscheduletests_vaccinationscheduleitemtests",
-      "community": 34,
+      "community": 345,
       "norm_label": "vaccinationscheduleitemtests"
     },
     {
@@ -58104,7 +58365,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L56",
       "id": "vaccination_vaccinationscheduletests_vaccinationscheduleitemtests_namelookup",
-      "community": 34,
+      "community": 345,
       "norm_label": ".namelookup()"
     },
     {
@@ -58113,7 +58374,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L68",
       "id": "vaccination_vaccinationscheduletests_vaccinationscheduleitemtests_customnamefallback",
-      "community": 34,
+      "community": 345,
       "norm_label": ".customnamefallback()"
     },
     {
@@ -58122,7 +58383,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L78",
       "id": "vaccination_vaccinationscheduletests_vaccinationscheduleprovidertests",
-      "community": 34,
+      "community": 345,
       "norm_label": "vaccinationscheduleprovidertests"
     },
     {
@@ -58131,7 +58392,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L81",
       "id": "vaccination_vaccinationscheduletests_vaccinationscheduleprovidertests_autodetectclamped",
-      "community": 34,
+      "community": 345,
       "norm_label": ".autodetectclamped()"
     },
     {
@@ -58140,7 +58401,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L87",
       "id": "vaccination_vaccinationscheduletests_vaccinationscheduleprovidertests_whoidsnamespaced",
-      "community": 34,
+      "community": 345,
       "norm_label": ".whoidsnamespaced()"
     },
     {
@@ -58149,7 +58410,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L96",
       "id": "vaccination_vaccinationscheduletests_vaccinationmigrationmaptests",
-      "community": 34,
+      "community": 345,
       "norm_label": "vaccinationmigrationmaptests"
     },
     {
@@ -58158,7 +58419,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L99",
       "id": "vaccination_vaccinationscheduletests_vaccinationmigrationmaptests_coversalllegacyids",
-      "community": 34,
+      "community": 345,
       "norm_label": ".coversalllegacyids()"
     },
     {
@@ -58167,7 +58428,7 @@
       "source_file": "MomsyTests/Features/Vaccination/VaccinationScheduleTests.swift",
       "source_location": "L106",
       "id": "vaccination_vaccinationscheduletests_vaccinationmigrationmaptests_targetsarevalidwhoids",
-      "community": 34,
+      "community": 345,
       "norm_label": ".targetsarevalidwhoids()"
     },
     {
@@ -59112,7 +59373,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L1",
       "id": "mocks_mockdiaryrepository",
-      "community": 321,
+      "community": 617,
       "norm_label": "mockdiaryrepository.swift"
     },
     {
@@ -59121,7 +59382,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L4",
       "id": "mocks_mockdiaryrepository_mockdiaryrepository",
-      "community": 321,
+      "community": 617,
       "norm_label": "mockdiaryrepository"
     },
     {
@@ -59130,7 +59391,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L5",
       "id": "momsytests_mocks_mockdiaryrepository_swift_storeddiaryitem",
-      "community": 321,
+      "community": 617,
       "norm_label": "storeddiaryitem"
     },
     {
@@ -59139,7 +59400,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L10",
       "id": "mocks_mockdiaryrepository_mockdiaryrepository_getentries",
-      "community": 321,
+      "community": 617,
       "norm_label": ".getentries()"
     },
     {
@@ -59148,7 +59409,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L10",
       "id": "momsytests_mocks_mockdiaryrepository_swift_date",
-      "community": 321,
+      "community": 617,
       "norm_label": "date"
     },
     {
@@ -59157,7 +59418,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L15",
       "id": "mocks_mockdiaryrepository_mockdiaryrepository_add",
-      "community": 321,
+      "community": 617,
       "norm_label": ".add()"
     },
     {
@@ -59166,7 +59427,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L21",
       "id": "mocks_mockdiaryrepository_mockdiaryrepository_upsert",
-      "community": 321,
+      "community": 617,
       "norm_label": ".upsert()"
     },
     {
@@ -59175,7 +59436,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L30",
       "id": "mocks_mockdiaryrepository_mockdiaryrepository_update",
-      "community": 321,
+      "community": 617,
       "norm_label": ".update()"
     },
     {
@@ -59184,7 +59445,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L36",
       "id": "mocks_mockdiaryrepository_mockdiaryrepository_delete",
-      "community": 321,
+      "community": 617,
       "norm_label": ".delete()"
     },
     {
@@ -59193,7 +59454,7 @@
       "source_file": "MomsyTests/Mocks/MockDiaryRepository.swift",
       "source_location": "L36",
       "id": "momsytests_mocks_mockdiaryrepository_swift_uuid",
-      "community": 321,
+      "community": 617,
       "norm_label": "uuid"
     },
     {
@@ -59283,7 +59544,7 @@
       "source_file": "MomsyTests/Mocks/MockLeapsRepository.swift",
       "source_location": "L1",
       "id": "mocks_mockleapsrepository",
-      "community": 321,
+      "community": 626,
       "norm_label": "mockleapsrepository.swift"
     },
     {
@@ -59292,7 +59553,7 @@
       "source_file": "MomsyTests/Mocks/MockLeapsRepository.swift",
       "source_location": "L4",
       "id": "mocks_mockleapsrepository_mockleapsrepository",
-      "community": 321,
+      "community": 626,
       "norm_label": "mockleapsrepository"
     },
     {
@@ -59301,7 +59562,7 @@
       "source_file": "MomsyTests/Mocks/MockLeapsRepository.swift",
       "source_location": "L5",
       "id": "momsytests_mocks_mockleapsrepository_swift_leapprogress",
-      "community": 321,
+      "community": 626,
       "norm_label": "leapprogress"
     },
     {
@@ -59310,7 +59571,7 @@
       "source_file": "MomsyTests/Mocks/MockLeapsRepository.swift",
       "source_location": "L8",
       "id": "mocks_mockleapsrepository_mockleapsrepository_getallprogress",
-      "community": 321,
+      "community": 626,
       "norm_label": ".getallprogress()"
     },
     {
@@ -59319,7 +59580,7 @@
       "source_file": "MomsyTests/Mocks/MockLeapsRepository.swift",
       "source_location": "L13",
       "id": "mocks_mockleapsrepository_mockleapsrepository_saveprogress",
-      "community": 321,
+      "community": 626,
       "norm_label": ".saveprogress()"
     },
     {
@@ -59328,7 +59589,7 @@
       "source_file": "MomsyTests/Mocks/MockLeapsRepository.swift",
       "source_location": "L22",
       "id": "mocks_mockleapsrepository_mockleapsrepository_upsert",
-      "community": 321,
+      "community": 626,
       "norm_label": ".upsert()"
     },
     {
@@ -59337,7 +59598,7 @@
       "source_file": "MomsyTests/Mocks/MockLeapsRepository.swift",
       "source_location": "L33",
       "id": "mocks_mockleapsrepository_mockleapsrepository_resetprogress",
-      "community": 321,
+      "community": 626,
       "norm_label": ".resetprogress()"
     },
     {
@@ -59346,7 +59607,7 @@
       "source_file": "MomsyTests/Mocks/MockLeapsRepository.swift",
       "source_location": "L33",
       "id": "momsytests_mocks_mockleapsrepository_swift_int",
-      "community": 321,
+      "community": 626,
       "norm_label": "int"
     },
     {
@@ -59553,7 +59814,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L1",
       "id": "mocks_mocksleeprepository",
-      "community": 444,
+      "community": 621,
       "norm_label": "mocksleeprepository.swift"
     },
     {
@@ -59562,7 +59823,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L4",
       "id": "mocks_mocksleeprepository_mocksleeprepository",
-      "community": 444,
+      "community": 621,
       "norm_label": "mocksleeprepository"
     },
     {
@@ -59571,7 +59832,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L5",
       "id": "momsytests_mocks_mocksleeprepository_swift_sleepentry",
-      "community": 444,
+      "community": 621,
       "norm_label": "sleepentry"
     },
     {
@@ -59580,7 +59841,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L9",
       "id": "mocks_mocksleeprepository_mocksleeprepository_getentries",
-      "community": 444,
+      "community": 621,
       "norm_label": ".getentries()"
     },
     {
@@ -59589,7 +59850,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L9",
       "id": "momsytests_mocks_mocksleeprepository_swift_date",
-      "community": 444,
+      "community": 621,
       "norm_label": "date"
     },
     {
@@ -59598,7 +59859,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L14",
       "id": "mocks_mocksleeprepository_mocksleeprepository_add",
-      "community": 444,
+      "community": 621,
       "norm_label": ".add()"
     },
     {
@@ -59607,7 +59868,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L19",
       "id": "mocks_mocksleeprepository_mocksleeprepository_update",
-      "community": 444,
+      "community": 621,
       "norm_label": ".update()"
     },
     {
@@ -59616,7 +59877,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L26",
       "id": "mocks_mocksleeprepository_mocksleeprepository_upsert",
-      "community": 444,
+      "community": 621,
       "norm_label": ".upsert()"
     },
     {
@@ -59625,7 +59886,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L32",
       "id": "mocks_mocksleeprepository_mocksleeprepository_delete",
-      "community": 444,
+      "community": 621,
       "norm_label": ".delete()"
     },
     {
@@ -59634,7 +59895,7 @@
       "source_file": "MomsyTests/Mocks/MockSleepRepository.swift",
       "source_location": "L32",
       "id": "momsytests_mocks_mocksleeprepository_swift_uuid",
-      "community": 444,
+      "community": 621,
       "norm_label": "uuid"
     },
     {
@@ -59931,7 +60192,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L1",
       "id": "momsywatch_views_feedingview_swift_views_feedingview",
-      "community": 26,
+      "community": 603,
       "norm_label": "feedingview.swift"
     },
     {
@@ -59940,7 +60201,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L3",
       "id": "momsywatch_views_feedingview_swift_views_feedingview_feedingview",
-      "community": 26,
+      "community": 603,
       "norm_label": "feedingview"
     },
     {
@@ -59949,7 +60210,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L4",
       "id": "momsywatch_views_feedingview_swift_watchsessionmanager",
-      "community": 26,
+      "community": 603,
       "norm_label": "watchsessionmanager"
     },
     {
@@ -59967,7 +60228,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L29",
       "id": "momsywatch_views_feedingview_swift_string",
-      "community": 26,
+      "community": 603,
       "norm_label": "string"
     },
     {
@@ -59976,7 +60237,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L39",
       "id": "views_feedingview_feedingview_runningview",
-      "community": 26,
+      "community": 603,
       "norm_label": ".runningview()"
     },
     {
@@ -59985,7 +60246,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L39",
       "id": "momsywatch_views_feedingview_swift_date",
-      "community": 26,
+      "community": 603,
       "norm_label": "date"
     },
     {
@@ -59994,7 +60255,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L39",
       "id": "momsywatch_views_feedingview_swift_bool",
-      "community": 26,
+      "community": 603,
       "norm_label": "bool"
     },
     {
@@ -60003,7 +60264,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L58",
       "id": "views_feedingview_feedingview_pausedview",
-      "community": 26,
+      "community": 603,
       "norm_label": ".pausedview()"
     },
     {
@@ -60012,7 +60273,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L58",
       "id": "momsywatch_views_feedingview_swift_int",
-      "community": 26,
+      "community": 603,
       "norm_label": "int"
     },
     {
@@ -60021,7 +60282,7 @@
       "source_file": "MomsyWatch/Views/FeedingView.swift",
       "source_location": "L78",
       "id": "views_feedingview_feedingview_timestring",
-      "community": 26,
+      "community": 603,
       "norm_label": ".timestring()"
     },
     {
@@ -60093,7 +60354,7 @@
       "source_file": "MomsyWatch/Views/SleepView.swift",
       "source_location": "L1",
       "id": "momsywatch_views_sleepview_swift_views_sleepview",
-      "community": 10,
+      "community": 603,
       "norm_label": "sleepview.swift"
     },
     {
@@ -60102,7 +60363,7 @@
       "source_file": "MomsyWatch/Views/SleepView.swift",
       "source_location": "L3",
       "id": "momsywatch_views_sleepview_swift_views_sleepview_sleepview",
-      "community": 10,
+      "community": 603,
       "norm_label": "sleepview"
     },
     {
@@ -60111,7 +60372,7 @@
       "source_file": "MomsyWatch/Views/SleepView.swift",
       "source_location": "L4",
       "id": "momsywatch_views_sleepview_swift_watchsessionmanager",
-      "community": 10,
+      "community": 603,
       "norm_label": "watchsessionmanager"
     },
     {
@@ -60120,7 +60381,7 @@
       "source_file": "MomsyWatch/Views/SleepView.swift",
       "source_location": "L42",
       "id": "views_sleepview_qualitysheet",
-      "community": 10,
+      "community": 603,
       "norm_label": "qualitysheet"
     },
     {
@@ -60129,7 +60390,7 @@
       "source_file": "MomsyWatch/Views/SleepView.swift",
       "source_location": "L43",
       "id": "momsywatch_views_sleepview_swift_string",
-      "community": 10,
+      "community": 603,
       "norm_label": "string"
     },
     {
@@ -60138,7 +60399,7 @@
       "source_file": "MomsyWatch/Views/SleepView.swift",
       "source_location": "L43",
       "id": "momsywatch_views_sleepview_swift_void",
-      "community": 10,
+      "community": 603,
       "norm_label": "void"
     },
     {
@@ -60147,7 +60408,7 @@
       "source_file": "MomsyWatch/Views/SleepView.swift",
       "source_location": "L55",
       "id": "views_sleepview_qualitysheet_row",
-      "community": 10,
+      "community": 603,
       "norm_label": ".row()"
     },
     {
@@ -64280,6 +64541,24 @@
       "id": "remember_today_2026_06_26_done_14_31_main",
       "community": 595,
       "norm_label": "14:31 | main"
+    },
+    {
+      "label": "today-2026-06-27.md",
+      "file_type": "document",
+      "source_file": ".remember/today-2026-06-27.md",
+      "source_location": "L1",
+      "id": "remember_today_2026_06_27",
+      "community": 638,
+      "norm_label": "today-2026-06-27.md"
+    },
+    {
+      "label": "16:22 | main",
+      "file_type": "document",
+      "source_file": ".remember/today-2026-06-27.md",
+      "source_location": "L5",
+      "id": "remember_today_2026_06_27_16_22_main",
+      "community": 638,
+      "norm_label": "16:22 | main"
     },
     {
       "label": "progress.md",
@@ -86252,9 +86531,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734",
-      "target": "sessions_session_1782451892734_context",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_context"
     },
     {
       "relation": "contains",
@@ -86262,9 +86541,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734",
-      "target": "sessions_session_1782451892734_cwd",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_cwd"
     },
     {
       "relation": "contains",
@@ -86272,9 +86551,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734",
-      "target": "sessions_session_1782451892734_duration",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_duration"
     },
     {
       "relation": "contains",
@@ -86282,9 +86561,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734",
-      "target": "sessions_session_1782451892734_endedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_endedat"
     },
     {
       "relation": "contains",
@@ -86292,9 +86571,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734",
-      "target": "sessions_session_1782451892734_id",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_id"
     },
     {
       "relation": "contains",
@@ -86302,9 +86581,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734",
-      "target": "sessions_session_1782451892734_metrics",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_metrics"
     },
     {
       "relation": "contains",
@@ -86312,9 +86591,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734",
-      "target": "sessions_session_1782451892734_startedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_startedat"
     },
     {
       "relation": "contains",
@@ -86322,9 +86601,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734_metrics",
-      "target": "sessions_session_1782451892734_metrics_commands",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_metrics_commands"
     },
     {
       "relation": "contains",
@@ -86332,9 +86611,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734_metrics",
-      "target": "sessions_session_1782451892734_metrics_edits",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_metrics_edits"
     },
     {
       "relation": "contains",
@@ -86342,9 +86621,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734_metrics",
-      "target": "sessions_session_1782451892734_metrics_errors",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_metrics_errors"
     },
     {
       "relation": "contains",
@@ -86352,9 +86631,9 @@
       "source_file": ".claude-flow/sessions/session-1782451892734.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782451892734_metrics",
-      "target": "sessions_session_1782451892734_metrics_tasks",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782451892734_metrics_tasks"
     },
     {
       "relation": "contains",
@@ -86362,9 +86641,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834",
-      "target": "sessions_session_1782469887834_context",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_context"
     },
     {
       "relation": "contains",
@@ -86372,9 +86651,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834",
-      "target": "sessions_session_1782469887834_cwd",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_cwd"
     },
     {
       "relation": "contains",
@@ -86382,9 +86661,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834",
-      "target": "sessions_session_1782469887834_duration",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_duration"
     },
     {
       "relation": "contains",
@@ -86392,9 +86671,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834",
-      "target": "sessions_session_1782469887834_endedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_endedat"
     },
     {
       "relation": "contains",
@@ -86402,9 +86681,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834",
-      "target": "sessions_session_1782469887834_id",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_id"
     },
     {
       "relation": "contains",
@@ -86412,9 +86691,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834",
-      "target": "sessions_session_1782469887834_metrics",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_metrics"
     },
     {
       "relation": "contains",
@@ -86422,9 +86701,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834",
-      "target": "sessions_session_1782469887834_startedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_startedat"
     },
     {
       "relation": "contains",
@@ -86432,9 +86711,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834_metrics",
-      "target": "sessions_session_1782469887834_metrics_commands",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_metrics_commands"
     },
     {
       "relation": "contains",
@@ -86442,9 +86721,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834_metrics",
-      "target": "sessions_session_1782469887834_metrics_edits",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_metrics_edits"
     },
     {
       "relation": "contains",
@@ -86452,9 +86731,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834_metrics",
-      "target": "sessions_session_1782469887834_metrics_errors",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_metrics_errors"
     },
     {
       "relation": "contains",
@@ -86462,9 +86741,9 @@
       "source_file": ".claude-flow/sessions/session-1782469887834.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469887834_metrics",
-      "target": "sessions_session_1782469887834_metrics_tasks",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469887834_metrics_tasks"
     },
     {
       "relation": "contains",
@@ -86472,9 +86751,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596",
-      "target": "sessions_session_1782469896596_context",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_context"
     },
     {
       "relation": "contains",
@@ -86482,9 +86761,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596",
-      "target": "sessions_session_1782469896596_cwd",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_cwd"
     },
     {
       "relation": "contains",
@@ -86492,9 +86771,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596",
-      "target": "sessions_session_1782469896596_duration",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_duration"
     },
     {
       "relation": "contains",
@@ -86502,9 +86781,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596",
-      "target": "sessions_session_1782469896596_endedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_endedat"
     },
     {
       "relation": "contains",
@@ -86512,9 +86791,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596",
-      "target": "sessions_session_1782469896596_id",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_id"
     },
     {
       "relation": "contains",
@@ -86522,9 +86801,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596",
-      "target": "sessions_session_1782469896596_metrics",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_metrics"
     },
     {
       "relation": "contains",
@@ -86532,9 +86811,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596",
-      "target": "sessions_session_1782469896596_startedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_startedat"
     },
     {
       "relation": "contains",
@@ -86542,9 +86821,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596_metrics",
-      "target": "sessions_session_1782469896596_metrics_commands",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_metrics_commands"
     },
     {
       "relation": "contains",
@@ -86552,9 +86831,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596_metrics",
-      "target": "sessions_session_1782469896596_metrics_edits",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_metrics_edits"
     },
     {
       "relation": "contains",
@@ -86562,9 +86841,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596_metrics",
-      "target": "sessions_session_1782469896596_metrics_errors",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_metrics_errors"
     },
     {
       "relation": "contains",
@@ -86572,9 +86851,9 @@
       "source_file": ".claude-flow/sessions/session-1782469896596.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782469896596_metrics",
-      "target": "sessions_session_1782469896596_metrics_tasks",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782469896596_metrics_tasks"
     },
     {
       "relation": "contains",
@@ -86582,9 +86861,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461",
-      "target": "sessions_session_1782470346461_context",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_context"
     },
     {
       "relation": "contains",
@@ -86592,9 +86871,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461",
-      "target": "sessions_session_1782470346461_cwd",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_cwd"
     },
     {
       "relation": "contains",
@@ -86602,9 +86881,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461",
-      "target": "sessions_session_1782470346461_duration",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_duration"
     },
     {
       "relation": "contains",
@@ -86612,9 +86891,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461",
-      "target": "sessions_session_1782470346461_endedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_endedat"
     },
     {
       "relation": "contains",
@@ -86622,9 +86901,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461",
-      "target": "sessions_session_1782470346461_id",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_id"
     },
     {
       "relation": "contains",
@@ -86632,9 +86911,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461",
-      "target": "sessions_session_1782470346461_metrics",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_metrics"
     },
     {
       "relation": "contains",
@@ -86642,9 +86921,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461",
-      "target": "sessions_session_1782470346461_startedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_startedat"
     },
     {
       "relation": "contains",
@@ -86652,9 +86931,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461_metrics",
-      "target": "sessions_session_1782470346461_metrics_commands",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_metrics_commands"
     },
     {
       "relation": "contains",
@@ -86662,9 +86941,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461_metrics",
-      "target": "sessions_session_1782470346461_metrics_edits",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_metrics_edits"
     },
     {
       "relation": "contains",
@@ -86672,9 +86951,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461_metrics",
-      "target": "sessions_session_1782470346461_metrics_errors",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_metrics_errors"
     },
     {
       "relation": "contains",
@@ -86682,9 +86961,9 @@
       "source_file": ".claude-flow/sessions/session-1782470346461.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782470346461_metrics",
-      "target": "sessions_session_1782470346461_metrics_tasks",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782470346461_metrics_tasks"
     },
     {
       "relation": "contains",
@@ -86692,9 +86971,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391",
-      "target": "sessions_session_1782502248391_context",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_context"
     },
     {
       "relation": "contains",
@@ -86702,9 +86981,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391",
-      "target": "sessions_session_1782502248391_cwd",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_cwd"
     },
     {
       "relation": "contains",
@@ -86712,9 +86991,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391",
-      "target": "sessions_session_1782502248391_duration",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_duration"
     },
     {
       "relation": "contains",
@@ -86722,9 +87001,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391",
-      "target": "sessions_session_1782502248391_endedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_endedat"
     },
     {
       "relation": "contains",
@@ -86732,9 +87011,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391",
-      "target": "sessions_session_1782502248391_id",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_id"
     },
     {
       "relation": "contains",
@@ -86742,9 +87021,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391",
-      "target": "sessions_session_1782502248391_metrics",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_metrics"
     },
     {
       "relation": "contains",
@@ -86752,9 +87031,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391",
-      "target": "sessions_session_1782502248391_startedat",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_startedat"
     },
     {
       "relation": "contains",
@@ -86762,9 +87041,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391_metrics",
-      "target": "sessions_session_1782502248391_metrics_commands",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_metrics_commands"
     },
     {
       "relation": "contains",
@@ -86772,9 +87051,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391_metrics",
-      "target": "sessions_session_1782502248391_metrics_edits",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_metrics_edits"
     },
     {
       "relation": "contains",
@@ -86782,9 +87061,9 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391_metrics",
-      "target": "sessions_session_1782502248391_metrics_errors",
-      "confidence_score": 1.0
+      "target": "sessions_session_1782502248391_metrics_errors"
     },
     {
       "relation": "contains",
@@ -86792,8 +87071,228 @@
       "source_file": ".claude-flow/sessions/session-1782502248391.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sessions_session_1782502248391_metrics",
-      "target": "sessions_session_1782502248391_metrics_tasks",
+      "target": "sessions_session_1782502248391_metrics_tasks"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849",
+      "target": "sessions_session_1782543465849_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849",
+      "target": "sessions_session_1782543465849_cwd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849",
+      "target": "sessions_session_1782543465849_duration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849",
+      "target": "sessions_session_1782543465849_endedat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849",
+      "target": "sessions_session_1782543465849_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849",
+      "target": "sessions_session_1782543465849_metrics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849",
+      "target": "sessions_session_1782543465849_startedat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849_metrics",
+      "target": "sessions_session_1782543465849_metrics_commands",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849_metrics",
+      "target": "sessions_session_1782543465849_metrics_edits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849_metrics",
+      "target": "sessions_session_1782543465849_metrics_errors",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782543465849.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "sessions_session_1782543465849_metrics",
+      "target": "sessions_session_1782543465849_metrics_tasks",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803",
+      "target": "sessions_session_1782548447803_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803",
+      "target": "sessions_session_1782548447803_cwd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803",
+      "target": "sessions_session_1782548447803_duration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803",
+      "target": "sessions_session_1782548447803_endedat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803",
+      "target": "sessions_session_1782548447803_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803",
+      "target": "sessions_session_1782548447803_metrics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803",
+      "target": "sessions_session_1782548447803_startedat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803_metrics",
+      "target": "sessions_session_1782548447803_metrics_commands",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803_metrics",
+      "target": "sessions_session_1782548447803_metrics_edits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803_metrics",
+      "target": "sessions_session_1782548447803_metrics_errors",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude-flow/sessions/session-1782548447803.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "sessions_session_1782548447803_metrics",
+      "target": "sessions_session_1782548447803_metrics_tasks",
       "confidence_score": 1.0
     },
     {
@@ -152056,6 +152555,46 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "localization_languagetests",
+      "target": "localization_languagetests_languagetests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "localization_languagetests_languagetests",
+      "target": "localization_languagetests_languagetests_allcasesarecomplete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "localization_languagetests_languagetests",
+      "target": "localization_languagetests_languagetests_chineseisselectable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "MomsyTests/Core/Localization/LanguageTests.swift",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "localization_languagetests_languagetests",
+      "target": "localization_languagetests_languagetests_everylanguagerenders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "MomsyTests/Features/Account/DeleteAccountTests.swift",
       "source_location": "L9",
       "weight": 1.0,
@@ -158302,9 +158841,9 @@
       "source_file": "MomsyTests/Features/Today/DailyTipAlgorithmTests.swift",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "today_dailytipalgorithmtests_dailytipalgorithmtests",
-      "target": "today_dailytipalgorithmtests_dailytipalgorithmtests_alertc_nostooldata_nofalsealert",
-      "confidence_score": 1.0
+      "target": "today_dailytipalgorithmtests_dailytipalgorithmtests_alertc_nostooldata_nofalsealert"
     },
     {
       "relation": "method",
@@ -158549,9 +159088,9 @@
       "source_file": "MomsyTests/Features/Today/DailyTipAlgorithmTests.swift",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "today_dailytipalgorithmtests_dailytipalgorithmtests_alertc_nostooldata_nofalsealert",
-      "target": "today_dailytipalgorithmtests_dailytipalgorithmtests_makecontext",
-      "confidence_score": 1.0
+      "target": "today_dailytipalgorithmtests_dailytipalgorithmtests_makecontext"
     },
     {
       "relation": "calls",
@@ -159154,9 +159693,9 @@
       "source_file": "MomsyTests/Features/Today/TodayViewModelTests.swift",
       "source_location": "L230",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "today_todayviewmodeltests_todayviewmodeltests",
-      "target": "today_todayviewmodeltests_todayviewmodeltests_freshinstall_nostooldata_noconstipationalert",
-      "confidence_score": 1.0
+      "target": "today_todayviewmodeltests_todayviewmodeltests_freshinstall_nostooldata_noconstipationalert"
     },
     {
       "relation": "method",
@@ -159467,9 +160006,9 @@
       "source_file": "MomsyTests/Features/Today/TodayViewModelTests.swift",
       "source_location": "L234",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "today_todayviewmodeltests_todayviewmodeltests_freshinstall_nostooldata_noconstipationalert",
-      "target": "today_todayviewmodeltests_todayviewmodeltests_makevm",
-      "confidence_score": 1.0
+      "target": "today_todayviewmodeltests_todayviewmodeltests_makevm"
     },
     {
       "relation": "calls",
@@ -166659,9 +167198,9 @@
       "source_file": ".remember/archive.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "remember_archive_archive",
-      "target": "remember_archive_week_of_2026_06_23",
-      "confidence_score": 1.0
+      "target": "remember_archive_week_of_2026_06_23"
     },
     {
       "relation": "contains",
@@ -168559,9 +169098,9 @@
       "source_file": ".remember/today-2026-06-26.done.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "remember_today_2026_06_26_done",
-      "target": "remember_today_2026_06_26_done_01_27_main",
-      "confidence_score": 1.0
+      "target": "remember_today_2026_06_26_done_01_27_main"
     },
     {
       "relation": "contains",
@@ -168569,9 +169108,9 @@
       "source_file": ".remember/today-2026-06-26.done.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "remember_today_2026_06_26_done",
-      "target": "remember_today_2026_06_26_done_01_27_main_3",
-      "confidence_score": 1.0
+      "target": "remember_today_2026_06_26_done_01_27_main_3"
     },
     {
       "relation": "contains",
@@ -168579,9 +169118,9 @@
       "source_file": ".remember/today-2026-06-26.done.md",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "remember_today_2026_06_26_done",
-      "target": "remember_today_2026_06_26_done_09_31_main",
-      "confidence_score": 1.0
+      "target": "remember_today_2026_06_26_done_09_31_main"
     },
     {
       "relation": "contains",
@@ -168589,8 +169128,18 @@
       "source_file": ".remember/today-2026-06-26.done.md",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "remember_today_2026_06_26_done",
-      "target": "remember_today_2026_06_26_done_14_31_main",
+      "target": "remember_today_2026_06_26_done_14_31_main"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".remember/today-2026-06-27.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "remember_today_2026_06_27",
+      "target": "remember_today_2026_06_27_16_22_main",
       "confidence_score": 1.0
     },
     {
@@ -170869,5 +171418,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "80ae1e1a940269c59cdf82f730574c56a507b70a"
+  "built_at_commit": "b44dc750212acbb8d7fc327b288c4dbc2faf1867"
 }
