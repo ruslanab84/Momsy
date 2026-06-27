@@ -23,5 +23,17 @@ enum Language: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    var flag: String {
+        switch self {
+        case .english:    return "🇬🇧"
+        case .russian:    return "🇷🇺"
+        case .german:     return "🇩🇪"
+        case .spanish:    return "🇪🇸"
+        case .french:     return "🇫🇷"
+        case .portuguese: return "🇵🇹"
+        case .chinese:    return "🇨🇳"
+        }
+    }
+
     var isRTL: Bool { false }
 }

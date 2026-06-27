@@ -17,6 +17,7 @@
 		0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */; };
 		0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */; };
 		0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */; };
+		0BABF1270000000000000001 /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1270000000000000002 /* LanguageTests.swift */; };
 		1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
@@ -139,6 +140,7 @@
 		0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActiveBabySyncOverrideTests.swift; sourceTree = "<group>"; };
 		0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncWatermarkStoreTests.swift; sourceTree = "<group>"; };
 		0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatermarkAdvanceTests.swift; sourceTree = "<group>"; };
+		0BABF1270000000000000002 /* LanguageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LanguageTests.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipAlgorithmTests.swift; sourceTree = "<group>"; };
@@ -378,10 +380,27 @@
 		24C05EE6BF7D0D4B0444897D /* MomsyTests */ = {
 			isa = PBXGroup;
 			children = (
+				0BABF1280000000000000001 /* Core */,
 				CF188E3D6A5F475289D564B6 /* Features */,
 				ABCCB7544C43D5D7725CF1CA /* Mocks */,
 			);
 			path = MomsyTests;
+			sourceTree = "<group>";
+		};
+		0BABF1280000000000000001 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				0BABF1290000000000000001 /* Localization */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		0BABF1290000000000000001 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				0BABF1270000000000000002 /* LanguageTests.swift */,
+			);
+			path = Localization;
 			sourceTree = "<group>";
 		};
 		26B51C26FECCF7D6A3AF0390 /* Repositories */ = {
@@ -889,6 +908,7 @@
 				0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */,
 				0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */,
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
+				0BABF1270000000000000001 /* LanguageTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

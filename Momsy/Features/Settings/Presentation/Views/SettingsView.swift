@@ -180,12 +180,9 @@ struct SettingsView: View {
             HStack(spacing: 14) {
                 iconSquare(systemName: "globe", bg: .bbMint)
                 Picker("", selection: $vm.appLanguage) {
-                    Text("🇬🇧 English").tag("en")
-                    Text("🇷🇺 Русский").tag("ru")
-                    Text("🇩🇪 Deutsch").tag("de")
-                    Text("🇪🇸 Español").tag("es")
-                    Text("🇫🇷 Français").tag("fr")
-                    Text("🇵🇹 Português").tag("pt")
+                    ForEach(Language.allCases) { language in
+                        Text("\(language.flag) \(language.displayName)").tag(language.rawValue)
+                    }
                 }
                 .pickerStyle(.menu)
                 .tint(.bbCoralDeep)
