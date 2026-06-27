@@ -227,6 +227,15 @@ struct TodayViewModelTests {
         #expect(vm.dailyTip?.text.contains("0") != true || vm.dailyTip?.category != .alert)
     }
 
+    @Test("fresh install with no stool ever logged shows no false constipation alert")
+    func freshInstall_noStoolData_noConstipationAlert() async {
+        // Empty stool repo == nothing ever logged. The "no stool for N days" alert
+        // must not fire just because there is no data yet on a fresh install.
+        let vm = makeVM()
+        await vm.fetchDailyTipIfNeeded()
+        #expect(vm.dailyTip?.category != .alert)
+    }
+
     @Test("fetchDailyTipIfNeeded does not recompute on second call in same session")
     func fetchDailyTipIfNeeded_skipsSecondCall_withinSession() async {
         let vm = makeVM()

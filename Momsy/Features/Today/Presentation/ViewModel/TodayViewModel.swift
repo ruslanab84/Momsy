@@ -235,7 +235,10 @@ final class TodayViewModel: ObservableObject {
         isTipLoading = false
     }
 
-    private func computeDaysSinceLastStool() async -> Int {
+    /// Days since the last logged stool, or `nil` when none has ever been logged
+    /// within the search window — the algorithm treats `nil` as "no data" and
+    /// won't raise a constipation alert on a fresh install.
+    private func computeDaysSinceLastStool() async -> Int? {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         for daysBack in 0...10 {
@@ -244,7 +247,7 @@ final class TodayViewModel: ObservableObject {
             let entries = (try? await stoolRepo.getEntries(from: date, to: nextDay)) ?? []
             if !entries.isEmpty { return daysBack }
         }
-        return 10
+        return nil
     }
 
     // MARK: - Quick log actions

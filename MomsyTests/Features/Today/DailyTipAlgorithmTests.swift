@@ -85,6 +85,13 @@ struct DailyTipAlgorithmTests {
         #expect(result?.category == .alert)
     }
 
+    @Test("Alert C does not fire when no stool has ever been logged (fresh install)")
+    func alertC_noStoolData_noFalseAlert() {
+        let ctx = makeContext(ageMonths: 4, daysSinceLastStool: nil, hour: 12)
+        let result = AlertRules.evaluate(context: ctx)
+        #expect(result == nil)
+    }
+
     @Test("Alert D fires when totalSleepMinutes is critically low in evening")
     func alertD_sleepDeficit() {
         let ctx = makeContext(ageMonths: 4, totalSleepMinutes: 580, hour: 20)
@@ -215,7 +222,7 @@ struct DailyTipAlgorithmTests {
         minutesSinceLastSleepEnd: Int? = nil,
         walkCount: Int = 1,
         bathCount: Int = 0,
-        daysSinceLastStool: Int = 0,
+        daysSinceLastStool: Int? = 0,
         hour: Int = 10,
         language: Language = .russian
     ) -> DailyContext {

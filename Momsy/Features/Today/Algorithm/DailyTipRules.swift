@@ -65,24 +65,27 @@ enum AlertRules {
 
     // Alert C: no stool for too many days
     private static func checkStool(_ ctx: DailyContext) -> DailyTip? {
+        // nil means no stool has ever been logged (fresh install / not tracking),
+        // not a real streak — never warn without at least one recorded stool.
+        guard let days = ctx.daysSinceLastStool else { return nil }
         let alertDays = WhoNorms.maxDaysWithoutStool(ageMonths: ctx.ageMonths)
-        guard ctx.daysSinceLastStool >= alertDays else { return nil }
+        guard days >= alertDays else { return nil }
         let text: String
         switch ctx.language {
         case .russian:
-            text = "Стула не было \(ctx.daysSinceLastStool) дн. Попробуйте «велосипед»: положите \(ctx.babyName) на спину и аккуратно сгибайте ножки к животику 10–15 раз."
+            text = "Стула не было \(days) дн. Попробуйте «велосипед»: положите \(ctx.babyName) на спину и аккуратно сгибайте ножки к животику 10–15 раз."
         case .english:
-            text = "No stool for \(ctx.daysSinceLastStool) days. Try the bicycle exercise: lay \(ctx.babyName) on their back and gently cycle their legs toward the tummy 10–15 times."
+            text = "No stool for \(days) days. Try the bicycle exercise: lay \(ctx.babyName) on their back and gently cycle their legs toward the tummy 10–15 times."
         case .portuguese:
-            text = "Sem fezes há \(ctx.daysSinceLastStool) dias. Experimente o exercício da bicicleta: deite \(ctx.babyName) de costas e dobre suavemente as perninhas em direção à barriga 10–15 vezes."
+            text = "Sem fezes há \(days) dias. Experimente o exercício da bicicleta: deite \(ctx.babyName) de costas e dobre suavemente as perninhas em direção à barriga 10–15 vezes."
         case .spanish:
-            text = "Sin deposiciones desde hace \(ctx.daysSinceLastStool) días. Prueba el ejercicio de la bicicleta: pon a \(ctx.babyName) bocarriba y mueve sus piernas suavemente hacia la tripita 10–15 veces."
+            text = "Sin deposiciones desde hace \(days) días. Prueba el ejercicio de la bicicleta: pon a \(ctx.babyName) bocarriba y mueve sus piernas suavemente hacia la tripita 10–15 veces."
         case .german:
-            text = "Seit \(ctx.daysSinceLastStool) Tagen kein Stuhl. Versuche die Fahrrad-Übung: Lege \(ctx.babyName) auf den Rücken und beuge die Beinchen sanft zum Bauch, 10–15 Mal."
+            text = "Seit \(days) Tagen kein Stuhl. Versuche die Fahrrad-Übung: Lege \(ctx.babyName) auf den Rücken und beuge die Beinchen sanft zum Bauch, 10–15 Mal."
         case .french:
-            text = "Pas de selles depuis \(ctx.daysSinceLastStool) jours. Essayez l’exercice du vélo : allongez \(ctx.babyName) sur le dos et ramenez doucement ses jambes vers le ventre 10 à 15 fois."
+            text = "Pas de selles depuis \(days) jours. Essayez l’exercice du vélo : allongez \(ctx.babyName) sur le dos et ramenez doucement ses jambes vers le ventre 10 à 15 fois."
         case .chinese:
-            text = "已经 \(ctx.daysSinceLastStool) 天没有大便了。试试「蹬自行车」运动：让 \(ctx.babyName) 仰卧，轻轻把小腿朝肚子方向蹬 10–15 次。"
+            text = "已经 \(days) 天没有大便了。试试「蹬自行车」运动：让 \(ctx.babyName) 仰卧，轻轻把小腿朝肚子方向蹬 10–15 次。"
         }
         return DailyTip(text: text, contextHash: ctx.contextHash, category: .alert)
     }

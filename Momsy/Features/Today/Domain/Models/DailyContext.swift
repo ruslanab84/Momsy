@@ -86,7 +86,7 @@ struct DailyContext {
     let minutesSinceLastSleepEnd: Int?   // nil=no sleep today, 0=currently sleeping
     let walkCount: Int
     let bathCount: Int
-    let daysSinceLastStool: Int          // 0=today, 1=yesterday, …
+    let daysSinceLastStool: Int?         // nil=never logged, 0=today, 1=yesterday, …
     let dayOfYear: Int                   // 1–366 for tip rotation
     let lastFeedDurationMinutes: Int     // 0 if no feeding
     let recentFeedSides: [String]        // last ≤3 non-bottle sides (newest first)
@@ -103,7 +103,7 @@ enum DailyContextBuilder {
     static func build(
         from entries: [LogEntry],
         diaperCount: Int,
-        daysSinceLastStool: Int = 0,
+        daysSinceLastStool: Int? = nil,
         appState: AppState
     ) -> DailyContext {
         let feedingEntries = entries.filter { $0.kind == .bottle }
