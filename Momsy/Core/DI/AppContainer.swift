@@ -245,13 +245,45 @@ final class AppContainer {
         try context.delete(model: WeeklyInsightRecord.self)
         try context.save()
 
+        clearAccountScopedDefaults()
+        PendingWritesStore.shared.clear()
+        PendingDeletionsStore.shared.clear()
+        WidgetDataStore.shared.clearAll()
+
+        appState.reset()
+    }
+
+    @MainActor
+    private func clearAccountScopedDefaults() {
         let defaults = UserDefaults.standard
-        for key in ["onboardingDone", "paywallShown", kFamilyIdDefaultsKey,
-                    kBabyIdDefaultsKey, "AppPersistence.schemaVersion"] {
+        let exactKeys = [
+            "onboardingDone",
+            "paywallShown",
+            kFamilyIdDefaultsKey,
+            kFamilyOwnerUidDefaultsKey,
+            kBabyIdDefaultsKey,
+            "AppPersistence.schemaVersion",
+            "babysync_perbaby_migration_v1_done",
+            "firestore_quicklogs_cleanup_v1_done",
+            "babyLogBackfill_v1_done",
+            "diaper_today_count",
+            "diaper_today_date",
+            "uid",
+            "displayName",
+            "watch_processed_cmd_ids",
+            "invite_code",
+            "invite_expiry",
+        ]
+        exactKeys.forEach { defaults.removeObject(forKey: $0) }
+
+        let prefixes = [
+            "quick_log_today_",
+            "babysync_watermarks_v1_",
+            "local_",
+        ]
+        for key in defaults.dictionaryRepresentation().keys where prefixes.contains(where: { key.hasPrefix($0) }) {
             defaults.removeObject(forKey: key)
         }
-
-        appState.babyProfile = nil
     }
 
     // MARK: — Migration
@@ -297,6 +329,9 @@ final class AppContainer {
             syncRepo: babySyncRepository,
             analytics: analytics,
             pushNotifications: pushNotifications,
+            recoverPendingAccountDeletion: { [unowned self] in
+                await self.recoverPendingAccountDeletion()
+            },
             onDone: onDone
         )
     }
@@ -392,13 +427,42 @@ final class AppContainer {
         SymptomViewModel(appState: appState, addDiaryEntry: addDiaryEntry, syncRepo: babySyncRepository)
     }
 
+    /// Durable "deletion in progress" marker, shared by the delete use case (writes it) and
+    /// launch recovery (completes/clears it). Survives `eraseLocalData()`.
+    let pendingAccountDeletionStore: PendingAccountDeletionStore = UserDefaultsPendingAccountDeletionStore()
+    let suppressedFamilyRestoreStore: SuppressedFamilyRestoreStore = UserDefaultsSuppressedFamilyRestoreStore()
+
     func makeDeleteAccountUseCase() -> DeleteAccountUseCase {
         DeleteAccountUseCase(
             cloudEraser: FirestoreAccountEraser(babySync: BabySyncService()),
             photoStorage: photoStorage,
             auth: authManager,
+            pendingStore: pendingAccountDeletionStore,
+            suppressedRestoreStore: suppressedFamilyRestoreStore,
             eraseLocal: { [unowned self] in try self.eraseLocalData() }
         )
+    }
+
+    /// Completes an account deletion interrupted before the backend confirmed it. Run at
+    /// launch (before any cloud download) so erased data can never resurface on re-login.
+    lazy var accountDeletionRecovery = AccountDeletionRecovery(
+        cloudEraser: FirestoreAccountEraser(babySync: BabySyncService()),
+        auth: authManager,
+        pendingStore: pendingAccountDeletionStore,
+        suppressedRestoreStore: suppressedFamilyRestoreStore
+    )
+
+    /// Runs before launch-time migrations/local profile loading, and after a provider sign-in
+    /// when that provider maps to the uid being deleted. Returns true while the delete marker
+    /// is still unresolved; callers should skip cloud sync in that state so cached remote data
+    /// cannot refill the freshly wiped device.
+    @MainActor
+    func recoverPendingAccountDeletion() async -> Bool {
+        guard pendingAccountDeletionStore.loadPending() != nil else { return false }
+        await accountDeletionRecovery.runIfNeeded()
+        try? eraseLocalData()
+        FamilyManager.shared.reset()
+        return pendingAccountDeletionStore.loadPending() != nil
     }
 
     func makeSettingsViewModel() -> SettingsViewModel {

@@ -182,6 +182,13 @@ final class WidgetDataStore {
         return Date(timeIntervalSinceReferenceDate: ti)
     }
 
+    func clearAll() {
+        for key in defaults.dictionaryRepresentation().keys where key.hasPrefix("w_") {
+            defaults.removeObject(forKey: key)
+        }
+        reload()
+    }
+
     // MARK: - Private
 
     private var idleFeeding: FeedingWidgetState {

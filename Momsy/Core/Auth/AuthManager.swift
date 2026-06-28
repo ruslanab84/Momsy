@@ -15,6 +15,8 @@ enum AuthError: LocalizedError {
     case notImplemented
     case appleSignInUnavailable
     case reauthRequired
+    case accountDeletionPending
+    case accountDeletionFinished
 
     var errorDescription: String? {
         switch self {
@@ -22,6 +24,8 @@ enum AuthError: LocalizedError {
         case .notImplemented:        return "Google Sign-In is coming soon."
         case .appleSignInUnavailable: return "To use Sign in with Apple, open Settings → [Your Name] and sign in with your Apple ID."
         case .reauthRequired:        return "Please sign in again to delete your account."
+        case .accountDeletionPending: return "Previous account deletion is still finishing. Please try again."
+        case .accountDeletionFinished: return "Previous account deletion finished. Please sign in again."
         }
     }
 }
@@ -34,16 +38,26 @@ final class AuthManager: ObservableObject {
     var isSignedIn: Bool { firebaseUser != nil && firebaseUser?.isAnonymous == false }
 
     private(set) var currentNonce: String?
+    private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "Auth")
 
     init() {
+        installStateListenerIfPossible()
+    }
+
+    private func installStateListenerIfPossible() {
         guard FirebaseApp.app() != nil else { return }
+        guard authStateHandle == nil else { return }
         firebaseUser = Auth.auth().currentUser
-        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             self?.firebaseUser = user
             if let user {
                 Task { @MainActor in
+                    if UserDefaultsPendingAccountDeletionStore().loadPending() == user.uid {
+                        AuthManager.log.info("Skipping family setup while account deletion is pending")
+                        return
+                    }
                     let name = user.displayName ?? user.email ?? "User"
                     do {
                         try await FamilyManager.shared.setup(uid: user.uid, displayName: name)
@@ -67,8 +81,12 @@ final class AuthManager: ObservableObject {
     /// that guarantee now that Firebase is the single backend.
     @MainActor
     func signInAnonymouslyIfNeeded() async {
+        installStateListenerIfPossible()
         guard FirebaseApp.app() != nil else { return }
-        guard Auth.auth().currentUser == nil else { return }
+        guard Auth.auth().currentUser == nil else {
+            firebaseUser = Auth.auth().currentUser
+            return
+        }
         do {
             let result = try await Auth.auth().signInAnonymously()
             firebaseUser = result.user
@@ -107,6 +125,7 @@ final class AuthManager: ObservableObject {
 
     @MainActor
     func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) async throws {
+        installStateListenerIfPossible()
         let auth = try result.get()
         guard
             let cred = auth.credential as? ASAuthorizationAppleIDCredential,
@@ -127,6 +146,7 @@ final class AuthManager: ObservableObject {
 
     @MainActor
     func signInWithGoogle() async throws {
+        installStateListenerIfPossible()
 #if canImport(GoogleSignIn)
         guard let clientID = FirebaseApp.app()?.options.clientID else {
             throw AuthError.tokenMissing
@@ -158,6 +178,7 @@ final class AuthManager: ObservableObject {
 
     @MainActor
     func signOut() throws {
+        installStateListenerIfPossible()
         try Auth.auth().signOut()
         firebaseUser = nil
     }
@@ -169,6 +190,7 @@ final class AuthManager: ObservableObject {
     /// we surface as `.reauthRequired` so the caller can fall back to `signOut()`.
     @MainActor
     func deleteAccount() async throws {
+        installStateListenerIfPossible()
         guard let user = Auth.auth().currentUser else { return }
         do {
             try await user.delete()

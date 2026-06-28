@@ -50,6 +50,14 @@ struct PendingWritesStoreTests {
         #expect(all[0].docId == "y")
     }
 
+    @Test func clearRemovesAllEntries() {
+        let store = freshStore()
+        store.add(collection: "sleepLogs", docId: "x", payload: ["v": 1], familyId: "f", babyId: "b")
+        store.add(collection: "feedingLogs", docId: "y", payload: ["v": 2], familyId: "f", babyId: "b")
+        store.clear()
+        #expect(store.all().isEmpty)
+    }
+
     @Test func legacyEntryWithoutStampDefaultsToEmptyPath() {
         let store = freshStore()
         store.add(collection: "sleepLogs", docId: "x", payload: ["v": 1], familyId: "", babyId: "")

@@ -62,6 +62,12 @@ final class FamilyManager: ObservableObject {
     /// Called by AuthManager's state listener on every sign-in / app launch with existing session.
     /// Reads the user's familyId from Firestore; creates a new family if none exists.
     func setup(uid: String, displayName: String) async throws {
+        let suppressedRestoreStore = UserDefaultsSuppressedFamilyRestoreStore()
+        let restoreSuppressed = suppressedRestoreStore.isRestoreSuppressed(for: uid)
+        if restoreSuppressed {
+            reset()
+        }
+
         // A uid change since the cache was written (e.g. signing into an existing
         // account that replaced the anonymous user) invalidates the cached familyId.
         if Self.cacheIsStale(
@@ -78,12 +84,20 @@ final class FamilyManager: ObservableObject {
         defer { isSettingUp = false }
 
         let userRef = db.collection("users").document(uid)
-        let userDoc = try await userRef.getDocument()
+        // This routing document decides whether a provider login adopts an existing
+        // family or starts fresh. Read it from the backend, not Firestore's persistent
+        // cache, so a just-deleted account cannot reattach to a stale cached familyId.
+        let userDoc = try await userRef.getDocument(source: .server)
+        let existingId = userDoc.data()?["familyId"] as? String
 
-        if let existingId = userDoc.data()?["familyId"] as? String {
+        if let existingId, !restoreSuppressed {
             persist(familyId: existingId, ownerUid: uid)
             try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
         } else {
+            if let existingId, restoreSuppressed {
+                try? await db.collection("families").document(existingId)
+                    .collection("members").document(uid).delete()
+            }
             let newId = try await createFamily(for: uid)
             try await db.collection("families").document(newId)
                 .collection("members").document(uid)
@@ -94,6 +108,7 @@ final class FamilyManager: ObservableObject {
             )
             persist(familyId: newId, ownerUid: uid)
             try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
+            suppressedRestoreStore.clearSuppression(for: uid)
             Self.log.info("Created new family \(newId, privacy: .public) for user")
         }
         isReady = true

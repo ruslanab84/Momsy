@@ -402,4 +402,14 @@ struct PendingDeletionsStoreTests {
         PendingDeletionsStore(defaults: defaults).add(id: id, collection: "diaperLogs")
         #expect(PendingDeletionsStore(defaults: defaults).ids() == [id])
     }
+
+    @Test("clear removes every pending deletion")
+    func clearRemovesAllEntries() {
+        let store = freshStore()
+        store.add(id: UUID(), collection: "sleepLogs")
+        store.add(id: UUID(), collection: "feedingLogs")
+        store.clear()
+        #expect(store.ids().isEmpty)
+        #expect(store.all().isEmpty)
+    }
 }

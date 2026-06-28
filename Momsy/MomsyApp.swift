@@ -61,9 +61,14 @@ struct MomsyApp: App {
                 .withLocalization(localization)
                 .preferredColorScheme(resolvedColorScheme)
                 .task {
+                    let deletionStillPending = await container.recoverPendingAccountDeletion()
                     container.runMigrationIfNeeded()
                     await appState.load()
                     phoneSession.activate()
+                    guard !deletionStillPending else {
+                        await setupNotificationsOnLaunch(appState: appState)
+                        return
+                    }
                     await container.authManager.signInAnonymouslyIfNeeded()
                     await container.cloudSyncDownloader.downloadAndMergeWhenReady()
                     await setupNotificationsOnLaunch(appState: appState)

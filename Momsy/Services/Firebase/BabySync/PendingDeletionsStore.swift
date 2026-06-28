@@ -36,4 +36,6 @@ final class PendingDeletionsStore {
 
     /// Ids still pending, used by the merge to avoid resurrecting an in-flight delete.
     func ids() -> Set<UUID> { Set(map.keys.compactMap(UUID.init)) }
+
+    func clear() { defaults.removeObject(forKey: key) }
 }

@@ -28,6 +28,7 @@ final class OnboardingViewModel: ObservableObject {
     private let analytics: any AnalyticsServiceProtocol
     private let pushNotifications: any PushNotificationServiceProtocol
     private let syncRepo: any BabySyncRepositoryProtocol
+    private let recoverPendingAccountDeletion: @MainActor () async -> Bool
     private let onDone: () -> Void
 
     init(saveBabyProfile: SaveBabyProfileUseCase,
@@ -36,6 +37,7 @@ final class OnboardingViewModel: ObservableObject {
          syncRepo: any BabySyncRepositoryProtocol,
          analytics: any AnalyticsServiceProtocol = LogAnalyticsService(),
          pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared,
+         recoverPendingAccountDeletion: @MainActor @escaping () async -> Bool = { false },
          onDone: @escaping () -> Void) {
         self.saveBabyProfileUC = saveBabyProfile
         self.appState = appState
@@ -43,6 +45,7 @@ final class OnboardingViewModel: ObservableObject {
         self.syncRepo = syncRepo
         self.analytics = analytics
         self.pushNotifications = pushNotifications
+        self.recoverPendingAccountDeletion = recoverPendingAccountDeletion
         self.onDone = onDone
     }
 
@@ -87,6 +90,7 @@ final class OnboardingViewModel: ObservableObject {
         Task {
             do {
                 try await authManager.handleAppleCompletion(result)
+                if await finishPendingAccountDeletionIfNeeded() { return }
                 advance()
             } catch let error as ASAuthorizationError where error.code == .canceled {
                 // User cancelled — no error shown
@@ -106,6 +110,7 @@ final class OnboardingViewModel: ObservableObject {
         Task {
             do {
                 try await authManager.signInWithGoogle()
+                if await finishPendingAccountDeletionIfNeeded() { return }
                 advance()
             } catch {
                 authError = error
@@ -115,6 +120,17 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     func skipAuth() { advance() }
+
+    private func finishPendingAccountDeletionIfNeeded() async -> Bool {
+        guard
+            let uid = authManager.currentUID,
+            UserDefaultsPendingAccountDeletionStore().loadPending() == uid
+        else { return false }
+
+        let stillPending = await recoverPendingAccountDeletion()
+        authError = stillPending ? AuthError.accountDeletionPending : AuthError.accountDeletionFinished
+        return true
+    }
 
     func finish() {
         let name = babyName.trimmingCharacters(in: .whitespaces)

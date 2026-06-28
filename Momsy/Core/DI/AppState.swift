@@ -40,6 +40,12 @@ final class AppState: ObservableObject {
         }
     }
 
+    func reset() {
+        babies = []
+        activeBabyId = nil
+        babyProfile = nil
+    }
+
     private func activeChild() -> BabyProfile? {
         if let id = activeBabyId, let match = babies.first(where: { $0.id == id }) { return match }
         return babies.sorted { $0.birthDate < $1.birthDate }.first
