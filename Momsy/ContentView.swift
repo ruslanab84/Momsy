@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("onboardingDone") private var onboardingDone = false
-    @State private var paywallShown = UserDefaults.standard.bool(forKey: "paywallShown")
+    @AppStorage("paywallShown") private var paywallShown = false
     @Environment(\.appContainer) private var container
     @State private var showSplash = true
 
@@ -19,7 +19,6 @@ struct ContentView: View {
                 PaywallView(
                     subscriptionManager: container.subscriptionManager,
                     onComplete: {
-                        UserDefaults.standard.set(true, forKey: "paywallShown")
                         withAnimation(.easeInOut(duration: 0.35)) { paywallShown = true }
                     }
                 )
@@ -32,12 +31,34 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: onboardingDone)
         .task {
+            migrateLegacyPaywallStateIfNeeded()
             try? await Task.sleep(for: .seconds(2.2))
             showSplash = false
+        }
+    }
+
+    private func migrateLegacyPaywallStateIfNeeded() {
+        if PaywallPresentationState.shouldSuppressInitialPaywallForExistingUser() {
+            paywallShown = true
         }
     }
 }
 
 #Preview {
     ContentView()
+}
+
+private enum PaywallPresentationState {
+    private static let onboardingDoneKey = "onboardingDone"
+    private static let paywallShownKey = "paywallShown"
+    private static let legacyMigrationKey = "paywallShownExistingUserMigrationDone"
+
+    static func shouldSuppressInitialPaywallForExistingUser(defaults: UserDefaults = .standard) -> Bool {
+        guard !defaults.bool(forKey: legacyMigrationKey) else { return false }
+        defer { defaults.set(true, forKey: legacyMigrationKey) }
+
+        let completedOnboarding = defaults.bool(forKey: onboardingDoneKey)
+        let hasPaywallDecision = defaults.object(forKey: paywallShownKey) != nil
+        return completedOnboarding && !hasPaywallDecision
+    }
 }

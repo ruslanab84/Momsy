@@ -11,15 +11,16 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var product: Product?
 
     private var listenerTask: Task<Void, Never>?
+    private var productLoadTask: Task<Product, Error>?
 
     init() {
         listenerTask = Task {
-            await loadProducts()
+            _ = await loadProducts()
             await updateStatus()
             for await result in Transaction.updates {
                 guard case .verified(let tx) = result else { continue }
-                await tx.finish()
                 await updateStatus()
+                await tx.finish()
             }
         }
     }
@@ -29,15 +30,20 @@ final class SubscriptionManager: ObservableObject {
     }
 
     func purchase() async throws {
-        guard let product else { return }
+        guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
+
+        let product = try await loadProductIfNeeded()
         let result = try await product.purchase()
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
+            if tx.productID == Self.productID, tx.revocationDate == nil {
+                isPremium = true
+            }
             await tx.finish()
-            isPremium = true
+            await updateStatus()
         case .pending, .userCancelled:
             break
         @unknown default:
@@ -46,15 +52,39 @@ final class SubscriptionManager: ObservableObject {
     }
 
     func restore() async {
+        guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         try? await AppStore.sync()
         await updateStatus()
     }
 
-    private func loadProducts() async {
-        guard let p = try? await Product.products(for: [Self.productID]).first else { return }
-        product = p
+    @discardableResult
+    private func loadProducts() async -> Product? {
+        try? await loadProductIfNeeded()
+    }
+
+    private func loadProductIfNeeded() async throws -> Product {
+        if let product { return product }
+        if let productLoadTask {
+            let loadedProduct = try await productLoadTask.value
+            product = loadedProduct
+            return loadedProduct
+        }
+
+        let task = Task<Product, Error> {
+            let products = try await Product.products(for: [Self.productID])
+            guard let product = products.first else {
+                throw SubscriptionError.productUnavailable
+            }
+            return product
+        }
+        productLoadTask = task
+        defer { productLoadTask = nil }
+
+        let loadedProduct = try await task.value
+        product = loadedProduct
+        return loadedProduct
     }
 
     private func updateStatus() async {
@@ -77,6 +107,16 @@ final class SubscriptionManager: ObservableObject {
     }
 }
 
-enum SubscriptionError: Error {
+enum SubscriptionError: LocalizedError {
     case failedVerification
+    case productUnavailable
+
+    var errorDescription: String? {
+        switch self {
+        case .failedVerification:
+            return "Could not verify the purchase. Please try again."
+        case .productUnavailable:
+            return "Subscription is not available yet. Please check your connection and try again."
+        }
+    }
 }

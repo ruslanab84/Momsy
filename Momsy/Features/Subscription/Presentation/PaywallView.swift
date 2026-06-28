@@ -117,7 +117,7 @@ struct PaywallView: View {
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .disabled(subscriptionManager.isLoading || subscriptionManager.product == nil)
+            .disabled(subscriptionManager.isLoading)
             .padding(.horizontal, 24)
 
             Text(lm.paywallPriceNote)
