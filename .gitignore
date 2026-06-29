@@ -74,3 +74,10 @@ fastlane/test_output/
 
 # ── Claude / AI tools ──────────────────────────────────────────────────────────
 .claude/
+.claude-flow/
+.agents/
+.codex/
+AGENTS.md
+
+# ── Graphify generated cache ───────────────────────────────────────────────────
+graphify-out/cache/ast/

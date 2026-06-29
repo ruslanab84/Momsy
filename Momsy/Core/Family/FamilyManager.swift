@@ -132,7 +132,11 @@ final class FamilyManager: ObservableObject {
 
     /// Accepts an invite code, looks it up in Firestore, and assigns this user to that family.
     func joinFamily(code: String, uid: String, force: Bool = false) async throws {
-        let trimmed = code.trimmingCharacters(in: .whitespaces).uppercased()
+        // Accept either a bare code or a full `momsy://join?code=…` link a user may
+        // have pasted; reject anything else so it can't become a `//` Firestore path.
+        guard let trimmed = JoinDeeplink.normalize(rawCode: code) else {
+            throw FamilyError.invalidOrExpiredCode
+        }
         let inviteDoc = try await db.collection("invites").document(trimmed).getDocument()
         guard
             let data = inviteDoc.data(),

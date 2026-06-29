@@ -369,6 +369,22 @@
 			path = Report;
 			sourceTree = "<group>";
 		};
+		0BABF1280000000000000001 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				0BABF1290000000000000001 /* Localization */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		0BABF1290000000000000001 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				0BABF1270000000000000002 /* LanguageTests.swift */,
+			);
+			path = Localization;
+			sourceTree = "<group>";
+		};
 		100C67B934D28C1B553835F3 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -385,22 +401,6 @@
 				ABCCB7544C43D5D7725CF1CA /* Mocks */,
 			);
 			path = MomsyTests;
-			sourceTree = "<group>";
-		};
-		0BABF1280000000000000001 /* Core */ = {
-			isa = PBXGroup;
-			children = (
-				0BABF1290000000000000001 /* Localization */,
-			);
-			path = Core;
-			sourceTree = "<group>";
-		};
-		0BABF1290000000000000001 /* Localization */ = {
-			isa = PBXGroup;
-			children = (
-				0BABF1270000000000000002 /* LanguageTests.swift */,
-			);
-			path = Localization;
 			sourceTree = "<group>";
 		};
 		26B51C26FECCF7D6A3AF0390 /* Repositories */ = {

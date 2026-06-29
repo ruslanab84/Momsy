@@ -5,16 +5,16 @@ import UIKit
 
 extension Color {
     // Adaptive neutral tokens — flip between light and dark based on color scheme
-    static let bbCream     = Color(UIColor(light: UIColor(bbHex: "FFF6EC"), dark: UIColor(bbHex: "0C0804")))
-    static let bbCreamSoft = Color(UIColor(light: UIColor(bbHex: "FFFAF2"), dark: UIColor(bbHex: "120C07")))
-    static let bbCard      = Color(UIColor(light: .white,                   dark: UIColor(bbHex: "1A1109")))
-    static let bbInk       = Color(UIColor(light: UIColor(bbHex: "3D2A20"), dark: UIColor(bbHex: "F8F2EC")))
-    static let bbInkSoft   = Color(UIColor(light: UIColor(bbHex: "6B5446"), dark: UIColor(bbHex: "CCAA8A")))
-    static let bbInkMute   = Color(UIColor(light: UIColor(bbHex: "A89484"), dark: UIColor(bbHex: "8A6A58")))
+    static let bbCream     = Color(UIColor(light: UIColor(bbHex: "FFF6EC"), dark: UIColor(bbHex: "2A2530")))
+    static let bbCreamSoft = Color(UIColor(light: UIColor(bbHex: "FFFAF2"), dark: UIColor(bbHex: "342E39")))
+    static let bbCard      = Color(UIColor(light: .white,                   dark: UIColor(bbHex: "433B46")))
+    static let bbInk       = Color(UIColor(light: UIColor(bbHex: "3D2A20"), dark: UIColor(bbHex: "FFF8F4")))
+    static let bbInkSoft   = Color(UIColor(light: UIColor(bbHex: "6B5446"), dark: UIColor(bbHex: "E6D6DE")))
+    static let bbInkMute   = Color(UIColor(light: UIColor(bbHex: "A89484"), dark: UIColor(bbHex: "B9A6B2")))
 
-    // Fixed dark surface — always warm dark brown regardless of color scheme.
+    // Fixed dark surface — always a soft dark accent regardless of color scheme.
     // Use for elements that are intentionally dark: now-playing card, action buttons, disclaimer banners.
-    static let bbSurface   = Color(bbHex: "2C1C12")
+    static let bbSurface   = Color(bbHex: "5A4654")
 
     // Accent colors — more vibrant for punch on both light and dark backgrounds
     static let bbCoral      = Color(bbHex: "FF8C72")
@@ -127,6 +127,143 @@ struct BBPill: View {
             .padding(.vertical, 4)
             .background(color)
             .clipShape(Capsule())
+    }
+}
+
+// MARK: - Baby Gender Icon
+
+enum BabyGenderIconKind {
+    case boy
+    case girl
+    case unknown
+}
+
+struct BabyGenderIconView: View {
+    let kind: BabyGenderIconKind
+    var size: CGFloat = 36
+    var tone: Color = .bbCoral
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
+                .fill(tone)
+
+            switch kind {
+            case .boy, .girl:
+                BabyGenderFace(kind: kind, size: size)
+            case .unknown:
+                BabyGenderSparkle(size: size)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipped()
+        .accessibilityHidden(true)
+    }
+}
+
+private struct BabyGenderFace: View {
+    let kind: BabyGenderIconKind
+    let size: CGFloat
+
+    var body: some View {
+        let face = size * 0.58
+        let hair = Color(bbHex: kind == .boy ? "5A3D2B" : "7A4A2A")
+
+        ZStack {
+            if kind == .girl {
+                Circle()
+                    .fill(hair)
+                    .frame(width: face * 0.3, height: face * 0.3)
+                    .offset(x: -face * 0.54, y: -face * 0.02)
+                Circle()
+                    .fill(hair)
+                    .frame(width: face * 0.3, height: face * 0.3)
+                    .offset(x: face * 0.54, y: -face * 0.02)
+                Circle()
+                    .fill(Color.bbRose)
+                    .frame(width: face * 0.12, height: face * 0.12)
+                    .offset(x: -face * 0.62, y: -face * 0.16)
+                Circle()
+                    .fill(Color.bbRose)
+                    .frame(width: face * 0.12, height: face * 0.12)
+                    .offset(x: face * 0.62, y: -face * 0.16)
+            }
+
+            RoundedRectangle(cornerRadius: face * 0.3, style: .continuous)
+                .fill(Color.white.opacity(0.82))
+                .frame(width: face * 1.04, height: face * 0.45)
+                .offset(y: face * 0.58)
+
+            Ellipse()
+                .fill(Color(bbHex: "FFD9B8"))
+                .frame(width: face, height: face * 1.05)
+
+            if kind == .boy {
+                Ellipse()
+                    .fill(hair)
+                    .frame(width: face * 0.92, height: face * 0.38)
+                    .offset(y: -face * 0.34)
+                Circle()
+                    .fill(hair)
+                    .frame(width: face * 0.18, height: face * 0.18)
+                    .offset(x: -face * 0.18, y: -face * 0.48)
+            } else {
+                Ellipse()
+                    .fill(hair)
+                    .frame(width: face * 1.0, height: face * 0.42)
+                    .offset(y: -face * 0.34)
+                Capsule()
+                    .fill(Color(bbHex: "FFD9B8"))
+                    .frame(width: face * 0.11, height: face * 0.36)
+                    .offset(y: -face * 0.38)
+            }
+
+            Circle()
+                .fill(Color(bbHex: "3D2A20"))
+                .frame(width: face * 0.1, height: face * 0.1)
+                .offset(x: -face * 0.16, y: -face * 0.04)
+            Circle()
+                .fill(Color(bbHex: "3D2A20"))
+                .frame(width: face * 0.1, height: face * 0.1)
+                .offset(x: face * 0.16, y: -face * 0.04)
+
+            Circle()
+                .fill(Color.bbCoral.opacity(0.68))
+                .frame(width: face * 0.2, height: face * 0.2)
+                .offset(x: -face * 0.25, y: face * 0.14)
+            Circle()
+                .fill(Color.bbCoral.opacity(0.68))
+                .frame(width: face * 0.2, height: face * 0.2)
+                .offset(x: face * 0.25, y: face * 0.14)
+
+            BabyGenderSmile()
+                .stroke(Color(bbHex: "3D2A20"), style: StrokeStyle(lineWidth: face * 0.045, lineCap: .round))
+                .frame(width: face * 0.18, height: face * 0.08)
+                .offset(y: face * 0.18)
+        }
+    }
+}
+
+private struct BabyGenderSmile: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.maxX, y: rect.minY),
+            control: CGPoint(x: rect.midX, y: rect.maxY * 1.7)
+        )
+        return path
+    }
+}
+
+private struct BabyGenderSparkle: View {
+    let size: CGFloat
+
+    var body: some View {
+        Image(systemName: "sparkles")
+            .font(.system(size: size * 0.44, weight: .heavy, design: .rounded))
+            .foregroundStyle(Color.white)
+            .shadow(color: Color.bbButterDeep.opacity(0.25), radius: 1, y: 1)
     }
 }
 

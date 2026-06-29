@@ -251,6 +251,7 @@ final class AppContainer {
         WidgetDataStore.shared.clearAll()
 
         appState.reset()
+        NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
     }
 
     @MainActor

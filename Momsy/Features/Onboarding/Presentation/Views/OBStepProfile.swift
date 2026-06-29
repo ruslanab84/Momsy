@@ -15,16 +15,16 @@ struct ProfileStep: View {
 
     private struct GenderOption: Identifiable {
         let id: String
-        let emoji: String
+        let icon: BabyGenderIconKind
         let label: (L10n) -> String
         let color: Color
     }
 
     private var genderOptions: [GenderOption] {
         [
-            GenderOption(id: "boy",     emoji: "👦", label: { $0.genderBoy },     color: .bbSky),
-            GenderOption(id: "girl",    emoji: "👧", label: { $0.genderGirl },    color: .bbCoral),
-            GenderOption(id: "unknown", emoji: "🌟", label: { $0.genderUnknown }, color: .bbButter),
+            GenderOption(id: "boy",     icon: .boy,     label: { $0.genderBoy },     color: .bbSky),
+            GenderOption(id: "girl",    icon: .girl,    label: { $0.genderGirl },    color: .bbCoral),
+            GenderOption(id: "unknown", icon: .unknown, label: { $0.genderUnknown }, color: .bbButter),
         ]
     }
 
@@ -94,8 +94,7 @@ struct ProfileStep: View {
                                 }
                             } label: {
                                 VStack(spacing: 6) {
-                                    Text(option.emoji)
-                                        .font(.system(size: 28))
+                                    BabyGenderIconView(kind: option.icon, size: 36, tone: option.color)
                                     Text(option.label(loc.strings))
                                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                                         .foregroundColor(.bbInk)
