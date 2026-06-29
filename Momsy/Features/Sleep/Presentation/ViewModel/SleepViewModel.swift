@@ -13,7 +13,10 @@ final class SleepViewModel: ObservableObject {
     @Published private(set) var nextSleep: SleepPrediction?
 
     private var activeSleepEntry: SleepEntry?
+    private var activeSleepBabyId: UUID?
     private var timerTask: Task<Void, Never>?
+    private var activeBabyCancellable: AnyCancellable?
+    private var reloadTask: Task<Void, Never>?
     private var lm: LocalizationManager { .shared }
 
     private let liveActivity = SleepLiveActivityManager()
@@ -40,31 +43,26 @@ final class SleepViewModel: ObservableObject {
         self.reconcileStaleSleepUC = reconcileStaleSleep
         self.predictNextSleepUC = predictNextSleep
         self.appState = appState
-        Task {
-            await loadTodayEntries()
-            if let open = todayEntries.first(where: { $0.endDate == nil }) {
-                // Cross-check WidgetDataStore: if it says idle, the session was stopped
-                // but the async DB write didn't complete before the app was killed.
-                if case .active = WidgetDataStore.shared.sleepState {
-                    liveActivity.reattachIfNeeded()
-                    activateTimer(entry: open)
-                } else {
-                    // Orphaned open entry: recover its real end (or discard) — never
-                    // stamp `now`, which would record a phantom multi-hour/day sleep.
-                    await self.reconcileStaleSleep(open)
-                    await loadTodayEntries()
+        activeBabyCancellable = appState.$babyProfile
+            .map { $0?.id }
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.scheduleReloadForActiveBaby(reconcileStaleOpenSession: false, clearVisibleState: true)
                 }
             }
-            await loadChartData()
-            await refreshForecast()
-        }
+        scheduleReloadForActiveBaby(reconcileStaleOpenSession: true, clearVisibleState: false)
     }
 
-    deinit { timerTask?.cancel() }
+    deinit {
+        timerTask?.cancel()
+        reloadTask?.cancel()
+        activeBabyCancellable?.cancel()
+    }
 
     func refreshForecast() async {
-        guard let birth = appState.babyProfile?.birthDate else { nextSleep = nil; return }
-        nextSleep = try? await predictNextSleepUC.execute(birthDate: birth)
+        await refreshForecast(expectedBabyId: currentBabyId)
     }
 
     var sleepNorm: (min: Double, max: Double) {
@@ -80,11 +78,18 @@ final class SleepViewModel: ObservableObject {
     }
 
     func loadChartData() async {
+        await loadChartData(expectedBabyId: currentBabyId)
+    }
+
+    private func loadChartData(expectedBabyId: UUID?) async {
         let cal = Calendar.current
         let dayCount = selectedChartPeriod == 0 ? 7 : 30
         let today = cal.startOfDay(for: Date())
         guard let periodStart = cal.date(byAdding: .day, value: -(dayCount - 1), to: today) else { return }
-        let entries = (try? await getSleepUC.execute(from: periodStart, to: Date())) ?? []
+        let entries = (try? await withBabyScope(expectedBabyId) {
+            try await getSleepUC.execute(from: periodStart, to: Date())
+        }) ?? []
+        guard isCurrentBaby(expectedBabyId) else { return }
         let completed = entries.filter { $0.endDate != nil }
         sleepDays = (0..<dayCount).compactMap { offset in
             guard let day = cal.date(byAdding: .day, value: offset, to: periodStart) else { return nil }
@@ -125,10 +130,14 @@ final class SleepViewModel: ObservableObject {
     }
 
     func start() {
+        let babyId = currentBabyId
         Task {
             do {
-                let entry = try await startSleepUC.execute()
-                activateTimer(entry: entry)
+                let entry = try await withBabyScope(babyId) {
+                    try await startSleepUC.execute()
+                }
+                guard isCurrentBaby(babyId) else { return }
+                activateTimer(entry: entry, babyId: babyId)
             } catch {
                 saveError = error.localizedDescription
             }
@@ -140,11 +149,12 @@ final class SleepViewModel: ObservableObject {
         sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
     }
 
-    private func activateTimer(entry: SleepEntry) {
+    private func activateTimer(entry: SleepEntry, babyId: UUID?) {
         activeSleepEntry = entry
+        activeSleepBabyId = babyId
         isSleepActive = true
         sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
-        WidgetDataStore.shared.setSleepActive(startDate: entry.startDate)
+        WidgetDataStore.shared.setSleepActive(startDate: entry.startDate, babyId: babyId)
         liveActivity.startActivity(startDate: entry.startDate, babyName: appState.babyProfile?.name ?? "")
         timerTask?.cancel()
         timerTask = Task { [weak self] in
@@ -158,6 +168,7 @@ final class SleepViewModel: ObservableObject {
 
     func stop() {
         guard isSleepActive, var entry = activeSleepEntry else { return }
+        let babyId = activeSleepBabyId ?? currentBabyId
         timerTask?.cancel()
         timerTask = nil
         entry.quality = selectedQuality
@@ -170,16 +181,17 @@ final class SleepViewModel: ObservableObject {
         }
         isSleepActive = false
         activeSleepEntry = nil
+        activeSleepBabyId = nil
         liveActivity.endActivity()
-        WidgetDataStore.shared.setLastSleepEnd(Date())
-        WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds)
+        WidgetDataStore.shared.setLastSleepEnd(Date(), babyId: babyId)
+        WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds, babyId: babyId)
         Task {
             do {
                 let saved = try await stopSleepUC.execute(entry)
                 if let idx = todayEntries.firstIndex(where: { $0.id == saved.id }) {
                     todayEntries[idx] = saved
                 }
-                pushSleepToFirestore(saved)
+                pushSleepToFirestore(saved, babyId: babyId)
                 await refreshForecast()
             } catch {
                 todayEntries.removeAll { $0.id == completed.id }
@@ -188,7 +200,7 @@ final class SleepViewModel: ObservableObject {
         }
     }
 
-    private func pushSleepToFirestore(_ entry: SleepEntry) {
+    private func pushSleepToFirestore(_ entry: SleepEntry, babyId: UUID?) {
         guard FamilyManager.shared.familyId != nil else { return }
         let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
         let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
@@ -202,15 +214,23 @@ final class SleepViewModel: ObservableObject {
             addedByName: name,
             updatedAt:   entry.updatedAt ?? Date()
         )
-        Task { try? await BabySyncService().setLog(SleepLogDTO(from: log), id: log.id, to: "sleepLogs") }
+        Task {
+            try? await withBabyScope(babyId) {
+                try await BabySyncService().setLog(SleepLogDTO(from: log), id: log.id, to: "sleepLogs")
+            }
+        }
     }
 
     func logManualEntry(startDate: Date, endDate: Date, quality: SleepQuality, note: String) {
+        let babyId = currentBabyId
         Task {
             do {
-                let saved = try await addManualSleepUC.execute(
-                    startDate: startDate, endDate: endDate, quality: quality, note: note
-                )
+                let saved = try await withBabyScope(babyId) {
+                    try await addManualSleepUC.execute(
+                        startDate: startDate, endDate: endDate, quality: quality, note: note
+                    )
+                }
+                guard isCurrentBaby(babyId) else { return }
                 if Calendar.current.isDateInToday(saved.startDate) {
                     todayEntries.append(saved)
                     todayEntries.sort { $0.startDate < $1.startDate }
@@ -224,25 +244,115 @@ final class SleepViewModel: ObservableObject {
     }
 
     func loadTodayEntries() async {
+        await loadTodayEntries(expectedBabyId: currentBabyId)
+    }
+
+    private func loadTodayEntries(expectedBabyId: UUID?) async {
         let cal = Calendar.current
         let start = cal.startOfDay(for: Date())
         let end = cal.date(byAdding: .day, value: 1, to: start) ?? Date()
-        if let entries = try? await getSleepUC.execute(from: start, to: end) {
+        if let entries = try? await withBabyScope(expectedBabyId, operation: {
+            try await getSleepUC.execute(from: start, to: end)
+        }) {
+            guard isCurrentBaby(expectedBabyId) else { return }
             todayEntries = entries.sorted { $0.startDate < $1.startDate }
         }
     }
 
     /// Closes an orphaned open sleep at the end time the widget recorded when `stop()`
     /// ran, or discards it when that end is unknown / implausible.
-    private func reconcileStaleSleep(_ entry: SleepEntry) async {
+    private func reconcileStaleSleep(_ entry: SleepEntry, babyId: UUID?) async {
         let resolution = StaleSessionReconciler.resolve(
             start: entry.startDate,
-            recoveredEnd: WidgetDataStore.shared.lastSleepEndDate,
+            recoveredEnd: WidgetDataStore.shared.lastSleepEndDate(for: babyId),
             maxDuration: Self.maxPlausibleSleep
         )
         switch resolution {
         case .close(let end): try? await reconcileStaleSleepUC.execute(entry, end: end)
         case .discard:        try? await reconcileStaleSleepUC.execute(entry, end: nil)
+        }
+    }
+
+    private var currentBabyId: UUID? {
+        appState.babyProfile?.id ?? appState.activeBabyId ?? ActiveBaby.currentId
+    }
+
+    private func isCurrentBaby(_ babyId: UUID?) -> Bool {
+        currentBabyId == babyId
+    }
+
+    private func scheduleReloadForActiveBaby(reconcileStaleOpenSession: Bool, clearVisibleState: Bool) {
+        let babyId = currentBabyId
+        reloadTask?.cancel()
+        detachVisibleTimer()
+        if clearVisibleState {
+            todayEntries = []
+            sleepDays = []
+            nextSleep = nil
+        }
+        reloadTask = Task { @MainActor [weak self] in
+            await self?.reloadActiveBabyState(
+                expectedBabyId: babyId,
+                reconcileStaleOpenSession: reconcileStaleOpenSession
+            )
+        }
+    }
+
+    private func detachVisibleTimer() {
+        timerTask?.cancel()
+        timerTask = nil
+        activeSleepEntry = nil
+        activeSleepBabyId = nil
+        isSleepActive = false
+        sleepSeconds = 0
+        selectedQuality = .normal
+    }
+
+    private func reloadActiveBabyState(expectedBabyId: UUID?, reconcileStaleOpenSession: Bool) async {
+        await loadTodayEntries(expectedBabyId: expectedBabyId)
+        guard isCurrentBaby(expectedBabyId), !Task.isCancelled else { return }
+        if let open = todayEntries.first(where: { $0.endDate == nil }) {
+            await restoreOpenSession(
+                open,
+                babyId: expectedBabyId,
+                reconcileStaleOpenSession: reconcileStaleOpenSession
+            )
+        }
+        guard isCurrentBaby(expectedBabyId), !Task.isCancelled else { return }
+        await loadChartData(expectedBabyId: expectedBabyId)
+        await refreshForecast(expectedBabyId: expectedBabyId)
+    }
+
+    private func restoreOpenSession(_ entry: SleepEntry, babyId: UUID?, reconcileStaleOpenSession: Bool) async {
+        if !reconcileStaleOpenSession {
+            activateTimer(entry: entry, babyId: babyId)
+            return
+        }
+        if case .active = WidgetDataStore.shared.sleepState(for: babyId) {
+            liveActivity.reattachIfNeeded()
+            activateTimer(entry: entry, babyId: babyId)
+        } else {
+            await reconcileStaleSleep(entry, babyId: babyId)
+            await loadTodayEntries(expectedBabyId: babyId)
+        }
+    }
+
+    private func refreshForecast(expectedBabyId: UUID?) async {
+        guard isCurrentBaby(expectedBabyId), let birth = appState.babyProfile?.birthDate else {
+            nextSleep = nil
+            return
+        }
+        let prediction = try? await withBabyScope(expectedBabyId) {
+            try await predictNextSleepUC.execute(birthDate: birth)
+        }
+        guard isCurrentBaby(expectedBabyId) else { return }
+        nextSleep = prediction
+    }
+
+    private func withBabyScope<T>(_ babyId: UUID?, operation: () async throws -> T) async throws -> T {
+        guard let babyId else { return try await operation() }
+        return try await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+            try await operation()
         }
     }
 

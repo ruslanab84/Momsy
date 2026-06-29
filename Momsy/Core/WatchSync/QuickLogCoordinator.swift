@@ -90,9 +90,12 @@ final class QuickLogCoordinator {
     // MARK: - Sleep (mirrors SleepViewModel)
 
     func startSleep() {
+        let babyId = currentBabyId
         Task {
-            guard let entry = try? await startSleepUC.execute() else { return }
-            WidgetDataStore.shared.setSleepActive(startDate: entry.startDate)
+            guard let entry = try? await withBabyScope(babyId, operation: {
+                try await startSleepUC.execute()
+            }) else { return }
+            WidgetDataStore.shared.setSleepActive(startDate: entry.startDate, babyId: babyId)
             sleepLA.startActivity(
                 startDate: entry.startDate,
                 babyName: appState.babyProfile?.name ?? WidgetDataStore.shared.babyName
@@ -102,24 +105,27 @@ final class QuickLogCoordinator {
 
     func stopSleep(qualityRaw: String) {
         let quality = SleepQuality(rawValue: qualityRaw) ?? .normal
+        let babyId = currentBabyId
         Task {
             let cal = Calendar.current
             let dayStart = cal.startOfDay(for: Date())
             let from = cal.date(byAdding: .day, value: -1, to: dayStart) ?? dayStart
             let to = cal.date(byAdding: .day, value: 1, to: dayStart) ?? Date()
-            let entries = (try? await getSleepUC.execute(from: from, to: to)) ?? []
+            let entries = (try? await withBabyScope(babyId, operation: {
+                try await getSleepUC.execute(from: from, to: to)
+            })) ?? []
             guard var open = entries.first(where: { $0.endDate == nil }) else {
-                WidgetDataStore.shared.clearSleep(lastDurationSeconds: 0)
+                WidgetDataStore.shared.clearSleep(lastDurationSeconds: 0, babyId: babyId)
                 sleepLA.endActivity()
                 return
             }
             open.quality = quality
             let secs = max(0, Int(Date().timeIntervalSince(open.startDate)))
-            WidgetDataStore.shared.setLastSleepEnd(Date())
-            WidgetDataStore.shared.clearSleep(lastDurationSeconds: secs)
+            WidgetDataStore.shared.setLastSleepEnd(Date(), babyId: babyId)
+            WidgetDataStore.shared.clearSleep(lastDurationSeconds: secs, babyId: babyId)
             sleepLA.endActivity()
             if let saved = try? await stopSleepUC.execute(open) {
-                pushSleepToFirestore(saved)
+                pushSleepToFirestore(saved, babyId: babyId)
             }
         }
     }
@@ -153,7 +159,7 @@ final class QuickLogCoordinator {
         Task { try? await BabySyncService().setLog(FeedingLogDTO(from: log), id: log.id, to: "feedingLogs") }
     }
 
-    private func pushSleepToFirestore(_ entry: SleepEntry) {
+    private func pushSleepToFirestore(_ entry: SleepEntry, babyId: UUID?) {
         guard FamilyManager.shared.familyId != nil else { return }
         let log = SleepLog(
             id:          entry.id.uuidString,
@@ -164,7 +170,11 @@ final class QuickLogCoordinator {
             addedBy:     UserDefaults.standard.string(forKey: "uid") ?? "",
             addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
         )
-        Task { try? await BabySyncService().setLog(SleepLogDTO(from: log), id: log.id, to: "sleepLogs") }
+        Task {
+            try? await withBabyScope(babyId) {
+                try await BabySyncService().setLog(SleepLogDTO(from: log), id: log.id, to: "sleepLogs")
+            }
+        }
     }
 
     private func pushDiaperToFirestore(_ entry: DiaperEntry) {
@@ -177,6 +187,17 @@ final class QuickLogCoordinator {
             addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
         )
         Task { try? await BabySyncService().setLog(DiaperLogDTO(from: log), id: log.id, to: "diaperLogs") }
+    }
+
+    private var currentBabyId: UUID? {
+        appState.babyProfile?.id ?? appState.activeBabyId ?? ActiveBaby.currentId
+    }
+
+    private func withBabyScope<T>(_ babyId: UUID?, operation: () async throws -> T) async throws -> T {
+        guard let babyId else { return try await operation() }
+        return try await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+            try await operation()
+        }
     }
 }
 

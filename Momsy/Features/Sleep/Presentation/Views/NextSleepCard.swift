@@ -69,7 +69,7 @@ struct NextSleepCard: View {
                 forecastContent
             }
         }
-        .bbCard()
+        .bbCard(pad: 16, bg: Color.white.opacity(0.92), radius: 24)
     }
 
     private var forecastContent: some View {

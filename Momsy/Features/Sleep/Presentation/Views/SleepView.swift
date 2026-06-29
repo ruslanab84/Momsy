@@ -5,11 +5,21 @@ struct SleepView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
+
     @State private var showAddManual = false
 
     var body: some View {
         ZStack {
-            Color(.systemBackground).ignoresSafeArea()
+            Color.bbLilac.ignoresSafeArea()
+            Color.bbCreamSoft
+                .opacity(0.22)
+                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                Color.bbLilac
+                    .frame(height: 470)
+                Color.bbCreamSoft
+            }
+            .ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
@@ -54,164 +64,277 @@ struct SleepView: View {
     // MARK: - Top Bar
 
     private var topBar: some View {
-        HStack {
+        HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(loc.strings.sleepTracker)
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInkMute)
+                    .foregroundColor(Color.bbInk.opacity(0.58))
                     .kerning(0.5)
                 Text(loc.strings.sleep)
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbLilacDeep)
+                    .foregroundColor(.bbInk)
             }
             Spacer()
             Button { showAddManual = true } label: {
-                Text(loc.strings.enterManuallyLabel)
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbLilacDeep)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                    .padding(.horizontal, 12)
-                    .frame(height: 36)
-                    .background(Color.bbLilac.opacity(0.25))
-                    .clipShape(Capsule())
+                HStack(spacing: 6) {
+                    Image(systemName: "square.and.pencil")
+                        .font(.system(size: 12, weight: .heavy))
+                    Text(loc.strings.enterManuallyLabel)
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .foregroundColor(.bbInk)
+                .padding(.horizontal, 14)
+                .frame(height: 38)
+                .background(Color.white.opacity(0.76))
+                .clipShape(Capsule())
+                .bbShadowSoft()
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SleepPressButtonStyle())
+
             Button { dismiss() } label: {
                 Circle()
-                    .fill(Color.bbLilac.opacity(0.25))
-                    .frame(width: 36, height: 36)
+                    .fill(Color.white.opacity(0.78))
+                    .frame(width: 44, height: 44)
                     .overlay(
                         Image(systemName: "xmark")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.bbLilacDeep)
+                            .font(.system(size: 14, weight: .heavy))
+                            .foregroundColor(.bbInk)
                     )
+                    .bbShadowSoft()
             }
+            .buttonStyle(SleepPressButtonStyle())
         }
     }
 
     // MARK: - Stats Row
 
     private var statsRow: some View {
-        HStack(spacing: 0) {
-            statCell(
+        HStack(spacing: 12) {
+            statTile(
+                icon: "clock.fill",
                 label: loc.strings.totalToday,
-                value: vm.totalSleepToday
+                value: vm.totalSleepToday,
+                tint: .bbLilacDeep
             )
-            Rectangle()
-                .fill(Color.bbLilac.opacity(0.4))
-                .frame(width: 1, height: 44)
-            statCell(
+
+            statTile(
+                icon: "number",
                 label: loc.strings.sessions,
-                value: "\(vm.todayEntries.filter { $0.endDate != nil }.count)"
+                value: "\(vm.todayEntries.filter { $0.endDate != nil }.count)",
+                tint: .bbSkyDeep
             )
         }
-        .padding(.vertical, 14)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private func statCell(label: String, value: String) -> some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(.system(size: 22, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbLilacDeep)
-            Text(label)
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .foregroundColor(.bbInkMute)
+    private func statTile(icon: String, label: String, value: String, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundColor(tint)
+                .frame(width: 32, height: 32)
+                .background(tint.opacity(0.13))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbInk)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                Text(label)
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInkMute)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.white.opacity(0.92))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.60), lineWidth: 1)
+        )
+        .bbShadowSoft()
     }
 
     // MARK: - Timer Block
 
     private var timerBlock: some View {
-        VStack(spacing: 8) {
-            if vm.isSleepActive {
-                HStack(spacing: 8) {
-                    Circle()
-                        .fill(Color.white.opacity(0.85))
-                        .frame(width: 8, height: 8)
-                    Text(loc.strings.sleeping)
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.8))
+        VStack(spacing: 16) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(vm.isSleepActive ? Color.bbMintDeep : Color.bbButterDeep)
+                    .frame(width: 8, height: 8)
+                Text(vm.isSleepActive ? loc.strings.sleeping.uppercased() : vm.lastSleepSubtitle.uppercased())
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundColor(Color.bbInk.opacity(0.62))
+                    .kerning(1)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Color.white.opacity(0.38))
+            .clipShape(Capsule())
+
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.16))
+                    .frame(width: 274, height: 274)
+
+                Circle()
+                    .stroke(Color.white.opacity(0.30), lineWidth: 18)
+                    .frame(width: 246, height: 246)
+
+                Circle()
+                    .stroke(Color.white.opacity(vm.isSleepActive ? 0.88 : 0.52),
+                            style: StrokeStyle(lineWidth: 18, lineCap: .round))
+                    .frame(width: 246, height: 246)
+
+                VStack(spacing: 8) {
+                    Image(systemName: vm.isSleepActive ? "moon.zzz.fill" : "moon.stars.fill")
+                        .font(.system(size: 20, weight: .heavy))
+                        .foregroundColor(.bbLilacDeep)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.54))
+                        .clipShape(Circle())
+
+                    Text(vm.isSleepActive ? vm.sleepTimerString : vm.lastSleepDurationString)
+                        .font(.system(size: vm.isSleepActive ? 56 : 50, weight: .heavy, design: vm.isSleepActive ? .monospaced : .rounded))
+                        .foregroundColor(.bbInk)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+                        .contentTransition(.numericText())
+                        .animation(.linear(duration: 0.3), value: vm.sleepSeconds)
+
+                    Text(vm.isSleepActive ? loc.strings.asleep : vm.lastSleepSubtitle)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(Color.bbInk.opacity(0.58))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
                 }
-                Text(vm.sleepTimerString)
-                    .font(.system(size: 60, weight: .heavy, design: .monospaced))
-                    .foregroundColor(.white)
-                    .contentTransition(.numericText())
-                    .animation(.linear(duration: 0.3), value: vm.sleepSeconds)
-            } else {
-                Text(vm.lastSleepDurationString)
-                    .font(.system(size: 56, weight: .heavy, design: .rounded))
-                    .foregroundColor(.white)
-                Text(vm.lastSleepSubtitle)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
+                .padding(.horizontal, 24)
             }
         }
+        .padding(.vertical, 18)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
-        .background(Color.bbLilac)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(Color.white.opacity(0.14))
+        .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .stroke(Color.white.opacity(0.20), lineWidth: 1)
+        )
     }
 
     // MARK: - Quality Picker
 
     private var qualityPicker: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(loc.strings.sleepQuality)
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInkMute)
-                .kerning(0.5)
-            HStack(spacing: 8) {
-                ForEach(SleepQuality.allCases, id: \.self) { q in
-                    Button {
-                        withAnimation(.spring(response: 0.3)) { vm.selectedQuality = q }
-                    } label: {
-                        Text(q.localizedLabel(loc.strings))
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(vm.selectedQuality == q ? .bbLilacDeep : .bbInkSoft)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .background(vm.selectedQuality == q ? Color.white : Color.bbLilac.opacity(0.25))
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .animation(.spring(response: 0.25), value: vm.selectedQuality)
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel(loc.strings.sleepQuality)
+
+            HStack(spacing: 10) {
+                ForEach(SleepQuality.allCases, id: \.self) { quality in
+                    qualityButton(quality)
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color.bbLilac.opacity(0.15))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(16)
+        .background(Color.white.opacity(0.92))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .bbShadowSoft()
+    }
+
+    private func qualityButton(_ quality: SleepQuality) -> some View {
+        let isSelected = vm.selectedQuality == quality
+        let tint = accent(for: quality)
+
+        return Button {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.88)) {
+                vm.selectedQuality = quality
+            }
+        } label: {
+            VStack(spacing: 8) {
+                Image(systemName: icon(for: quality))
+                    .font(.system(size: 15, weight: .heavy))
+                    .foregroundColor(isSelected ? tint : .bbInkMute)
+                    .frame(width: 34, height: 34)
+                    .background(isSelected ? tint.opacity(0.16) : Color.bbCreamSoft)
+                    .clipShape(Circle())
+
+                Text(quality.localizedLabel(loc.strings))
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundColor(isSelected ? tint : .bbInkSoft)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.66)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 92)
+            .background(isSelected ? tint.opacity(0.10) : Color.bbCreamSoft.opacity(0.72))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(isSelected ? tint.opacity(0.28) : Color.bbInk.opacity(0.05), lineWidth: 1)
+            )
+        }
+        .buttonStyle(SleepPressButtonStyle())
     }
 
     // MARK: - Action Button
 
     private var actionButton: some View {
         Button {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
                 if vm.isSleepActive { vm.stop() } else { vm.start() }
             }
         } label: {
-            HStack(spacing: 10) {
-                Image(systemName: vm.isSleepActive ? "stop.fill" : "moon.fill")
-                    .font(.system(size: 16, weight: .bold))
-                Text(vm.isSleepActive ? loc.strings.stopSleep : loc.strings.sleep)
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
-            }
-            .foregroundColor(vm.isSleepActive ? .bbLilacDeep : .white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 18)
-            .background(vm.isSleepActive ? Color.bbLilac.opacity(0.25) : Color.bbLilacDeep)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .animation(.easeInOut(duration: 0.2), value: vm.isSleepActive)
+            Label(vm.isSleepActive ? loc.strings.stopSleep : loc.strings.sleep,
+                  systemImage: vm.isSleepActive ? "stop.fill" : "moon.fill")
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .foregroundColor(vm.isSleepActive ? .bbLilacDeep : .white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 62)
+                .background(vm.isSleepActive ? Color.white.opacity(0.90) : Color.bbLilacDeep)
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .bbShadowSoft()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SleepPressButtonStyle())
     }
 
+    private func sectionLabel(_ label: String) -> some View {
+        Text(label)
+            .font(.system(size: 11, weight: .heavy, design: .rounded))
+            .foregroundColor(.bbInkMute)
+            .kerning(0.5)
+            .textCase(.uppercase)
+    }
+
+    private func accent(for quality: SleepQuality) -> Color {
+        switch quality {
+        case .good:     return .bbMintDeep
+        case .normal:   return .bbLilacDeep
+        case .restless: return .bbRoseDeep
+        }
+    }
+
+    private func icon(for quality: SleepQuality) -> String {
+        switch quality {
+        case .good:     return "sparkles"
+        case .normal:   return "moon.fill"
+        case .restless: return "wind"
+        }
+    }
+}
+
+private struct SleepPressButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
 }
 
 #Preview {

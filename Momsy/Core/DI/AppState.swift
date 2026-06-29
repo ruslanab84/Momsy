@@ -36,7 +36,7 @@ final class AppState: ObservableObject {
         activeBabyId = ActiveBaby.currentId
         babyProfile = activeChild()
         if let p = babyProfile {
-            WidgetDataStore.shared.setBabyInfo(name: p.name, birthDate: p.birthDate)
+            WidgetDataStore.shared.setBabyInfo(id: p.id, name: p.name, birthDate: p.birthDate)
         }
     }
 
@@ -67,7 +67,7 @@ final class AppState: ObservableObject {
         if !babies.contains(where: { $0.id == activeBabyId }) { activeBabyId = profile.id }
         if activeBabyId == profile.id {
             babyProfile = profile
-            WidgetDataStore.shared.setBabyInfo(name: profile.name, birthDate: profile.birthDate)
+            WidgetDataStore.shared.setBabyInfo(id: profile.id, name: profile.name, birthDate: profile.birthDate)
         }
     }
 
@@ -78,7 +78,7 @@ final class AppState: ObservableObject {
         activeBabyId = id
         babyProfile = activeChild()
         if let p = babyProfile {
-            WidgetDataStore.shared.setBabyInfo(name: p.name, birthDate: p.birthDate)
+            WidgetDataStore.shared.setBabyInfo(id: p.id, name: p.name, birthDate: p.birthDate)
         }
     }
 

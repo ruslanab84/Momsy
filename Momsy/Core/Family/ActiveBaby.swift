@@ -15,12 +15,10 @@ enum ActiveBaby {
     /// Maximum number of children per family.
     static let maxChildren = 5
 
-    /// Task-scoped target for a background roster sync. Bound (via `withValue`) only
-    /// for the span of one child's sync inside `CloudSyncDownloader.downloadAllBabies`,
-    /// so the sync can retarget the cloud path and local scope per child WITHOUT moving
-    /// the user's persisted selection. A concurrent user write runs in a separate task
-    /// tree, never inherits this binding, and so always reads the real active child —
-    /// closing the window where a foreground resync could misattribute a new log.
+    /// Task-scoped target for one child-specific operation. Bound (via `withValue`) for
+    /// background roster syncs and short foreground writes that already captured the
+    /// intended child, so local scope/cloud paths can stay stable without moving the
+    /// user's persisted selection.
     @TaskLocal static var syncTargetOverride: UUID?
 
     static var currentId: UUID? {

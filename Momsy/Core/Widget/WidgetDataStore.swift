@@ -55,19 +55,35 @@ final class WidgetDataStore {
 
     // MARK: - Sleep writes (called from SleepViewModel)
 
-    func setSleepActive(startDate: Date) {
+    func setSleepActive(startDate: Date, babyId: UUID? = nil) {
+        defaults.set(true, forKey: sleepActiveKey(for: babyId))
+        defaults.set(startDate.timeIntervalSinceReferenceDate, forKey: sleepStartKey(for: babyId))
+        if let babyId {
+            defaults.set(babyId.uuidString, forKey: "w_sleep_active_baby_id")
+        }
         defaults.set(true, forKey: "w_sleep_active")
         defaults.set(startDate.timeIntervalSinceReferenceDate, forKey: "w_sleep_start")
         reload()
     }
 
-    func clearSleep(lastDurationSeconds: Int) {
-        defaults.set(false, forKey: "w_sleep_active")
-        defaults.set(lastDurationSeconds, forKey: "w_last_sleep_dur")
+    func clearSleep(lastDurationSeconds: Int, babyId: UUID? = nil) {
+        defaults.set(false, forKey: sleepActiveKey(for: babyId))
+        defaults.set(lastDurationSeconds, forKey: sleepDurationKey(for: babyId))
+        if babyId == nil || sleepActiveBabyId == nil || sleepActiveBabyId == babyId {
+            defaults.set(false, forKey: "w_sleep_active")
+            defaults.set(lastDurationSeconds, forKey: "w_last_sleep_dur")
+            defaults.removeObject(forKey: "w_sleep_active_baby_id")
+        }
         reload()
     }
 
-    func setLastSleepEnd(_ date: Date) {
+    func setLastSleepEnd(_ date: Date, babyId: UUID? = nil) {
+        defaults.set(date.timeIntervalSinceReferenceDate, forKey: sleepEndKey(for: babyId))
+        if let babyId {
+            defaults.set(babyId.uuidString, forKey: "w_last_sleep_end_baby_id")
+        } else {
+            defaults.removeObject(forKey: "w_last_sleep_end_baby_id")
+        }
         defaults.set(date.timeIntervalSinceReferenceDate, forKey: "w_last_sleep_end")
     }
 
@@ -101,10 +117,17 @@ final class WidgetDataStore {
 
     // MARK: - Baby info writes (called from AppState)
 
-    func setBabyInfo(name: String, birthDate: Date) {
+    func setBabyInfo(id: UUID?, name: String, birthDate: Date) {
+        if let id {
+            defaults.set(id.uuidString, forKey: "w_baby_id")
+        }
         defaults.set(name, forKey: "w_baby_name")
         defaults.set(birthDate.timeIntervalSinceReferenceDate, forKey: "w_baby_birth")
         reload()
+    }
+
+    func setBabyInfo(name: String, birthDate: Date) {
+        setBabyInfo(id: currentBabyId, name: name, birthDate: birthDate)
     }
 
     // MARK: - Diaper writes (called from TodayViewModel)
@@ -133,11 +156,28 @@ final class WidgetDataStore {
     }
 
     var sleepState: SleepWidgetState {
-        guard defaults.bool(forKey: "w_sleep_active") else {
-            let dur = defaults.integer(forKey: "w_last_sleep_dur")
+        sleepState(for: currentBabyId)
+    }
+
+    func sleepState(for babyId: UUID?) -> SleepWidgetState {
+        let activeKey = sleepActiveKey(for: babyId)
+        let hasScopedState = babyId != nil && defaults.object(forKey: activeKey) != nil
+        if hasScopedState || babyId == nil {
+            return sleepState(activeKey: activeKey, startKey: sleepStartKey(for: babyId), durationKey: sleepDurationKey(for: babyId))
+        }
+        if let sleepActiveBabyId, sleepActiveBabyId != babyId {
+            let dur = defaults.integer(forKey: sleepDurationKey(for: babyId))
             return .idle(lastDurationSeconds: dur > 0 ? dur : nil)
         }
-        let ti = defaults.double(forKey: "w_sleep_start")
+        return sleepState(activeKey: "w_sleep_active", startKey: "w_sleep_start", durationKey: "w_last_sleep_dur")
+    }
+
+    private func sleepState(activeKey: String, startKey: String, durationKey: String) -> SleepWidgetState {
+        guard defaults.bool(forKey: activeKey) else {
+            let dur = defaults.integer(forKey: durationKey)
+            return .idle(lastDurationSeconds: dur > 0 ? dur : nil)
+        }
+        let ti = defaults.double(forKey: startKey)
         guard ti > 0 else { return .idle(lastDurationSeconds: nil) }
         return .active(startDate: Date(timeIntervalSinceReferenceDate: ti))
     }
@@ -166,6 +206,10 @@ final class WidgetDataStore {
         defaults.string(forKey: "w_baby_name") ?? ""
     }
 
+    var currentBabyId: UUID? {
+        defaults.string(forKey: "w_baby_id").flatMap(UUID.init)
+    }
+
     var babyBirthDate: Date? {
         let ti = defaults.double(forKey: "w_baby_birth")
         guard ti > 0 else { return nil }
@@ -177,7 +221,19 @@ final class WidgetDataStore {
     }
 
     var lastSleepEndDate: Date? {
-        let ti = defaults.double(forKey: "w_last_sleep_end")
+        lastSleepEndDate(for: currentBabyId)
+    }
+
+    func lastSleepEndDate(for babyId: UUID?) -> Date? {
+        let key = sleepEndKey(for: babyId)
+        let scopedValue = defaults.double(forKey: key)
+        let fallbackValue: Double
+        if babyId == nil || lastSleepEndBabyId == nil || lastSleepEndBabyId == babyId {
+            fallbackValue = defaults.double(forKey: "w_last_sleep_end")
+        } else {
+            fallbackValue = 0
+        }
+        let ti = scopedValue > 0 ? scopedValue : fallbackValue
         guard ti > 0 else { return nil }
         return Date(timeIntervalSinceReferenceDate: ti)
     }
@@ -195,6 +251,35 @@ final class WidgetDataStore {
         let ti = defaults.double(forKey: "w_last_feeding_date")
         let date = ti > 0 ? Date(timeIntervalSinceReferenceDate: ti) : nil
         return .idle(lastFeedingDate: date)
+    }
+
+    private var sleepActiveBabyId: UUID? {
+        defaults.string(forKey: "w_sleep_active_baby_id").flatMap(UUID.init)
+    }
+
+    private var lastSleepEndBabyId: UUID? {
+        defaults.string(forKey: "w_last_sleep_end_baby_id").flatMap(UUID.init)
+    }
+
+    private func scopedSleepKey(_ base: String, for babyId: UUID?) -> String {
+        guard let babyId else { return base }
+        return "\(base)_\(babyId.uuidString)"
+    }
+
+    private func sleepActiveKey(for babyId: UUID?) -> String {
+        scopedSleepKey("w_sleep_active", for: babyId)
+    }
+
+    private func sleepStartKey(for babyId: UUID?) -> String {
+        scopedSleepKey("w_sleep_start", for: babyId)
+    }
+
+    private func sleepDurationKey(for babyId: UUID?) -> String {
+        scopedSleepKey("w_last_sleep_dur", for: babyId)
+    }
+
+    private func sleepEndKey(for babyId: UUID?) -> String {
+        scopedSleepKey("w_last_sleep_end", for: babyId)
     }
 
     private func reload() {

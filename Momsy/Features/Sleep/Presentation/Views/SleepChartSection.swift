@@ -24,9 +24,10 @@ struct SleepChartSection: View {
                 statsRow
             }
         }
-        .padding(14)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(16)
+        .background(Color.white.opacity(0.92))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .bbShadowSoft()
     }
 
     // MARK: - Header
@@ -75,8 +76,8 @@ struct SleepChartSection: View {
                 .font(.system(size: 12, weight: .bold, design: .rounded))
                 .foregroundColor(selectedPeriod == index ? .white : .bbInkSoft)
                 .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(selectedPeriod == index ? Color.bbLilacDeep : Color.bbLilac.opacity(0.15))
+                .padding(.vertical, 8)
+                .background(selectedPeriod == index ? Color.bbLilacDeep : Color.bbCreamSoft)
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)

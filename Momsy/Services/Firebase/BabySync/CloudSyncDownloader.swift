@@ -216,7 +216,10 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
             // are pushed to the cloud immediately, so the cloud copy is current.
             if remote != local {
                 try? await babyRepo.saveProfile(remote)
-                WidgetDataStore.shared.setBabyInfo(name: remote.name, birthDate: remote.birthDate)
+                let activeId = UserDefaults.standard.string(forKey: kBabyIdDefaultsKey).flatMap(UUID.init)
+                if activeId == nil || activeId == remote.id {
+                    WidgetDataStore.shared.setBabyInfo(id: remote.id, name: remote.name, birthDate: remote.birthDate)
+                }
                 NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
             }
         } else if let local {

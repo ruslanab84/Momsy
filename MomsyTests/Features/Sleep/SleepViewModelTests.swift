@@ -2,21 +2,61 @@ import Testing
 @testable import Momsy
 import Foundation
 
+private final class BabyScopedSleepRepository: SleepRepository {
+    private struct StoredEntry {
+        let babyId: UUID
+        var entry: SleepEntry
+    }
+
+    private var storedEntries: [StoredEntry] = []
+
+    func entries(for babyId: UUID) -> [SleepEntry] {
+        storedEntries.filter { $0.babyId == babyId }.map(\.entry)
+    }
+
+    func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
+        let scope = ActiveBaby.scope
+        return storedEntries
+            .filter { $0.babyId == scope && $0.entry.startDate >= from && $0.entry.startDate < to }
+            .map(\.entry)
+    }
+
+    func add(_ entry: SleepEntry) async throws {
+        storedEntries.append(StoredEntry(babyId: ActiveBaby.scope, entry: entry))
+    }
+
+    func upsert(_ entries: [SleepEntry]) async throws {
+        for entry in entries where !storedEntries.contains(where: { $0.entry.id == entry.id }) {
+            storedEntries.append(StoredEntry(babyId: ActiveBaby.scope, entry: entry))
+        }
+    }
+
+    func update(_ entry: SleepEntry) async throws {
+        guard let index = storedEntries.firstIndex(where: { $0.entry.id == entry.id }) else { return }
+        storedEntries[index].entry = entry
+    }
+
+    func delete(id: UUID) async throws {
+        storedEntries.removeAll { $0.entry.id == id }
+    }
+}
+
 @Suite("SleepViewModel", .serialized)
 @MainActor
 struct SleepViewModelTests {
 
-    func makeVM(repo: MockSleepRepository = MockSleepRepository(),
-                babyRepo: MockBabyRepository = MockBabyRepository()) -> SleepViewModel {
-        let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: babyRepo),
-                                getAllBabies: GetAllBabiesUseCase(repository: babyRepo))
+    func makeVM(repo: any SleepRepository = MockSleepRepository(),
+                babyRepo: MockBabyRepository = MockBabyRepository(),
+                appState: AppState? = nil) -> SleepViewModel {
+        let state = appState ?? AppState(getBabyProfile: GetBabyProfileUseCase(repository: babyRepo),
+                                         getAllBabies: GetAllBabiesUseCase(repository: babyRepo))
         return SleepViewModel(
             startSleep: StartSleepUseCase(repository: repo),
             stopSleep: StopSleepUseCase(repository: repo),
             getSleep: GetSleepEntriesUseCase(repository: repo),
             addManualSleep: AddManualSleepUseCase(repository: repo),
             reconcileStaleSleep: ReconcileStaleSleepUseCase(repository: repo),
-            appState: appState,
+            appState: state,
             predictNextSleep: PredictNextSleepUseCase(
                 getSleep: GetSleepEntriesUseCase(repository: repo),
                 engine: DeterministicSleepForecastEngine()
@@ -52,6 +92,55 @@ struct SleepViewModelTests {
         try await Task.sleep(nanoseconds: 50_000_000)
         #expect(vm.saveError != nil)
         #expect(!vm.isSleepActive)
+    }
+
+    @Test("switching active baby detaches visible timer and keeps sessions scoped")
+    func switchingActiveBabyKeepsSeparateSleepTimers() async throws {
+        ActiveBaby.currentId = nil
+        WidgetDataStore.shared.clearAll()
+        defer {
+            ActiveBaby.currentId = nil
+            WidgetDataStore.shared.clearAll()
+        }
+
+        let babyA = BabyProfile(name: "A", birthDate: Date(timeIntervalSince1970: 1_000))
+        let babyB = BabyProfile(name: "B", birthDate: Date(timeIntervalSince1970: 2_000))
+        let babyRepo = MockBabyRepository(initialProfiles: [babyA, babyB])
+        let appState = AppState(
+            getBabyProfile: GetBabyProfileUseCase(repository: babyRepo),
+            getAllBabies: GetAllBabiesUseCase(repository: babyRepo)
+        )
+        ActiveBaby.currentId = babyA.id
+        await appState.load()
+
+        let repo = BabyScopedSleepRepository()
+        let vm = makeVM(repo: repo, appState: appState)
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        vm.start()
+        try await Task.sleep(nanoseconds: 100_000_000)
+        #expect(vm.isSleepActive)
+        #expect(repo.entries(for: babyA.id).count == 1)
+
+        vm.sleepSeconds = 42
+        appState.setActive(babyB.id)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        #expect(!vm.isSleepActive)
+        #expect(vm.sleepSeconds == 0)
+        #expect(repo.entries(for: babyB.id).isEmpty)
+
+        vm.start()
+        try await Task.sleep(nanoseconds: 100_000_000)
+        #expect(vm.isSleepActive)
+        #expect(repo.entries(for: babyB.id).count == 1)
+
+        appState.setActive(babyA.id)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        #expect(vm.isSleepActive)
+        #expect(repo.entries(for: babyA.id).count == 1)
+        #expect(repo.entries(for: babyB.id).count == 1)
     }
 
     // MARK: - stop
