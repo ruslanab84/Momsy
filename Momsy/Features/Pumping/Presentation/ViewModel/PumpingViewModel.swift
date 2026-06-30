@@ -59,7 +59,9 @@ final class PumpingViewModel: ObservableObject {
                 let finished = try await repository.stop(entry, volumeML: savedML)
                 let dur = finished.durationMinutes
                 let label = lm.strings.pumpingLogEntry(dur: dur, ml: savedML)
-                quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .pump, label: label))
+                quickLogRepo.append(
+                    QuickLogEntry(id: finished.id, time: finished.endDate ?? Date(), kind: .pump, label: label)
+                )
                 pushPumpingToFirestore(entry: finished)
                 await loadTodayEntries()
             } catch {
@@ -101,7 +103,12 @@ final class PumpingViewModel: ObservableObject {
                 let entry = try await repository.logManual(
                     date: date, durationMinutes: durationMinutes,
                     side: side, volumeML: volumeML)
+                pushPumpingToFirestore(entry: entry)
                 if Calendar.current.isDateInToday(entry.date) {
+                    let label = lm.strings.pumpingLogEntry(dur: entry.durationMinutes, ml: volumeML)
+                    quickLogRepo.append(
+                        QuickLogEntry(id: entry.id, time: entry.endDate ?? entry.date, kind: .pump, label: label)
+                    )
                     todayEntries.append(entry)
                     todayEntries.sort { $0.date < $1.date }
                 }

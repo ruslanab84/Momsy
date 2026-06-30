@@ -45,6 +45,16 @@ final class QuickLogRepository {
         }
     }
 
+    func remove(ids: Set<UUID>) {
+        guard !ids.isEmpty else { return }
+        var current = load()
+        let originalCount = current.count
+        current.removeAll { ids.contains($0.id) }
+        if current.count != originalCount {
+            persist(current)
+        }
+    }
+
     private func persist(_ entries: [QuickLogEntry]) {
         if let data = try? JSONEncoder().encode(entries) {
             UserDefaults.standard.set(data, forKey: key)

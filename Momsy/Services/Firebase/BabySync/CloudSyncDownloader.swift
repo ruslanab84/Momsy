@@ -310,8 +310,11 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         let waters   = await waterDTOs.compactMap(Self.waterIntakeEntry)
         let leaps    = await leapDTOs.compactMap(Self.leapProgress)
         let visits   = await visitDTOs.compactMap(Self.doctorVisit)
-        let quickToday = (await walkDTOs + bathDTOs + vitaminDTOs + stoolDTOs)
-            .compactMap(Self.todayQuickLog)
+        let quickEventDTOs =
+            (await walkDTOs) + (await bathDTOs) + (await vitaminDTOs) + (await stoolDTOs)
+        let quickToday = quickEventDTOs.compactMap(Self.todayQuickLog)
+            + (await diaperDTOs).compactMap(Self.todayDiaperQuickLog)
+            + (await pumpingDTOs).compactMap(Self.todayPumpingQuickLog)
 
         // Merge into SwiftData on the main actor (shared context is main-actor owned).
         try? await feedingRepo.upsert(feedings)
@@ -338,6 +341,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
             try? await diaperRepo.applyDeletions(deletedIds)
             try? await vaccinationRepo.applyDeletions(deletedIds)
             try? await foodDiaryRepo.applyDeletions(deletedIds)
+            quickLogRepo.remove(ids: deletedIds)
         }
 
         NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
@@ -395,13 +399,16 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
 
     private static func walkEntry(_ dto: QuickEventLogDTO) -> WalkEntry? {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
-        // Quick-event logs only carry a single timestamp; end time isn't synced.
-        return WalkEntry(id: uuid, startDate: dto.domain.loggedAt, endDate: nil)
+        let log = dto.domain
+        let start = log.startDate ?? log.loggedAt
+        return WalkEntry(id: uuid, startDate: start, endDate: log.endDate ?? log.loggedAt)
     }
 
     private static func bathEntry(_ dto: QuickEventLogDTO) -> BathEntry? {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
-        return BathEntry(id: uuid, startDate: dto.domain.loggedAt, endDate: nil)
+        let log = dto.domain
+        let start = log.startDate ?? log.loggedAt
+        return BathEntry(id: uuid, startDate: start, endDate: log.endDate ?? log.loggedAt)
     }
 
     private static func pumpingEntry(_ dto: PumpingLogDTO) -> PumpingEntry? {
@@ -499,5 +506,32 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard Calendar.current.isDateInToday(log.loggedAt) else { return nil }
         let kind = BlobKind(rawValue: log.kind) ?? .star
         return QuickLogEntry(id: uuid, time: log.loggedAt, kind: kind, label: log.label)
+    }
+
+    private static func todayDiaperQuickLog(_ dto: DiaperLogDTO) -> QuickLogEntry? {
+        guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
+        let log = dto.domain
+        guard Calendar.current.isDateInToday(log.loggedAt) else { return nil }
+        let strings = LocalizationManager.shared.strings
+        return QuickLogEntry(
+            id: uuid,
+            time: log.loggedAt,
+            kind: .drop,
+            label: "\(strings.diaper) · \(strings.diaperWet)"
+        )
+    }
+
+    private static func todayPumpingQuickLog(_ dto: PumpingLogDTO) -> QuickLogEntry? {
+        guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
+        let log = dto.domain
+        let time = log.endDate ?? log.date
+        guard Calendar.current.isDateInToday(time) else { return nil }
+        let minutes = max(1, log.durationSeconds / 60)
+        return QuickLogEntry(
+            id: uuid,
+            time: time,
+            kind: .pump,
+            label: LocalizationManager.shared.strings.pumpingLogEntry(dur: minutes, ml: log.volumeML)
+        )
     }
 }

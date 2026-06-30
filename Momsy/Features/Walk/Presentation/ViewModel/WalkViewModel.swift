@@ -112,7 +112,10 @@ final class WalkViewModel: ObservableObject {
                 let finished = try await walkRepository.stop(entry)
                 let dur = finished.durationMinutes ?? 1
                 let label = lm.strings.walkLogEntry(dur: dur)
-                quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .walk, label: label))
+                quickLogRepo.append(
+                    QuickLogEntry(id: finished.id, time: finished.endDate ?? Date(), kind: .walk, label: label)
+                )
+                pushWalkToFirestore(finished, label: label)
                 await loadTodayEntries()
             } catch {
                 saveError = error.localizedDescription
@@ -147,7 +150,10 @@ final class WalkViewModel: ObservableObject {
                 let saved = try await addManualWalkUC.execute(startDate: startDate, endDate: endDate)
                 let dur = saved.durationMinutes ?? 1
                 let label = lm.strings.walkLogEntry(dur: dur)
-                quickLogRepo.append(QuickLogEntry(id: UUID(), time: Date(), kind: .walk, label: label))
+                quickLogRepo.append(
+                    QuickLogEntry(id: saved.id, time: saved.endDate ?? saved.startDate, kind: .walk, label: label)
+                )
+                pushWalkToFirestore(saved, label: label)
                 if Calendar.current.isDateInToday(saved.startDate) {
                     await loadTodayEntries()
                 }
@@ -163,6 +169,25 @@ final class WalkViewModel: ObservableObject {
         let end = cal.date(byAdding: .day, value: 1, to: start) ?? Date()
         if let entries = try? await walkRepository.getEntries(from: start, to: end) {
             todayEntries = entries.sorted { $0.startDate < $1.startDate }
+        }
+    }
+
+    private func pushWalkToFirestore(_ entry: WalkEntry, label: String) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = QuickEventLog(
+            id: entry.id.uuidString,
+            kind: BlobKind.walk.rawValue,
+            loggedAt: entry.endDate ?? entry.startDate,
+            label: label,
+            startDate: entry.startDate,
+            endDate: entry.endDate,
+            addedBy: uid,
+            addedByName: name
+        )
+        Task {
+            try? await BabySyncService().setLog(QuickEventLogDTO(from: log), id: log.id, to: "walkLogs")
         }
     }
 

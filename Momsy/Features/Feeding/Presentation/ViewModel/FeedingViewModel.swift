@@ -161,6 +161,7 @@ final class FeedingViewModel: ObservableObject {
                     todayEntries.append(saved)
                     todayEntries.sort { $0.date < $1.date }
                 }
+                pushFeedingToFirestore(saved)
             } catch {
                 saveError = error.localizedDescription
             }
