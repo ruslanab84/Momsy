@@ -4,8 +4,11 @@ import AuthenticationServices
 // MARK: - Step 4: Sign-In (optional)
 
 struct AuthStep: View {
+    let title: String
+    let subtitle: String
     let isSigningIn: Bool
     let authError: Error?
+    let allowsSkip: Bool
     let prepareAppleRequest: (ASAuthorizationAppleIDRequest) -> Void
     let onAppleCompletion: (Result<ASAuthorization, Error>) -> Void
     let onGoogle: () -> Void
@@ -37,15 +40,7 @@ struct AuthStep: View {
                         .padding(.horizontal, 24)
                 }
 
-                Button(action: onSkip) {
-                    Text(loc.strings.mayBeLater)
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(.bbInkMute)
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 20)
-                }
-                .disabled(isSigningIn)
-                .padding(.bottom, 40)
+                Spacer(minLength: 40)
             }
             .padding(.top, 8)
         }
@@ -57,10 +52,10 @@ struct AuthStep: View {
         VStack(spacing: 8) {
             CuteBlobView(kind: .cloud, size: 64, tone: .bbSky)
                 .padding(.top, 12)
-            Text(loc.strings.authStepTitle)
+            Text(title)
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
-            Text(loc.strings.authStepSubtitle)
+            Text(subtitle)
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkSoft)
                 .multilineTextAlignment(.center)
@@ -80,6 +75,18 @@ struct AuthStep: View {
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
             googleButton
+
+            if allowsSkip {
+                Button(action: onSkip) {
+                    Text(loc.strings.mayBeLater)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 20)
+                }
+                .disabled(isSigningIn)
+                .padding(.top, 8)
+            }
         }
     }
 

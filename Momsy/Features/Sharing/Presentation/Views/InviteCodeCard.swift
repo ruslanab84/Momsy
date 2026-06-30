@@ -6,7 +6,9 @@ struct InviteSheet: View {
     let inviteCode: String
     let inviteURL:  String
     let inviteExpiry: Date
-    let onRegenerate: () -> Void
+    let isSyncing: Bool
+    let onRegenerate: (FamilyRole) -> Void
+    let onRoleChange: (FamilyRole) -> Void
     let onInvite: (FamilyMember) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -95,10 +97,11 @@ struct InviteSheet: View {
                             }
                             .buttonStyle(.plain)
                             .animation(.spring(response: 0.3), value: isCopied)
+                            .disabled(isSyncing)
 
                             Button {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                onRegenerate()
+                                onRegenerate(selectedRole)
                             } label: {
                                 Label(loc.strings.newCode, systemImage: "arrow.clockwise")
                                     .font(.system(size: 12, weight: .bold, design: .rounded))
@@ -109,6 +112,7 @@ struct InviteSheet: View {
                                     .clipShape(Capsule())
                             }
                             .buttonStyle(.plain)
+                            .disabled(isSyncing)
                         }
 
                         HStack(spacing: 6) {
@@ -133,6 +137,7 @@ struct InviteSheet: View {
                             ForEach(FamilyRole.allCases) { role in
                                 Button {
                                     withAnimation(.spring(response: 0.25)) { selectedRole = role }
+                                    onRoleChange(role)
                                 } label: {
                                     VStack(spacing: 6) {
                                         let (blob, tone) = blobsByRole[role] ?? (.star, .bbButter)
@@ -151,6 +156,7 @@ struct InviteSheet: View {
                                     )
                                 }
                                 .buttonStyle(.plain)
+                                .disabled(isSyncing)
                             }
                         }
 
@@ -188,6 +194,7 @@ struct InviteSheet: View {
                             .background(Color.bbSurface)
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
+                        .disabled(isSyncing)
 
                         Button {
                             let (blob, tone) = blobsByRole[selectedRole] ?? (.star, .bbButter)
@@ -211,6 +218,7 @@ struct InviteSheet: View {
                                         .strokeBorder(Color.bbCoralDeep.opacity(0.4), lineWidth: 1.5)
                                 )
                         }
+                        .disabled(isSyncing)
                     }
                 }
                 .padding(20)
@@ -227,6 +235,9 @@ struct InviteSheet: View {
                 ActivityView(items: [inviteURL])
             }
             .onAppear { expiryLabel = formatExpiry(inviteExpiry) }
+            .task(id: inviteCode) {
+                onRoleChange(selectedRole)
+            }
             .task {
                 while !Task.isCancelled {
                     expiryLabel = formatExpiry(inviteExpiry)

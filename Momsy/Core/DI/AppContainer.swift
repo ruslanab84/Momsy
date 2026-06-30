@@ -274,6 +274,10 @@ final class AppContainer {
             "watch_processed_cmd_ids",
             "invite_code",
             "invite_expiry",
+            FirestoreInviteService.codeKey,
+            FirestoreInviteService.expiryKey,
+            FirestoreInviteService.syncedCodeKey,
+            PendingFamilyInviteStore.codeKey,
         ]
         exactKeys.forEach { defaults.removeObject(forKey: $0) }
 
@@ -328,6 +332,18 @@ final class AppContainer {
             appState: appState,
             authManager: authManager,
             syncRepo: babySyncRepository,
+            inviteService: inviteService,
+            pendingInviteStore: PendingFamilyInviteStore(),
+            ensureFamilyReady: { [unowned self] displayName in
+                try await self.ensureFamilyReady(displayName: displayName)
+            },
+            joinFamily: { [unowned self] code, force in
+                try await self.joinFamilyFromOnboarding(code: code, force: force)
+            },
+            syncAfterJoiningFamily: { [unowned self] in
+                await self.cloudSyncDownloader.forceResyncAll()
+                await self.appState.load()
+            },
             analytics: analytics,
             pushNotifications: pushNotifications,
             recoverPendingAccountDeletion: { [unowned self] in
@@ -335,6 +351,18 @@ final class AppContainer {
             },
             onDone: onDone
         )
+    }
+
+    func ensureFamilyReady(displayName: String) async throws {
+        await authManager.signInAnonymouslyIfNeeded()
+        guard let uid = authManager.currentUID else { throw FamilyError.noFamilyId }
+        try await FamilyManager.shared.setup(uid: uid, displayName: displayName)
+    }
+
+    func joinFamilyFromOnboarding(code: String, force: Bool = false) async throws {
+        await authManager.signInAnonymouslyIfNeeded()
+        guard let uid = authManager.currentUID else { throw FamilyError.noFamilyId }
+        try await FamilyManager.shared.joinFamily(code: code, uid: uid, force: force)
     }
 
     func makeDiaryViewModel() -> DiaryViewModel {

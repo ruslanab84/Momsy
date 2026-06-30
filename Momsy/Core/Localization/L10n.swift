@@ -751,6 +751,16 @@ struct L10n {
     var helloMama: String       { s("Hello, mama!",  "Привет, мама!", "Hallo, Mama!",  "¡Hola, mamá!", "Bonjour, maman !", "Olá, mamã!", "你好，妈妈！") }
     var howOldIsYourBaby: String { s("How old is your baby?\nWe'll tailor everything to their age.", "Сколько малышу?\nМы всё адаптируем под его возраст.", "Wie alt ist Ihr Baby?\nWir passen alles an.", "¿Cuántos meses tiene tu bebé?\nLo adaptaremos todo a su edad.", "Quel âge a votre bébé ?\nNous adapterons tout à son âge.", "Que idade tem o seu bebé?\nVamos adaptar tudo à idade dele.", "宝宝多大了？\n我们会根据他的年龄量身定制一切。") }
     var ageChangeNote: String   { s("Age can be changed later. We'll highlight developmental leaps specifically for you.", "Возраст можно изменить позже. Мы выделим скачки развития специально для вас.", "Alter kann später geändert werden.", "La edad se puede cambiar después. Destacaremos los saltos del desarrollo especialmente para ti.", "L’âge peut être modifié plus tard. Nous mettrons en avant les bonds de développement spécialement pour vous.", "A idade pode ser alterada mais tarde. Vamos destacar os saltos de desenvolvimento especialmente para si.", "年龄之后可以修改。我们会专门为您标出发育猛长期。") }
+    var haveInviteLink: String  { s("I have a family invite link", "У меня есть семейная ссылка", "Ich habe einen Familienlink", "Tengo un enlace familiar", "J’ai un lien familial", "Tenho uma ligação familiar", "我有家庭邀请链接") }
+    var joinOnboardingTitle: String { s("Join your family", "Войти в семью", "Familie beitreten", "Unirse a tu familia", "Rejoindre votre famille", "Entrar na sua família", "加入您的家庭") }
+    var joinOnboardingSubtitle: String { s("Paste the Momsy invite code or continue with the link you opened.", "Вставьте код Momsy или продолжите со ссылкой, которую открыли.", "Füge den Momsy-Code ein oder fahre mit dem geöffneten Link fort.", "Pega el código de Momsy o continúa con el enlace que abriste.", "Collez le code Momsy ou continuez avec le lien ouvert.", "Cole o código Momsy ou continue com a ligação aberta.", "粘贴 Momsy 邀请码，或继续使用刚打开的链接。") }
+    var inviteCodeLabel: String { s("INVITE CODE OR LINK", "КОД ИЛИ ССЫЛКА", "CODE ODER LINK", "CÓDIGO O ENLACE", "CODE OU LIEN", "CÓDIGO OU LIGAÇÃO", "邀请码或链接") }
+    var createNewBabyProfile: String { s("Set up a new baby profile", "Создать новый профиль малыша", "Neues Baby-Profil einrichten", "Crear un nuevo perfil del bebé", "Créer un nouveau profil bébé", "Criar um novo perfil do bebé", "创建新的宝宝资料") }
+    var inviteOnboardingTitle: String { s("Invite your family", "Пригласите семью", "Familie einladen", "Invita a tu familia", "Invitez votre famille", "Convide a família", "邀请家人") }
+    var inviteOnboardingSubtitle: String { s("Create a private link for another caregiver. You can skip this and invite them later.", "Создайте приватную ссылку для второго взрослого. Можно пропустить и пригласить позже.", "Erstelle einen privaten Link für eine weitere Betreuungsperson. Du kannst das überspringen.", "Crea un enlace privado para otro cuidador. Puedes omitirlo e invitarlo después.", "Créez un lien privé pour une autre personne. Vous pouvez passer cette étape.", "Crie uma ligação privada para outro cuidador. Pode ignorar e convidar depois.", "为另一位照护者创建私人链接。也可以稍后再邀请。") }
+    var generateInviteLink: String { s("Generate link", "Создать ссылку", "Link erstellen", "Generar enlace", "Générer le lien", "Gerar ligação", "生成链接") }
+    var inviteLinkNotGenerated: String { s("No invite link yet", "Ссылка ещё не создана", "Noch kein Einladungslink", "Aún no hay enlace", "Aucun lien pour l’instant", "Ainda sem ligação", "尚未生成邀请链接") }
+    var skipInviteForNow: String { s("Skip for now", "Пока пропустить", "Vorerst überspringen", "Omitir por ahora", "Passer pour l’instant", "Ignorar por agora", "暂时跳过") }
     var whatsYourBabyName: String { s("What's your baby's name?", "Как зовут малыша?", "Wie heißt Ihr Baby?", "¿Cómo se llama tu bebé?", "Comment s’appelle votre bébé ?", "Como se chama o seu bebé?", "宝宝叫什么名字？") }
     var nameBirthHelp: String   { s("Name and birth date help track\nleaps and development more accurately.", "Имя и дата рождения помогают точнее\nотслеживать скачки и развитие.", "Name und Geburtsdatum helfen genauer.", "El nombre y la fecha de nacimiento ayudan a seguir\nlos saltos y el desarrollo con más precisión.", "Le prénom et la date de naissance aident à suivre\nles bonds et le développement plus précisément.", "O nome e a data de nascimento ajudam a acompanhar\nos saltos e o desenvolvimento com mais precisão.", "姓名和出生日期有助于更准确地\n追踪猛长期和发育。") }
     var babyNameLabel: String   { s("BABY'S NAME",   "ИМЯ МАЛЫША",   "NAME DES BABYS", "NOMBRE DEL BEBÉ", "PRÉNOM DU BÉBÉ", "NOME DO BEBÉ", "宝宝的名字") }
@@ -765,6 +775,9 @@ struct L10n {
     var greetNanny: String      { s("Nanny!",        "Няня!",         "Nanny!",        "¡Niñera!", "Nounou !", "Ama!", "保姆！") }
     var greetDefault: String    { s("Hello!",        "Привет!",       "Hallo!",        "¡Hola!", "Bonjour !", "Olá!", "你好！") }
     var allSet: String          { s("All set,",      "Всё готово,",   "Fertig,",       "Todo listo,", "Tout est prêt,", "Tudo pronto,", "一切就绪，") }
+    var familyJoinedReadyTitle: String { s("You're in,", "Вы в семье,", "Du bist drin,", "Ya estás dentro,", "Vous êtes dedans,", "Entrou,", "您已加入，") }
+    var familyJoinedReadySubtitle: String { s("family is ready", "семья готова", "Familie bereit", "familia lista", "famille prête", "família pronta", "家庭已准备好") }
+    var familyJoinedReadyFootnote: String { s("Family data is synced from the shared Momsy workspace.", "Данные семьи синхронизированы из общего пространства Momsy.", "Familiendaten werden aus dem gemeinsamen Momsy-Bereich synchronisiert.", "Los datos familiares se sincronizan desde el espacio compartido de Momsy.", "Les données familiales sont synchronisées depuis l’espace partagé Momsy.", "Os dados da família são sincronizados a partir do espaço partilhado Momsy.", "家庭数据已从共享的 Momsy 空间同步。") }
     var age: String             { s("Age",           "Возраст",       "Alter",         "Edad", "Âge", "Idade", "年龄") }
     var caregiver: String       { s("Caregiver",     "Кто следит",    "Betreuer",      "Cuidador", "Personne en charge", "Cuidador", "照护者") }
     var stage: String           { s("Stage",         "Стадия",        "Stufe",         "Etapa", "Étape", "Fase", "阶段") }
@@ -1014,6 +1027,14 @@ struct L10n {
     var signInWithApple: String    { s("Sign in with Apple",               "Войти через Apple",                 "Mit Apple anmelden", "Iniciar sesión con Apple", "Se connecter avec Apple", "Iniciar sessão com a Apple", "通过 Apple 登录") }
     var signInWithGoogle: String   { s("Sign in with Google",              "Войти через Google",                "Mit Google anmelden", "Iniciar sesión con Google", "Se connecter avec Google", "Iniciar sessão com o Google", "通过 Google 登录") }
     var mayBeLater: String         { s("Maybe Later",                      "Позже",                             "Vielleicht später", "Quizá más tarde", "Plus tard", "Talvez mais tarde", "稍后再说") }
+    var joinAuthTitle: String      { s("Sign in to join",                  "Войдите, чтобы присоединиться",     "Zum Beitreten anmelden", "Inicia sesión para unirte", "Connectez-vous pour rejoindre", "Inicie sessão para entrar", "登录以加入") }
+    var joinAuthSubtitle: String   { s("Apple or Google keeps your family access safe across devices.",
+                                       "Apple или Google сохранят доступ к семье на ваших устройствах.",
+                                       "Apple oder Google schützt den Familienzugang geräteübergreifend.",
+                                       "Apple o Google mantiene seguro el acceso familiar en tus dispositivos.",
+                                       "Apple ou Google sécurise l’accès familial sur vos appareils.",
+                                       "Apple ou Google mantém o acesso familiar seguro nos seus dispositivos.",
+                                       "Apple 或 Google 可在多设备上安全保存家庭访问权限。") }
 
     // MARK: — Paywall
     var trialBadge: String         { s("7 days free",

@@ -92,6 +92,12 @@ final class FamilyManager: ObservableObject {
 
         if let existingId, !restoreSuppressed {
             persist(familyId: existingId, ownerUid: uid)
+            try await ensureMemberDocument(
+                familyId: existingId,
+                uid: uid,
+                displayName: displayName,
+                defaultRoleRaw: FamilyRole.mom.rawValue
+            )
             try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
         } else {
             if let existingId, restoreSuppressed {
@@ -99,9 +105,12 @@ final class FamilyManager: ObservableObject {
                     .collection("members").document(uid).delete()
             }
             let newId = try await createFamily(for: uid)
-            try await db.collection("families").document(newId)
-                .collection("members").document(uid)
-                .setData(["name": displayName, "joinedAt": Timestamp(date: Date())])
+            try await ensureMemberDocument(
+                familyId: newId,
+                uid: uid,
+                displayName: displayName,
+                defaultRoleRaw: FamilyRole.mom.rawValue
+            )
             try await userRef.setData(
                 ["familyId": newId, "displayName": displayName],
                 merge: true
@@ -144,6 +153,7 @@ final class FamilyManager: ObservableObject {
             let expiresAt = (data["expiresAt"] as? Timestamp)?.dateValue(),
             expiresAt > Date()
         else { throw FamilyError.invalidOrExpiredCode }
+        let inviteRoleRaw = data["roleRaw"] as? String
 
         // Already in the target family — idempotent no-op.
         if familyId == targetFamilyId { isReady = true; return }
@@ -169,9 +179,12 @@ final class FamilyManager: ObservableObject {
             .setData(["familyId": targetFamilyId], merge: true)
 
         let displayName = Auth.auth().currentUser?.displayName ?? Auth.auth().currentUser?.email ?? "User"
-        try await db.collection("families").document(targetFamilyId)
-            .collection("members").document(uid)
-            .setData(["name": displayName, "joinedAt": Timestamp(date: Date())], merge: true)
+        try await ensureMemberDocument(
+            familyId: targetFamilyId,
+            uid: uid,
+            displayName: displayName,
+            defaultRoleRaw: inviteRoleRaw ?? FamilyRole.dad.rawValue
+        )
 
         persist(familyId: targetFamilyId, ownerUid: uid)
         isReady = true
@@ -217,5 +230,31 @@ final class FamilyManager: ObservableObject {
         familyId = id
         UserDefaults.standard.set(id, forKey: kFamilyIdDefaultsKey)
         UserDefaults.standard.set(uid, forKey: kFamilyOwnerUidDefaultsKey)
+    }
+
+    private func ensureMemberDocument(
+        familyId: String,
+        uid: String,
+        displayName: String,
+        defaultRoleRaw: String
+    ) async throws {
+        let ref = db.collection("families").document(familyId)
+            .collection("members").document(uid)
+        let snap = try await ref.getDocument()
+        var data: [String: Any] = [
+            "name": displayName,
+            "uid": uid
+        ]
+        let existing = snap.data() ?? [:]
+        if existing["id"] as? String == nil {
+            data["id"] = UUID().uuidString
+        }
+        if existing["roleRaw"] as? String == nil {
+            data["roleRaw"] = defaultRoleRaw
+        }
+        if existing["joinedAt"] as? Timestamp == nil {
+            data["joinedAt"] = Timestamp(date: Date())
+        }
+        try await ref.setData(data, merge: true)
     }
 }

@@ -13,6 +13,7 @@ final class SharingViewModel: ObservableObject {
     @Published var joinError: String?
     @Published var joinSuccess = false
     @Published var showJoinConfirm = false
+    @Published var isPreparingInvite = false
 
     private let repo: any FamilyRepository
     private let inviteService: any InviteServiceProtocol
@@ -28,9 +29,47 @@ final class SharingViewModel: ObservableObject {
     var inviteURL:  String { inviteService.inviteURL(for: inviteCode) }
     var inviteExpiry: Date { inviteService.expiry() }
 
-    func regenerateInvite() {
-        inviteService.regenerate()
-        objectWillChange.send()
+    func presentInvite() {
+        guard !isPreparingInvite else { return }
+        isPreparingInvite = true
+        saveError = nil
+        Task {
+            do {
+                let code = try await inviteService.prepareInvite()
+                try await inviteService.updateInviteRole(code: code, role: .dad)
+                showInvite = true
+            } catch {
+                saveError = error.localizedDescription
+            }
+            isPreparingInvite = false
+        }
+    }
+
+    func updateInviteRole(_ role: FamilyRole) {
+        guard !isPreparingInvite else { return }
+        Task {
+            do {
+                try await inviteService.updateInviteRole(code: inviteCode, role: role)
+            } catch {
+                saveError = error.localizedDescription
+            }
+        }
+    }
+
+    func regenerateInvite(role: FamilyRole) {
+        guard !isPreparingInvite else { return }
+        isPreparingInvite = true
+        saveError = nil
+        Task {
+            do {
+                let code = try await inviteService.regenerateAndSync()
+                try await inviteService.updateInviteRole(code: code, role: role)
+                objectWillChange.send()
+            } catch {
+                saveError = error.localizedDescription
+            }
+            isPreparingInvite = false
+        }
     }
 
     init(repo: any FamilyRepository, inviteService: any InviteServiceProtocol = LocalInviteService(), appState: AppState) {
@@ -44,8 +83,6 @@ final class SharingViewModel: ObservableObject {
         let stored = (try? await repo.getMembers()) ?? []
         storedMembers = stored
         members = stored.map { $0.toFamilyMember() }
-        // Ensure any pending invite-code Firestore write completes before user can share
-        await (inviteService as? FirestoreInviteService)?.awaitSync()
     }
 
     func addMember(_ member: FamilyMember) {

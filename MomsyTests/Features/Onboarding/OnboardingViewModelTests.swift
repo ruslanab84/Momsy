@@ -6,23 +6,123 @@ import Foundation
 @MainActor
 struct OnboardingViewModelTests {
 
-    func makeVM(
+    final class TrackingBabySyncRepository: BabySyncRepositoryProtocol {
+        var feedingLogs: AsyncStream<[FeedingLog]> { AsyncStream { $0.finish() } }
+        var sleepLogs: AsyncStream<[SleepLog]>     { AsyncStream { $0.finish() } }
+        var diaperLogs: AsyncStream<[DiaperLog]>   { AsyncStream { $0.finish() } }
+        private(set) var syncedProfiles: [BabyProfile] = []
+
+        func addFeedingLog(_ log: FeedingLog) async throws {}
+        func addSleepLog(_ log: SleepLog) async throws {}
+        func addDiaperLog(_ log: DiaperLog) async throws {}
+        func addSymptomLog(_ log: SymptomLog) async throws {}
+        func addDiaryLog(_ log: DiaryLog) async throws {}
+        func addMeasurementLog(_ log: MeasurementLog) async throws {}
+        func addVaccinationLog(_ log: VaccinationLog) async throws {}
+        func addFoodDiaryLog(_ log: FoodDiaryLog) async throws {}
+        func fetchTodayFeedings() async throws -> [FeedingLog] { [] }
+        func fetchTodaySleep() async throws -> [SleepLog] { [] }
+        func syncBabyProfile(_ profile: BabyProfile) async throws {
+            syncedProfiles.append(profile)
+        }
+        func fetchBabyProfile() async throws -> BabyProfile? { nil }
+    }
+
+    final class MockInviteService: InviteServiceProtocol, @unchecked Sendable {
+        var code = "MOMSY-TEST1"
+        var preparedCount = 0
+        var regeneratedCount = 0
+        var updatedRoles: [FamilyRole] = []
+
+        func currentCode() -> String { code }
+        func inviteURL(for code: String) -> String { "momsy://join?code=\(code)" }
+        func expiry() -> Date { Date().addingTimeInterval(86400) }
+        func regenerate() -> String {
+            code = "MOMSY-TEST2"
+            return code
+        }
+        func prepareInvite() async throws -> String {
+            preparedCount += 1
+            return code
+        }
+        func regenerateAndSync() async throws -> String {
+            regeneratedCount += 1
+            return regenerate()
+        }
+        func updateInviteRole(code: String, role: FamilyRole) async throws {
+            updatedRoles.append(role)
+        }
+    }
+
+    final class JoinRecorder {
+        var ensuredDisplayNames: [String] = []
+        var joinRequests: [(code: String, force: Bool)] = []
+        var syncAfterJoinCount = 0
+    }
+
+    struct Harness {
+        let vm: OnboardingViewModel
+        let repo: MockBabyRepository
+        let analytics: MockAnalyticsService
+        let push: MockPushNotificationService
+        let sync: TrackingBabySyncRepository
+        let invite: MockInviteService
+        let recorder: JoinRecorder
+    }
+
+    func makeHarness(
+        pendingCode: String? = nil,
         onDone: @escaping () -> Void = {}
-    ) -> (OnboardingViewModel, MockBabyRepository, MockAnalyticsService, MockPushNotificationService) {
+    ) -> Harness {
+        let defaults = UserDefaults(suiteName: UUID().uuidString)!
+        let pendingStore = PendingFamilyInviteStore(defaults: defaults)
+        if let pendingCode {
+            pendingStore.save(pendingCode)
+        }
+
         let repo      = MockBabyRepository()
         let analytics = MockAnalyticsService()
         let push      = MockPushNotificationService()
         let state     = makeAppState()
+        let sync      = TrackingBabySyncRepository()
+        let invite    = MockInviteService()
+        let recorder  = JoinRecorder()
         let vm = OnboardingViewModel(
             saveBabyProfile: SaveBabyProfileUseCase(repository: repo),
             appState: state,
             authManager: AuthManager(),
-            syncRepo: MockBabySyncRepository(),
+            syncRepo: sync,
+            inviteService: invite,
+            pendingInviteStore: pendingStore,
+            ensureFamilyReady: { displayName in
+                recorder.ensuredDisplayNames.append(displayName)
+            },
+            joinFamily: { code, force in
+                recorder.joinRequests.append((code, force))
+            },
+            syncAfterJoiningFamily: {
+                recorder.syncAfterJoinCount += 1
+            },
             analytics: analytics,
             pushNotifications: push,
             onDone: onDone
         )
-        return (vm, repo, analytics, push)
+        return Harness(
+            vm: vm,
+            repo: repo,
+            analytics: analytics,
+            push: push,
+            sync: sync,
+            invite: invite,
+            recorder: recorder
+        )
+    }
+
+    func makeVM(
+        onDone: @escaping () -> Void = {}
+    ) -> (OnboardingViewModel, MockBabyRepository, MockAnalyticsService, MockPushNotificationService) {
+        let harness = makeHarness(onDone: onDone)
+        return (harness.vm, harness.repo, harness.analytics, harness.push)
     }
 
     // MARK: - canContinue
@@ -51,13 +151,31 @@ struct OnboardingViewModelTests {
         #expect(vm.canContinue)
     }
 
-    @Test("canContinue is true on role, auth, and ready steps")
+    @Test("canContinue is true on role, invite, auth, and ready steps")
     func canContinueTrueOnLaterSteps() {
         let (vm, _, _, _) = makeVM()
-        for s in [OBStep.role, OBStep.auth, OBStep.ready] {
+        for s in [OBStep.role, OBStep.invite, OBStep.auth, OBStep.ready] {
             vm.step = s
             #expect(vm.canContinue)
         }
+    }
+
+    @Test("canContinue is false on join step without an invite code")
+    func canContinueFalseOnJoinWithoutCode() {
+        let (vm, _, _, _) = makeVM()
+        vm.startJoinFlow()
+        #expect(vm.step == .join)
+        #expect(!vm.canContinue)
+    }
+
+    @Test("pending invite starts onboarding in join flow")
+    func pendingInviteStartsJoinFlow() {
+        let harness = makeHarness(pendingCode: "momsy://join?code=MOMSY-ABCD12")
+        #expect(harness.vm.flow == .joinFamily)
+        #expect(harness.vm.step == .join)
+        #expect(harness.vm.pendingInviteCode == "MOMSY-ABCD12")
+        #expect(harness.vm.steps == [.join, .auth, .ready])
+        #expect(harness.vm.canContinue)
     }
 
     // MARK: - advance
@@ -79,6 +197,8 @@ struct OnboardingViewModelTests {
         #expect(vm.step == .profile)
         vm.advance()
         #expect(vm.step == .role)
+        vm.advance()
+        #expect(vm.step == .invite)
         vm.advance()
         #expect(vm.step == .auth)
         vm.advance()
@@ -102,6 +222,14 @@ struct OnboardingViewModelTests {
         #expect(vm.step == .ready)
     }
 
+    @Test("skipInvite() moves from invite to auth")
+    func skipInviteMovesToAuth() {
+        let (vm, _, _, _) = makeVM()
+        vm.step = .invite
+        vm.skipInvite()
+        #expect(vm.step == .auth)
+    }
+
     @Test("goBack() moves from profile to age")
     func goBackMovesToPreviousStep() {
         let (vm, _, _, _) = makeVM()
@@ -116,6 +244,50 @@ struct OnboardingViewModelTests {
         vm.step = .age
         vm.goBack()
         #expect(vm.step == .age)
+    }
+
+    @Test("skipAuth() is ignored in join flow")
+    func skipAuthIgnoredInJoinFlow() {
+        let harness = makeHarness(pendingCode: "MOMSY-JOIN1")
+        harness.vm.step = .auth
+        harness.vm.skipAuth()
+        #expect(harness.vm.step == .auth)
+    }
+
+    // MARK: - invite
+
+    @Test("prepareInvite() saves baby profile, syncs it, and prepares role invite")
+    func prepareInviteSavesAndSyncsProfile() async throws {
+        let harness = makeHarness()
+        harness.vm.babyName = "Mia"
+        harness.vm.parentName = "Anna"
+        harness.vm.selectedInviteRole = .nanny
+
+        await harness.vm.prepareInvite()
+
+        let saved = try await harness.repo.getProfile()
+        #expect(saved?.name == "Mia")
+        #expect(harness.sync.syncedProfiles.map(\.name) == ["Mia"])
+        #expect(harness.invite.preparedCount == 1)
+        #expect(harness.invite.updatedRoles == [.nanny])
+        #expect(harness.vm.inviteCode == "MOMSY-TEST1")
+        #expect(harness.vm.inviteURL == "momsy://join?code=MOMSY-TEST1")
+        #expect(harness.recorder.ensuredDisplayNames == ["Anna"])
+    }
+
+    @Test("confirmJoinReplacingFamily() joins with force and advances to ready")
+    func confirmJoinReplacingFamilyJoinsWithForce() async throws {
+        let harness = makeHarness(pendingCode: "MOMSY-JOIN1")
+        harness.vm.step = .auth
+
+        harness.vm.confirmJoinReplacingFamily()
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(harness.recorder.joinRequests.count == 1)
+        #expect(harness.recorder.joinRequests.first?.code == "MOMSY-JOIN1")
+        #expect(harness.recorder.joinRequests.first?.force == true)
+        #expect(harness.recorder.syncAfterJoinCount == 1)
+        #expect(harness.vm.step == .ready)
     }
 
     // MARK: - finish
@@ -167,5 +339,19 @@ struct OnboardingViewModelTests {
         vm.finish()
         try await Task.sleep(nanoseconds: 100_000_000)
         #expect(push.scheduledDiaryHour == 9)
+    }
+
+    @Test("finish() in join flow completes without creating a baby profile")
+    func finishJoinFlowDoesNotCreateProfile() async throws {
+        var called = false
+        let harness = makeHarness(pendingCode: "MOMSY-JOIN1", onDone: { called = true })
+        harness.vm.step = .ready
+
+        harness.vm.finish()
+
+        let saved = try await harness.repo.getProfile()
+        #expect(called)
+        #expect(saved == nil)
+        #expect(harness.analytics.events.count == 1)
     }
 }

@@ -8,13 +8,23 @@ import GoogleSignIn
 #endif
 
 private enum JoinAlert: Identifiable {
-    case success, failure
-    var id: Int { self == .success ? 0 : 1 }
+    case success
+    case failure
+    case confirm(String)
+
+    var id: String {
+        switch self {
+        case .success: return "success"
+        case .failure: return "failure"
+        case .confirm(let code): return "confirm-\(code)"
+        }
+    }
 }
 
 @main
 struct MomsyApp: App {
     @AppStorage("appTheme") private var appTheme = "system"
+    @AppStorage("onboardingDone") private var onboardingDone = false
     @Environment(\.scenePhase) private var scenePhase
     @State private var joinAlert: JoinAlert?
 
@@ -79,17 +89,12 @@ struct MomsyApp: App {
                     GIDSignIn.sharedInstance.handle(url)
 #endif
                     guard let code = JoinDeeplink.code(from: url) else { return }
+                    guard onboardingDone else {
+                        PendingFamilyInviteStore().save(code)
+                        return
+                    }
                     Task { @MainActor in
-                        await container.authManager.signInAnonymouslyIfNeeded()
-                        guard let uid = container.authManager.firebaseUser?.uid else {
-                            joinAlert = .failure; return
-                        }
-                        do {
-                            try await FamilyManager.shared.joinFamily(code: code, uid: uid)
-                            joinAlert = .success
-                        } catch {
-                            joinAlert = .failure
-                        }
+                        await joinFamilyFromLink(code: code)
                     }
                 }
                 .alert(item: $joinAlert) { alert in
@@ -102,6 +107,17 @@ struct MomsyApp: App {
                         return Alert(title: Text(localization.strings.joinFailedTitle),
                                      message: Text(localization.strings.joinFailedMessage),
                                      dismissButton: .default(Text(localization.strings.done)))
+                    case .confirm(let code):
+                        return Alert(
+                            title: Text(localization.strings.joinReplaceTitle),
+                            message: Text(localization.strings.joinReplaceMessage),
+                            primaryButton: .destructive(Text(localization.strings.joinReplaceConfirm)) {
+                                Task { @MainActor in
+                                    await joinFamilyFromLink(code: code, force: true)
+                                }
+                            },
+                            secondaryButton: .cancel(Text(localization.strings.cancel))
+                        )
                     }
                 }
         }
@@ -120,6 +136,23 @@ struct MomsyApp: App {
     private func maybeGenerateWeeklyReport() async {
         guard container.subscriptionManager.isPremium else { return }
         _ = await container.generateWeeklyInsight.generateIfNeeded()
+    }
+
+    @MainActor
+    private func joinFamilyFromLink(code: String, force: Bool = false) async {
+        await container.authManager.signInAnonymouslyIfNeeded()
+        guard let uid = container.authManager.firebaseUser?.uid else {
+            joinAlert = .failure
+            return
+        }
+        do {
+            try await FamilyManager.shared.joinFamily(code: code, uid: uid, force: force)
+            joinAlert = .success
+        } catch FamilyError.wouldAbandonExistingFamily where !force {
+            joinAlert = .confirm(code)
+        } catch {
+            joinAlert = .failure
+        }
     }
 }
 

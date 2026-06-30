@@ -1,4 +1,6 @@
 import Foundation
+import CryptoKit
+import FirebaseAuth
 import FirebaseFirestore
 
 final class FirestoreFamilyRepository: FamilyRepository {
@@ -13,7 +15,10 @@ final class FirestoreFamilyRepository: FamilyRepository {
 
     func getMembers() async throws -> [StoredFamilyMember] {
         let snap = try await col().getDocuments()
-        return snap.documents.compactMap { StoredFamilyMember(firestoreData: $0.data(), docId: $0.documentID) }
+        let currentUid = Auth.auth().currentUser?.uid
+        return snap.documents.compactMap {
+            StoredFamilyMember(firestoreData: $0.data(), docId: $0.documentID, currentUid: currentUid)
+        }
     }
 
     func add(_ member: StoredFamilyMember) async throws {
@@ -48,18 +53,29 @@ extension StoredFamilyMember {
         return data
     }
 
-    init?(firestoreData data: [String: Any], docId: String) {
-        guard
-            let idStr = data["id"] as? String,
-            let id = UUID(uuidString: idStr),
-            let name = data["name"] as? String,
-            let roleRaw = data["roleRaw"] as? String
-        else { return nil }
+    init?(firestoreData data: [String: Any], docId: String, currentUid: String? = nil) {
+        let id = (data["id"] as? String).flatMap(UUID.init(uuidString:)) ?? Self.stableId(for: docId)
+        let uid = data["uid"] as? String ?? docId
+        let isCurrentUser = currentUid.map { $0 == uid || $0 == docId }
+        guard let name = data["name"] as? String else { return nil }
         self.id = id
         self.name = name
-        self.roleRaw = roleRaw
-        self.isMe = data["isMe"] as? Bool ?? false
-        self.uid = data["uid"] as? String ?? docId
+        self.roleRaw = data["roleRaw"] as? String ?? FamilyRole.dad.rawValue
+        self.isMe = isCurrentUser ?? (data["isMe"] as? Bool ?? false)
+        self.uid = uid
         self.inviteEmail = data["inviteEmail"] as? String
+    }
+
+    private static func stableId(for value: String) -> UUID {
+        let digest = SHA256.hash(data: Data(value.utf8))
+        var bytes = Array(digest.prefix(16))
+        bytes[6] = (bytes[6] & 0x0F) | 0x50
+        bytes[8] = (bytes[8] & 0x3F) | 0x80
+        return UUID(uuid: (
+            bytes[0], bytes[1], bytes[2], bytes[3],
+            bytes[4], bytes[5], bytes[6], bytes[7],
+            bytes[8], bytes[9], bytes[10], bytes[11],
+            bytes[12], bytes[13], bytes[14], bytes[15]
+        ))
     }
 }

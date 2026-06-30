@@ -31,7 +31,9 @@ struct SharingView: View {
                 inviteCode: vm.inviteCode,
                 inviteURL:  vm.inviteURL,
                 inviteExpiry: vm.inviteExpiry,
-                onRegenerate: { vm.regenerateInvite() },
+                isSyncing: vm.isPreparingInvite,
+                onRegenerate: { role in vm.regenerateInvite(role: role) },
+                onRoleChange: { role in vm.updateInviteRole(role) },
                 onInvite: { member in vm.addMember(member) }
             )
         }
@@ -76,15 +78,21 @@ struct SharingView: View {
     // MARK: - Invite card
 
     private var inviteCard: some View {
-        Button { vm.showInvite = true } label: {
+        Button { vm.presentInvite() } label: {
             HStack(spacing: 14) {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(Color.bbCoralDeep.opacity(0.12))
                     .frame(width: 48, height: 48)
                     .overlay(
-                        Image(systemName: "person.badge.plus.fill")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.bbCoralDeep)
+                        Group {
+                            if vm.isPreparingInvite {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "person.badge.plus.fill")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(.bbCoralDeep)
+                            }
+                        }
                     )
                 VStack(alignment: .leading, spacing: 2) {
                     Text(loc.strings.inviteFamilyMember)
@@ -108,6 +116,7 @@ struct SharingView: View {
             )
         }
         .buttonStyle(.plain)
+        .disabled(vm.isPreparingInvite)
     }
 
     // MARK: - Join with code

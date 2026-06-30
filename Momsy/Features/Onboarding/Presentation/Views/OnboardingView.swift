@@ -33,6 +33,17 @@ struct OnboardingView: View {
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.85), value: vm.step)
+        .onReceive(NotificationCenter.default.publisher(for: .pendingFamilyInviteDidChange)) { _ in
+            vm.loadPendingInviteIfNeeded()
+        }
+        .alert(loc.strings.joinReplaceTitle, isPresented: $vm.showJoinConfirm) {
+            Button(loc.strings.joinReplaceConfirm, role: .destructive) {
+                vm.confirmJoinReplacingFamily()
+            }
+            Button(loc.strings.cancel, role: .cancel) { }
+        } message: {
+            Text(loc.strings.joinReplaceMessage)
+        }
     }
 
     // MARK: - Background
@@ -62,16 +73,16 @@ struct OnboardingView: View {
             .disabled(vm.step == .age)
 
             HStack(spacing: 6) {
-                ForEach(OBStep.allCases, id: \.self) { s in
+                ForEach(vm.steps, id: \.self) { s in
                     Capsule()
-                        .fill(s.rawValue <= vm.step.rawValue ? Color.bbCoralDeep : Color.bbInkMute.opacity(0.2))
+                        .fill(stepIsCompleteOrCurrent(s) ? Color.bbCoralDeep : Color.bbInkMute.opacity(0.2))
                         .frame(width: s == vm.step ? 24 : 8, height: 8)
                         .animation(.spring(response: 0.3), value: vm.step)
                 }
             }
             .frame(maxWidth: .infinity)
 
-            Text("\(vm.step.rawValue + 1) / \(OBStep.allCases.count)")
+            Text("\(vm.currentStepNumber) / \(vm.steps.count)")
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .frame(width: 36)
@@ -79,22 +90,59 @@ struct OnboardingView: View {
         .padding(.bottom, 12)
     }
 
+    private func stepIsCompleteOrCurrent(_ step: OBStep) -> Bool {
+        guard
+            let stepIndex = vm.steps.firstIndex(of: step),
+            let currentIndex = vm.steps.firstIndex(of: vm.step)
+        else { return false }
+        return stepIndex <= currentIndex
+    }
+
     // MARK: - Step Router
 
     @ViewBuilder
     private var stepContent: some View {
         switch vm.step {
+        case .join:
+            JoinFamilyStep(
+                inviteCode: $vm.pendingInviteCode,
+                canContinue: vm.canContinue,
+                onContinue: vm.advance,
+                onCreateNewProfile: vm.startCreateFlow
+            )
         case .age:
-            AgeStep(selected: $vm.selectedStage, lang: loc.lang, onContinue: vm.advance)
+            AgeStep(
+                selected: $vm.selectedStage,
+                lang: loc.lang,
+                onContinue: vm.advance,
+                onJoinWithInvite: { vm.startJoinFlow() }
+            )
         case .profile:
             ProfileStep(babyName: $vm.babyName, birthDate: $vm.birthDate, gender: $vm.babyGender,
                         lang: loc.lang, canContinue: vm.canContinue, onContinue: vm.advance)
         case .role:
             RoleStep(parentName: $vm.parentName, selectedRole: $vm.parentRole, lang: loc.lang, onContinue: vm.advance)
+        case .invite:
+            FamilyInviteStep(
+                selectedRole: vm.selectedInviteRole,
+                inviteCode: vm.inviteCode,
+                inviteURL: vm.inviteURL,
+                inviteExpiry: vm.inviteExpiry,
+                isPreparing: vm.isPreparingInvite,
+                error: vm.inviteError,
+                onRoleChange: vm.updateInviteRole,
+                onGenerate: { Task { await vm.prepareInvite() } },
+                onRegenerate: { Task { await vm.regenerateInvite() } },
+                onContinue: vm.advance,
+                onSkip: vm.skipInvite
+            )
         case .auth:
             AuthStep(
+                title: vm.isJoinFlow ? loc.strings.joinAuthTitle : loc.strings.authStepTitle,
+                subtitle: vm.isJoinFlow ? loc.strings.joinAuthSubtitle : loc.strings.authStepSubtitle,
                 isSigningIn: vm.isSigningIn,
                 authError: vm.authError,
+                allowsSkip: !vm.isJoinFlow,
                 prepareAppleRequest: vm.authManager.prepareAppleRequest,
                 onAppleCompletion: vm.handleAppleCompletion,
                 onGoogle: vm.signInWithGoogle,
@@ -102,12 +150,13 @@ struct OnboardingView: View {
             )
         case .ready:
             ReadyStep(
-                babyName: vm.babyName,
-                birthDate: vm.birthDate,
-                stage: vm.selectedStage,
+                babyName: vm.readyBabyName,
+                birthDate: vm.readyBirthDate,
+                stage: vm.readyStage,
                 parentName: vm.parentName,
                 role: vm.parentRole,
                 lang: loc.lang,
+                isJoinFlow: vm.isJoinFlow,
                 onStart: vm.finish
             )
         }

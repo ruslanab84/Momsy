@@ -9,6 +9,7 @@ struct ReadyStep: View {
     let parentName: String
     let role: String
     let lang: String
+    let isJoinFlow: Bool
     let onStart: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
@@ -68,36 +69,50 @@ struct ReadyStep: View {
                 .onAppear { pulse = true }
 
                 VStack(spacing: 6) {
-                    Text(loc.strings.allSet)
+                    Text(isJoinFlow ? loc.strings.familyJoinedReadyTitle : loc.strings.allSet)
                         .font(.system(size: 32, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text(parentLabel)
+                    Text(isJoinFlow ? loc.strings.familyJoinedReadySubtitle : parentLabel)
                         .font(.system(size: 32, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbCoralDeep)
                 }
                 .multilineTextAlignment(.center)
 
                 VStack(spacing: 16) {
-                    summaryRow(blob: .baby, tone: .bbCoral,
-                               label: loc.strings.baby,
-                               value: babyName.isEmpty ? "—" : babyName)
-                    Divider().opacity(0.3)
-                    summaryRow(blob: .moon, tone: .bbLilac,
-                               label: loc.strings.age,
-                               value: ageDescription)
-                    Divider().opacity(0.3)
-                    summaryRow(blob: roleBlob, tone: .bbSky,
-                               label: loc.strings.caregiver,
-                               value: roleName)
-                    Divider().opacity(0.3)
-                    summaryRow(blob: .star, tone: .bbButter,
-                               label: loc.strings.stage,
-                               value: lang == "en" ? stage.labelEn : stage.label)
+                    if isJoinFlow {
+                        summaryRow(blob: .heart, tone: .bbSky,
+                                   label: loc.strings.family,
+                                   value: loc.strings.joinSuccessTitle)
+                        Divider().opacity(0.3)
+                        summaryRow(blob: .baby, tone: .bbCoral,
+                                   label: loc.strings.baby,
+                                   value: babyName.isEmpty ? "—" : babyName)
+                        Divider().opacity(0.3)
+                        summaryRow(blob: .star, tone: .bbButter,
+                                   label: loc.strings.stage,
+                                   value: lang == "en" ? stage.labelEn : stage.label)
+                    } else {
+                        summaryRow(blob: .baby, tone: .bbCoral,
+                                   label: loc.strings.baby,
+                                   value: babyName.isEmpty ? "—" : babyName)
+                        Divider().opacity(0.3)
+                        summaryRow(blob: .moon, tone: .bbLilac,
+                                   label: loc.strings.age,
+                                   value: ageDescription)
+                        Divider().opacity(0.3)
+                        summaryRow(blob: roleBlob, tone: .bbSky,
+                                   label: loc.strings.caregiver,
+                                   value: roleName)
+                        Divider().opacity(0.3)
+                        summaryRow(blob: .star, tone: .bbButter,
+                                   label: loc.strings.stage,
+                                   value: lang == "en" ? stage.labelEn : stage.label)
+                    }
                 }
                 .bbCard(pad: 16)
                 .padding(.horizontal, 24)
 
-                Text(loc.strings.dataStoredLocally)
+                Text(isJoinFlow ? loc.strings.familyJoinedReadyFootnote : loc.strings.dataStoredLocally)
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkMute)
                     .multilineTextAlignment(.center)

@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 @testable import Momsy
 
 @Suite("FamilyJoinGuard")
@@ -22,5 +23,39 @@ struct FamilyJoinGuardTests {
     @Test("different family but no existing data → no confirmation")
     func differentNoData() {
         #expect(!FamilyJoinGuard.requiresConfirmation(currentFamilyId: "F1", targetFamilyId: "F2", currentFamilyHasData: false, force: false))
+    }
+}
+
+@Suite("StoredFamilyMember Firestore mapping")
+struct StoredFamilyMemberFirestoreMappingTests {
+    @Test("legacy member doc without id or role still maps into roster")
+    func legacyMemberDocMaps() throws {
+        let member = try #require(StoredFamilyMember(
+            firestoreData: ["name": "Alex"],
+            docId: "firebase-uid-1",
+            currentUid: "firebase-uid-1"
+        ))
+
+        #expect(member.name == "Alex")
+        #expect(member.roleRaw == FamilyRole.dad.rawValue)
+        #expect(member.uid == "firebase-uid-1")
+        #expect(member.isMe)
+    }
+
+    @Test("current uid overrides persisted isMe flag")
+    func currentUidControlsIsMe() throws {
+        let member = try #require(StoredFamilyMember(
+            firestoreData: [
+                "id": UUID().uuidString,
+                "name": "Parent",
+                "roleRaw": FamilyRole.mom.rawValue,
+                "uid": "other-uid",
+                "isMe": true
+            ],
+            docId: "other-uid",
+            currentUid: "current-uid"
+        ))
+
+        #expect(!member.isMe)
     }
 }

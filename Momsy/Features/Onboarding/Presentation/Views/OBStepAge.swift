@@ -6,6 +6,7 @@ struct AgeStep: View {
     @Binding var selected: BabyAgeStage
     let lang: String
     let onContinue: () -> Void
+    let onJoinWithInvite: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
     var body: some View {
@@ -48,6 +49,15 @@ struct AgeStep: View {
                 OBContinueButton(label: loc.strings.continueArrow, action: onContinue)
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
+
+                Button(action: onJoinWithInvite) {
+                    Text(loc.strings.haveInviteLink)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 20)
+                }
+                .padding(.top, 6)
                     .padding(.bottom, 40)
             }
         }

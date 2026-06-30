@@ -15,7 +15,7 @@ final class LocalInviteService: InviteServiceProtocol, @unchecked Sendable {
     }
 
     func inviteURL(for code: String) -> String {
-        "https://momsy.app/join/\(code)"
+        "momsy://join?code=\(code)"
     }
 
     func expiry() -> Date {
@@ -29,4 +29,16 @@ final class LocalInviteService: InviteServiceProtocol, @unchecked Sendable {
         UserDefaults.standard.set(Date().addingTimeInterval(ttl), forKey: expiryKey)
         return code
     }
+
+    @discardableResult
+    func prepareInvite() async throws -> String {
+        currentCode()
+    }
+
+    @discardableResult
+    func regenerateAndSync() async throws -> String {
+        regenerate()
+    }
+
+    func updateInviteRole(code: String, role: FamilyRole) async throws { }
 }
