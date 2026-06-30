@@ -26,8 +26,26 @@ final class VitaminViewModel: ObservableObject {
         let label = LocalizationManager.shared.strings.vitaminAdded(name: name)
         let entry = QuickLogEntry(id: UUID(), time: Date(), kind: .vitamin, label: label)
         quickLogRepo.append(entry)
+        pushVitaminToFirestore(entry)
         todayEntries.insert(entry, at: 0)
         vitaminName = ""
         onEntrySaved?()
+    }
+
+    private func pushVitaminToFirestore(_ entry: QuickLogEntry) {
+        guard FamilyManager.shared.familyId != nil else { return }
+        let uid = UserDefaults.standard.string(forKey: "uid") ?? ""
+        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
+        let log = QuickEventLog(
+            id: entry.id.uuidString,
+            kind: entry.kind.rawValue,
+            loggedAt: entry.time,
+            label: entry.label,
+            addedBy: uid,
+            addedByName: name
+        )
+        Task {
+            try? await BabySyncService().setLog(QuickEventLogDTO(from: log), id: log.id, to: "vitaminLogs")
+        }
     }
 }

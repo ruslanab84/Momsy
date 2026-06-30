@@ -230,6 +230,7 @@ final class SleepViewModel: ObservableObject {
                         startDate: startDate, endDate: endDate, quality: quality, note: note
                     )
                 }
+                pushSleepToFirestore(saved, babyId: babyId)
                 guard isCurrentBaby(babyId) else { return }
                 if Calendar.current.isDateInToday(saved.startDate) {
                     todayEntries.append(saved)
