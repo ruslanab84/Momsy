@@ -185,6 +185,7 @@ final class TodayViewModel: ObservableObject {
         guard let feedings = try? await getFeeding.execute(for: Date()) else { return }
         let feedingEntries: [LogEntry] = feedings.map {
             LogEntry(
+                id: "feeding:\($0.id.uuidString)",
                 time: $0.date,
                 kind: .bottle,
                 label: feedingLabel($0),
@@ -199,12 +200,10 @@ final class TodayViewModel: ObservableObject {
         guard let sleeps = try? await getSleep.execute(from: startOfDay, to: endOfDay) else { return }
         let sleepEntries: [LogEntry] = sleeps.map { sleepLabel($0) }
         let quickEntries: [LogEntry] = quickLogRepo.load().map {
-            LogEntry(time: $0.time, kind: $0.kind, label: $0.label)
+            LogEntry(id: "quick:\($0.id.uuidString)", time: $0.time, kind: $0.kind, label: $0.label)
         }
         let merged = (feedingEntries + sleepEntries + quickEntries).sorted { $0.time > $1.time }
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-            logEntries = merged
-        }
+        logEntries = merged
     }
 
     // MARK: - Daily Tip
@@ -260,7 +259,7 @@ final class TodayViewModel: ObservableObject {
         let label = lm.strings.diaperLogEntry(count: newCount)
         let entry = DiaperEntry()
         quickLogRepo.append(QuickLogEntry(id: entry.id, time: entry.date, kind: .drop, label: label))
-        addEntry(LogEntry(time: entry.date, kind: .drop, label: label))
+        addEntry(LogEntry(id: "quick:\(entry.id.uuidString)", time: entry.date, kind: .drop, label: label))
         Task { try? await diaperRepo.add(entry) }
         pushDiaperToFirestore(entry)
         if hasFetchedThisSession { Task { await updateTip() } }
@@ -282,7 +281,7 @@ final class TodayViewModel: ObservableObject {
         quickLogRepo.removeLast(kind: .drop)
         if let idx = logEntries.firstIndex(where: { $0.kind == .drop }) {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                logEntries.remove(at: idx)
+                _ = logEntries.remove(at: idx)
             }
         }
         Task {
@@ -295,26 +294,29 @@ final class TodayViewModel: ObservableObject {
 
     func logWalk() {
         let id = UUID()
+        let date = Date()
         let label = LocalizationManager.shared.strings.walkLogged
-        quickLogRepo.append(QuickLogEntry(id: id, time: Date(), kind: .walk, label: label))
-        addEntry(LogEntry(time: Date(), kind: .walk, label: label))
-        pushQuickEventToFirestore(id: id, kind: .walk, label: label)
+        quickLogRepo.append(QuickLogEntry(id: id, time: date, kind: .walk, label: label))
+        addEntry(LogEntry(id: "quick:\(id.uuidString)", time: date, kind: .walk, label: label))
+        pushQuickEventToFirestore(id: id, kind: .walk, label: label, at: date)
     }
 
     func logBath() {
         let id = UUID()
+        let date = Date()
         let label = LocalizationManager.shared.strings.bathLogged
-        quickLogRepo.append(QuickLogEntry(id: id, time: Date(), kind: .bath, label: label))
-        addEntry(LogEntry(time: Date(), kind: .bath, label: label))
-        pushQuickEventToFirestore(id: id, kind: .bath, label: label)
+        quickLogRepo.append(QuickLogEntry(id: id, time: date, kind: .bath, label: label))
+        addEntry(LogEntry(id: "quick:\(id.uuidString)", time: date, kind: .bath, label: label))
+        pushQuickEventToFirestore(id: id, kind: .bath, label: label, at: date)
     }
 
     func logVitamins() {
         let id = UUID()
+        let date = Date()
         let label = LocalizationManager.shared.strings.vitaminsGiven
-        quickLogRepo.append(QuickLogEntry(id: id, time: Date(), kind: .vitamin, label: label))
-        addEntry(LogEntry(time: Date(), kind: .vitamin, label: label))
-        pushQuickEventToFirestore(id: id, kind: .vitamin, label: label)
+        quickLogRepo.append(QuickLogEntry(id: id, time: date, kind: .vitamin, label: label))
+        addEntry(LogEntry(id: "quick:\(id.uuidString)", time: date, kind: .vitamin, label: label))
+        pushQuickEventToFirestore(id: id, kind: .vitamin, label: label, at: date)
     }
 
     func logStool(date: Date) {
@@ -322,7 +324,7 @@ final class TodayViewModel: ObservableObject {
         let lm = LocalizationManager.shared
         let label = lm.strings.stoolLogged
         quickLogRepo.append(QuickLogEntry(id: id, time: date, kind: .stool, label: label))
-        addEntry(LogEntry(time: date, kind: .stool, label: label))
+        addEntry(LogEntry(id: "quick:\(id.uuidString)", time: date, kind: .stool, label: label))
         Task { try? await stoolRepo.add(id: id, date: date) }
         pushQuickEventToFirestore(id: id, kind: .stool, label: label, at: date)
     }
@@ -361,7 +363,13 @@ final class TodayViewModel: ObservableObject {
         } else {
             label = lm.strings.sleepStarted
         }
-        return LogEntry(time: entry.startDate, kind: .sleep, label: label, durationMinutes: entry.durationMinutes)
+        return LogEntry(
+            id: "sleep:\(entry.id.uuidString)",
+            time: entry.startDate,
+            kind: .sleep,
+            label: label,
+            durationMinutes: entry.durationMinutes
+        )
     }
 
     private func feedingLabel(_ entry: FeedingEntry) -> String {

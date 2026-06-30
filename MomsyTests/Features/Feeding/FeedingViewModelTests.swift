@@ -81,4 +81,19 @@ struct FeedingViewModelTests {
 
         #expect(vm.todayEntries[0].date <= vm.todayEntries[1].date)
     }
+
+    @Test("loadTodayEntries keeps visible entries during a transient read failure")
+    func loadTodayEntriesKeepsEntriesOnTransientFailure() async throws {
+        let repo = MockFeedingRepository()
+        let entry = FeedingEntry(date: Date(), durationSeconds: 600, side: .left)
+        repo.entries = [entry]
+        let vm = makeVM(repo: repo)
+        await vm.loadTodayEntries()
+        #expect(vm.todayEntries.count == 1)
+
+        repo.shouldThrow = true
+        await vm.loadTodayEntries()
+
+        #expect(vm.todayEntries.map(\.id) == [entry.id])
+    }
 }

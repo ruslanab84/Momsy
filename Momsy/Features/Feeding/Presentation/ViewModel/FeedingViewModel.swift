@@ -48,7 +48,8 @@ final class FeedingViewModel: ObservableObject {
     }
 
     func loadTodayEntries() async {
-        todayEntries = (try? await getFeeding.execute(for: Date())) ?? []
+        guard let entries = try? await getFeeding.execute(for: Date()) else { return }
+        todayEntries = entries
     }
 
     func loadChartData() async {

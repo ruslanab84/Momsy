@@ -1,7 +1,7 @@
 import Foundation
 
 struct LogEntry: Identifiable, Equatable {
-    let id = UUID()
+    let id: String
     let time: Date
     let kind: BlobKind
     let label: String
@@ -17,6 +17,7 @@ struct LogEntry: Identifiable, Equatable {
     let isBottleFeed: Bool
 
     init(
+        id: String = UUID().uuidString,
         time: Date,
         kind: BlobKind,
         label: String,
@@ -24,6 +25,7 @@ struct LogEntry: Identifiable, Equatable {
         feedSide: String? = nil,
         isBottleFeed: Bool = false
     ) {
+        self.id = id
         self.time = time
         self.kind = kind
         self.label = label

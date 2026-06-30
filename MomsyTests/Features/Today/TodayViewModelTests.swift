@@ -172,6 +172,43 @@ struct TodayViewModelTests {
         #expect(vm.logEntries[0].time >= vm.logEntries[1].time)
     }
 
+    @Test("loadTodayEntries keeps stable row identifiers across reloads")
+    func loadKeepsStableRowIdentifiers() async throws {
+        let repo = MockFeedingRepository()
+        let sleepRepo = MockSleepRepository()
+        let feedingId = UUID()
+        let sleepId = UUID()
+        repo.entries = [
+            FeedingEntry(id: feedingId, date: Date(), durationSeconds: 600, side: .left)
+        ]
+        sleepRepo.entries = [
+            SleepEntry(id: sleepId, startDate: Date().addingTimeInterval(-7200), endDate: Date().addingTimeInterval(-3600))
+        ]
+        let vm = makeVM(repo: repo, sleepRepo: sleepRepo)
+
+        await vm.loadTodayEntries()
+        let firstIDs = vm.logEntries.map(\.id)
+        await vm.loadTodayEntries()
+
+        #expect(vm.logEntries.map(\.id) == firstIDs)
+        #expect(firstIDs.contains("feeding:\(feedingId.uuidString)"))
+        #expect(firstIDs.contains("sleep:\(sleepId.uuidString)"))
+    }
+
+    @Test("loadTodayEntries keeps visible entries during a transient read failure")
+    func loadKeepsEntriesOnTransientReadFailure() async throws {
+        let repo = MockFeedingRepository()
+        repo.entries = [FeedingEntry(date: Date(), durationSeconds: 600, side: .left)]
+        let vm = makeVM(repo: repo)
+        await vm.loadTodayEntries()
+        let firstEntries = vm.logEntries
+
+        repo.shouldThrow = true
+        await vm.loadTodayEntries()
+
+        #expect(vm.logEntries == firstEntries)
+    }
+
     @Test("loadTodayEntries shows empty list when no events today")
     func loadEmptyWhenNoEvents() async throws {
         let vm = makeVM()
