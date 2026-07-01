@@ -17,6 +17,7 @@ enum AuthError: LocalizedError {
     case reauthRequired
     case accountDeletionPending
     case accountDeletionFinished
+    case nonceGenerationFailed
 
     var errorDescription: String? {
         switch self {
@@ -26,6 +27,7 @@ enum AuthError: LocalizedError {
         case .reauthRequired:        return "Please sign in again to delete your account."
         case .accountDeletionPending: return "Previous account deletion is still finishing. Please try again."
         case .accountDeletionFinished: return "Previous account deletion finished. Please sign in again."
+        case .nonceGenerationFailed: return "Could not start Sign in with Apple. Please try again."
         }
     }
 }
@@ -38,6 +40,7 @@ final class AuthManager: ObservableObject {
     var isSignedIn: Bool { firebaseUser != nil && firebaseUser?.isAnonymous == false }
 
     private(set) var currentNonce: String?
+    private var appleRequestPreparationError: Error?
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "Auth")
@@ -117,16 +120,31 @@ final class AuthManager: ObservableObject {
     // MARK: — Apple Sign-In
 
     func prepareAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
-        let nonce = randomNonceString()
-        currentNonce = nonce
+        currentNonce = nil
+        appleRequestPreparationError = nil
         request.requestedScopes = [.fullName, .email]
-        request.nonce = sha256(nonce)
+
+        do {
+            let nonce = try randomNonceString()
+            currentNonce = nonce
+            request.nonce = sha256(nonce)
+        } catch {
+            appleRequestPreparationError = error
+            AuthManager.log.error("Apple nonce generation failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     @MainActor
     func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) async throws {
         installStateListenerIfPossible()
+        defer {
+            currentNonce = nil
+            appleRequestPreparationError = nil
+        }
         let auth = try result.get()
+        if let appleRequestPreparationError {
+            throw appleRequestPreparationError
+        }
         guard
             let cred = auth.credential as? ASAuthorizationAppleIDCredential,
             let tokenData = cred.identityToken,
@@ -202,11 +220,11 @@ final class AuthManager: ObservableObject {
 
     // MARK: — Helpers
 
-    private func randomNonceString(length: Int = 32) -> String {
+    private func randomNonceString(length: Int = 32) throws -> String {
         var randomBytes = [UInt8](repeating: 0, count: length)
         let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
-        if errorCode != errSecSuccess {
-            fatalError("Unable to generate nonce: \(errorCode)")
+        guard errorCode == errSecSuccess else {
+            throw AuthError.nonceGenerationFailed
         }
         let charset = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         return String(randomBytes.map { charset[Int($0) % charset.count] })

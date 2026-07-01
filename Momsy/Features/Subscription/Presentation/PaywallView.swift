@@ -34,7 +34,7 @@ struct PaywallView: View {
             set: { if !$0 { errorMessage = nil } }
         )) {
             Alert(
-                title: Text(lm.done),
+                title: Text(lm.purchaseErrorTitle),
                 message: Text(errorMessage ?? ""),
                 dismissButton: .default(Text(lm.done))
             )

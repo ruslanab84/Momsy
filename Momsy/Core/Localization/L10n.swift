@@ -1106,6 +1106,13 @@ struct L10n {
                                        "Puis 4,99 €/mois · Annulable à tout moment",
                                        "Depois 4,99 €/mês · Cancele quando quiser",
                                        "之后 ¥35/月 · 随时取消") }
+    var purchaseErrorTitle: String { s("Purchase Error",
+                                       "Ошибка покупки",
+                                       "Kauffehler",
+                                       "Error de compra",
+                                       "Erreur d’achat",
+                                       "Erro na compra",
+                                       "购买错误") }
     var restorePurchases: String   { s("Restore Purchases",
                                        "Восстановить покупки",
                                        "Käufe wiederherstellen",
