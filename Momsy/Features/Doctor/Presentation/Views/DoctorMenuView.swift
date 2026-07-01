@@ -107,7 +107,7 @@ struct DoctorMenuView: View {
             .padding(.top, 8)
             .padding(.bottom, 24)
         }
-        .background(Color.bbCream.ignoresSafeArea())
+        .background(BabyFoodBackgroundView())
         .navigationTitle(lm.strings.tabDoctor)
     }
 }

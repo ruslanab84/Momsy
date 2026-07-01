@@ -28,7 +28,7 @@ struct FoodDiaryView: View {
             .padding(.top, 8)
             .padding(.bottom, 32)
         }
-        .background(Color.bbCream.ignoresSafeArea())
+        .background(BabyFoodBackgroundView())
         .navigationTitle(lm.strings.foodDiary)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -406,7 +406,7 @@ private struct AddFoodEntrySheet: View {
                 }
                 .padding(20)
             }
-            .background(Color.bbCream.ignoresSafeArea())
+            .background(BabyFoodBackgroundView())
             .navigationTitle(lm.strings.addFood)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
