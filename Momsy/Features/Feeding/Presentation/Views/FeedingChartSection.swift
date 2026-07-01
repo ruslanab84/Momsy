@@ -23,8 +23,12 @@ struct FeedingChartSection: View {
             }
         }
         .padding(14)
-        .background(Color.white.opacity(0.9))
+        .background(FeedingPosterPalette.paper.opacity(0.94))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.68), lineWidth: 1)
+        )
     }
 
     // MARK: - Header
@@ -32,7 +36,7 @@ struct FeedingChartSection: View {
     private var headerRow: some View {
         Text(loc.strings.feedingChartTitle.uppercased())
             .font(.system(size: 11, weight: .heavy, design: .rounded))
-            .foregroundColor(.bbInkMute)
+            .foregroundStyle(FeedingPosterPalette.inkMute)
             .kerning(0.5)
     }
 
@@ -53,7 +57,7 @@ struct FeedingChartSection: View {
         } label: {
             Text(title)
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundColor(selectedPeriod == index ? .white : .bbInkSoft)
+                .foregroundStyle(selectedPeriod == index ? Color.white : FeedingPosterPalette.inkSoft)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(selectedPeriod == index ? Color.bbCoralDeep : Color.bbCoral.opacity(0.15))
@@ -99,7 +103,7 @@ struct FeedingChartSection: View {
                                        height: day.sessionCount == 0 ? 2 : max(4, CGFloat(ratio) * barAreaH))
                             Text(dayLabel(for: day.id, count: count))
                                 .font(.system(size: count > 14 ? 7 : 8, weight: .bold, design: .rounded))
-                                .foregroundColor(isToday ? .bbCoralDeep : .bbInkMute)
+                                .foregroundStyle(isToday ? Color.bbCoralDeep : FeedingPosterPalette.inkMute)
                                 .frame(width: bw, height: labelHeight)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.5)
@@ -129,7 +133,7 @@ struct FeedingChartSection: View {
         return HStack(spacing: 0) {
             miniStat(top: loc.strings.feedingAvgPerDay, value: avgTxt, valueColor: .bbCoralDeep)
             Divider().frame(height: 28).overlay(Color.bbCoral.opacity(0.3))
-            miniStat(top: loc.strings.feedingTotalSessions, value: totalTxt, valueColor: .bbInk)
+            miniStat(top: loc.strings.feedingTotalSessions, value: totalTxt, valueColor: FeedingPosterPalette.ink)
             Divider().frame(height: 28).overlay(Color.bbCoral.opacity(0.3))
             miniStat(top: loc.strings.feedingAvgDuration, value: durTxt, valueColor: .bbCoralDeep)
         }
@@ -142,14 +146,14 @@ struct FeedingChartSection: View {
         VStack(spacing: 2) {
             Text(top)
                 .font(.system(size: 9, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInkMute)
+                .foregroundStyle(FeedingPosterPalette.inkMute)
                 .kerning(0.3)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
             Text(value)
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
-                .foregroundColor(valueColor)
+                .foregroundStyle(valueColor)
         }
         .frame(maxWidth: .infinity)
     }
@@ -160,10 +164,10 @@ struct FeedingChartSection: View {
         VStack(spacing: 6) {
             Image(systemName: "drop")
                 .font(.system(size: 28, weight: .light))
-                .foregroundColor(.bbCoral)
+                .foregroundStyle(Color.bbCoral)
             Text(loc.strings.feedingNoData)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundColor(.bbInkMute)
+                .foregroundStyle(FeedingPosterPalette.inkMute)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)

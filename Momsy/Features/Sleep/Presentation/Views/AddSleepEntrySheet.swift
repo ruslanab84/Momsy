@@ -4,6 +4,9 @@ struct AddSleepEntrySheet: View {
     @ObservedObject var vm: SleepViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
+    private var cardInk: Color { SleepPosterPalette.ink }
+    private var cardInkSoft: Color { SleepPosterPalette.inkSoft }
+    private var cardInkMute: Color { SleepPosterPalette.inkMute }
 
     @State private var startTime = Date().addingTimeInterval(-1800)
     @State private var endTime   = Date()
@@ -17,10 +20,7 @@ struct AddSleepEntrySheet: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                Color.bbCreamSoft.ignoresSafeArea()
-                Color.bbLilac.opacity(0.32)
-                    .frame(height: 132)
-                    .ignoresSafeArea(edges: .top)
+                SleepScreenBackground()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 18) {
@@ -36,19 +36,19 @@ struct AddSleepEntrySheet: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
-        .presentationBackground(Color.bbCreamSoft)
+        .presentationBackground(Color.bbLilac)
         .presentationCornerRadius(34)
     }
 
     private var sheetHeader: some View {
         VStack(spacing: 18) {
             Capsule()
-                .fill(Color.bbInk.opacity(0.16))
+                .fill(SleepPosterPalette.ink.opacity(0.16))
                 .frame(width: 42, height: 5)
                 .padding(.top, 10)
 
             HStack(spacing: 12) {
-                headerButton(title: loc.strings.cancel, systemImage: "xmark", foreground: .bbInkSoft) {
+                headerButton(title: loc.strings.cancel, systemImage: "xmark", foreground: cardInkSoft) {
                     dismiss()
                 }
 
@@ -57,7 +57,7 @@ struct AddSleepEntrySheet: View {
                 VStack(spacing: 7) {
                     Text(loc.strings.addSleepTitle)
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbInk)
+                        .foregroundStyle(cardInk)
                         .lineLimit(1)
                         .minimumScaleFactor(0.85)
 
@@ -67,14 +67,40 @@ struct AddSleepEntrySheet: View {
 
                 Spacer(minLength: 0)
 
-                headerButton(title: loc.strings.save, systemImage: "checkmark", foreground: isValid ? .bbLilacDeep : .bbInkMute) {
+                headerButton(title: loc.strings.save, systemImage: "checkmark", foreground: isValid ? .bbLilacDeep : cardInkMute) {
                     save()
                 }
                 .disabled(!isValid)
                 .opacity(isValid ? 1 : 0.55)
             }
         }
-        .padding(.bottom, 2)
+        .padding(14)
+        .background {
+            ZStack {
+                SleepPosterPalette.paper
+
+                SleepOrganicBlob(variant: .topLeading)
+                    .fill(Color.bbLilac.opacity(0.32))
+                    .frame(width: 230, height: 150)
+                    .offset(x: -92, y: -48)
+
+                SleepOrganicBlob(variant: .bottomTrailing)
+                    .fill(Color.bbSky.opacity(0.18))
+                    .frame(width: 210, height: 176)
+                    .offset(x: 104, y: 72)
+
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(Color.bbLilacDeep.opacity(0.30))
+                    .offset(x: 114, y: -32)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(Color.white.opacity(0.70), lineWidth: 1)
+        )
+        .bbShadowSoft()
     }
 
     private var durationChip: some View {
@@ -103,11 +129,11 @@ struct AddSleepEntrySheet: View {
             endTimeRow
         }
         .padding(14)
-        .background(Color.bbCard)
+        .background(SleepPosterPalette.paper.opacity(0.96))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.65), lineWidth: 1)
+                .stroke(Color.white.opacity(0.70), lineWidth: 1)
         )
         .bbShadowSoft()
     }
@@ -154,7 +180,7 @@ struct AddSleepEntrySheet: View {
             }
         }
         .padding(16)
-        .background(Color.bbCard)
+        .background(SleepPosterPalette.paper.opacity(0.96))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .bbShadowSoft()
     }
@@ -166,18 +192,18 @@ struct AddSleepEntrySheet: View {
             HStack(spacing: 10) {
                 Image(systemName: "text.alignleft")
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.bbInkMute)
+                    .foregroundStyle(cardInkMute)
                     .frame(width: 34, height: 34)
-                    .background(Color.bbCreamSoft)
+                    .background(SleepPosterPalette.paperSoft)
                     .clipShape(Circle())
 
                 TextField(loc.strings.optional, text: $note)
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(.bbInk)
+                    .foregroundStyle(cardInk)
                     .submitLabel(.done)
             }
             .padding(12)
-            .background(Color.bbCreamSoft)
+            .background(SleepPosterPalette.paperSoft)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
         .sleepDetailCardStyle()
@@ -200,6 +226,7 @@ struct AddSleepEntrySheet: View {
             VStack(alignment: .leading, spacing: 6) {
                 sectionLabel(label)
                 picker()
+                    .foregroundStyle(cardInk)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -218,24 +245,24 @@ struct AddSleepEntrySheet: View {
             VStack(spacing: 8) {
                 Image(systemName: icon(for: option))
                     .font(.system(size: 15, weight: .heavy))
-                    .foregroundColor(isSelected ? tint : .bbInkMute)
+                    .foregroundStyle(isSelected ? tint : cardInkMute)
                     .frame(width: 34, height: 34)
-                    .background(isSelected ? tint.opacity(0.16) : Color.bbCreamSoft)
+                    .background(isSelected ? tint.opacity(0.16) : SleepPosterPalette.paperSoft)
                     .clipShape(Circle())
 
                 Text(option.localizedLabel(loc.strings))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundColor(isSelected ? tint : .bbInkSoft)
+                    .foregroundStyle(isSelected ? tint : cardInkSoft)
                     .lineLimit(1)
                     .minimumScaleFactor(0.66)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 92)
-            .background(isSelected ? tint.opacity(0.10) : Color.bbCreamSoft.opacity(0.72))
+            .background(isSelected ? tint.opacity(0.10) : SleepPosterPalette.paperSoft.opacity(0.72))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(isSelected ? tint.opacity(0.28) : Color.bbInk.opacity(0.05), lineWidth: 1)
+                    .stroke(isSelected ? tint.opacity(0.28) : SleepPosterPalette.ink.opacity(0.05), lineWidth: 1)
             )
         }
         .buttonStyle(SleepSheetPressButtonStyle())
@@ -256,7 +283,7 @@ struct AddSleepEntrySheet: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
-            .foregroundColor(foreground)
+            .foregroundStyle(foreground)
             .frame(width: 92, height: 44)
             .background(Color.white.opacity(0.86))
             .clipShape(Capsule())
@@ -269,7 +296,7 @@ struct AddSleepEntrySheet: View {
     private func sectionLabel(_ label: String) -> some View {
         Text(label)
             .font(.system(size: 11, weight: .heavy, design: .rounded))
-            .foregroundColor(.bbInkMute)
+            .foregroundStyle(cardInkMute)
             .kerning(0.5)
             .textCase(.uppercase)
     }
@@ -314,8 +341,12 @@ private extension View {
     func sleepDetailCardStyle() -> some View {
         self
             .padding(16)
-            .background(Color.bbCard)
+            .background(SleepPosterPalette.paper.opacity(0.96))
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .stroke(Color.white.opacity(0.70), lineWidth: 1)
+            )
             .bbShadowSoft()
     }
 }

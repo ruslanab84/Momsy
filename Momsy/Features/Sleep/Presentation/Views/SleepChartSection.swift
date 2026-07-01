@@ -8,6 +8,9 @@ struct SleepChartSection: View {
     let lang: String
 
     @EnvironmentObject private var loc: LocalizationManager
+    private var cardInk: Color { SleepPosterPalette.ink }
+    private var cardInkSoft: Color { SleepPosterPalette.inkSoft }
+    private var cardInkMute: Color { SleepPosterPalette.inkMute }
 
     private let chartMax: Double = 18
     private let chartHeight: CGFloat = 150
@@ -25,8 +28,12 @@ struct SleepChartSection: View {
             }
         }
         .padding(16)
-        .background(Color.white.opacity(0.92))
+        .background(SleepPosterPalette.paper.opacity(0.95))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.70), lineWidth: 1)
+        )
         .bbShadowSoft()
     }
 
@@ -36,7 +43,7 @@ struct SleepChartSection: View {
         HStack {
             Text(loc.strings.sleepChartTitle.uppercased())
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInkMute)
+                .foregroundColor(cardInkMute)
                 .kerning(0.5)
             Spacer()
             normBadge
@@ -72,12 +79,12 @@ struct SleepChartSection: View {
                 selectedPeriod = index
             }
         } label: {
-            Text(title)
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundColor(selectedPeriod == index ? .white : .bbInkSoft)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(selectedPeriod == index ? Color.bbLilacDeep : Color.bbCreamSoft)
+                Text(title)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(selectedPeriod == index ? .white : cardInkSoft)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                .background(selectedPeriod == index ? Color.bbLilacDeep : SleepPosterPalette.paperSoft)
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -133,7 +140,7 @@ struct SleepChartSection: View {
                                        height: day.totalMinutes == 0 ? 2 : max(4, CGFloat(ratio) * barAreaH))
                             Text(dayLabel(for: day.id, count: count))
                                 .font(.system(size: count > 14 ? 7 : 8, weight: .bold, design: .rounded))
-                                .foregroundColor(isToday ? .bbLilacDeep : .bbInkMute)
+                                .foregroundColor(isToday ? .bbLilacDeep : cardInkMute)
                                 .frame(width: bw, height: labelHeight)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.5)
@@ -168,7 +175,7 @@ struct SleepChartSection: View {
         return HStack(spacing: 0) {
             miniStat(top: loc.strings.sleepAverage, value: avgTxt, valueColor: .bbLilacDeep)
             Divider().frame(height: 28).overlay(Color.bbLilac.opacity(0.4))
-            miniStat(top: loc.strings.sleepNormLabel, value: normTxt, valueColor: .bbInk)
+            miniStat(top: loc.strings.sleepNormLabel, value: normTxt, valueColor: cardInk)
             Divider().frame(height: 28).overlay(Color.bbLilac.opacity(0.4))
             miniStat(top: statusTxt, value: diffTxt, valueColor: diffColor)
         }
@@ -181,7 +188,7 @@ struct SleepChartSection: View {
         VStack(spacing: 2) {
             Text(top)
                 .font(.system(size: 9, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInkMute)
+                .foregroundColor(cardInkMute)
                 .kerning(0.3)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
@@ -202,7 +209,7 @@ struct SleepChartSection: View {
                 .foregroundColor(.bbLilac)
             Text(loc.strings.sleepNoData)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundColor(.bbInkMute)
+                .foregroundColor(cardInkMute)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)

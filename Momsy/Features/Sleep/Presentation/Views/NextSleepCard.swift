@@ -5,6 +5,9 @@ struct NextSleepCard: View {
     @EnvironmentObject var loc: LocalizationManager
 
     private var strings: L10n { loc.strings }
+    private var cardInk: Color { SleepPosterPalette.ink }
+    private var cardInkSoft: Color { SleepPosterPalette.inkSoft }
+    private var cardInkMute: Color { SleepPosterPalette.inkMute }
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -69,7 +72,7 @@ struct NextSleepCard: View {
                 forecastContent
             }
         }
-        .bbCard(pad: 16, bg: Color.white.opacity(0.92), radius: 24)
+        .bbCard(pad: 16, bg: SleepPosterPalette.paper.opacity(0.95), radius: 24)
     }
 
     private var forecastContent: some View {
@@ -77,13 +80,13 @@ struct NextSleepCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInkSoft)
+                    .foregroundColor(cardInkSoft)
                 Text(time(prediction.predictedOnset))
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInk)
+                    .foregroundColor(cardInk)
                 Text(strings.sleepForecastRange(time(prediction.windowStart), time(prediction.windowEnd)))
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(.bbInkMute)
+                    .foregroundColor(cardInkMute)
             }
 
             Spacer(minLength: 0)
@@ -92,7 +95,7 @@ struct NextSleepCard: View {
                 BBPill(text: confidenceLabel, color: accent.opacity(0.14), fg: accent, size: 11)
                 Text(basisLabel)
                     .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundColor(.bbInkMute)
+                    .foregroundColor(cardInkMute)
             }
         }
     }
@@ -102,14 +105,14 @@ struct NextSleepCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(strings.sleepForecastOverdueTitle)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInkSoft)
+                    .foregroundColor(cardInkSoft)
                 Text(strings.sleepForecastOverdueAction)
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInk)
+                    .foregroundColor(cardInk)
                 if let awakeText {
                     Text(awakeText)
                         .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(.bbInkMute)
+                        .foregroundColor(cardInkMute)
                 }
             }
 
