@@ -21,6 +21,7 @@ final class MockBabySyncRepository: BabySyncRepositoryProtocol {
 
     func syncBabyProfile(_ profile: BabyProfile) async throws {}
     func fetchBabyProfile() async throws -> BabyProfile? { nil }
+    func deleteBaby(id: UUID) async throws {}
 }
 
 @Suite("TodayViewModel", .serialized)

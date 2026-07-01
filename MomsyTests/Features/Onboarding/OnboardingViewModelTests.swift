@@ -26,6 +26,7 @@ struct OnboardingViewModelTests {
             syncedProfiles.append(profile)
         }
         func fetchBabyProfile() async throws -> BabyProfile? { nil }
+        func deleteBaby(id: UUID) async throws {}
     }
 
     final class MockInviteService: InviteServiceProtocol, @unchecked Sendable {

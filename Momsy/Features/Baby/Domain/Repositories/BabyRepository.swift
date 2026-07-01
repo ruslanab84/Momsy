@@ -2,11 +2,14 @@ import Foundation
 
 enum BabyError: LocalizedError {
     case maxChildrenReached
+    case cannotDeleteLastChild
 
     var errorDescription: String? {
         switch self {
         case .maxChildrenReached:
             return "You can add up to \(ActiveBaby.maxChildren) children."
+        case .cannotDeleteLastChild:
+            return "At least one child profile must remain."
         }
     }
 }

@@ -26,6 +26,7 @@ struct SettingsView: View {
                 unitsSection
                 languageSection
                 vaccinationScheduleSection
+                childrenSection
                 aboutSection
                 dangerSection
             }
@@ -225,6 +226,31 @@ struct SettingsView: View {
             .bbShadow()
 
             Text(lm.strings.vaccinationScheduleHint)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .padding(.horizontal, 2)
+        }
+    }
+
+    // MARK: - Children
+
+    private var childrenSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BBSectionLabel(text: lm.strings.babyProfile)
+
+            NavigationLink(destination: ManageChildrenView()) {
+                chevronRow(
+                    icon: "figure.2.and.child.holdinghands",
+                    bg: .bbMint,
+                    title: lm.strings.children
+                )
+            }
+            .buttonStyle(.plain)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .bbShadow()
+
+            Text(lm.strings.childrenSettingsHint)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)

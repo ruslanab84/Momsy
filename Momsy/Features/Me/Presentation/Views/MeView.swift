@@ -13,8 +13,8 @@ struct MeView: View {
                 meSection(rows: [
                     MeRow(destination: ManageChildrenView(),
                           icon: "figure.2.and.child.holdinghands", bg: .bbMint,
-                          title: lm.lang == "ru" ? "Дети" : "Children",
-                          sub: lm.lang == "ru" ? "Профили детей" : "Children’s profiles"),
+                          title: lm.strings.children,
+                          sub: lm.strings.childrenProfiles),
                     MeRow(destination: SharingView(container: container),
                           icon: "person.3.fill", bg: .bbCoral,
                           title: lm.strings.family,

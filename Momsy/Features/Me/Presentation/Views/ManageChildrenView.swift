@@ -1,8 +1,5 @@
 import SwiftUI
 
-/// Phase-1 multi-child management: list the roster, switch the active child, add up
-/// to `ActiveBaby.maxChildren`, and delete. Intentionally minimal — the polished
-/// top-bar switcher is Phase 2. Strings are inline (ru/en) pending full localization.
 struct ManageChildrenView: View {
     @EnvironmentObject private var lm: LocalizationManager
     @EnvironmentObject private var appState: AppState
@@ -11,8 +8,9 @@ struct ManageChildrenView: View {
     @State private var showAdd = false
     @State private var busy = false
     @State private var errorMessage: String?
+    @State private var pendingDeletion: BabyProfile?
 
-    private var ru: Bool { lm.lang == "ru" }
+    private var canDeleteChildren: Bool { appState.babies.count > 1 && !busy }
 
     var body: some View {
         List {
@@ -20,14 +18,11 @@ struct ManageChildrenView: View {
                 ForEach(appState.babies) { baby in
                     row(for: baby)
                 }
-                .onDelete { offsets in
-                    if appState.babies.count > 1 { delete(at: offsets) }
-                }
             } footer: {
-                Text(ru ? "До \(ActiveBaby.maxChildren) детей." : "Up to \(ActiveBaby.maxChildren) children.")
+                Text(lm.strings.maxChildrenHint(ActiveBaby.maxChildren))
             }
         }
-        .navigationTitle(ru ? "Дети" : "Children")
+        .navigationTitle(lm.strings.children)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showAdd = true } label: { Image(systemName: "plus") }
@@ -40,44 +35,111 @@ struct ManageChildrenView: View {
             }
             .environmentObject(lm)
         }
-        .alert(ru ? "Не удалось" : "Couldn’t complete",
+        .confirmationDialog(
+            lm.strings.deleteChildTitle(displayName(for: pendingDeletion)),
+            isPresented: Binding(
+                get: { pendingDeletion != nil },
+                set: { if !$0 { pendingDeletion = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            if let pendingDeletion {
+                Button(lm.strings.delete, role: .destructive) {
+                    Task { await delete(pendingDeletion) }
+                }
+            }
+            Button(lm.strings.cancel, role: .cancel) {
+                pendingDeletion = nil
+            }
+        } message: {
+            Text(lm.strings.deleteChildMessage(displayName(for: pendingDeletion)))
+        }
+        .alert(lm.strings.couldntComplete,
                isPresented: .constant(errorMessage != nil)) {
             Button("OK") { errorMessage = nil }
         } message: { Text(errorMessage ?? "") }
     }
 
     private func row(for baby: BabyProfile) -> some View {
-        Button {
-            guard baby.id != appState.activeBabyId, !busy else { return }
-            Task { busy = true; await container.switchActiveBaby(to: baby.id); busy = false }
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(baby.name.isEmpty ? (ru ? "Малыш" : "Baby") : baby.name)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(.bbInk)
-                    Text(baby.birthDate, style: .date)
-                        .font(.system(size: 12, design: .rounded))
-                        .foregroundColor(.bbInkSoft)
+        HStack(spacing: 12) {
+            Button {
+                guard baby.id != appState.activeBabyId, !busy else { return }
+                Task {
+                    busy = true
+                    await container.switchActiveBaby(to: baby.id)
+                    busy = false
                 }
-                Spacer()
-                if baby.id == appState.activeBabyId {
-                    Image(systemName: "checkmark.circle.fill").foregroundColor(.bbCoralDeep)
+            } label: {
+                HStack {
+                    childSummary(for: baby)
+                    Spacer()
+                    if baby.id == appState.activeBabyId {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.bbCoralDeep)
+                    }
                 }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .disabled(busy)
+
+            Button(role: .destructive) {
+                requestDelete(baby)
+            } label: {
+                Image(systemName: "trash")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(canDeleteChildren ? Color.bbCoralDeep : Color.bbInkMute.opacity(0.55))
+                    .frame(width: 36, height: 36)
+                    .background(canDeleteChildren ? Color.bbCoral.opacity(0.14) : Color.bbInkMute.opacity(0.08))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!canDeleteChildren)
+            .accessibilityLabel(lm.strings.deleteChildTitle(displayName(for: baby)))
         }
-        .buttonStyle(.plain)
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                requestDelete(baby)
+            } label: {
+                Label(lm.strings.delete, systemImage: "trash")
+            }
+            .disabled(!canDeleteChildren)
+        }
     }
 
-    private func delete(at offsets: IndexSet) {
-        let targets = offsets.map { appState.babies[$0].id }
-        Task {
-            busy = true
-            for id in targets {
-                do { try await container.deleteChild(id: id) }
-                catch { errorMessage = error.localizedDescription }
-            }
-            busy = false
+    private func childSummary(for baby: BabyProfile) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(displayName(for: baby))
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundColor(.bbInk)
+            Text(baby.birthDate, style: .date)
+                .font(.system(size: 12, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+        }
+    }
+
+    private func displayName(for baby: BabyProfile?) -> String {
+        guard let baby else { return lm.strings.baby }
+        let name = baby.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? lm.strings.baby : name
+    }
+
+    private func requestDelete(_ baby: BabyProfile) {
+        guard canDeleteChildren else {
+            errorMessage = lm.strings.cannotDeleteLastChild
+            return
+        }
+        pendingDeletion = baby
+    }
+
+    private func delete(_ baby: BabyProfile) async {
+        pendingDeletion = nil
+        busy = true
+        defer { busy = false }
+        do {
+            try await container.deleteChild(id: baby.id)
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 

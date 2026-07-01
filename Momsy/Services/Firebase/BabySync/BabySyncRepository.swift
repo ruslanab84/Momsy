@@ -69,6 +69,10 @@ final class BabySyncRepository: BabySyncRepositoryProtocol {
         try await service.fetchBabyProfile()?.domain
     }
 
+    func deleteBaby(id: UUID) async throws {
+        try await service.deleteBaby(id: id)
+    }
+
     private func map<DTO: Decodable, Model>(
         _ base: AsyncStream<[DTO]>,
         transform: @escaping (DTO) -> Model

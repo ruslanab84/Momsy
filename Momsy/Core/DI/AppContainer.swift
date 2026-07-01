@@ -126,6 +126,12 @@ final class AppContainer {
     /// Remove a child: cascade-delete its logs, drop the profile, re-point active.
     @MainActor
     func deleteChild(id: UUID) async throws {
+        let profiles = try await babyRepository.getAllProfiles()
+        guard profiles.contains(where: { $0.id == id }) else { return }
+        guard profiles.count > 1 else { throw BabyError.cannotDeleteLastChild }
+
+        try await babySyncRepository.deleteBaby(id: id)
+        PendingWritesStore.shared.removeAll(forBaby: id)
         BabyLogBackfill.deleteLogs(forBaby: id, context: context)
         try context.save()
         try await babyRepository.deleteProfile(id: id)

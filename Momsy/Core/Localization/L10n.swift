@@ -30,6 +30,7 @@ struct L10n {
     var add: String         { s("Add",           "Добавить",     "Hinzufügen",   "Añadir",       "Ajouter",      "Adicionar", "添加") }
     var close: String       { s("Close",         "Закрыть",      "Schließen",    "Cerrar",       "Fermer",       "Fechar", "关闭") }
     var confirm: String     { s("Confirm",       "Подтвердить",  "Bestätigen",   "Confirmar",    "Confirmer",    "Confirmar", "确认") }
+    var couldntComplete: String { s("Couldn’t complete", "Не удалось", "Konnte nicht abgeschlossen werden", "No se pudo completar", "Impossible de terminer", "Não foi possível concluir", "无法完成") }
 
     // MARK: — Weekly Insights (AI weekly report)
     var weeklyInsightTitle: String {
@@ -732,6 +733,53 @@ struct L10n {
     var themeDark: String       { s("Dark",          "Тёмная",        "Dunkel",        "Oscuro", "Sombre", "Escuro", "深色") }
     var notifications: String   { s("Notifications", "Уведомления",   "Benachrichtigungen", "Notificaciones", "Notifications", "Notificações", "通知") }
     var babyProfile: String     { s("Baby profile",  "Профиль малыша","Baby-Profil",   "Perfil del bebé", "Profil du bébé", "Perfil do bebé", "宝宝资料") }
+    var children: String        { s("Children",      "Дети",          "Kinder",        "Niños", "Enfants", "Crianças", "孩子") }
+    var childrenProfiles: String { s("Children’s profiles", "Профили детей", "Kinderprofile", "Perfiles de niños", "Profils des enfants", "Perfis das crianças", "孩子资料") }
+    var childrenSettingsHint: String {
+        s("Add, switch, or remove child profiles.",
+          "Добавляйте, переключайте или удаляйте профили детей.",
+          "Kinderprofile hinzufügen, wechseln oder entfernen.",
+          "Añade, cambia o elimina perfiles de niños.",
+          "Ajoutez, changez ou supprimez les profils des enfants.",
+          "Adicione, alterne ou remova perfis de crianças.",
+          "添加、切换或移除孩子资料。")
+    }
+    func maxChildrenHint(_ count: Int) -> String {
+        s("Up to \(count) children.",
+          "До \(count) детей.",
+          "Bis zu \(count) Kinder.",
+          "Hasta \(count) niños.",
+          "Jusqu’à \(count) enfants.",
+          "Até \(count) crianças.",
+          "最多 \(count) 个孩子。")
+    }
+    func deleteChildTitle(_ name: String) -> String {
+        s("Delete \(name)?",
+          "Удалить \(name)?",
+          "\(name) löschen?",
+          "¿Eliminar \(name)?",
+          "Supprimer \(name) ?",
+          "Eliminar \(name)?",
+          "删除 \(name)？")
+    }
+    func deleteChildMessage(_ name: String) -> String {
+        s("This permanently removes \(name)'s profile and records from this device and the cloud. This cannot be undone.",
+          "Профиль \(name) и все записи будут навсегда удалены с этого устройства и из облака. Это действие необратимо.",
+          "Das Profil und alle Einträge von \(name) werden dauerhaft von diesem Gerät und aus der Cloud gelöscht. Dies kann nicht rückgängig gemacht werden.",
+          "Esto elimina permanentemente el perfil y los registros de \(name) de este dispositivo y de la nube. No se puede deshacer.",
+          "Le profil et les enregistrements de \(name) seront définitivement supprimés de cet appareil et du cloud. Cette action est irréversible.",
+          "Isto remove permanentemente o perfil e os registos de \(name) deste dispositivo e da nuvem. Não pode ser desfeito.",
+          "这会从本设备和云端永久删除 \(name) 的资料和记录。此操作无法撤销。")
+    }
+    var cannotDeleteLastChild: String {
+        s("At least one child profile must remain.",
+          "Должен остаться хотя бы один профиль ребёнка.",
+          "Mindestens ein Kinderprofil muss erhalten bleiben.",
+          "Debe quedar al menos un perfil de niño.",
+          "Au moins un profil d’enfant doit rester.",
+          "Deve permanecer pelo menos um perfil de criança.",
+          "至少需要保留一个孩子资料。")
+    }
     var editProfile: String     { s("Edit Profile",  "Редактировать", "Bearbeiten",    "Editar perfil", "Modifier le profil", "Editar perfil", "编辑资料") }
     var saveChanges: String     { s("Save changes",  "Сохранить",     "Speichern",     "Guardar cambios", "Enregistrer les modifications", "Guardar alterações", "保存更改") }
     var profileUpdated: String  { s("Profile saved", "Профиль сохранён","Profil gespeichert", "Perfil guardado", "Profil enregistré", "Perfil guardado", "资料已保存") }

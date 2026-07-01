@@ -232,6 +232,20 @@ final class BabySyncService {
         SyncWatermarkStore().reset(family: familyId, baby: babyId)
     }
 
+    /// Deletes one child from the per-baby family roster without touching the legacy
+    /// family-wide tree that full account erasure owns.
+    func deleteBaby(id: UUID) async throws {
+        guard !familyId.isEmpty else { return }
+        try await ActiveBaby.$syncTargetOverride.withValue(id) {
+            for sub in Self.allSubcollections {
+                try await deleteAll(in: sub)
+            }
+            try await babyDoc().collection("profile").document("info").delete()
+            try await babyDoc().delete()
+            SyncWatermarkStore().reset(family: familyId, baby: id.uuidString)
+        }
+    }
+
     /// Best-effort removal of the old family-keyed tree (`babies/{familyId}`) that the
     /// per-baby migration copies from but leaves in place during rollout.
     private func deleteLegacyFamilyTree() async throws {

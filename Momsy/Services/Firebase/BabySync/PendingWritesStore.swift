@@ -60,6 +60,10 @@ final class PendingWritesStore {
         raw = raw.filter { ($0["docId"] as? String) != docId }
     }
 
+    func removeAll(forBaby id: UUID) {
+        raw = raw.filter { ($0["babyId"] as? String) != id.uuidString }
+    }
+
     func clear() { defaults.removeObject(forKey: key) }
 
     /// Recursively replaces Firestore `Timestamp` with `Date` so the payload is

@@ -19,4 +19,5 @@ protocol BabySyncRepositoryProtocol {
 
     func syncBabyProfile(_ profile: BabyProfile) async throws
     func fetchBabyProfile() async throws -> BabyProfile?
+    func deleteBaby(id: UUID) async throws
 }

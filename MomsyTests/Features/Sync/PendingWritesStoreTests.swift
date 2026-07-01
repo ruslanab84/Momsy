@@ -50,6 +50,24 @@ struct PendingWritesStoreTests {
         #expect(all[0].docId == "y")
     }
 
+    @Test func removeAllForBabyKeepsOtherChildrenQueued() {
+        let store = freshStore()
+        let deletedBaby = UUID()
+        let remainingBaby = UUID()
+        store.add(collection: "sleepLogs", docId: "x", payload: ["v": 1],
+                  familyId: "f", babyId: deletedBaby.uuidString)
+        store.add(collection: "feedingLogs", docId: "y", payload: ["v": 2],
+                  familyId: "f", babyId: remainingBaby.uuidString)
+        store.add(collection: "diaperLogs", docId: "z", payload: ["v": 3],
+                  familyId: "f", babyId: "")
+
+        store.removeAll(forBaby: deletedBaby)
+
+        let all = store.all()
+        #expect(all.map(\.docId).sorted() == ["y", "z"])
+        #expect(all.allSatisfy { $0.babyId != deletedBaby.uuidString })
+    }
+
     @Test func clearRemovesAllEntries() {
         let store = freshStore()
         store.add(collection: "sleepLogs", docId: "x", payload: ["v": 1], familyId: "f", babyId: "b")
