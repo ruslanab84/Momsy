@@ -252,18 +252,7 @@ private struct SoundCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(cardTone)
-                    .aspectRatio(1.65, contentMode: .fit)
-                    .overlay(
-                        EqualizerBars(
-                            isPlaying: sound.isPlaying,
-                            color: Color.bbInk.opacity(0.5),
-                            count: 8,
-                            maxH: 18,
-                            minH: 4
-                        )
-                    )
+                SoundArtwork(sound: sound, tone: cardTone)
 
                 if sound.isPlaying {
                     Text(loc.strings.playing)
