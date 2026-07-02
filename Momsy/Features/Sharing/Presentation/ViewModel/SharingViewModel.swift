@@ -86,7 +86,11 @@ final class SharingViewModel: ObservableObject {
     }
 
     func loadMembers() async {
-        let stored = (try? await repo.getMembers()) ?? []
+        var stored = (try? await repo.getMembers()) ?? []
+        if let currentMember = currentManagingMember(in: stored) {
+            try? await repo.prepareForRosterManagement(currentMember: currentMember)
+            stored = (try? await repo.getMembers()) ?? stored
+        }
         storedMembers = stored
         members = stored.map { $0.toFamilyMember() }
     }
@@ -135,7 +139,10 @@ final class SharingViewModel: ObservableObject {
         storedMembers.remove(at: storedIdx)
         Task {
             do {
-                try await repo.remove(id: id)
+                if let currentMember = currentManagingMember(in: storedMembers) {
+                    try await repo.prepareForRosterManagement(currentMember: currentMember)
+                }
+                try await repo.remove(removedStoredMember)
             } catch {
                 members.insert(removedMember, at: min(idx, members.count))
                 storedMembers.insert(removedStoredMember, at: min(storedIdx, storedMembers.count))
@@ -175,13 +182,19 @@ final class SharingViewModel: ObservableObject {
         showJoinConfirm = false
         joinFamily(force: true)
     }
+
+    private func currentManagingMember(in stored: [StoredFamilyMember]) -> StoredFamilyMember? {
+        stored.first {
+            $0.isMe && (FamilyRole(storedRawValue: $0.roleRaw)?.canManageFamilyMembers ?? false)
+        }
+    }
 }
 
 // MARK: - Mapping
 
 private extension StoredFamilyMember {
     func toFamilyMember() -> FamilyMember {
-        let role = FamilyRole(rawValue: roleRaw) ?? .mom
+        let role = FamilyRole(storedRawValue: roleRaw) ?? .mom
         return FamilyMember(
             id: id, name: name, role: role, isMe: isMe,
             isOnline: false, activity: "", blob: role.defaultBlob, tone: role.defaultTone

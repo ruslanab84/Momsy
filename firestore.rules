@@ -59,7 +59,15 @@ service cloud.firestore {
     function canManageFamilyRoster(familyId) {
       return belongsToFamily(familyId)
         && hasCallerMemberDoc(familyId)
-        && callerRoleRaw(familyId) in ['Мама', 'Папа'];
+        && callerRoleRaw(familyId) in [
+          'Мама', 'Папа',
+          'мама', 'папа',
+          'mom', 'dad',
+          'Mom', 'Dad',
+          'mama', 'papa',
+          'mother', 'father',
+          'parent', 'Parent'
+        ];
     }
 
     function isSelfMemberWrite(familyId, memberId) {

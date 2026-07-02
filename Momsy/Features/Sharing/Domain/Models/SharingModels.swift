@@ -8,6 +8,26 @@ enum FamilyRole: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    init?(storedRawValue: String) {
+        if let role = FamilyRole(rawValue: storedRawValue) {
+            self = role
+            return
+        }
+
+        switch storedRawValue.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+        case "mom", "mama", "mother", "parent", "мама":
+            self = .mom
+        case "dad", "papa", "father", "папа":
+            self = .dad
+        case "nanny", "няня":
+            self = .nanny
+        case "grandma", "grandmother", "бабушка":
+            self = .grandma
+        default:
+            return nil
+        }
+    }
+
     var displayNameEn: String {
         switch self {
         case .mom:     return "Mom"
@@ -97,4 +117,3 @@ struct FamilyMember: Identifiable {
         self.tone = tone
     }
 }
-

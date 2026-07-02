@@ -22,21 +22,75 @@ final class FirestoreFamilyRepository: FamilyRepository {
     }
 
     func add(_ member: StoredFamilyMember) async throws {
-        let docId = member.uid ?? member.id.uuidString
+        let docId = documentId(for: member)
         try await col().document(docId).setData(member.toFirestoreData(), merge: true)
     }
 
     func update(_ member: StoredFamilyMember) async throws {
-        let docId = member.uid ?? member.id.uuidString
+        let docId = documentId(for: member)
         try await col().document(docId).updateData(member.toFirestoreData())
     }
 
-    func remove(id: UUID) async throws {
-        // Try to find by id field since docId may be a Firebase uid
-        let snap = try await col().whereField("id", isEqualTo: id.uuidString).getDocuments()
+    func prepareForRosterManagement(currentMember: StoredFamilyMember) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard currentMember.isMe else { return }
+        guard let currentRole = currentMember.role, currentRole.canManageFamilyMembers else { return }
+
+        let collection = try col()
+        let canonicalRef = collection.document(uid)
+        let canonicalSnap = try await canonicalRef.getDocument()
+        var canonicalMember = currentMember
+        canonicalMember.uid = uid
+        canonicalMember.documentId = uid
+        canonicalMember.roleRaw = currentRole.rawValue
+
+        if canonicalSnap.exists {
+            let existingRaw = canonicalSnap.data()?["roleRaw"] as? String ?? ""
+            if FamilyRole(storedRawValue: existingRaw)?.rawValue != currentRole.rawValue {
+                try await canonicalRef.setData(canonicalMember.toFirestoreData(), merge: true)
+            }
+        } else {
+            try await canonicalRef.setData(canonicalMember.toFirestoreData(), merge: true)
+        }
+
+        if let documentId = currentMember.documentId, documentId != uid {
+            try? await collection.document(documentId).delete()
+        }
+    }
+
+    func remove(_ member: StoredFamilyMember) async throws {
+        let collection = try col()
+        let docIds = [
+            member.documentId,
+            member.uid,
+            member.id.uuidString
+        ].compactMap { $0 }
+
+        var checkedDocIds = Set<String>()
+        for docId in docIds {
+            guard checkedDocIds.insert(docId).inserted else { continue }
+            let ref = collection.document(docId)
+            let snap = try await ref.getDocument()
+            if snap.exists {
+                try await ref.delete()
+                return
+            }
+        }
+
+        let snap = try await collection.whereField("id", isEqualTo: member.id.uuidString).getDocuments()
         for doc in snap.documents {
             try await doc.reference.delete()
         }
+    }
+
+    private func documentId(for member: StoredFamilyMember) -> String {
+        member.documentId ?? member.uid ?? member.id.uuidString
+    }
+}
+
+private extension StoredFamilyMember {
+    var role: FamilyRole? {
+        FamilyRole(storedRawValue: roleRaw)
     }
 }
 
@@ -45,7 +99,7 @@ extension StoredFamilyMember {
         var data: [String: Any] = [
             "id": id.uuidString,
             "name": name,
-            "roleRaw": roleRaw,
+            "roleRaw": FamilyRole(storedRawValue: roleRaw)?.rawValue ?? roleRaw,
             "isMe": isMe
         ]
         if let uid { data["uid"] = uid }
@@ -64,6 +118,7 @@ extension StoredFamilyMember {
         self.isMe = isCurrentUser ?? (data["isMe"] as? Bool ?? false)
         self.uid = uid
         self.inviteEmail = data["inviteEmail"] as? String
+        self.documentId = docId
     }
 
     private static func stableId(for value: String) -> UUID {

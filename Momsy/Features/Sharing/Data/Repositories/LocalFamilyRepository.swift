@@ -28,9 +28,11 @@ final class LocalFamilyRepository: FamilyRepository {
         try save(members)
     }
 
-    func remove(id: UUID) async throws {
+    func prepareForRosterManagement(currentMember: StoredFamilyMember) async throws { }
+
+    func remove(_ member: StoredFamilyMember) async throws {
         var members = try load()
-        members.removeAll { $0.id == id }
+        members.removeAll { $0.id == member.id }
         try save(members)
     }
 }
