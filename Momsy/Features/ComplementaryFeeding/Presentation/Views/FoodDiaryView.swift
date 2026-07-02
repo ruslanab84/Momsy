@@ -10,26 +10,30 @@ struct FoodDiaryView: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 16) {
-                if !vm.allergens.isEmpty {
-                    AllergenCard(allergens: vm.allergens, lm: lm)
-                }
+        ZStack {
+            BabyFoodBackgroundView()
 
-                if vm.entries.isEmpty {
-                    FoodDiaryEmptyState(lm: lm)
-                } else {
-                    ForEach(vm.grouped, id: \.date) { group in
-                        FoodGroupSection(group: group, vm: vm, lm: lm)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 16) {
+                    if !vm.allergens.isEmpty {
+                        AllergenCard(allergens: vm.allergens, lm: lm)
+                    }
+
+                    if vm.entries.isEmpty {
+                        FoodDiaryEmptyState(lm: lm)
+                    } else {
+                        ForEach(vm.grouped, id: \.date) { group in
+                            FoodGroupSection(group: group, vm: vm, lm: lm)
+                        }
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 32)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-            .padding(.bottom, 32)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(BabyFoodBackgroundView())
+        .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.foodDiary)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
