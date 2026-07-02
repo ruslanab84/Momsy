@@ -28,6 +28,7 @@ struct FoodDiaryView: View {
             .padding(.top, 8)
             .padding(.bottom, 32)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BabyFoodBackgroundView())
         .navigationTitle(lm.strings.foodDiary)
         .toolbar {

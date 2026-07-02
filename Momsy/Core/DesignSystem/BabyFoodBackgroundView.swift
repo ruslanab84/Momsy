@@ -6,23 +6,23 @@ struct BabyFoodBackgroundView: View {
             ZStack {
                 Color.bbCream
 
-                BabyFoodDecoration(kind: .bottle, size: 92, tone: .bbSky, rotation: .degrees(-12), opacity: 0.18)
-                    .position(x: proxy.size.width * 0.16, y: 86)
+                BabyFoodDecoration(kind: .bottle, size: 48, tone: .bbSky, rotation: .degrees(-12), opacity: 0.16)
+                    .position(x: proxy.size.width * 0.12, y: 82)
 
-                BabyFoodDecoration(kind: .banana, size: 84, tone: .bbButter, rotation: .degrees(18), opacity: 0.2)
-                    .position(x: proxy.size.width * 0.84, y: 128)
+                BabyFoodDecoration(kind: .banana, size: 44, tone: .bbButter, rotation: .degrees(18), opacity: 0.18)
+                    .position(x: proxy.size.width * 0.88, y: 124)
 
-                BabyFoodDecoration(kind: .porridge, size: 96, tone: .bbCoral, rotation: .degrees(-8), opacity: 0.15)
-                    .position(x: proxy.size.width * 0.18, y: proxy.size.height * 0.46)
+                BabyFoodDecoration(kind: .porridge, size: 52, tone: .bbCoral, rotation: .degrees(-8), opacity: 0.14)
+                    .position(x: proxy.size.width * 0.12, y: proxy.size.height * 0.45)
 
-                BabyFoodDecoration(kind: .fruit, size: 82, tone: .bbRose, rotation: .degrees(10), opacity: 0.17)
-                    .position(x: proxy.size.width * 0.86, y: proxy.size.height * 0.56)
+                BabyFoodDecoration(kind: .fruit, size: 46, tone: .bbRose, rotation: .degrees(10), opacity: 0.15)
+                    .position(x: proxy.size.width * 0.88, y: proxy.size.height * 0.56)
 
-                BabyFoodDecoration(kind: .carrot, size: 74, tone: .bbMint, rotation: .degrees(-22), opacity: 0.14)
+                BabyFoodDecoration(kind: .carrot, size: 42, tone: .bbMint, rotation: .degrees(-22), opacity: 0.13)
                     .position(x: proxy.size.width * 0.12, y: proxy.size.height * 0.82)
 
-                BabyFoodDecoration(kind: .bottle, size: 78, tone: .bbLilac, rotation: .degrees(14), opacity: 0.13)
-                    .position(x: proxy.size.width * 0.78, y: proxy.size.height * 0.9)
+                BabyFoodDecoration(kind: .bottle, size: 44, tone: .bbLilac, rotation: .degrees(14), opacity: 0.12)
+                    .position(x: proxy.size.width * 0.82, y: proxy.size.height * 0.9)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .clipped()

@@ -107,6 +107,7 @@ struct DoctorMenuView: View {
             .padding(.top, 8)
             .padding(.bottom, 24)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BabyFoodBackgroundView())
         .navigationTitle(lm.strings.tabDoctor)
     }
