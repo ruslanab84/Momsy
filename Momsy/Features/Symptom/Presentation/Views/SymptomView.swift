@@ -131,11 +131,11 @@ struct SymptomView: View {
                     }
                     Text(vm.result.warning)
                         .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(.bbInkSoft)
+                        .foregroundColor(Color(bbHex: "3D2A20"))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(10)
-                .background(Color.white.opacity(0.8))
+                .background(Color(bbHex: "FFF7EA"))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
         }

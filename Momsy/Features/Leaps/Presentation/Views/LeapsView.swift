@@ -68,7 +68,7 @@ struct LeapsView: View {
                 CuteBlobView(kind: .star, size: 56, tone: Color.white.opacity(0.4))
                 Spacer()
                 BBPill(text: loc.strings.weekPill(n: vm.currentLeap.week),
-                       color: .bbInk, fg: .white)
+                       color: .white.opacity(0.9), fg: .black)
             }
 
             Text("«\(vm.leapName(vm.currentLeap))»")

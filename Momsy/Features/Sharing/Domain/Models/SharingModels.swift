@@ -43,6 +43,10 @@ enum FamilyRole: String, CaseIterable, Identifiable {
         lang == "en" ? descriptionEn : description
     }
 
+    var canManageFamilyMembers: Bool {
+        self == .mom || self == .dad
+    }
+
     var icon: String {
         switch self {
         case .mom:     return "person.fill"
@@ -93,5 +97,4 @@ struct FamilyMember: Identifiable {
         self.tone = tone
     }
 }
-
 

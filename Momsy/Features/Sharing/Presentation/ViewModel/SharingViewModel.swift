@@ -24,12 +24,16 @@ final class SharingViewModel: ObservableObject {
     private var lm: LocalizationManager { .shared }
 
     var displayName: String { appState.displayName }
+    var canManageMembers: Bool {
+        members.first(where: { $0.isMe })?.role.canManageFamilyMembers ?? false
+    }
 
     var inviteCode: String { inviteService.currentCode() }
     var inviteURL:  String { inviteService.inviteURL(for: inviteCode) }
     var inviteExpiry: Date { inviteService.expiry() }
 
     func presentInvite() {
+        guard canManageMembers else { return }
         guard !isPreparingInvite else { return }
         isPreparingInvite = true
         saveError = nil
@@ -46,6 +50,7 @@ final class SharingViewModel: ObservableObject {
     }
 
     func updateInviteRole(_ role: FamilyRole) {
+        guard canManageMembers else { return }
         guard !isPreparingInvite else { return }
         Task {
             do {
@@ -57,6 +62,7 @@ final class SharingViewModel: ObservableObject {
     }
 
     func regenerateInvite(role: FamilyRole) {
+        guard canManageMembers else { return }
         guard !isPreparingInvite else { return }
         isPreparingInvite = true
         saveError = nil
@@ -86,6 +92,7 @@ final class SharingViewModel: ObservableObject {
     }
 
     func addMember(_ member: FamilyMember) {
+        guard canManageMembers else { return }
         withAnimation(.spring(response: 0.38, dampingFraction: 0.8)) {
             members.append(member)
         }
@@ -98,6 +105,7 @@ final class SharingViewModel: ObservableObject {
     }
 
     func changeRole(id: UUID, to newRole: FamilyRole) {
+        guard canManageMembers else { return }
         guard
             let idx = members.firstIndex(where: { $0.id == id }),
             let storedIdx = storedMembers.firstIndex(where: { $0.id == id })
@@ -114,13 +122,25 @@ final class SharingViewModel: ObservableObject {
     }
 
     func removeMember(id: UUID) {
+        guard canManageMembers else { return }
+        guard
+            let idx = members.firstIndex(where: { $0.id == id }),
+            let storedIdx = storedMembers.firstIndex(where: { $0.id == id })
+        else { return }
+        let removedMember = members[idx]
+        let removedStoredMember = storedMembers[storedIdx]
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-            members.removeAll { $0.id == id }
+            _ = members.remove(at: idx)
         }
-        storedMembers.removeAll { $0.id == id }
+        storedMembers.remove(at: storedIdx)
         Task {
-            do { try await repo.remove(id: id) }
-            catch { saveError = error.localizedDescription }
+            do {
+                try await repo.remove(id: id)
+            } catch {
+                members.insert(removedMember, at: min(idx, members.count))
+                storedMembers.insert(removedStoredMember, at: min(storedIdx, storedMembers.count))
+                saveError = error.localizedDescription
+            }
         }
     }
 

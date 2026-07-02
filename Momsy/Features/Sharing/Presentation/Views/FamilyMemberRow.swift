@@ -4,6 +4,7 @@ import SwiftUI
 
 struct MemberCard: View {
     let member: FamilyMember
+    let canEdit: Bool
     let onEdit: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
@@ -47,7 +48,7 @@ struct MemberCard: View {
                     .padding(.vertical, 4)
                     .background(Color.bbCoral)
                     .clipShape(Capsule())
-            } else {
+            } else if canEdit {
                 Button(action: onEdit) {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 14, weight: .bold))

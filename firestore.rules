@@ -47,6 +47,32 @@ service cloud.firestore {
       return isFamilyMember(familyId) || isFamilyCreator(familyId);
     }
 
+    function hasCallerMemberDoc(familyId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
+    }
+
+    function callerRoleRaw(familyId) {
+      return get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.roleRaw;
+    }
+
+    function canManageFamilyRoster(familyId) {
+      return belongsToFamily(familyId)
+        && hasCallerMemberDoc(familyId)
+        && callerRoleRaw(familyId) in ['Мама', 'Папа'];
+    }
+
+    function isSelfMemberWrite(familyId, memberId) {
+      return isSignedIn()
+        && memberId == request.auth.uid
+        && (isFamilyMember(familyId) || isFamilyCreator(familyId));
+    }
+
+    function memberRoleUnchanged() {
+      return !('roleRaw' in resource.data)
+        || request.resource.data.roleRaw == resource.data.roleRaw;
+    }
+
     // Each user owns only their own doc.
     match /users/{uid} {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
@@ -56,13 +82,13 @@ service cloud.firestore {
     // familyId to join — but only while it is unexpired. `list` is denied outright:
     // allowing it would let any signed-in user enumerate every family's code and
     // familyId, then self-assign membership via their own users/{uid} doc.
-    // Only members of the referenced family may create/replace or delete a code.
+    // Only full-access members of the referenced family may create/replace or delete a code.
     match /invites/{code} {
       allow get:            if isSignedIn()
                             && resource.data.expiresAt > request.time;
       allow list:           if false;
-      allow create, update: if isFamilyMember(request.resource.data.familyId);
-      allow delete:         if isFamilyMember(resource.data.familyId);
+      allow create, update: if canManageFamilyRoster(request.resource.data.familyId);
+      allow delete:         if canManageFamilyRoster(resource.data.familyId);
     }
 
     match /families/{familyId} {
@@ -71,14 +97,15 @@ service cloud.firestore {
       allow update, delete: if belongsToFamily(familyId);
 
       // Members roster. A joining member may write their own membership doc; the family
-      // creator may write during setup; existing members may manage the roster.
+      // creator may write during setup; Mom/Dad members may manage the roster.
       match /members/{memberId} {
         allow read:   if belongsToFamily(familyId);
-        // Create/update: any member (manage roster names) or the joining user themselves.
-        allow create, update: if belongsToFamily(familyId)
-                              || (isSignedIn() && memberId == request.auth.uid && isFamilyMember(familyId));
-        // Delete: only your own membership doc.
-        allow delete: if isSignedIn() && memberId == request.auth.uid;
+        allow create: if canManageFamilyRoster(familyId)
+                      || isSelfMemberWrite(familyId, memberId);
+        allow update: if canManageFamilyRoster(familyId)
+                      || (isSelfMemberWrite(familyId, memberId) && memberRoleUnchanged());
+        allow delete: if canManageFamilyRoster(familyId)
+                      || (isSignedIn() && memberId == request.auth.uid);
       }
 
       // Per-baby tree: profile parent doc + every log subcollection.

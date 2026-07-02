@@ -15,7 +15,9 @@ struct SharingView: View {
             VStack(spacing: 14) {
                 header
                 memberList
-                inviteCard
+                if vm.canManageMembers {
+                    inviteCard
+                }
                 joinCard
                 roleMatrix
             }
@@ -67,7 +69,7 @@ struct SharingView: View {
     private var memberList: some View {
         VStack(spacing: 10) {
             ForEach(vm.members) { member in
-                MemberCard(member: member) {
+                MemberCard(member: member, canEdit: vm.canManageMembers) {
                     vm.editingMember = member
                 }
             }
