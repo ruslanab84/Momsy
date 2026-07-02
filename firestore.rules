@@ -52,12 +52,17 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
-    // Any signed-in user may read an invite to discover the familyId to join.
+    // A signed-in user may look up ONE invite by its exact code to discover the
+    // familyId to join — but only while it is unexpired. `list` is denied outright:
+    // allowing it would let any signed-in user enumerate every family's code and
+    // familyId, then self-assign membership via their own users/{uid} doc.
     // Only members of the referenced family may create/replace or delete a code.
     match /invites/{code} {
-      allow read:          if isSignedIn();
+      allow get:            if isSignedIn()
+                            && resource.data.expiresAt > request.time;
+      allow list:           if false;
       allow create, update: if isFamilyMember(request.resource.data.familyId);
-      allow delete:        if isFamilyMember(resource.data.familyId);
+      allow delete:         if isFamilyMember(resource.data.familyId);
     }
 
     match /families/{familyId} {
