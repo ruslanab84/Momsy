@@ -67,6 +67,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     deinit {
+        syncTasks.forEach { $0.cancel() }
         if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
 
@@ -141,14 +142,16 @@ final class TodayViewModel: ObservableObject {
     }
 
     private func startSyncListeners() {
-        syncTasks.append(Task {
-            for await logs in syncRepo.feedingLogs {
-                self.syncedFeedingLogs = logs
+        syncTasks.append(Task { [weak self] in
+            guard let feedingLogs = self?.syncRepo.feedingLogs else { return }
+            for await logs in feedingLogs {
+                self?.syncedFeedingLogs = logs
             }
         })
-        syncTasks.append(Task {
-            for await logs in syncRepo.sleepLogs {
-                self.syncedSleepLogs = logs
+        syncTasks.append(Task { [weak self] in
+            guard let sleepLogs = self?.syncRepo.sleepLogs else { return }
+            for await logs in sleepLogs {
+                self?.syncedSleepLogs = logs
             }
         })
     }

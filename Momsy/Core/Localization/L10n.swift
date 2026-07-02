@@ -786,6 +786,7 @@ struct L10n {
     var subscription: String    { s("Subscription",  "Подписка",      "Abonnement",    "Suscripción", "Abonnement", "Subscrição", "订阅") }
     var privacyPolicy: String   { s("Privacy Policy","Политика конфид.", "Datenschutz", "Política de privacidad", "Politique de confidentialité", "Política de privacidade", "隐私政策") }
     var termsOfUse: String      { s("Terms of Use",  "Условия использования", "Nutzungsbedingungen", "Términos de uso", "Conditions d’utilisation", "Termos de utilização", "使用条款") }
+    var termsOfUseEULA: String  { s("Terms of Use (EULA)", "Условия использования (EULA)", "Nutzungsbedingungen (EULA)", "Términos de uso (EULA)", "Conditions d’utilisation (EULA)", "Termos de utilização (EULA)", "使用条款 (EULA)") }
 
     // MARK: — Onboarding
     var onboardingWelcome: String { s("Welcome to Momsy", "Добро пожаловать в Momsy", "Willkommen bei Momsy", "Bienvenida a Momsy", "Bienvenue sur Momsy", "Bem-vinda à Momsy", "欢迎使用 Momsy") }
@@ -1099,13 +1100,24 @@ struct L10n {
                                        "Commencer l’essai gratuit",
                                        "Iniciar avaliação gratuita",
                                        "开始免费试用") }
-    var paywallPriceNote: String   { s("Then $4.99/month · Cancel anytime",
-                                       "Затем 299 ₽/мес · Отменить в любое время",
-                                       "Dann 4,99 €/Monat · Jederzeit kündbar",
-                                       "Luego 4,99 $/mes · Cancela cuando quieras",
-                                       "Puis 4,99 €/mois · Annulable à tout moment",
-                                       "Depois 4,99 €/mês · Cancele quando quiser",
-                                       "之后 ¥35/月 · 随时取消") }
+    var paywallPriceLoadingDisclosure: String {
+        s("Loading subscription price...",
+          "Загружаем цену подписки...",
+          "Abo-Preis wird geladen...",
+          "Cargando precio de la suscripción...",
+          "Chargement du prix de l'abonnement...",
+          "A carregar o preço da subscrição...",
+          "正在加载订阅价格...")
+    }
+    func paywallRenewalDisclosure(price: String) -> String {
+        s("7 days free, then \(price)/month. Subscription renews automatically every month unless canceled at least 24 hours before the period ends.",
+          "7 дней бесплатно, затем \(price)/мес. Подписка автоматически продлевается каждый месяц, если не отменить её минимум за 24 часа до конца периода.",
+          "7 Tage gratis, danach \(price)/Monat. Das Abo verlängert sich jeden Monat automatisch, sofern es nicht mindestens 24 Stunden vor Periodenende gekündigt wird.",
+          "7 días gratis, luego \(price)/mes. La suscripción se renueva automáticamente cada mes salvo que se cancele al menos 24 horas antes de que termine el periodo.",
+          "7 jours gratuits, puis \(price)/mois. L'abonnement se renouvelle automatiquement chaque mois sauf annulation au moins 24 heures avant la fin de la période.",
+          "7 dias grátis, depois \(price)/mês. A subscrição renova automaticamente todos os meses, salvo cancelamento pelo menos 24 horas antes do fim do período.",
+          "7 天免费，之后 \(price)/月。订阅每月自动续订，除非在当前周期结束前至少 24 小时取消。")
+    }
     var purchaseErrorTitle: String { s("Purchase Error",
                                        "Ошибка покупки",
                                        "Kauffehler",
@@ -1113,6 +1125,24 @@ struct L10n {
                                        "Erreur d’achat",
                                        "Erro na compra",
                                        "购买错误") }
+    var purchaseVerificationFailed: String {
+        s("Couldn’t verify the purchase. Please try again.",
+          "Не удалось подтвердить покупку. Попробуйте ещё раз.",
+          "Kauf konnte nicht verifiziert werden. Bitte erneut versuchen.",
+          "No se pudo verificar la compra. Inténtalo de nuevo.",
+          "Impossible de vérifier l’achat. Veuillez réessayer.",
+          "Não foi possível verificar a compra. Tente novamente.",
+          "无法验证购买，请重试。")
+    }
+    var purchaseProductUnavailable: String {
+        s("Subscription isn’t available right now. Check your connection and try again.",
+          "Подписка сейчас недоступна. Проверьте соединение и попробуйте ещё раз.",
+          "Abo derzeit nicht verfügbar. Prüfe deine Verbindung und versuche es erneut.",
+          "La suscripción no está disponible ahora. Revisa tu conexión e inténtalo de nuevo.",
+          "L’abonnement n’est pas disponible pour le moment. Vérifiez votre connexion et réessayez.",
+          "A subscrição não está disponível de momento. Verifique a ligação e tente novamente.",
+          "订阅当前不可用，请检查网络后重试。")
+    }
     var restorePurchases: String   { s("Restore Purchases",
                                        "Восстановить покупки",
                                        "Käufe wiederherstellen",

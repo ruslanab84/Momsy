@@ -3,13 +3,51 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Каждый юзер владеет только своей папкой. Зеркало правила users/{uid} в Firestore.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasUserDoc(uid) {
+      return isSignedIn()
+             && firestore.exists(/databases/(default)/documents/users/$(uid));
+    }
+
+    function userFamilyId(uid) {
+      return firestore.get(/databases/(default)/documents/users/$(uid)).data.familyId;
+    }
+
+    function isFamilyMember(familyId) {
+      return hasUserDoc(request.auth.uid)
+             && userFamilyId(request.auth.uid) == familyId;
+    }
+
+    function sharesFamilyWith(uid) {
+      return hasUserDoc(request.auth.uid)
+             && hasUserDoc(uid)
+             && userFamilyId(request.auth.uid) == userFamilyId(uid);
+    }
+
+    function isImageUnderLimit() {
+      return request.resource.size < 10 * 1024 * 1024
+             && request.resource.contentType.matches('image/.*');
+    }
+
+    // Shared family photos. Photo paths are synced through Firestore, so every
+    // co-parent in the family must be able to read the object behind that path.
+    match /families/{familyId}/photos/{photoName} {
+      allow read: if isFamilyMember(familyId);
+      allow create, update: if isFamilyMember(familyId) && isImageUnderLimit();
+      allow delete: if isFamilyMember(familyId);
+    }
+
+    // Legacy per-user photo path. Kept readable by same-family members so existing
+    // synced photoPath values do not break for co-parents after the new family path ships.
     match /users/{uid}/{allPaths=**} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if request.auth != null
-                   && request.auth.uid == uid
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
+      allow read: if isSignedIn() && (request.auth.uid == uid || sharesFamilyWith(uid));
+      allow create, update: if isSignedIn()
+                            && request.auth.uid == uid
+                            && isImageUnderLimit();
+      allow delete: if isSignedIn() && request.auth.uid == uid;
     }
 
     // Всё остальное — запрет по умолчанию.

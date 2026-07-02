@@ -32,6 +32,32 @@ final class PumpingViewModel: ObservableObject {
         return String(format: "%02d:%02d", m, s)
     }
 
+    var lastPumpingDurationString: String {
+        guard let last = todayEntries.last(where: { $0.endDate != nil }) else {
+            return "—"
+        }
+        return lm.strings.durationFormatted(last.durationMinutes)
+    }
+
+    var lastPumpingSubtitle: String {
+        guard let last = todayEntries.last(where: { $0.endDate != nil }),
+              let end = last.endDate else {
+            return lm.strings.noPumpingYet
+        }
+        let mins = max(0, Int(-end.timeIntervalSinceNow / 60))
+        if mins == 0 { return lm.strings.justNow }
+        if mins < 60 { return lm.strings.minsAgo(mins) }
+        return lm.strings.hrAgo(mins / 60)
+    }
+
+    var totalPumpingToday: String {
+        let total = todayEntries
+            .filter { $0.endDate != nil }
+            .map(\.durationMinutes)
+            .reduce(0, +)
+        return lm.strings.durationFormatted(total)
+    }
+
     func start() {
         guard !isPumpingActive else { return }
         Task {

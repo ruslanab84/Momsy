@@ -8,6 +8,7 @@ enum PhotoUploadEvent: Sendable {
 enum PhotoStorageError: Error {
     case encodingFailed
     case uploadFailed
+    case familyUnavailable
 }
 
 protocol PhotoStorageService: Sendable {

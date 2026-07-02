@@ -9,6 +9,8 @@ struct PaywallView: View {
     @State private var errorMessage: String?
 
     private var lm: L10n { loc.strings }
+    private let privacyPolicyURL = URL(string: "https://momsy.app/privacy")
+    private let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
 
     var body: some View {
         ZStack {
@@ -96,10 +98,10 @@ struct PaywallView: View {
             Button {
                 Task {
                     do {
-                        try await subscriptionManager.purchase()
-                        if subscriptionManager.isPremium { onComplete() }
+                        let purchaseSucceeded = try await subscriptionManager.purchase()
+                        if purchaseSucceeded { onComplete() }
                     } catch {
-                        errorMessage = error.localizedDescription
+                        errorMessage = localizedPurchaseError(error)
                     }
                 }
             } label: {
@@ -117,13 +119,16 @@ struct PaywallView: View {
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .disabled(subscriptionManager.isLoading)
+            .disabled(subscriptionManager.isLoading || subscriptionManager.product == nil)
             .padding(.horizontal, 24)
 
-            Text(lm.paywallPriceNote)
+            Text(renewalDisclosureText)
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
+                .padding(.horizontal, 28)
+
+            legalLinks
 
             Button {
                 Task {
@@ -140,7 +145,42 @@ struct PaywallView: View {
         .padding(.bottom, 44)
     }
 
+    private var renewalDisclosureText: String {
+        guard let product = subscriptionManager.product else {
+            return lm.paywallPriceLoadingDisclosure
+        }
+        return lm.paywallRenewalDisclosure(price: product.displayPrice)
+    }
+
+    private var legalLinks: some View {
+        HStack(spacing: 18) {
+            if let termsOfUseURL {
+                Link(destination: termsOfUseURL) {
+                    Text(lm.termsOfUseEULA)
+                        .underline()
+                }
+            }
+
+            if let privacyPolicyURL {
+                Link(destination: privacyPolicyURL) {
+                    Text(lm.privacyPolicy)
+                        .underline()
+                }
+            }
+        }
+        .font(.caption.weight(.semibold))
+        .foregroundColor(.white.opacity(0.8))
+    }
+
     // MARK: — Helpers
+
+    private func localizedPurchaseError(_ error: Error) -> String {
+        switch error {
+        case SubscriptionError.failedVerification: return lm.purchaseVerificationFailed
+        case SubscriptionError.productUnavailable:  return lm.purchaseProductUnavailable
+        default:                                    return lm.purchaseProductUnavailable
+        }
+    }
 
     private func featureRow(icon: String, text: String) -> some View {
         HStack(spacing: 14) {

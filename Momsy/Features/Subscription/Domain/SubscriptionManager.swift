@@ -29,8 +29,8 @@ final class SubscriptionManager: ObservableObject {
         listenerTask?.cancel()
     }
 
-    func purchase() async throws {
-        guard !isLoading else { return }
+    func purchase() async throws -> Bool {
+        guard !isLoading else { return false }
         isLoading = true
         defer { isLoading = false }
 
@@ -39,15 +39,17 @@ final class SubscriptionManager: ObservableObject {
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
-            if tx.productID == Self.productID, tx.revocationDate == nil {
+            let grantsPremium = tx.productID == Self.productID && tx.revocationDate == nil
+            if grantsPremium {
                 isPremium = true
             }
             await tx.finish()
             await updateStatus()
+            return grantsPremium
         case .pending, .userCancelled:
-            break
+            return false
         @unknown default:
-            break
+            return false
         }
     }
 
@@ -107,16 +109,7 @@ final class SubscriptionManager: ObservableObject {
     }
 }
 
-enum SubscriptionError: LocalizedError {
+enum SubscriptionError: Error {
     case failedVerification
     case productUnavailable
-
-    var errorDescription: String? {
-        switch self {
-        case .failedVerification:
-            return "Could not verify the purchase. Please try again."
-        case .productUnavailable:
-            return "Subscription is not available yet. Please check your connection and try again."
-        }
-    }
 }
