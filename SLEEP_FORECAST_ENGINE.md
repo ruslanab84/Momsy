@@ -76,10 +76,14 @@
    personalizedWW = w·observedWW + (1−w)·profile.typicalMinutes
    clamp → [profile.safeLower, profile.safeUpper]   // защитные рамки
 
-4. ТОЧКА ОТСЧЁТА
-   Спит (последний entry endDate == nil): onset = entry.start + profile.typicalNapMinutes + personalizedWW
-   Бодрствует: lastWake = end последнего завершённого сна (или утреннее пробуждение)
-               onset = lastWake + personalizedWW
+4. ТОЧКА ОТСЧЁТА + КРЕДИТ ЗА ДЛИТЕЛЬНОСТЬ
+   Спит (endDate == nil): onset = entry.start + typicalNapMinutes + personalizedWW
+   Бодрствует, длительность последнего завершённого сна D, cutoff = typicalNap·0.5:
+     D ≥ cutoff  → onset = lastWake + personalizedWW                       (полное окно)
+     10 ≤ D < cutoff → onset = lastWake + personalizedWW·(0.5 + 0.5·D/cutoff)  (частичный кредит)
+     D < 10 мин  → false start: onset = предыдущее РЕАЛЬНОЕ пробуждение + personalizedWW,
+                   clamp ≥ now + 15 мин. False starts исключаются из gap-статистики (§3.2),
+                   napsTaken (§3.6) и minutesAwake.
 
 5. ОКНО
    buffer = max(15 мин, 0.15·personalizedWW)
@@ -198,6 +202,8 @@ final class PredictNextSleepUseCase {
 | Ночное время | подавить `nap`, не предлагать дневной сон до утра |
 | Выбросы / пропущенные логи | отсекаются фильтром §3.2 |
 | Переезд / DST | только `Calendar` + абсолютные `Date`, без ручной арифметики часов |
+| Сон < 10 мин (false start) | Окно не сбрасывается: отсчёт от прошлого реального пробуждения, клампится к now+15 |
+| Сон 10 мин – ½·typicalNap | Частичный кредит окна (линейная рампа 0.5→1.0) |
 
 ---
 
