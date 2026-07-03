@@ -1130,6 +1130,41 @@ struct L10n {
                                        "Apple 或 Google 可在多设备上安全保存家庭访问权限。") }
 
     // MARK: — Paywall
+    var paywallPlanFallbackName: String { s("Momsy Premium",
+                                            "Momsy Premium",
+                                            "Momsy Premium",
+                                            "Momsy Premium",
+                                            "Momsy Premium",
+                                            "Momsy Premium",
+                                            "Momsy Premium") }
+    var paywallSubscriptionNameLabel: String { s("Subscription",
+                                                 "Подписка",
+                                                 "Abo",
+                                                 "Suscripción",
+                                                 "Abonnement",
+                                                 "Subscrição",
+                                                 "订阅") }
+    var paywallSubscriptionPeriodLabel: String { s("Period",
+                                                   "Период",
+                                                   "Zeitraum",
+                                                   "Periodo",
+                                                   "Période",
+                                                   "Período",
+                                                   "周期") }
+    var paywallSubscriptionPriceLabel: String { s("Price",
+                                                  "Цена",
+                                                  "Preis",
+                                                  "Precio",
+                                                  "Prix",
+                                                  "Preço",
+                                                  "价格") }
+    var paywallMonthlyPeriod: String { s("1 month",
+                                         "1 месяц",
+                                         "1 Monat",
+                                         "1 mes",
+                                         "1 mois",
+                                         "1 mês",
+                                         "1个月") }
     var trialBadge: String         { s("7 days free",
                                        "7 дней бесплатно",
                                        "7 Tage gratis",

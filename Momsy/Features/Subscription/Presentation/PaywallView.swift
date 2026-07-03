@@ -1,5 +1,4 @@
 import SwiftUI
-import StoreKit
 
 struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
@@ -19,14 +18,22 @@ struct PaywallView: View {
             )
             .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                skipButton
-                Spacer()
-                heroSection
-                Spacer().frame(height: 36)
-                featureList
-                Spacer()
-                ctaSection
+            GeometryReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        skipButton
+                        Spacer(minLength: 12)
+                        heroSection
+                        Spacer().frame(height: 24)
+                        featureList
+                        Spacer().frame(height: 18)
+                        planSummary
+                        Spacer(minLength: 16)
+                        ctaSection
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: proxy.size.height)
+                }
             }
         }
         .alert(isPresented: Binding(
@@ -68,9 +75,11 @@ struct PaywallView: View {
                     .foregroundColor(.white)
             }
 
-            Text("Momsy Premium")
+            Text(subscriptionNameText)
                 .font(.system(size: 30, weight: .bold))
                 .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
 
             Text(lm.trialBadge)
                 .font(.subheadline.weight(.semibold))
@@ -89,6 +98,23 @@ struct PaywallView: View {
             featureRow(icon: "book.fill", text: lm.featureDiary)
         }
         .padding(.horizontal, 40)
+    }
+
+    private var planSummary: some View {
+        VStack(spacing: 10) {
+            planRow(title: lm.paywallSubscriptionNameLabel, value: subscriptionNameText)
+            planRow(title: lm.paywallSubscriptionPeriodLabel, value: lm.paywallMonthlyPeriod)
+            planRow(title: lm.paywallSubscriptionPriceLabel, value: subscriptionPriceText)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.white.opacity(0.13))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.22), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal, 24)
     }
 
     private var ctaSection: some View {
@@ -117,7 +143,7 @@ struct PaywallView: View {
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .disabled(subscriptionManager.isLoading || subscriptionManager.product == nil)
+            .disabled(subscriptionManager.isLoading || !subscriptionManager.canPurchase)
             .padding(.horizontal, 24)
 
             Text(renewalDisclosureText)
@@ -144,10 +170,18 @@ struct PaywallView: View {
     }
 
     private var renewalDisclosureText: String {
-        guard let product = subscriptionManager.product else {
+        guard !subscriptionManager.monthlyPrice.isEmpty else {
             return lm.paywallPriceLoadingDisclosure
         }
-        return lm.paywallRenewalDisclosure(price: product.displayPrice)
+        return lm.paywallRenewalDisclosure(price: subscriptionManager.monthlyPrice)
+    }
+
+    private var subscriptionNameText: String {
+        subscriptionManager.subscriptionName.isEmpty ? lm.paywallPlanFallbackName : subscriptionManager.subscriptionName
+    }
+
+    private var subscriptionPriceText: String {
+        subscriptionManager.monthlyPrice.isEmpty ? lm.paywallPriceLoadingDisclosure : subscriptionManager.monthlyPrice
     }
 
     private var legalLinks: some View {
@@ -188,6 +222,23 @@ struct PaywallView: View {
             Text(text)
                 .font(.subheadline)
                 .foregroundColor(.white)
+        }
+    }
+
+    private func planRow(title: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.white.opacity(0.72))
+
+            Spacer(minLength: 12)
+
+            Text(value)
+                .font(.caption.weight(.bold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.trailing)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
         }
     }
 }

@@ -4,16 +4,22 @@ import StoreKit
 
 @MainActor
 final class SubscriptionManager: ObservableObject {
-    static let productID = "com.ruslanabdulov.momsy.premium.monthly"
-
     @Published private(set) var isPremium = false
     @Published private(set) var isLoading = false
-    @Published private(set) var product: Product?
+    @Published private(set) var monthlyPrice = ""
+    @Published private(set) var subscriptionName = ""
+    @Published private var product: Product?
 
+    var canPurchase: Bool {
+        product != nil
+    }
+
+    private let service: any SubscriptionServicing
     private var listenerTask: Task<Void, Never>?
     private var productLoadTask: Task<Product, Error>?
 
-    init() {
+    init(service: any SubscriptionServicing) {
+        self.service = service
         listenerTask = Task {
             _ = await loadProducts()
             await updateStatus()
@@ -35,11 +41,11 @@ final class SubscriptionManager: ObservableObject {
         defer { isLoading = false }
 
         let product = try await loadProductIfNeeded()
-        let result = try await product.purchase()
+        let result = try await service.purchase(product)
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
-            let grantsPremium = tx.productID == Self.productID && tx.revocationDate == nil
+            let grantsPremium = tx.productID == ProductID.monthly && tx.revocationDate == nil
             if grantsPremium {
                 isPremium = true
             }
@@ -57,7 +63,7 @@ final class SubscriptionManager: ObservableObject {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        try? await AppStore.sync()
+        try? await service.restorePurchases()
         await updateStatus()
     }
 
@@ -70,13 +76,14 @@ final class SubscriptionManager: ObservableObject {
         if let product { return product }
         if let productLoadTask {
             let loadedProduct = try await productLoadTask.value
-            product = loadedProduct
+            cache(loadedProduct)
             return loadedProduct
         }
 
+        let service = service
         let task = Task<Product, Error> {
-            let products = try await Product.products(for: [Self.productID])
-            guard let product = products.first else {
+            let products = try await service.fetchProducts(ids: ProductID.all)
+            guard let product = products.first(where: { $0.id == ProductID.monthly }) else {
                 throw SubscriptionError.productUnavailable
             }
             return product
@@ -85,15 +92,21 @@ final class SubscriptionManager: ObservableObject {
         defer { productLoadTask = nil }
 
         let loadedProduct = try await task.value
-        product = loadedProduct
+        cache(loadedProduct)
         return loadedProduct
+    }
+
+    private func cache(_ loadedProduct: Product) {
+        product = loadedProduct
+        monthlyPrice = loadedProduct.displayPrice
+        subscriptionName = loadedProduct.displayName
     }
 
     private func updateStatus() async {
         var hasSub = false
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result,
-               tx.productID == Self.productID,
+               tx.productID == ProductID.monthly,
                tx.revocationDate == nil {
                 hasSub = true
             }
