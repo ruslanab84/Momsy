@@ -6,6 +6,7 @@ final class NowPlayingService {
 
     private var onPlay: (() -> Void)?
     private var onPause: (() -> Void)?
+    private var isPlaying = false
 
     private init() {
         let rc = MPRemoteCommandCenter.shared()
@@ -18,7 +19,8 @@ final class NowPlayingService {
             return .success
         }
         rc.togglePlayPauseCommand.addTarget { [weak self] _ in
-            self?.onPlay?()
+            guard let self else { return .commandFailed }
+            if self.isPlaying { self.onPause?() } else { self.onPlay?() }
             return .success
         }
         rc.stopCommand.addTarget { [weak self] _ in
@@ -33,6 +35,7 @@ final class NowPlayingService {
     }
 
     func update(soundName: String, category: String, isPlaying: Bool) {
+        self.isPlaying = isPlaying
         var info: [String: Any] = [
             MPMediaItemPropertyTitle: soundName,
             MPMediaItemPropertyAlbumTitle: category,
@@ -47,6 +50,7 @@ final class NowPlayingService {
     }
 
     func clear() {
+        isPlaying = false
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
 

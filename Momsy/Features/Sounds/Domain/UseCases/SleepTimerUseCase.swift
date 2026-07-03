@@ -7,12 +7,12 @@ final class SleepTimerUseCase {
         onFinish: @escaping @Sendable () -> Void
     ) -> Task<Void, Never> {
         Task {
-            var remaining = seconds
-            while !Task.isCancelled, remaining > 0 {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                guard !Task.isCancelled else { return }
-                remaining -= 1
+            let deadline = Date().addingTimeInterval(TimeInterval(seconds))
+            while !Task.isCancelled {
+                let remaining = Int(deadline.timeIntervalSinceNow.rounded())
+                guard remaining > 0 else { break }
                 onTick(remaining)
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
             }
             if !Task.isCancelled { onFinish() }
         }
