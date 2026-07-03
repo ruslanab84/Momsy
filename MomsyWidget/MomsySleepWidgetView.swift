@@ -35,7 +35,7 @@ private struct SleepSmallView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Сон", systemImage: "moon.fill")
+            Label(WidgetL10n.current.sleep, systemImage: "moon.fill")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(bbLilac)
             switch entry.sleepState {
@@ -43,20 +43,20 @@ private struct SleepSmallView: View {
                 Text(timerInterval: start...Date.distantFuture, countsDown: false)
                     .font(.system(.title, design: .rounded, weight: .bold).monospacedDigit())
                     .minimumScaleFactor(0.6)
-                Text("спит").font(.caption).foregroundStyle(.secondary)
+                Text(WidgetL10n.current.sleeping).font(.caption).foregroundStyle(.secondary)
             case .idle:
                 if let end = entry.lastSleepEndDate {
                     Text(end, style: .relative)
                         .font(.system(.title2, design: .rounded, weight: .semibold).monospacedDigit())
                         .minimumScaleFactor(0.6)
-                    Text("назад").font(.caption).foregroundStyle(.secondary)
+                    Text(WidgetL10n.current.ago).font(.caption).foregroundStyle(.secondary)
                 } else if let name = entry.babyName.nilIfEmpty {
-                    Text("Открой Momsy\nдля \(name)")
+                    Text(WidgetL10n.current.openMomsyFor(name))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.leading)
                 } else {
-                    Text("Нет данных")
+                    Text(WidgetL10n.current.noData)
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
@@ -93,7 +93,7 @@ private struct SleepStatusColumn: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Label("Сон", systemImage: "moon.fill")
+            Label(WidgetL10n.current.sleep, systemImage: "moon.fill")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(bbLilac)
             switch entry.sleepState {
@@ -101,12 +101,12 @@ private struct SleepStatusColumn: View {
                 Text(timerInterval: start...Date.distantFuture, countsDown: false)
                     .font(.title2.monospacedDigit().weight(.semibold))
                     .minimumScaleFactor(0.7)
-                Text("спит сейчас").font(.caption).foregroundStyle(.green)
+                Text(WidgetL10n.current.sleepingNow).font(.caption).foregroundStyle(.green)
             case .idle:
                 if let end = entry.lastSleepEndDate {
                     Text(end, style: .relative)
                         .font(.subheadline.monospacedDigit())
-                    Text("проснулся").font(.caption).foregroundStyle(.secondary)
+                    Text(WidgetL10n.current.wokeUp).font(.caption).foregroundStyle(.secondary)
                 } else {
                     Text("—").font(.title2).foregroundStyle(.tertiary)
                 }
@@ -122,15 +122,15 @@ private struct SleepLastColumn: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Label("Последний", systemImage: "clock.fill")
+            Label(WidgetL10n.current.last, systemImage: "clock.fill")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(bbLilac.opacity(0.7))
             if case .idle(let dur) = entry.sleepState, let secs = dur {
                 Text(formatDuration(secs))
                     .font(.subheadline.monospacedDigit().weight(.semibold))
-                Text("продолжительность").font(.caption2).foregroundStyle(.secondary)
+                Text(WidgetL10n.current.duration).font(.caption2).foregroundStyle(.secondary)
             } else if case .active = entry.sleepState {
-                Text("идёт сейчас").font(.caption).foregroundStyle(.secondary)
+                Text(WidgetL10n.current.inProgress).font(.caption).foregroundStyle(.secondary)
             } else {
                 Text("—").font(.title2).foregroundStyle(.tertiary)
             }
@@ -150,16 +150,16 @@ private struct SleepAccessoryRectView: View {
             Image(systemName: "moon.fill").frame(width: 12)
             switch entry.sleepState {
             case .active(let start):
-                Text("Спит")
+                Text(WidgetL10n.current.sleeping)
                 Text(timerInterval: start...Date.distantFuture, countsDown: false)
                     .monospacedDigit()
                     .minimumScaleFactor(0.7)
             case .idle:
                 if let end = entry.lastSleepEndDate {
-                    Text("Проснулся")
+                    Text(WidgetL10n.current.wokeUp)
                     Text(end, style: .relative).monospacedDigit()
                 } else {
-                    Text("Нет данных")
+                    Text(WidgetL10n.current.noData)
                 }
             }
         }
@@ -171,10 +171,7 @@ private struct SleepAccessoryRectView: View {
 // MARK: - Helpers
 
 private func formatDuration(_ total: Int) -> String {
-    let h = total / 3600
-    let m = (total % 3600) / 60
-    if h > 0 { return "\(h) ч \(m) мин" }
-    return "\(m) мин"
+    WidgetL10n.current.duration(seconds: total)
 }
 
 private extension String {

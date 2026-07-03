@@ -4,11 +4,7 @@ import SwiftUI
 import WidgetKit
 
 private func pumpSideLabel(_ side: String) -> String {
-    switch side {
-    case "left":  return NSLocalizedString("Left", comment: "")
-    case "right": return NSLocalizedString("Right", comment: "")
-    default:      return NSLocalizedString("Both", comment: "")
-    }
+    WidgetL10n.current.pumpingSideLabel(side)
 }
 
 struct PumpingLockScreenView: View {
@@ -21,13 +17,13 @@ struct PumpingLockScreenView: View {
                 HStack {
                     BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Pumping", comment: "")
+                         ? WidgetL10n.current.pumping
                          : context.attributes.babyName)
                         .font(.headline)
                         .bold()
                         .foregroundStyle(.white)
                     Spacer()
-                    Text(NSLocalizedString("Pumping", comment: ""))
+                    Text(WidgetL10n.current.pumping)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.6))
                 }
@@ -54,7 +50,7 @@ struct PumpingLockScreenView: View {
     @ViewBuilder
     private var timerView: some View {
         if context.isStale {
-            Text(NSLocalizedString("Updating…", comment: ""))
+            Text(WidgetL10n.current.updating)
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
         } else {
@@ -90,13 +86,13 @@ struct PumpingLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.center) {
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Pumping", comment: "")
+                         ? WidgetL10n.current.pumping
                          : context.attributes.babyName)
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     Label {
-                        Text(NSLocalizedString("Pumping…", comment: ""))
+                        Text(WidgetL10n.current.pumpingActive)
                     } icon: {
                         Image(systemName: "drop.fill")
                             .foregroundStyle(.pink)

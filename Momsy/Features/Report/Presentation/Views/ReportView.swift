@@ -241,7 +241,7 @@ struct ReportPreviewContent: View {
 
     private var dateString: String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: lang == "en" ? "en_US" : "ru_RU")
+        f.locale = Locale(identifier: Language.localeIdentifier(for: lang))
         f.dateFormat = "d MMMM yyyy"
         return f.string(from: Date())
     }

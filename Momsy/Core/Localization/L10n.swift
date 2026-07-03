@@ -30,6 +30,9 @@ struct L10n {
     var add: String         { s("Add",           "Добавить",     "Hinzufügen",   "Añadir",       "Ajouter",      "Adicionar", "添加") }
     var close: String       { s("Close",         "Закрыть",      "Schließen",    "Cerrar",       "Fermer",       "Fechar", "关闭") }
     var confirm: String     { s("Confirm",       "Подтвердить",  "Bestätigen",   "Confirmar",    "Confirmer",    "Confirmar", "确认") }
+    var name: String        { s("Name",          "Имя",          "Name",         "Nombre",       "Nom",          "Nome", "姓名") }
+    var gender: String      { s("Gender",        "Пол",          "Geschlecht",   "Sexo",         "Sexe",         "Sexo", "性别") }
+    var genderUnspecified: String { s("Unspecified", "Не указан", "Nicht angegeben", "Sin especificar", "Non précisé", "Não especificado", "未指定") }
     var couldntComplete: String { s("Couldn’t complete", "Не удалось", "Konnte nicht abgeschlossen werden", "No se pudo completar", "Impossible de terminer", "Não foi possível concluir", "无法完成") }
 
     // MARK: — Weekly Insights (AI weekly report)
@@ -387,6 +390,12 @@ struct L10n {
     var addPhoto: String    { s("Add photo",     "Добавить фото",    "Foto hinzufügen",  "Añadir foto", "Ajouter une photo", "Adicionar foto", "添加照片") }
     var milestone: String   { s("Milestone",     "Веха",             "Meilenstein",      "Hito",   "Étape", "Marco", "里程碑") }
     var milestones: String  { s("Milestones",    "Вехи",             "Meilensteine",     "Hitos",  "Étapes", "Marcos", "里程碑") }
+    var milestoneFirstSmile: String { s("First smile", "Первая улыбка", "Erstes Lächeln", "Primera sonrisa", "Premier sourire", "Primeiro sorriso", "第一次微笑") }
+    var milestoneRolledOver: String { s("Rolled over", "Перевернулся", "Umdrehen", "Se dio la vuelta", "S’est retourné", "Virou-se", "会翻身了") }
+    var milestoneSatUpAlone: String { s("Sat up alone", "Сел сам", "Alleine hingesetzt", "Se sentó solo", "S’est assis seul", "Sentou-se sem ajuda", "能独自坐起") }
+    var milestoneFirstTooth: String { s("First tooth", "Первый зуб", "Erster Zahn", "Primer diente", "Première dent", "Primeiro dente", "第一颗牙") }
+    var milestoneTriedSolids: String { s("Tried solids", "Попробовал прикорм", "Beikost probiert", "Probó sólidos", "A goûté les solides", "Experimentou sólidos", "尝试了辅食") }
+    var milestoneFirstWord: String { s("First word", "Первое слово", "Erstes Wort", "Primera palabra", "Premier mot", "Primeira palavra", "第一个词") }
     var feed: String        { s("Feed",          "Лента",            "Feed",             "Muro",   "Fil", "Feed", "动态") }
     var empty: String       { s("Empty",         "Пусто",            "Leer",             "Vacío",  "Vide", "Vazio", "空") }
     var diaryEmptyHint: String { s("Nothing in this category yet.\nAdd the first — tap +", "В этой категории пока нет записей.\nДобавьте первую — нажмите +", "Noch nichts hier.\nAuf + tippen", "Aún no hay nada en esta categoría.\nAñade la primera — pulsa +", "Rien dans cette catégorie pour l’instant.\nAjoutez la première — touchez +", "Ainda nada nesta categoria.\nAdicione a primeira — toque em +", "这个分类还没有内容。\n添加第一条——点击 +") }
@@ -522,6 +531,19 @@ struct L10n {
     var tapToPlay: String       { s("Tap to play",   "Нажмите чтобы играть", "Zum Abspielen tippen", "Pulsa para reproducir", "Touchez pour lire", "Toque para reproduzir", "点按播放") }
     var sleepTight: String      { s("sleep tight",   "пусть спит крепко", "schlaf gut", "que duerma bien", "fais de beaux rêves", "dorme bem", "睡个好觉") }
     var playing: String         { s("playing",       "играет",        "spielt",        "sonando", "en lecture", "a tocar", "播放中") }
+    var soundWomb: String       { s("Womb", "Утроба", "Mutterleib", "Útero", "Ventre maternel", "Útero", "子宫声") }
+    var soundRain: String       { s("Rain", "Дождь", "Regen", "Lluvia", "Pluie", "Chuva", "雨声") }
+    var soundHairDryer: String  { s("Hair dryer", "Фен", "Föhn", "Secador", "Sèche-cheveux", "Secador", "吹风机") }
+    var soundLullaby: String    { s("Lullaby", "Колыбельная", "Schlaflied", "Nana", "Berceuse", "Canção de embalar", "摇篮曲") }
+    var soundHeartbeat: String  { s("Heartbeat", "Сердцебиение", "Herzschlag", "Latido", "Battement de cœur", "Batimento cardíaco", "心跳声") }
+    var soundOcean: String      { s("Ocean", "Океан", "Ozean", "Océano", "Océan", "Oceano", "海浪声") }
+    var soundForest: String     { s("Forest", "Лес", "Wald", "Bosque", "Forêt", "Floresta", "森林") }
+    var soundBrook: String      { s("Brook", "Ручей", "Bach", "Arroyo", "Ruisseau", "Ribeiro", "溪流") }
+    var soundCategoryWhiteNoise: String { s("white noise", "белый шум", "weißes Rauschen", "ruido blanco", "bruit blanc", "ruído branco", "白噪音") }
+    var soundCategoryNature: String     { s("nature", "природа", "Natur", "naturaleza", "nature", "natureza", "自然") }
+    var soundCategoryPinkNoise: String  { s("pink noise", "розовый шум", "rosa Rauschen", "ruido rosa", "bruit rose", "ruído rosa", "粉红噪音") }
+    var soundCategoryMelody: String     { s("melody", "мелодия", "Melodie", "melodía", "mélodie", "melodia", "旋律") }
+    var soundCategoryNewborns: String   { s("for newborns", "для новорождённых", "für Neugeborene", "para recién nacidos", "pour nouveau-nés", "para recém-nascidos", "适合新生儿") }
 
     func forBabyName(_ name: String) -> String { s(" for \(name)", " для \(name)", " für \(name)", " para \(name)", " pour \(name)", " para \(name)", "（\(name)）") }
 
@@ -536,6 +558,9 @@ struct L10n {
     var roleGrandpa: String     { s("Grandpa",       "Дедушка",       "Opa",           "Abuelo", "Grand-père", "Avô", "爷爷") }
     var roleNanny: String       { s("Nanny",         "Няня",          "Nanny",         "Niñera", "Nounou", "Ama", "保姆") }
     var roleOther: String       { s("Other",         "Другой",        "Andere",        "Otro", "Autre", "Outro", "其他") }
+    var roleFullAccess: String  { s("full access",   "полный доступ", "voller Zugriff", "acceso completo", "accès complet", "acesso total", "完整访问权限") }
+    var roleTrackingNoMedical: String { s("tracking · no medical", "трекинг · без медицины", "Tracking · keine Medizin", "seguimiento · sin medicina", "suivi · sans médical", "registo · sem saúde", "记录 · 无医疗权限") }
+    var rolePhotosStatusOnly: String { s("photos and status only", "только фото и статус", "nur Fotos und Status", "solo fotos y estado", "photos et statut uniquement", "apenas fotos e estado", "仅照片和状态") }
     var familyRoleHint: String  { s("Everyone has a role — each with their own access level.", "У всех своя роль — у каждой свой уровень доступа.", "Jeder hat eine Rolle — mit eigenem Zugangslevel.", "Cada uno tiene un rol — con su propio nivel de acceso.", "Chacun a un rôle — chacun avec son niveau d’accès.", "Cada um tem uma função — cada uma com o seu nível de acesso.", "每个人都有自己的角色——各有不同的访问权限。") }
     var inviteFamilyMember: String { s("Invite family member", "Пригласить члена семьи", "Familienmitglied einladen", "Invitar a un familiar", "Inviter un membre de la famille", "Convidar membro da família", "邀请家庭成员") }
     var inviteQrHint: String    { s("QR code or link · choose role", "QR-код или ссылка · выбор роли", "QR-Code oder Link · Rolle wählen", "Código QR o enlace · elige rol", "QR code ou lien · choisir le rôle", "Código QR ou ligação · escolher função", "二维码或链接 · 选择角色") }
@@ -734,6 +759,8 @@ struct L10n {
     var notifications: String   { s("Notifications", "Уведомления",   "Benachrichtigungen", "Notificaciones", "Notifications", "Notificações", "通知") }
     var babyProfile: String     { s("Baby profile",  "Профиль малыша","Baby-Profil",   "Perfil del bebé", "Profil du bébé", "Perfil do bebé", "宝宝资料") }
     var children: String        { s("Children",      "Дети",          "Kinder",        "Niños", "Enfants", "Crianças", "孩子") }
+    var addChild: String        { s("Add child",     "Добавить ребёнка", "Kind hinzufügen", "Añadir niño", "Ajouter un enfant", "Adicionar criança", "添加孩子") }
+    var newChild: String        { s("New child",     "Новый ребёнок", "Neues Kind",    "Nuevo niño", "Nouvel enfant", "Nova criança", "新孩子") }
     var childrenProfiles: String { s("Children’s profiles", "Профили детей", "Kinderprofile", "Perfiles de niños", "Profils des enfants", "Perfis das crianças", "孩子资料") }
     var childrenSettingsHint: String {
         s("Add, switch, or remove child profiles.",
@@ -800,6 +827,21 @@ struct L10n {
     var helloMama: String       { s("Hello, mama!",  "Привет, мама!", "Hallo, Mama!",  "¡Hola, mamá!", "Bonjour, maman !", "Olá, mamã!", "你好，妈妈！") }
     var howOldIsYourBaby: String { s("How old is your baby?\nWe'll tailor everything to their age.", "Сколько малышу?\nМы всё адаптируем под его возраст.", "Wie alt ist Ihr Baby?\nWir passen alles an.", "¿Cuántos meses tiene tu bebé?\nLo adaptaremos todo a su edad.", "Quel âge a votre bébé ?\nNous adapterons tout à son âge.", "Que idade tem o seu bebé?\nVamos adaptar tudo à idade dele.", "宝宝多大了？\n我们会根据他的年龄量身定制一切。") }
     var ageChangeNote: String   { s("Age can be changed later. We'll highlight developmental leaps specifically for you.", "Возраст можно изменить позже. Мы выделим скачки развития специально для вас.", "Alter kann später geändert werden.", "La edad se puede cambiar después. Destacaremos los saltos del desarrollo especialmente para ti.", "L’âge peut être modifié plus tard. Nous mettrons en avant les bonds de développement spécialement pour vous.", "A idade pode ser alterada mais tarde. Vamos destacar os saltos de desenvolvimento especialmente para si.", "年龄之后可以修改。我们会专门为您标出发育猛长期。") }
+    var ageStageNewbornLabel: String { s("0–3 mo", "0–3 мес", "0–3 Mon", "0–3 m", "0–3 mois", "0–3 m", "0–3 个月") }
+    var ageStageBabyLabel: String    { s("3–6 mo", "3–6 мес", "3–6 Mon", "3–6 m", "3–6 mois", "3–6 m", "3–6 个月") }
+    var ageStageEatLabel: String     { s("6–12 mo", "6–12 мес", "6–12 Mon", "6–12 m", "6–12 mois", "6–12 m", "6–12 个月") }
+    var ageStageToddlerLabel: String { s("1–2 yr", "1–2 года", "1–2 J", "1–2 años", "1–2 ans", "1–2 anos", "1–2 岁") }
+    var ageStageKidLabel: String     { s("2+", "2+", "2+", "2+", "2+", "2+", "2+") }
+    var ageStageNewbornSubtitle: String { s("Newborn", "Новорождённый", "Neugeborenes", "Recién nacido", "Nouveau-né", "Recém-nascido", "新生儿") }
+    var ageStageBabySubtitle: String    { s("Baby", "Малыш", "Baby", "Bebé", "Bébé", "Bebé", "宝宝") }
+    var ageStageEatSubtitle: String     { s("Solids", "Прикорм", "Beikost", "Sólidos", "Diversification", "Sólidos", "辅食") }
+    var ageStageToddlerSubtitle: String { s("Toddler", "Карапуз", "Kleinkind", "Niño pequeño", "Tout-petit", "Criança pequena", "幼儿") }
+    var ageStageKidSubtitle: String     { s("Little one", "Маленький человек", "Kleines Kind", "Peque", "Petit enfant", "Pequenino", "小朋友") }
+    var ageStageNewbornFocus: String { s("Feeding, sleep, diapers", "Кормление, сон, подгузники", "Füttern, Schlaf, Windeln", "Tomas, sueño, pañales", "Tétées, sommeil, couches", "Mamadas, sono, fraldas", "喂养、睡眠、尿布") }
+    var ageStageBabyFocus: String    { s("Leaps, routine, development", "Скачки, режим, развитие", "Schübe, Rhythmus, Entwicklung", "Saltos, rutina, desarrollo", "Bonds, rythme, développement", "Saltos, rotina, desenvolvimento", "猛长期、作息、发育") }
+    var ageStageEatFocus: String     { s("+ Solid foods & food diary", "+ Прикорм и пищевой дневник", "+ Beikost & Ernährungstagebuch", "+ Sólidos y diario de comida", "+ Aliments solides et journal", "+ Sólidos e diário alimentar", "+ 辅食与食物日记") }
+    var ageStageToddlerFocus: String { s("+ Daily routine, activities", "+ Режим дня, активности", "+ Tagesrhythmus, Aktivitäten", "+ Rutina diaria, actividades", "+ Routine quotidienne, activités", "+ Rotina diária, atividades", "+ 日常作息、活动") }
+    var ageStageKidFocus: String     { s("Flexible routine, health", "Гибкий режим, здоровье", "Flexibler Rhythmus, Gesundheit", "Rutina flexible, salud", "Rythme flexible, santé", "Rotina flexível, saúde", "灵活作息、健康") }
     var haveInviteLink: String  { s("I have a family invite link", "У меня есть семейная ссылка", "Ich habe einen Familienlink", "Tengo un enlace familiar", "J’ai un lien familial", "Tenho uma ligação familiar", "我有家庭邀请链接") }
     var joinOnboardingTitle: String { s("Join your family", "Войти в семью", "Familie beitreten", "Unirse a tu familia", "Rejoindre votre famille", "Entrar na sua família", "加入您的家庭") }
     var joinOnboardingSubtitle: String { s("Paste the Momsy invite code or continue with the link you opened.", "Вставьте код Momsy или продолжите со ссылкой, которую открыли.", "Füge den Momsy-Code ein oder fahre mit dem geöffneten Link fort.", "Pega el código de Momsy o continúa con el enlace que abriste.", "Collez le code Momsy ou continuez avec le lien ouvert.", "Cole o código Momsy ou continue com a ligação aberta.", "粘贴 Momsy 邀请码，或继续使用刚打开的链接。") }
@@ -866,6 +908,8 @@ struct L10n {
     var vaccinationScheduleHint: String { s("Based on your region. The WHO international schedule is used by default.", "На основе вашего региона. По умолчанию используется международный календарь ВОЗ.", "Basierend auf Ihrer Region. Standardmäßig wird der internationale WHO-Impfkalender verwendet.", "Según tu región. Se usa el calendario internacional de la OMS por defecto.", "Selon votre région. Le calendrier international de l’OMS est utilisé par défaut.", "Com base na sua região. Por predefinição, é usado o plano internacional da OMS.", "根据您所在地区。默认使用 WHO 国际接种计划。") }
     var vaccinationMarkDone: String     { s("Mark as done",           "Отметить выполненной",         "Als erledigt markieren", "Marcar como hecha", "Marquer comme fait", "Marcar como feita", "标记为已完成") }
     var vaccinationUndo: String         { s("Undo",                   "Отменить",                     "Rückgängig", "Deshacer", "Annuler", "Anular", "撤销") }
+    var vaccinationAddCustom: String    { s("Add vaccine",            "Добавить прививку",            "Impfung hinzufügen", "Añadir vacuna", "Ajouter un vaccin", "Adicionar vacina", "添加疫苗") }
+    var vaccinationNamePlaceholder: String { s("Vaccine name",         "Название прививки",            "Name der Impfung", "Nombre de la vacuna", "Nom du vaccin", "Nome da vacina", "疫苗名称") }
 
     // MARK: — Food Diary
     var foodDiary: String           { s("Food Diary",          "Прикорм-дневник",        "Beikost-Tagebuch", "Diario de alimentación", "Journal alimentaire", "Diário alimentar", "辅食日记") }

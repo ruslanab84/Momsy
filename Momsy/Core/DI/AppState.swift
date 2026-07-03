@@ -88,17 +88,16 @@ final class AppState: ObservableObject {
     }
 
     func babyAgeString(lang: String) -> String {
+        babyAgeString(for: Language.from(lang))
+    }
+
+    func babyAgeString(for language: Language) -> String {
         guard let birth = babyProfile?.birthDate else { return "" }
         let comps = Calendar.current.dateComponents([.month, .day], from: birth, to: Date())
         let m = comps.month ?? 0, d = comps.day ?? 0
-        if lang == "en" {
-            if m == 0 { return "\(d)d" }
-            if d == 0 { return "\(m)mo" }
-            return "\(m)mo \(d)d"
-        } else {
-            if m == 0 { return "\(d) дн" }
-            if d == 0 { return "\(m) мес" }
-            return "\(m) мес \(d) дн"
-        }
+        let strings = L10n(language)
+        if m == 0 { return "\(d) \(strings.ageDayShort)" }
+        if d == 0 { return "\(m) \(strings.ageMonthShort)" }
+        return "\(m) \(strings.ageMonthShort) \(d) \(strings.ageDayShort)"
     }
 }

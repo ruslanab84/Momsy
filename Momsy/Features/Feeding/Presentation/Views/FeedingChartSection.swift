@@ -177,7 +177,7 @@ struct FeedingChartSection: View {
 
     private func dayLabel(for date: Date, count: Int) -> String {
         let df = DateFormatter()
-        df.locale = Locale(identifier: lang == "en" ? "en_US" : "ru_RU")
+        df.locale = Locale(identifier: Language.localeIdentifier(for: lang))
         if selectedPeriod == 0 {
             df.dateFormat = "EEE"
             return String(df.string(from: date).prefix(2))

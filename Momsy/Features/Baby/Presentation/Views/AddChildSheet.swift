@@ -11,28 +11,28 @@ struct AddChildSheet: View {
     @State private var birthDate = Date()
     @State private var gender = ""
 
-    private var ru: Bool { lm.lang == "ru" }
+    private var strings: L10n { lm.strings }
     private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty }
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField(ru ? "Имя" : "Name", text: $name)
-                DatePicker(ru ? "Дата рождения" : "Birth date",
+                TextField(strings.name, text: $name)
+                DatePicker(strings.birthDate,
                            selection: $birthDate, in: ...Date(), displayedComponents: .date)
-                Picker(ru ? "Пол" : "Gender", selection: $gender) {
-                    Text(ru ? "Не указан" : "Unspecified").tag("")
-                    Text(ru ? "Мальчик" : "Boy").tag("boy")
-                    Text(ru ? "Девочка" : "Girl").tag("girl")
+                Picker(strings.gender, selection: $gender) {
+                    Text(strings.genderUnspecified).tag("")
+                    Text(strings.genderBoy).tag("boy")
+                    Text(strings.genderGirl).tag("girl")
                 }
             }
-            .navigationTitle(ru ? "Новый ребёнок" : "New child")
+            .navigationTitle(strings.newChild)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(ru ? "Отмена" : "Cancel") { dismiss() }
+                    Button(strings.cancel) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(ru ? "Готово" : "Done") {
+                    Button(strings.done) {
                         onSave(BabyProfile(name: name.trimmingCharacters(in: .whitespaces),
                                            birthDate: birthDate, gender: gender))
                         dismiss()

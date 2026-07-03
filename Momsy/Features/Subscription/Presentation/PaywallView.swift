@@ -9,8 +9,6 @@ struct PaywallView: View {
     @State private var errorMessage: String?
 
     private var lm: L10n { loc.strings }
-    private let privacyPolicyURL = URL(string: "https://momsy.app/privacy")
-    private let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
 
     var body: some View {
         ZStack {
@@ -154,14 +152,14 @@ struct PaywallView: View {
 
     private var legalLinks: some View {
         HStack(spacing: 18) {
-            if let termsOfUseURL {
+            if let termsOfUseURL = AppLegalLinks.termsOfUseURL {
                 Link(destination: termsOfUseURL) {
                     Text(lm.termsOfUseEULA)
                         .underline()
                 }
             }
 
-            if let privacyPolicyURL {
+            if let privacyPolicyURL = AppLegalLinks.privacyPolicyURL {
                 Link(destination: privacyPolicyURL) {
                     Text(lm.privacyPolicy)
                         .underline()

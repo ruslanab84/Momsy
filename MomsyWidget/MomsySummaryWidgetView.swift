@@ -15,7 +15,7 @@ struct MomsySummaryWidgetView: View {
     private var ageString: String {
         guard let birth = entry.babyBirthDate else { return "" }
         let months = Calendar.current.dateComponents([.month], from: birth, to: .now).month ?? 0
-        return "\(months) мес"
+        return WidgetL10n.current.ageMonths(months)
     }
 
     private var hasLeap: Bool {
@@ -26,17 +26,11 @@ struct MomsySummaryWidgetView: View {
 
     private var lastSleepDuration: String? {
         if case .idle(let secs) = entry.sleepState, let s = secs {
-            let h = s / 3600
-            let m = (s % 3600) / 60
-            if h > 0 { return "\(h) ч \(m) мин" }
-            return "\(m) мин"
+            return WidgetL10n.current.duration(seconds: s)
         }
         if case .active(let start) = entry.sleepState {
             let secs = Int(Date().timeIntervalSince(start))
-            let h = secs / 3600
-            let m = (secs % 3600) / 60
-            if h > 0 { return "Спит \(h) ч \(m) м" }
-            return "Спит \(m) м"
+            return WidgetL10n.current.sleepingDuration(seconds: secs)
         }
         return nil
     }
@@ -51,7 +45,7 @@ struct MomsySummaryWidgetView: View {
             // Header
             HStack {
                 HStack(spacing: 4) {
-                    Text(entry.babyName.isEmpty ? "Малыш" : entry.babyName)
+                    Text(entry.babyName.isEmpty ? WidgetL10n.current.baby : entry.babyName)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(bbInk)
                     if !ageString.isEmpty {
@@ -63,7 +57,7 @@ struct MomsySummaryWidgetView: View {
                     }
                 }
                 Spacer()
-                Text("Сегодня")
+                Text(WidgetL10n.current.today)
                     .font(.caption2)
                     .foregroundStyle(bbInkSoft)
             }
@@ -127,7 +121,7 @@ struct MomsySummaryWidgetView: View {
                         HStack(spacing: 4) {
                             Text("⚡")
                                 .font(.caption)
-                            Text("Скачок")
+                            Text(WidgetL10n.current.leap)
                                 .font(.subheadline.weight(.medium))
                                 .foregroundStyle(bbInk)
                         }

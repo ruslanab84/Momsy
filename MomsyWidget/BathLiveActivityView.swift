@@ -13,20 +13,20 @@ struct BathLockScreenView: View {
                 HStack {
                     BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Bath", comment: "")
+                         ? WidgetL10n.current.bath
                          : context.attributes.babyName)
                         .font(.headline)
                         .bold()
                         .foregroundStyle(.white)
                     Spacer()
-                    Text(NSLocalizedString("Bath", comment: ""))
+                    Text(WidgetL10n.current.bath)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.6))
                 }
 
                 HStack {
                     Label {
-                        Text(NSLocalizedString("Bathing…", comment: ""))
+                        Text(WidgetL10n.current.bathing)
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
@@ -46,7 +46,7 @@ struct BathLockScreenView: View {
     @ViewBuilder
     private var timerView: some View {
         if context.isStale {
-            Text(NSLocalizedString("Updating…", comment: ""))
+            Text(WidgetL10n.current.updating)
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
         } else {
@@ -67,7 +67,7 @@ struct BathLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Label {
-                        Text(NSLocalizedString("Bath", comment: ""))
+                        Text(WidgetL10n.current.bath)
                     } icon: {
                         BabyFaceIcon(size: 14)
                     }
@@ -82,13 +82,13 @@ struct BathLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.center) {
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Bath", comment: "")
+                         ? WidgetL10n.current.bath
                          : context.attributes.babyName)
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     Label {
-                        Text(NSLocalizedString("Bathing…", comment: ""))
+                        Text(WidgetL10n.current.bathing)
                     } icon: {
                         Image(systemName: "drop.fill")
                             .foregroundStyle(.cyan)

@@ -52,9 +52,7 @@ struct SleepChartSection: View {
 
     private var normBadge: some View {
         let h = loc.strings.unitHourShort
-        let label = lang == "en"
-            ? "\(Int(normMin))–\(Int(normMax))\(h)"
-            : "\(Int(normMin))–\(Int(normMax)) \(h)"
+        let label = "\(Int(normMin))–\(Int(normMax)) \(h)"
         return Text(label)
             .font(.system(size: 10, weight: .bold, design: .rounded))
             .foregroundColor(.bbMintDeep)
@@ -163,11 +161,9 @@ struct SleepChartSection: View {
         let isIn = avg >= normMin && avg <= normMax
 
         let h = loc.strings.unitHourShort
-        let avgTxt = lang == "en" ? String(format: "%.1f\(h)", avg) : String(format: "%.1f \(h)", avg)
-        let normTxt = lang == "en" ? "\(Int(normMin))–\(Int(normMax))\(h)" : "\(Int(normMin))–\(Int(normMax)) \(h)"
-        let diffTxt = lang == "en"
-            ? String(format: "%+.1f\(h)", diff)
-            : String(format: "%+.1f \(h)", diff)
+        let avgTxt = String(format: "%.1f %@", avg, h)
+        let normTxt = "\(Int(normMin))–\(Int(normMax)) \(h)"
+        let diffTxt = String(format: "%+.1f %@", diff, h)
         let statusTxt = isIn ? loc.strings.sleepInNorm
             : (diff < 0 ? loc.strings.sleepBelowNorm : loc.strings.sleepAboveNorm)
         let diffColor: Color = isIn ? .bbMintDeep : (diff < 0 ? Color(UIColor.systemOrange) : .bbMintDeep)
@@ -219,7 +215,7 @@ struct SleepChartSection: View {
 
     private func dayLabel(for date: Date, count: Int) -> String {
         let df = DateFormatter()
-        df.locale = Locale(identifier: lang == "en" ? "en_US" : "ru_RU")
+        df.locale = Locale(identifier: Language.localeIdentifier(for: lang))
         if selectedPeriod == 0 {
             df.dateFormat = "EEE"
             return String(df.string(from: date).prefix(2))

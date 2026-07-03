@@ -92,15 +92,15 @@ private struct OBAgeCard: View {
             CuteBlobView(kind: stage.blobKind, size: 56, tone: stage.tone)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .lastTextBaseline, spacing: 8) {
-                    Text(lang == "en" ? stage.labelEn : stage.label)
+                    Text(stage.label(L10n(Language.from(lang))))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
-                    Text((lang == "en" ? stage.subtitleEn : stage.subtitle).uppercased())
+                    Text(stage.subtitle(L10n(Language.from(lang))).uppercased())
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                         .kerning(0.4)
                 }
-                Text(lang == "en" ? stage.focusEn : stage.focus)
+                Text(stage.focus(L10n(Language.from(lang))))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInkSoft)
             }

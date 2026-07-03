@@ -5,12 +5,16 @@ enum FeedingSide: String, CaseIterable, Codable {
     case right  = "Правая"
     case bottle = "Бутылка"
 
-    func displayName(lang: String) -> String {
+    func displayName(_ strings: L10n) -> String {
         switch self {
-        case .left:   return lang == "en" ? "Left"   : rawValue
-        case .right:  return lang == "en" ? "Right"  : rawValue
-        case .bottle: return lang == "en" ? "Bottle" : rawValue
+        case .left:   return strings.feedingLeft
+        case .right:  return strings.feedingRight
+        case .bottle: return strings.feedingBottle
         }
+    }
+
+    func displayName(lang: String) -> String {
+        displayName(L10n(Language.from(lang)))
     }
 
     /// Stable, non-localized identifier passed to the Live Activity. The

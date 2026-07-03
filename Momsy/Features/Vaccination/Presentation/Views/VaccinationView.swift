@@ -212,33 +212,15 @@ private struct AddCustomVaccinationSheet: View {
     }
 
     private var title: String {
-        switch lm.current {
-        case .english, .spanish, .portuguese: return "Add vaccine"
-        case .german:  return "Impfung hinzufügen"
-        case .russian: return "Добавить прививку"
-        case .french:  return "Ajouter un vaccin"
-        case .chinese: return "添加疫苗"
-        }
+        lm.strings.vaccinationAddCustom
     }
 
     private var namePlaceholder: String {
-        switch lm.current {
-        case .english, .spanish, .portuguese: return "Vaccine name"
-        case .german:  return "Name der Impfung"
-        case .russian: return "Название прививки"
-        case .french:  return "Nom du vaccin"
-        case .chinese: return "疫苗名称"
-        }
+        lm.strings.vaccinationNamePlaceholder
     }
 
     private var saveLabel: String {
-        switch lm.current {
-        case .english, .spanish, .portuguese: return "Save"
-        case .german:  return "Speichern"
-        case .russian: return "Сохранить"
-        case .french:  return "Enregistrer"
-        case .chinese: return "保存"
-        }
+        lm.strings.save
     }
 
     var body: some View {

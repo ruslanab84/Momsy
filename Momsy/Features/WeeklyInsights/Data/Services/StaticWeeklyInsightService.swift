@@ -9,6 +9,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
         switch context.language {
         case .russian: return ru(s)
         case .german:  return de(s)
+        case .spanish: return es(s)
         case .french:  return fr(s)
         case .portuguese: return pt(s)
         case .chinese: return zh(s)
@@ -90,6 +91,27 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             feedingSummary: "Etwa \(feeds) Mahlzeiten pro Tag. Neue Lebensmittel diese Woche: \(foods).",
             feedingRecommendation: feedingRec,
             overallSummary: "Eine ruhige Woche — \(hEn(s.avgSleepMinutesPerDay)) Schlaf/Tag und \(feeds) Mahlzeiten/Tag. Du machst das toll."
+        )
+    }
+
+    // MARK: - Spanish
+
+    private func es(_ s: WeeklyStats) -> WeeklyInsightAI {
+        let enough = s.avgSleepMinutesPerDay >= s.whoMinSleepMinutes
+        let sleepRec = enough
+            ? "El sueño está saludable para esta edad: mantén el ritmo actual."
+            : "Prueba una hora de dormir más temprana y observa las ventanas de vigilia (~\(s.whoAwakeWindowMax) min) para sumar descanso."
+        let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
+        let foods = s.newFoodsIntroduced.isEmpty ? "ningún alimento nuevo" : s.newFoodsIntroduced.joined(separator: ", ")
+        let feedingRec = s.allergensFlagged.isEmpty
+            ? "Introduce un alimento nuevo cada vez y observa posibles reacciones."
+            : "Evita reintroducir los alimentos marcados (\(s.allergensFlagged.joined(separator: ", "))) y consulta con tu pediatra."
+        return WeeklyInsightAI(
+            sleepSummary: "Esta semana el bebé durmió una media de \(hEn(s.avgSleepMinutesPerDay)) al día (\(String(format: "%.1f", s.avgNapsPerDay)) siestas). La OMS recomienda ≥ \(hEn(s.whoMinSleepMinutes)).",
+            sleepRecommendation: sleepRec,
+            feedingSummary: "Unas \(feeds) tomas al día. Nuevos alimentos esta semana: \(foods).",
+            feedingRecommendation: feedingRec,
+            overallSummary: "Una semana estable: \(hEn(s.avgSleepMinutesPerDay)) de sueño/día y \(feeds) tomas/día. Lo estás haciendo muy bien."
         )
     }
 

@@ -35,5 +35,25 @@ enum Language: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    var localeIdentifier: String {
+        switch self {
+        case .english:    return "en_US"
+        case .russian:    return "ru_RU"
+        case .german:     return "de_DE"
+        case .spanish:    return "es_ES"
+        case .french:     return "fr_FR"
+        case .portuguese: return "pt_PT"
+        case .chinese:    return "zh_CN"
+        }
+    }
+
+    static func from(_ code: String) -> Language {
+        Language(rawValue: code) ?? .english
+    }
+
+    static func localeIdentifier(for code: String) -> String {
+        from(code).localeIdentifier
+    }
+
     var isRTL: Bool { false }
 }

@@ -17,12 +17,19 @@ enum TimeOfDay: String {
 
     func displayName(for lang: Language) -> String {
         switch lang {
-        case .english, .spanish:
+        case .english:
             switch self {
             case .morning:   return "morning"
             case .afternoon: return "afternoon"
             case .evening:   return "evening"
             case .night:     return "night"
+            }
+        case .spanish:
+            switch self {
+            case .morning:   return "mañana"
+            case .afternoon: return "tarde"
+            case .evening:   return "noche"
+            case .night:     return "madrugada"
             }
         case .portuguese:
             switch self {

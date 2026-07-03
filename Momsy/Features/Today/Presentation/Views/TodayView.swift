@@ -49,7 +49,7 @@ struct TodayView: View {
 
     private var dateString: String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: loc.lang == "en" ? "en_US" : "ru_RU")
+        f.locale = Locale(identifier: loc.current.localeIdentifier)
         f.dateFormat = "EEEE, d MMMM"
         return f.string(from: now).capitalized
     }
@@ -161,7 +161,7 @@ struct TodayView: View {
                         guard baby.id != appState.activeBabyId else { return }
                         Task { await container.switchActiveBaby(to: baby.id) }
                     } label: {
-                        let title = baby.name.isEmpty ? (loc.lang == "ru" ? "Малыш" : "Baby") : baby.name
+                        let title = baby.name.isEmpty ? loc.strings.baby : baby.name
                         if baby.id == appState.activeBabyId {
                             Label(title, systemImage: "checkmark")
                         } else {
@@ -174,7 +174,7 @@ struct TodayView: View {
                     Button {
                         showAddChild = true
                     } label: {
-                        Label(loc.lang == "ru" ? "Добавить ребёнка" : "Add child", systemImage: "plus")
+                        Label(loc.strings.addChild, systemImage: "plus")
                     }
                 }
             } label: {

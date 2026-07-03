@@ -3,12 +3,16 @@ import Foundation
 enum PumpingSide: String, CaseIterable, Codable {
     case left, right, both
 
-    func displayName(lang: String) -> String {
+    func displayName(_ strings: L10n) -> String {
         switch self {
-        case .left:  return lang == "ru" ? "Левая"  : lang == "de" ? "Links"  : "Left"
-        case .right: return lang == "ru" ? "Правая" : lang == "de" ? "Rechts" : "Right"
-        case .both:  return lang == "ru" ? "Обе"    : lang == "de" ? "Beide"  : "Both"
+        case .left:  return strings.pumpingLeft
+        case .right: return strings.pumpingRight
+        case .both:  return strings.pumpingBoth
         }
+    }
+
+    func displayName(lang: String) -> String {
+        displayName(L10n(Language.from(lang)))
     }
 }
 

@@ -29,11 +29,7 @@ private struct MiniBottleIcon: View {
 // MARK: - Side helpers
 
 private func sideLabel(_ side: String) -> String {
-    switch side {
-    case "left":  return NSLocalizedString("Left", comment: "")
-    case "right": return NSLocalizedString("Right", comment: "")
-    default:      return NSLocalizedString("Bottle", comment: "")
-    }
+    WidgetL10n.current.feedingSideLabel(side)
 }
 
 @ViewBuilder
@@ -62,13 +58,13 @@ struct FeedingLockScreenView: View {
                 HStack {
                     BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Feeding", comment: "")
+                         ? WidgetL10n.current.feeding
                          : context.attributes.babyName)
                         .font(.headline)
                         .bold()
                         .foregroundStyle(.white)
                     Spacer()
-                    Text(NSLocalizedString("Feeding", comment: ""))
+                    Text(WidgetL10n.current.feeding)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.6))
                 }
@@ -93,7 +89,7 @@ struct FeedingLockScreenView: View {
     @ViewBuilder
     private var timerView: some View {
         if context.isStale {
-            Text(NSLocalizedString("Updating…", comment: ""))
+            Text(WidgetL10n.current.updating)
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
         } else if context.state.isPaused {
@@ -145,15 +141,15 @@ struct FeedingLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.center) {
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Feeding", comment: "")
+                         ? WidgetL10n.current.feeding
                          : context.attributes.babyName)
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     Label {
                         Text(context.state.isPaused
-                             ? NSLocalizedString("Paused", comment: "")
-                             : NSLocalizedString("Feeding…", comment: ""))
+                             ? WidgetL10n.current.paused
+                             : WidgetL10n.current.feedingActive)
                     } icon: {
                         if context.state.isPaused {
                             Image(systemName: "pause.circle")

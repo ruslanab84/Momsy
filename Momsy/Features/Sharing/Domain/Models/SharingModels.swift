@@ -28,39 +28,29 @@ enum FamilyRole: String, CaseIterable, Identifiable {
         }
     }
 
-    var displayNameEn: String {
+    func displayName(_ strings: L10n) -> String {
         switch self {
-        case .mom:     return "Mom"
-        case .dad:     return "Dad"
-        case .nanny:   return "Nanny"
-        case .grandma: return "Grandma"
+        case .mom:     return strings.roleMom
+        case .dad:     return strings.roleDad
+        case .nanny:   return strings.roleNanny
+        case .grandma: return strings.roleGrandma
         }
     }
 
     func displayName(lang: String) -> String {
-        lang == "en" ? displayNameEn : rawValue
+        displayName(L10n(Language.from(lang)))
     }
 
-    var description: String {
+    func roleDescription(_ strings: L10n) -> String {
         switch self {
-        case .mom:     return "полный доступ"
-        case .dad:     return "полный доступ"
-        case .nanny:   return "трекинг · без медицины"
-        case .grandma: return "только фото и статус"
-        }
-    }
-
-    var descriptionEn: String {
-        switch self {
-        case .mom:     return "full access"
-        case .dad:     return "full access"
-        case .nanny:   return "tracking · no medical"
-        case .grandma: return "photos and status only"
+        case .mom, .dad: return strings.roleFullAccess
+        case .nanny:     return strings.roleTrackingNoMedical
+        case .grandma:   return strings.rolePhotosStatusOnly
         }
     }
 
     func roleDescription(lang: String) -> String {
-        lang == "en" ? descriptionEn : description
+        roleDescription(L10n(Language.from(lang)))
     }
 
     var canManageFamilyMembers: Bool {

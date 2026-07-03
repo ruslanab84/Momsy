@@ -86,7 +86,7 @@ final class DiaryViewModel: ObservableObject {
     private func makeDateLabel(_ day: Date, today: Date) -> String {
         let cal = Calendar.current
         let df = DateFormatter()
-        df.locale = Locale(identifier: lm.lang == "en" ? "en_US" : "ru_RU")
+        df.locale = Locale(identifier: lm.current.localeIdentifier)
         if cal.isDate(day, inSameDayAs: today) {
             df.dateFormat = "EEE"
             return lm.strings.todayEntry(df.string(from: day))
@@ -96,7 +96,7 @@ final class DiaryViewModel: ObservableObject {
             df.dateFormat = "EEE"
             return lm.strings.yesterdayEntry(df.string(from: day))
         }
-        df.dateFormat = lm.lang == "en" ? "EEE d MMM" : "d MMM"
+        df.setLocalizedDateFormatFromTemplate("EEE d MMM")
         return df.string(from: day)
     }
 

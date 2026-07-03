@@ -14,29 +14,22 @@ struct AddEntrySheet: View {
         case note = "note"
         case milestone = "milestone"
 
-        func displayName(lang: String) -> String {
+        func displayName(_ strings: L10n) -> String {
             switch self {
-            case .note:      return lang == "en" ? "Note"      : "Заметка"
-            case .milestone: return "Milestone"
+            case .note:      return strings.noteSectionLabel
+            case .milestone: return strings.milestone
             }
         }
     }
 
     private var presetMilestones: [(BlobKind, String)] {
-        loc.lang == "en" ? [
-            (.star,   "First smile"),
-            (.moon,   "Rolled over"),
-            (.baby,   "Sat up alone"),
-            (.bear,   "First tooth"),
-            (.bottle, "Tried solids"),
-            (.heart,  "First word"),
-        ] : [
-            (.star,   "Первая улыбка"),
-            (.moon,   "Перевернулся"),
-            (.baby,   "Сел сам"),
-            (.bear,   "Первый зуб"),
-            (.bottle, "Попробовал прикорм"),
-            (.heart,  "Первое слово"),
+        [
+            (.star,   loc.strings.milestoneFirstSmile),
+            (.moon,   loc.strings.milestoneRolledOver),
+            (.baby,   loc.strings.milestoneSatUpAlone),
+            (.bear,   loc.strings.milestoneFirstTooth),
+            (.bottle, loc.strings.milestoneTriedSolids),
+            (.heart,  loc.strings.milestoneFirstWord),
         ]
     }
 
@@ -68,7 +61,7 @@ struct AddEntrySheet: View {
                 VStack(spacing: 16) {
                     Picker(loc.strings.entryType, selection: $entryType) {
                         ForEach(EntryType.allCases, id: \.self) {
-                            Text($0.displayName(lang: loc.lang)).tag($0)
+                            Text($0.displayName(loc.strings)).tag($0)
                         }
                     }
                     .pickerStyle(.segmented)

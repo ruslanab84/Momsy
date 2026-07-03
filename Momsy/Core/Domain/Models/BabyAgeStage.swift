@@ -4,60 +4,36 @@ enum BabyAgeStage: String, CaseIterable, Identifiable {
     case newborn, baby, eat, toddler, kid
     var id: String { rawValue }
 
-    var label: String {
+    func label(_ strings: L10n) -> String {
         switch self {
-        case .newborn: return "0–3 мес"
-        case .baby:    return "3–6 мес"
-        case .eat:     return "6–12 мес"
-        case .toddler: return "1–2 года"
-        case .kid:     return "2+"
+        case .newborn: return strings.ageStageNewbornLabel
+        case .baby:    return strings.ageStageBabyLabel
+        case .eat:     return strings.ageStageEatLabel
+        case .toddler: return strings.ageStageToddlerLabel
+        case .kid:     return strings.ageStageKidLabel
         }
     }
-    var labelEn: String {
+
+    func subtitle(_ strings: L10n) -> String {
         switch self {
-        case .newborn: return "0–3 mo"
-        case .baby:    return "3–6 mo"
-        case .eat:     return "6–12 mo"
-        case .toddler: return "1–2 yr"
-        case .kid:     return "2+"
+        case .newborn: return strings.ageStageNewbornSubtitle
+        case .baby:    return strings.ageStageBabySubtitle
+        case .eat:     return strings.ageStageEatSubtitle
+        case .toddler: return strings.ageStageToddlerSubtitle
+        case .kid:     return strings.ageStageKidSubtitle
         }
     }
-    var subtitle: String {
+
+    func focus(_ strings: L10n) -> String {
         switch self {
-        case .newborn: return "Новорождённый"
-        case .baby:    return "Малыш"
-        case .eat:     return "Прикорм"
-        case .toddler: return "Карапуз"
-        case .kid:     return "Маленький человек"
+        case .newborn: return strings.ageStageNewbornFocus
+        case .baby:    return strings.ageStageBabyFocus
+        case .eat:     return strings.ageStageEatFocus
+        case .toddler: return strings.ageStageToddlerFocus
+        case .kid:     return strings.ageStageKidFocus
         }
     }
-    var subtitleEn: String {
-        switch self {
-        case .newborn: return "Newborn"
-        case .baby:    return "Baby"
-        case .eat:     return "Solids"
-        case .toddler: return "Toddler"
-        case .kid:     return "Little one"
-        }
-    }
-    var focus: String {
-        switch self {
-        case .newborn: return "Кормление, сон, подгузники"
-        case .baby:    return "Скачки, режим, развитие"
-        case .eat:     return "+ Прикорм и пищевой дневник"
-        case .toddler: return "+ Режим дня, активности"
-        case .kid:     return "Гибкий режим, здоровье"
-        }
-    }
-    var focusEn: String {
-        switch self {
-        case .newborn: return "Feeding, sleep, diapers"
-        case .baby:    return "Leaps, routine, development"
-        case .eat:     return "+ Solid foods & food diary"
-        case .toddler: return "+ Daily routine, activities"
-        case .kid:     return "Flexible routine, health"
-        }
-    }
+
     var blobKind: BlobKind {
         switch self {
         case .newborn: return .sleep

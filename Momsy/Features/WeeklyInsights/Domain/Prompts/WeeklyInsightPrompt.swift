@@ -9,13 +9,21 @@ enum WeeklyInsightPrompt {
 
     static func system(for language: Language) -> String {
         switch language {
-        case .english, .spanish:
+        case .english:
             return """
             You are a warm, caring pediatric assistant for mothers. Analyze a baby's weekly stats.
             Compare to WHO age norms. Be encouraging, never give medical diagnoses, and NEVER recommend
             re-introducing a food that is flagged as an allergen or caused a reaction.
             Reply ONLY with a JSON object with exactly these keys: \(jsonKeys).
             Each value is 1–2 warm sentences in English. No markdown, no extra keys, no text outside the JSON.
+            """
+        case .spanish:
+            return """
+            Eres una asistente pediátrica cálida y cercana para madres. Analiza las estadísticas semanales de un bebé.
+            Compáralas con las normas de la OMS para su edad. Sé alentadora, no des diagnósticos médicos y NUNCA recomiendes
+            reintroducir un alimento marcado como alérgeno o que haya causado una reacción.
+            Responde SOLO con un objeto JSON con exactamente estas claves: \(jsonKeys).
+            Cada valor debe tener 1–2 frases cálidas en español. Sin markdown, sin claves extra, sin texto fuera del JSON.
             """
         case .portuguese:
             return """
@@ -62,7 +70,8 @@ enum WeeklyInsightPrompt {
 
     static func user(ctx: WeeklyInsightContext) -> String {
         switch ctx.language {
-        case .english, .spanish: return build(ctx: ctx, l: .en)
+        case .english: return build(ctx: ctx, l: .en)
+        case .spanish: return build(ctx: ctx, l: .es)
         case .russian: return build(ctx: ctx, l: .ru)
         case .german:  return build(ctx: ctx, l: .de)
         case .french:  return build(ctx: ctx, l: .fr)
@@ -73,7 +82,7 @@ enum WeeklyInsightPrompt {
 
     // MARK: - Builder
 
-    private enum Loc { case en, ru, de, fr, pt, zh }
+    private enum Loc { case en, ru, de, es, fr, pt, zh }
 
     private static func build(ctx: WeeklyInsightContext, l: Loc) -> String {
         let s = ctx.stats
@@ -114,6 +123,14 @@ enum WeeklyInsightPrompt {
             lines.append("Mahlzeiten diese Woche: \(feeds)/Tag, gesamt \(s.totalFeedings). Windelwechsel: \(s.totalDiapers).")
             lines.append("Neue Lebensmittel: \(foods). Allergen/Reaktion: \(allergens).")
             lines.append("Gib JSON {\(jsonKeys)} zurück, vergleiche mit WHO-Normen, je eine praktische Empfehlung.")
+        case .es:
+            lines.append("Edad del bebé: \(s.ageMonths) meses (\(s.ageWeeks) semanas).")
+            if let leap { lines.append("Salto de desarrollo: \(leap).") }
+            lines.append("OMS: objetivo de sueño total ≥ \(whoH)/día; ventana máxima de vigilia ~\(s.whoAwakeWindowMax) min.")
+            lines.append("Sueño esta semana: media \(sleepH)/día (noche \(nightH), día \(dayH), \(naps) siestas/día), \(trend).")
+            lines.append("Tomas esta semana: \(feeds)/día, \(s.totalFeedings) en total. Cambios de pañal: \(s.totalDiapers).")
+            lines.append("Nuevos alimentos introducidos: \(foods). Alérgeno/reacción marcada: \(allergens).")
+            lines.append("Devuelve JSON {\(jsonKeys)} comparando con las normas de la OMS, con una recomendación práctica en cada campo.")
         case .fr:
             lines.append("Âge du bébé : \(s.ageMonths) mois (\(s.ageWeeks) semaines).")
             if let leap { lines.append("Bond de développement : \(leap).") }
@@ -162,6 +179,9 @@ enum WeeklyInsightPrompt {
         case .de:
             if absMin < 10 { return "etwa wie letzte Woche" }
             return delta > 0 ? "+\(absMin) Min/Tag vs. letzte Woche" : "-\(absMin) Min/Tag vs. letzte Woche"
+        case .es:
+            if absMin < 10 { return "aproximadamente igual que la semana pasada" }
+            return delta > 0 ? "+\(absMin) min/día frente a la semana pasada" : "-\(absMin) min/día frente a la semana pasada"
         case .fr:
             if absMin < 10 { return "à peu près comme la semaine dernière" }
             return delta > 0 ? "+\(absMin) min/jour vs. semaine dernière" : "-\(absMin) min/jour vs. semaine dernière"

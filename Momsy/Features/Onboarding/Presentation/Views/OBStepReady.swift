@@ -90,7 +90,7 @@ struct ReadyStep: View {
                         Divider().opacity(0.3)
                         summaryRow(blob: .star, tone: .bbButter,
                                    label: loc.strings.stage,
-                                   value: lang == "en" ? stage.labelEn : stage.label)
+                                   value: stage.label(L10n(Language.from(lang))))
                     } else {
                         summaryRow(blob: .baby, tone: .bbCoral,
                                    label: loc.strings.baby,
@@ -106,7 +106,7 @@ struct ReadyStep: View {
                         Divider().opacity(0.3)
                         summaryRow(blob: .star, tone: .bbButter,
                                    label: loc.strings.stage,
-                                   value: lang == "en" ? stage.labelEn : stage.label)
+                                   value: stage.label(L10n(Language.from(lang))))
                     }
                 }
                 .bbCard(pad: 16)

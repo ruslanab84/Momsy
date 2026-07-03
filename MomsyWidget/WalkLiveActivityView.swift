@@ -13,20 +13,20 @@ struct WalkLockScreenView: View {
                 HStack {
                     BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Walk", comment: "")
+                         ? WidgetL10n.current.walk
                          : context.attributes.babyName)
                         .font(.headline)
                         .bold()
                         .foregroundStyle(.white)
                     Spacer()
-                    Text(NSLocalizedString("Walk", comment: ""))
+                    Text(WidgetL10n.current.walk)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.6))
                 }
 
                 HStack {
                     Label {
-                        Text(NSLocalizedString("Walking…", comment: ""))
+                        Text(WidgetL10n.current.walking)
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
@@ -46,7 +46,7 @@ struct WalkLockScreenView: View {
     @ViewBuilder
     private var timerView: some View {
         if context.isStale {
-            Text(NSLocalizedString("Updating…", comment: ""))
+            Text(WidgetL10n.current.updating)
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
         } else {
@@ -67,7 +67,7 @@ struct WalkLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Label {
-                        Text(NSLocalizedString("Walk", comment: ""))
+                        Text(WidgetL10n.current.walk)
                     } icon: {
                         BabyFaceIcon(size: 14)
                     }
@@ -82,13 +82,13 @@ struct WalkLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.center) {
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Walk", comment: "")
+                         ? WidgetL10n.current.walk
                          : context.attributes.babyName)
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     Label {
-                        Text(NSLocalizedString("Walking…", comment: ""))
+                        Text(WidgetL10n.current.walking)
                     } icon: {
                         Image(systemName: "stroller.fill")
                             .foregroundStyle(.green)

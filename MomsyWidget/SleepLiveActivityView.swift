@@ -13,20 +13,20 @@ struct SleepLockScreenView: View {
                 HStack {
                     BabyFaceIcon(size: 20)
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Sleep", comment: "")
+                         ? WidgetL10n.current.sleep
                          : context.attributes.babyName)
                         .font(.headline)
                         .bold()
                         .foregroundStyle(.white)
                     Spacer()
-                    Text(NSLocalizedString("Sleep", comment: ""))
+                    Text(WidgetL10n.current.sleep)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.6))
                 }
 
                 HStack {
                     Label {
-                        Text(NSLocalizedString("Sleeping…", comment: ""))
+                        Text(WidgetL10n.current.sleeping)
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
@@ -46,7 +46,7 @@ struct SleepLockScreenView: View {
     @ViewBuilder
     private var timerView: some View {
         if context.isStale {
-            Text(NSLocalizedString("Updating…", comment: ""))
+            Text(WidgetL10n.current.updating)
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
         } else {
@@ -67,7 +67,7 @@ struct SleepLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Label {
-                        Text(NSLocalizedString("Sleep", comment: ""))
+                        Text(WidgetL10n.current.sleep)
                     } icon: {
                         BabyFaceIcon(size: 14)
                     }
@@ -82,13 +82,13 @@ struct SleepLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.center) {
                     Text(context.attributes.babyName.isEmpty
-                         ? NSLocalizedString("Sleep", comment: "")
+                         ? WidgetL10n.current.sleep
                          : context.attributes.babyName)
                         .font(.headline)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     Label {
-                        Text(NSLocalizedString("Sleeping…", comment: ""))
+                        Text(WidgetL10n.current.sleeping)
                     } icon: {
                         Image(systemName: "moon.fill")
                             .foregroundStyle(.purple)

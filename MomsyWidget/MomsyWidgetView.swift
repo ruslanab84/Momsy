@@ -78,12 +78,100 @@ private let bbLilac   = Color(red: 0.624, green: 0.510, blue: 0.847)
 private let bbInk     = Color(red: 0.239, green: 0.165, blue: 0.125)
 private let bbInkSoft = Color(red: 0.420, green: 0.329, blue: 0.275)
 
+struct WidgetL10n {
+    static var current: WidgetL10n {
+        let code = Locale.preferredLanguages.first ?? "en"
+        if code.hasPrefix("ru") { return WidgetL10n(lang: "ru") }
+        if code.hasPrefix("de") { return WidgetL10n(lang: "de") }
+        if code.hasPrefix("es") { return WidgetL10n(lang: "es") }
+        if code.hasPrefix("fr") { return WidgetL10n(lang: "fr") }
+        if code.hasPrefix("pt") { return WidgetL10n(lang: "pt") }
+        if code.hasPrefix("zh") { return WidgetL10n(lang: "zh") }
+        return WidgetL10n(lang: "en")
+    }
+
+    let lang: String
+
+    private func t(_ en: String, _ ru: String, _ de: String, _ es: String, _ fr: String, _ pt: String, _ zh: String) -> String {
+        switch lang {
+        case "ru": return ru
+        case "de": return de
+        case "es": return es
+        case "fr": return fr
+        case "pt": return pt
+        case "zh": return zh
+        default:   return en
+        }
+    }
+
+    var baby: String { t("Baby", "Малыш", "Baby", "Bebé", "Bébé", "Bebé", "宝宝") }
+    var today: String { t("Today", "Сегодня", "Heute", "Hoy", "Aujourd’hui", "Hoje", "今天") }
+    var ago: String { t("ago", "назад", "her", "atrás", "avant", "atrás", "前") }
+    var active: String { t("active", "активен", "aktiv", "activo", "en cours", "ativo", "进行中") }
+    var last: String { t("last", "последний", "letzter", "último", "dernier", "último", "上次") }
+    var duration: String { t("duration", "продолжительность", "Dauer", "duración", "durée", "duração", "时长") }
+    var inProgress: String { t("in progress", "идёт сейчас", "läuft gerade", "en curso", "en cours", "em curso", "进行中") }
+    var noData: String { t("No data", "Нет данных", "Keine Daten", "Sin datos", "Aucune donnée", "Sem dados", "暂无数据") }
+    var feeding: String { t("Feeding", "Кормление", "Füttern", "Toma", "Tétée", "Mamada", "喂养") }
+    var feedingActive: String { t("Feeding…", "Кормление…", "Füttern…", "Tomando…", "Tétée…", "Mamada…", "喂养中…") }
+    var paused: String { t("Paused", "Пауза", "Pause", "En pausa", "En pause", "Em pausa", "已暂停") }
+    var sleep: String { t("Sleep", "Сон", "Schlaf", "Sueño", "Sommeil", "Sono", "睡眠") }
+    var sleeping: String { t("sleeping", "спит", "schläft", "durmiendo", "dort", "a dormir", "睡觉中") }
+    var sleepingNow: String { t("sleeping now", "спит сейчас", "schläft jetzt", "duerme ahora", "dort maintenant", "a dormir agora", "正在睡觉") }
+    var wokeUp: String { t("woke up", "проснулся", "aufgewacht", "se despertó", "réveillé", "acordou", "醒来") }
+    var leap: String { t("Leap", "Скачок", "Schub", "Salto", "Bond", "Salto", "飞跃期") }
+    var walk: String { t("Walk", "Прогулка", "Spaziergang", "Paseo", "Promenade", "Passeio", "散步") }
+    var walking: String { t("Walking…", "Прогулка…", "Spaziergang…", "Paseando…", "En promenade…", "A passear…", "散步中…") }
+    var bath: String { t("Bath", "Купание", "Bad", "Baño", "Bain", "Banho", "洗澡") }
+    var bathing: String { t("Bathing…", "Купание…", "Baden…", "Bañando…", "Au bain…", "A tomar banho…", "洗澡中…") }
+    var pumping: String { t("Pumping", "Сцеживание", "Pumpen", "Extracción", "Tire-lait", "Extração", "吸奶") }
+    var pumpingActive: String { t("Pumping…", "Сцеживание…", "Pumpen…", "Extrayendo…", "Tire-lait…", "Extração…", "吸奶中…") }
+    var updating: String { t("Updating…", "Обновление…", "Aktualisiert…", "Actualizando…", "Mise à jour…", "A atualizar…", "更新中…") }
+
+    func openMomsyFor(_ name: String) -> String {
+        t("Open Momsy\nfor \(name)", "Открой Momsy\nдля \(name)", "Öffne Momsy\nfür \(name)", "Abre Momsy\npara \(name)", "Ouvrez Momsy\npour \(name)", "Abra o Momsy\npara \(name)", "打开 Momsy\n查看 \(name)")
+    }
+
+    func ageMonths(_ months: Int) -> String {
+        t("\(months) mo", "\(months) мес", "\(months) Mon", "\(months) m", "\(months) mois", "\(months) m", "\(months) 个月")
+    }
+
+    func duration(seconds total: Int) -> String {
+        let h = total / 3600
+        let m = (total % 3600) / 60
+        if h > 0 {
+            return t("\(h)h \(m)m", "\(h) ч \(m) мин", "\(h)h \(m)m", "\(h)h \(m)m", "\(h)h \(m)m", "\(h)h \(m)m", "\(h) 小时 \(m) 分钟")
+        }
+        return t("\(m)m", "\(m) мин", "\(m)m", "\(m) min", "\(m) min", "\(m) min", "\(m) 分钟")
+    }
+
+    func sleepingDuration(seconds total: Int) -> String {
+        t("Sleeping \(duration(seconds: total))", "Спит \(duration(seconds: total))", "Schläft \(duration(seconds: total))", "Duerme \(duration(seconds: total))", "Dort \(duration(seconds: total))", "A dormir \(duration(seconds: total))", "已睡 \(duration(seconds: total))")
+    }
+
+    func feedingSideLabel(_ side: String) -> String {
+        switch side {
+        case "left", "Левая": return t("Left", "Левая", "Links", "Izquierdo", "Gauche", "Esquerdo", "左侧")
+        case "right", "Правая": return t("Right", "Правая", "Rechts", "Derecho", "Droite", "Direito", "右侧")
+        default: return t("Bottle", "Бутылка", "Flasche", "Biberón", "Biberon", "Biberão", "奶瓶")
+        }
+    }
+
+    func pumpingSideLabel(_ side: String) -> String {
+        switch side {
+        case "left": return t("Left", "Левая", "Links", "Izquierdo", "Gauche", "Esquerdo", "左侧")
+        case "right": return t("Right", "Правая", "Rechts", "Derecho", "Droite", "Direito", "右侧")
+        default: return t("Both", "Обе", "Beide", "Ambos", "Les deux", "Ambos", "双侧")
+        }
+    }
+}
+
 private struct FeedingColumn: View {
     let state: FeedingWidgetState
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Label("Кормление", systemImage: "drop.fill")
+            Label(WidgetL10n.current.feeding, systemImage: "drop.fill")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(bbCoral)
             switch state {
@@ -104,7 +192,7 @@ private struct FeedingColumn: View {
                 if let date = lastDate {
                     Text(date, style: .relative)
                         .font(.subheadline.monospacedDigit())
-                    Text("назад").font(.caption).foregroundStyle(.secondary)
+                    Text(WidgetL10n.current.ago).font(.caption).foregroundStyle(.secondary)
                 } else {
                     Text("—").font(.title2).foregroundStyle(.tertiary)
                 }
@@ -120,7 +208,7 @@ private struct SleepColumn: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Label("Сон", systemImage: "moon.fill")
+            Label(WidgetL10n.current.sleep, systemImage: "moon.fill")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(bbLilac)
             switch state {
@@ -128,12 +216,12 @@ private struct SleepColumn: View {
                 Text(timerInterval: start...Date.distantFuture, countsDown: false)
                     .font(.title2.monospacedDigit().weight(.semibold))
                     .minimumScaleFactor(0.7)
-                Text("активен").font(.caption).foregroundStyle(.green)
+                Text(WidgetL10n.current.active).font(.caption).foregroundStyle(.green)
             case .idle(let dur):
                 if let secs = dur {
                     Text(formatSeconds(secs))
                         .font(.subheadline.monospacedDigit())
-                    Text("последний").font(.caption).foregroundStyle(.secondary)
+                    Text(WidgetL10n.current.last).font(.caption).foregroundStyle(.secondary)
                 } else {
                     Text("—").font(.title2).foregroundStyle(.tertiary)
                 }
@@ -211,7 +299,7 @@ private struct FeedingTimerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Label("Кормление", systemImage: "drop.fill")
+            Label(WidgetL10n.current.feeding, systemImage: "drop.fill")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(bbCoral)
             if paused {
@@ -237,7 +325,7 @@ private struct SleepTimerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Label("Сон", systemImage: "moon.fill")
+            Label(WidgetL10n.current.sleep, systemImage: "moon.fill")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(bbLilac)
             Text(timerInterval: startDate...Date.distantFuture, countsDown: false)
@@ -259,14 +347,14 @@ private struct IdleSummaryView: View {
 
     @ViewBuilder private var feedingRow: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Label("Кормление", systemImage: "drop.fill")
+            Label(WidgetL10n.current.feeding, systemImage: "drop.fill")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(bbCoral)
             if case .idle(let date) = entry.feedingState, let d = date {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(d, style: .relative)
                         .font(.subheadline.monospacedDigit().weight(.medium))
-                    Text("назад").font(.caption).foregroundStyle(.secondary)
+                    Text(WidgetL10n.current.ago).font(.caption).foregroundStyle(.secondary)
                 }
             } else {
                 Text("—").foregroundStyle(.tertiary)
@@ -276,7 +364,7 @@ private struct IdleSummaryView: View {
 
     @ViewBuilder private var sleepRow: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Label("Сон", systemImage: "moon.fill")
+            Label(WidgetL10n.current.sleep, systemImage: "moon.fill")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(bbLilac)
             if case .idle(let dur) = entry.sleepState, let secs = dur {
@@ -326,9 +414,9 @@ private struct AccessoryCircularView: View {
 
 private func sideLabel(_ side: String) -> String {
     switch side {
-    case "Левая":   return "←"
-    case "Правая":  return "→"
-    case "Бутылка": return "🍼"
+    case "left", "Левая":   return "←"
+    case "right", "Правая":  return "→"
+    case "bottle", "Бутылка": return "🍼"
     default:        return side
     }
 }

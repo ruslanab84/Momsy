@@ -14,7 +14,7 @@ struct MomsyStandByWidgetView: View {
     private var ageString: String {
         guard let birth = entry.babyBirthDate else { return "" }
         let months = Calendar.current.dateComponents([.month], from: birth, to: .now).month ?? 0
-        return "\(months) мес"
+        return WidgetL10n.current.ageMonths(months)
     }
 
     var body: some View {
@@ -34,7 +34,7 @@ struct MomsyStandByWidgetView: View {
 
     @ViewBuilder private var header: some View {
         HStack(spacing: 4) {
-            Text(entry.babyName.isEmpty ? "Малыш" : entry.babyName)
+            Text(entry.babyName.isEmpty ? WidgetL10n.current.baby : entry.babyName)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(bbInk)
             if !ageString.isEmpty {
@@ -67,12 +67,12 @@ struct MomsyStandByWidgetView: View {
         StandByRow(icon: "moon.fill", accent: bbLilac) {
             switch entry.sleepState {
             case .active(let start):
-                liveTimer(from: start, caption: "спит")
+                liveTimer(from: start, caption: WidgetL10n.current.sleeping)
             case .idle(let dur):
                 if let end = entry.lastSleepEndDate {
                     relativeValue(end)
                 } else if let secs = dur {
-                    staticValue(formatSeconds(secs), caption: "последний")
+                    staticValue(formatSeconds(secs), caption: WidgetL10n.current.last)
                 } else {
                     emptyValue
                 }
@@ -98,7 +98,7 @@ struct MomsyStandByWidgetView: View {
                 .font(.system(.title3, design: .rounded, weight: .semibold).monospacedDigit())
                 .foregroundStyle(bbInk)
                 .minimumScaleFactor(0.6)
-            Text("назад").font(.caption2).foregroundStyle(bbInkSoft)
+            Text(WidgetL10n.current.ago).font(.caption2).foregroundStyle(bbInkSoft)
         }
     }
 
@@ -140,9 +140,9 @@ private struct StandByRow<Value: View>: View {
 
 private func sideLabel(_ side: String) -> String {
     switch side {
-    case "Левая":   return "←"
-    case "Правая":  return "→"
-    case "Бутылка": return "🍼"
+    case "left", "Левая":   return "←"
+    case "right", "Правая":  return "→"
+    case "bottle", "Бутылка": return "🍼"
     default:        return side
     }
 }
