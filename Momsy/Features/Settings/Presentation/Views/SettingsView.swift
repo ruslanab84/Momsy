@@ -6,13 +6,6 @@ struct SettingsView: View {
     @EnvironmentObject private var units: UnitSystemManager
     @Environment(\.openURL) private var openURL
 
-    // ⚠️ RELEASE BLOCKER: this page must be hosted and reachable before submitting —
-    // App Store Review (Guideline 5.1.1) rejects a privacy-policy link that 404s.
-    private let privacyPolicyURL = URL(string: "https://momsy.app/privacy")
-    // Apple's standard EULA satisfies the Terms-of-Use link required for the
-    // auto-renewing subscription (Guideline 3.1.2). Always live; swap for a custom URL if hosted.
-    private let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
-
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeSettingsViewModel())
     }
@@ -276,7 +269,10 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
                 Divider().opacity(0.2).padding(.leading, 60)
-                chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.feedback)
+                Button(action: openFeedback) {
+                    chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.feedback)
+                }
+                .buttonStyle(.plain)
             }
             .background(Color.bbCard)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -320,13 +316,18 @@ struct SettingsView: View {
     }
 
     private func openPrivacyPolicy() {
-        guard let privacyPolicyURL else { return }
+        guard let privacyPolicyURL = AppLegalLinks.privacyPolicyURL else { return }
         openURL(privacyPolicyURL)
     }
 
     private func openTermsOfUse() {
-        guard let termsOfUseURL else { return }
+        guard let termsOfUseURL = AppLegalLinks.termsOfUseURL else { return }
         openURL(termsOfUseURL)
+    }
+
+    private func openFeedback() {
+        guard let feedbackURL = AppLegalLinks.feedbackURL else { return }
+        openURL(feedbackURL)
     }
 
     private func infoRow(icon: String, bg: Color, title: String, value: String) -> some View {
