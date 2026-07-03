@@ -12,6 +12,17 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
         static let eveningBedtimeHour           = 18
         static let nightStartHour               = 19
         static let morningWakeHour              = 6
+        /// Completed sleep shorter than this is a "false start": sleep
+        /// pressure was not relieved, so the wake window must not reset.
+        static let falseStartMaxMinutes         = 10
+        /// Naps shorter than `typicalNapMinutes * shortNapFraction` earn
+        /// only partial wake-window credit.
+        static let shortNapFraction             = 0.5
+        /// Floor of the partial-credit ramp (fraction of the full window).
+        static let minPartialWindowFactor       = 0.5
+        /// When a recomputed onset lands in the past, suggest settling the
+        /// baby this many minutes from now.
+        static let minLeadMinutes               = 15
     }
 
     func predict(birthDate: Date, entries: [SleepEntry], now: Date) -> SleepPrediction? {
@@ -22,8 +33,8 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
         let samples = observedWakeWindows(entries, profile: profile, now: now)
         let (windowMinutes, basis) = personalizedWindow(profile: profile, samples: samples)
 
-        guard let anchor = onsetAnchor(entries, profile: profile, now: now) else { return nil }
-        let onset  = anchor.addingMinutes(windowMinutes)
+        guard let onset = onsetDate(entries, profile: profile,
+                                    windowMinutes: windowMinutes, now: now) else { return nil }
         let buffer = bufferMinutes(forWindow: windowMinutes)
 
         guard let kind = classify(onset: onset, entries: entries, profile: profile, now: now) else { return nil }
@@ -58,9 +69,13 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
     }
 
     // MARK: - §4.1
+    /// False starts are skipped entirely so the wake windows around them
+    /// merge back into one real gap instead of two broken fragments.
     private func observedWakeWindows(_ entries: [SleepEntry], profile: WakeWindowProfile, now: Date) -> [Int] {
         let cal = Calendar.current
-        let completed = entries.filter { $0.endDate != nil }.sorted { $0.startDate < $1.startDate }
+        let completed = entries
+            .filter { $0.endDate != nil && !$0.isFalseStart(maxMinutes: Const.falseStartMaxMinutes) }
+            .sorted { $0.startDate < $1.startDate }
         guard completed.count >= 2 else { return [] }
 
         let lower = Double(profile.minMinutes) * 0.5
@@ -101,22 +116,59 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
         return (clamped, .personalized(samples: n))
     }
 
-    // MARK: - §4.3
-    private func onsetAnchor(_ entries: [SleepEntry], profile: WakeWindowProfile, now: Date) -> Date? {
-        if let latest = entries.max(by: { $0.startDate < $1.startDate }) {
-            if latest.endDate == nil {
-                return latest.startDate.addingMinutes(profile.typicalNapMinutes)
-            }
-            let lastCompleted = entries
-                .filter { $0.endDate != nil }
-                .max(by: { ($0.endDate ?? .distantPast) < ($1.endDate ?? .distantPast) })
-            return lastCompleted?.endDate
+    // MARK: - §4.3 (точка отсчёта + кредит за длительность сна)
+    private func onsetDate(_ entries: [SleepEntry], profile: WakeWindowProfile,
+                           windowMinutes: Int, now: Date) -> Date? {
+        guard let latest = entries.max(by: { $0.startDate < $1.startDate }) else {
+            // Нет логов вообще: сегодня в morningWakeHour, если now уже позже; иначе now.
+            let morning = Calendar.current.date(
+                bySettingHour: Const.morningWakeHour, minute: 0, second: 0, of: now
+            ) ?? now
+            let anchor = now > morning ? morning : now
+            return anchor.addingMinutes(windowMinutes)
         }
-        // Нет логов вообще: сегодня в morningWakeHour, если now уже позже; иначе now.
-        let morning = Calendar.current.date(
-            bySettingHour: Const.morningWakeHour, minute: 0, second: 0, of: now
-        ) ?? now
-        return now > morning ? morning : now
+
+        if latest.endDate == nil {
+            return latest.startDate
+                .addingMinutes(profile.typicalNapMinutes)
+                .addingMinutes(windowMinutes)
+        }
+
+        let completed = entries
+            .filter { $0.endDate != nil }
+            .sorted { ($0.endDate ?? .distantPast) < ($1.endDate ?? .distantPast) }
+        guard let last = completed.last,
+              let lastEnd = last.endDate,
+              let lastDuration = last.durationMinutes else { return nil }
+
+        let shortNapCutoff = max(Const.falseStartMaxMinutes + 1,
+                                 Int(Double(profile.typicalNapMinutes) * Const.shortNapFraction))
+
+        // Полноценный сон → полное окно (прежнее поведение).
+        if lastDuration >= shortNapCutoff {
+            return lastEnd.addingMinutes(windowMinutes)
+        }
+
+        // False start: окно продолжает отсчитываться от последнего реального пробуждения.
+        if lastDuration < Const.falseStartMaxMinutes {
+            let lastRealWake = completed
+                .filter { !$0.isFalseStart(maxMinutes: Const.falseStartMaxMinutes) }
+                .compactMap(\.endDate)
+                .max()
+            if let realWake = lastRealWake {
+                let onset = realWake.addingMinutes(windowMinutes)
+                return max(onset, now.addingMinutes(Const.minLeadMinutes))
+            }
+            // В истории только false starts: минимальный частичный кредит.
+            let reduced = Int(Double(windowMinutes) * Const.minPartialWindowFactor)
+            return max(lastEnd.addingMinutes(reduced), now.addingMinutes(Const.minLeadMinutes))
+        }
+
+        // Короткий сон: частичный кредит, линейная рампа 0.5 → 1.0.
+        let restoration = Double(lastDuration) / Double(shortNapCutoff)
+        let factor = Const.minPartialWindowFactor + (1 - Const.minPartialWindowFactor) * restoration
+        let effective = Int((Double(windowMinutes) * factor).rounded())
+        return lastEnd.addingMinutes(effective)
     }
 
     // MARK: - §4.4
@@ -124,6 +176,7 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
         let cal = Calendar.current
         return entries.filter { entry in
             guard cal.isDate(entry.startDate, inSameDayAs: now) else { return false }
+            guard !entry.isFalseStart(maxMinutes: Const.falseStartMaxMinutes) else { return false }
             let hour = calendarHour(entry.startDate)
             return hour >= Const.morningWakeHour && hour < Const.nightStartHour
         }.count
@@ -137,10 +190,14 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
         entries.max(by: { $0.startDate < $1.startDate })?.endDate == nil && !entries.isEmpty
     }
 
-    /// Minutes the baby has been awake since the last completed sleep ended.
-    /// `nil` when no sleep has ended yet or the timestamp is in the future.
+    /// Minutes the baby has been awake. Counted from the last *real* wake-up:
+    /// a false start does not reset the counter. Falls back to any completed
+    /// end when only false starts exist. `nil` when nothing has ended yet.
     private func minutesAwake(_ entries: [SleepEntry], now: Date) -> Int? {
-        guard let lastEnd = entries.compactMap(\.endDate).max() else { return nil }
+        let realEnds = entries
+            .filter { !$0.isFalseStart(maxMinutes: Const.falseStartMaxMinutes) }
+            .compactMap(\.endDate)
+        guard let lastEnd = realEnds.max() ?? entries.compactMap(\.endDate).max() else { return nil }
         let mins = Int(now.timeIntervalSince(lastEnd) / 60)
         return mins >= 0 ? mins : nil
     }
@@ -158,4 +215,13 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
 
 private extension Date {
     func addingMinutes(_ minutes: Int) -> Date { addingTimeInterval(TimeInterval(minutes * 60)) }
+}
+
+private extension SleepEntry {
+    /// Completed sleep too short to relieve sleep pressure. Ongoing sleeps
+    /// (`endDate == nil`) are never treated as false starts.
+    func isFalseStart(maxMinutes: Int) -> Bool {
+        guard let d = durationMinutes else { return false }
+        return d < maxMinutes
+    }
 }
