@@ -193,4 +193,82 @@ struct SleepForecastEngineTests {
         #expect(!pred.isOverdue)
         #expect(pred.minutesAwake == nil)
     }
+
+    // MARK: - 12. False start не сбрасывает окно бодрствования
+
+    @Test("a 5-minute false start keeps counting from the previous real wake")
+    func falseStartDoesNotResetWindow() throws {
+        let today = try makeToday()
+        // Реальный сон 08:00–09:15; false start 11:00–11:05; сейчас 11:10.
+        let entries = [
+            entry(try at(today, 8, 0), try at(today, 9, 15)),
+            entry(try at(today, 11, 0), try at(today, 11, 5))
+        ]
+        let now = try at(today, 11, 10)
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 150),
+                                               entries: entries, now: now))
+        // Онсет от реального пробуждения 09:15 + 127 = 11:22 → клампится к now + 15 = 11:25.
+        let expected = now.addingTimeInterval(15 * 60)
+        #expect(abs(pred.predictedOnset.timeIntervalSince(expected)) < 90)
+        // НЕ 11:05 + 127 ≈ 13:12.
+        let noon = try at(today, 12, 0)
+        #expect(pred.predictedOnset < noon)
+        #expect(!pred.isOverdue)
+        #expect(pred.minutesAwake == 115)          // 09:15 → 11:10, false start игнорируется
+        #expect(pred.napsRemaining == 3)           // false start не съедает слот (4 − 1)
+    }
+
+    // MARK: - 13. Короткий сон → частичный кредит окна
+
+    @Test("a 20-minute nap earns a shortened wake window")
+    func shortNapPartialCredit() throws {
+        let today = try makeToday()
+        let entries = [entry(try at(today, 12, 0), try at(today, 12, 20))]
+        let now = try at(today, 12, 30)
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 150),
+                                               entries: entries, now: now))
+        // cutoff 37, restoration 20/37 → factor ≈ 0.77 → окно ≈ 98 мин (вместо 127).
+        let anchor = try at(today, 12, 20)
+        let deltaMin = pred.predictedOnset.timeIntervalSince(anchor) / 60
+        #expect(deltaMin >= 90 && deltaMin <= 110)
+    }
+
+    // MARK: - 14. False start в истории не ломает статистику окон
+
+    @Test("false starts are merged out of observed wake-window gaps")
+    func falseStartGapsMerged() throws {
+        let today = try makeToday()
+        var entries: [SleepEntry] = []
+        // 9 дней: реальный сон, false start посреди окна, реальный сон.
+        for d in 0..<9 {
+            let day = try #require(cal.date(byAdding: .day, value: -d, to: today))
+            entries.append(entry(try at(day, 8, 0), try at(day, 9, 15)))
+            entries.append(entry(try at(day, 10, 0), try at(day, 10, 5)))
+            entries.append(entry(try at(day, 11, 15), try at(day, 12, 30)))
+        }
+        let now = try at(today, 14, 0)
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 150),
+                                               entries: entries, now: now))
+        // Слитый gap = 120 мин/день → 9 сэмплов; бленд ≈ 0.7·120 + 0.3·127 ≈ 122.
+        #expect(pred.basis == .personalized(samples: 9))
+        let anchor = try at(today, 12, 30)
+        let deltaMin = pred.predictedOnset.timeIntervalSince(anchor) / 60
+        #expect(deltaMin >= 110 && deltaMin <= 135)   // без слияния было бы ≈ 87
+    }
+
+    // MARK: - 15. Только false starts в истории → минимальный частичный кредит
+
+    @Test("false starts alone yield a reduced window from their end")
+    func onlyFalseStartsReducedWindow() throws {
+        let today = try makeToday()
+        let entries = [entry(try at(today, 10, 0), try at(today, 10, 5))]
+        let now = try at(today, 10, 10)
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 150),
+                                               entries: entries, now: now))
+        // 0.5 × 127 = 63 мин от 10:05 → ≈ 11:08.
+        let anchor = try at(today, 10, 5)
+        let deltaMin = pred.predictedOnset.timeIntervalSince(anchor) / 60
+        #expect(deltaMin >= 55 && deltaMin <= 70)
+        #expect(!pred.isOverdue)
+    }
 }
