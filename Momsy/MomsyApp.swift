@@ -27,6 +27,9 @@ struct MomsyApp: App {
     @AppStorage("onboardingDone") private var onboardingDone = false
     @Environment(\.scenePhase) private var scenePhase
     @State private var joinAlert: JoinAlert?
+    @State private var showJoinAuthSheet = false
+    @State private var pendingAuthenticatedJoinCode: String?
+    @State private var pendingAuthenticatedJoinForce = false
 
     private let container = AppContainer()
     private let localization = LocalizationManager.shared
@@ -120,6 +123,13 @@ struct MomsyApp: App {
                         )
                     }
                 }
+                .sheet(isPresented: $showJoinAuthSheet, onDismiss: {
+                    Task { @MainActor in
+                        await retryPendingAuthenticatedJoinIfPossible()
+                    }
+                }) {
+                    AccountAuthSheet(container: container, mode: .joinFamily)
+                }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
@@ -140,19 +150,36 @@ struct MomsyApp: App {
 
     @MainActor
     private func joinFamilyFromLink(code: String, force: Bool = false) async {
-        await container.authManager.signInAnonymouslyIfNeeded()
-        guard let uid = container.authManager.firebaseUser?.uid else {
-            joinAlert = .failure
-            return
-        }
         do {
+            try await container.authManager.requireAnonymousSignInIfNeeded()
+            guard let uid = container.authManager.currentUID else {
+                joinAlert = .failure
+                return
+            }
             try await FamilyManager.shared.joinFamily(code: code, uid: uid, force: force)
+            pendingAuthenticatedJoinCode = nil
+            pendingAuthenticatedJoinForce = false
             joinAlert = .success
+        } catch AuthError.anonymousSignInRestricted {
+            pendingAuthenticatedJoinCode = code
+            pendingAuthenticatedJoinForce = force
+            joinAlert = nil
+            showJoinAuthSheet = true
         } catch FamilyError.wouldAbandonExistingFamily where !force {
             joinAlert = .confirm(code)
         } catch {
             joinAlert = .failure
         }
+    }
+
+    @MainActor
+    private func retryPendingAuthenticatedJoinIfPossible() async {
+        guard let code = pendingAuthenticatedJoinCode else { return }
+        guard container.authManager.currentUID != nil else { return }
+        let force = pendingAuthenticatedJoinForce
+        pendingAuthenticatedJoinCode = nil
+        pendingAuthenticatedJoinForce = false
+        await joinFamilyFromLink(code: code, force: force)
     }
 }
 

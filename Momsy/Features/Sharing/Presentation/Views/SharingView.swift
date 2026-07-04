@@ -4,10 +4,15 @@ import SwiftUI
 
 struct SharingView: View {
     @StateObject private var vm: SharingViewModel
+    @ObservedObject private var authManager: AuthManager
     @EnvironmentObject var loc: LocalizationManager
 
+    private let container: AppContainer
+
     init(container: AppContainer) {
+        self.container = container
         _vm = StateObject(wrappedValue: container.makeSharingViewModel())
+        _authManager = ObservedObject(wrappedValue: container.authManager)
     }
 
     var body: some View {
@@ -45,6 +50,14 @@ struct SharingView: View {
                 onRoleChange: { newRole in vm.changeRole(id: member.id, to: newRole) },
                 onRemove: { vm.removeMember(id: member.id) }
             )
+        }
+        .sheet(isPresented: $vm.showJoinAuthSheet, onDismiss: {
+            vm.retryPendingJoinAfterAuthIfNeeded()
+        }) {
+            AccountAuthSheet(container: container, mode: .joinFamily)
+        }
+        .onChange(of: authManager.isSignedIn) { _, _ in
+            vm.retryPendingJoinAfterAuthIfNeeded()
         }
         .errorToast($vm.saveError)
     }

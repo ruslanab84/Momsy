@@ -18,6 +18,7 @@ enum AuthError: LocalizedError {
     case accountDeletionPending
     case accountDeletionFinished
     case nonceGenerationFailed
+    case anonymousSignInRestricted
 
     var errorDescription: String? {
         switch self {
@@ -28,6 +29,7 @@ enum AuthError: LocalizedError {
         case .accountDeletionPending: return "Previous account deletion is still finishing. Please try again."
         case .accountDeletionFinished: return "Previous account deletion finished. Please sign in again."
         case .nonceGenerationFailed: return "Could not start Sign in with Apple. Please try again."
+        case .anonymousSignInRestricted: return "Sign in with Apple or Google before creating or joining a family."
         }
     }
 }
@@ -84,6 +86,11 @@ final class AuthManager: ObservableObject {
     /// that guarantee now that Firebase is the single backend.
     @MainActor
     func signInAnonymouslyIfNeeded() async {
+        try? await requireAnonymousSignInIfNeeded()
+    }
+
+    @MainActor
+    func requireAnonymousSignInIfNeeded() async throws {
         installStateListenerIfPossible()
         guard FirebaseApp.app() != nil else { return }
         guard Auth.auth().currentUser == nil else {
@@ -95,7 +102,18 @@ final class AuthManager: ObservableObject {
             firebaseUser = result.user
         } catch {
             AuthManager.log.error("Anonymous sign-in failed: \(error.localizedDescription, privacy: .public)")
+            throw normalizedAnonymousSignInError(error)
         }
+    }
+
+    private func normalizedAnonymousSignInError(_ error: Error) -> Error {
+        let nsError = error as NSError
+        if nsError.code == AuthErrorCode.adminRestrictedOperation.rawValue ||
+            nsError.code == AuthErrorCode.operationNotAllowed.rawValue ||
+            nsError.localizedDescription.localizedCaseInsensitiveContains("restricted to administrators") {
+            return AuthError.anonymousSignInRestricted
+        }
+        return error
     }
 
     /// Promotes the current (possibly anonymous) user to a provider credential.

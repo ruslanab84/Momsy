@@ -394,13 +394,13 @@ final class AppContainer {
     }
 
     func ensureFamilyReady(displayName: String) async throws {
-        await authManager.signInAnonymouslyIfNeeded()
+        try await authManager.requireAnonymousSignInIfNeeded()
         guard let uid = authManager.currentUID else { throw FamilyError.noFamilyId }
         try await FamilyManager.shared.setup(uid: uid, displayName: displayName)
     }
 
     func joinFamilyFromOnboarding(code: String, force: Bool = false) async throws {
-        await authManager.signInAnonymouslyIfNeeded()
+        try await authManager.requireAnonymousSignInIfNeeded()
         guard let uid = authManager.currentUID else { throw FamilyError.noFamilyId }
         try await FamilyManager.shared.joinFamily(code: code, uid: uid, force: force)
     }
@@ -414,7 +414,13 @@ final class AppContainer {
     }
 
     func makeSharingViewModel() -> SharingViewModel {
-        SharingViewModel(repo: familyRepository, inviteService: inviteService, appState: appState)
+        SharingViewModel(repo: familyRepository, inviteService: inviteService, appState: appState, auth: authManager)
+    }
+
+    func makeAccountAuthViewModel() -> AccountAuthViewModel {
+        AccountAuthViewModel(auth: authManager) { [weak self] in
+            await self?.cloudSyncDownloader.downloadAndMergeWhenReady()
+        }
     }
 
     func makeSoundsViewModel() -> SoundsViewModel {

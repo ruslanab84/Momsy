@@ -1128,6 +1128,13 @@ struct L10n {
                                        "Apple ou Google sécurise l’accès familial sur vos appareils.",
                                        "Apple ou Google mantém o acesso familiar seguro nos seus dispositivos.",
                                        "Apple 或 Google 可在多设备上安全保存家庭访问权限。") }
+    var settingsAccount: String        { s("Account", "Аккаунт", "Konto", "Cuenta", "Compte", "Conta", "账户") }
+    var settingsSignIn: String         { s("Sign in", "Войти", "Anmelden", "Iniciar sesión", "Se connecter", "Iniciar sessão", "登录") }
+    var settingsSignInHint: String     { s("Back up your data and sync with your family", "Сохраните данные и синхронизируйтесь с семьёй", "Sichern Sie Ihre Daten und synchronisieren Sie mit Ihrer Familie", "Guarda tus datos y sincroniza con tu familia", "Sauvegardez vos données et synchronisez avec votre famille", "Faça backup dos seus dados e sincronize com a família", "备份数据并与家人同步") }
+    var settingsSignedIn: String       { s("Signed in", "Вы вошли", "Angemeldet", "Sesión iniciada", "Connecté", "Sessão iniciada", "已登录") }
+    var settingsAuthSheetTitle: String { s("Sign in to Momsy", "Войдите в Momsy", "Bei Momsy anmelden", "Inicia sesión en Momsy", "Connectez-vous à Momsy", "Inicie sessão no Momsy", "登录 Momsy") }
+    var settingsAuthSheetSubtitle: String { s("Your entries will be linked to your account and synced across devices", "Записи будут привязаны к аккаунту и синхронизированы между устройствами", "Ihre Einträge werden mit Ihrem Konto verknüpft und geräteübergreifend synchronisiert", "Tus registros se vincularán a tu cuenta y se sincronizarán entre dispositivos", "Vos entrées seront liées à votre compte et synchronisées entre vos appareils", "Os seus registos serão associados à sua conta e sincronizados entre dispositivos", "记录将关联到您的账户并在设备间同步") }
+    var joinAuthUnavailable: String    { s("Couldn't connect. Check your internet connection and try again.", "Не удалось подключиться. Проверьте интернет и попробуйте снова.", "Verbindung fehlgeschlagen. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.", "No se pudo conectar. Comprueba tu conexión e inténtalo de nuevo.", "Connexion impossible. Vérifiez votre connexion Internet et réessayez.", "Não foi possível conectar. Verifique a sua ligação e tente novamente.", "无法连接。请检查网络后重试。") }
 
     // MARK: — Paywall
     var paywallPlanFallbackName: String { s("Momsy Premium",

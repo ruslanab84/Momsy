@@ -1,6 +1,5 @@
 import SwiftUI
 import Combine
-import FirebaseAuth
 
 @MainActor
 final class SharingViewModel: ObservableObject {
@@ -14,12 +13,16 @@ final class SharingViewModel: ObservableObject {
     @Published var joinSuccess = false
     @Published var showJoinConfirm = false
     @Published var isPreparingInvite = false
+    @Published var showJoinAuthSheet = false
 
     private let repo: any FamilyRepository
     private let inviteService: any InviteServiceProtocol
     private let appState: AppState
+    private let auth: any JoinAuthProviding
     // Preserves full StoredFamilyMember (including uid) across round-trips
     private var storedMembers: [StoredFamilyMember] = []
+    private var pendingJoinAfterAuth = false
+    private var pendingJoinForceAfterAuth = false
 
     private var lm: LocalizationManager { .shared }
 
@@ -78,10 +81,11 @@ final class SharingViewModel: ObservableObject {
         }
     }
 
-    init(repo: any FamilyRepository, inviteService: any InviteServiceProtocol = LocalInviteService(), appState: AppState) {
+    init(repo: any FamilyRepository, inviteService: any InviteServiceProtocol = LocalInviteService(), appState: AppState, auth: any JoinAuthProviding) {
         self.repo = repo
         self.inviteService = inviteService
         self.appState = appState
+        self.auth = auth
         Task { await loadMembers() }
     }
 
@@ -153,13 +157,31 @@ final class SharingViewModel: ObservableObject {
 
     func joinFamily(force: Bool = false) {
         guard !joinCode.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        guard let uid = Auth.auth().currentUser?.uid else {
-            joinError = "Please sign in first."
-            return
-        }
+        guard !isJoining else { return }
         isJoining = true
         joinError = nil
         Task {
+            do {
+                // Self-heal a missing session like the deep-link join path does,
+                // instead of dead-ending the user at an auth wall.
+                try await auth.requireAnonymousSignInIfNeeded()
+            } catch AuthError.anonymousSignInRestricted {
+                pendingJoinAfterAuth = true
+                pendingJoinForceAfterAuth = force
+                joinError = lm.strings.joinAuthSubtitle
+                showJoinAuthSheet = true
+                isJoining = false
+                return
+            } catch {
+                joinError = lm.strings.joinAuthUnavailable
+                isJoining = false
+                return
+            }
+            guard let uid = auth.currentUID else {
+                joinError = lm.strings.joinAuthUnavailable
+                isJoining = false
+                return
+            }
             do {
                 try await FamilyManager.shared.joinFamily(code: joinCode, uid: uid, force: force)
                 joinCode = ""
@@ -176,6 +198,15 @@ final class SharingViewModel: ObservableObject {
                 joinSuccess = false
             }
         }
+    }
+
+    func retryPendingJoinAfterAuthIfNeeded() {
+        guard pendingJoinAfterAuth, auth.currentUID != nil else { return }
+        let force = pendingJoinForceAfterAuth
+        pendingJoinAfterAuth = false
+        pendingJoinForceAfterAuth = false
+        showJoinAuthSheet = false
+        joinFamily(force: force)
     }
 
     func confirmJoinReplacingFamily() {

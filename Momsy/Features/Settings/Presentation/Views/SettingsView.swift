@@ -1,16 +1,23 @@
 import SwiftUI
+import FirebaseAuth
 
 struct SettingsView: View {
     @StateObject private var vm: SettingsViewModel
+    @ObservedObject private var authManager: AuthManager
     @EnvironmentObject private var lm: LocalizationManager
     @EnvironmentObject private var units: UnitSystemManager
     @Environment(\.openURL) private var openURL
 
+    private let container: AppContainer
+
     init(container: AppContainer) {
+        self.container = container
+        _authManager = ObservedObject(wrappedValue: container.authManager)
         _vm = StateObject(wrappedValue: container.makeSettingsViewModel())
     }
 
     @State private var showDeleteConfirm = false
+    @State private var showAuthSheet = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -20,6 +27,7 @@ struct SettingsView: View {
                 languageSection
                 vaccinationScheduleSection
                 childrenSection
+                accountSection
                 aboutSection
                 dangerSection
             }
@@ -30,6 +38,9 @@ struct SettingsView: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.settings)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showAuthSheet) {
+            AccountAuthSheet(container: container)
+        }
         .confirmationDialog(
             lm.strings.deleteAllDataConfirm,
             isPresented: $showDeleteConfirm,
@@ -247,6 +258,63 @@ struct SettingsView: View {
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)
+        }
+    }
+
+    // MARK: - Account
+
+    private var accountSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BBSectionLabel(text: lm.strings.settingsAccount)
+
+            if authManager.isSignedIn {
+                HStack(spacing: 14) {
+                    iconSquare(systemName: "person.crop.circle.badge.checkmark", bg: .bbMint)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(lm.strings.settingsSignedIn)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundColor(.bbInk)
+                        if let email = authManager.firebaseUser?.email, !email.isEmpty {
+                            Text(email)
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(.bbInkMute)
+                                .lineLimit(1)
+                        }
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color.bbCard)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .bbShadow()
+            } else {
+                Button {
+                    showAuthSheet = true
+                } label: {
+                    HStack(spacing: 14) {
+                        iconSquare(systemName: "person.crop.circle.badge.plus", bg: .bbCoral)
+                        Text(lm.strings.settingsSignIn)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundColor(.bbInk)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.bbInkMute)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                }
+                .buttonStyle(.plain)
+                .background(Color.bbCard)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .bbShadow()
+
+                Text(lm.strings.settingsSignInHint)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(.bbInkMute)
+                    .padding(.horizontal, 2)
+            }
         }
     }
 
