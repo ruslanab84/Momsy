@@ -34,6 +34,9 @@ enum FamilyError: LocalizedError {
 @MainActor
 final class FamilyManager: ObservableObject {
     static let shared = FamilyManager()
+    /// `userInfo` key on `.familyDidJoin` carrying the family id the user left,
+    /// so observers can tell a real switch from a first-ever join.
+    nonisolated static let previousFamilyIdUserInfoKey = "previousFamilyId"
 
     @Published private(set) var familyId: String?
     @Published private(set) var isReady = false
@@ -168,6 +171,10 @@ final class FamilyManager: ObservableObject {
             throw FamilyError.wouldAbandonExistingFamily
         }
 
+        // Captured before persist() repoints familyId, so the join notification can
+        // carry the id of the family being left.
+        let previousFamilyId = familyId
+
         // Detach from the previous roster BEFORE repointing users/{uid}.familyId,
         // otherwise the rules no longer authorise deleting the old membership doc.
         if let previous = familyId, previous != targetFamilyId {
@@ -188,7 +195,10 @@ final class FamilyManager: ObservableObject {
 
         persist(familyId: targetFamilyId, ownerUid: uid)
         isReady = true
-        NotificationCenter.default.post(name: .familyDidJoin, object: nil)
+        NotificationCenter.default.post(
+            name: .familyDidJoin, object: nil,
+            userInfo: previousFamilyId.map { [Self.previousFamilyIdUserInfoKey: $0] }
+        )
     }
 
     /// True when the caller is the only remaining member (or the roster is empty).

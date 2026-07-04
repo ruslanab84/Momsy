@@ -42,6 +42,9 @@ final class AppContainer {
     let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
     lazy var inviteService: any InviteServiceProtocol  = FirestoreInviteService()
     lazy var babySyncRepository: any BabySyncRepositoryProtocol = BabySyncRepository(service: BabySyncService())
+    /// Shared with the downloader so a family-switch purge can reset the same
+    /// watermarks the sync advances.
+    let syncWatermarks = SyncWatermarkStore()
     lazy var cloudSyncDownloader: any CloudSyncDownloaderProtocol = CloudSyncDownloader(
         service: BabySyncService(),
         feedingRepo: feedingRepository,
@@ -61,7 +64,8 @@ final class AppContainer {
         momSleepRepo: momSleepRepository,
         waterIntakeRepo: waterIntakeRepository,
         leapsRepo: leapsRepository,
-        doctorVisitRepo: doctorVisitRepository
+        doctorVisitRepo: doctorVisitRepository,
+        watermarks: syncWatermarks
     )
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
@@ -81,12 +85,20 @@ final class AppContainer {
     init() { observeFamilyJoin() }
 
     /// After a join, drop the active-baby pointer so the downloader adopts the joined
-    /// family's roster, then re-pull everything.
+    /// family's roster, then re-pull everything. When the join SWITCHED families, wipe
+    /// the old family's local cache first — otherwise its children stay in the picker
+    /// and `syncBabyProfile` would re-upload them into the new family.
     private func observeFamilyJoin() {
         familyJoinObserver = NotificationCenter.default.addObserver(
-            forName: .familyDidJoin, object: nil, queue: .main) { [weak self] _ in
+            forName: .familyDidJoin, object: nil, queue: .main) { [weak self] note in
             guard let self else { return }
+            let previous = note.userInfo?[FamilyManager.previousFamilyIdUserInfoKey] as? String
             Task { @MainActor in
+                if let newFamily = FamilyManager.shared.familyId,
+                   FamilySwitchPolicy.shouldPurgeLocalData(previousFamilyId: previous,
+                                                           newFamilyId: newFamily) {
+                    self.purgeLocalData(previousFamilyId: previous ?? "")
+                }
                 // Clear the active pointer FIRST (this also clears the persisted babyId)
                 // so discovery adopts the joined family's roster. Any writes still queued
                 // from a previous family are skipped by the replay's cross-family guard.
@@ -95,6 +107,28 @@ final class AppContainer {
                 NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
             }
         }
+    }
+
+    /// Removes every locally cached child and log of the family being left so nothing
+    /// from it can surface in the picker or be re-uploaded into the joined family.
+    /// The old family's watermarks are reset too: the local rows backing that delta
+    /// are gone, so a later re-join must start from a clean full pull. Queued cloud
+    /// deletes are dropped — replaying them would write stray tombstones into the
+    /// new family's tree.
+    @MainActor
+    private func purgeLocalData(previousFamilyId: String) {
+        let records = (try? context.fetch(FetchDescriptor<BabyRecord>())) ?? []
+        for record in records {
+            BabyLogBackfill.deleteLogs(forBaby: record.id, context: context)
+            PendingWritesStore.shared.removeAll(forBaby: record.id)
+            if !previousFamilyId.isEmpty {
+                syncWatermarks.reset(family: previousFamilyId, baby: record.id.uuidString)
+            }
+            context.delete(record)
+        }
+        try? context.save()
+        PendingDeletionsStore.shared.clear()
+        Task { await appState.load() }
     }
 
     // MARK: — Use Cases — Baby

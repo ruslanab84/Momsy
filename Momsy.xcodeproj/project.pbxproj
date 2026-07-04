@@ -17,6 +17,7 @@
 		0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */; };
 		0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */; };
 		0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */; };
+		0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */; };
 		0BABF1270000000000000001 /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1270000000000000002 /* LanguageTests.swift */; };
 		1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
@@ -31,6 +32,7 @@
 		56A4C28EC62F43A96F2D8DA4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
 		5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */; };
 		5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */; };
+		5A11ABF0000000000000A007 /* FamilySwitchPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */; };
 		802A6938D28AA6A793B23C06 /* MockFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */; };
 		85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */; };
 		880ACB76F459C0F289D9A8A4 /* MomsyWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4F159218252E2FF5857958F7 /* MomsyWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -140,6 +142,7 @@
 		0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActiveBabySyncOverrideTests.swift; sourceTree = "<group>"; };
 		0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncWatermarkStoreTests.swift; sourceTree = "<group>"; };
 		0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatermarkAdvanceTests.swift; sourceTree = "<group>"; };
+		0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncWatermarkCommitTests.swift; sourceTree = "<group>"; };
 		0BABF1270000000000000002 /* LanguageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LanguageTests.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
@@ -164,6 +167,7 @@
 		53F845EB5F589FB39171B36B /* MockLeapsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockLeapsRepository.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountErasureGateTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinGuardTests.swift; sourceTree = "<group>"; };
+		5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilySwitchPolicyTests.swift; sourceTree = "<group>"; };
 		5C108DEF939A1DFF17A30728 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		6284D94988BAA9F30D148420 /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
@@ -358,6 +362,7 @@
 				0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */,
 				0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */,
 				0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */,
+				0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -444,6 +449,7 @@
 			children = (
 				5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */,
 				5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */,
+				5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */,
 			);
 			path = Sharing;
 			sourceTree = "<group>";
@@ -871,6 +877,7 @@
 				FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */,
 				5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */,
 				5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */,
+				5A11ABF0000000000000A007 /* FamilySwitchPolicyTests.swift in Sources */,
 				EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */,
 				27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */,
 				DEADBEEF0000000000000012 /* MockComplementaryFeedingRepository.swift in Sources */,
@@ -907,6 +914,7 @@
 				0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */,
 				0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */,
 				0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */,
+				0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */,
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
 				0BABF1270000000000000001 /* LanguageTests.swift in Sources */,
 			);
@@ -1029,7 +1037,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = MomsyWidget/MomsyWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MomsyWidget/Info.plist;
@@ -1062,7 +1070,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = MomsyWidget/MomsyWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MomsyWidget/Info.plist;
@@ -1214,7 +1222,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1254,7 +1262,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.Release.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

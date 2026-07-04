@@ -95,6 +95,25 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         return candidate
     }
 
+    /// One collection's fetch result with its watermark commit deferred until the
+    /// merge lands. `commitTo == nil` when the fetch itself failed — the previous
+    /// watermark must stay untouched so the next sync retries the same window.
+    struct PendingFetch<T> {
+        let dtos: [T]
+        let familyId: String
+        let babyId: String
+        let collection: String
+        let commitTo: Date?
+    }
+
+    /// Pure: the watermark to persist after a merge, or nil to leave it as-is.
+    /// A failed fetch never commits — in particular a failed FIRST pull must not
+    /// write the epoch floor, or the one-time full pull (which captures legacy
+    /// nil-`updatedAt` docs) would be skipped forever.
+    static func watermarkAfterFetch(fetchSucceeded: Bool, next: Date) -> Date? {
+        fetchSucceeded ? next : nil
+    }
+
     @MainActor
     func downloadAndMergeWhenReady() async {
         guard !hasRun else { return }
@@ -255,23 +274,23 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     @MainActor
     private func downloadAndMerge(recordQuickLogs: Bool = true) async {
         // Fetch all collections concurrently (network runs off the main actor).
-        async let feedingDTOs: [FeedingLogDTO]     = fetch("feedingLogs",     dateField: "startedAt")
-        async let sleepDTOs:   [SleepLogDTO]        = fetch("sleepLogs",       dateField: "startedAt")
-        async let diaperDTOs:  [DiaperLogDTO]       = fetch("diaperLogs",      dateField: "loggedAt")
-        async let stoolDTOs:   [QuickEventLogDTO]   = fetch("stoolLogs",       dateField: "loggedAt")
-        async let walkDTOs:    [QuickEventLogDTO]   = fetch("walkLogs",        dateField: "loggedAt")
-        async let bathDTOs:    [QuickEventLogDTO]   = fetch("bathLogs",        dateField: "loggedAt")
-        async let vitaminDTOs: [QuickEventLogDTO]   = fetch("vitaminLogs",     dateField: "loggedAt")
-        async let pumpingDTOs: [PumpingLogDTO]      = fetch("pumpingLogs",     dateField: "date")
-        async let diaryDTOs:   [DiaryLogDTO]        = fetch("diaryLogs",       dateField: "date")
-        async let measureDTOs: [MeasurementLogDTO]  = fetch("measurementLogs", dateField: "date")
-        async let vaccineDTOs: [VaccinationLogDTO]  = fetch("vaccinationLogs", dateField: "doneDate")
-        async let foodDTOs:    [FoodDiaryLogDTO]    = fetch("foodDiaryLogs",   dateField: "date")
-        async let tempDTOs:    [TemperatureLogDTO]  = fetch("temperatureLogs", dateField: "date")
-        async let momSleepDTOs:[SleepLogDTO]        = fetch("momSleepLogs",    dateField: "startedAt")
-        async let waterDTOs:   [WaterIntakeLogDTO]  = fetch("waterIntakeLogs", dateField: "date")
-        async let leapDTOs:    [LeapLogDTO]         = fetch("leapLogs",        dateField: "completedDate")
-        async let visitDTOs:   [DoctorVisitLogDTO]  = fetch("doctorVisitLogs", dateField: "date")
+        async let feedingFetch:  PendingFetch<FeedingLogDTO>     = fetch("feedingLogs",     dateField: "startedAt")
+        async let sleepFetch:    PendingFetch<SleepLogDTO>       = fetch("sleepLogs",       dateField: "startedAt")
+        async let diaperFetchA:  PendingFetch<DiaperLogDTO>      = fetch("diaperLogs",      dateField: "loggedAt")
+        async let stoolFetchA:   PendingFetch<QuickEventLogDTO>  = fetch("stoolLogs",       dateField: "loggedAt")
+        async let walkFetchA:    PendingFetch<QuickEventLogDTO>  = fetch("walkLogs",        dateField: "loggedAt")
+        async let bathFetchA:    PendingFetch<QuickEventLogDTO>  = fetch("bathLogs",        dateField: "loggedAt")
+        async let vitaminFetchA: PendingFetch<QuickEventLogDTO>  = fetch("vitaminLogs",     dateField: "loggedAt")
+        async let pumpingFetchA: PendingFetch<PumpingLogDTO>     = fetch("pumpingLogs",     dateField: "date")
+        async let diaryFetch:    PendingFetch<DiaryLogDTO>       = fetch("diaryLogs",       dateField: "date")
+        async let measureFetch:  PendingFetch<MeasurementLogDTO> = fetch("measurementLogs", dateField: "date")
+        async let vaccineFetch:  PendingFetch<VaccinationLogDTO> = fetch("vaccinationLogs", dateField: "doneDate")
+        async let foodFetch:     PendingFetch<FoodDiaryLogDTO>   = fetch("foodDiaryLogs",   dateField: "date")
+        async let tempFetch:     PendingFetch<TemperatureLogDTO> = fetch("temperatureLogs", dateField: "date")
+        async let momSleepFetch: PendingFetch<SleepLogDTO>       = fetch("momSleepLogs",    dateField: "startedAt")
+        async let waterFetch:    PendingFetch<WaterIntakeLogDTO> = fetch("waterIntakeLogs", dateField: "date")
+        async let leapFetch:     PendingFetch<LeapLogDTO>        = fetch("leapLogs",        dateField: "completedDate")
+        async let visitFetch:    PendingFetch<DoctorVisitLogDTO> = fetch("doctorVisitLogs", dateField: "date")
 
         // Reconcile deletes before merging: retry our own unsent deletes, then gather
         // every tombstoned id so the merge neither resurrects nor re-inserts a deleted
@@ -279,94 +298,132 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         // even before its tombstone round-trips.
         await service.retryPendingDeletions()
 
-        // Reconcile deletes incrementally: only pull tombstones newer than last seen. A tombstone
-        // older than the watermark was already applied on a previous sync, and `applyDeletions`
-        // is idempotent (deleting an already-absent row is a no-op).
+        // Incremental tombstone pull. The `deletions` watermark is committed only after
+        // `applyDeletions` below succeeds — a failed apply must re-pull the same
+        // tombstones, or the deleted entry resurrects on this device forever.
         let tombScope = service.currentScope()
         let tombWatermark = watermarks.watermark(family: tombScope.familyId, baby: tombScope.babyId,
                                                  collection: "deletions")
-        let tombstones = (try? await service.fetchTombstones(since: tombWatermark)) ?? []
-        let tombstonedIds = Set(tombstones.compactMap { UUID(uuidString: $0.id) })
+        let tombstones = try? await service.fetchTombstones(since: tombWatermark)
+        let tombstonedIds = Set((tombstones ?? []).compactMap { UUID(uuidString: $0.id) })
         let deletedIds = tombstonedIds.union(PendingDeletionsStore.shared.ids())
 
-        let maxTomb = tombstones.map(\.deletedAt).max()
-        let nextTomb = Self.advancedWatermark(previous: tombWatermark, maxObserved: maxTomb)
-        watermarks.set(family: tombScope.familyId, baby: tombScope.babyId,
-                       collection: "deletions", to: nextTomb)
-
-        let feedings = await feedingDTOs.compactMap(Self.feedingEntry)
-        let sleeps   = await sleepDTOs.compactMap(Self.sleepEntry)
-        let diapers  = await diaperDTOs.compactMap(Self.diaperEntry)
-        let stools   = await stoolDTOs.compactMap(Self.stoolEntry)
-        let diaries  = await diaryDTOs.compactMap(Self.diaryItem)
-        let walks    = await walkDTOs.compactMap(Self.walkEntry)
-        let baths    = await bathDTOs.compactMap(Self.bathEntry)
-        let pumpings = await pumpingDTOs.compactMap(Self.pumpingEntry)
-        let measures = await measureDTOs.compactMap(Self.measurementEntry)
-        let vaccines = await vaccineDTOs.compactMap(Self.vaccinationEntry)
-        let foods    = await foodDTOs.compactMap(Self.foodEntry)
-        let temps    = await tempDTOs.compactMap(Self.temperatureEntry)
-        let momSleeps = await momSleepDTOs.compactMap(Self.momSleepEntry)
-        let waters   = await waterDTOs.compactMap(Self.waterIntakeEntry)
-        let leaps    = await leapDTOs.compactMap(Self.leapProgress)
-        let visits   = await visitDTOs.compactMap(Self.doctorVisit)
-        let quickEventDTOs =
-            (await walkDTOs) + (await bathDTOs) + (await vitaminDTOs) + (await stoolDTOs)
-        let quickToday = quickEventDTOs.compactMap(Self.todayQuickLog)
-            + (await diaperDTOs).compactMap(Self.todayDiaperQuickLog)
-            + (await pumpingDTOs).compactMap(Self.todayPumpingQuickLog)
+        // Raw fetch results needed twice (entry merge + quick-log strip).
+        let stoolFetch   = await stoolFetchA
+        let walkFetch    = await walkFetchA
+        let bathFetch    = await bathFetchA
+        let vitaminFetch = await vitaminFetchA
+        let diaperFetch  = await diaperFetchA
+        let pumpingFetch = await pumpingFetchA
 
         // Merge into SwiftData on the main actor (shared context is main-actor owned).
-        try? await feedingRepo.upsert(feedings)
-        try? await sleepRepo.upsert(sleeps)
-        try? await diaperRepo.upsert(diapers.filter { !deletedIds.contains($0.id) })
-        try? await stoolRepo.upsert(stools)
-        try? await diaryRepo.upsert(diaries)
-        try? await walkRepo.upsert(walks)
-        try? await bathRepo.upsert(baths)
-        try? await pumpingRepo.upsert(pumpings)
-        try? await measurementRepo.upsert(measures)
-        try? await vaccinationRepo.upsert(vaccines.filter { !deletedIds.contains($0.id) })
-        try? await foodDiaryRepo.upsert(foods.filter { !deletedIds.contains($0.id) })
-        try? await temperatureRepo.upsert(temps)
-        try? await momSleepRepo.upsert(momSleeps)
-        try? await waterIntakeRepo.upsert(waters)
-        try? await leapsRepo.upsert(leaps)
-        try? await doctorVisitRepo.upsert(visits)
-        if recordQuickLogs { quickToday.forEach { quickLogRepo.appendUnique($0) } }
+        // Each collection commits its own watermark iff its upsert did not throw.
+        await merge(await feedingFetch,  map: Self.feedingEntry)     { try await self.feedingRepo.upsert($0) }
+        await merge(await sleepFetch,    map: Self.sleepEntry)       { try await self.sleepRepo.upsert($0) }
+        await merge(diaperFetch,         map: Self.diaperEntry)      { entries in
+            try await self.diaperRepo.upsert(entries.filter { !deletedIds.contains($0.id) })
+        }
+        await merge(stoolFetch,          map: Self.stoolEntry)       { try await self.stoolRepo.upsert($0) }
+        await merge(await diaryFetch,    map: Self.diaryItem)        { try await self.diaryRepo.upsert($0) }
+        await merge(walkFetch,           map: Self.walkEntry)        { try await self.walkRepo.upsert($0) }
+        await merge(bathFetch,           map: Self.bathEntry)        { try await self.bathRepo.upsert($0) }
+        await merge(pumpingFetch,        map: Self.pumpingEntry)     { try await self.pumpingRepo.upsert($0) }
+        await merge(await measureFetch,  map: Self.measurementEntry) { try await self.measurementRepo.upsert($0) }
+        await merge(await vaccineFetch,  map: Self.vaccinationEntry) { entries in
+            try await self.vaccinationRepo.upsert(entries.filter { !deletedIds.contains($0.id) })
+        }
+        await merge(await foodFetch,     map: Self.foodEntry)        { entries in
+            try await self.foodDiaryRepo.upsert(entries.filter { !deletedIds.contains($0.id) })
+        }
+        await merge(await tempFetch,     map: Self.temperatureEntry) { try await self.temperatureRepo.upsert($0) }
+        await merge(await momSleepFetch, map: Self.momSleepEntry)    { try await self.momSleepRepo.upsert($0) }
+        await merge(await waterFetch,    map: Self.waterIntakeEntry) { try await self.waterIntakeRepo.upsert($0) }
+        await merge(await leapFetch,     map: Self.leapProgress)     { try await self.leapsRepo.upsert($0) }
+        await merge(await visitFetch,    map: Self.doctorVisit)      { try await self.doctorVisitRepo.upsert($0) }
+
+        // Quick-log "today" strip. `appendUnique` cannot throw; vitamins have no
+        // entry repo, so their watermark commits here.
+        if recordQuickLogs {
+            let quickEventDTOs = walkFetch.dtos + bathFetch.dtos + vitaminFetch.dtos + stoolFetch.dtos
+            let quickToday = quickEventDTOs.compactMap(Self.todayQuickLog)
+                + diaperFetch.dtos.compactMap(Self.todayDiaperQuickLog)
+                + pumpingFetch.dtos.compactMap(Self.todayPumpingQuickLog)
+            quickToday.forEach { quickLogRepo.appendUnique($0) }
+        }
+        commit(vitaminFetch)
 
         // Propagate deletes made on other devices: remove any local row whose id was
         // explicitly tombstoned. Only ever deletes ids we have a tombstone for.
+        var deletionsApplied = true
         if !deletedIds.isEmpty {
-            try? await diaperRepo.applyDeletions(deletedIds)
-            try? await vaccinationRepo.applyDeletions(deletedIds)
-            try? await foodDiaryRepo.applyDeletions(deletedIds)
-            quickLogRepo.remove(ids: deletedIds)
+            do {
+                try await diaperRepo.applyDeletions(deletedIds)
+                try await vaccinationRepo.applyDeletions(deletedIds)
+                try await foodDiaryRepo.applyDeletions(deletedIds)
+                quickLogRepo.remove(ids: deletedIds)
+            } catch {
+                deletionsApplied = false
+            }
+        }
+        if deletionsApplied, let tombstones {
+            let maxTomb = tombstones.map(\.deletedAt).max()
+            let nextTomb = Self.advancedWatermark(previous: tombWatermark, maxObserved: maxTomb)
+            watermarks.set(family: tombScope.familyId, baby: tombScope.babyId,
+                           collection: "deletions", to: nextTomb)
         }
 
         NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
     }
 
     /// Incremental fetch: full pull on first sync of a collection (captures legacy `nil`-`updatedAt`
-    /// docs that a `>=` range query would exclude), delta thereafter. Advances the
-    /// per-`(family, baby, collection)` watermark by the max server `updatedAt` merged.
+    /// docs that a `>=` range query would exclude), delta thereafter. The per-`(family, baby,
+    /// collection)` watermark is NOT advanced here — the caller commits it via `merge`/`commit`
+    /// only after the local upsert succeeds, so a failed save re-pulls the same window.
     private func fetch<T: Decodable & CloudSyncTimestamped>(_ collection: String,
-                                                            dateField: String) async -> [T] {
+                                                            dateField: String) async -> PendingFetch<T> {
         let scope = service.currentScope()
         let previous = watermarks.watermark(family: scope.familyId, baby: scope.babyId,
                                             collection: collection)
-
-        let dtos: [T]
-        if let previous {
-            dtos = (try? await service.fetchChanged(from: collection, since: previous)) ?? []
-        } else {
-            dtos = (try? await service.fetchAll(from: collection, dateField: dateField)) ?? []
+        var dtos: [T] = []
+        var fetchSucceeded = false
+        do {
+            if let previous {
+                dtos = try await service.fetchChanged(from: collection, since: previous)
+            } else {
+                dtos = try await service.fetchAll(from: collection, dateField: dateField)
+            }
+            fetchSucceeded = true
+        } catch {
+            // Transient failure: keep the previous watermark; retried next sync.
         }
-
         let maxObserved = dtos.compactMap { $0.updatedAt?.dateValue() }.max()
         let next = Self.advancedWatermark(previous: previous, maxObserved: maxObserved)
-        watermarks.set(family: scope.familyId, baby: scope.babyId, collection: collection, to: next)
-        return dtos
+        return PendingFetch(dtos: dtos, familyId: scope.familyId, babyId: scope.babyId,
+                            collection: collection,
+                            commitTo: Self.watermarkAfterFetch(fetchSucceeded: fetchSucceeded,
+                                                               next: next))
+    }
+
+    /// Merges one collection and, only on success, advances its watermark. A throwing
+    /// upsert leaves the watermark untouched so the same delta is re-pulled next sync.
+    @MainActor
+    private func merge<DTO, Entry>(_ fetched: PendingFetch<DTO>,
+                                   map: (DTO) -> Entry?,
+                                   upsert: ([Entry]) async throws -> Void) async {
+        let entries = fetched.dtos.compactMap(map)
+        do {
+            try await upsert(entries)
+            commit(fetched)
+        } catch {
+            // Watermark not advanced; this window is retried on the next sync.
+        }
+    }
+
+    @MainActor
+    private func commit<DTO>(_ fetched: PendingFetch<DTO>) {
+        guard let date = fetched.commitTo else { return }
+        watermarks.set(family: fetched.familyId, baby: fetched.babyId,
+                       collection: fetched.collection, to: date)
     }
 
     // MARK: - DTO → local mapping (skip docs whose id isn't a UUID, e.g. legacy random ids)
