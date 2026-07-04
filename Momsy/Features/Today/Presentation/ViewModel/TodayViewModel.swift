@@ -200,7 +200,7 @@ final class TodayViewModel: ObservableObject {
         let cal = Calendar.current
         let startOfDay = cal.startOfDay(for: Date())
         let endOfDay = cal.date(byAdding: .day, value: 1, to: startOfDay) ?? Date()
-        guard let sleeps = try? await getSleep.execute(from: startOfDay, to: endOfDay) else { return }
+        guard let sleeps = try? await getSleep.executeOverlapping(from: startOfDay, to: endOfDay) else { return }
         let sleepEntries: [LogEntry] = sleeps.map { sleepLabel($0) }
         let quickEntries: [LogEntry] = quickLogRepo.load().map {
             LogEntry(id: "quick:\($0.id.uuidString)", time: $0.time, kind: $0.kind, label: $0.label)

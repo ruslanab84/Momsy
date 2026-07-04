@@ -8,3 +8,21 @@ protocol SleepRepository {
     func update(_ entry: SleepEntry) async throws
     func delete(id: UUID) async throws
 }
+
+extension SleepRepository {
+    func getEntries(
+        overlapping dayStart: Date,
+        until dayEnd: Date,
+        lookback: TimeInterval = 24 * 3600
+    ) async throws -> [SleepEntry] {
+        let widened = try await getEntries(from: dayStart.addingTimeInterval(-lookback), to: dayEnd)
+        return widened.filter {
+            SleepDayWindow.overlaps(
+                start: $0.startDate,
+                end: $0.endDate,
+                dayStart: dayStart,
+                dayEnd: dayEnd
+            )
+        }
+    }
+}

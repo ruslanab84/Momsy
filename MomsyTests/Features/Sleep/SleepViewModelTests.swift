@@ -64,6 +64,16 @@ struct SleepViewModelTests {
         )
     }
 
+    private func waitUntil(
+        timeout: TimeInterval = 1,
+        condition: @escaping @MainActor () -> Bool
+    ) async throws {
+        let deadline = Date().addingTimeInterval(timeout)
+        while !condition() && Date() < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+    }
+
     // MARK: - start
 
     @Test("start() sets isSleepActive = true")
@@ -124,7 +134,7 @@ struct SleepViewModelTests {
 
         vm.sleepSeconds = 42
         appState.setActive(babyB.id)
-        try await Task.sleep(nanoseconds: 150_000_000)
+        try await waitUntil { !vm.isSleepActive && vm.sleepSeconds == 0 }
 
         #expect(!vm.isSleepActive)
         #expect(vm.sleepSeconds == 0)
@@ -136,7 +146,7 @@ struct SleepViewModelTests {
         #expect(repo.entries(for: babyB.id).count == 1)
 
         appState.setActive(babyA.id)
-        try await Task.sleep(nanoseconds: 150_000_000)
+        try await waitUntil { vm.isSleepActive }
 
         #expect(vm.isSleepActive)
         #expect(repo.entries(for: babyA.id).count == 1)
@@ -202,10 +212,16 @@ struct SleepViewModelTests {
         #expect(vm.todayEntries[1].id == late.id)
     }
 
-    @Test("loadTodayEntries ignores entries outside today")
-    func loadFiltersToToday() async throws {
+    @Test("loadTodayEntries ignores completed entries outside today")
+    func loadFiltersCompletedEntriesOutsideToday() async throws {
         let repo = MockSleepRepository()
-        let yesterday = SleepEntry(startDate: Date().addingTimeInterval(-86400))
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let yesterdayStart = cal.date(byAdding: .day, value: -1, to: today) ?? today.addingTimeInterval(-24 * 3600)
+        let yesterday = SleepEntry(
+            startDate: yesterdayStart.addingTimeInterval(12 * 3600),
+            endDate: yesterdayStart.addingTimeInterval(13 * 3600)
+        )
         repo.entries = [yesterday]
         let vm = makeVM(repo: repo)
         await vm.loadTodayEntries()

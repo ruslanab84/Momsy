@@ -87,16 +87,22 @@ final class SleepViewModel: ObservableObject {
         let today = cal.startOfDay(for: Date())
         guard let periodStart = cal.date(byAdding: .day, value: -(dayCount - 1), to: today) else { return }
         let entries = (try? await withBabyScope(expectedBabyId) {
-            try await getSleepUC.execute(from: periodStart, to: Date())
+            try await getSleepUC.executeOverlapping(from: periodStart, to: Date())
         }) ?? []
         guard isCurrentBaby(expectedBabyId) else { return }
         let completed = entries.filter { $0.endDate != nil }
         sleepDays = (0..<dayCount).compactMap { offset in
-            guard let day = cal.date(byAdding: .day, value: offset, to: periodStart) else { return nil }
-            let mins = completed
-                .filter { cal.isDate($0.startDate, inSameDayAs: day) }
-                .compactMap(\.durationMinutes)
-                .reduce(0, +)
+            guard let day = cal.date(byAdding: .day, value: offset, to: periodStart),
+                  let next = cal.date(byAdding: .day, value: 1, to: day) else { return nil }
+            let mins = completed.reduce(0) { total, entry in
+                guard let end = entry.endDate else { return total }
+                return total + SleepDayWindow.clippedMinutes(
+                    start: entry.startDate,
+                    end: end,
+                    dayStart: day,
+                    dayEnd: next
+                )
+            }
             return SleepDayPoint(id: day, totalMinutes: mins)
         }
     }
@@ -125,7 +131,18 @@ final class SleepViewModel: ObservableObject {
     }
 
     var totalSleepToday: String {
-        let total = todayEntries.compactMap(\.durationMinutes).reduce(0, +)
+        let cal = Calendar.current
+        let dayStart = cal.startOfDay(for: Date())
+        let dayEnd = cal.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(24 * 3600)
+        let total = todayEntries.reduce(0) { total, entry in
+            guard let end = entry.endDate else { return total }
+            return total + SleepDayWindow.clippedMinutes(
+                start: entry.startDate,
+                end: end,
+                dayStart: dayStart,
+                dayEnd: dayEnd
+            )
+        }
         return lm.strings.durationFormatted(total)
     }
 
@@ -232,7 +249,15 @@ final class SleepViewModel: ObservableObject {
                 }
                 pushSleepToFirestore(saved, babyId: babyId)
                 guard isCurrentBaby(babyId) else { return }
-                if Calendar.current.isDateInToday(saved.startDate) {
+                let cal = Calendar.current
+                let dayStart = cal.startOfDay(for: Date())
+                let dayEnd = cal.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(24 * 3600)
+                if SleepDayWindow.overlaps(
+                    start: saved.startDate,
+                    end: saved.endDate,
+                    dayStart: dayStart,
+                    dayEnd: dayEnd
+                ) {
                     todayEntries.append(saved)
                     todayEntries.sort { $0.startDate < $1.startDate }
                 }
@@ -253,7 +278,7 @@ final class SleepViewModel: ObservableObject {
         let start = cal.startOfDay(for: Date())
         let end = cal.date(byAdding: .day, value: 1, to: start) ?? Date()
         if let entries = try? await withBabyScope(expectedBabyId, operation: {
-            try await getSleepUC.execute(from: start, to: end)
+            try await getSleepUC.executeOverlapping(from: start, to: end)
         }) {
             guard isCurrentBaby(expectedBabyId) else { return }
             todayEntries = entries.sorted { $0.startDate < $1.startDate }
