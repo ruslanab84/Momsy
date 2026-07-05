@@ -183,21 +183,33 @@ final class FamilyManager: ObservableObject {
         let previousFamilyId = familyId
 
         let displayName = Auth.auth().currentUser?.displayName ?? Auth.auth().currentUser?.email ?? "User"
-        try await ensureMemberDocument(
-            familyId: targetFamilyId,
-            uid: uid,
-            displayName: displayName,
-            defaultRoleRaw: inviteRoleRaw ?? FamilyRole.dad.rawValue,
-            inviteCode: trimmed
+        let targetMemberRef = db.collection("families").document(targetFamilyId)
+            .collection("members").document(uid)
+        let userRef = db.collection("users").document(uid)
+        let batch = db.batch()
+
+        // Keep routing and roster membership atomic: users/{uid}.familyId must
+        // never commit without the matching member document.
+        batch.setData(
+            memberDocumentData(
+                uid: uid,
+                displayName: displayName,
+                defaultRoleRaw: inviteRoleRaw ?? FamilyRole.dad.rawValue,
+                inviteCode: trimmed,
+                includeLifecycleFields: true
+            ),
+            forDocument: targetMemberRef,
+            merge: true
         )
 
         if let previous = familyId, previous != targetFamilyId {
-            try? await db.collection("families").document(previous)
-                .collection("members").document(uid).delete()
+            let previousMemberRef = db.collection("families").document(previous)
+                .collection("members").document(uid)
+            batch.deleteDocument(previousMemberRef)
         }
 
-        try await db.collection("users").document(uid)
-            .setData(["familyId": targetFamilyId], merge: true)
+        batch.setData(["familyId": targetFamilyId], forDocument: userRef, merge: true)
+        try await batch.commit()
 
         persist(familyId: targetFamilyId, ownerUid: uid)
         isReady = true
@@ -258,19 +270,15 @@ final class FamilyManager: ObservableObject {
     ) async throws {
         let ref = db.collection("families").document(familyId)
             .collection("members").document(uid)
-        var data: [String: Any] = [
-            "name": displayName,
-            "uid": uid
-        ]
-        if let inviteCode {
-            data["inviteCode"] = inviteCode
-        }
+        var data = memberDocumentData(
+            uid: uid,
+            displayName: displayName,
+            defaultRoleRaw: defaultRoleRaw,
+            inviteCode: inviteCode,
+            includeLifecycleFields: inviteCode != nil || bootstrapCreator
+        )
 
-        if inviteCode != nil || bootstrapCreator {
-            data["id"] = UUID().uuidString
-            data["roleRaw"] = defaultRoleRaw
-            data["joinedAt"] = Timestamp(date: Date())
-        } else {
+        if inviteCode == nil && !bootstrapCreator {
             let snap = try await ref.getDocument()
             let existing = snap.data() ?? [:]
             if existing["id"] as? String == nil {
@@ -284,5 +292,27 @@ final class FamilyManager: ObservableObject {
             }
         }
         try await ref.setData(data, merge: true)
+    }
+
+    private func memberDocumentData(
+        uid: String,
+        displayName: String,
+        defaultRoleRaw: String,
+        inviteCode: String? = nil,
+        includeLifecycleFields: Bool
+    ) -> [String: Any] {
+        var data: [String: Any] = [
+            "name": displayName,
+            "uid": uid
+        ]
+        if let inviteCode {
+            data["inviteCode"] = inviteCode
+        }
+        if includeLifecycleFields {
+            data["id"] = UUID().uuidString
+            data["roleRaw"] = defaultRoleRaw
+            data["joinedAt"] = Timestamp(date: Date())
+        }
+        return data
     }
 }

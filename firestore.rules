@@ -25,6 +25,11 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
     }
 
+    function isFamilyMemberAfter(familyId) {
+      return isSignedIn()
+        && getAfter(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.uid == request.auth.uid;
+    }
+
     // True only during initial family setup before the creator has written their
     // own member doc and the app marks bootstrapComplete.
     function isFamilyCreator(familyId) {
@@ -109,7 +114,12 @@ service cloud.firestore {
       return !('familyId' in request.resource.data)
         || (
           request.resource.data.familyId is string
-          && (isFamilyMember(request.resource.data.familyId) || isFamilyCreator(request.resource.data.familyId))
+          && (
+            isFamilyMember(request.resource.data.familyId)
+            || isFamilyCreator(request.resource.data.familyId)
+            // Allows the join batch only when it also creates the caller's member doc.
+            || isFamilyMemberAfter(request.resource.data.familyId)
+          )
         );
     }
 
