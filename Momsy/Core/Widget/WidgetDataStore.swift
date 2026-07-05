@@ -26,6 +26,7 @@ final class WidgetDataStore {
     static let shared = WidgetDataStore()
 
     private let defaults: UserDefaults
+    private var reloadTask: Task<Void, Never>?
 
     private init() {
         defaults = UserDefaults(suiteName: "group.RuslanAbd.Momsy") ?? .standard
@@ -283,8 +284,15 @@ final class WidgetDataStore {
     }
 
     private func reload() {
-        WidgetCenter.shared.reloadAllTimelines()
-        NotificationCenter.default.post(name: .widgetDataDidChange, object: nil)
+        reloadTask?.cancel()
+        reloadTask = Task {
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                WidgetCenter.shared.reloadAllTimelines()
+                NotificationCenter.default.post(name: .widgetDataDidChange, object: nil)
+            }
+        }
     }
 }
 

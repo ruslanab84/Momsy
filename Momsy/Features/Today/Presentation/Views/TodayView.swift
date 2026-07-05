@@ -1,13 +1,27 @@
 import SwiftUI
+import Combine
+
+private final class TodayFeatureViewModels: ObservableObject {
+    let feeding: FeedingViewModel
+    let sleep: SleepViewModel
+    let walk: WalkViewModel
+    let bath: BathViewModel
+    let vitamin: VitaminViewModel
+    let pumping: PumpingViewModel
+
+    init(container: AppContainer) {
+        feeding = container.makeFeedingViewModel()
+        sleep = container.makeSleepViewModel()
+        walk = container.makeWalkViewModel()
+        bath = container.makeBathViewModel()
+        vitamin = container.makeVitaminViewModel()
+        pumping = container.makePumpingViewModel()
+    }
+}
 
 struct TodayView: View {
     @StateObject private var vm: TodayViewModel
-    @StateObject private var feedingVM: FeedingViewModel
-    @StateObject private var sleepVM: SleepViewModel
-    @StateObject private var walkVM: WalkViewModel
-    @StateObject private var bathVM: BathViewModel
-    @StateObject private var vitaminVM: VitaminViewModel
-    @StateObject private var pumpingVM: PumpingViewModel
+    @StateObject private var featureVMs: TodayFeatureViewModels
     @State private var showFeeding = false
     @State private var showSymptom = false
     @State private var showSleep = false
@@ -25,13 +39,15 @@ struct TodayView: View {
     init(container: AppContainer) {
         self.container = container
         _vm         = StateObject(wrappedValue: container.makeTodayViewModel())
-        _feedingVM  = StateObject(wrappedValue: container.makeFeedingViewModel())
-        _sleepVM    = StateObject(wrappedValue: container.makeSleepViewModel())
-        _walkVM     = StateObject(wrappedValue: container.makeWalkViewModel())
-        _bathVM     = StateObject(wrappedValue: container.makeBathViewModel())
-        _vitaminVM  = StateObject(wrappedValue: container.makeVitaminViewModel())
-        _pumpingVM  = StateObject(wrappedValue: container.makePumpingViewModel())
+        _featureVMs = StateObject(wrappedValue: TodayFeatureViewModels(container: container))
     }
+
+    private var feedingVM: FeedingViewModel { featureVMs.feeding }
+    private var sleepVM: SleepViewModel { featureVMs.sleep }
+    private var walkVM: WalkViewModel { featureVMs.walk }
+    private var bathVM: BathViewModel { featureVMs.bath }
+    private var vitaminVM: VitaminViewModel { featureVMs.vitamin }
+    private var pumpingVM: PumpingViewModel { featureVMs.pumping }
 
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
@@ -86,16 +102,6 @@ struct TodayView: View {
                 Task { await vm.refreshForecast() }
             }
         }
-        .onChange(of: feedingVM.todayEntries.count) { _, _ in
-            // During a merge, reloadAfterMerge already reloads everything; skip the
-            // duplicate read so it doesn't race the downloader on the shared context.
-            guard !vm.isReloading else { return }
-            Task { await vm.loadTodayEntries() }
-        }
-        .onChange(of: sleepVM.todayEntries.count) { _, _ in
-            guard !vm.isReloading else { return }
-            Task { await vm.refreshForecast() }
-        }
         .task {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 60_000_000_000)
@@ -111,7 +117,12 @@ struct TodayView: View {
         }
         .sheet(isPresented: $showSleep) {
             SleepView(vm: sleepVM)
-                .onDisappear { Task { await vm.loadTodayEntries() } }
+                .onDisappear {
+                    Task {
+                        await vm.loadTodayEntries()
+                        await vm.refreshForecast()
+                    }
+                }
         }
         .sheet(isPresented: $showWalk) {
             WalkView(vm: walkVM)
@@ -229,207 +240,20 @@ struct TodayView: View {
 
     private var mainCards: some View {
         VStack(spacing: 10) {
-            feedingCard
+            TodayFeedingCard(
+                vm: feedingVM,
+                openFeeding: { showFeeding = true },
+                reloadTodayEntries: { Task { await vm.loadTodayEntries() } }
+            )
             HStack(spacing: 10) {
-                sleepCard
-                diaperCard
+                TodaySleepCard(vm: sleepVM) { showSleep = true }
+                TodayDiaperCard(
+                    count: vm.diaperCount,
+                    remove: { vm.removeDiaper() },
+                    log: { vm.logDiaper() }
+                )
             }
         }
-    }
-
-    // MARK: - Feeding Card
-
-    private var feedingCard: some View {
-        HStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(loc.strings.feedingLabel)
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.bbInk.opacity(0.6))
-                    .kerning(0.5)
-
-                if feedingVM.feedingSessionExists {
-                    HStack(alignment: .lastTextBaseline, spacing: 6) {
-                        Text(feedingVM.feedingTimerString)
-                            .font(.system(size: 32, weight: .heavy, design: .monospaced))
-                            .foregroundColor(.bbInk)
-                            .contentTransition(.numericText())
-                            .animation(.linear(duration: 0.3), value: feedingVM.feedingSeconds)
-                        Text(feedingVM.isFeedingActive
-                            ? loc.strings.feedingActiveLabel(side: feedingVM.feedingSide.displayName(lang: loc.lang).lowercased())
-                            : loc.strings.paused)
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(Color.bbInk.opacity(0.6))
-                    }
-                    Text(loc.strings.typicalLengthHint)
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color.bbInk.opacity(0.6))
-                } else {
-                    Text(feedingVM.lastFeedAgoString)
-                        .font(.system(size: 28, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbInk)
-                    Text(loc.strings.usuallyAroundThisTime)
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color.bbInk.opacity(0.6))
-                }
-            }
-
-            Spacer(minLength: 8)
-
-            if feedingVM.feedingSessionExists {
-                VStack(spacing: 8) {
-                    Button(action: {
-                        if feedingVM.isFeedingActive {
-                            feedingVM.pauseFeeding()
-                        } else {
-                            feedingVM.resumeFeeding()
-                        }
-                    }) {
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 48, height: 48)
-                            .overlay(
-                                Group {
-                                    if feedingVM.isFeedingActive {
-                                        HStack(spacing: 3) {
-                                            ForEach(0..<2) { _ in
-                                                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                                    .fill(Color.bbCoralDeep)
-                                                    .frame(width: 4, height: 16)
-                                            }
-                                        }
-                                    } else {
-                                        Image(systemName: "play.fill")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .foregroundColor(.bbCoralDeep)
-                                            .offset(x: 2)
-                                    }
-                                }
-                            )
-                            .bbShadowSoft()
-                            .animation(.spring(response: 0.25), value: feedingVM.isFeedingActive)
-                    }
-                    Button(action: {
-                        feedingVM.stopFeeding()
-                        Task { await vm.loadTodayEntries() }
-                    }) {
-                        Circle()
-                            .fill(Color.bbSurface)
-                            .frame(width: 48, height: 48)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                    .fill(Color.white)
-                                    .frame(width: 16, height: 16)
-                            )
-                    }
-                }
-            } else {
-                Button(action: { showFeeding = true }) {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 56, height: 56)
-                        .shadow(color: Color.black.opacity(0.06), radius: 2)
-                        .overlay(
-                            Image(systemName: "play.fill")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.bbCoralDeep)
-                                .offset(x: 2)
-                        )
-                }
-            }
-        }
-        .bbCard(pad: 14, bg: .bbCoral)
-        .overlay(alignment: .topTrailing) {
-            if feedingVM.feedingSessionExists {
-                Circle()
-                    .fill(feedingVM.isFeedingActive ? Color.bbSurface : Color.bbCoralDeep.opacity(0.5))
-                    .frame(width: 10, height: 10)
-                    .padding(10)
-                    .opacity(0.7)
-            }
-        }
-    }
-
-    // MARK: - Sleep Card
-
-    private var sleepCard: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .top) {
-                CuteBlobView(kind: .sleep, size: 36, tone: .bbLilac)
-                Spacer()
-                if sleepVM.isSleepActive {
-                    Circle()
-                        .fill(Color.bbLilacDeep)
-                        .frame(width: 8, height: 8)
-                        .padding(.top, 4)
-                        .transition(.scale.combined(with: .opacity))
-                }
-            }
-            Text(loc.strings.sleep)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(.bbInkSoft)
-            if sleepVM.isSleepActive {
-                Text(sleepVM.sleepTimerString)
-                    .font(.system(size: 18, weight: .heavy, design: .monospaced))
-                    .foregroundColor(.bbLilacDeep)
-                    .contentTransition(.numericText())
-                    .animation(.linear(duration: 0.3), value: sleepVM.sleepSeconds)
-                Text(loc.strings.sleeping)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(.bbInkMute)
-            } else {
-                Text(sleepVM.lastSleepDurationString)
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbInk)
-                Text(sleepVM.lastSleepSubtitle)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(.bbInkMute)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .bbCard(pad: 14)
-        .animation(.spring(response: 0.3), value: sleepVM.isSleepActive)
-        .onTapGesture { showSleep = true }
-    }
-
-    // MARK: - Diaper Card
-
-    private var diaperCard: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            CuteBlobView(kind: .drop, size: 36, tone: .bbSky)
-            Text(loc.strings.diapers)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(.bbInkSoft)
-            Text(loc.strings.diaperCountDay(vm.diaperCount))
-                .font(.system(size: 18, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInk)
-                .contentTransition(.numericText())
-                .animation(.spring(response: 0.35), value: vm.diaperCount)
-            HStack(spacing: 8) {
-                Button { vm.removeDiaper() } label: {
-                    Image(systemName: "minus")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(vm.diaperCount > 0 ? .bbInkSoft : .bbInkMute.opacity(0.35))
-                        .frame(width: 28, height: 28)
-                        .background(Color.bbCreamSoft)
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .disabled(vm.diaperCount == 0)
-                .animation(.spring(response: 0.25), value: vm.diaperCount)
-
-                Button { vm.logDiaper() } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.bbSkyDeep)
-                        .frame(width: 28, height: 28)
-                        .background(Color.bbSky.opacity(0.45))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .bbCard(pad: 14)
     }
 
     // MARK: - Daily Tip Card
@@ -651,6 +475,223 @@ struct TodayView: View {
         }
         .bbCard(pad: 14)
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: vm.logEntries.count)
+    }
+}
+
+private struct TodayFeedingCard: View {
+    @ObservedObject var vm: FeedingViewModel
+    let openFeeding: () -> Void
+    let reloadTodayEntries: () -> Void
+
+    @EnvironmentObject private var loc: LocalizationManager
+
+    var body: some View {
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(loc.strings.feedingLabel)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(Color.bbInk.opacity(0.6))
+                    .kerning(0.5)
+
+                if vm.feedingSessionExists {
+                    HStack(alignment: .lastTextBaseline, spacing: 6) {
+                        Text(vm.feedingTimerString)
+                            .font(.system(size: 32, weight: .heavy, design: .monospaced))
+                            .foregroundColor(.bbInk)
+                            .contentTransition(.numericText())
+                            .animation(.linear(duration: 0.3), value: vm.feedingSeconds)
+                        Text(vm.isFeedingActive
+                            ? loc.strings.feedingActiveLabel(side: vm.feedingSide.displayName(lang: loc.lang).lowercased())
+                            : loc.strings.paused)
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(Color.bbInk.opacity(0.6))
+                    }
+                    Text(loc.strings.typicalLengthHint)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color.bbInk.opacity(0.6))
+                } else {
+                    Text(vm.lastFeedAgoString)
+                        .font(.system(size: 28, weight: .heavy, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Text(loc.strings.usuallyAroundThisTime)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color.bbInk.opacity(0.6))
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            if vm.feedingSessionExists {
+                VStack(spacing: 8) {
+                    Button(action: toggleFeeding) {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 48, height: 48)
+                            .overlay(playPauseIcon)
+                            .bbShadowSoft()
+                            .animation(.spring(response: 0.25), value: vm.isFeedingActive)
+                    }
+                    Button(action: stopFeeding) {
+                        Circle()
+                            .fill(Color.bbSurface)
+                            .frame(width: 48, height: 48)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                    .fill(Color.white)
+                                    .frame(width: 16, height: 16)
+                            )
+                    }
+                }
+            } else {
+                Button(action: openFeeding) {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 56, height: 56)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2)
+                        .overlay(
+                            Image(systemName: "play.fill")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.bbCoralDeep)
+                                .offset(x: 2)
+                        )
+                }
+            }
+        }
+        .bbCard(pad: 14, bg: .bbCoral)
+        .overlay(alignment: .topTrailing) {
+            if vm.feedingSessionExists {
+                Circle()
+                    .fill(vm.isFeedingActive ? Color.bbSurface : Color.bbCoralDeep.opacity(0.5))
+                    .frame(width: 10, height: 10)
+                    .padding(10)
+                    .opacity(0.7)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var playPauseIcon: some View {
+        if vm.isFeedingActive {
+            HStack(spacing: 3) {
+                ForEach(0..<2) { _ in
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(Color.bbCoralDeep)
+                        .frame(width: 4, height: 16)
+                }
+            }
+        } else {
+            Image(systemName: "play.fill")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.bbCoralDeep)
+                .offset(x: 2)
+        }
+    }
+
+    private func toggleFeeding() {
+        if vm.isFeedingActive {
+            vm.pauseFeeding()
+        } else {
+            vm.resumeFeeding()
+        }
+    }
+
+    private func stopFeeding() {
+        vm.stopFeeding()
+        reloadTodayEntries()
+    }
+}
+
+private struct TodaySleepCard: View {
+    @ObservedObject var vm: SleepViewModel
+    let openSleep: () -> Void
+
+    @EnvironmentObject private var loc: LocalizationManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top) {
+                CuteBlobView(kind: .sleep, size: 36, tone: .bbLilac)
+                Spacer()
+                if vm.isSleepActive {
+                    Circle()
+                        .fill(Color.bbLilacDeep)
+                        .frame(width: 8, height: 8)
+                        .padding(.top, 4)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            Text(loc.strings.sleep)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+            if vm.isSleepActive {
+                Text(vm.sleepTimerString)
+                    .font(.system(size: 18, weight: .heavy, design: .monospaced))
+                    .foregroundColor(.bbLilacDeep)
+                    .contentTransition(.numericText())
+                    .animation(.linear(duration: 0.3), value: vm.sleepSeconds)
+                Text(loc.strings.sleeping)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbInkMute)
+            } else {
+                Text(vm.lastSleepDurationString)
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbInk)
+                Text(vm.lastSleepSubtitle)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbInkMute)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .bbCard(pad: 14)
+        .animation(.spring(response: 0.3), value: vm.isSleepActive)
+        .onTapGesture(perform: openSleep)
+    }
+}
+
+private struct TodayDiaperCard: View {
+    let count: Int
+    let remove: () -> Void
+    let log: () -> Void
+
+    @EnvironmentObject private var loc: LocalizationManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            CuteBlobView(kind: .drop, size: 36, tone: .bbSky)
+            Text(loc.strings.diapers)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+            Text(loc.strings.diaperCountDay(count))
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .foregroundColor(.bbInk)
+                .contentTransition(.numericText())
+                .animation(.spring(response: 0.35), value: count)
+            HStack(spacing: 8) {
+                Button(action: remove) {
+                    Image(systemName: "minus")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(count > 0 ? .bbInkSoft : .bbInkMute.opacity(0.35))
+                        .frame(width: 28, height: 28)
+                        .background(Color.bbCreamSoft)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .disabled(count == 0)
+                .animation(.spring(response: 0.25), value: count)
+
+                Button(action: log) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.bbSkyDeep)
+                        .frame(width: 28, height: 28)
+                        .background(Color.bbSky.opacity(0.45))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .bbCard(pad: 14)
     }
 }
 

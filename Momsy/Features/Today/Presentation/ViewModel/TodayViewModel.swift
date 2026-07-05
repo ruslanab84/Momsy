@@ -8,15 +8,9 @@ final class TodayViewModel: ObservableObject {
     @Published var saveError: String?
     @Published var dailyTip: DailyTip?
     @Published var isTipLoading: Bool = false
-    @Published var syncedFeedingLogs: [FeedingLog] = []
-    @Published var syncedSleepLogs: [SleepLog] = []
     @Published private(set) var currentLeap: DevelopmentLeap?
     @Published private(set) var leapPhase: BabyAgeContext.LeapPhase?
     @Published private(set) var nextSleep: SleepPrediction?
-    /// True while a post-merge reload is in flight. `TodayView` reads this to skip
-    /// its own feeding/sleep-stream reload triggers during a merge, so they don't
-    /// pile a second concurrent read onto the shared `ModelContext`.
-    @Published private(set) var isReloading = false
 
     private let getFeeding: GetFeedingEntriesUseCase
     private let getSleep: GetSleepEntriesUseCase
@@ -32,7 +26,11 @@ final class TodayViewModel: ObservableObject {
     private var hasFetchedThisSession = false
     private var mergeObserver: NSObjectProtocol?
     private var reloadTask: Task<Void, Never>?
+    private var tipRefreshTask: Task<Void, Never>?
     private var reloadGeneration = 0
+    private var isReloading = false
+    private var syncedFeedingLogs: [FeedingLog] = []
+    private var syncedSleepLogs: [SleepLog] = []
 
     init(
         getFeeding: GetFeedingEntriesUseCase,
@@ -68,6 +66,7 @@ final class TodayViewModel: ObservableObject {
 
     deinit {
         syncTasks.forEach { $0.cancel() }
+        tipRefreshTask?.cancel()
         if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
 
@@ -243,13 +242,16 @@ final class TodayViewModel: ObservableObject {
     private func computeDaysSinceLastStool() async -> Int? {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
-        for daysBack in 0...10 {
-            guard let date = cal.date(byAdding: .day, value: -daysBack, to: today) else { continue }
-            let nextDay = cal.date(byAdding: .day, value: 1, to: date) ?? date
-            let entries = (try? await stoolRepo.getEntries(from: date, to: nextDay)) ?? []
-            if !entries.isEmpty { return daysBack }
-        }
-        return nil
+        guard
+            let searchStart = cal.date(byAdding: .day, value: -10, to: today),
+            let tomorrow = cal.date(byAdding: .day, value: 1, to: today)
+        else { return nil }
+        let now = Date()
+        let entries = ((try? await stoolRepo.getEntries(from: searchStart, to: tomorrow)) ?? [])
+            .filter { $0 <= now }
+        guard let latest = entries.max() else { return nil }
+        let latestDay = cal.startOfDay(for: latest)
+        return max(0, cal.dateComponents([.day], from: latestDay, to: today).day ?? 0)
     }
 
     // MARK: - Quick log actions
@@ -265,7 +267,7 @@ final class TodayViewModel: ObservableObject {
         addEntry(LogEntry(id: "quick:\(entry.id.uuidString)", time: entry.date, kind: .drop, label: label))
         Task { try? await diaperRepo.add(entry) }
         pushDiaperToFirestore(entry)
-        if hasFetchedThisSession { Task { await updateTip() } }
+        scheduleTipRefresh()
     }
 
     private func pushDiaperToFirestore(_ entry: DiaperEntry) {
@@ -292,7 +294,7 @@ final class TodayViewModel: ObservableObject {
                 BabySyncService().propagateDelete(id: removedId, in: "diaperLogs")
             }
         }
-        if hasFetchedThisSession { Task { await updateTip() } }
+        scheduleTipRefresh()
     }
 
     func logWalk() {
@@ -384,6 +386,16 @@ final class TodayViewModel: ObservableObject {
     private func addEntry(_ entry: LogEntry) {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             logEntries.insert(entry, at: 0)
+        }
+    }
+
+    private func scheduleTipRefresh() {
+        guard hasFetchedThisSession else { return }
+        tipRefreshTask?.cancel()
+        tipRefreshTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 600_000_000)
+            guard let self, !Task.isCancelled else { return }
+            await self.updateTip()
         }
     }
 }
