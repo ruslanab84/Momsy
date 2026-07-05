@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseCore
 import FirebaseFirestore
 
 extension Notification.Name {
@@ -116,6 +117,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
 
     @MainActor
     func downloadAndMergeWhenReady() async {
+        guard FirebaseApp.app() != nil else { return }
         guard !hasRun else { return }
         if FamilyManager.shared.familyId == nil {
             await waitForFamilyReady(timeout: 8)
@@ -180,6 +182,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// read the active babyId at query time, so the merge targets the new child.
     @MainActor
     func resyncActiveBaby() async {
+        guard FirebaseApp.app() != nil else { return }
         guard FamilyManager.shared.familyId != nil else { return }
         await syncBabyProfile()
         await downloadAndMerge()
@@ -191,6 +194,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// `.task` download. Debounced so a quick background→foreground bounce is a no-op.
     @MainActor
     func resyncAll() async {
+        guard FirebaseApp.app() != nil else { return }
         guard hasRun else { return }
         // Foreground re-pull is a cheap delta now (incremental sync), but a quick
         // background→foreground bounce still needn't re-hit Firestore: debounce wide.
@@ -209,6 +213,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// so two `downloadAllBabies` never interleave their `ActiveBaby` mutations.
     @MainActor
     func forceResyncAll() async {
+        guard FirebaseApp.app() != nil else { return }
         guard FamilyManager.shared.familyId != nil else { return }
         let deadline = Date().addingTimeInterval(8)
         while isSyncing && Date() < deadline {

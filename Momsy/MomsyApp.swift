@@ -1,7 +1,4 @@
 import SwiftUI
-import FirebaseCore
-import FirebaseFirestore
-import FirebaseAuth
 import WidgetKit
 #if canImport(GoogleSignIn)
 import GoogleSignIn
@@ -31,7 +28,7 @@ struct MomsyApp: App {
     @State private var pendingAuthenticatedJoinCode: String?
     @State private var pendingAuthenticatedJoinForce = false
 
-    private let container = AppContainer()
+    private let container: AppContainer
     private let localization = LocalizationManager.shared
     private let unitSystem   = UnitSystemManager.shared
     private let phoneSession: PhoneSessionManager
@@ -46,11 +43,10 @@ struct MomsyApp: App {
     }
 
     init() {
-        FirebaseApp.configure()
-        let settings = FirestoreSettings()
-        settings.cacheSettings = PersistentCacheSettings()
-        Firestore.firestore().settings = settings
+        FirebaseBootstrapper.configureIfAvailable()
 
+        let container = AppContainer()
+        self.container = container
         let coordinator = QuickLogCoordinator(
             logFeeding:        container.logFeeding,
             startSleep:        container.startSleep,

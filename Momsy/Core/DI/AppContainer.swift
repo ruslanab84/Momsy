@@ -37,36 +37,47 @@ final class AppContainer {
     lazy var waterIntakeRepository: any WaterIntakeRepository                    = SwiftDataWaterIntakeRepository(context: context)
     lazy var pumpingRepository: any PumpingRepository                            = SwiftDataPumpingRepository(context: context)
 
-    lazy var familyRepository: any FamilyRepository   = FirestoreFamilyRepository()
+    lazy var familyRepository: any FamilyRepository = FirebaseBootstrapper.isConfigured
+        ? FirestoreFamilyRepository()
+        : LocalFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
-    let photoStorage: any PhotoStorageService          = FirebasePhotoStorageService()
-    lazy var inviteService: any InviteServiceProtocol  = FirestoreInviteService()
-    lazy var babySyncRepository: any BabySyncRepositoryProtocol = BabySyncRepository(service: BabySyncService())
+    let photoStorage: any PhotoStorageService = FirebaseBootstrapper.isConfigured
+        ? FirebasePhotoStorageService()
+        : LocalPhotoStorageService()
+    lazy var inviteService: any InviteServiceProtocol = FirebaseBootstrapper.isConfigured
+        ? FirestoreInviteService()
+        : LocalInviteService()
+    lazy var babySyncRepository: any BabySyncRepositoryProtocol = FirebaseBootstrapper.isConfigured
+        ? BabySyncRepository(service: BabySyncService())
+        : NoOpBabySyncRepository()
     /// Shared with the downloader so a family-switch purge can reset the same
     /// watermarks the sync advances.
     let syncWatermarks = SyncWatermarkStore()
-    lazy var cloudSyncDownloader: any CloudSyncDownloaderProtocol = CloudSyncDownloader(
-        service: BabySyncService(),
-        feedingRepo: feedingRepository,
-        sleepRepo: sleepRepository,
-        diaperRepo: diaperRepository,
-        stoolRepo: stoolRepository,
-        diaryRepo: diaryRepository,
-        walkRepo: walkRepository,
-        bathRepo: bathRepository,
-        pumpingRepo: pumpingRepository,
-        measurementRepo: measurementRepository,
-        vaccinationRepo: vaccinationRepository,
-        foodDiaryRepo: complementaryFeedingRepository,
-        quickLogRepo: quickLogRepository,
-        babyRepo: babyRepository,
-        temperatureRepo: temperatureRepository,
-        momSleepRepo: momSleepRepository,
-        waterIntakeRepo: waterIntakeRepository,
-        leapsRepo: leapsRepository,
-        doctorVisitRepo: doctorVisitRepository,
-        watermarks: syncWatermarks
-    )
+    lazy var cloudSyncDownloader: any CloudSyncDownloaderProtocol = {
+        guard FirebaseBootstrapper.isConfigured else { return NoOpCloudSyncDownloader() }
+        return CloudSyncDownloader(
+            service: BabySyncService(),
+            feedingRepo: feedingRepository,
+            sleepRepo: sleepRepository,
+            diaperRepo: diaperRepository,
+            stoolRepo: stoolRepository,
+            diaryRepo: diaryRepository,
+            walkRepo: walkRepository,
+            bathRepo: bathRepository,
+            pumpingRepo: pumpingRepository,
+            measurementRepo: measurementRepository,
+            vaccinationRepo: vaccinationRepository,
+            foodDiaryRepo: complementaryFeedingRepository,
+            quickLogRepo: quickLogRepository,
+            babyRepo: babyRepository,
+            temperatureRepo: temperatureRepository,
+            momSleepRepo: momSleepRepository,
+            waterIntakeRepo: waterIntakeRepository,
+            leapsRepo: leapsRepository,
+            doctorVisitRepo: doctorVisitRepository,
+            watermarks: syncWatermarks
+        )
+    }()
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let authManager                                    = AuthManager()
@@ -76,7 +87,9 @@ final class AppContainer {
     let preferencesRepository: any UserPreferencesRepository = LocalUserPreferencesRepository()
     let dailyTipRepository                             = DailyTipRepository()
     lazy var weeklyInsightRepository: any WeeklyInsightRepository = SwiftDataWeeklyInsightRepository(context: context)
-    lazy var weeklyInsightService: any WeeklyInsightService       = GeminiWeeklyInsightService()
+    lazy var weeklyInsightService: any WeeklyInsightService = FirebaseBootstrapper.isConfigured
+        ? GeminiWeeklyInsightService()
+        : StaticWeeklyInsightService()
 
     // MARK: — Cross-device sync wiring
 
