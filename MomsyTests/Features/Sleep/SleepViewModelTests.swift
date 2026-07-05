@@ -41,6 +41,38 @@ private final class BabyScopedSleepRepository: SleepRepository {
     }
 }
 
+private final class DelayedAddSleepRepository: SleepRepository {
+    var entries: [SleepEntry] = []
+    private let addDelayNanoseconds: UInt64
+
+    init(addDelayNanoseconds: UInt64) {
+        self.addDelayNanoseconds = addDelayNanoseconds
+    }
+
+    func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
+        entries.filter { $0.startDate >= from && $0.startDate < to }
+    }
+
+    func add(_ entry: SleepEntry) async throws {
+        try await Task.sleep(nanoseconds: addDelayNanoseconds)
+        entries.append(entry)
+    }
+
+    func upsert(_ newEntries: [SleepEntry]) async throws {
+        let existing = Set(entries.map(\.id))
+        entries.append(contentsOf: newEntries.filter { !existing.contains($0.id) })
+    }
+
+    func update(_ entry: SleepEntry) async throws {
+        guard let index = entries.firstIndex(where: { $0.id == entry.id }) else { return }
+        entries[index] = entry
+    }
+
+    func delete(id: UUID) async throws {
+        entries.removeAll { $0.id == id }
+    }
+}
+
 @Suite("SleepViewModel", .serialized)
 @MainActor
 struct SleepViewModelTests {
@@ -102,6 +134,33 @@ struct SleepViewModelTests {
         try await Task.sleep(nanoseconds: 50_000_000)
         #expect(vm.saveError != nil)
         #expect(!vm.isSleepActive)
+    }
+
+    @Test("start() activates before repository add completes")
+    func startActivatesOptimistically() async throws {
+        let repo = DelayedAddSleepRepository(addDelayNanoseconds: 200_000_000)
+        let vm = makeVM(repo: repo)
+        vm.start()
+        #expect(vm.isSleepActive)
+        #expect(repo.entries.isEmpty)
+        try await waitUntil { !repo.entries.isEmpty }
+        #expect(vm.isSleepActive)
+    }
+
+    @Test("stop() closes an optimistic start after the pending add completes")
+    func stopWaitsForPendingStartBeforeClosing() async throws {
+        let repo = DelayedAddSleepRepository(addDelayNanoseconds: 200_000_000)
+        let vm = makeVM(repo: repo)
+        vm.start()
+        #expect(vm.isSleepActive)
+
+        vm.stop()
+        #expect(!vm.isSleepActive)
+
+        try await waitUntil { repo.entries.first?.endDate != nil }
+        #expect(repo.entries.count == 1)
+        #expect(repo.entries.first?.endDate != nil)
+        #expect(vm.todayEntries.first?.endDate != nil)
     }
 
     @Test("switching active baby detaches visible timer and keeps sessions scoped")

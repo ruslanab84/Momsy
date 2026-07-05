@@ -14,6 +14,8 @@ final class SleepViewModel: ObservableObject {
 
     private var activeSleepEntry: SleepEntry?
     private var activeSleepBabyId: UUID?
+    private var pendingStartEntryId: UUID?
+    private var pendingStartTask: Task<SleepEntry, Error>?
     private var timerTask: Task<Void, Never>?
     private var activeBabyCancellable: AnyCancellable?
     private var reloadTask: Task<Void, Never>?
@@ -57,6 +59,7 @@ final class SleepViewModel: ObservableObject {
 
     deinit {
         timerTask?.cancel()
+        pendingStartTask?.cancel()
         reloadTask?.cancel()
         activeBabyCancellable?.cancel()
     }
@@ -147,16 +150,28 @@ final class SleepViewModel: ObservableObject {
     }
 
     func start() {
+        guard !isSleepActive else { return }
         let babyId = currentBabyId
-        Task {
+        let entry = SleepEntry(startDate: Date())
+        reloadTask?.cancel()
+        saveError = nil
+        activateTimer(entry: entry, babyId: babyId)
+
+        let startTask = Task { @MainActor in
+            try await withBabyScope(babyId) {
+                try await startSleepUC.execute(entry)
+            }
+        }
+        pendingStartEntryId = entry.id
+        pendingStartTask = startTask
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
             do {
-                let entry = try await withBabyScope(babyId) {
-                    try await startSleepUC.execute()
-                }
-                guard isCurrentBaby(babyId) else { return }
-                activateTimer(entry: entry, babyId: babyId)
+                let saved = try await startTask.value
+                finishStartPersistence(saved, optimisticEntryId: entry.id, babyId: babyId)
             } catch {
-                saveError = error.localizedDescription
+                handleStartPersistenceFailure(error, optimisticEntryId: entry.id, babyId: babyId)
             }
         }
     }
@@ -186,6 +201,12 @@ final class SleepViewModel: ObservableObject {
     func stop() {
         guard isSleepActive, var entry = activeSleepEntry else { return }
         let babyId = activeSleepBabyId ?? currentBabyId
+        reloadTask?.cancel()
+        let startTask = pendingStartEntryId == entry.id ? pendingStartTask : nil
+        if pendingStartEntryId == entry.id {
+            pendingStartEntryId = nil
+            pendingStartTask = nil
+        }
         timerTask?.cancel()
         timerTask = nil
         entry.quality = selectedQuality
@@ -204,6 +225,7 @@ final class SleepViewModel: ObservableObject {
         WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds, babyId: babyId)
         Task {
             do {
+                _ = try await startTask?.value
                 let saved = try await stopSleepUC.execute(entry)
                 if let idx = todayEntries.firstIndex(where: { $0.id == saved.id }) {
                     todayEntries[idx] = saved
@@ -214,6 +236,43 @@ final class SleepViewModel: ObservableObject {
                 todayEntries.removeAll { $0.id == completed.id }
                 saveError = error.localizedDescription
             }
+        }
+    }
+
+    private func finishStartPersistence(_ saved: SleepEntry, optimisticEntryId: UUID, babyId: UUID?) {
+        let shouldRestoreVisibleTimer = pendingStartEntryId == optimisticEntryId && activeSleepEntry == nil
+        if pendingStartEntryId == optimisticEntryId {
+            pendingStartEntryId = nil
+            pendingStartTask = nil
+        }
+        guard isCurrentBaby(babyId) else { return }
+        if activeSleepEntry?.id == optimisticEntryId {
+            activeSleepEntry = saved
+            activeSleepBabyId = babyId
+            sleepSeconds = Int(Date().timeIntervalSince(saved.startDate))
+            WidgetDataStore.shared.setSleepActive(startDate: saved.startDate, babyId: babyId)
+        } else if shouldRestoreVisibleTimer {
+            activateTimer(entry: saved, babyId: babyId)
+        }
+    }
+
+    private func handleStartPersistenceFailure(_ error: Error, optimisticEntryId: UUID, babyId: UUID?) {
+        if pendingStartEntryId == optimisticEntryId {
+            pendingStartEntryId = nil
+            pendingStartTask = nil
+        }
+        guard activeSleepEntry?.id == optimisticEntryId else { return }
+        timerTask?.cancel()
+        timerTask = nil
+        activeSleepEntry = nil
+        activeSleepBabyId = nil
+        isSleepActive = false
+        sleepSeconds = 0
+        selectedQuality = .normal
+        liveActivity.endActivity()
+        WidgetDataStore.shared.clearSleep(lastDurationSeconds: 0, babyId: babyId)
+        if isCurrentBaby(babyId) {
+            saveError = error.localizedDescription
         }
     }
 
@@ -280,7 +339,7 @@ final class SleepViewModel: ObservableObject {
         if let entries = try? await withBabyScope(expectedBabyId, operation: {
             try await getSleepUC.executeOverlapping(from: start, to: end)
         }) {
-            guard isCurrentBaby(expectedBabyId) else { return }
+            guard isCurrentBaby(expectedBabyId), !Task.isCancelled else { return }
             todayEntries = entries.sorted { $0.startDate < $1.startDate }
         }
     }
