@@ -41,7 +41,7 @@ struct MeView: View {
             EditBabyProfileView(profile: appState.babyProfile ?? BabyProfile())
                 .environmentObject(lm)
                 .environmentObject(appState)
-                .environment(\.appContainer, container)
+                .withContainer(container)
         }
     }
 

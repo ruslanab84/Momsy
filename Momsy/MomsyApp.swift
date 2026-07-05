@@ -18,21 +18,20 @@ private enum JoinAlert: Identifiable {
     }
 }
 
+private enum AppStartupState {
+    case ready(AppRuntime)
+    case failed(AppPersistenceError)
+}
+
+private struct AppRuntime {
+    let container: AppContainer
+    let phoneSession: PhoneSessionManager
+}
+
 @main
 struct MomsyApp: App {
     @AppStorage("appTheme") private var appTheme = "system"
-    @AppStorage("onboardingDone") private var onboardingDone = false
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var joinAlert: JoinAlert?
-    @State private var showJoinAuthSheet = false
-    @State private var pendingAuthenticatedJoinCode: String?
-    @State private var pendingAuthenticatedJoinForce = false
-
-    private let container: AppContainer
-    private let localization = LocalizationManager.shared
-    private let unitSystem   = UnitSystemManager.shared
-    private let phoneSession: PhoneSessionManager
-    private var appState: AppState { container.appState }
+    @State private var startup: AppStartupState
 
     private var resolvedColorScheme: ColorScheme? {
         switch appTheme {
@@ -44,9 +43,47 @@ struct MomsyApp: App {
 
     init() {
         FirebaseBootstrapper.configureIfAvailable()
+        _startup = State(initialValue: Self.bootstrap())
+    }
 
-        let container = AppContainer()
-        self.container = container
+    var body: some Scene {
+        WindowGroup {
+            Group {
+                switch startup {
+                case .ready(let runtime):
+                    MomsyRootView(runtime: runtime)
+                case .failed(let error):
+                    PersistenceRecoveryView(error: error) {
+                        startup = Self.bootstrap()
+                    }
+                }
+            }
+            .environmentObject(LocalizationManager.shared)
+            .withLocalization(LocalizationManager.shared)
+            .preferredColorScheme(resolvedColorScheme)
+        }
+    }
+
+    @MainActor
+    private static func bootstrap() -> AppStartupState {
+        do {
+            let container = try AppContainer.makeProduction()
+            return .ready(AppRuntime(
+                container: container,
+                phoneSession: makePhoneSession(container: container)
+            ))
+        } catch let error as AppPersistenceError {
+            return .failed(error)
+        } catch {
+            return .failed(.freshStoreCreationFailed(
+                existingStoreError: error,
+                freshStoreError: error
+            ))
+        }
+    }
+
+    @MainActor
+    private static func makePhoneSession(container: AppContainer) -> PhoneSessionManager {
         let coordinator = QuickLogCoordinator(
             logFeeding:        container.logFeeding,
             startSleep:        container.startSleep,
@@ -57,83 +94,97 @@ struct MomsyApp: App {
             analytics:         container.analytics,
             pushNotifications: container.pushNotifications
         )
-        phoneSession = PhoneSessionManager(coordinator: coordinator, appState: container.appState)
+        return PhoneSessionManager(coordinator: coordinator, appState: container.appState)
     }
+}
 
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .withContainer(container)
-                .environmentObject(localization)
-                .environmentObject(unitSystem)
-                .environmentObject(appState)
-                .withLocalization(localization)
-                .preferredColorScheme(resolvedColorScheme)
-                .task {
-                    let deletionStillPending = await container.recoverPendingAccountDeletion()
-                    container.runMigrationIfNeeded()
-                    await appState.load()
-                    phoneSession.activate()
-                    guard !deletionStillPending else {
-                        await setupNotificationsOnLaunch(appState: appState)
-                        return
-                    }
-                    await container.authManager.signInAnonymouslyIfNeeded()
-                    await container.cloudSyncDownloader.downloadAndMergeWhenReady()
+private struct MomsyRootView: View {
+    @AppStorage("onboardingDone") private var onboardingDone = false
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var joinAlert: JoinAlert?
+    @State private var showJoinAuthSheet = false
+    @State private var pendingAuthenticatedJoinCode: String?
+    @State private var pendingAuthenticatedJoinForce = false
+
+    let runtime: AppRuntime
+
+    private var container: AppContainer { runtime.container }
+    private var phoneSession: PhoneSessionManager { runtime.phoneSession }
+    private let localization = LocalizationManager.shared
+    private let unitSystem = UnitSystemManager.shared
+    private var appState: AppState { container.appState }
+
+    var body: some View {
+        ContentView()
+            .withContainer(container)
+            .environmentObject(localization)
+            .environmentObject(unitSystem)
+            .environmentObject(appState)
+            .withLocalization(localization)
+            .task {
+                let deletionStillPending = await container.recoverPendingAccountDeletion()
+                container.runMigrationIfNeeded()
+                await appState.load()
+                phoneSession.activate()
+                guard !deletionStillPending else {
                     await setupNotificationsOnLaunch(appState: appState)
-                    await maybeGenerateWeeklyReport()
+                    return
                 }
-                .onOpenURL { url in
-#if canImport(GoogleSignIn)
-                    GIDSignIn.sharedInstance.handle(url)
-#endif
-                    guard let code = JoinDeeplink.code(from: url) else { return }
-                    guard onboardingDone else {
-                        PendingFamilyInviteStore().save(code)
-                        return
-                    }
-                    Task { @MainActor in
-                        await joinFamilyFromLink(code: code)
-                    }
-                }
-                .alert(item: $joinAlert) { alert in
-                    switch alert {
-                    case .success:
-                        return Alert(title: Text(localization.strings.joinSuccessTitle),
-                                     message: Text(localization.strings.joinSuccessMessage),
-                                     dismissButton: .default(Text(localization.strings.done)))
-                    case .failure:
-                        return Alert(title: Text(localization.strings.joinFailedTitle),
-                                     message: Text(localization.strings.joinFailedMessage),
-                                     dismissButton: .default(Text(localization.strings.done)))
-                    case .confirm(let code):
-                        return Alert(
-                            title: Text(localization.strings.joinReplaceTitle),
-                            message: Text(localization.strings.joinReplaceMessage),
-                            primaryButton: .destructive(Text(localization.strings.joinReplaceConfirm)) {
-                                Task { @MainActor in
-                                    await joinFamilyFromLink(code: code, force: true)
-                                }
-                            },
-                            secondaryButton: .cancel(Text(localization.strings.cancel))
-                        )
-                    }
-                }
-                .sheet(isPresented: $showJoinAuthSheet, onDismiss: {
-                    Task { @MainActor in
-                        await retryPendingAuthenticatedJoinIfPossible()
-                    }
-                }) {
-                    AccountAuthSheet(container: container, mode: .joinFamily)
-                }
-        }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active {
-                WidgetCenter.shared.reloadAllTimelines()
-                Task { await container.cloudSyncDownloader.resyncAll() }
-                Task { await maybeGenerateWeeklyReport() }
+                await container.authManager.signInAnonymouslyIfNeeded()
+                await container.cloudSyncDownloader.downloadAndMergeWhenReady()
+                await setupNotificationsOnLaunch(appState: appState)
+                await maybeGenerateWeeklyReport()
             }
-        }
+            .onOpenURL { url in
+#if canImport(GoogleSignIn)
+                GIDSignIn.sharedInstance.handle(url)
+#endif
+                guard let code = JoinDeeplink.code(from: url) else { return }
+                guard onboardingDone else {
+                    PendingFamilyInviteStore().save(code)
+                    return
+                }
+                Task { @MainActor in
+                    await joinFamilyFromLink(code: code)
+                }
+            }
+            .alert(item: $joinAlert) { alert in
+                switch alert {
+                case .success:
+                    return Alert(title: Text(localization.strings.joinSuccessTitle),
+                                 message: Text(localization.strings.joinSuccessMessage),
+                                 dismissButton: .default(Text(localization.strings.done)))
+                case .failure:
+                    return Alert(title: Text(localization.strings.joinFailedTitle),
+                                 message: Text(localization.strings.joinFailedMessage),
+                                 dismissButton: .default(Text(localization.strings.done)))
+                case .confirm(let code):
+                    return Alert(
+                        title: Text(localization.strings.joinReplaceTitle),
+                        message: Text(localization.strings.joinReplaceMessage),
+                        primaryButton: .destructive(Text(localization.strings.joinReplaceConfirm)) {
+                            Task { @MainActor in
+                                await joinFamilyFromLink(code: code, force: true)
+                            }
+                        },
+                        secondaryButton: .cancel(Text(localization.strings.cancel))
+                    )
+                }
+            }
+            .sheet(isPresented: $showJoinAuthSheet, onDismiss: {
+                Task { @MainActor in
+                    await retryPendingAuthenticatedJoinIfPossible()
+                }
+            }) {
+                AccountAuthSheet(container: container, mode: .joinFamily)
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    WidgetCenter.shared.reloadAllTimelines()
+                    Task { await container.cloudSyncDownloader.resyncAll() }
+                    Task { await maybeGenerateWeeklyReport() }
+                }
+            }
     }
 
     /// Generates the weekly AI report for the last completed week (Premium only).

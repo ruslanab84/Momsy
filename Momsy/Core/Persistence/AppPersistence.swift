@@ -3,6 +3,8 @@ import SwiftData
 import os
 
 enum AppPersistence {
+    typealias ContainerFactory = @MainActor (Schema, ModelConfiguration) throws -> ModelContainer
+
     // Informational only — recorded after a successful open so we can tell, in
     // diagnostics, which schema last wrote the store. It no longer gates a wipe;
     // migration is attempted in place to preserve user data.
@@ -13,8 +15,51 @@ enum AppPersistence {
     private static let storeName = "default.store"
     private static let storeSuffixes = ["", "-shm", "-wal"]
 
-    static func makeContainer() -> ModelContainer {
-        let schema = Schema([
+    @MainActor
+    static func makeContainer(
+        defaults: UserDefaults = .standard,
+        fileManager: FileManager = .default,
+        storeURL: URL? = Self.storeURL,
+        containerFactory: ContainerFactory = Self.makeModelContainer
+    ) throws -> ModelContainer {
+        let schema = makeSchema()
+        let localConfig = ModelConfiguration(schema: schema)
+
+        do {
+            let container = try containerFactory(schema, localConfig)
+            recordSuccess(defaults: defaults)
+            return container
+        } catch {
+            let existingStoreError = error
+            log.error("Failed to open existing SwiftData store: \(existingStoreError.localizedDescription, privacy: .public)")
+            log.error("Store incompatible with current schema; backing up and recreating.")
+            backupStore(at: storeURL, fileManager: fileManager)
+            deleteStore(at: storeURL, fileManager: fileManager)
+            defaults.removeObject(forKey: schemaVersionKey)
+
+            do {
+                let container = try containerFactory(schema, localConfig)
+                recordSuccess(defaults: defaults)
+                return container
+            } catch {
+                log.fault("Fresh SwiftData store creation failed: \(error.localizedDescription, privacy: .public)")
+                throw AppPersistenceError.freshStoreCreationFailed(
+                    existingStoreError: existingStoreError,
+                    freshStoreError: error
+                )
+            }
+        }
+    }
+
+    @MainActor
+    static func makeInMemoryContainer() throws -> ModelContainer {
+        let schema = makeSchema()
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        return try makeModelContainer(schema: schema, configuration: config)
+    }
+
+    private static func makeSchema() -> Schema {
+        Schema([
             SleepRecord.self,
             FeedingRecord.self,
             WalkRecord.self,
@@ -35,37 +80,18 @@ enum AppPersistence {
             PumpingRecord.self,
             WeeklyInsightRecord.self,
         ])
-
-        // Local-only SwiftData store. Cross-device sync is handled entirely by
-        // Firebase/Firestore (write-on-save + launch download + offline cache);
-        // SwiftData is purely the on-device cache now that CloudKit is removed.
-        let localConfig = ModelConfiguration(schema: schema)
-
-        // 1. Open the existing store, letting SwiftData run an automatic
-        //    lightweight migration in place. This preserves all local data.
-        if let container = try? ModelContainer(for: schema, configurations: localConfig) {
-            recordSuccess()
-            return container
-        }
-
-        // 2. Last resort: the on-disk store is genuinely incompatible with the
-        //    current schema and SwiftData cannot migrate it. Move it aside (do not
-        //    destroy it) so it stays recoverable, then create a fresh store.
-        log.error("Store incompatible with current schema; backing up and recreating.")
-        backupStore()
-        deleteStore()
-        UserDefaults.standard.removeObject(forKey: schemaVersionKey)
-
-        if let container = try? ModelContainer(for: schema, configurations: localConfig) {
-            recordSuccess()
-            return container
-        }
-
-        fatalError("SwiftData container failed even with a fresh store.")
     }
 
-    private static func recordSuccess() {
-        UserDefaults.standard.set(schemaVersion, forKey: schemaVersionKey)
+    @MainActor
+    private static func makeModelContainer(
+        schema: Schema,
+        configuration: ModelConfiguration
+    ) throws -> ModelContainer {
+        try ModelContainer(for: schema, configurations: configuration)
+    }
+
+    private static func recordSuccess(defaults: UserDefaults) {
+        defaults.set(schemaVersion, forKey: schemaVersionKey)
     }
 
     private static var storeURL: URL? {
@@ -78,27 +104,55 @@ enum AppPersistence {
     /// Copies the current store aside before a destructive recreate, so a failed
     /// migration is recoverable rather than permanent data loss. Keeps only the
     /// most recent backup to avoid unbounded disk growth.
-    private static func backupStore() {
-        guard let store = storeURL else { return }
+    private static func backupStore(at store: URL?, fileManager: FileManager) {
+        guard let store else { return }
         let backupBase = URL(fileURLWithPath: store.path + ".backup")
         for suffix in storeSuffixes {
             let src = URL(fileURLWithPath: store.path + suffix)
             let dst = URL(fileURLWithPath: backupBase.path + suffix)
-            guard FileManager.default.fileExists(atPath: src.path) else { continue }
-            try? FileManager.default.removeItem(at: dst)
+            guard fileManager.fileExists(atPath: src.path) else { continue }
+            try? fileManager.removeItem(at: dst)
             do {
-                try FileManager.default.copyItem(at: src, to: dst)
+                try fileManager.copyItem(at: src, to: dst)
             } catch {
                 log.error("Store backup failed for \(src.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
     }
 
-    private static func deleteStore() {
-        guard let store = storeURL else { return }
+    private static func deleteStore(at store: URL?, fileManager: FileManager) {
+        guard let store else { return }
         for suffix in storeSuffixes {
             let url = URL(fileURLWithPath: store.path + suffix)
-            try? FileManager.default.removeItem(at: url)
+            try? fileManager.removeItem(at: url)
+        }
+    }
+}
+
+enum AppPersistenceError: LocalizedError {
+    case freshStoreCreationFailed(existingStoreError: Error, freshStoreError: Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .freshStoreCreationFailed:
+            "Momsy couldn't open its local data store."
+        }
+    }
+
+    var recoverySuggestion: String? {
+        switch self {
+        case .freshStoreCreationFailed:
+            "Free up device storage if needed, then try again. Your previous store was backed up before Momsy attempted to create a fresh one."
+        }
+    }
+
+    var technicalDetails: String {
+        switch self {
+        case let .freshStoreCreationFailed(existingStoreError, freshStoreError):
+            return """
+            Existing store: \(existingStoreError.localizedDescription)
+            Fresh store: \(freshStoreError.localizedDescription)
+            """
         }
     }
 }

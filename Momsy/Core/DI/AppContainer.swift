@@ -5,15 +5,9 @@ import SwiftData
 @MainActor
 final class AppContainer {
 
-    /// Fallback used only to satisfy the environment default. Real views receive
-    /// the instance injected at the view-tree root via `withContainer(_:)`; this is
-    /// lazily built (Swift `static let`) so its ModelContainer is created only if the
-    /// default is ever actually read.
-    static let shared = AppContainer()
-
     // MARK: — Persistence
 
-    let modelContainer: ModelContainer = AppPersistence.makeContainer()
+    let modelContainer: ModelContainer
     private lazy var context: ModelContext = ModelContext(modelContainer)
 
     // MARK: — Repositories
@@ -95,7 +89,22 @@ final class AppContainer {
 
     private var familyJoinObserver: NSObjectProtocol?
 
-    init() { observeFamilyJoin() }
+    convenience init() {
+        do {
+            try self.init(modelContainer: AppPersistence.makeInMemoryContainer())
+        } catch {
+            preconditionFailure("Failed to build in-memory AppContainer: \(error.localizedDescription)")
+        }
+    }
+
+    static func makeProduction() throws -> AppContainer {
+        try AppContainer(modelContainer: AppPersistence.makeContainer())
+    }
+
+    init(modelContainer: ModelContainer) {
+        self.modelContainer = modelContainer
+        observeFamilyJoin()
+    }
 
     /// After a join, drop the active-baby pointer so the downloader adopts the joined
     /// family's roster, then re-pull everything. When the join SWITCHED families, wipe
@@ -578,26 +587,27 @@ final class AppContainer {
 // MARK: — Environment
 
 private struct AppContainerKey: EnvironmentKey {
-    // SwiftUI may evaluate this default while seeding/diffing the environment even
-    // though withContainer(_:) injects the real instance at the root, so it must not
-    // crash. `defaultValue` is a nonisolated requirement while AppContainer is
-    // @MainActor; environment reads happen on the main thread, so assumeIsolated is
-    // safe here. Returns the shared fallback rather than a fresh instance to avoid
-    // building a second ModelContainer per access.
-    nonisolated static var defaultValue: AppContainer {
-        MainActor.assumeIsolated { AppContainer.shared }
-    }
+    static let defaultValue: AppContainer? = nil
 }
 
 extension EnvironmentValues {
-    var appContainer: AppContainer {
+    fileprivate var injectedAppContainer: AppContainer? {
         get { self[AppContainerKey.self] }
         set { self[AppContainerKey.self] = newValue }
+    }
+
+    var appContainer: AppContainer {
+        get {
+            guard let container = injectedAppContainer else {
+                preconditionFailure("AppContainer is missing. Inject one at the root with .withContainer(_:).")
+            }
+            return container
+        }
     }
 }
 
 extension View {
     func withContainer(_ container: AppContainer) -> some View {
-        environment(\.appContainer, container)
+        environment(\.injectedAppContainer, container)
     }
 }

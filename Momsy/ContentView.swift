@@ -45,7 +45,14 @@ struct ContentView: View {
 }
 
 #Preview {
+    let container = AppContainer()
+
     ContentView()
+        .withContainer(container)
+        .environmentObject(LocalizationManager.shared)
+        .environmentObject(UnitSystemManager.shared)
+        .environmentObject(container.appState)
+        .withLocalization(LocalizationManager.shared)
 }
 
 private enum PaywallPresentationState {

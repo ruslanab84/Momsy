@@ -34,6 +34,39 @@ struct L10n {
     var gender: String      { s("Gender",        "Пол",          "Geschlecht",   "Sexo",         "Sexe",         "Sexo", "性别") }
     var genderUnspecified: String { s("Unspecified", "Не указан", "Nicht angegeben", "Sin especificar", "Non précisé", "Não especificado", "未指定") }
     var couldntComplete: String { s("Couldn’t complete", "Не удалось", "Konnte nicht abgeschlossen werden", "No se pudo completar", "Impossible de terminer", "Não foi possível concluir", "无法完成") }
+    var persistenceRecoveryTitle: String {
+        s("Local data couldn't be opened",
+          "Не удалось открыть локальные данные",
+          "Lokale Daten konnten nicht geöffnet werden",
+          "No se pudieron abrir los datos locales",
+          "Impossible d’ouvrir les données locales",
+          "Não foi possível abrir os dados locais",
+          "无法打开本地数据")
+    }
+    var persistenceRecoveryMessage: String {
+        s("Momsy couldn't start its on-device database. The app did not crash, and your previous store was backed up before a fresh store was attempted.",
+          "Momsy не смогла запустить базу данных на устройстве. Приложение не закрылось аварийно, а предыдущая store была сохранена в backup перед попыткой создать новую.",
+          "Momsy konnte die Datenbank auf diesem Gerät nicht starten. Die App ist nicht abgestürzt; der vorherige Store wurde gesichert, bevor ein neuer Store versucht wurde.",
+          "Momsy no pudo iniciar la base de datos del dispositivo. La app no se cerró inesperadamente; la base anterior se respaldó antes de intentar crear una nueva.",
+          "Momsy n’a pas pu démarrer la base de données de l’appareil. L’app ne s’est pas fermée brutalement; l’ancien store a été sauvegardé avant la tentative de création d’un nouveau store.",
+          "A Momsy não conseguiu iniciar a base de dados no dispositivo. A app não encerrou de forma inesperada; a store anterior foi guardada antes de tentar criar uma nova.",
+          "Momsy 无法启动设备上的数据库。应用没有崩溃；在尝试创建新 store 前，旧 store 已备份。")
+    }
+    var persistenceRecoverySuggestion: String {
+        s("Free up device storage if needed, then try again. If this keeps happening, send the technical details to support.",
+          "Если нужно, освободите место на устройстве и попробуйте снова. Если ошибка повторяется, отправьте технические детали в поддержку.",
+          "Gib bei Bedarf Speicherplatz frei und versuche es erneut. Wenn das Problem weiter besteht, sende die technischen Details an den Support.",
+          "Libera espacio en el dispositivo si hace falta y vuelve a intentarlo. Si sigue ocurriendo, envía los detalles técnicos a soporte.",
+          "Libérez de l’espace sur l’appareil si nécessaire, puis réessayez. Si le problème persiste, envoyez les détails techniques au support.",
+          "Liberte espaço no dispositivo, se necessário, e tente novamente. Se continuar a acontecer, envie os detalhes técnicos para o suporte.",
+          "如有需要，请释放设备存储空间后重试。如果问题持续发生，请将技术详情发送给支持团队。")
+    }
+    var persistenceRecoveryRetry: String {
+        s("Try Again", "Попробовать снова", "Erneut versuchen", "Intentarlo de nuevo", "Réessayer", "Tentar novamente", "重试")
+    }
+    var persistenceRecoveryDetails: String {
+        s("Technical Details", "Технические детали", "Technische Details", "Detalles técnicos", "Détails techniques", "Detalhes técnicos", "技术详情")
+    }
 
     // MARK: — Weekly Insights (AI weekly report)
     var weeklyInsightTitle: String {
