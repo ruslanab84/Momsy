@@ -2,10 +2,68 @@ import SwiftUI
 import Combine
 import UIKit
 
+enum ReportPeriod: Int, CaseIterable, Identifiable {
+    case threeDays
+    case week
+    case twoWeeks
+    case month
+    case sinceVisit
+
+    var id: Self { self }
+
+    var dayCount: Int {
+        switch self {
+        case .threeDays:
+            return 3
+        case .week:
+            return 7
+        case .twoWeeks:
+            return 14
+        case .month, .sinceVisit:
+            return 30
+        }
+    }
+}
+
+struct ReportPeriodOption: Identifiable, Equatable {
+    let period: ReportPeriod
+    let title: String
+
+    var id: ReportPeriod { period }
+}
+
+enum ReportSection: Int, CaseIterable, Identifiable {
+    case feedings
+    case sleepByDay
+    case diapers
+    case temperatureSymptoms
+    case weightHeight
+    case medicine
+    case photosNotes
+
+    var id: Self { self }
+
+    static let defaultIncluded: Set<ReportSection> = [
+        .feedings,
+        .sleepByDay,
+        .diapers,
+        .temperatureSymptoms,
+        .weightHeight,
+    ]
+}
+
+struct ReportSectionRow: Identifiable, Equatable {
+    let section: ReportSection
+    let label: String
+    let isIncluded: Bool
+
+    var id: ReportSection { section }
+}
+
 @MainActor
 final class ReportViewModel: ObservableObject {
-    @Published var selectedPeriod = 1
-    @Published var isOnStates: [Bool] = [true, true, true, true, true, false, false]
+    @Published var selectedPeriod: ReportPeriod = .week
+    @Published private var includedSections: Set<ReportSection> = ReportSection.defaultIncluded
     @Published var isGenerating = false
     @Published var shareURL: URL? = nil
     @Published var showShare = false
@@ -49,37 +107,84 @@ final class ReportViewModel: ObservableObject {
 
     var displayName: String { appState.displayName }
 
-    var periods: [String] {
-        [lm.strings.reportPeriod3Days, lm.strings.reportPeriodWeek,
-         lm.strings.reportPeriod2Weeks, lm.strings.reportPeriodMonth,
-         lm.strings.reportPeriodSinceVisit]
+    var periodOptions: [ReportPeriodOption] {
+        ReportPeriod.allCases.map { ReportPeriodOption(period: $0, title: title(for: $0)) }
+    }
+
+    var selectedPeriodTitle: String {
+        title(for: selectedPeriod)
     }
 
     var periodLabel: String {
-        [lm.strings.reportPeriod3Days, lm.strings.reportPeriodLabelWeek,
-         lm.strings.reportPeriod2Weeks, lm.strings.reportPeriodLabelMonth,
-         lm.strings.reportPeriodLabelLastVisit][selectedPeriod]
+        switch selectedPeriod {
+        case .threeDays:
+            return lm.strings.reportPeriod3Days
+        case .week:
+            return lm.strings.reportPeriodLabelWeek
+        case .twoWeeks:
+            return lm.strings.reportPeriod2Weeks
+        case .month:
+            return lm.strings.reportPeriodLabelMonth
+        case .sinceVisit:
+            return lm.strings.reportPeriodLabelLastVisit
+        }
     }
 
-    var sectionLabels: [String] {
-        [
-            lm.strings.reportSectionFeedings,
-            lm.strings.reportSectionSleepByDay,
-            lm.strings.reportSectionDiapers,
-            lm.strings.reportSectionTempSymptoms,
-            lm.strings.reportSectionWeightHeight,
-            lm.strings.reportSectionMedicine,
-            lm.strings.reportSectionPhotosNotes,
-        ]
+    var reportSectionRows: [ReportSectionRow] {
+        ReportSection.allCases.map {
+            ReportSectionRow(section: $0, label: label(for: $0), isIncluded: includedSections.contains($0))
+        }
+    }
+
+    func isSectionIncluded(_ section: ReportSection) -> Bool {
+        includedSections.contains(section)
+    }
+
+    func setSection(_ section: ReportSection, isIncluded: Bool) {
+        var updated = includedSections
+        if isIncluded {
+            updated.insert(section)
+        } else {
+            updated.remove(section)
+        }
+        includedSections = updated
     }
 
     private var periodDays: Int {
-        switch selectedPeriod {
-        case 0: return 3
-        case 1: return 7
-        case 2: return 14
-        case 3: return 30
-        default: return 30
+        selectedPeriod.dayCount
+    }
+
+    private func title(for period: ReportPeriod) -> String {
+        switch period {
+        case .threeDays:
+            return lm.strings.reportPeriod3Days
+        case .week:
+            return lm.strings.reportPeriodWeek
+        case .twoWeeks:
+            return lm.strings.reportPeriod2Weeks
+        case .month:
+            return lm.strings.reportPeriodMonth
+        case .sinceVisit:
+            return lm.strings.reportPeriodSinceVisit
+        }
+    }
+
+    private func label(for section: ReportSection) -> String {
+        switch section {
+        case .feedings:
+            return lm.strings.reportSectionFeedings
+        case .sleepByDay:
+            return lm.strings.reportSectionSleepByDay
+        case .diapers:
+            return lm.strings.reportSectionDiapers
+        case .temperatureSymptoms:
+            return lm.strings.reportSectionTempSymptoms
+        case .weightHeight:
+            return lm.strings.reportSectionWeightHeight
+        case .medicine:
+            return lm.strings.reportSectionMedicine
+        case .photosNotes:
+            return lm.strings.reportSectionPhotosNotes
         }
     }
 
@@ -105,7 +210,7 @@ final class ReportViewModel: ObservableObject {
     // MARK: - Data loading
 
     func loadData() async {
-        if selectedPeriod == 4 {
+        if selectedPeriod == .sinceVisit {
             lastVisitDate = (try? await doctorVisitRepo.getLast())?.date
         }
 
@@ -114,7 +219,7 @@ final class ReportViewModel: ObservableObject {
         let to = cal.date(byAdding: .day, value: 1, to: todayStart) ?? Date()
         let from: Date
         let days: Int
-        if selectedPeriod == 4, let visitDate = lastVisitDate {
+        if selectedPeriod == .sinceVisit, let visitDate = lastVisitDate {
             from = cal.startOfDay(for: visitDate)
             days = max(1, cal.dateComponents([.day], from: from, to: todayStart).day ?? 30) + 1
         } else {
@@ -293,12 +398,12 @@ final class ReportViewModel: ObservableObject {
         await loadData()
         guard let url = generateReport.execute(
             babyName: displayName,
-            periodLabel: periods[selectedPeriod],
+            periodLabel: selectedPeriodTitle,
             stats: currentStats,
             sparklines: currentSparklines,
             lang: lm.lang
         ) else { return }
-        analytics.track(.reportGenerated(period: periods[selectedPeriod]))
+        analytics.track(.reportGenerated(period: selectedPeriodTitle))
         shareURL = url
         showShare = true
     }
@@ -310,7 +415,7 @@ final class ReportViewModel: ObservableObject {
         await loadData()
         guard let url = generateReport.execute(
             babyName: displayName,
-            periodLabel: periods[selectedPeriod],
+            periodLabel: selectedPeriodTitle,
             stats: currentStats,
             sparklines: currentSparklines,
             lang: lm.lang

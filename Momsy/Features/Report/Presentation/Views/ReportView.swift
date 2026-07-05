@@ -16,7 +16,7 @@ struct ReportView: View {
             VStack(spacing: 12) {
                 header
                 periodChips
-                if vm.selectedPeriod == 4 {
+                if vm.selectedPeriod == .sinceVisit {
                     visitDateCard
                 }
                 pdfPreviewCard
@@ -31,7 +31,7 @@ struct ReportView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .task { await vm.loadData() }
-        .onChange(of: vm.selectedPeriod) { _ in Task { await vm.loadData() } }
+        .onChange(of: vm.selectedPeriod) { _, _ in Task { await vm.loadData() } }
         .sheet(isPresented: $vm.showShare) {
             if let url = vm.shareURL {
                 ActivityView(items: [url])
@@ -66,18 +66,18 @@ struct ReportView: View {
     private var periodChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(vm.periods.indices, id: \.self) { i in
+                ForEach(vm.periodOptions) { option in
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            vm.selectedPeriod = i
+                            vm.selectedPeriod = option.period
                         }
                     } label: {
-                        Text(vm.periods[i])
+                        Text(option.title)
                             .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(vm.selectedPeriod == i ? .white : .bbInk)
+                            .foregroundColor(vm.selectedPeriod == option.period ? .white : .bbInk)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-                            .background(vm.selectedPeriod == i ? Color.bbSurface : Color.bbCard)
+                            .background(vm.selectedPeriod == option.period ? Color.bbSurface : Color.bbCard)
                             .clipShape(Capsule())
                             .bbShadowSoft()
                     }
@@ -136,7 +136,7 @@ struct ReportView: View {
     private var pdfPreviewCard: some View {
         ReportPreviewContent(
             babyName: vm.displayName,
-            periodLabel: vm.periods[vm.selectedPeriod],
+            periodLabel: vm.selectedPeriodTitle,
             stats: vm.currentStats,
             sparklines: vm.currentSparklines,
             lang: loc.lang
@@ -158,18 +158,24 @@ struct ReportView: View {
                 .kerning(0.5)
                 .padding(.bottom, 8)
 
-            ForEach(vm.isOnStates.indices, id: \.self) { i in
+            ForEach(Array(vm.reportSectionRows.enumerated()), id: \.element.id) { index, row in
                 HStack {
-                    Text(vm.sectionLabels[i])
+                    Text(row.label)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundColor(.bbInk)
                     Spacer()
-                    Toggle("", isOn: $vm.isOnStates[i])
+                    Toggle(
+                        "",
+                        isOn: Binding(
+                            get: { vm.isSectionIncluded(row.section) },
+                            set: { vm.setSection(row.section, isIncluded: $0) }
+                        )
+                    )
                         .tint(.bbMintDeep)
                         .labelsHidden()
                 }
                 .padding(.vertical, 8)
-                if i < vm.isOnStates.count - 1 {
+                if index < vm.reportSectionRows.count - 1 {
                     Divider().opacity(0.4)
                 }
             }
