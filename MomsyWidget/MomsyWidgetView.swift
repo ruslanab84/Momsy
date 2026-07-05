@@ -78,19 +78,35 @@ private let bbLilac   = Color(red: 0.624, green: 0.510, blue: 0.847)
 private let bbInk     = Color(red: 0.239, green: 0.165, blue: 0.125)
 private let bbInkSoft = Color(red: 0.420, green: 0.329, blue: 0.275)
 
+private enum WidgetLocalizationDefaults {
+    static let appLanguageKey = "appLanguage"
+    static let appGroupSuiteName = "group.RuslanAbd.Momsy"
+
+    static var selectedLanguageCode: String? {
+        UserDefaults(suiteName: appGroupSuiteName)?.string(forKey: appLanguageKey)
+            ?? UserDefaults.standard.string(forKey: appLanguageKey)
+    }
+}
+
 struct WidgetL10n {
     static var current: WidgetL10n {
-        let code = Locale.preferredLanguages.first ?? "en"
-        if code.hasPrefix("ru") { return WidgetL10n(lang: "ru") }
-        if code.hasPrefix("de") { return WidgetL10n(lang: "de") }
-        if code.hasPrefix("es") { return WidgetL10n(lang: "es") }
-        if code.hasPrefix("fr") { return WidgetL10n(lang: "fr") }
-        if code.hasPrefix("pt") { return WidgetL10n(lang: "pt") }
-        if code.hasPrefix("zh") { return WidgetL10n(lang: "zh") }
-        return WidgetL10n(lang: "en")
+        let code = WidgetLocalizationDefaults.selectedLanguageCode
+            ?? Locale.preferredLanguages.first
+            ?? "en"
+        return WidgetL10n(lang: normalizedLanguageCode(from: code))
     }
 
     let lang: String
+
+    private static func normalizedLanguageCode(from code: String) -> String {
+        let languageCode = code.split(separator: "-").first.map(String.init) ?? code
+        switch languageCode {
+        case "ru", "de", "es", "fr", "pt", "zh":
+            return languageCode
+        default:
+            return "en"
+        }
+    }
 
     private func t(_ en: String, _ ru: String, _ de: String, _ es: String, _ fr: String, _ pt: String, _ zh: String) -> String {
         switch lang {
