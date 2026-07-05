@@ -3,17 +3,15 @@ rules_version = '2';
 // Firestore security rules for Momsy.
 //
 // Data model:
-//   users/{uid}                                   -> per-user doc, carries familyId
+//   users/{uid}                                   -> per-user routing/cache doc
 //   families/{familyId}                           -> family doc (createdBy)
 //   families/{familyId}/members/{uid}             -> member roster
 //   families/{familyId}/babies/{babyId}/**        -> baby profile + per-baby log tree (current)
 //   invites/{code}                                -> short-lived join codes (familyId)
 //   babies/{familyId}/**                          -> LEGACY family-keyed log tree (pre-migration)
 //
-// Membership is derived from the caller's own users/{uid}.familyId field so a member can
-// be authorised without first reading the members subcollection. The family creator is
-// authorised separately for the brief window during family setup when the members doc is
-// written before users/{uid}.familyId has been committed (see FamilyManager.setup).
+// Access is authorised by families/{familyId}/members/{uid}. users/{uid}.familyId is
+// only a routing/cache field and must never grant family access by itself.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -22,29 +20,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function hasUserDoc() {
-      return isSignedIn()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-
-    function callerFamilyId() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.familyId;
-    }
-
     function isFamilyMember(familyId) {
-      return hasUserDoc() && callerFamilyId() == familyId;
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
     }
 
-    // True during family setup: the caller created families/{familyId} (createdBy == uid)
-    // but has not yet written users/{uid}.familyId.
+    // True only during initial family setup before the creator has written their
+    // own member doc and the app marks bootstrapComplete.
     function isFamilyCreator(familyId) {
       return isSignedIn()
         && exists(/databases/$(database)/documents/families/$(familyId))
-        && get(/databases/$(database)/documents/families/$(familyId)).data.createdBy == request.auth.uid;
+        && get(/databases/$(database)/documents/families/$(familyId)).data.createdBy == request.auth.uid
+        && get(/databases/$(database)/documents/families/$(familyId)).data.bootstrapComplete == false;
     }
 
     function belongsToFamily(familyId) {
-      return isFamilyMember(familyId) || isFamilyCreator(familyId);
+      return isFamilyMember(familyId);
     }
 
     function hasCallerMemberDoc(familyId) {
@@ -70,20 +61,75 @@ service cloud.firestore {
         ];
     }
 
-    function isSelfMemberWrite(familyId, memberId) {
+    function hasInviteCode() {
+      return 'inviteCode' in request.resource.data
+        && request.resource.data.inviteCode is string;
+    }
+
+    function inviteMatchesFamily(familyId) {
+      return hasInviteCode()
+        && exists(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode))
+        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.familyId == familyId
+        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt > request.time;
+    }
+
+    function memberRoleMatchesInvite() {
+      return (
+          'roleRaw' in get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data
+          && request.resource.data.roleRaw == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.roleRaw
+        )
+        || (
+          !('roleRaw' in get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data)
+          && request.resource.data.roleRaw == 'Папа'
+        );
+    }
+
+    function isSelfInviteJoin(familyId, memberId) {
       return isSignedIn()
         && memberId == request.auth.uid
-        && (isFamilyMember(familyId) || isFamilyCreator(familyId));
+        && request.resource.data.uid == request.auth.uid
+        && inviteMatchesFamily(familyId)
+        && memberRoleMatchesInvite();
+    }
+
+    function isSelfCreatorBootstrap(familyId, memberId) {
+      return isSignedIn()
+        && memberId == request.auth.uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.roleRaw == 'Мама'
+        && isFamilyCreator(familyId);
     }
 
     function memberRoleUnchanged() {
-      return !('roleRaw' in resource.data)
+      return !('roleRaw' in request.resource.data)
         || request.resource.data.roleRaw == resource.data.roleRaw;
     }
 
-    // Each user owns only their own doc.
+    function requestedUserFamilyIdIsAuthorized() {
+      return !('familyId' in request.resource.data)
+        || (
+          request.resource.data.familyId is string
+          && (isFamilyMember(request.resource.data.familyId) || isFamilyCreator(request.resource.data.familyId))
+        );
+    }
+
+    function userFamilyIdUnchanged() {
+      return 'familyId' in resource.data
+        && 'familyId' in request.resource.data
+        && request.resource.data.familyId == resource.data.familyId;
+    }
+
+    // Each user owns only their own doc. familyId may only point at a family the
+    // caller is already authorised for via roster membership or creator bootstrap.
     match /users/{uid} {
-      allow read, write: if isSignedIn() && request.auth.uid == uid;
+      allow read:   if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn()
+                    && request.auth.uid == uid
+                    && requestedUserFamilyIdIsAuthorized();
+      allow update: if isSignedIn()
+                    && request.auth.uid == uid
+                    && (userFamilyIdUnchanged() || requestedUserFamilyIdIsAuthorized());
+      allow delete: if isSignedIn() && request.auth.uid == uid;
     }
 
     // A signed-in user may look up ONE invite by its exact code to discover the
@@ -101,17 +147,24 @@ service cloud.firestore {
 
     match /families/{familyId} {
       allow read:          if belongsToFamily(familyId);
-      allow create:        if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow create:        if isSignedIn()
+                           && request.resource.data.createdBy == request.auth.uid
+                           && request.resource.data.bootstrapComplete == false;
       allow update, delete: if belongsToFamily(familyId);
 
-      // Members roster. A joining member may write their own membership doc; the family
-      // creator may write during setup; Mom/Dad members may manage the roster.
+      // Members roster. A joining member may create their own membership doc only
+      // with a valid, unexpired invite code for this family; the family creator may
+      // write their own doc during setup; Mom/Dad members may manage the roster.
       match /members/{memberId} {
         allow read:   if belongsToFamily(familyId);
         allow create: if canManageFamilyRoster(familyId)
-                      || isSelfMemberWrite(familyId, memberId);
+                      || isSelfCreatorBootstrap(familyId, memberId)
+                      || isSelfInviteJoin(familyId, memberId);
         allow update: if canManageFamilyRoster(familyId)
-                      || (isSelfMemberWrite(familyId, memberId) && memberRoleUnchanged());
+                      || (isSignedIn()
+                          && memberId == request.auth.uid
+                          && isFamilyMember(familyId)
+                          && memberRoleUnchanged());
         allow delete: if canManageFamilyRoster(familyId)
                       || (isSignedIn() && memberId == request.auth.uid);
       }

@@ -112,8 +112,11 @@ final class FamilyManager: ObservableObject {
                 familyId: newId,
                 uid: uid,
                 displayName: displayName,
-                defaultRoleRaw: FamilyRole.mom.rawValue
+                defaultRoleRaw: FamilyRole.mom.rawValue,
+                bootstrapCreator: true
             )
+            try await db.collection("families").document(newId)
+                .updateData(["bootstrapComplete": true])
             try await userRef.setData(
                 ["familyId": newId, "displayName": displayName],
                 merge: true
@@ -129,7 +132,11 @@ final class FamilyManager: ObservableObject {
     @discardableResult
     func createFamily(for uid: String) async throws -> String {
         let ref = db.collection("families").document()
-        try await ref.setData(["createdAt": Timestamp(date: Date()), "createdBy": uid])
+        try await ref.setData([
+            "createdAt": Timestamp(date: Date()),
+            "createdBy": uid,
+            "bootstrapComplete": false
+        ])
         return ref.documentID
     }
 
@@ -175,8 +182,15 @@ final class FamilyManager: ObservableObject {
         // carry the id of the family being left.
         let previousFamilyId = familyId
 
-        // Detach from the previous roster BEFORE repointing users/{uid}.familyId,
-        // otherwise the rules no longer authorise deleting the old membership doc.
+        let displayName = Auth.auth().currentUser?.displayName ?? Auth.auth().currentUser?.email ?? "User"
+        try await ensureMemberDocument(
+            familyId: targetFamilyId,
+            uid: uid,
+            displayName: displayName,
+            defaultRoleRaw: inviteRoleRaw ?? FamilyRole.dad.rawValue,
+            inviteCode: trimmed
+        )
+
         if let previous = familyId, previous != targetFamilyId {
             try? await db.collection("families").document(previous)
                 .collection("members").document(uid).delete()
@@ -184,14 +198,6 @@ final class FamilyManager: ObservableObject {
 
         try await db.collection("users").document(uid)
             .setData(["familyId": targetFamilyId], merge: true)
-
-        let displayName = Auth.auth().currentUser?.displayName ?? Auth.auth().currentUser?.email ?? "User"
-        try await ensureMemberDocument(
-            familyId: targetFamilyId,
-            uid: uid,
-            displayName: displayName,
-            defaultRoleRaw: inviteRoleRaw ?? FamilyRole.dad.rawValue
-        )
 
         persist(familyId: targetFamilyId, ownerUid: uid)
         isReady = true
@@ -220,10 +226,10 @@ final class FamilyManager: ObservableObject {
     func leaveFamily(uid: String, tearDownSharedFamily: Bool) async throws {
         if let familyId {
             let familyRef = db.collection("families").document(familyId)
-            try await familyRef.collection("members").document(uid).delete()
             if tearDownSharedFamily {
                 try await familyRef.delete()
             }
+            try await familyRef.collection("members").document(uid).delete()
         }
         try await db.collection("users").document(uid).delete()
     }
@@ -246,24 +252,36 @@ final class FamilyManager: ObservableObject {
         familyId: String,
         uid: String,
         displayName: String,
-        defaultRoleRaw: String
+        defaultRoleRaw: String,
+        inviteCode: String? = nil,
+        bootstrapCreator: Bool = false
     ) async throws {
         let ref = db.collection("families").document(familyId)
             .collection("members").document(uid)
-        let snap = try await ref.getDocument()
         var data: [String: Any] = [
             "name": displayName,
             "uid": uid
         ]
-        let existing = snap.data() ?? [:]
-        if existing["id"] as? String == nil {
+        if let inviteCode {
+            data["inviteCode"] = inviteCode
+        }
+
+        if inviteCode != nil || bootstrapCreator {
             data["id"] = UUID().uuidString
-        }
-        if existing["roleRaw"] as? String == nil {
             data["roleRaw"] = defaultRoleRaw
-        }
-        if existing["joinedAt"] as? Timestamp == nil {
             data["joinedAt"] = Timestamp(date: Date())
+        } else {
+            let snap = try await ref.getDocument()
+            let existing = snap.data() ?? [:]
+            if existing["id"] as? String == nil {
+                data["id"] = UUID().uuidString
+            }
+            if existing["roleRaw"] as? String == nil {
+                data["roleRaw"] = defaultRoleRaw
+            }
+            if existing["joinedAt"] as? Timestamp == nil {
+                data["joinedAt"] = Timestamp(date: Date())
+            }
         }
         try await ref.setData(data, merge: true)
     }

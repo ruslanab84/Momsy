@@ -17,14 +17,14 @@ service firebase.storage {
     }
 
     function isFamilyMember(familyId) {
-      return hasUserDoc(request.auth.uid)
-             && userFamilyId(request.auth.uid) == familyId;
+      return isSignedIn()
+             && firestore.exists(/databases/(default)/documents/families/$(familyId)/members/$(request.auth.uid));
     }
 
     function sharesFamilyWith(uid) {
       return hasUserDoc(request.auth.uid)
              && hasUserDoc(uid)
-             && userFamilyId(request.auth.uid) == userFamilyId(uid);
+             && isFamilyMember(userFamilyId(uid));
     }
 
     function isImageUnderLimit() {
