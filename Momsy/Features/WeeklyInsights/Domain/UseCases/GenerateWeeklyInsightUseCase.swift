@@ -12,6 +12,8 @@ final class GenerateWeeklyInsightUseCase {
     private let service: any WeeklyInsightService
     private let fallback: any WeeklyInsightService
     private let appState: AppState
+    private let leapCheckInRepo: (any LeapCheckInRepository)?
+    private let diaryRepo: (any DiaryRepository)?
 
     init(
         sleepRepo: any SleepRepository,
@@ -21,7 +23,9 @@ final class GenerateWeeklyInsightUseCase {
         repo: any WeeklyInsightRepository,
         service: any WeeklyInsightService,
         fallback: any WeeklyInsightService,
-        appState: AppState
+        appState: AppState,
+        leapCheckInRepo: (any LeapCheckInRepository)? = nil,
+        diaryRepo: (any DiaryRepository)? = nil
     ) {
         self.sleepRepo = sleepRepo
         self.feedingRepo = feedingRepo
@@ -31,6 +35,8 @@ final class GenerateWeeklyInsightUseCase {
         self.service = service
         self.fallback = fallback
         self.appState = appState
+        self.leapCheckInRepo = leapCheckInRepo
+        self.diaryRepo = diaryRepo
     }
 
     /// Generates a report for the most recent completed week if one doesn't exist yet.
@@ -57,7 +63,8 @@ final class GenerateWeeklyInsightUseCase {
     func generate(weekStart: Date, weekEnd: Date, birthDate: Date?, language: Language) async -> WeeklyInsight {
         let stats = await WeeklyInsightContextBuilder.buildStats(
             weekStart: weekStart, weekEnd: weekEnd, birthDate: birthDate, language: language,
-            sleepRepo: sleepRepo, feedingRepo: feedingRepo, foodRepo: foodRepo, diaperRepo: diaperRepo
+            sleepRepo: sleepRepo, feedingRepo: feedingRepo, foodRepo: foodRepo, diaperRepo: diaperRepo,
+            leapCheckInRepo: leapCheckInRepo, diaryRepo: diaryRepo
         )
         // No logged activity this week → don't spend a Gemini request. Emit a
         // static, localized "no data" note so the report still reflects the gap.

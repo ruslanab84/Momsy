@@ -249,6 +249,8 @@ final class AppContainer {
     lazy var markLeapComplete  = MarkLeapCompleteUseCase(repository: leapsRepository)
     lazy var getLeapCheckIns   = GetLeapCheckInsUseCase(repository: leapCheckInRepository)
     lazy var saveLeapCheckIn   = SaveLeapCheckInUseCase(repository: leapCheckInRepository)
+    lazy var recordLeapSkill   = RecordLeapSkillUseCase(addDiaryEntry: addDiaryEntry, syncRepo: babySyncRepository)
+    lazy var scheduleLeapNotifications = ScheduleLeapNotificationsUseCase(pushNotifications: pushNotifications)
 
     // MARK: — Use Cases — Doctor Visit
 
@@ -278,7 +280,9 @@ final class AppContainer {
         repo: weeklyInsightRepository,
         service: weeklyInsightService,
         fallback: StaticWeeklyInsightService(),
-        appState: appState
+        appState: appState,
+        leapCheckInRepo: leapCheckInRepository,
+        diaryRepo: diaryRepository
     )
     lazy var getWeeklyInsights = GetWeeklyInsightsUseCase(repository: weeklyInsightRepository)
 
@@ -506,7 +510,9 @@ final class AppContainer {
             saveCheckIn: saveLeapCheckIn,
             getSleep: getSleepEntries,
             getFeeding: getFeedingEntries,
-            appState: appState
+            appState: appState,
+            recordLeapSkill: recordLeapSkill,
+            scheduleLeapNotifications: scheduleLeapNotifications
         )
     }
 

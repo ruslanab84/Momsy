@@ -91,4 +91,40 @@ struct WeeklyInsightContextBuilderTests {
         )
         #expect(stats.sleepTrendVsPrevWeekMinutes == (700 / 7) - (70 / 7))
     }
+
+    @Test("adds leap signals from check-ins and diary milestones")
+    func leapSignals() async throws {
+        let (start, end) = window()
+        let birthDate = Calendar.current.date(byAdding: .weekOfYear, value: -16, to: end)!
+        let checkInRepo = MockLeapCheckInRepository()
+        checkInRepo.checkIns = [
+            LeapDailyCheckIn(
+                leapID: 4,
+                date: start.addingTimeInterval(12 * 3600),
+                symptoms: [.sleepWorse, .appetiteShift]
+            )
+        ]
+        let diaryRepo = MockDiaryRepository()
+        diaryRepo.items = [
+            StoredDiaryItem(
+                date: start.addingTimeInterval(24 * 3600),
+                kind: .milestone,
+                text: "Grabs toys",
+                isMilestone: true,
+                iconName: "star"
+            )
+        ]
+
+        let stats = await WeeklyInsightContextBuilder.buildStats(
+            weekStart: start, weekEnd: end, birthDate: birthDate, language: .english,
+            sleepRepo: MockSleepRepository(), feedingRepo: MockFeedingRepository(),
+            foodRepo: MockComplementaryFeedingRepository(), diaperRepo: MockDiaperRepository(),
+            leapCheckInRepo: checkInRepo, diaryRepo: diaryRepo
+        )
+
+        #expect(stats.currentLeapID == 4)
+        #expect(stats.leapSignals.contains("sleep"))
+        #expect(stats.leapSignals.contains("feedings"))
+        #expect(stats.leapSignals.contains("new skills"))
+    }
 }

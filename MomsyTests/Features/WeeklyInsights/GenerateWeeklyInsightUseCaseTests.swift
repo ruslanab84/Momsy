@@ -107,6 +107,7 @@ struct GenerateWeeklyInsightUseCaseTests {
         WeeklyStats(
             weekStart: weekStart, weekEnd: weekEnd,
             ageMonths: 2, ageWeeks: 9, currentLeapName: "World of Patterns",
+            currentLeapID: 2, leapSignals: [],
             avgSleepMinutesPerDay: 840, avgNightSleepMinutes: 600, avgDaySleepMinutes: 240,
             avgNapsPerDay: 3, sleepTrendVsPrevWeekMinutes: 0,
             whoMinSleepMinutes: 840, whoAwakeWindowMax: 90,

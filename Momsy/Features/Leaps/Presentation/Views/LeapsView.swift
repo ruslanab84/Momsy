@@ -3,6 +3,7 @@ import SwiftUI
 struct LeapsView: View {
     @StateObject private var vm: LeapsViewModel
     @State private var calendarScope: LeapCalendarScope = .week
+    @State private var isSkillDiarySheetPresented = false
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
 
@@ -21,6 +22,7 @@ struct LeapsView: View {
                 behaviorInsightsSection
                 normalDoctorCard
                 timelineSection
+                historySection
                 tipCard
             }
             .padding(.horizontal, 20)
@@ -28,6 +30,12 @@ struct LeapsView: View {
             .padding(.bottom, 24)
         }
         .background(Color.bbCream.ignoresSafeArea())
+        .sheet(isPresented: $isSkillDiarySheetPresented) {
+            LeapSkillDiarySheet(skills: vm.leapSkills(vm.currentLeap)) { skill in
+                Task { await vm.recordSkillToDiary(label: skill) }
+            }
+            .environmentObject(loc)
+        }
     }
 
     // MARK: - Header
@@ -107,6 +115,34 @@ struct LeapsView: View {
                     items: vm.leapSkills(vm.currentLeap),
                     accent: .bbMintDeep
                 )
+            }
+
+            Button {
+                isSkillDiarySheetPresented = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "square.and.pencil")
+                        .font(.system(size: 13, weight: .bold))
+                    Text(loc.strings.leapRecordSkillButton)
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .bold))
+                }
+                .foregroundColor(.white)
+                .padding(.vertical, 11)
+                .padding(.horizontal, 12)
+                .background(Color.bbSurface)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .disabled(vm.isRecordingSkill)
+
+            if let message = vm.skillDiaryMessage {
+                Text(message)
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbMintDeep)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Text(loc.strings.leapWillPass(hardDays: vm.currentLeap.hardDays))
@@ -226,6 +262,36 @@ struct LeapsView: View {
             }
             .bbCard(pad: 14)
         }
+    }
+
+    private var historySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            BBSectionLabel(text: loc.strings.leapHistoryTitle)
+            Text(loc.strings.leapHistorySubtitle)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if vm.historySummaries.isEmpty {
+                Text(loc.strings.leapHistoryEmpty)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbInkMute)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 2)
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(vm.historySummaries) { summary in
+                        LeapHistoryRow(
+                            summary: summary,
+                            difficultyTitle: vm.historyDifficultyTitle(summary.difficulty),
+                            durationText: vm.historyDurationText(summary),
+                            symptomsText: vm.historySymptomsText(summary)
+                        )
+                    }
+                }
+            }
+        }
+        .bbCard(pad: 14, bg: Color.bbLilac.opacity(0.18))
     }
 
     // MARK: - Tip Card
@@ -418,6 +484,136 @@ private struct LeapInsightRow: View {
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+}
+
+private struct LeapHistoryRow: View {
+    let summary: LeapHistorySummary
+    let difficultyTitle: String
+    let durationText: String
+    let symptomsText: String
+    @EnvironmentObject var loc: LocalizationManager
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: summary.difficulty.systemImage)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(summary.difficulty.tint)
+                .frame(width: 28, height: 28)
+                .background(Color.white.opacity(0.78))
+                .clipShape(Circle())
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(loc.strings.leapPill(summary.leapID))
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Spacer(minLength: 6)
+                    Text(difficultyTitle)
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .foregroundColor(summary.difficulty.tint)
+                }
+                Text(summary.title)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+                    .lineLimit(1)
+                Text(durationText)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbInkMute)
+                Text(symptomsText)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(10)
+        .background(Color.white.opacity(0.72))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+private struct LeapSkillDiarySheet: View {
+    let skills: [String]
+    let onSave: (String) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var loc: LocalizationManager
+    @State private var selectedSkill: String
+    @State private var customSkill: String
+
+    private var trimmedSkill: String {
+        customSkill.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    init(skills: [String], onSave: @escaping (String) -> Void) {
+        self.skills = skills
+        self.onSave = onSave
+        let initial = skills.first ?? ""
+        _selectedSkill = State(initialValue: initial)
+        _customSkill = State(initialValue: initial)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(loc.strings.leapRecordSkillSubtitle)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbInkSoft)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if !skills.isEmpty {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 130), spacing: 8)], spacing: 8) {
+                            ForEach(skills, id: \.self) { skill in
+                                Button {
+                                    selectedSkill = skill
+                                    customSkill = skill
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: selectedSkill == skill ? "checkmark.circle.fill" : "sparkles")
+                                            .font(.system(size: 12, weight: .bold))
+                                        Text(skill)
+                                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                            .multilineTextAlignment(.leading)
+                                            .lineLimit(2)
+                                        Spacer(minLength: 0)
+                                    }
+                                    .foregroundColor(selectedSkill == skill ? .white : .bbInk)
+                                    .padding(10)
+                                    .frame(minHeight: 46)
+                                    .background(selectedSkill == skill ? Color.bbSurface : Color.bbCard)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+
+                    TextField(loc.strings.leapRecordSkillPlaceholder, text: $customSkill)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .padding(14)
+                        .background(Color.bbCard)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .padding(20)
+            }
+            .background(Color.bbCream.ignoresSafeArea())
+            .navigationTitle(loc.strings.leapRecordSkillTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(loc.strings.cancel) { dismiss() }
+                        .foregroundColor(.bbInkSoft)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(loc.strings.add) {
+                        onSave(trimmedSkill)
+                        dismiss()
+                    }
+                    .disabled(trimmedSkill.isEmpty)
+                    .foregroundColor(trimmedSkill.isEmpty ? .bbInkMute : .bbCoralDeep)
+                }
             }
         }
     }
@@ -619,6 +815,24 @@ private extension LeapCalendarDayPhase {
             return Color.bbCoralDeep
         case .recovery:
             return Color.bbMint.opacity(0.55)
+        }
+    }
+}
+
+private extension LeapHistoryDifficulty {
+    var systemImage: String {
+        switch self {
+        case .light: return "leaf.fill"
+        case .moderate: return "waveform.path.ecg"
+        case .hard: return "exclamationmark.circle.fill"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .light: return .bbMintDeep
+        case .moderate: return .bbButterDeep
+        case .hard: return .bbCoralDeep
         }
     }
 }

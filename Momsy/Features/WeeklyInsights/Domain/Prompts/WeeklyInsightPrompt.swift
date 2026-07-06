@@ -96,12 +96,14 @@ enum WeeklyInsightPrompt {
         let foods = s.newFoodsIntroduced.isEmpty ? "—" : s.newFoodsIntroduced.joined(separator: ", ")
         let allergens = s.allergensFlagged.isEmpty ? "—" : s.allergensFlagged.joined(separator: ", ")
         let leap = s.currentLeapName
+        let leapSignals = s.leapSignals.isEmpty ? nil : s.leapSignals.joined(separator: ", ")
 
         var lines: [String] = []
         switch l {
         case .en:
             lines.append("Baby age: \(s.ageMonths) mo (\(s.ageWeeks) weeks).")
             if let leap { lines.append("Developmental leap: \(leap).") }
+            if let leapSignals, let leapID = s.currentLeapID { lines.append("Leap signals this week: leap #\(leapID) — \(leapSignals). Mention this in overallSummary.") }
             lines.append("WHO: total sleep target ≥ \(whoH)/day; max awake window ~\(s.whoAwakeWindowMax) min.")
             lines.append("Sleep this week: avg \(sleepH)/day (night \(nightH), day \(dayH), \(naps) naps/day), \(trend).")
             lines.append("Feeding this week: \(feeds)/day, \(s.totalFeedings) total. Diaper changes: \(s.totalDiapers).")
@@ -110,6 +112,7 @@ enum WeeklyInsightPrompt {
         case .ru:
             lines.append("Возраст малыша: \(s.ageMonths) мес (\(s.ageWeeks) нед).")
             if let leap { lines.append("Скачок развития: \(leap).") }
+            if let leapSignals, let leapID = s.currentLeapID { lines.append("Признаки скачка за неделю: скачок #\(leapID) — \(leapSignals). Упомяни это в overallSummary.") }
             lines.append("ВОЗ: суммарный сон ≥ \(whoH)/сутки; макс. время бодрствования ~\(s.whoAwakeWindowMax) мин.")
             lines.append("Сон за неделю: в среднем \(sleepH)/сутки (ночь \(nightH), день \(dayH), \(naps) дневных снов/сутки), \(trend).")
             lines.append("Кормления за неделю: \(feeds)/сутки, всего \(s.totalFeedings). Смен подгузников: \(s.totalDiapers).")
@@ -118,6 +121,7 @@ enum WeeklyInsightPrompt {
         case .de:
             lines.append("Babyalter: \(s.ageMonths) Mon. (\(s.ageWeeks) Wochen).")
             if let leap { lines.append("Entwicklungsschub: \(leap).") }
+            if let leapSignals, let leapID = s.currentLeapID { lines.append("Schubsignale diese Woche: Schub #\(leapID) — \(leapSignals). In overallSummary erwähnen.") }
             lines.append("WHO: Gesamtschlaf ≥ \(whoH)/Tag; max. Wachfenster ~\(s.whoAwakeWindowMax) Min.")
             lines.append("Schlaf diese Woche: Ø \(sleepH)/Tag (Nacht \(nightH), Tag \(dayH), \(naps) Schläfchen/Tag), \(trend).")
             lines.append("Mahlzeiten diese Woche: \(feeds)/Tag, gesamt \(s.totalFeedings). Windelwechsel: \(s.totalDiapers).")
@@ -126,6 +130,7 @@ enum WeeklyInsightPrompt {
         case .es:
             lines.append("Edad del bebé: \(s.ageMonths) meses (\(s.ageWeeks) semanas).")
             if let leap { lines.append("Salto de desarrollo: \(leap).") }
+            if let leapSignals, let leapID = s.currentLeapID { lines.append("Señales del salto esta semana: salto #\(leapID) — \(leapSignals). Menciónalo en overallSummary.") }
             lines.append("OMS: objetivo de sueño total ≥ \(whoH)/día; ventana máxima de vigilia ~\(s.whoAwakeWindowMax) min.")
             lines.append("Sueño esta semana: media \(sleepH)/día (noche \(nightH), día \(dayH), \(naps) siestas/día), \(trend).")
             lines.append("Tomas esta semana: \(feeds)/día, \(s.totalFeedings) en total. Cambios de pañal: \(s.totalDiapers).")
@@ -134,6 +139,7 @@ enum WeeklyInsightPrompt {
         case .fr:
             lines.append("Âge du bébé : \(s.ageMonths) mois (\(s.ageWeeks) semaines).")
             if let leap { lines.append("Bond de développement : \(leap).") }
+            if let leapSignals, let leapID = s.currentLeapID { lines.append("Signes de bond cette semaine : bond #\(leapID) — \(leapSignals). À mentionner dans overallSummary.") }
             lines.append("OMS : objectif de sommeil total ≥ \(whoH)/jour ; fenêtre d’éveil max. ~\(s.whoAwakeWindowMax) min.")
             lines.append("Sommeil cette semaine : moy. \(sleepH)/jour (nuit \(nightH), jour \(dayH), \(naps) siestes/jour), \(trend).")
             lines.append("Tétées cette semaine : \(feeds)/jour, \(s.totalFeedings) au total. Changes de couche : \(s.totalDiapers).")
@@ -142,6 +148,7 @@ enum WeeklyInsightPrompt {
         case .pt:
             lines.append("Idade do bebé: \(s.ageMonths) meses (\(s.ageWeeks) semanas).")
             if let leap { lines.append("Salto de desenvolvimento: \(leap).") }
+            if let leapSignals, let leapID = s.currentLeapID { lines.append("Sinais de salto esta semana: salto #\(leapID) — \(leapSignals). Menciona isto em overallSummary.") }
             lines.append("OMS: objetivo de sono total ≥ \(whoH)/dia; janela máxima de vigília ~\(s.whoAwakeWindowMax) min.")
             lines.append("Sono esta semana: média \(sleepH)/dia (noite \(nightH), dia \(dayH), \(naps) sestas/dia), \(trend).")
             lines.append("Mamadas esta semana: \(feeds)/dia, \(s.totalFeedings) no total. Mudas de fralda: \(s.totalDiapers).")
@@ -150,6 +157,7 @@ enum WeeklyInsightPrompt {
         case .zh:
             lines.append("宝宝年龄：\(s.ageMonths) 个月（\(s.ageWeeks) 周）。")
             if let leap { lines.append("发育猛长期：\(leap)。") }
+            if let leapSignals, let leapID = s.currentLeapID { lines.append("本周飞跃期迹象：#\(leapID) — \(leapSignals)。请在 overallSummary 中提到。") }
             lines.append("世卫组织：每日总睡眠目标 ≥ \(whoH)；最长清醒时长约 \(s.whoAwakeWindowMax) 分钟。")
             lines.append("本周睡眠：平均 \(sleepH)/天（夜间 \(nightH)，白天 \(dayH)，每天 \(naps) 次小睡），\(trend)。")
             lines.append("本周喂养：\(feeds)/天，共 \(s.totalFeedings) 次。换尿布：\(s.totalDiapers) 次。")

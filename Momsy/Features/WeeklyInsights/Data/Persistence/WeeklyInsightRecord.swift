@@ -17,6 +17,8 @@ final class WeeklyInsightRecord {
     var ageMonths: Int = 0
     var ageWeeks: Int = 0
     var currentLeapName: String?
+    var currentLeapID: Int?
+    var leapSignals: [String] = []
     var avgSleepMinutesPerDay: Int = 0
     var avgNightSleepMinutes: Int = 0
     var avgDaySleepMinutes: Int = 0
@@ -47,6 +49,8 @@ final class WeeklyInsightRecord {
         ageMonths = s.ageMonths
         ageWeeks = s.ageWeeks
         currentLeapName = s.currentLeapName
+        currentLeapID = s.currentLeapID
+        leapSignals = s.leapSignals
         avgSleepMinutesPerDay = s.avgSleepMinutesPerDay
         avgNightSleepMinutes = s.avgNightSleepMinutes
         avgDaySleepMinutes = s.avgDaySleepMinutes
@@ -73,6 +77,8 @@ final class WeeklyInsightRecord {
             ageMonths: ageMonths,
             ageWeeks: ageWeeks,
             currentLeapName: currentLeapName,
+            currentLeapID: currentLeapID,
+            leapSignals: leapSignals,
             avgSleepMinutesPerDay: avgSleepMinutesPerDay,
             avgNightSleepMinutes: avgNightSleepMinutes,
             avgDaySleepMinutes: avgDaySleepMinutes,

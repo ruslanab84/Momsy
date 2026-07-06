@@ -26,6 +26,7 @@ struct LeapsViewModelTests {
         checkInRepo: MockLeapCheckInRepository? = nil,
         sleepRepo: MockSleepRepository? = nil,
         feedingRepo: MockFeedingRepository? = nil,
+        recordLeapSkill: RecordLeapSkillUseCase? = nil,
         profile: BabyProfile? = nil
     ) async throws -> LeapsViewModel {
         let repo = repo ?? MockLeapsRepository()
@@ -40,7 +41,8 @@ struct LeapsViewModelTests {
             saveCheckIn: SaveLeapCheckInUseCase(repository: checkInRepo),
             getSleep: GetSleepEntriesUseCase(repository: sleepRepo),
             getFeeding: GetFeedingEntriesUseCase(repository: feedingRepo),
-            appState: state
+            appState: state,
+            recordLeapSkill: recordLeapSkill
         )
         try await Task.sleep(nanoseconds: 50_000_000)
         return vm
@@ -243,6 +245,52 @@ struct LeapsViewModelTests {
         )
 
         #expect(vm.behaviorInsights.contains { $0.id == "sleep" })
+    }
+
+    @Test("history summarizes actual check-in span and difficulty for the active child")
+    func historySummarizesCheckIns() async throws {
+        let calendar = Calendar.current
+        let birth = calendar.date(byAdding: .day, value: -40, to: Date())!
+        let leapStart = BabyAgeContext.leapStartDate(
+            for: DevelopmentLeap.catalog.first { $0.id == 1 }!,
+            birthDate: birth,
+            calendar: calendar
+        )
+        let repo = MockLeapsRepository()
+        repo.progress = [LeapProgress(id: 1, isDone: true, completedDate: calendar.date(byAdding: .day, value: 3, to: leapStart))]
+        let checkInRepo = MockLeapCheckInRepository()
+        checkInRepo.checkIns = [
+            LeapDailyCheckIn(leapID: 1, date: leapStart, symptoms: [.sleepWorse, .appetiteShift]),
+            LeapDailyCheckIn(leapID: 1, date: calendar.date(byAdding: .day, value: 2, to: leapStart)!, symptoms: [.fussiness])
+        ]
+
+        let vm = try await makeVM(
+            repo: repo,
+            checkInRepo: checkInRepo,
+            profile: BabyProfile(name: "Test", birthDate: birth)
+        )
+
+        let summary = vm.historySummaries.first { $0.leapID == 1 }
+        #expect(summary?.actualDays == 3)
+        #expect(summary?.symptomDays == 2)
+        #expect(summary?.difficulty == .moderate)
+    }
+
+    @Test("recordSkillToDiary creates a milestone diary item")
+    func recordSkillCreatesDiaryMilestone() async throws {
+        let diaryRepo = MockDiaryRepository()
+        let recordSkill = RecordLeapSkillUseCase(
+            addDiaryEntry: AddDiaryEntryUseCase(repository: diaryRepo),
+            syncRepo: NoOpBabySyncRepository()
+        )
+        let vm = try await makeVM(recordLeapSkill: recordSkill)
+
+        await vm.recordSkillToDiary(label: "Grabs toys")
+
+        #expect(diaryRepo.addedItems.count == 1)
+        #expect(diaryRepo.addedItems.first?.kind == .milestone)
+        #expect(diaryRepo.addedItems.first?.text == "Grabs toys")
+        #expect(vm.skillDiaryMessage == LocalizationManager.shared.strings.leapSkillSaved)
     }
 
     // MARK: - markComplete

@@ -103,3 +103,19 @@ struct LeapBehaviorInsight: Identifiable, Equatable {
     let detail: String
     let systemImage: String
 }
+
+enum LeapHistoryDifficulty: String, Equatable {
+    case light
+    case moderate
+    case hard
+}
+
+struct LeapHistorySummary: Identifiable, Equatable {
+    let id: Int
+    let leapID: Int
+    let title: String
+    let actualDays: Int
+    let symptomDays: Int
+    let difficulty: LeapHistoryDifficulty
+    let dominantSymptoms: [LeapCheckInSymptom]
+}

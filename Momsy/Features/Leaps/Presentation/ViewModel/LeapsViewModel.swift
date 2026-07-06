@@ -8,6 +8,9 @@ final class LeapsViewModel: ObservableObject {
     @Published private(set) var checkIns: [LeapDailyCheckIn] = []
     @Published private(set) var selectedSymptoms: Set<LeapCheckInSymptom> = []
     @Published private(set) var behaviorInsights: [LeapBehaviorInsight] = []
+    @Published private(set) var historySummaries: [LeapHistorySummary] = []
+    @Published private(set) var skillDiaryMessage: String?
+    @Published private(set) var isRecordingSkill = false
 
     private let getLeapsUC: GetLeapsUseCase
     private let markLeapCompleteUC: MarkLeapCompleteUseCase
@@ -15,8 +18,11 @@ final class LeapsViewModel: ObservableObject {
     private let saveCheckInUC: SaveLeapCheckInUseCase
     private let getSleepUC: GetSleepEntriesUseCase
     private let getFeedingUC: GetFeedingEntriesUseCase
+    private let recordLeapSkillUC: RecordLeapSkillUseCase?
+    private let scheduleLeapNotificationsUC: ScheduleLeapNotificationsUseCase?
     private let appState: AppState
     private let calendar: Calendar
+    private var progressByID: [Int: LeapProgress] = [:]
     private var lm: LocalizationManager { .shared }
     private var mergeObserver: NSObjectProtocol?
 
@@ -28,6 +34,8 @@ final class LeapsViewModel: ObservableObject {
         getSleep: GetSleepEntriesUseCase,
         getFeeding: GetFeedingEntriesUseCase,
         appState: AppState,
+        recordLeapSkill: RecordLeapSkillUseCase? = nil,
+        scheduleLeapNotifications: ScheduleLeapNotificationsUseCase? = nil,
         calendar: Calendar = .current
     ) {
         self.getLeapsUC = getLeaps
@@ -36,6 +44,8 @@ final class LeapsViewModel: ObservableObject {
         self.saveCheckInUC = saveCheckIn
         self.getSleepUC = getSleep
         self.getFeedingUC = getFeeding
+        self.recordLeapSkillUC = recordLeapSkill
+        self.scheduleLeapNotificationsUC = scheduleLeapNotifications
         self.appState = appState
         self.calendar = calendar
         Task { await loadLeaps() }
@@ -131,6 +141,7 @@ final class LeapsViewModel: ObservableObject {
 
     func loadLeaps() async {
         let progress = (try? await getLeapsUC.execute()) ?? []
+        progressByID = Dictionary(uniqueKeysWithValues: progress.map { ($0.id, $0) })
         let doneIDs = Set(progress.filter(\.isDone).map(\.id))
         let ageWeeks = BabyAgeContext.ageWeeks(birthDate: appState.babyProfile?.birthDate)
         let current = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, completedIDs: doneIDs)
@@ -139,6 +150,13 @@ final class LeapsViewModel: ObservableObject {
             copy.isCurrent = leap.id == current?.id
             copy.isDone = doneIDs.contains(leap.id) || (!copy.isCurrent && leap.week <= ageWeeks)
             return copy
+        }
+        if let birthDate = appState.babyProfile?.birthDate {
+            scheduleLeapNotificationsUC?.execute(
+                leaps: leaps,
+                birthDate: birthDate,
+                language: lm.current
+            )
         }
         await refreshPersonalizedContext()
     }
@@ -221,6 +239,7 @@ final class LeapsViewModel: ObservableObject {
     private func refreshPersonalizedContext() async {
         await loadCheckIns()
         await loadBehaviorInsights()
+        await loadHistory()
     }
 
     private func loadCheckIns() async {
@@ -254,6 +273,93 @@ final class LeapsViewModel: ObservableObject {
             insights.append(feedingInsight)
         }
         behaviorInsights = Array(insights.prefix(2))
+    }
+
+    private func loadHistory() async {
+        guard let birthDate = appState.babyProfile?.birthDate else {
+            historySummaries = []
+            return
+        }
+
+        var summaries: [LeapHistorySummary] = []
+        for leap in leaps where progressByID[leap.id] != nil || leap.isCurrent {
+            let leapCheckIns = (try? await getCheckInsUC.execute(leapID: leap.id)) ?? []
+            guard let summary = historySummary(
+                for: leap,
+                checkIns: leapCheckIns,
+                birthDate: birthDate
+            ) else { continue }
+            summaries.append(summary)
+        }
+        historySummaries = summaries.sorted { $0.leapID > $1.leapID }
+    }
+
+    private func historySummary(
+        for leap: DevelopmentLeap,
+        checkIns: [LeapDailyCheckIn],
+        birthDate: Date
+    ) -> LeapHistorySummary? {
+        let symptomCheckIns = checkIns.filter { !$0.symptoms.isEmpty }
+        let progress = progressByID[leap.id]
+        guard !symptomCheckIns.isEmpty || progress != nil || leap.isCurrent else { return nil }
+
+        let startDate = calendar.startOfDay(
+            for: BabyAgeContext.leapStartDate(for: leap, birthDate: birthDate, calendar: calendar)
+        )
+        let actualDays: Int
+        if let first = symptomCheckIns.map(\.date).min(),
+           let last = symptomCheckIns.map(\.date).max() {
+            actualDays = max(1, (calendar.dateComponents([.day], from: first, to: last).day ?? 0) + 1)
+        } else if let completedDate = progress?.completedDate {
+            actualDays = max(1, (calendar.dateComponents([.day], from: startDate, to: completedDate).day ?? 0) + 1)
+        } else {
+            let today = calendar.startOfDay(for: Date())
+            actualDays = max(1, (calendar.dateComponents([.day], from: startDate, to: today).day ?? 0) + 1)
+        }
+
+        let symptomWeights = symptomCheckIns.flatMap(\.symptoms).reduce(into: [LeapCheckInSymptom: Int]()) {
+            $0[$1, default: 0] += 1
+        }
+        let dominantSymptoms = symptomWeights.sorted {
+            if $0.value == $1.value { return $0.key.rawValue < $1.key.rawValue }
+            return $0.value > $1.value
+        }
+        .map(\.key)
+
+        return LeapHistorySummary(
+            id: leap.id,
+            leapID: leap.id,
+            title: leap.name(for: lm.current),
+            actualDays: actualDays,
+            symptomDays: symptomCheckIns.count,
+            difficulty: difficulty(for: symptomCheckIns, hardDays: leap.hardDays),
+            dominantSymptoms: Array(dominantSymptoms.prefix(3))
+        )
+    }
+
+    private func difficulty(
+        for checkIns: [LeapDailyCheckIn],
+        hardDays: Int
+    ) -> LeapHistoryDifficulty {
+        let weightedScore = checkIns.reduce(0) { partial, checkIn in
+            partial + checkIn.symptoms.reduce(0) { score, symptom in
+                switch symptom {
+                case .sleepWorse, .appetiteShift:
+                    return score + 2
+                case .wantsHeld, .fussiness:
+                    return score + 1
+                case .newSkills:
+                    return score
+                }
+            }
+        }
+        if weightedScore >= 10 || checkIns.count >= max(3, Int(Double(hardDays) * 0.55)) {
+            return .hard
+        }
+        if weightedScore >= 4 || checkIns.count >= 2 {
+            return .moderate
+        }
+        return .light
     }
 
     private func sleepInsight(from baselineStart: Date, start: Date, recentStart: Date, end: Date) async -> LeapBehaviorInsight? {
@@ -330,6 +436,36 @@ final class LeapsViewModel: ObservableObject {
     func leapSigns(_ l: DevelopmentLeap) -> [String] { l.signs(for: lm.current) }
     func leapSkills(_ l: DevelopmentLeap) -> [String] { l.skills(for: lm.current) }
     func leapTip(_ l: DevelopmentLeap) -> String { l.tip(for: lm.current) }
+
+    func historyDifficultyTitle(_ difficulty: LeapHistoryDifficulty) -> String {
+        switch difficulty {
+        case .light: return lm.strings.leapHistoryLight
+        case .moderate: return lm.strings.leapHistoryModerate
+        case .hard: return lm.strings.leapHistoryHard
+        }
+    }
+
+    func historyDurationText(_ summary: LeapHistorySummary) -> String {
+        lm.strings.leapHistoryDuration(days: summary.actualDays)
+    }
+
+    func historySymptomsText(_ summary: LeapHistorySummary) -> String {
+        guard !summary.dominantSymptoms.isEmpty else { return lm.strings.leapHistoryNoSymptoms }
+        return summary.dominantSymptoms.map { symptomTitle($0) }.joined(separator: ", ")
+    }
+
+    func recordSkillToDiary(label: String) async {
+        guard let recordLeapSkillUC else { return }
+        isRecordingSkill = true
+        skillDiaryMessage = nil
+        do {
+            try await recordLeapSkillUC.execute(skill: label)
+            skillDiaryMessage = lm.strings.leapSkillSaved
+        } catch {
+            skillDiaryMessage = lm.strings.leapSkillSaveError
+        }
+        isRecordingSkill = false
+    }
 
     func markComplete(id: Int) async {
         try? await markLeapCompleteUC.execute(leapId: id)

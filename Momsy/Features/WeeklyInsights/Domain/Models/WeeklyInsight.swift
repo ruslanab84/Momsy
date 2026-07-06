@@ -8,6 +8,8 @@ struct WeeklyStats: Codable, Equatable {
     let ageMonths: Int
     let ageWeeks: Int
     let currentLeapName: String?
+    let currentLeapID: Int?
+    let leapSignals: [String]
 
     // Sleep
     let avgSleepMinutesPerDay: Int
@@ -35,6 +37,7 @@ struct WeeklyStats: Codable, Equatable {
             && totalFeedings == 0
             && newFoodsIntroduced.isEmpty
             && totalDiapers == 0
+            && leapSignals.isEmpty
     }
 
     /// Returns a copy with the localized developmental-leap label replaced.
@@ -42,7 +45,9 @@ struct WeeklyStats: Codable, Equatable {
     func withLeapName(_ name: String?) -> WeeklyStats {
         WeeklyStats(
             weekStart: weekStart, weekEnd: weekEnd,
-            ageMonths: ageMonths, ageWeeks: ageWeeks, currentLeapName: name,
+            ageMonths: ageMonths, ageWeeks: ageWeeks,
+            currentLeapName: name, currentLeapID: currentLeapID,
+            leapSignals: leapSignals,
             avgSleepMinutesPerDay: avgSleepMinutesPerDay,
             avgNightSleepMinutes: avgNightSleepMinutes,
             avgDaySleepMinutes: avgDaySleepMinutes,

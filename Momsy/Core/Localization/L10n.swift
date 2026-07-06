@@ -586,6 +586,72 @@ struct L10n {
     var leapActionFeeding: String {
         s("Offer smaller calm feeds and do not force volume when appetite shifts.", "Предлагайте меньше и спокойнее; не давите на объём, если аппетит скачет.", "Biete kleinere ruhige Mahlzeiten an und erzwinge keine Menge.", "Ofrece tomas pequeñas y tranquilas; no fuerces cantidad si cambia el apetito.", "Proposez de petites tétées calmes sans forcer les quantités.", "Ofereça mamadas menores e calmas; não force quantidade se o apetite mudar.", "少量、安静地喂；食欲变化时不要强迫量。")
     }
+    var leapRecordSkillButton: String {
+        s("Record new skill", "Записать новый навык", "Neue Fähigkeit notieren", "Registrar nueva habilidad", "Noter une nouvelle compétence", "Registar nova competência", "记录新技能")
+    }
+    var leapRecordSkillTitle: String {
+        s("New skill", "Новый навык", "Neue Fähigkeit", "Nueva habilidad", "Nouvelle compétence", "Nova competência", "新技能")
+    }
+    var leapRecordSkillSubtitle: String {
+        s("Pick a skill from this leap or write your own milestone for the diary.",
+          "Выберите навык из этого скачка или запишите свою веху в дневник.",
+          "Wähle eine Fähigkeit aus diesem Schub oder schreibe einen eigenen Meilenstein ins Tagebuch.",
+          "Elige una habilidad de este salto o escribe tu propio hito en el diario.",
+          "Choisissez une compétence de ce bond ou écrivez votre propre étape dans le journal.",
+          "Escolha uma competência deste salto ou escreva o seu próprio marco no diário.",
+          "选择本次飞跃期的技能，或为日记写下自己的里程碑。")
+    }
+    var leapRecordSkillPlaceholder: String {
+        s("What appeared today?", "Что появилось сегодня?", "Was ist heute neu?", "¿Qué apareció hoy?", "Qu’est-ce qui est apparu aujourd’hui ?", "O que apareceu hoje?", "今天出现了什么新变化？")
+    }
+    var leapSkillSaved: String {
+        s("Saved to diary", "Сохранено в дневник", "Im Tagebuch gespeichert", "Guardado en el diario", "Enregistré dans le journal", "Guardado no diário", "已保存到日记")
+    }
+    var leapSkillSaveError: String {
+        s("Couldn't save the skill. Try again.", "Не удалось сохранить навык. Попробуйте ещё раз.", "Fähigkeit konnte nicht gespeichert werden. Bitte erneut versuchen.", "No se pudo guardar la habilidad. Inténtalo de nuevo.", "Impossible d’enregistrer la compétence. Réessayez.", "Não foi possível guardar a competência. Tente novamente.", "无法保存技能，请重试。")
+    }
+    var leapHistoryTitle: String {
+        s("Child's leap history", "История скачков ребёнка", "Schubverlauf des Kindes", "Historial de saltos del bebé", "Historique des bonds de l’enfant", "Histórico de saltos do bebé", "宝宝飞跃期历史")
+    }
+    var leapHistorySubtitle: String {
+        s("Based on completed leaps and daily check-ins for this child.",
+          "По завершённым скачкам и дневным чек-инам этого ребёнка.",
+          "Basierend auf abgeschlossenen Schüben und täglichen Check-ins dieses Kindes.",
+          "Según los saltos completados y los registros diarios de este bebé.",
+          "D’après les bonds terminés et les pointages quotidiens de cet enfant.",
+          "Com base nos saltos concluídos e check-ins diários deste bebé.",
+          "基于这个宝宝已完成的飞跃期和每日记录。")
+    }
+    var leapHistoryEmpty: String {
+        s("History will appear after you mark symptoms or complete a leap.",
+          "История появится после отметок симптомов или завершения скачка.",
+          "Der Verlauf erscheint, sobald du Symptome markierst oder einen Schub abschließt.",
+          "El historial aparecerá cuando marques señales o completes un salto.",
+          "L’historique apparaîtra après avoir noté des signes ou terminé un bond.",
+          "O histórico aparece depois de marcar sinais ou concluir um salto.",
+          "标记迹象或完成飞跃期后，这里会显示历史。")
+    }
+    var leapHistoryLight: String {
+        s("lighter", "легче", "leichter", "más fácil", "plus facile", "mais leve", "较轻松")
+    }
+    var leapHistoryModerate: String {
+        s("moderate", "средне", "mittel", "moderado", "modéré", "moderado", "中等")
+    }
+    var leapHistoryHard: String {
+        s("harder", "тяжелее", "schwerer", "más difícil", "plus difficile", "mais difícil", "较困难")
+    }
+    func leapHistoryDuration(days: Int) -> String {
+        s("Lasted about \(days)d",
+          "Длился фактически около \(days) дн.",
+          "Dauerte etwa \(days) T.",
+          "Duró aprox. \(days) d",
+          "A duré environ \(days) j",
+          "Durou cerca de \(days) d",
+          "实际持续约 \(days) 天")
+    }
+    var leapHistoryNoSymptoms: String {
+        s("No symptom check-ins", "Нет чек-инов симптомов", "Keine Symptom-Check-ins", "Sin registros de señales", "Aucun pointage de signe", "Sem check-ins de sinais", "没有迹象记录")
+    }
     var leapInsightTitle: String {
         s("From your logs", "По вашим записям", "Aus deinen Daten", "Según tus registros", "D’après vos notes", "Pelos seus registos", "根据记录")
     }
@@ -1408,6 +1474,12 @@ struct L10n {
     var notifDiaryBody: String     { s("Write down today's special moments", "Запишите сегодняшние моменты в дневник малыша", "Halte die besonderen Momente von heute fest", "Anota los momentos especiales de hoy", "Notez les moments spéciaux d’aujourd’hui", "Registe os momentos especiais de hoje", "记下今天的特别时刻") }
     var notifLeapTitle: String     { s("Development leap", "Скачок развития", "Entwicklungsschub", "Salto del desarrollo", "Bond de développement", "Salto de desenvolvimento", "发育猛长期") }
     func notifLeapBody(name: String) -> String { s("«\(name)» leap begins — your baby is reaching a new stage", "Начинается «\(name)» — малыш переходит на новый этап", "Der Schub «\(name)» beginnt — dein Baby erreicht eine neue Phase", "Comienza el salto «\(name)» — tu bebé alcanza una nueva etapa", "Le bond «\(name)» commence — votre bébé atteint une nouvelle étape", "O salto «\(name)» começa — o seu bebé atinge uma nova fase", "「\(name)」猛长期开始了——您的宝宝正迈入新阶段") }
+    var notifLeapSoonTitle: String { s("Leap may start soon", "Скоро возможен скачок", "Schub bald möglich", "Puede empezar un salto", "Un bond peut commencer bientôt", "Salto pode começar em breve", "飞跃期可能快开始了") }
+    func notifLeapSoonBody(name: String) -> String { s("In 3 days «\(name)» may begin. Keep routines a little calmer.", "Через 3 дня возможен «\(name)». Сделайте режим чуть спокойнее.", "In 3 Tagen kann «\(name)» beginnen. Halte Routinen etwas ruhiger.", "En 3 días puede empezar «\(name)». Mantén las rutinas un poco más tranquilas.", "Dans 3 jours, «\(name)» peut commencer. Gardez des routines un peu plus calmes.", "Em 3 dias pode começar «\(name)». Mantenha as rotinas um pouco mais calmas.", "3 天后可能进入「\(name)」。让日常节奏稍微更安静。") }
+    var notifLeapPeakTitle: String { s("Peak of the hard phase", "Пик сложной фазы", "Höhepunkt der schweren Phase", "Pico de la fase difícil", "Pic de la phase difficile", "Pico da fase difícil", "困难阶段高峰") }
+    func notifLeapPeakBody(name: String) -> String { s("Today may be the peak of «\(name)». Shorter wake windows can help.", "Сегодня может быть пик «\(name)». Помогут более короткие окна бодрствования.", "Heute kann der Höhepunkt von «\(name)» sein. Kürzere Wachfenster können helfen.", "Hoy puede ser el pico de «\(name)». Ventanas de vigilia más cortas pueden ayudar.", "Aujourd’hui peut être le pic de «\(name)». Des temps d’éveil plus courts peuvent aider.", "Hoje pode ser o pico de «\(name)». Janelas acordado mais curtas podem ajudar.", "今天可能是「\(name)」的高峰。缩短清醒时间可能有帮助。") }
+    var notifLeapSkillsTitle: String { s("Time to mark new skills", "Пора отметить новые навыки", "Zeit für neue Fähigkeiten", "Hora de marcar nuevas habilidades", "Il est temps de noter les nouvelles compétences", "Hora de marcar novas competências", "该记录新技能了") }
+    func notifLeapSkillsBody(name: String) -> String { s("The hard stretch of «\(name)» is easing. Record what your baby learned.", "Сложная часть «\(name)» стихает. Запишите, чему малыш научился.", "Die schwere Phase von «\(name)» lässt nach. Notiere, was dein Baby gelernt hat.", "La parte difícil de «\(name)» se calma. Registra lo que aprendió tu bebé.", "La phase difficile de «\(name)» s’apaise. Notez ce que bébé a appris.", "A parte difícil de «\(name)» está a acalmar. Registe o que o bebé aprendeu.", "「\(name)」的困难阶段正在缓和。记录宝宝学会了什么。") }
     var notifVaccinationTitle: String { s("Vaccination reminder", "Напоминание о прививке", "Impferinnerung", "Recordatorio de vacuna", "Rappel de vaccin", "Lembrete de vacina", "疫苗接种提醒") }
     func notifVaccinationBody(name: String) -> String { s("\(name) — in 7 days", "\(name) — через 7 дней", "\(name) — in 7 Tagen", "\(name) — en 7 días", "\(name) — dans 7 jours", "\(name) — em 7 dias", "\(name) — 7 天后") }
 }

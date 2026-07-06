@@ -31,6 +31,29 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
         return "\(mm)m"
     }
 
+    private func withLeapLine(_ base: String, _ s: WeeklyStats, language: Language) -> String {
+        guard let leapID = s.currentLeapID, !s.leapSignals.isEmpty else { return base }
+        let signals = s.leapSignals.joined(separator: ", ")
+        let line: String
+        switch language {
+        case .english:
+            line = " This week signs matched leap #\(leapID): \(signals)."
+        case .russian:
+            line = " На этой неделе признаки совпали со скачком #\(leapID): \(signals)."
+        case .german:
+            line = " Diese Woche passten die Zeichen zu Schub #\(leapID): \(signals)."
+        case .spanish:
+            line = " Esta semana las señales coincidieron con el salto #\(leapID): \(signals)."
+        case .french:
+            line = " Cette semaine, les signes correspondaient au bond #\(leapID) : \(signals)."
+        case .portuguese:
+            line = " Esta semana os sinais coincidiram com o salto #\(leapID): \(signals)."
+        case .chinese:
+            line = " 本周迹象与飞跃期 #\(leapID) 相符：\(signals)。"
+        }
+        return base + line
+    }
+
     // MARK: - English (also es/pt fallback)
 
     private func en(_ s: WeeklyStats) -> WeeklyInsightAI {
@@ -48,7 +71,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             sleepRecommendation: sleepRec,
             feedingSummary: "Around \(feeds) feedings per day. New foods this week: \(foods).",
             feedingRecommendation: feedingRec,
-            overallSummary: "A steady week — \(hEn(s.avgSleepMinutesPerDay)) sleep/day and \(feeds) feedings/day. You're doing great."
+            overallSummary: withLeapLine("A steady week — \(hEn(s.avgSleepMinutesPerDay)) sleep/day and \(feeds) feedings/day. You're doing great.", s, language: .english)
         )
     }
 
@@ -69,7 +92,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             sleepRecommendation: sleepRec,
             feedingSummary: "Около \(feeds) кормлений в сутки. Новые продукты за неделю: \(foods).",
             feedingRecommendation: feedingRec,
-            overallSummary: "Спокойная неделя — \(h(s.avgSleepMinutesPerDay)) сна в сутки и \(feeds) кормлений. Вы отлично справляетесь."
+            overallSummary: withLeapLine("Спокойная неделя — \(h(s.avgSleepMinutesPerDay)) сна в сутки и \(feeds) кормлений. Вы отлично справляетесь.", s, language: .russian)
         )
     }
 
@@ -90,7 +113,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             sleepRecommendation: sleepRec,
             feedingSummary: "Etwa \(feeds) Mahlzeiten pro Tag. Neue Lebensmittel diese Woche: \(foods).",
             feedingRecommendation: feedingRec,
-            overallSummary: "Eine ruhige Woche — \(hEn(s.avgSleepMinutesPerDay)) Schlaf/Tag und \(feeds) Mahlzeiten/Tag. Du machst das toll."
+            overallSummary: withLeapLine("Eine ruhige Woche — \(hEn(s.avgSleepMinutesPerDay)) Schlaf/Tag und \(feeds) Mahlzeiten/Tag. Du machst das toll.", s, language: .german)
         )
     }
 
@@ -111,7 +134,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             sleepRecommendation: sleepRec,
             feedingSummary: "Unas \(feeds) tomas al día. Nuevos alimentos esta semana: \(foods).",
             feedingRecommendation: feedingRec,
-            overallSummary: "Una semana estable: \(hEn(s.avgSleepMinutesPerDay)) de sueño/día y \(feeds) tomas/día. Lo estás haciendo muy bien."
+            overallSummary: withLeapLine("Una semana estable: \(hEn(s.avgSleepMinutesPerDay)) de sueño/día y \(feeds) tomas/día. Lo estás haciendo muy bien.", s, language: .spanish)
         )
     }
 
@@ -132,7 +155,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             sleepRecommendation: sleepRec,
             feedingSummary: "Environ \(feeds) tétées par jour. Nouveaux aliments cette semaine : \(foods).",
             feedingRecommendation: feedingRec,
-            overallSummary: "Une semaine régulière — \(hEn(s.avgSleepMinutesPerDay)) de sommeil/jour et \(feeds) tétées/jour. Vous faites un travail formidable."
+            overallSummary: withLeapLine("Une semaine régulière — \(hEn(s.avgSleepMinutesPerDay)) de sommeil/jour et \(feeds) tétées/jour. Vous faites un travail formidable.", s, language: .french)
         )
     }
 
@@ -153,7 +176,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             sleepRecommendation: sleepRec,
             feedingSummary: "Cerca de \(feeds) mamadas por dia. Alimentos novos esta semana: \(foods).",
             feedingRecommendation: feedingRec,
-            overallSummary: "Uma semana estável — \(hEn(s.avgSleepMinutesPerDay)) de sono/dia e \(feeds) mamadas/dia. Está a fazer um ótimo trabalho."
+            overallSummary: withLeapLine("Uma semana estável — \(hEn(s.avgSleepMinutesPerDay)) de sono/dia e \(feeds) mamadas/dia. Está a fazer um ótimo trabalho.", s, language: .portuguese)
         )
     }
 
@@ -181,7 +204,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             sleepRecommendation: sleepRec,
             feedingSummary: "每天约 \(feeds) 次喂养。本周的新食物：\(foods)。",
             feedingRecommendation: feedingRec,
-            overallSummary: "平稳的一周——每天 \(hZh(s.avgSleepMinutesPerDay)) 睡眠、\(feeds) 次喂养。你做得很棒。"
+            overallSummary: withLeapLine("平稳的一周——每天 \(hZh(s.avgSleepMinutesPerDay)) 睡眠、\(feeds) 次喂养。你做得很棒。", s, language: .chinese)
         )
     }
 }
