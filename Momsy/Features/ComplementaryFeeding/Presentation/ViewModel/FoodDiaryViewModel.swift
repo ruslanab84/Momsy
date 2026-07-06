@@ -95,8 +95,8 @@ final class FoodDiaryViewModel: ObservableObject {
             isAllergen: entry.isAllergen,
             notes: entry.notes,
             photoPath: entry.photoPath,
-            addedBy: UserDefaults.standard.string(forKey: "uid") ?? "",
-            addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
+            addedBy: "",
+            addedByName: ""
         )
         Task { try? await syncRepo.addFoodDiaryLog(log) }
     }

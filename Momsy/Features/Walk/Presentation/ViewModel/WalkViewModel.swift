@@ -174,8 +174,6 @@ final class WalkViewModel: ObservableObject {
 
     private func pushWalkToFirestore(_ entry: WalkEntry, label: String) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = QuickEventLog(
             id: entry.id.uuidString,
             kind: BlobKind.walk.rawValue,
@@ -183,8 +181,8 @@ final class WalkViewModel: ObservableObject {
             label: label,
             startDate: entry.startDate,
             endDate: entry.endDate,
-            addedBy: uid,
-            addedByName: name
+            addedBy: "",
+            addedByName: ""
         )
         Task {
             try? await BabySyncService().setLog(QuickEventLogDTO(from: log), id: log.id, to: "walkLogs")

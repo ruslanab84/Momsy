@@ -146,12 +146,10 @@ final class TrackingViewModel: ObservableObject {
 
     private func pushMeasurementToFirestore(_ entry: MeasurementEntry) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = MeasurementLog(
             id: entry.id.uuidString, date: entry.date,
             weight: entry.weight, height: entry.height,
-            headCirc: entry.headCirc, addedBy: uid, addedByName: name
+            headCirc: entry.headCirc, addedBy: "", addedByName: ""
         )
         Task { try? await BabySyncService().setLog(MeasurementLogDTO(from: log), id: log.id, to: "measurementLogs") }
     }
@@ -167,12 +165,10 @@ final class TrackingViewModel: ObservableObject {
 
     private func pushTemperatureToFirestore(_ entry: TemperatureEntry) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = TemperatureLog(
             id: entry.id.uuidString, date: entry.date,
             value: entry.value, note: entry.note,
-            addedBy: uid, addedByName: name
+            addedBy: "", addedByName: ""
         )
         Task { try? await BabySyncService().setLog(TemperatureLogDTO(from: log), id: log.id, to: "temperatureLogs") }
     }

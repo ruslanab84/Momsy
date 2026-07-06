@@ -278,16 +278,14 @@ final class SleepViewModel: ObservableObject {
 
     private func pushSleepToFirestore(_ entry: SleepEntry, babyId: UUID?) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = SleepLog(
             id:          entry.id.uuidString,
             startedAt:   entry.startDate,
             endedAt:     entry.endDate,
             durationMin: entry.durationMinutes,
             quality:     entry.quality,
-            addedBy:     uid,
-            addedByName: name,
+            addedBy:     "",
+            addedByName: "",
             updatedAt:   entry.updatedAt ?? Date()
         )
         Task {

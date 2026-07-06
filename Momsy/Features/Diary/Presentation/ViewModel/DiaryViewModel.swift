@@ -196,12 +196,10 @@ final class DiaryViewModel: ObservableObject {
 
     private func pushDiaryToFirestore(_ item: StoredDiaryItem) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = DiaryLog(
             id: item.id.uuidString, date: item.date,
             kind: item.kind.rawValue, text: item.text,
-            iconName: item.iconName, addedBy: uid, addedByName: name
+            iconName: item.iconName, addedBy: "", addedByName: ""
         )
         Task { try? await BabySyncService().setLog(DiaryLogDTO(from: log), id: log.id, to: "diaryLogs") }
     }

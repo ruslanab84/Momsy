@@ -19,6 +19,7 @@ final class AppContainer {
     lazy var measurementRepository: any MeasurementRepository = SwiftDataMeasurementRepository(context: context)
     lazy var temperatureRepository: any TemperatureRepository = SwiftDataTemperatureRepository(context: context)
     lazy var leapsRepository: any LeapsRepository          = SwiftDataLeapsRepository(context: context)
+    lazy var leapCheckInRepository: any LeapCheckInRepository = LocalLeapCheckInRepository()
     lazy var walkRepository: any WalkRepository            = SwiftDataWalkRepository(context: context)
     lazy var bathRepository: any BathRepository             = SwiftDataBathRepository(context: context)
     lazy var doctorVisitRepository: any DoctorVisitRepository = SwiftDataDoctorVisitRepository(context: context)
@@ -246,6 +247,8 @@ final class AppContainer {
 
     lazy var getLeaps          = GetLeapsUseCase(repository: leapsRepository)
     lazy var markLeapComplete  = MarkLeapCompleteUseCase(repository: leapsRepository)
+    lazy var getLeapCheckIns   = GetLeapCheckInsUseCase(repository: leapCheckInRepository)
+    lazy var saveLeapCheckIn   = SaveLeapCheckInUseCase(repository: leapCheckInRepository)
 
     // MARK: — Use Cases — Doctor Visit
 
@@ -496,7 +499,15 @@ final class AppContainer {
     }
 
     func makeLeapsViewModel() -> LeapsViewModel {
-        LeapsViewModel(getLeaps: getLeaps, markLeapComplete: markLeapComplete, appState: appState)
+        LeapsViewModel(
+            getLeaps: getLeaps,
+            markLeapComplete: markLeapComplete,
+            getCheckIns: getLeapCheckIns,
+            saveCheckIn: saveLeapCheckIn,
+            getSleep: getSleepEntries,
+            getFeeding: getFeedingEntries,
+            appState: appState
+        )
     }
 
     func makeVaccinationViewModel() -> VaccinationViewModel {

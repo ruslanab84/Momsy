@@ -213,8 +213,8 @@ final class SymptomViewModel: ObservableObject {
             description: symptomLabels.isEmpty ? currentResult.title
                                               : "\(currentResult.title): \(symptomLabels)",
             severity: Self.severity(for: currentResult.urgency),
-            addedBy: UserDefaults.standard.string(forKey: "uid") ?? "",
-            addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
+            addedBy: "",
+            addedByName: ""
         )
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { diaryLogged = true }

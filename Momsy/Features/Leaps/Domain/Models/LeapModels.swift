@@ -3,7 +3,7 @@ import Foundation
 struct DevelopmentLeap: Identifiable {
     let id: Int
     let week: Int
-    /// Typical length of this leap's fussy / "stormy" stretch, in days.
+    /// Typical length of this leap's hard stretch, in days.
     let hardDays: Int
     let names: [Language: String]
     let semanticColor: SemanticColor
@@ -21,6 +21,33 @@ struct DevelopmentLeap: Identifiable {
     func tip(for lang: Language) -> String { tips[lang] ?? tips[.english] ?? "" }
 }
 
+extension DevelopmentLeap {
+    init(
+        scheduleID: Int,
+        names: [Language: String],
+        semanticColor: SemanticColor,
+        isDone: Bool,
+        isCurrent: Bool,
+        descriptions: [Language: String],
+        signsByLang: [Language: [String]],
+        skillsByLang: [Language: [String]],
+        tips: [Language: String]
+    ) {
+        let definition = DevelopmentLeapSchedule.definition(id: scheduleID)
+        self.id = definition.id
+        self.week = definition.week
+        self.hardDays = definition.hardDays
+        self.names = names
+        self.semanticColor = semanticColor
+        self.isDone = isDone
+        self.isCurrent = isCurrent
+        self.descriptions = descriptions
+        self.signsByLang = signsByLang
+        self.skillsByLang = skillsByLang
+        self.tips = tips
+    }
+}
+
 /// Builds a per-language string map. Argument order mirrors `L10n.s`: en, ru, de, es, fr, pt, zh.
 private func loc(_ en: String, _ ru: String, _ de: String, _ es: String, _ fr: String, _ pt: String, _ zh: String) -> [Language: String] {
     [.english: en, .russian: ru, .german: de, .spanish: es, .french: fr, .portuguese: pt, .chinese: zh]
@@ -33,7 +60,7 @@ private func loc(_ en: [String], _ ru: [String], _ de: [String], _ es: [String],
 extension DevelopmentLeap {
     static let catalog: [DevelopmentLeap] = [
     DevelopmentLeap(
-        id: 1, week: 5, hardDays: 7,
+        scheduleID: 1,
         names: loc("World of Senses", "Мир ощущений", "Welt der Sinne", "Mundo de los sentidos", "Monde des sensations", "Mundo dos sentidos", "感官世界"),
         semanticColor: .rose, isDone: true, isCurrent: false,
         descriptions: loc(
@@ -70,7 +97,7 @@ extension DevelopmentLeap {
             "用平静的声音说话，避免突然的响声——听觉系统还在校准中。")
     ),
     DevelopmentLeap(
-        id: 2, week: 8, hardDays: 7,
+        scheduleID: 2,
         names: loc("World of Patterns", "Мир узоров", "Welt der Muster", "Mundo de los patrones", "Monde des motifs", "Mundo dos padrões", "图案世界"),
         semanticColor: .butter, isDone: true, isCurrent: false,
         descriptions: loc(
@@ -107,7 +134,7 @@ extension DevelopmentLeap {
             "给宝宝看黑白图片——对比能刺激视觉皮层。")
     ),
     DevelopmentLeap(
-        id: 3, week: 12, hardDays: 7,
+        scheduleID: 3,
         names: loc("Smooth Transitions", "Плавные движения", "Fließende Bewegungen", "Movimientos suaves", "Mouvements fluides", "Movimentos suaves", "顺畅的动作"),
         semanticColor: .mint, isDone: true, isCurrent: false,
         descriptions: loc(
@@ -144,7 +171,7 @@ extension DevelopmentLeap {
             "每天的趴卧能锻炼颈部和背部——这是翻身的基础。")
     ),
     DevelopmentLeap(
-        id: 4, week: 17, hardDays: 28,
+        scheduleID: 4,
         names: loc("World of Events", "Мир событий", "Welt der Ereignisse", "Mundo de los acontecimientos", "Monde des événements", "Mundo dos acontecimentos", "事件世界"),
         semanticColor: .coral, isDone: false, isCurrent: true,
         descriptions: loc(
@@ -181,7 +208,7 @@ extension DevelopmentLeap {
             "给宝宝看按一下会响的玩具或黑白绘本——在这个猛长期，因果关系特别吸引他。")
     ),
     DevelopmentLeap(
-        id: 5, week: 26, hardDays: 28,
+        scheduleID: 5,
         names: loc("Relationships", "Отношения", "Beziehungen", "Relaciones", "Relations", "Relações", "关系"),
         semanticColor: .lilac, isDone: false, isCurrent: false,
         descriptions: loc(
@@ -218,7 +245,7 @@ extension DevelopmentLeap {
             "躲猫猫有助于掌握客体永存——这是这个猛长期的关键能力。")
     ),
     DevelopmentLeap(
-        id: 6, week: 36, hardDays: 35,
+        scheduleID: 6,
         names: loc("Categories", "Категории", "Kategorien", "Categorías", "Catégories", "Categorias", "分类"),
         semanticColor: .sky, isDone: false, isCurrent: false,
         descriptions: loc(
@@ -253,6 +280,154 @@ extension DevelopmentLeap {
             "Boîtes à formes, gobelets, jouets gigognes — parfaits. Nommez les propriétés : « rouge », « grand », « lourd ».",
             "Caixas de encaixe, copos, brinquedos de encaixar — ideais. Nomeie as propriedades: «vermelho», «grande», «pesado».",
             "形状分类盒、套杯、套叠玩具都很理想。说出物品的属性：「红色」「大」「重」。")
+    ),
+    DevelopmentLeap(
+        scheduleID: 7,
+        names: loc("Sequences", "Последовательности", "Sequenzen", "Secuencias", "Séquences", "Sequências", "顺序"),
+        semanticColor: .rose, isDone: false, isCurrent: false,
+        descriptions: loc(
+            "starts seeing that actions can happen in a predictable order: first this, then that.",
+            "начинает понимать порядок действий: сначала одно, потом другое.",
+            "beginnt zu verstehen, dass Handlungen in einer vorhersehbaren Reihenfolge ablaufen: erst dies, dann das.",
+            "empieza a ver que las acciones pueden suceder en un orden predecible: primero esto, luego aquello.",
+            "commence à comprendre que les actions peuvent suivre un ordre prévisible : d’abord ceci, puis cela.",
+            "começa a perceber que as ações podem acontecer numa ordem previsível: primeiro isto, depois aquilo.",
+            "开始理解动作可以按可预期的顺序发生：先这样，再那样。"),
+        signsByLang: loc(
+            ["expects routines", "copies simple steps", "gets upset when order changes"],
+            ["ждёт привычных ритуалов", "повторяет простые шаги", "расстраивается, если порядок меняется"],
+            ["erwartet Routinen", "ahmt einfache Schritte nach", "wird unruhig, wenn sich die Reihenfolge ändert"],
+            ["espera rutinas", "imita pasos sencillos", "se molesta si cambia el orden"],
+            ["attend les routines", "imite des étapes simples", "se fâche si l’ordre change"],
+            ["espera rotinas", "imita passos simples", "fica irritado se a ordem muda"],
+            ["期待固定流程", "模仿简单步骤", "顺序变化会不安"]),
+        skillsByLang: loc(
+            ["follows two-step play", "helps with dressing", "anticipates bedtime routine"],
+            ["следует игре из двух шагов", "помогает одеваться", "предугадывает ритуал сна"],
+            ["folgt Zwei-Schritt-Spielen", "hilft beim Anziehen", "erwartet die Schlafroutine"],
+            ["sigue juegos de dos pasos", "ayuda al vestirse", "anticipa la rutina de dormir"],
+            ["suit un jeu en deux étapes", "aide à s’habiller", "anticipe le rituel du coucher"],
+            ["segue brincadeiras de dois passos", "ajuda a vestir", "antecipa a rotina de sono"],
+            ["能跟随两步游戏", "会帮忙穿衣", "预期睡前流程"]),
+        tips: loc(
+            "Keep tiny routines predictable: bath, pajamas, book, sleep. Sequences lower anxiety.",
+            "Держите маленькие ритуалы предсказуемыми: купание, пижама, книжка, сон. Последовательность снижает тревогу.",
+            "Halte kleine Routinen vorhersehbar: Bad, Schlafanzug, Buch, Schlaf. Sequenzen senken Anspannung.",
+            "Mantén rutinas pequeñas y predecibles: baño, pijama, cuento, sueño. Las secuencias reducen la ansiedad.",
+            "Gardez de petites routines prévisibles : bain, pyjama, livre, sommeil. Les séquences apaisent.",
+            "Mantenha pequenas rotinas previsíveis: banho, pijama, livro, sono. As sequências reduzem a ansiedade.",
+            "保持小流程可预期：洗澡、睡衣、读书、睡觉。固定顺序能减少焦虑。")
+    ),
+    DevelopmentLeap(
+        scheduleID: 8,
+        names: loc("Programs", "Программы", "Programme", "Programas", "Programmes", "Programas", "程序"),
+        semanticColor: .butter, isDone: false, isCurrent: false,
+        descriptions: loc(
+            "learns that a goal can be reached through several steps, choices, and corrections.",
+            "понимает, что к цели можно идти через несколько шагов, выборов и исправлений.",
+            "lernt, dass ein Ziel über mehrere Schritte, Entscheidungen und Korrekturen erreicht wird.",
+            "aprende que una meta se alcanza con varios pasos, elecciones y correcciones.",
+            "apprend qu’un objectif peut être atteint par plusieurs étapes, choix et ajustements.",
+            "aprende que uma meta pode ser alcançada com vários passos, escolhas e correções.",
+            "开始明白一个目标可以通过多个步骤、选择和调整来实现。"),
+        signsByLang: loc(
+            ["insists on doing it alone", "tries new routes", "says no more often"],
+            ["настаивает «сам»", "ищет новые способы", "чаще говорит «нет»"],
+            ["will es allein machen", "probiert neue Wege", "sagt öfter nein"],
+            ["quiere hacerlo solo", "prueba caminos nuevos", "dice no más a menudo"],
+            ["veut faire seul", "essaie de nouvelles façons", "dit non plus souvent"],
+            ["quer fazer sozinho", "tenta novos caminhos", "diz não com mais frequência"],
+            ["坚持自己来", "尝试新方法", "更常说不"]),
+        skillsByLang: loc(
+            ["solves simple problems", "chooses between options", "uses tools in play"],
+            ["решает простые задачи", "выбирает из вариантов", "использует инструменты в игре"],
+            ["löst einfache Probleme", "wählt zwischen Optionen", "nutzt Werkzeuge im Spiel"],
+            ["resuelve problemas simples", "elige entre opciones", "usa herramientas al jugar"],
+            ["résout de petits problèmes", "choisit entre options", "utilise des outils dans le jeu"],
+            ["resolve problemas simples", "escolhe entre opções", "usa ferramentas na brincadeira"],
+            ["解决简单问题", "在选项中选择", "游戏中使用工具"]),
+        tips: loc(
+            "Offer two acceptable choices. It gives independence without turning every moment into a negotiation.",
+            "Давайте два приемлемых выбора. Так появляется самостоятельность без постоянных переговоров.",
+            "Biete zwei gute Optionen an. Das gibt Selbstständigkeit, ohne jeden Moment zu verhandeln.",
+            "Ofrece dos opciones aceptables. Da independencia sin convertirlo todo en una negociación.",
+            "Proposez deux choix acceptables. Cela donne de l’autonomie sans tout transformer en négociation.",
+            "Ofereça duas escolhas aceitáveis. Dá autonomia sem transformar tudo numa negociação.",
+            "提供两个都可以接受的选择。既给自主感，也避免每件事都变成拉扯。")
+    ),
+    DevelopmentLeap(
+        scheduleID: 9,
+        names: loc("Principles", "Принципы", "Prinzipien", "Principios", "Principes", "Princípios", "原则"),
+        semanticColor: .mint, isDone: false, isCurrent: false,
+        descriptions: loc(
+            "starts noticing rules and reasons: why something is allowed, unsafe, fair, or not fair.",
+            "начинает замечать правила и причины: почему что-то можно, опасно, честно или нечестно.",
+            "bemerkt Regeln und Gründe: warum etwas erlaubt, unsicher, fair oder unfair ist.",
+            "empieza a notar reglas y razones: por qué algo está permitido, es peligroso, justo o injusto.",
+            "commence à remarquer les règles et les raisons : permis, dangereux, juste ou injuste.",
+            "começa a notar regras e razões: porque algo é permitido, inseguro, justo ou injusto.",
+            "开始注意规则和原因：为什么可以、不安全、公平或不公平。"),
+        signsByLang: loc(
+            ["asks why", "tests boundaries", "reacts strongly to fairness"],
+            ["спрашивает «почему»", "проверяет границы", "остро реагирует на справедливость"],
+            ["fragt warum", "testet Grenzen", "reagiert stark auf Fairness"],
+            ["pregunta por qué", "pone límites a prueba", "reacciona mucho ante lo justo"],
+            ["demande pourquoi", "teste les limites", "réagit fortement à l’équité"],
+            ["pergunta porquê", "testa limites", "reage muito à justiça"],
+            ["问为什么", "试探边界", "强烈在意公平"]),
+        skillsByLang: loc(
+            ["understands simple rules", "waits briefly", "names right and wrong"],
+            ["понимает простые правила", "немного ждёт", "называет можно и нельзя"],
+            ["versteht einfache Regeln", "wartet kurz", "benennt richtig und falsch"],
+            ["entiende reglas simples", "espera un poco", "nombra lo correcto e incorrecto"],
+            ["comprend des règles simples", "attend brièvement", "nomme le permis et l’interdit"],
+            ["entende regras simples", "espera um pouco", "diz o que pode e não pode"],
+            ["理解简单规则", "能短暂等待", "说出可以和不可以"]),
+        tips: loc(
+            "Keep rules short and consistent: hot, stop, hands away. Toddlers learn principles through repetition.",
+            "Держите правила короткими и одинаковыми: горячо, стоп, руки убираем. Принципы усваиваются через повтор.",
+            "Halte Regeln kurz und konsequent: heiß, stopp, Hände weg. Prinzipien entstehen durch Wiederholung.",
+            "Mantén reglas breves y constantes: caliente, alto, manos fuera. Los principios se aprenden repitiendo.",
+            "Gardez des règles courtes et constantes : chaud, stop, on enlève les mains. Les principes s’apprennent par répétition.",
+            "Mantenha regras curtas e consistentes: quente, para, mãos fora. Os princípios aprendem-se pela repetição.",
+            "规则要简短且一致：烫、停、手拿开。原则是在重复中学会的。")
+    ),
+    DevelopmentLeap(
+        scheduleID: 10,
+        names: loc("Systems", "Системы", "Systeme", "Sistemas", "Systèmes", "Sistemas", "系统"),
+        semanticColor: .lilac, isDone: false, isCurrent: false,
+        descriptions: loc(
+            "connects roles, rules, and routines into little models of the world: family, shop, doctor, home.",
+            "соединяет роли, правила и ритуалы в маленькие модели мира: семья, магазин, врач, дом.",
+            "verbindet Rollen, Regeln und Routinen zu kleinen Weltmodellen: Familie, Laden, Arzt, Zuhause.",
+            "conecta roles, reglas y rutinas en pequeños modelos del mundo: familia, tienda, médico, casa.",
+            "relie rôles, règles et routines en petits modèles du monde : famille, magasin, médecin, maison.",
+            "liga papéis, regras e rotinas em pequenos modelos do mundo: família, loja, médico, casa.",
+            "把角色、规则和流程连接成小小的世界模型：家庭、商店、医生、家。"),
+        signsByLang: loc(
+            ["role-plays daily life", "assigns roles", "uses longer pretend stories"],
+            ["играет в бытовые роли", "раздаёт роли", "придумывает более длинные сюжеты"],
+            ["spielt Alltag nach", "verteilt Rollen", "erfindet längere Geschichten"],
+            ["juega a la vida diaria", "asigna roles", "crea historias más largas"],
+            ["joue les scènes du quotidien", "attribue des rôles", "invente des histoires plus longues"],
+            ["brinca ao faz de conta diário", "atribui papéis", "cria histórias mais longas"],
+            ["模仿日常生活", "分配角色", "假装游戏情节更长"]),
+        skillsByLang: loc(
+            ["plays doctor or shop", "combines several rules", "explains what happens next"],
+            ["играет во врача или магазин", "сочетает несколько правил", "объясняет, что будет дальше"],
+            ["spielt Arzt oder Laden", "kombiniert mehrere Regeln", "erklärt, was als Nächstes passiert"],
+            ["juega al médico o a la tienda", "combina varias reglas", "explica qué pasa después"],
+            ["joue au docteur ou au magasin", "combine plusieurs règles", "explique la suite"],
+            ["brinca aos médicos ou às lojas", "combina várias regras", "explica o que vem a seguir"],
+            ["玩医生或商店游戏", "组合多条规则", "解释接下来会发生什么"]),
+        tips: loc(
+            "Pretend play is powerful now. A toy kitchen, doctor kit, or blocks helps build flexible thinking.",
+            "Сейчас особенно полезны ролевые игры. Кухня, набор врача или кубики помогают гибко мыслить.",
+            "Rollenspiel ist jetzt besonders stark. Küche, Arztkoffer oder Bausteine fördern flexibles Denken.",
+            "El juego simbólico es muy potente ahora. Cocinita, kit médico o bloques ayudan al pensamiento flexible.",
+            "Le jeu d’imitation est très riche maintenant. Cuisine, mallette de docteur ou cubes développent la pensée souple.",
+            "O faz de conta é muito poderoso agora. Cozinha, kit médico ou blocos ajudam o pensamento flexível.",
+            "现在假装游戏很有力量。玩具厨房、医生套装或积木能培养灵活思维。")
     ),
     ]
 }

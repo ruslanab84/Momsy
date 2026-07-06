@@ -130,7 +130,7 @@ final class TodayViewModel: ObservableObject {
         let leap = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, completedIDs: doneIDs)
         currentLeap = leap
         leapPhase = leap.map {
-            BabyAgeContext.leapPhase(for: $0, ageDays: BabyAgeContext.ageDays(birthDate: birth))
+            BabyAgeContext.leapPhase(for: $0, birthDate: birth)
         }
     }
 
@@ -156,8 +156,6 @@ final class TodayViewModel: ObservableObject {
     }
 
     func addSyncedFeeding(side: FeedingSide, durationMin: Int, amountMl: Int? = nil) {
-        let uid = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = FeedingLog(
             id: UUID().uuidString,
             startedAt: Date(),
@@ -165,8 +163,8 @@ final class TodayViewModel: ObservableObject {
             durationMin: durationMin,
             side: side,
             amountMl: amountMl,
-            addedBy: uid,
-            addedByName: name
+            addedBy: "",
+            addedByName: ""
         )
         Task { try? await syncRepo.addFeedingLog(log) }
     }
@@ -272,10 +270,8 @@ final class TodayViewModel: ObservableObject {
 
     private func pushDiaperToFirestore(_ entry: DiaperEntry) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = DiaperLog(id: entry.id.uuidString, loggedAt: entry.date,
-                            type: .wet, addedBy: uid, addedByName: name)
+                            type: .wet, addedBy: "", addedByName: "")
         Task { try? await BabySyncService().setLog(DiaperLogDTO(from: log), id: log.id, to: "diaperLogs") }
     }
 
@@ -336,8 +332,6 @@ final class TodayViewModel: ObservableObject {
 
     private func pushQuickEventToFirestore(id: UUID, kind: BlobKind, label: String, at date: Date = Date()) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         // Only quick events with a dedicated collection are synced. Anything else
         // is intentionally not written (the old `quickLogs` catch-all is removed).
         let collection: String
@@ -350,7 +344,7 @@ final class TodayViewModel: ObservableObject {
         }
         let log = QuickEventLog(id: id.uuidString, kind: kind.rawValue,
                                 loggedAt: date, label: label,
-                                addedBy: uid, addedByName: name)
+                                addedBy: "", addedByName: "")
         Task { try? await BabySyncService().setLog(QuickEventLogDTO(from: log), id: log.id, to: collection) }
     }
 

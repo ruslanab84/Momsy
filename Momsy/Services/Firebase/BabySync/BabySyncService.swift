@@ -1,3 +1,4 @@
+import FirebaseAuth
 import FirebaseFirestore
 
 final class BabySyncService {
@@ -54,7 +55,8 @@ final class BabySyncService {
     func addLog<T: Encodable>(_ log: T, to subcollection: String) async throws {
         guard hasPath else { return }
         let ref = collection(subcollection).document()
-        try ref.setData(from: log)
+        let payload = try await encodedPayloadWithAuthor(log)
+        try await ref.setData(payload)
     }
 
     /// Writes a log using the supplied stable id as the Firestore document id.
@@ -64,8 +66,8 @@ final class BabySyncService {
     /// instead of being silently dropped.
     func setLog<T: Encodable>(_ log: T, id: String, to subcollection: String) async throws {
         guard !id.isEmpty else { return }
+        var payload = try await encodedPayloadWithAuthor(log)
         guard hasPath else {
-            var payload = try Firestore.Encoder().encode(log)
             // `@ServerTimestamp updatedAt` encodes to a `FieldValue` sentinel that `UserDefaults`
             // can't persist; drop it here and let `replayPendingWrites` re-stamp a fresh
             // serverTimestamp. The path is still stamped so replay routes the write to the baby
@@ -75,7 +77,50 @@ final class BabySyncService {
                                           payload: payload, familyId: familyId, babyId: babyId)
             return
         }
-        try collection(subcollection).document(id).setData(from: log, merge: true)
+        try await collection(subcollection).document(id).setData(payload, merge: true)
+    }
+
+    private func encodedPayloadWithAuthor<T: Encodable>(_ log: T) async throws -> [String: Any] {
+        let payload = try Firestore.Encoder().encode(log)
+        guard SyncAuthorMetadata.requiresAuthor(in: payload) else { return payload }
+        return SyncAuthorMetadata.stamp(payload, author: await currentAuthorIdentity())
+    }
+
+    private func currentAuthorIdentity() async -> SyncAuthorIdentity? {
+        guard FirebaseBootstrapper.isConfigured else { return nil }
+        guard let user = Auth.auth().currentUser else { return nil }
+
+        let fallbackName = user.displayName ?? user.email ?? "User"
+        guard !familyId.isEmpty else {
+            return SyncAuthorIdentity(uid: user.uid, displayName: fallbackName)
+        }
+
+        if let cachedName = await SyncAuthorIdentityCache.shared.displayName(
+            familyId: familyId,
+            uid: user.uid
+        ) {
+            return SyncAuthorIdentity(uid: user.uid, displayName: cachedName)
+        }
+
+        if let memberName = try? await memberDisplayName(familyId: familyId, uid: user.uid) {
+            await SyncAuthorIdentityCache.shared.setDisplayName(
+                memberName,
+                familyId: familyId,
+                uid: user.uid
+            )
+            return SyncAuthorIdentity(uid: user.uid, displayName: memberName)
+        }
+
+        return SyncAuthorIdentity(uid: user.uid, displayName: fallbackName)
+    }
+
+    private func memberDisplayName(familyId: String, uid: String) async throws -> String? {
+        let snapshot = try await db.collection("families").document(familyId)
+            .collection("members").document(uid)
+            .getDocument()
+        guard let name = snapshot.data()?["name"] as? String else { return nil }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     // MARK: - Deletes & tombstones
@@ -167,7 +212,10 @@ final class BabySyncService {
                 // Re-stamp a server `updatedAt` at replay so the watermark sees the real
                 // write time (not the offline enqueue time). The sentinel was stripped at
                 // enqueue because `UserDefaults` can't persist a `FieldValue`.
-                var payload = entry.payload
+                var payload = SyncAuthorMetadata.stamp(
+                    entry.payload,
+                    author: await currentAuthorIdentity()
+                )
                 payload["updatedAt"] = FieldValue.serverTimestamp()
                 try await ActiveBaby.$syncTargetOverride.withValue(targetUUID) {
                     try await collection(entry.collection).document(entry.docId)

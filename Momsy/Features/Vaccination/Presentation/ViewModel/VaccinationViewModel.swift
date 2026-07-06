@@ -77,12 +77,10 @@ final class VaccinationViewModel: ObservableObject {
 
     private func pushVaccinationToFirestore(entry: VaccinationEntry, vaccineName: String) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = VaccinationLog(
             id: entry.id.uuidString, catalogId: entry.catalogId,
             doneDate: entry.doneDate, vaccineName: vaccineName,
-            notes: entry.notes, addedBy: uid, addedByName: name
+            notes: entry.notes, addedBy: "", addedByName: ""
         )
         Task { try? await BabySyncService().setLog(VaccinationLogDTO(from: log), id: log.id, to: "vaccinationLogs") }
     }

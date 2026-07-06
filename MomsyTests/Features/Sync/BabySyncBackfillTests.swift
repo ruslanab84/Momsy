@@ -7,6 +7,37 @@ struct BabySyncBackfillTests {
 
     private struct DummyLog: Encodable { let id: String; let amountMl: Int }
 
+    @Test func authorStampingOverwritesLogAuthorFields() {
+        let payload: [String: Any] = ["amountMl": 120, "addedBy": "", "addedByName": ""]
+        let stamped = SyncAuthorMetadata.stamp(
+            payload,
+            author: SyncAuthorIdentity(uid: "user-1", displayName: "Parent")
+        )
+
+        #expect((stamped["amountMl"] as? Int) == 120)
+        #expect((stamped["addedBy"] as? String) == "user-1")
+        #expect((stamped["addedByName"] as? String) == "Parent")
+    }
+
+    @Test func authorStampingLeavesNonAuthorPayloadAlone() {
+        let payload: [String: Any] = ["amountMl": 120]
+        let stamped = SyncAuthorMetadata.stamp(
+            payload,
+            author: SyncAuthorIdentity(uid: "user-1", displayName: "Parent")
+        )
+
+        #expect((stamped["amountMl"] as? Int) == 120)
+        #expect(!stamped.keys.contains("addedBy"))
+        #expect(!stamped.keys.contains("addedByName"))
+    }
+
+    @Test func authorIdentityTrimsAndFallsBackToUserName() {
+        let identity = SyncAuthorIdentity(uid: " user-1 ", displayName: "   ")
+
+        #expect(identity.uid == "user-1")
+        #expect(identity.displayName == "User")
+    }
+
     private func clearPath() {
         UserDefaults.standard.removeObject(forKey: kFamilyIdDefaultsKey)
         UserDefaults.standard.removeObject(forKey: kBabyIdDefaultsKey)

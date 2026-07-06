@@ -327,7 +327,7 @@ struct TodayViewModelTests {
         let vm = makeVM(profile: profile)
         await vm.loadLeap()
         #expect(vm.currentLeap?.id == 2)
-        #expect(vm.leapPhase == .settled) // hard window of leap #2 has passed by 9w
+        #expect(vm.leapPhase == .consolidation) // hard window of leap #2 has passed by 9w
     }
 
     @Test("newborn has no active leap, so the badge and card are hidden")
@@ -340,14 +340,20 @@ struct TodayViewModelTests {
         #expect(vm.currentLeapName == nil)
     }
 
-    @Test("a baby at a leap's onset is in the stormy phase on day 1")
-    func babyAtOnsetIsStormy() async throws {
+    @Test("a baby at a leap's onset is in the hard-days phase on day 1")
+    func babyAtOnsetIsHardDays() async throws {
         // Leap 1 (week 5) surfaces 1 week early → onset at day 28.
         let birth = Calendar.current.date(byAdding: .day, value: -28, to: Date())!
         let vm = makeVM(profile: BabyProfile(name: "Test", birthDate: birth))
         await vm.loadLeap()
         let leap1HardDays = DevelopmentLeap.catalog.first { $0.id == 1 }!.hardDays
         #expect(vm.currentLeap?.id == 1)
-        #expect(vm.leapPhase == .stormy(day: 1, total: leap1HardDays))
+        guard case .hardDays(let day, let total, _, _, _, let remaining)? = vm.leapPhase else {
+            Issue.record("Expected hard days phase")
+            return
+        }
+        #expect(day == 1)
+        #expect(total == leap1HardDays)
+        #expect(remaining == leap1HardDays)
     }
 }

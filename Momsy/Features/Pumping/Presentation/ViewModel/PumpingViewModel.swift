@@ -98,13 +98,11 @@ final class PumpingViewModel: ObservableObject {
 
     private func pushPumpingToFirestore(entry: PumpingEntry) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = PumpingLog(
             id: entry.id.uuidString, date: entry.date,
             durationSeconds: entry.durationSeconds, side: entry.side.rawValue,
             volumeML: entry.volumeML, endDate: entry.endDate,
-            addedBy: uid, addedByName: name
+            addedBy: "", addedByName: ""
         )
         Task { try? await BabySyncService().setLog(PumpingLogDTO(from: log), id: log.id, to: "pumpingLogs") }
     }

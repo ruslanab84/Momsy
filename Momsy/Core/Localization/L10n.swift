@@ -466,6 +466,9 @@ struct L10n {
     var leapSettled: String     { s("calmer days now — new skills emerging ✿", "сейчас спокойнее — появляются новые навыки ✿", "ruhigere Tage — neue Fähigkeiten zeigen sich ✿", "días más tranquilos — surgen nuevas habilidades ✿", "des jours plus calmes — de nouvelles compétences apparaissent ✿", "dias mais calmos agora — surgem novas competências ✿", "现在平静些了——新技能正在显现 ✿") }
     var whatYouNotice: String   { s("WHAT YOU NOTICE",   "ЧТО ЗАМЕТНО",      "WAS SIE BEMERKEN", "LO QUE NOTAS", "CE QUE VOUS REMARQUEZ", "O QUE NOTA", "你会注意到") }
     var comingSoon: String      { s("COMING SOON",       "СКОРО НАУЧИТСЯ",   "KOMMT BALD",      "PRONTO", "BIENTÔT", "EM BREVE", "即将学会") }
+    var leapPhaseSoon: String { s("soon", "скоро", "bald", "pronto", "bientôt", "em breve", "即将开始") }
+    var leapPhaseHardDays: String { s("hard days", "сложные дни", "schwere Tage", "días difíciles", "jours difficiles", "dias difíceis", "难熬阶段") }
+    var leapPhaseConsolidation: String { s("consolidation", "закрепление", "Festigung", "consolidación", "consolidation", "consolidação", "巩固期") }
     /// Approximate duration in weeks, pluralized per language. `days` rounds to weeks (min 1).
     private func weeksApprox(days: Int) -> String {
         let w = max(1, Int((Double(days) / 7.0).rounded()))
@@ -506,10 +509,101 @@ struct L10n {
 
     func hardDaysProgress(day: Int, total: Int) -> String { s("Day \(day) of ~\(total) hard days.", "День \(day) из ~\(total) трудных.", "Tag \(day) von ~\(total) schweren.", "Día \(day) de ~\(total) días difíciles.", "Jour \(day) sur ~\(total) jours difficiles.", "Dia \(day) de ~\(total) dias difíceis.", "第 \(day) 天 / 约 \(total) 个难熬的日子。") }
     func currentLeapTitle(id: Int) -> String { s("Now — leap #\(id)", "Сейчас — скачок №\(id)", "Jetzt — Schub №\(id)", "Ahora — salto n.º \(id)", "Maintenant — bond n° \(id)", "Agora — salto n.º \(id)", "现在——飞跃期 #\(id)") }
+    func nextLeapTitle(id: Int) -> String { s("Next — leap #\(id)", "Дальше — скачок №\(id)", "Als Nächstes — Schub №\(id)", "Siguiente — salto n.º \(id)", "Ensuite — bond n° \(id)", "A seguir — salto n.º \(id)", "下一个——飞跃期 #\(id)") }
     func weekPill(n: Int) -> String { s("week \(n)", "\(n)-я неделя", "Woche \(n)", "semana \(n)", "semaine \(n)", "semana \(n)", "第 \(n) 周") }
     func weekRow(n: Int) -> String  { s("\(n) wk",   "\(n) нед",     "\(n) W",      "\(n) sem", "\(n) sem", "\(n) sem", "\(n) 周") }
     func leapAhead(week: Int) -> String { s("ahead · week \(week)", "впереди · \(week)-я неделя", "bald · Woche \(week)", "próximo · semana \(week)", "à venir · semaine \(week)", "a chegar · semana \(week)", "即将 · 第 \(week) 周") }
     func forLeapTip(name: String) -> String { s("For leap «\(name)»", "Для скачка «\(name)»", "Für Schub «\(name)»", "Para el salto «\(name)»", "Pour le bond «\(name)»", "Para o salto «\(name)»", "针对飞跃期「\(name)」") }
+    func leapStartsOn(_ date: String) -> String {
+        s("starts \(date)", "начнётся \(date)", "startet \(date)", "empieza \(date)", "commence \(date)", "começa \(date)", "\(date) 开始")
+    }
+    func leapStartsIn(days: Int, date: String) -> String {
+        s("starts \(date) · in \(days)d", "начнётся \(date) · через \(days) дн.", "startet \(date) · in \(days) T.", "empieza \(date) · en \(days) d", "commence \(date) · dans \(days) j", "começa \(date) · em \(days) d", "\(date) 开始 · 还有 \(days) 天")
+    }
+    var leapPeakToday: String {
+        s("peak today", "пик сегодня", "Höhepunkt heute", "pico hoy", "pic aujourd’hui", "pico hoje", "今天是高峰")
+    }
+    func leapPeakIn(days: Int) -> String {
+        s("peak in \(days)d", "пик через \(days) дн.", "Höhepunkt in \(days) T.", "pico en \(days) d", "pic dans \(days) j", "pico em \(days) d", "高峰还有 \(days) 天")
+    }
+    func leapHardDaysLeft(days: Int) -> String {
+        s("about \(days)d left", "осталось примерно \(days) дн.", "noch etwa \(days) T.", "quedan unos \(days) d", "encore environ \(days) j", "faltam cerca de \(days) d", "大约还剩 \(days) 天")
+    }
+    var leapConsolidationDetail: String {
+        s("hard part passed · practicing skills", "сложная часть позади · закрепляет навыки", "das Schwere ist vorbei · übt Fähigkeiten", "lo difícil pasó · practica habilidades", "le plus dur est passé · les compétences se fixent", "a parte difícil passou · pratica competências", "最难的部分过去了 · 正在练习技能")
+    }
+    var leapCompletedDetail: String {
+        s("completed", "завершён", "abgeschlossen", "completado", "terminé", "concluído", "已完成")
+    }
+    var leapCalendarWeekMode: String {
+        s("Week", "Неделя", "Woche", "Semana", "Semaine", "Semana", "周")
+    }
+    var leapCalendarMonthMode: String {
+        s("Month", "Месяц", "Monat", "Mes", "Mois", "Mês", "月")
+    }
+    var leapCalmDay: String {
+        s("Calm", "Спокойно", "Ruhig", "Calma", "Calme", "Calmo", "平静")
+    }
+    var leapHardDay: String {
+        s("Hard", "Сложно", "Schwer", "Difícil", "Difficile", "Difícil", "困难")
+    }
+    var leapPeakDay: String {
+        s("Peak", "Пик", "Höhepunkt", "Pico", "Pic", "Pico", "高峰")
+    }
+    var leapRecoveryDay: String {
+        s("Recovery", "Восстановление", "Erholung", "Recuperación", "Récupération", "Recuperação", "恢复")
+    }
+    var leapCheckInTitle: String {
+        s("Daily check-in", "Дневной чек-ин", "Täglicher Check-in", "Registro diario", "Point du jour", "Check-in diário", "每日记录")
+    }
+    var leapCheckInSubtitle: String {
+        s("Mark what you noticed today.", "Отметьте, что заметили сегодня.", "Markiere, was du heute bemerkt hast.", "Marca lo que notaste hoy.", "Notez ce que vous avez remarqué aujourd’hui.", "Marque o que notou hoje.", "记录今天观察到的情况。")
+    }
+    var leapTodayActionsTitle: String {
+        s("What to do today", "Что делать сегодня", "Was heute hilft", "Qué hacer hoy", "Que faire aujourd’hui", "O que fazer hoje", "今天可以做什么")
+    }
+    var leapActionPlayTitle: String {
+        s("Play", "Игра", "Spiel", "Juego", "Jeu", "Brincar", "游戏")
+    }
+    var leapActionSleepTitle: String {
+        s("Sleep", "Сон", "Schlaf", "Sueño", "Sommeil", "Sono", "睡眠")
+    }
+    var leapActionContactTitle: String {
+        s("Contact", "Контакт", "Nähe", "Contacto", "Contact", "Contacto", "亲密接触")
+    }
+    var leapActionFeedingTitle: String {
+        s("Feeding", "Кормление", "Füttern", "Toma", "Tétée", "Mamada", "喂养")
+    }
+    var leapActionSleepHard: String {
+        s("Shorten wake windows by 10-15 min and keep the room quieter.", "Сократите окна бодрствования на 10-15 мин и сделайте комнату тише.", "Verkürze Wachfenster um 10-15 Min. und halte den Raum ruhiger.", "Acorta las ventanas de vigilia 10-15 min y baja estímulos.", "Réduisez les temps d’éveil de 10-15 min et gardez la pièce plus calme.", "Reduza as janelas acordado em 10-15 min e deixe o quarto mais calmo.", "清醒时间缩短 10-15 分钟，房间保持更安静。")
+    }
+    var leapActionSleepCalm: String {
+        s("Keep the bedtime sequence steady: same order, same cues.", "Держите ритуал сна стабильным: тот же порядок и сигналы.", "Halte die Schlafroutine stabil: gleiche Reihenfolge, gleiche Signale.", "Mantén la rutina de dormir estable: mismo orden, mismas señales.", "Gardez le rituel du coucher stable : même ordre, mêmes repères.", "Mantenha a rotina de sono estável: mesma ordem, mesmos sinais.", "保持睡前流程稳定：同样顺序、同样提示。")
+    }
+    var leapActionContact: String {
+        s("Offer more carrying and eye contact; it does not spoil during a leap.", "Чаще берите на руки и ловите взгляд — во время скачка это не балует.", "Biete mehr Tragen und Blickkontakt an; das verwöhnt in einem Schub nicht.", "Ofrece más brazos y contacto visual; en un salto no malcría.", "Proposez plus de portage et de regard; pendant un bond, cela ne gâte pas.", "Ofereça mais colo e contacto visual; durante um salto não estraga.", "多抱抱、多眼神交流；飞跃期这样不会惯坏。")
+    }
+    var leapActionFeeding: String {
+        s("Offer smaller calm feeds and do not force volume when appetite shifts.", "Предлагайте меньше и спокойнее; не давите на объём, если аппетит скачет.", "Biete kleinere ruhige Mahlzeiten an und erzwinge keine Menge.", "Ofrece tomas pequeñas y tranquilas; no fuerces cantidad si cambia el apetito.", "Proposez de petites tétées calmes sans forcer les quantités.", "Ofereça mamadas menores e calmas; não force quantidade se o apetite mudar.", "少量、安静地喂；食欲变化时不要强迫量。")
+    }
+    var leapInsightTitle: String {
+        s("From your logs", "По вашим записям", "Aus deinen Daten", "Según tus registros", "D’après vos notes", "Pelos seus registos", "根据记录")
+    }
+    var leapSleepInsight: String {
+        s("Sleep looks shorter during this leap. That can happen; protect an earlier, calmer wind-down today.", "Сон стал короче во время скачка. Так бывает; сегодня лучше начать спокойное укладывание раньше.", "Der Schlaf wirkt in diesem Schub kürzer. Das kann passieren; beginne heute früher und ruhiger.", "El sueño parece más corto en este salto. Puede pasar; hoy conviene una bajada más temprana y tranquila.", "Le sommeil semble plus court pendant ce bond. Cela arrive; commencez l’apaisement plus tôt aujourd’hui.", "O sono parece mais curto neste salto. Pode acontecer; hoje comece a acalmar mais cedo.", "这次飞跃期睡眠看起来变短了。这可能发生；今天早点安静进入睡眠流程。")
+    }
+    var leapFeedingInsight: String {
+        s("Feeding rhythm shifted during the leap. Offer calmly and follow cues instead of pushing a fixed amount.", "Ритм кормлений изменился во время скачка. Предлагайте спокойно и идите по сигналам, не по фиксированному объёму.", "Der Fütterrhythmus hat sich im Schub verändert. Biete ruhig an und folge den Signalen statt festen Mengen.", "El ritmo de tomas cambió durante el salto. Ofrece con calma y sigue sus señales.", "Le rythme des tétées a changé pendant le bond. Proposez calmement et suivez les signaux.", "O ritmo das mamadas mudou durante o salto. Ofereça com calma e siga os sinais.", "飞跃期喂养节奏有变化。安静提供，跟随信号，不强求固定量。")
+    }
+    var leapNormalDoctorTitle: String {
+        s("Normal or doctor?", "Это нормально / когда к врачу", "Normal oder Arzt?", "Normal o médico", "Normal ou médecin ?", "Normal ou médico?", "正常还是就医？")
+    }
+    var leapNormalText: String {
+        s("More fussiness, clinginess, short naps, and uneven appetite can be normal during a leap.", "Больше капризов, просьб на руки, короткие сны и неровный аппетит во время скачка часто нормальны.", "Mehr Quengeln, Nähebedürfnis, kurze Nickerchen und wechselnder Appetit können normal sein.", "Más irritabilidad, brazos, siestas cortas y apetito irregular pueden ser normales.", "Plus d’agitation, de besoin des bras, de siestes courtes et d’appétit irrégulier peut être normal.", "Mais irritação, colo, sestas curtas e apetite irregular podem ser normais.", "更烦躁、更黏人、小睡变短、食欲不稳在飞跃期可能是正常的。")
+    }
+    var leapDoctorText: String {
+        s("Call a clinician for fever, dehydration signs, breathing trouble, unusual lethargy, persistent vomiting, or crying that feels different.", "Обратитесь к врачу при температуре, признаках обезвоживания, проблемах с дыханием, необычной вялости, постоянной рвоте или непривычном плаче.", "Wende dich an eine Praxis bei Fieber, Dehydrierungszeichen, Atemproblemen, ungewöhnlicher Schläfrigkeit, anhaltendem Erbrechen oder anderem Schreien.", "Consulta por fiebre, signos de deshidratación, dificultad respiratoria, letargo inusual, vómitos persistentes o llanto diferente.", "Appelez un soignant en cas de fièvre, signes de déshydratation, gêne respiratoire, grande somnolence, vomissements persistants ou pleurs inhabituels.", "Contacte um profissional se houver febre, sinais de desidratação, dificuldade respiratória, letargia invulgar, vómitos persistentes ou choro diferente.", "如有发热、脱水迹象、呼吸困难、异常嗜睡、持续呕吐或哭声明显不同，请联系医生。")
+    }
 
     // MARK: — Tracking
     var weight: String          { s("Weight",        "Вес",           "Gewicht",       "Peso",   "Poids", "Peso", "体重") }

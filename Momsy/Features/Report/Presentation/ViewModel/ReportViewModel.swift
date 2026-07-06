@@ -198,11 +198,9 @@ final class ReportViewModel: ObservableObject {
 
     private func pushDoctorVisitToFirestore(_ visit: DoctorVisit) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = DoctorVisitLog(
             id: visit.id.uuidString, date: visit.date,
-            addedBy: uid, addedByName: name
+            addedBy: "", addedByName: ""
         )
         Task { try? await BabySyncService().setLog(DoctorVisitLogDTO(from: log), id: log.id, to: "doctorVisitLogs") }
     }

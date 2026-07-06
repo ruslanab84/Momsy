@@ -153,8 +153,8 @@ final class QuickLogCoordinator {
             durationMin: entry.durationMinutes,
             side:        entry.side,
             amountMl:    entry.milliliters,
-            addedBy:     UserDefaults.standard.string(forKey: "uid") ?? "",
-            addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
+            addedBy:     "",
+            addedByName: ""
         )
         Task { try? await BabySyncService().setLog(FeedingLogDTO(from: log), id: log.id, to: "feedingLogs") }
     }
@@ -167,8 +167,8 @@ final class QuickLogCoordinator {
             endedAt:     entry.endDate,
             durationMin: entry.durationMinutes,
             quality:     entry.quality,
-            addedBy:     UserDefaults.standard.string(forKey: "uid") ?? "",
-            addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
+            addedBy:     "",
+            addedByName: ""
         )
         Task {
             try? await withBabyScope(babyId) {
@@ -183,8 +183,8 @@ final class QuickLogCoordinator {
             id:          entry.id.uuidString,
             loggedAt:    entry.date,
             type:        .wet,
-            addedBy:     UserDefaults.standard.string(forKey: "uid") ?? "",
-            addedByName: UserDefaults.standard.string(forKey: "displayName") ?? ""
+            addedBy:     "",
+            addedByName: ""
         )
         Task { try? await BabySyncService().setLog(DiaperLogDTO(from: log), id: log.id, to: "diaperLogs") }
     }

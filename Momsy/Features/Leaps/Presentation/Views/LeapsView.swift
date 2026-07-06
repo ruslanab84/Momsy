@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LeapsView: View {
     @StateObject private var vm: LeapsViewModel
+    @State private var calendarScope: LeapCalendarScope = .week
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
 
@@ -14,6 +15,11 @@ struct LeapsView: View {
             VStack(spacing: 12) {
                 header
                 currentLeapCard
+                calendarGridSection
+                todayActionsSection
+                checkInSection
+                behaviorInsightsSection
+                normalDoctorCard
                 timelineSection
                 tipCard
             }
@@ -29,7 +35,9 @@ struct LeapsView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             BBSectionLabel(text: loc.strings.developmentalLeaps)
-            Text(loc.strings.currentLeapTitle(id: vm.currentLeap.id))
+            Text(vm.currentLeap.isCurrent
+                 ? loc.strings.currentLeapTitle(id: vm.currentLeap.id)
+                 : loc.strings.nextLeapTitle(id: vm.currentLeap.id))
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundColor(.bbInk)
             leapSubtitle
@@ -39,8 +47,8 @@ struct LeapsView: View {
 
     @ViewBuilder
     private var leapSubtitle: some View {
-        switch vm.leapPhase {
-        case .stormy(let day, let total):
+        switch vm.currentLeapPhase {
+        case .hardDays(let day, let total, _, _, _, _):
             HStack(spacing: 4) {
                 Text(loc.strings.hardDaysProgress(day: day, total: total))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -50,13 +58,16 @@ struct LeapsView: View {
                     .italic()
                     .foregroundColor(.bbCoralDeep)
             }
-        case .settled:
+        case .consolidation:
             Text(loc.strings.leapSettled)
                 .font(.custom("Georgia", size: 17))
                 .italic()
                 .foregroundColor(.bbCoralDeep)
-        case nil:
-            EmptyView()
+        case .upcoming, .completed:
+            Text(vm.leapPhaseDetail(vm.currentLeapPhase))
+                .font(.custom("Georgia", size: 17))
+                .italic()
+                .foregroundColor(.bbCoralDeep)
         }
     }
 
@@ -79,6 +90,11 @@ struct LeapsView: View {
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(Color.bbInk.opacity(0.7))
                 .fixedSize(horizontal: false, vertical: true)
+
+            LeapPhaseBadge(
+                title: vm.leapPhaseTitle(vm.currentLeapPhase),
+                detail: vm.leapPhaseDetail(vm.currentLeapPhase)
+            )
 
             HStack(spacing: 8) {
                 LeapInfoBlock(
@@ -106,13 +122,101 @@ struct LeapsView: View {
 
     // MARK: - Timeline
 
+    private var calendarGridSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                BBSectionLabel(text: loc.strings.leapCalendar)
+                Spacer()
+                Picker(loc.strings.leapCalendar, selection: $calendarScope) {
+                    ForEach(LeapCalendarScope.allCases) { scope in
+                        Text(vm.calendarScopeTitle(scope)).tag(scope)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 154)
+            }
+
+            LeapCalendarGrid(
+                days: vm.calendarDays(scope: calendarScope),
+                phaseTitle: vm.calendarPhaseTitle
+            )
+        }
+        .bbCard(pad: 14)
+    }
+
+    private var todayActionsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            BBSectionLabel(text: loc.strings.leapTodayActionsTitle)
+            VStack(spacing: 8) {
+                ForEach(vm.todayActions) { action in
+                    LeapTodayActionRow(action: action)
+                }
+            }
+        }
+        .bbCard(pad: 14, bg: Color.bbButter.opacity(0.24))
+    }
+
+    private var checkInSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(loc.strings.leapCheckInTitle)
+                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                .foregroundColor(.bbInk)
+            Text(loc.strings.leapCheckInSubtitle)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 128), spacing: 8)], spacing: 8) {
+                ForEach(LeapCheckInSymptom.allCases) { symptom in
+                    LeapSymptomChip(
+                        title: vm.symptomTitle(symptom),
+                        systemImage: symptom.systemImage,
+                        isSelected: vm.selectedSymptoms.contains(symptom)
+                    ) {
+                        Task { await vm.toggleSymptom(symptom) }
+                    }
+                }
+            }
+        }
+        .bbCard(pad: 14)
+    }
+
+    @ViewBuilder
+    private var behaviorInsightsSection: some View {
+        if !vm.behaviorInsights.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(vm.behaviorInsights) { insight in
+                    LeapInsightRow(insight: insight)
+                }
+            }
+            .bbCard(pad: 14, bg: Color.bbSky.opacity(0.18))
+        }
+    }
+
+    private var normalDoctorCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            BBSectionLabel(text: loc.strings.leapNormalDoctorTitle)
+            Text(loc.strings.leapNormalText)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+                .fixedSize(horizontal: false, vertical: true)
+            Divider()
+            Text(loc.strings.leapDoctorText)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundColor(.bbCoralDeep)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .bbCard(pad: 14, bg: Color.bbRose.opacity(0.18))
+    }
+
     private var timelineSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             BBSectionLabel(text: loc.strings.leapCalendar)
             VStack(spacing: 0) {
                 ForEach(vm.leaps) { leap in
+                    let phase = vm.leapPhase(for: leap)
                     LeapTimelineRow(
                         leap: leap,
+                        phaseTitle: vm.leapPhaseTitle(phase),
+                        phaseDetail: vm.leapPhaseDetail(phase),
                         isExpanded: vm.expandedLeapID == leap.id,
                         isLast: leap.id == vm.leaps.last?.id
                     ) {
@@ -141,6 +245,181 @@ struct LeapsView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .bbCard(pad: 14, bg: Color.bbMint.opacity(0.3))
+    }
+}
+
+// MARK: - Leap Phase Badge
+
+private struct LeapPhaseBadge: View {
+    let title: String
+    let detail: String
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(title.uppercased())
+                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                .foregroundColor(.bbCoralDeep)
+                .kerning(0.6)
+            if !detail.isEmpty {
+                Text(detail)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .background(Color.white.opacity(0.75))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+// MARK: - Calendar Grid
+
+private struct LeapCalendarGrid: View {
+    let days: [LeapCalendarDay]
+    let phaseTitle: (LeapCalendarDayPhase) -> String
+
+    private let columns = Array(repeating: GridItem(.flexible(minimum: 28), spacing: 6), count: 7)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 6) {
+                ForEach(days) { day in
+                    LeapCalendarDayCell(day: day)
+                }
+            }
+            HStack(spacing: 10) {
+                ForEach([LeapCalendarDayPhase.calm, .hard, .peak, .recovery], id: \.self) { phase in
+                    LeapLegendItem(title: phaseTitle(phase), color: phase.color)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+private struct LeapCalendarDayCell: View {
+    let day: LeapCalendarDay
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Text("\(day.dayNumber)")
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .foregroundColor(day.phase == .peak ? .white : .bbInk)
+                .frame(maxWidth: .infinity)
+                .frame(height: 34)
+                .background(day.phase.color)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .stroke(day.isToday ? Color.bbInk : Color.clear, lineWidth: 2)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+            if day.hasCheckIn {
+                Circle()
+                    .fill(Color.bbMintDeep)
+                    .frame(width: 7, height: 7)
+                    .padding(4)
+            }
+        }
+        .accessibilityLabel("\(day.dayNumber)")
+    }
+}
+
+private struct LeapLegendItem: View {
+    let title: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+            Text(title)
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+    }
+}
+
+// MARK: - Personalized Blocks
+
+private struct LeapTodayActionRow: View {
+    let action: LeapTodayAction
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: action.systemImage)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.bbButterDeep)
+                .frame(width: 24, height: 24)
+                .background(Color.white.opacity(0.72))
+                .clipShape(Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(action.title)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbInk)
+                Text(action.detail)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+}
+
+private struct LeapSymptomChip: View {
+    let title: String
+    let systemImage: String
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 6) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 12, weight: .bold))
+                Text(title)
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .minimumScaleFactor(0.85)
+                Spacer(minLength: 0)
+            }
+            .foregroundColor(isSelected ? .white : .bbInk)
+            .padding(.vertical, 9)
+            .padding(.horizontal, 10)
+            .frame(minHeight: 42)
+            .background(isSelected ? Color.bbSurface : Color.bbCreamSoft)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct LeapInsightRow: View {
+    let insight: LeapBehaviorInsight
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: insight.systemImage)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(.bbSkyDeep)
+                .frame(width: 28, height: 28)
+                .background(Color.white.opacity(0.75))
+                .clipShape(Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(insight.title)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbSkyDeep)
+                Text(insight.detail)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 
@@ -175,6 +454,8 @@ private struct LeapInfoBlock: View {
 
 private struct LeapTimelineRow: View {
     let leap: DevelopmentLeap
+    let phaseTitle: String
+    let phaseDetail: String
     let isExpanded: Bool
     let isLast: Bool
     let onTap: () -> Void
@@ -244,17 +525,24 @@ private struct LeapTimelineRow: View {
 
                     Group {
                         if leap.isCurrent {
-                            Text(loc.strings.leapInProgressStatus)
+                            Text(phaseTitle)
                                 .foregroundColor(.bbCoralDeep)
                         } else if leap.isDone {
-                            Text(loc.strings.leapCompletedStatus)
+                            Text(phaseTitle)
                                 .foregroundColor(.bbMintDeep)
                         } else {
-                            Text(loc.strings.leapAhead(week: leap.week))
+                            Text(phaseTitle)
                                 .foregroundColor(.bbInkMute)
                         }
                     }
                     .font(.system(size: 11, weight: .bold, design: .rounded))
+
+                    if !phaseDetail.isEmpty {
+                        Text(phaseDetail)
+                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                            .foregroundColor(.bbInkMute)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
 
                     if isExpanded {
                         VStack(alignment: .leading, spacing: 8) {
@@ -317,6 +605,21 @@ private struct MiniList: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private extension LeapCalendarDayPhase {
+    var color: Color {
+        switch self {
+        case .calm:
+            return Color.bbCreamSoft
+        case .hard:
+            return Color.bbCoral.opacity(0.46)
+        case .peak:
+            return Color.bbCoralDeep
+        case .recovery:
+            return Color.bbMint.opacity(0.55)
+        }
     }
 }
 

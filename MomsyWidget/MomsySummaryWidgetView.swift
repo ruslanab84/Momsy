@@ -7,8 +7,6 @@ private let bbInk     = Color(red: 0.239, green: 0.165, blue: 0.125)
 private let bbInkSoft = Color(red: 0.420, green: 0.329, blue: 0.275)
 private let bbCream   = Color(red: 1.0,   green: 0.965, blue: 0.925)
 
-private let leapWeeks = [5, 8, 12, 15, 19, 26, 37, 46, 55]
-
 struct MomsySummaryWidgetView: View {
     let entry: MomsyWidgetEntry
 
@@ -21,7 +19,7 @@ struct MomsySummaryWidgetView: View {
     private var hasLeap: Bool {
         guard let birth = entry.babyBirthDate else { return false }
         let weeks = Calendar.current.dateComponents([.weekOfYear], from: birth, to: .now).weekOfYear ?? 0
-        return leapWeeks.contains(where: { abs($0 - weeks) <= 1 })
+        return DevelopmentLeapSchedule.weeks.contains(where: { abs($0 - weeks) <= DevelopmentLeapSchedule.lookaheadWeeks })
     }
 
     private var lastSleepDuration: String? {

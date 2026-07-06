@@ -19,6 +19,7 @@
 		0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */; };
 		0BABF1270000000000000001 /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1270000000000000002 /* LanguageTests.swift */; };
 		0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */; };
+		1D0A7E115EA9B00100000001 /* DevelopmentLeapSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0A7E115EA9B00100000002 /* DevelopmentLeapSchedule.swift */; };
 		1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
@@ -29,7 +30,6 @@
 		443C7EF01C216B989D605CE2 /* MockBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50479E8852BDAA636377733 /* MockBabyRepository.swift */; };
 		4BACDEB740F77369DB5F5A01 /* MockAnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */; };
 		5147AD29220EE4C99A2BADF1 /* SleepForecastEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B580BA4F6EA3262893A194D /* SleepForecastEngineTests.swift */; };
-		A1B2C3D4E5F60718293A4B5C /* SleepDayWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5D /* SleepDayWindowTests.swift */; };
 		56A4C28EC62F43A96F2D8DA4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9B50B0C5B463D402F0ABBAD /* Foundation.framework */; };
 		5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */; };
 		5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */; };
@@ -44,9 +44,10 @@
 		8FF4DECAE6F4B06FFD6E7189 /* MockPushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */; };
 		9CBCB9DF036CA6355130F76C /* MomsyWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */; };
 		9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */; };
-		A9F0E002A9F0E002A9F0E002 /* AppPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */; };
+		A1B2C3D4E5F60718293A4B5C /* SleepDayWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5D /* SleepDayWindowTests.swift */; };
 		A5522FF4A6C0AF27DC5EF07E /* MockSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */; };
 		A63165E2B06D8E9D3DC6D060 /* MockDailyTipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */; };
+		A9F0E002A9F0E002A9F0E002 /* AppPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */; };
 		AA001122CC33DD44EE55FF65 /* FeedingLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */; };
 		AA001122CC33DD44EE55FF67 /* FeedingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001122CC33DD44EE55FF66 /* FeedingActivityAttributes.swift */; };
 		AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */; };
@@ -156,6 +157,7 @@
 		153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetProvider.swift; sourceTree = "<group>"; };
 		1C4A5ACFF0B19C867F09310A /* MockSoundEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundEngine.swift; sourceTree = "<group>"; };
 		1C50DB4AF650A300CDE7D8BA /* MomsyWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MomsyWidget.entitlements; sourceTree = "<group>"; };
+		1D0A7E115EA9B00100000002 /* DevelopmentLeapSchedule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DevelopmentLeapSchedule.swift; path = Momsy/Core/Domain/DevelopmentLeapSchedule.swift; sourceTree = SOURCE_ROOT; };
 		1FBC13D67DAB3C192859429B /* GeminiDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GeminiDailyTipService.swift; sourceTree = "<group>"; };
 		27CCA3ED5F2ECE7D8505B730 /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
@@ -193,8 +195,8 @@
 		990B4C0F2CAF36C3F93A25A2 /* DailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipService.swift; sourceTree = "<group>"; };
 		99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
-		A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B5D /* SleepDayWindowTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepDayWindowTests.swift; sourceTree = "<group>"; };
+		A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
 		A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppPersistenceTests.swift; sourceTree = "<group>"; };
 		AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingLiveActivityView.swift; sourceTree = "<group>"; };
 		AA001122CC33DD44EE55FF66 /* FeedingActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingActivityAttributes.swift; path = Momsy/Core/Widget/FeedingActivityAttributes.swift; sourceTree = "<group>"; };
@@ -399,14 +401,6 @@
 			path = Localization;
 			sourceTree = "<group>";
 		};
-		A9F0E003A9F0E003A9F0E003 /* Persistence */ = {
-			isa = PBXGroup;
-			children = (
-				A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */,
-			);
-			path = Persistence;
-			sourceTree = "<group>";
-		};
 		100C67B934D28C1B553835F3 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -540,6 +534,14 @@
 				479F984578780BA8520D9CC7 /* Prompts */,
 			);
 			name = Domain;
+			sourceTree = "<group>";
+		};
+		A9F0E003A9F0E003A9F0E003 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */,
+			);
+			path = Persistence;
 			sourceTree = "<group>";
 		};
 		AA9D8473BEC847159E9AAAA5 /* MomMood */ = {
@@ -725,6 +727,7 @@
 				D7C1A0B2E3F40516A7B8C9D1 /* MomsyStandByWidgetView.swift */,
 				BB001122CC33DD44EE55FF60 /* MomsySleepWidgetView.swift */,
 				BB001122CC33DD44EE55FF62 /* MomsySummaryWidgetView.swift */,
+				1D0A7E115EA9B00100000002 /* DevelopmentLeapSchedule.swift */,
 				AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */,
 				CC001122CC33DD44EE55FF71 /* SharedActivityUI.swift */,
 				CC001122CC33DD44EE55FF73 /* SleepLiveActivityView.swift */,
@@ -735,14 +738,6 @@
 				3BBE7E66563E0F26A2DFF70C /* Info.plist */,
 			);
 			path = MomsyWidget;
-			sourceTree = "<group>";
-		};
-		FE11AA03FE11AA03FE11AA03 /* Vaccination */ = {
-			isa = PBXGroup;
-			children = (
-				FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */,
-			);
-			path = Vaccination;
 			sourceTree = "<group>";
 		};
 		F1AEB007F1AEB007F1AEB003 /* Services */ = {
@@ -759,6 +754,14 @@
 				F1AEB007F1AEB007F1AEB002 /* FirebaseBootstrapperTests.swift */,
 			);
 			path = Firebase;
+			sourceTree = "<group>";
+		};
+		FE11AA03FE11AA03FE11AA03 /* Vaccination */ = {
+			isa = PBXGroup;
+			children = (
+				FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */,
+			);
+			path = Vaccination;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -980,6 +983,7 @@
 				03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */,
 				BB001122CC33DD44EE55FF61 /* MomsySleepWidgetView.swift in Sources */,
 				BB001122CC33DD44EE55FF63 /* MomsySummaryWidgetView.swift in Sources */,
+				1D0A7E115EA9B00100000001 /* DevelopmentLeapSchedule.swift in Sources */,
 				AA001122CC33DD44EE55FF65 /* FeedingLiveActivityView.swift in Sources */,
 				AA001122CC33DD44EE55FF67 /* FeedingActivityAttributes.swift in Sources */,
 				BB001122CC33DD44EE55FF80 /* SleepActivityAttributes.swift in Sources */,
@@ -1089,7 +1093,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = MomsyWidget/MomsyWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MomsyWidget/Info.plist;
@@ -1122,7 +1126,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = MomsyWidget/MomsyWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MomsyWidget/Info.plist;
@@ -1274,7 +1278,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1314,7 +1318,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.Release.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

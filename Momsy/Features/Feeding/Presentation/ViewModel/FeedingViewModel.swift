@@ -131,8 +131,6 @@ final class FeedingViewModel: ObservableObject {
 
     private func pushFeedingToFirestore(_ entry: FeedingEntry) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid  = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = FeedingLog(
             id:          entry.id.uuidString,
             startedAt:   entry.date,
@@ -140,8 +138,8 @@ final class FeedingViewModel: ObservableObject {
             durationMin: entry.durationMinutes,
             side:        entry.side,
             amountMl:    entry.milliliters,
-            addedBy:     uid,
-            addedByName: name
+            addedBy:     "",
+            addedByName: ""
         )
         Task { try? await BabySyncService().setLog(FeedingLogDTO(from: log), id: log.id, to: "feedingLogs") }
     }

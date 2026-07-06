@@ -174,8 +174,6 @@ final class BathViewModel: ObservableObject {
 
     private func pushBathToFirestore(_ entry: BathEntry, label: String) {
         guard FamilyManager.shared.familyId != nil else { return }
-        let uid = UserDefaults.standard.string(forKey: "uid") ?? ""
-        let name = UserDefaults.standard.string(forKey: "displayName") ?? ""
         let log = QuickEventLog(
             id: entry.id.uuidString,
             kind: BlobKind.bath.rawValue,
@@ -183,8 +181,8 @@ final class BathViewModel: ObservableObject {
             label: label,
             startDate: entry.startDate,
             endDate: entry.endDate,
-            addedBy: uid,
-            addedByName: name
+            addedBy: "",
+            addedByName: ""
         )
         Task {
             try? await BabySyncService().setLog(QuickEventLogDTO(from: log), id: log.id, to: "bathLogs")

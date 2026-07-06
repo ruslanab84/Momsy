@@ -343,14 +343,14 @@ struct TodayView: View {
     // MARK: - Leap Card
 
     private func leapTitle(for leap: DevelopmentLeap) -> String {
-        if case .stormy(let day, let total) = vm.leapPhase {
+        if case .hardDays(let day, let total, _, _, _, _)? = vm.leapPhase {
             return loc.strings.leapDayCard(n: leap.id, day: day, total: total)
         }
         return loc.strings.leapNumberCard(leap.id)
     }
 
     private var leapNote: String {
-        if case .stormy = vm.leapPhase { return loc.strings.leapCryingNote }
+        if case .hardDays? = vm.leapPhase { return loc.strings.leapCryingNote }
         return loc.strings.leapSettledNote
     }
 
