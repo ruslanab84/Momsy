@@ -183,11 +183,12 @@ struct LeapsView: View {
     private var todayActionsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             BBSectionLabel(text: loc.strings.leapTodayActionsTitle)
-            VStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 8) {
                 ForEach(vm.todayActions) { action in
                     LeapTodayActionRow(action: action)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .bbCard(pad: 14, bg: Color.bbButter.opacity(0.24))
     }
@@ -432,7 +433,9 @@ private struct LeapTodayActionRow: View {
                     .foregroundColor(.bbInkSoft)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
