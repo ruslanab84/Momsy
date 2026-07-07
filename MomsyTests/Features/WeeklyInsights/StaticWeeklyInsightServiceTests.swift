@@ -80,3 +80,79 @@ struct StaticWeeklyInsightServiceTests {
         #expect(ai.overallSummary.contains("new skills"))
     }
 }
+
+@Suite("WeeklyInsightPrompt")
+struct WeeklyInsightPromptTests {
+
+    private func stats(
+        ageMonths: Int,
+        ageWeeks: Int? = nil,
+        avgFeedings: Double = 3.1,
+        totalFeedings: Int = 22,
+        foods: [String] = []
+    ) -> WeeklyStats {
+        let start = Date(timeIntervalSince1970: 1_750_000_000)
+        return WeeklyStats(
+            weekStart: start,
+            weekEnd: start.addingTimeInterval(7 * 86_400),
+            ageMonths: ageMonths,
+            ageWeeks: ageWeeks ?? ageMonths * 4,
+            currentLeapName: nil,
+            currentLeapID: nil,
+            leapSignals: [],
+            avgSleepMinutesPerDay: 274,
+            avgNightSleepMinutes: 220,
+            avgDaySleepMinutes: 54,
+            avgNapsPerDay: 3.0,
+            sleepTrendVsPrevWeekMinutes: 0,
+            whoMinSleepMinutes: WhoNorms.minSleepMinutes(ageMonths: ageMonths),
+            whoAwakeWindowMax: WhoNorms.awakeWindowMax(ageMonths: ageMonths),
+            avgFeedingsPerDay: avgFeedings,
+            totalFeedings: totalFeedings,
+            newFoodsIntroduced: foods,
+            allergensFlagged: [],
+            totalDiapers: 20
+        )
+    }
+
+    @Test("uses English instructions with explicit response language")
+    func usesEnglishInstructionsWithResponseLanguage() {
+        let ctx = WeeklyInsightContext(stats: stats(ageMonths: 3, ageWeeks: 13), language: .russian)
+
+        let system = WeeklyInsightPrompt.system(for: ctx.language)
+        let user = WeeklyInsightPrompt.user(ctx: ctx)
+
+        #expect(system.contains("Write every JSON string value in Russian"))
+        #expect(user.contains("Baby age: 3 mo (13 weeks)."))
+        #expect(user.contains("Response language: Russian"))
+        #expect(!user.contains("Возраст малыша"))
+    }
+
+    @Test("blocks complementary food advice for babies under six months")
+    func blocksComplementaryFoodAdviceUnderSixMonths() {
+        let ctx = WeeklyInsightContext(stats: stats(ageMonths: 3, ageWeeks: 13), language: .english)
+
+        let system = WeeklyInsightPrompt.system(for: ctx.language)
+        let user = WeeklyInsightPrompt.user(ctx: ctx)
+
+        #expect(system.contains("NEVER recommend complementary foods"))
+        #expect(user.contains("Feeding stage: under 6 months - milk-only stage"))
+        #expect(user.contains("New foods introduced: none. For this age, no new foods is expected"))
+        #expect(user.contains("Expected logged pattern is roughly 6+ milk feeds/day"))
+    }
+
+    @Test("allows complementary food context from six months")
+    func allowsComplementaryFoodContextFromSixMonths() {
+        let ctx = WeeklyInsightContext(
+            stats: stats(ageMonths: 6, ageWeeks: 26, avgFeedings: 5.0, totalFeedings: 35, foods: ["Carrot"]),
+            language: .english
+        )
+
+        let user = WeeklyInsightPrompt.user(ctx: ctx)
+
+        #expect(user.contains("Feeding stage: 6 months or older - complementary foods may be discussed"))
+        #expect(user.contains("New foods introduced: Carrot."))
+        #expect(!user.contains("low for a baby under 6 months"))
+    }
+
+}
