@@ -267,16 +267,19 @@ struct LeapsView: View {
 
     private var historySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: loc.strings.leapHistoryTitle)
+            Text(loc.strings.leapHistoryTitle.uppercased())
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundColor(.bbLilacDeep)
+                .kerning(0.6)
             Text(loc.strings.leapHistorySubtitle)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundColor(.bbInkSoft)
+                .foregroundColor(Color.bbSurface.opacity(0.78))
                 .fixedSize(horizontal: false, vertical: true)
 
             if vm.historySummaries.isEmpty {
                 Text(loc.strings.leapHistoryEmpty)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundColor(.bbInkMute)
+                    .foregroundColor(Color.bbSurface.opacity(0.64))
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 2)
             } else {
@@ -292,7 +295,7 @@ struct LeapsView: View {
                 }
             }
         }
-        .bbCard(pad: 14, bg: Color.bbLilac.opacity(0.18))
+        .bbCard(pad: 14, bg: Color.white.opacity(0.9))
     }
 
     // MARK: - Tip Card
@@ -330,13 +333,13 @@ private struct LeapPhaseBadge: View {
             if !detail.isEmpty {
                 Text(detail)
                     .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInkSoft)
+                    .foregroundColor(.bbSurface)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 10)
-        .background(Color.white.opacity(0.75))
+        .background(Color.white.opacity(0.92))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
@@ -511,7 +514,7 @@ private struct LeapHistoryRow: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text(loc.strings.leapPill(summary.leapID))
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbInk)
+                        .foregroundColor(.bbSurface)
                     Spacer(minLength: 6)
                     Text(difficultyTitle)
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
@@ -519,19 +522,20 @@ private struct LeapHistoryRow: View {
                 }
                 Text(summary.title)
                     .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInkSoft)
-                    .lineLimit(1)
+                    .foregroundColor(.bbSurface)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(durationText)
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(.bbInkMute)
+                    .foregroundColor(Color.bbSurface.opacity(0.68))
                 Text(symptomsText)
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(.bbInkSoft)
+                    .foregroundColor(Color.bbSurface.opacity(0.78))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(10)
-        .background(Color.white.opacity(0.72))
+        .background(Color.bbLilac.opacity(0.14))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
