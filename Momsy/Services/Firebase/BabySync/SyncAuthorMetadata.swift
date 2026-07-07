@@ -12,8 +12,8 @@ struct SyncAuthorIdentity: Equatable, Sendable {
 }
 
 enum SyncAuthorMetadata {
-    static let addedByKey = "addedBy"
-    static let addedByNameKey = "addedByName"
+    nonisolated static let addedByKey = "addedBy"
+    nonisolated static let addedByNameKey = "addedByName"
 
     nonisolated static func requiresAuthor(in payload: [String: Any]) -> Bool {
         payload.keys.contains(addedByKey) || payload.keys.contains(addedByNameKey)
@@ -21,6 +21,10 @@ enum SyncAuthorMetadata {
 
     nonisolated static func stamp(_ payload: [String: Any], author: SyncAuthorIdentity?) -> [String: Any] {
         guard let author, !author.uid.isEmpty else { return payload }
+
+        let existingUid = (payload[addedByKey] as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard existingUid.isEmpty else { return payload }
 
         var stamped = payload
         if stamped.keys.contains(addedByKey) {

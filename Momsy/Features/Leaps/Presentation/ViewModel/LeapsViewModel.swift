@@ -282,7 +282,7 @@ final class LeapsViewModel: ObservableObject {
         }
 
         var summaries: [LeapHistorySummary] = []
-        for leap in leaps where progressByID[leap.id] != nil || leap.isCurrent {
+        for leap in leaps where leap.isDone || leap.isCurrent {
             let leapCheckIns = (try? await getCheckInsUC.execute(leapID: leap.id)) ?? []
             guard let summary = historySummary(
                 for: leap,

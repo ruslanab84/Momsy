@@ -151,6 +151,7 @@ final class AppContainer {
         }
         try? context.save()
         PendingDeletionsStore.shared.clear()
+        WidgetDataStore.shared.clearAll()
         Task { await appState.load() }
     }
 

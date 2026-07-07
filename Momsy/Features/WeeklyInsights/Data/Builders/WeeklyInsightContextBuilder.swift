@@ -138,6 +138,7 @@ enum WeeklyInsightContextBuilder {
     }
 
     private static func sleepDropped(weekSleep: [SleepEntry], prevSleep: [SleepEntry]) -> Bool {
+        guard !weekSleep.isEmpty else { return false }
         let current = weekSleep.compactMap(\.durationMinutes).reduce(0, +)
         let previous = prevSleep.compactMap(\.durationMinutes).reduce(0, +)
         guard previous > 0 else { return false }
@@ -145,7 +146,7 @@ enum WeeklyInsightContextBuilder {
     }
 
     private static func feedingShifted(weekFeeds: [FeedingEntry], prevFeeds: [FeedingEntry]) -> Bool {
-        guard !prevFeeds.isEmpty else { return false }
+        guard !weekFeeds.isEmpty, !prevFeeds.isEmpty else { return false }
         let delta = abs(weekFeeds.count - prevFeeds.count)
         return delta >= 7 || Double(delta) / Double(prevFeeds.count) >= 0.25
     }

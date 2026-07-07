@@ -3,13 +3,16 @@ import Foundation
 final class ScheduleLeapNotificationsUseCase {
     private let pushNotifications: any PushNotificationServiceProtocol
     private let calendar: Calendar
+    private let maxScheduledLeaps: Int
 
     init(
         pushNotifications: any PushNotificationServiceProtocol,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        maxScheduledLeaps: Int = 3
     ) {
         self.pushNotifications = pushNotifications
         self.calendar = calendar
+        self.maxScheduledLeaps = maxScheduledLeaps
     }
 
     func execute(
@@ -18,8 +21,15 @@ final class ScheduleLeapNotificationsUseCase {
         language: Language,
         now: Date = Date()
     ) {
+        let upcomingIDs = Set(
+            leaps.filter { !$0.isDone }
+                .sorted { $0.week < $1.week }
+                .prefix(maxScheduledLeaps)
+                .map(\.id)
+        )
+
         for leap in leaps {
-            guard !leap.isDone else {
+            guard upcomingIDs.contains(leap.id) else {
                 pushNotifications.cancelLeapNotification(leapID: leap.id)
                 continue
             }

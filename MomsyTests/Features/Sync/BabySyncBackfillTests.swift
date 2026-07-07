@@ -7,7 +7,7 @@ struct BabySyncBackfillTests {
 
     private struct DummyLog: Encodable { let id: String; let amountMl: Int }
 
-    @Test func authorStampingOverwritesLogAuthorFields() {
+    @Test func authorStampingFillsEmptyAuthorFields() {
         let payload: [String: Any] = ["amountMl": 120, "addedBy": "", "addedByName": ""]
         let stamped = SyncAuthorMetadata.stamp(
             payload,
@@ -17,6 +17,17 @@ struct BabySyncBackfillTests {
         #expect((stamped["amountMl"] as? Int) == 120)
         #expect((stamped["addedBy"] as? String) == "user-1")
         #expect((stamped["addedByName"] as? String) == "Parent")
+    }
+
+    @Test func authorStampingPreservesExistingAuthor() {
+        let payload: [String: Any] = ["amountMl": 120, "addedBy": "creator-1", "addedByName": "Mom"]
+        let stamped = SyncAuthorMetadata.stamp(
+            payload,
+            author: SyncAuthorIdentity(uid: "editor-2", displayName: "Dad")
+        )
+
+        #expect((stamped["addedBy"] as? String) == "creator-1")
+        #expect((stamped["addedByName"] as? String) == "Mom")
     }
 
     @Test func authorStampingLeavesNonAuthorPayloadAlone() {

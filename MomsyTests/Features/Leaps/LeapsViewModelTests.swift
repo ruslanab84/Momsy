@@ -276,6 +276,31 @@ struct LeapsViewModelTests {
         #expect(summary?.difficulty == .moderate)
     }
 
+    @Test("history includes age-completed leaps with check-ins")
+    func historyIncludesAgeCompletedLeapCheckIns() async throws {
+        let calendar = Calendar.current
+        let birth = calendar.date(byAdding: .day, value: -65, to: Date())!
+        let leapStart = BabyAgeContext.leapStartDate(
+            for: DevelopmentLeap.catalog.first { $0.id == 1 }!,
+            birthDate: birth,
+            calendar: calendar
+        )
+        let checkInRepo = MockLeapCheckInRepository()
+        checkInRepo.checkIns = [
+            LeapDailyCheckIn(leapID: 1, date: leapStart, symptoms: [.sleepWorse])
+        ]
+
+        let vm = try await makeVM(
+            repo: MockLeapsRepository(),
+            checkInRepo: checkInRepo,
+            profile: BabyProfile(name: "Test", birthDate: birth)
+        )
+
+        let summary = vm.historySummaries.first { $0.leapID == 1 }
+        #expect(summary?.symptomDays == 1)
+        #expect(summary?.dominantSymptoms == [.sleepWorse])
+    }
+
     @Test("recordSkillToDiary creates a milestone diary item")
     func recordSkillCreatesDiaryMilestone() async throws {
         let diaryRepo = MockDiaryRepository()

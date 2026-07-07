@@ -56,7 +56,8 @@ final class BabySyncService {
         guard hasPath else { return }
         let ref = collection(subcollection).document()
         let payload = try await encodedPayloadWithAuthor(log)
-        try await ref.setData(payload)
+        // Firestore persists locally and syncs later; awaiting the server ack can hang callers offline.
+        ref.setData(payload) { _ in }
     }
 
     /// Writes a log using the supplied stable id as the Firestore document id.
@@ -77,7 +78,7 @@ final class BabySyncService {
                                           payload: payload, familyId: familyId, babyId: babyId)
             return
         }
-        try await collection(subcollection).document(id).setData(payload, merge: true)
+        collection(subcollection).document(id).setData(payload, merge: true) { _ in }
     }
 
     private func encodedPayloadWithAuthor<T: Encodable>(_ log: T) async throws -> [String: Any] {

@@ -127,4 +127,28 @@ struct WeeklyInsightContextBuilderTests {
         #expect(stats.leapSignals.contains("feedings"))
         #expect(stats.leapSignals.contains("new skills"))
     }
+
+    @Test("empty tracking week does not produce leap signals")
+    func emptyWeekNoLeapSignals() async throws {
+        let (start, end) = window()
+        let sleepRepo = MockSleepRepository()
+        sleepRepo.entries = [sleep(start.addingTimeInterval(-3 * 86_400), minutes: 600)]
+        let feedingRepo = MockFeedingRepository()
+        feedingRepo.entries = (0..<20).map {
+            FeedingEntry(date: start.addingTimeInterval(-Double($0 + 1) * 3600), durationSeconds: 600)
+        }
+
+        let stats = await WeeklyInsightContextBuilder.buildStats(
+            weekStart: start,
+            weekEnd: end,
+            birthDate: Calendar.current.date(byAdding: .weekOfYear, value: -18, to: end),
+            language: .english,
+            sleepRepo: sleepRepo,
+            feedingRepo: feedingRepo,
+            foodRepo: MockComplementaryFeedingRepository(),
+            diaperRepo: MockDiaperRepository()
+        )
+
+        #expect(stats.leapSignals.isEmpty)
+    }
 }
