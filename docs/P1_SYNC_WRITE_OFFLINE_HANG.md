@@ -294,6 +294,33 @@ struct ScheduleLeapNotificationsUseCaseTests {
 
 ---
 
+## Task 6 — P3: Clear widget snapshot on family switch
+
+**File:** `Momsy/Core/DI/AppContainer.swift`
+
+**Why:** `purgeLocalData` wipes SwiftData records, pending writes, and watermarks, but not the app-group store backing the widget and Watch. After leaving/switching a family, the widget keeps showing the old family's last snapshot (baby name, running feeding timer, today counters) — data the user may no longer have access to. `eraseLocalData()` already calls `clearAll()` (line 320); mirror it here. `clearAll()` reloads widget timelines internally (WidgetDataStore.swift:246), so no extra `WidgetCenter` call is needed.
+
+**Current (tail of `purgeLocalData`, lines 152-155):**
+```swift
+        try? context.save()
+        PendingDeletionsStore.shared.clear()
+        Task { await appState.load() }
+    }
+```
+
+**Replace with:**
+```swift
+        try? context.save()
+        PendingDeletionsStore.shared.clear()
+        WidgetDataStore.shared.clearAll()
+        Task { await appState.load() }
+    }
+```
+
+A feeding Live Activity started under the old family is out of scope: it ends on the next quick-log interaction, and `clearAll()` resets the shared state it reads from.
+
+---
+
 ## Definition of Done
 
 - [ ] `addLog`/`setLog` no longer await the online `setData`; signatures unchanged; `replayPendingWrites` untouched
@@ -301,6 +328,7 @@ struct ScheduleLeapNotificationsUseCaseTests {
 - [ ] `sleepDropped`/`feedingShifted` guard empty current-week data; `emptyWeekNoLeapSignals` green
 - [ ] `loadHistory` iterates `leap.isDone || leap.isCurrent`
 - [ ] Leap notifications capped via `maxScheduledLeaps = 3`; new use-case test green
+- [ ] `purgeLocalData` clears `WidgetDataStore`; widget resets after family switch
 - [ ] Full unit test suite green (Swift Testing, Momsy scheme)
 - [ ] No new user-facing strings (no localization changes required)
 
@@ -324,3 +352,8 @@ struct ScheduleLeapNotificationsUseCaseTests {
 **4. Notification cap (P3):**
 1. Profile with a newborn (all leaps pending), open Leaps.
 2. Debug-log `UNUserNotificationCenter.current().getPendingNotificationRequests` count: leap requests ≤ 12, only leaps 1-3.
+
+**5. Widget after family switch (P3):**
+1. Simulator with the Momsy widget on the home screen, family A active with a logged feeding.
+2. Join family B (real switch).
+3. Widget must not show family A's baby name/timer; after resync it shows family B's data (or the empty state).

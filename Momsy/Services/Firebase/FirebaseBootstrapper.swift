@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseAppCheck
 import FirebaseCore
 import FirebaseFirestore
 import os
@@ -26,6 +27,7 @@ enum FirebaseBootstrapper {
             return false
         }
 
+        AppCheck.setAppCheckProviderFactory(MomsyAppCheckProviderFactory())
         FirebaseApp.configure(options: options)
         configureFirestoreCache()
         return true
