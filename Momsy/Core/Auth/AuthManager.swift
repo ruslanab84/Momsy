@@ -63,6 +63,11 @@ final class AuthManager: ObservableObject {
                         AuthManager.log.info("Skipping family setup while account deletion is pending")
                         return
                     }
+                    FamilyManager.shared.resetStaleCacheIfNeeded(for: user.uid)
+                    if Self.shouldDeferAutomaticFamilySetup(defaults: .standard) {
+                        AuthManager.log.info("Deferring family setup while onboarding invite join is pending")
+                        return
+                    }
                     let name = user.displayName ?? user.email ?? "User"
                     do {
                         try await FamilyManager.shared.setup(uid: user.uid, displayName: name)
@@ -76,6 +81,12 @@ final class AuthManager: ObservableObject {
                 Task { @MainActor in FamilyManager.shared.reset() }
             }
         }
+    }
+
+    @MainActor
+    static func shouldDeferAutomaticFamilySetup(defaults: UserDefaults) -> Bool {
+        guard !defaults.bool(forKey: "onboardingDone") else { return false }
+        return PendingFamilyInviteStore(defaults: defaults).load() != nil
     }
 
     // MARK: — Anonymous fallback

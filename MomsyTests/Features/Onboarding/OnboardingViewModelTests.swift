@@ -69,6 +69,7 @@ struct OnboardingViewModelTests {
         let sync: TrackingBabySyncRepository
         let invite: MockInviteService
         let recorder: JoinRecorder
+        let pendingStore: PendingFamilyInviteStore
     }
 
     func makeHarness(
@@ -115,7 +116,8 @@ struct OnboardingViewModelTests {
             push: push,
             sync: sync,
             invite: invite,
-            recorder: recorder
+            recorder: recorder,
+            pendingStore: pendingStore
         )
     }
 
@@ -177,6 +179,30 @@ struct OnboardingViewModelTests {
         #expect(harness.vm.pendingInviteCode == "MOMSY-ABCD12")
         #expect(harness.vm.steps == [.join, .auth, .ready])
         #expect(harness.vm.canContinue)
+    }
+
+    @Test("join advance persists normalized invite for provider auth")
+    func joinAdvancePersistsInviteForAuth() {
+        let harness = makeHarness()
+        harness.vm.startJoinFlow()
+        harness.vm.pendingInviteCode = "momsy://join?code=momsy-abcd12"
+
+        harness.vm.advance()
+
+        #expect(harness.vm.step == .auth)
+        #expect(harness.vm.pendingInviteCode == "MOMSY-ABCD12")
+        #expect(harness.pendingStore.load() == "MOMSY-ABCD12")
+    }
+
+    @Test("pending onboarding invite defers automatic family setup")
+    func pendingOnboardingInviteDefersAutomaticFamilySetup() {
+        let defaults = UserDefaults(suiteName: UUID().uuidString)!
+        PendingFamilyInviteStore(defaults: defaults).save("MOMSY-JOIN1")
+
+        #expect(AuthManager.shouldDeferAutomaticFamilySetup(defaults: defaults))
+
+        defaults.set(true, forKey: "onboardingDone")
+        #expect(!AuthManager.shouldDeferAutomaticFamilySetup(defaults: defaults))
     }
 
     // MARK: - advance

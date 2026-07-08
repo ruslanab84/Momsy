@@ -148,6 +148,9 @@ final class OnboardingViewModel: ObservableObject {
 
     func advance() {
         guard canContinue else { return }
+        if step == .join {
+            guard persistPendingInviteForAuth() else { return }
+        }
         forward = true
         if let idx = steps.firstIndex(of: step), idx + 1 < steps.count {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
@@ -338,6 +341,15 @@ final class OnboardingViewModel: ObservableObject {
         pendingInviteStore.clear()
         await syncAfterJoiningFamily()
         await appState.load()
+    }
+
+    private func persistPendingInviteForAuth() -> Bool {
+        guard let code = JoinDeeplink.normalize(rawCode: pendingInviteCode) else { return false }
+        pendingInviteCode = code
+        if pendingInviteStore.load() != code {
+            pendingInviteStore.save(code)
+        }
+        return true
     }
 
     private func prepareInvite(regenerate: Bool) async {

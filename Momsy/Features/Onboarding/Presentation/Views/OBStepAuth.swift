@@ -33,7 +33,7 @@ struct AuthStep: View {
                 }
 
                 if let error = authError {
-                    Text((error as? AuthError)?.localizedDescription ?? loc.strings.signInFailed)
+                    Text(errorMessage(for: error))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundColor(.red.opacity(0.8))
                         .multilineTextAlignment(.center)
@@ -110,5 +110,12 @@ struct AuthStep: View {
             )
             .bbShadow()
         }
+    }
+
+    private func errorMessage(for error: Error) -> String {
+        if let description = (error as? any LocalizedError)?.errorDescription {
+            return description
+        }
+        return loc.strings.signInFailed
     }
 }

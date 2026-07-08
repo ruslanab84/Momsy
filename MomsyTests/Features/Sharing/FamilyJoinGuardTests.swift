@@ -24,6 +24,13 @@ struct FamilyJoinGuardTests {
     func differentNoData() {
         #expect(!FamilyJoinGuard.requiresConfirmation(currentFamilyId: "F1", targetFamilyId: "F2", currentFamilyHasData: false, force: false))
     }
+
+    @Test("family cache is stale when owner uid differs")
+    func staleFamilyCacheWhenOwnerUidDiffers() {
+        #expect(!FamilyManager.cacheIsStale(cachedOwnerUid: nil, currentUid: "provider"))
+        #expect(!FamilyManager.cacheIsStale(cachedOwnerUid: "provider", currentUid: "provider"))
+        #expect(FamilyManager.cacheIsStale(cachedOwnerUid: "anonymous", currentUid: "provider"))
+    }
 }
 
 @Suite("StoredFamilyMember Firestore mapping")
