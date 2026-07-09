@@ -63,6 +63,13 @@
       <StoreKitConfigurationFileReference
          identifier = "../../Momsy/Momsy.storekit">
       </StoreKitConfigurationFileReference>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "GACAppCheckDebugToken"
+            value = "674D7A53-D799-4089-8A37-A027E8C5194A"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

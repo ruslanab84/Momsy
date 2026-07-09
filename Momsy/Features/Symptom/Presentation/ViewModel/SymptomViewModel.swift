@@ -47,6 +47,7 @@ struct SymptomResult: Equatable {
 
 // MARK: - ViewModel
 
+@MainActor
 final class SymptomViewModel: ObservableObject {
     @Published var isOnIDs: Set<String> = ["fever", "cry", "sleep"]
     @Published var diaryLogged = false
@@ -219,10 +220,10 @@ final class SymptomViewModel: ObservableObject {
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { diaryLogged = true }
         Task {
-            try? await addDiaryEntry.execute(item)
+            _ = try? await addDiaryEntry.execute(item)
             try? await syncRepo.addSymptomLog(symptomLog)
             try? await Task.sleep(nanoseconds: 2_000_000_000)
-            await MainActor.run { withAnimation { diaryLogged = false } }
+            withAnimation { diaryLogged = false }
         }
     }
 
