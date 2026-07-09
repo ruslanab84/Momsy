@@ -10,6 +10,11 @@ protocol SleepRepository {
 }
 
 extension SleepRepository {
+    /// Removes entries tombstoned by another device during cloud merge.
+    func applyDeletions(_ ids: Set<UUID>) async throws {
+        for id in ids { try await delete(id: id) }
+    }
+
     func getEntries(
         overlapping dayStart: Date,
         until dayEnd: Date,

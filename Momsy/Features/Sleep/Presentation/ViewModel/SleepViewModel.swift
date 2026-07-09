@@ -8,6 +8,7 @@ final class SleepViewModel: ObservableObject {
     @Published var todayEntries: [SleepEntry] = []
     @Published var selectedQuality: SleepQuality = .normal
     @Published var saveError: String?
+    @Published var coParentSessionNotice: String?
     @Published var selectedChartPeriod = 0
     @Published var sleepDays: [SleepDayPoint] = []
     @Published private(set) var nextSleep: SleepPrediction?
@@ -19,12 +20,17 @@ final class SleepViewModel: ObservableObject {
     private var timerTask: Task<Void, Never>?
     private var activeBabyCancellable: AnyCancellable?
     private var reloadTask: Task<Void, Never>?
+    private var mergeObserver: NSObjectProtocol?
     private var lm: LocalizationManager { .shared }
 
     private let liveActivity = SleepLiveActivityManager()
+    private let currentUid: @MainActor () -> String?
     /// Longest plausible single sleep; anything beyond this is treated as a corrupt
     /// recovered end and the orphan is discarded instead of closed.
     private static let maxPlausibleSleep: TimeInterval = 24 * 3600
+    /// Window within which two independently-started open sessions are treated as
+    /// the same race rather than two genuine separate naps.
+    private static let duplicateStartWindow: TimeInterval = 180
 
     private let startSleepUC: StartSleepUseCase
     private let stopSleepUC: StopSleepUseCase
@@ -37,7 +43,8 @@ final class SleepViewModel: ObservableObject {
     init(startSleep: StartSleepUseCase, stopSleep: StopSleepUseCase,
          getSleep: GetSleepEntriesUseCase, addManualSleep: AddManualSleepUseCase,
          reconcileStaleSleep: ReconcileStaleSleepUseCase, appState: AppState,
-         predictNextSleep: PredictNextSleepUseCase) {
+         predictNextSleep: PredictNextSleepUseCase,
+         currentUid: @MainActor @escaping () -> String? = { nil }) {
         self.startSleepUC = startSleep
         self.stopSleepUC = stopSleep
         self.getSleepUC = getSleep
@@ -45,6 +52,7 @@ final class SleepViewModel: ObservableObject {
         self.reconcileStaleSleepUC = reconcileStaleSleep
         self.predictNextSleepUC = predictNextSleep
         self.appState = appState
+        self.currentUid = currentUid
         activeBabyCancellable = appState.$babyProfile
             .map { $0?.id }
             .removeDuplicates()
@@ -55,6 +63,7 @@ final class SleepViewModel: ObservableObject {
                 }
             }
         scheduleReloadForActiveBaby(reconcileStaleOpenSession: true, clearVisibleState: false)
+        observeCloudMerges()
     }
 
     deinit {
@@ -62,6 +71,7 @@ final class SleepViewModel: ObservableObject {
         pendingStartTask?.cancel()
         reloadTask?.cancel()
         activeBabyCancellable?.cancel()
+        if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
 
     func refreshForecast() async {
@@ -147,6 +157,13 @@ final class SleepViewModel: ObservableObject {
             )
         }
         return lm.strings.durationFormatted(total)
+    }
+
+    var activeSessionAttribution: String? {
+        guard let entry = activeSleepEntry,
+              SleepSessionOwnership.isRemoteOwned(startedBy: entry.startedBy, currentUid: currentUid()),
+              let name = entry.startedByName, !name.isEmpty else { return nil }
+        return lm.strings.sleepStartedBy(name)
     }
 
     func start() {
@@ -245,6 +262,7 @@ final class SleepViewModel: ObservableObject {
             pendingStartEntryId = nil
             pendingStartTask = nil
         }
+        pushSleepToFirestore(saved, babyId: babyId)
         guard isCurrentBaby(babyId) else { return }
         if activeSleepEntry?.id == optimisticEntryId {
             activeSleepEntry = saved
@@ -284,8 +302,8 @@ final class SleepViewModel: ObservableObject {
             endedAt:     entry.endDate,
             durationMin: entry.durationMinutes,
             quality:     entry.quality,
-            addedBy:     "",
-            addedByName: "",
+            addedBy:     entry.startedBy ?? "",
+            addedByName: entry.startedByName ?? "",
             updatedAt:   entry.updatedAt ?? Date()
         )
         Task {
@@ -407,6 +425,16 @@ final class SleepViewModel: ObservableObject {
     }
 
     private func restoreOpenSession(_ entry: SleepEntry, babyId: UUID?, reconcileStaleOpenSession: Bool) async {
+        if SleepSessionOwnership.isRemoteOwned(startedBy: entry.startedBy, currentUid: currentUid()) {
+            // A co-parent's live session: this device has no local signals to judge
+            // staleness, so it must never reconcile it — only mirror it while plausible.
+            if SleepSessionOwnership.shouldMirrorRemoteOpen(
+                start: entry.startDate, now: Date(), maxDuration: Self.maxPlausibleSleep
+            ) {
+                activateTimer(entry: entry, babyId: babyId)
+            }
+            return
+        }
         if !reconcileStaleOpenSession {
             activateTimer(entry: entry, babyId: babyId)
             return
@@ -418,6 +446,81 @@ final class SleepViewModel: ObservableObject {
             await reconcileStaleSleep(entry, babyId: babyId)
             await loadTodayEntries(expectedBabyId: babyId)
         }
+    }
+
+    private func observeCloudMerges() {
+        mergeObserver = NotificationCenter.default.addObserver(
+            forName: .cloudSyncDidMerge, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in await self?.handleCloudMerge() }
+        }
+    }
+
+    private func handleCloudMerge() async {
+        let babyId = currentBabyId
+        await loadTodayEntries(expectedBabyId: babyId)
+        guard isCurrentBaby(babyId), !Task.isCancelled else { return }
+
+        // 1. Remote close: the session this device shows got an endDate elsewhere.
+        if let active = activeSleepEntry,
+           let merged = todayEntries.first(where: { $0.id == active.id }),
+           merged.endDate != nil {
+            endLocalSessionPresentation(babyId: activeSleepBabyId ?? babyId)
+        }
+
+        // 2. Race duplicates: keep the earliest, drop own extras, tell the user.
+        let open = todayEntries.filter { $0.endDate == nil }
+        if open.count > 1, let canonical = DuplicateOpenSessionPolicy.canonical(open) {
+            let discards = DuplicateOpenSessionPolicy.ownDiscards(
+                open, canonical: canonical, currentUid: currentUid(), window: Self.duplicateStartWindow
+            )
+            for dup in discards {
+                try? await withBabyScope(babyId) {
+                    try await reconcileStaleSleepUC.execute(dup, end: nil)   // local delete
+                }
+                // Durable + tombstoned so a co-parent's already-cached copy of this
+                // duplicate is purged on its next merge, even if this device is offline now.
+                BabySyncService().propagateDelete(id: dup.id, in: "sleepLogs")
+                if activeSleepEntry?.id == dup.id {
+                    endLocalSessionPresentation(babyId: babyId)
+                }
+            }
+            if !discards.isEmpty {
+                coParentSessionNotice = duplicateNotice(for: canonical)
+                await loadTodayEntries(expectedBabyId: babyId)
+            }
+        }
+
+        // 3. Adopt / refresh the single open session, or clean a stale widget mirror.
+        if let openEntry = todayEntries.first(where: { $0.endDate == nil }) {
+            if activeSleepEntry?.id != openEntry.id {
+                await restoreOpenSession(openEntry, babyId: babyId, reconcileStaleOpenSession: false)
+            }
+        } else if !isSleepActive, case .active = WidgetDataStore.shared.sleepState(for: babyId) {
+            WidgetDataStore.shared.clearSleep(lastDurationSeconds: 0, babyId: babyId)
+            liveActivity.endActivity()
+        }
+
+        await loadChartData(expectedBabyId: babyId)
+        await refreshForecast(expectedBabyId: babyId)
+    }
+
+    private func endLocalSessionPresentation(babyId: UUID?) {
+        timerTask?.cancel(); timerTask = nil
+        liveActivity.endActivity()
+        WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds, babyId: babyId)
+        activeSleepEntry = nil
+        activeSleepBabyId = nil
+        isSleepActive = false
+        sleepSeconds = 0
+    }
+
+    private func duplicateNotice(for canonical: SleepEntry) -> String {
+        if let name = canonical.startedByName, !name.isEmpty,
+           SleepSessionOwnership.isRemoteOwned(startedBy: canonical.startedBy, currentUid: currentUid()) {
+            return lm.strings.sleepAlreadyTrackedBy(name)
+        }
+        return lm.strings.sleepAlreadyTrackedGeneric
     }
 
     private func refreshForecast(expectedBabyId: UUID?) async {

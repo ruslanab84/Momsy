@@ -175,6 +175,9 @@ struct L10n {
     var noData: String      { s("no data",     "нет данных",   "keine Daten",          "sin datos",    "aucune donnée", "sem dados", "暂无数据") }
     var playingContinuously: String { s("playing continuously","играет непрерывно","spielt kontinuierlich","sonando sin parar","lecture en continu","a tocar continuamente", "持续播放中") }
     var sleepStarted: String { s("Sleep · started", "Сон · начало", "Schlaf · begonnen", "Sueño · iniciado", "Sommeil · commencé", "Sono · iniciado", "睡眠 · 开始") }
+    func sleepStartedBy(_ name: String) -> String { s("Started by \(name)", "Начал(а): \(name)", "Gestartet von \(name)", "Iniciado por \(name)", "Démarré par \(name)", "Iniciado por \(name)", "由\(name)开始") }
+    func sleepAlreadyTrackedBy(_ name: String) -> String { s("Sleep is already being tracked — started by \(name).", "Сон уже отслеживается — начал(а) \(name).", "Schlaf wird bereits erfasst – gestartet von \(name).", "El sueño ya se está registrando: iniciado por \(name).", "Le sommeil est déjà suivi — démarré par \(name).", "O sono já está a ser registado — iniciado por \(name).", "睡眠已在记录中——由\(name)开始。") }
+    var sleepAlreadyTrackedGeneric: String { s("Sleep is already being tracked on another device.", "Сон уже отслеживается на другом устройстве.", "Schlaf wird bereits auf einem anderen Gerät erfasst.", "El sueño ya se está registrando en otro dispositivo.", "Le sommeil est déjà suivi sur un autre appareil.", "O sono já está a ser registado noutro dispositivo.", "睡眠已在另一台设备上记录。") }
     var symptomRecorded: String { s("Symptom · recorded","Симптом · записан","Symptom · erfasst","Síntoma · registrado","Symptôme · enregistré","Sintoma · registado", "症状 · 已记录") }
     var belowP3: String     { s("below P3",  "ниже P3",   "unter P3", "bajo P3",  "sous P3",  "abaixo de P3", "低于 P3") }
     var aboveP97: String    { s("above P97", "выше P97",  "über P97", "sobre P97","au-dessus de P97","acima de P97", "高于 P97") }

@@ -324,7 +324,9 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         // Merge into SwiftData on the main actor (shared context is main-actor owned).
         // Each collection commits its own watermark iff its upsert did not throw.
         await merge(await feedingFetch,  map: Self.feedingEntry)     { try await self.feedingRepo.upsert($0) }
-        await merge(await sleepFetch,    map: Self.sleepEntry)       { try await self.sleepRepo.upsert($0) }
+        await merge(await sleepFetch,    map: Self.sleepEntry)       { entries in
+            try await self.sleepRepo.upsert(entries.filter { !deletedIds.contains($0.id) })
+        }
         await merge(diaperFetch,         map: Self.diaperEntry)      { entries in
             try await self.diaperRepo.upsert(entries.filter { !deletedIds.contains($0.id) })
         }
@@ -365,6 +367,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
                 try await diaperRepo.applyDeletions(deletedIds)
                 try await vaccinationRepo.applyDeletions(deletedIds)
                 try await foodDiaryRepo.applyDeletions(deletedIds)
+                try await sleepRepo.applyDeletions(deletedIds)
                 quickLogRepo.remove(ids: deletedIds)
             } catch {
                 deletionsApplied = false
@@ -446,7 +449,9 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
         let log = dto.domain
         return SleepEntry(id: uuid, startDate: log.startedAt, endDate: log.endedAt,
-                          note: "", quality: log.quality, updatedAt: log.updatedAt)
+                          note: "", quality: log.quality, updatedAt: log.updatedAt,
+                          startedBy: log.addedBy.isEmpty ? nil : log.addedBy,
+                          startedByName: log.addedByName.isEmpty ? nil : log.addedByName)
     }
 
     private static func diaperEntry(_ dto: DiaperLogDTO) -> DiaperEntry? {

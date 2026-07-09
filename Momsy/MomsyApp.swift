@@ -183,6 +183,9 @@ private struct MomsyRootView: View {
                     WidgetCenter.shared.reloadAllTimelines()
                     Task { await container.cloudSyncDownloader.resyncAll() }
                     Task { await maybeGenerateWeeklyReport() }
+                    container.sleepLiveSync.start()
+                } else {
+                    container.sleepLiveSync.stop()
                 }
             }
     }

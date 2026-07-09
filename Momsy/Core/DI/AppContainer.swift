@@ -73,6 +73,9 @@ final class AppContainer {
             watermarks: syncWatermarks
         )
     }()
+    /// Foreground realtime trigger for co-parent sleep updates; baby-scoped, so it is
+    /// restarted on every active-baby switch and family join.
+    lazy var sleepLiveSync = SleepLiveSyncService(downloader: cloudSyncDownloader)
     let analytics: any AnalyticsServiceProtocol        = LogAnalyticsService()
     let pushNotifications: any PushNotificationServiceProtocol = LocalPushNotificationService.shared
     let authManager                                    = AuthManager()
@@ -127,6 +130,7 @@ final class AppContainer {
                 // from a previous family are skipped by the replay's cross-family guard.
                 ActiveBaby.currentId = nil
                 await self.cloudSyncDownloader.forceResyncAll()
+                self.sleepLiveSync.restart()
                 NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
             }
         }
@@ -179,6 +183,7 @@ final class AppContainer {
         appState.setActive(id)
         await cloudSyncDownloader.resyncActiveBaby()
         NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
+        sleepLiveSync.restart()
     }
 
     /// Remove a child: cascade-delete its logs, drop the profile, re-point active.
@@ -466,7 +471,8 @@ final class AppContainer {
         SleepViewModel(startSleep: startSleep, stopSleep: stopSleep,
                        getSleep: getSleepEntries, addManualSleep: addManualSleep,
                        reconcileStaleSleep: reconcileStaleSleep, appState: appState,
-                       predictNextSleep: predictNextSleep)
+                       predictNextSleep: predictNextSleep,
+                       currentUid: { [weak authManager] in authManager?.currentUID })
     }
 
     func makeReportViewModel() -> ReportViewModel {

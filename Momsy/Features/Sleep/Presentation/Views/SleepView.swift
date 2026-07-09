@@ -49,6 +49,7 @@ struct SleepView: View {
             }
         }
         .errorToast($vm.saveError)
+        .errorToast($vm.coParentSessionNotice)
         .task { await vm.refreshForecast() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
@@ -224,6 +225,14 @@ struct SleepView: View {
                         .foregroundColor(cardInkSoft)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
+
+                    if let attribution = vm.activeSessionAttribution {
+                        Text(attribution)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundColor(cardInkMute)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(1)
+                    }
                 }
                 .padding(.horizontal, 24)
             }

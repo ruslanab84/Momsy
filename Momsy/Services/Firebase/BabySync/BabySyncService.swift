@@ -394,6 +394,24 @@ final class BabySyncService {
         }
     }
 
+    /// Fires once per SERVER write to `subcollection` newer than `since`. The initial
+    /// snapshot is empty (0 reads) — this is a change trigger, not a data source; the
+    /// consumer runs the watermark downloader to actually merge. Local pending echoes
+    /// are ignored so a device does not resync in response to its own writes.
+    func streamLogUpdates(from subcollection: String, since: Date) -> AsyncStream<Void> {
+        guard hasPath else { return AsyncStream { $0.finish() } }
+        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
+            let listener = collection(subcollection)
+                .whereField("updatedAt", isGreaterThan: Timestamp(date: since))
+                .addSnapshotListener { snapshot, _ in
+                    guard let snapshot, !snapshot.documentChanges.isEmpty else { return }
+                    guard !snapshot.metadata.hasPendingWrites else { return }
+                    continuation.yield(())
+                }
+            continuation.onTermination = { _ in listener.remove() }
+        }
+    }
+
     func streamLogsByField<T: Decodable>(
         from subcollection: String,
         orderField: String,

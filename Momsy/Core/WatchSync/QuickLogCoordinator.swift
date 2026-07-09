@@ -100,6 +100,7 @@ final class QuickLogCoordinator {
                 startDate: entry.startDate,
                 babyName: appState.babyProfile?.name ?? WidgetDataStore.shared.babyName
             )
+            pushSleepToFirestore(entry, babyId: babyId)
         }
     }
 
@@ -167,8 +168,8 @@ final class QuickLogCoordinator {
             endedAt:     entry.endDate,
             durationMin: entry.durationMinutes,
             quality:     entry.quality,
-            addedBy:     "",
-            addedByName: ""
+            addedBy:     entry.startedBy ?? "",
+            addedByName: entry.startedByName ?? ""
         )
         Task {
             try? await withBabyScope(babyId) {
