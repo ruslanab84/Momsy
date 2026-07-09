@@ -40,6 +40,20 @@ struct PendingWritesStoreTests {
         #expect((all[0].payload["v"] as? Int) == 2)
     }
 
+    @Test func concurrentAddsKeepEveryEntry() async {
+        let store = freshStore()
+        await withTaskGroup(of: Void.self) { group in
+            for i in 0..<100 {
+                group.addTask {
+                    store.add(collection: "feedingLogs", docId: "doc-\(i)",
+                              payload: ["i": i], familyId: "fam", babyId: "baby")
+                }
+            }
+        }
+
+        #expect(store.all().count == 100)
+    }
+
     @Test func removeDeletesEntry() {
         let store = freshStore()
         store.add(collection: "sleepLogs", docId: "x", payload: ["v": 1], familyId: "f", babyId: "b")

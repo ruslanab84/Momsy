@@ -8,7 +8,7 @@ import FirebaseFirestore
 ///
 /// Payloads are stored plist-safe: Firestore `Timestamp` values are normalized to
 /// `Date` (Firestore converts them back to `Timestamp` on `setData`).
-final class PendingWritesStore {
+nonisolated final class PendingWritesStore: @unchecked Sendable {
     static let shared = PendingWritesStore()
 
     struct Entry {
@@ -24,6 +24,7 @@ final class PendingWritesStore {
 
     private let key = "pending_writes_v1"
     private let defaults: UserDefaults
+    private let lock = NSLock()
 
     init(defaults: UserDefaults = .standard) { self.defaults = defaults }
 
@@ -37,6 +38,8 @@ final class PendingWritesStore {
     func add(collection: String, docId: String, payload: [String: Any],
              familyId: String, babyId: String) {
         let safe = (Self.plistSafe(payload) as? [String: Any]) ?? [:]
+        lock.lock()
+        defer { lock.unlock() }
         var items = raw.filter { ($0["docId"] as? String) != docId }
         items.append(["collection": collection, "docId": docId, "payload": safe,
                       "familyId": familyId, "babyId": babyId])
@@ -44,7 +47,9 @@ final class PendingWritesStore {
     }
 
     func all() -> [Entry] {
-        raw.compactMap { dict in
+        lock.lock()
+        defer { lock.unlock() }
+        return raw.compactMap { dict in
             guard
                 let collection = dict["collection"] as? String,
                 let docId = dict["docId"] as? String,
@@ -57,14 +62,22 @@ final class PendingWritesStore {
     }
 
     func remove(docId: String) {
+        lock.lock()
+        defer { lock.unlock() }
         raw = raw.filter { ($0["docId"] as? String) != docId }
     }
 
     func removeAll(forBaby id: UUID) {
+        lock.lock()
+        defer { lock.unlock() }
         raw = raw.filter { ($0["babyId"] as? String) != id.uuidString }
     }
 
-    func clear() { defaults.removeObject(forKey: key) }
+    func clear() {
+        lock.lock()
+        defer { lock.unlock() }
+        defaults.removeObject(forKey: key)
+    }
 
     /// Recursively replaces Firestore `Timestamp` with `Date` so the payload is
     /// plist-codable for UserDefaults persistence.

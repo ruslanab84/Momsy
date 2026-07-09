@@ -39,6 +39,7 @@ extension Array where Element == WHOPoint {
     }
 }
 
+@MainActor
 final class UnitSystemManager: ObservableObject {
     static let shared = UnitSystemManager()
 
