@@ -242,6 +242,7 @@ struct TodayView: View {
         VStack(spacing: 10) {
             TodayFeedingCard(
                 vm: feedingVM,
+                now: now,
                 openFeeding: { showFeeding = true },
                 reloadTodayEntries: { Task { await vm.loadTodayEntries() } }
             )
@@ -482,6 +483,7 @@ struct TodayView: View {
 
 private struct TodayFeedingCard: View {
     @ObservedObject var vm: FeedingViewModel
+    let now: Date
     let openFeeding: () -> Void
     let reloadTodayEntries: () -> Void
 
@@ -512,7 +514,7 @@ private struct TodayFeedingCard: View {
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(Color.bbInk.opacity(0.6))
                 } else {
-                    Text(vm.lastFeedAgoString)
+                    Text(vm.lastFeedAgoString(now: now))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .foregroundColor(.bbInk)
                     Text(loc.strings.usuallyAroundThisTime)

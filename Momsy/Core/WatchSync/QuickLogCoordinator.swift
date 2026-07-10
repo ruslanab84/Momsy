@@ -83,6 +83,7 @@ final class QuickLogCoordinator {
         Task {
             if let saved = try? await logFeeding.execute(durationSeconds: seconds, side: side) {
                 pushFeedingToFirestore(saved)
+                NotificationCenter.default.post(name: .feedingLogDidChange, object: nil)
             }
         }
     }
@@ -211,4 +212,10 @@ private extension FeedingSide {
         default:       self = .left
         }
     }
+}
+
+extension Notification.Name {
+    /// Posted after a feeding log is written outside `FeedingViewModel` (Watch quick
+    /// actions), so in-memory ViewModels know to reload `todayEntries`.
+    static let feedingLogDidChange = Notification.Name("feedingLogDidChange")
 }

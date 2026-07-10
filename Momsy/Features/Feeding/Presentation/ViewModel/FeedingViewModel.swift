@@ -20,6 +20,7 @@ final class FeedingViewModel: ObservableObject {
     private let pushNotifications: any PushNotificationServiceProtocol
     private let liveActivity = FeedingLiveActivityManager()
     private var lm: LocalizationManager { .shared }
+    private var externalChangeObservers: [NSObjectProtocol] = []
 
     init(
         logFeeding: LogFeedingUseCase,
@@ -33,15 +34,27 @@ final class FeedingViewModel: ObservableObject {
         self.timerService = timerService
         self.analytics = analytics
         self.pushNotifications = pushNotifications
+        for name in [Notification.Name.feedingLogDidChange, .cloudSyncDidMerge] {
+            let token = NotificationCenter.default.addObserver(
+                forName: name, object: nil, queue: .main
+            ) { [weak self] _ in
+                Task { await self?.loadTodayEntries() }
+            }
+            externalChangeObservers.append(token)
+        }
+    }
+
+    deinit {
+        externalChangeObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
     var feedingTimerString: String {
         String(format: "%02d:%02d", feedingSeconds / 60, feedingSeconds % 60)
     }
 
-    var lastFeedAgoString: String {
+    func lastFeedAgoString(now: Date = Date()) -> String {
         guard let last = todayEntries.last else { return "—" }
-        let mins = max(0, Int(-last.date.timeIntervalSinceNow / 60))
+        let mins = max(0, Int(now.timeIntervalSince(last.date) / 60))
         if mins < 60 { return lm.strings.minsAgo(mins) }
         let h = mins / 60, m = mins % 60
         return lm.strings.hrsAgoFormatted(h: h, m: m)
@@ -125,6 +138,7 @@ final class FeedingViewModel: ObservableObject {
                 pushFeedingToFirestore(saved)
             } catch {
                 saveError = error.localizedDescription
+                await loadTodayEntries()
             }
         }
     }

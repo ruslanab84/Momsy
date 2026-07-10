@@ -96,4 +96,36 @@ struct FeedingViewModelTests {
 
         #expect(vm.todayEntries.map(\.id) == [entry.id])
     }
+
+    // MARK: - External write reload
+
+    @Test("feedingLogDidChange notification reloads todayEntries")
+    func notificationReloadsToday() async throws {
+        let repo = MockFeedingRepository()
+        let vm = makeVM(repo: repo)
+
+        // Simulate a Watch-side write: repository only, no ViewModel involvement.
+        try await repo.add(FeedingEntry(date: Date(), durationSeconds: 600, side: .bottle))
+        #expect(vm.todayEntries.isEmpty)
+
+        NotificationCenter.default.post(name: .feedingLogDidChange, object: nil)
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(vm.todayEntries.count == 1)
+        #expect(vm.todayEntries.last?.side == .bottle)
+    }
+
+    @Test("lastFeedAgoString reflects newest entry after reload")
+    func agoStringUsesNewestEntry() async throws {
+        let repo = MockFeedingRepository()
+        let vm = makeVM(repo: repo)
+        let old = Calendar.current.date(byAdding: .hour, value: -5, to: Date())!
+
+        try await repo.add(FeedingEntry(date: old, durationSeconds: 300, side: .left))
+        try await repo.add(FeedingEntry(date: Date(), durationSeconds: 300, side: .right))
+        await vm.loadTodayEntries()
+
+        let ago = vm.lastFeedAgoString(now: Date())
+        #expect(!ago.contains("5"))   // must not show the 5-hour-old entry
+    }
 }
