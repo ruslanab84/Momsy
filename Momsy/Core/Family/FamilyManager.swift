@@ -25,7 +25,7 @@ enum FamilyError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noFamilyId:                 return "Family not set up. Please sign in."
-        case .invalidOrExpiredCode:       return "This invite code is invalid or has expired."
+        case .invalidOrExpiredCode:       return LocalizationManager.shared.strings.joinFailedMessage
         case .wouldAbandonExistingFamily: return "You already belong to a family."
         }
     }
@@ -40,6 +40,12 @@ final class FamilyManager: ObservableObject {
 
     @Published private(set) var familyId: String?
     @Published private(set) var isReady = false
+
+    /// True while an explicit invite-join flow owns family state. `setup()` bails while
+    /// set so the auth state listener — fired by the join's own sign-in — cannot race
+    /// it into creating a parallel fresh family. In-memory only: the race exists only
+    /// within one process lifetime.
+    private(set) var joinInFlight = false
 
     private var db: Firestore { Firestore.firestore() }
     private var isSettingUp = false
@@ -62,6 +68,9 @@ final class FamilyManager: ObservableObject {
         return cachedOwnerUid != currentUid
     }
 
+    func beginJoinFlow() { joinInFlight = true }
+    func endJoinFlow() { joinInFlight = false }
+
     func resetStaleCacheIfNeeded(for uid: String) {
         if Self.cacheIsStale(
             cachedOwnerUid: UserDefaults.standard.string(forKey: kFamilyOwnerUidDefaultsKey),
@@ -74,6 +83,11 @@ final class FamilyManager: ObservableObject {
     /// Called by AuthManager's state listener on every sign-in / app launch with existing session.
     /// Reads the user's familyId from Firestore; creates a new family if none exists.
     func setup(uid: String, displayName: String) async throws {
+        guard !joinInFlight else {
+            Self.log.info("Deferring family setup — invite join in flight")
+            return
+        }
+
         let suppressedRestoreStore = UserDefaultsSuppressedFamilyRestoreStore()
         let restoreSuppressed = suppressedRestoreStore.isRestoreSuppressed(for: uid)
         if restoreSuppressed {
@@ -161,7 +175,16 @@ final class FamilyManager: ObservableObject {
         guard let trimmed = JoinDeeplink.normalize(rawCode: code) else {
             throw FamilyError.invalidOrExpiredCode
         }
-        let inviteDoc = try await db.collection("invites").document(trimmed).getDocument()
+        let inviteDoc: DocumentSnapshot
+        do {
+            inviteDoc = try await db.collection("invites").document(trimmed).getDocument()
+        } catch let error as NSError where error.domain == FirestoreErrorCode.errorDomain
+            && error.code == FirestoreErrorCode.permissionDenied.rawValue {
+            // Rules deny `get` for both nonexistent and expired invite codes
+            // (resource.data.expiresAt fails to evaluate or is past), so both
+            // surface as permission-denied here rather than an empty snapshot.
+            throw FamilyError.invalidOrExpiredCode
+        }
         guard
             let data = inviteDoc.data(),
             let targetFamilyId = data["familyId"] as? String,

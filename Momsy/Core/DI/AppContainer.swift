@@ -435,6 +435,8 @@ final class AppContainer {
     }
 
     func joinFamilyFromOnboarding(code: String, force: Bool = false) async throws {
+        FamilyManager.shared.beginJoinFlow()
+        defer { FamilyManager.shared.endJoinFlow() }
         try await authManager.requireAnonymousSignInIfNeeded()
         guard let uid = authManager.currentUID else { throw FamilyError.noFamilyId }
         try await FamilyManager.shared.joinFamily(code: code, uid: uid, force: force)

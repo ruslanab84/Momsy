@@ -161,6 +161,8 @@ final class SharingViewModel: ObservableObject {
         isJoining = true
         joinError = nil
         Task {
+            FamilyManager.shared.beginJoinFlow()
+            defer { FamilyManager.shared.endJoinFlow() }
             do {
                 // Self-heal a missing session like the deep-link join path does,
                 // instead of dead-ending the user at an auth wall.

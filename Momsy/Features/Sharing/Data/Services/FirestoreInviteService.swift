@@ -35,13 +35,28 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
 
     @discardableResult
     func regenerate() -> String {
+        let previousCode = defaults.string(forKey: codeKey)
         let code = generateCode()
         let exp = Date().addingTimeInterval(86400)
         defaults.set(code, forKey: codeKey)
         defaults.set(exp, forKey: expiryKey)
         defaults.removeObject(forKey: syncedCodeKey)
-        pendingWrite = Task { try await self.writeToFirestore(code: code, expiry: exp) }
+        pendingWrite = Task {
+            try await self.writeToFirestore(code: code, expiry: exp)
+            await self.revokeInvite(previousCode, replacedBy: code)
+        }
         return code
+    }
+
+    /// Best-effort revocation of the superseded code. Failure is non-fatal — the old
+    /// document still self-expires via `expiresAt` (≤24h) and rules deny expired gets.
+    private func revokeInvite(_ oldCode: String?, replacedBy newCode: String) async {
+        guard let oldCode, oldCode != newCode else { return }
+        do {
+            try await db.collection("invites").document(oldCode).delete()
+        } catch {
+            // Old code may belong to a previous family (rules deny) or be gone already.
+        }
     }
 
     /// Awaits the pending Firestore write so the invite code is guaranteed to exist

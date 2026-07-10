@@ -19,6 +19,8 @@
 		0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */; };
 		0BABF1270000000000000001 /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1270000000000000002 /* LanguageTests.swift */; };
 		0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */; };
+		0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */; };
+		0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */; };
 		1D0A7E115EA9B00100000001 /* DevelopmentLeapSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0A7E115EA9B00100000002 /* DevelopmentLeapSchedule.swift */; };
 		1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
@@ -152,6 +154,8 @@
 		0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatermarkAdvanceTests.swift; sourceTree = "<group>"; };
 		0BABF1270000000000000002 /* LanguageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LanguageTests.swift; sourceTree = "<group>"; };
 		0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncWatermarkCommitTests.swift; sourceTree = "<group>"; };
+		0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyErrorLocalizationTests.swift; sourceTree = "<group>"; };
+		0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinFlowFlagTests.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipAlgorithmTests.swift; sourceTree = "<group>"; };
@@ -393,10 +397,20 @@
 		0BABF1280000000000000001 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				0BABF12B0000000000000003 /* Family */,
 				0BABF1290000000000000001 /* Localization */,
 				A9F0E003A9F0E003A9F0E003 /* Persistence */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		0BABF12B0000000000000003 /* Family */ = {
+			isa = PBXGroup;
+			children = (
+				0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */,
+				0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */,
+			);
+			path = Family;
 			sourceTree = "<group>";
 		};
 		0BABF1290000000000000001 /* Localization */ = {
@@ -976,6 +990,8 @@
 				0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */,
 				0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */,
 				0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */,
+				0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */,
+				0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */,
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
 				0BABF1270000000000000001 /* LanguageTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB001 /* FirebaseBootstrapperTests.swift in Sources */,

@@ -200,6 +200,8 @@ private struct MomsyRootView: View {
 
     @MainActor
     private func joinFamilyFromLink(code: String, force: Bool = false) async {
+        FamilyManager.shared.beginJoinFlow()
+        defer { FamilyManager.shared.endJoinFlow() }
         do {
             try await container.authManager.requireAnonymousSignInIfNeeded()
             guard let uid = container.authManager.currentUID else {
