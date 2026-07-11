@@ -257,23 +257,6 @@ final class FamilyManager: ObservableObject {
         return AccountErasureGate.mayTearDownSharedData(memberIds: ids, callerUid: uid)
     }
 
-    /// Removes the caller's own membership and their `users/{uid}` doc. When
-    /// `tearDownSharedFamily` is true (caller is the sole member) the family doc itself
-    /// is also deleted; otherwise the family and co-parents' memberships are left intact.
-    /// Call while still authenticated (rules require it) and before `reset()`. The order
-    /// matters: `users/{uid}` is deleted LAST so membership-based rules still authorise
-    /// the family/member deletes above it.
-    func leaveFamily(uid: String, tearDownSharedFamily: Bool) async throws {
-        if let familyId {
-            let familyRef = db.collection("families").document(familyId)
-            if tearDownSharedFamily {
-                try await familyRef.delete()
-            }
-            try await familyRef.collection("members").document(uid).delete()
-        }
-        try await db.collection("users").document(uid).delete()
-    }
-
     func reset() {
         familyId = nil
         isReady = false

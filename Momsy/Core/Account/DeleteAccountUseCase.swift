@@ -73,6 +73,11 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                 }
                 try await deleteLegacyFamilyTree(familyId: familyId)
                 try await familyRef.delete()
+                // Firestore never cascades into subcollections: the caller's roster doc
+                // must be removed explicitly or it outlives the erased account as PII.
+                // Ordered AFTER the deletes above — those are authorised by
+                // `belongsToFamily`, which reads this very document.
+                try await familyRef.collection("members").document(uid).delete()
             } else {
                 try await familyRef.collection("members").document(uid).delete()
             }
