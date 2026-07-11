@@ -304,6 +304,7 @@ struct TodayView: View {
                 dailyTipBody
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .bbCard(pad: 14, bg: tipCardBackground)
         .overlay(alignment: .leading) {
             Rectangle()
@@ -375,6 +376,7 @@ struct TodayView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .bbCard(pad: 14, bg: Color.bbLilac.opacity(0.3))
         }
     }
