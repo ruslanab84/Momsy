@@ -43,27 +43,82 @@ service cloud.firestore {
       return isFamilyMember(familyId);
     }
 
-    function hasCallerMemberDoc(familyId) {
-      return isSignedIn()
-        && exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
-    }
-
     function callerRoleRaw(familyId) {
       return get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.roleRaw;
     }
 
+    function isParentRole(roleRaw) {
+      return roleRaw in [
+        'Мама', 'Папа',
+        'мама', 'папа',
+        'mom', 'dad',
+        'Mom', 'Dad',
+        'mama', 'papa',
+        'mother', 'father',
+        'parent', 'Parent'
+      ];
+    }
+
+    function isNannyRole(roleRaw) {
+      return roleRaw in ['Няня', 'няня', 'nanny', 'Nanny'];
+    }
+
+    function isGrandmaRole(roleRaw) {
+      return roleRaw in [
+        'Бабушка', 'бабушка',
+        'grandma', 'Grandma',
+        'grandmother', 'Grandmother'
+      ];
+    }
+
     function canManageFamilyRoster(familyId) {
       return belongsToFamily(familyId)
-        && hasCallerMemberDoc(familyId)
-        && callerRoleRaw(familyId) in [
-          'Мама', 'Папа',
-          'мама', 'папа',
-          'mom', 'dad',
-          'Mom', 'Dad',
-          'mama', 'papa',
-          'mother', 'father',
-          'parent', 'Parent'
-        ];
+        && isParentRole(callerRoleRaw(familyId));
+    }
+
+    function canTrackBaby(familyId) {
+      return belongsToFamily(familyId)
+        && isNannyRole(callerRoleRaw(familyId));
+    }
+
+    function canViewBabyStatus(familyId) {
+      return belongsToFamily(familyId)
+        && (
+          isParentRole(callerRoleRaw(familyId))
+          || isNannyRole(callerRoleRaw(familyId))
+          || isGrandmaRole(callerRoleRaw(familyId))
+        );
+    }
+
+    function isRoutineTrackingCollection(subcollection) {
+      return subcollection in [
+        'feedingLogs', 'sleepLogs', 'diaperLogs', 'stoolLogs',
+        'walkLogs', 'bathLogs', 'leapLogs'
+      ];
+    }
+
+    function canReadBabyCollection(familyId, subcollection) {
+      return canManageFamilyRoster(familyId)
+        || (
+          canViewBabyStatus(familyId)
+          && (
+            isRoutineTrackingCollection(subcollection)
+            || subcollection == 'deletions'
+          )
+        );
+    }
+
+    function canCreateRoutineLog(familyId, subcollection) {
+      return canTrackBaby(familyId)
+        && isRoutineTrackingCollection(subcollection)
+        && request.resource.data.addedBy == request.auth.uid;
+    }
+
+    function canUpdateRoutineLog(familyId, subcollection) {
+      return canTrackBaby(familyId)
+        && isRoutineTrackingCollection(subcollection)
+        && resource.data.addedBy == request.auth.uid
+        && request.resource.data.addedBy == request.auth.uid;
     }
 
     function hasInviteCode() {
@@ -129,6 +184,31 @@ service cloud.firestore {
         && request.resource.data.familyId == resource.data.familyId;
     }
 
+    function hasValidInviteData() {
+      return request.resource.data.keys()
+          .hasAll(['familyId', 'createdBy', 'expiresAt'])
+        && request.resource.data.keys()
+          .hasOnly(['familyId', 'createdBy', 'expiresAt', 'roleRaw'])
+        && request.resource.data.familyId is string
+        && request.resource.data.createdBy is string
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt <= request.time + duration.value(24, 'h')
+        && (
+          !('roleRaw' in request.resource.data)
+          || (
+            request.resource.data.roleRaw is string
+            && request.resource.data.roleRaw in ['Мама', 'Папа', 'Няня', 'Бабушка']
+          )
+        );
+    }
+
+    function inviteImmutableFieldsUnchanged() {
+      return request.resource.data.familyId == resource.data.familyId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.expiresAt == resource.data.expiresAt;
+    }
+
     // Each user owns only their own doc. familyId may only point at a family the
     // caller is already authorised for via roster membership or creator bootstrap.
     match /users/{uid} {
@@ -146,21 +226,36 @@ service cloud.firestore {
     // familyId to join — but only while it is unexpired. `list` is denied outright:
     // allowing it would let any signed-in user enumerate every family's code and
     // familyId, then self-assign membership via their own users/{uid} doc.
-    // Only full-access members of the referenced family may create/replace or delete a code.
+    // Only full-access members of the referenced family may manage a code.
     match /invites/{code} {
-      allow get:            if isSignedIn()
-                            && resource.data.expiresAt > request.time;
-      allow list:           if false;
-      allow create, update: if canManageFamilyRoster(request.resource.data.familyId);
-      allow delete:         if canManageFamilyRoster(resource.data.familyId);
+      allow get:    if isSignedIn()
+                    && resource.data.expiresAt > request.time;
+      allow list:   if false;
+      allow create: if isSignedIn()
+                    && hasValidInviteData()
+                    && request.resource.data.createdBy == request.auth.uid
+                    && canManageFamilyRoster(request.resource.data.familyId);
+      allow update: if hasValidInviteData()
+                    && inviteImmutableFieldsUnchanged()
+                    && canManageFamilyRoster(resource.data.familyId)
+                    && canManageFamilyRoster(request.resource.data.familyId);
+      allow delete: if canManageFamilyRoster(resource.data.familyId);
     }
 
     match /families/{familyId} {
-      allow read:          if belongsToFamily(familyId);
-      allow create:        if isSignedIn()
-                           && request.resource.data.createdBy == request.auth.uid
-                           && request.resource.data.bootstrapComplete == false;
-      allow update, delete: if belongsToFamily(familyId);
+      allow read:   if belongsToFamily(familyId);
+      allow create: if isSignedIn()
+                    && request.resource.data.createdBy == request.auth.uid
+                    && request.resource.data.bootstrapComplete == false;
+      // Bootstrap may only move false -> true; otherwise a downgraded creator could
+      // reopen bootstrap and recreate their member doc as Mom.
+      allow update: if canManageFamilyRoster(familyId)
+                    && request.resource.data.createdBy == resource.data.createdBy
+                    && request.resource.data.bootstrapComplete == true
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['bootstrapComplete']);
+      allow delete: if canManageFamilyRoster(familyId)
+                    && resource.data.createdBy == request.auth.uid;
 
       // Members roster. A joining member may create their own membership doc only
       // with a valid, unexpired invite code for this family; the family creator may
@@ -179,16 +274,36 @@ service cloud.firestore {
                       || (isSignedIn() && memberId == request.auth.uid);
       }
 
-      // Per-baby tree: profile parent doc + every log subcollection.
-      match /babies/{babyId}/{document=**} {
-        allow read, write: if belongsToFamily(familyId);
+      match /babies/{babyId} {
+        allow read: if canViewBabyStatus(familyId);
+        allow create, update, delete: if canManageFamilyRoster(familyId);
+
+        match /{subcollection}/{document=**} {
+          allow read: if canReadBabyCollection(familyId, subcollection);
+          allow create: if canManageFamilyRoster(familyId)
+                        || canCreateRoutineLog(familyId, subcollection);
+          allow update: if canManageFamilyRoster(familyId)
+                        || canUpdateRoutineLog(familyId, subcollection);
+          // ponytail: Nanny deletes stay parent-only until tombstones identify
+          // both the source collection and author.
+          allow delete: if canManageFamilyRoster(familyId);
+        }
       }
     }
 
     // LEGACY family-keyed log tree, still read/written during the per-baby migration
     // rollout. Remove this block once all clients have migrated to the per-baby path.
-    match /babies/{familyId}/{document=**} {
-      allow read, write: if belongsToFamily(familyId);
+    match /babies/{familyId} {
+      allow read, write: if canManageFamilyRoster(familyId);
+
+      match /{subcollection}/{document=**} {
+        allow read: if canReadBabyCollection(familyId, subcollection);
+        allow create: if canManageFamilyRoster(familyId)
+                      || canCreateRoutineLog(familyId, subcollection);
+        allow update: if canManageFamilyRoster(familyId)
+                      || canUpdateRoutineLog(familyId, subcollection);
+        allow delete: if canManageFamilyRoster(familyId);
+      }
     }
   }
 }

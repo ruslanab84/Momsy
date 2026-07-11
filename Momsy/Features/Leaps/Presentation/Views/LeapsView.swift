@@ -149,6 +149,7 @@ struct LeapsView: View {
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
                 .background(Color.bbSurface)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -314,6 +315,7 @@ struct LeapsView: View {
                 .foregroundColor(.bbInkSoft)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .bbCard(pad: 14, bg: Color.bbMint.opacity(0.3))
     }
 }
@@ -337,6 +339,7 @@ private struct LeapPhaseBadge: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 8)
         .padding(.horizontal, 10)
         .background(Color.white.opacity(0.92))

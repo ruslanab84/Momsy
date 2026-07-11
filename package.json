@@ -4,7 +4,8 @@
   "description": "AI-powered baby care assistant built with SwiftUI and Firebase.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test:firebase-rules",
+    "test:firebase-rules": "firebase emulators:exec --only firestore,storage --project demo-momsy \"node --test tests/firebase-rules.test.mjs\""
   },
   "repository": {
     "type": "git",
@@ -17,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/ruslanab84/Momsy/issues"
   },
-  "homepage": "https://github.com/ruslanab84/Momsy#readme"
+  "homepage": "https://github.com/ruslanab84/Momsy#readme",
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "firebase": "^12.16.0"
+  }
 }

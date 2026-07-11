@@ -61,18 +61,28 @@ struct FirestoreAccountEraser: CloudAccountEraser {
 
         if let familyId = resolvedFamilyId, !familyId.isEmpty {
             let familyRef = db.collection("families").document(familyId)
-            let members = try await familyRef.collection("members").getDocuments()
-                .documents
-                .map(\.documentID)
-            let soleMember = AccountErasureGate.mayTearDownSharedData(memberIds: members, callerUid: uid)
+            let memberDocuments = try await familyRef.collection("members").getDocuments().documents
+            let memberIds = memberDocuments.map(\.documentID)
+            let callerRoleRaw = memberDocuments
+                .first { $0.documentID == uid }?
+                .data()["roleRaw"] as? String ?? ""
+            let mayTearDownSharedData = AccountErasureGate.mayTearDownSharedData(
+                memberIds: memberIds,
+                callerUid: uid,
+                callerRoleRaw: callerRoleRaw
+            )
 
-            if soleMember {
+            if mayTearDownSharedData {
+                let familyDoc = try await familyRef.getDocument(source: .server)
+                let callerCreatedFamily = familyDoc.data()?["createdBy"] as? String == uid
                 let babyIds = try await discoverBabyIds(in: familyRef)
                 for babyId in babyIds {
                     try await deleteBabyTree(familyRef: familyRef, familyId: familyId, babyId: babyId)
                 }
                 try await deleteLegacyFamilyTree(familyId: familyId)
-                try await familyRef.delete()
+                if callerCreatedFamily {
+                    try await familyRef.delete()
+                }
                 // Firestore never cascades into subcollections: the caller's roster doc
                 // must be removed explicitly or it outlives the erased account as PII.
                 // Ordered AFTER the deletes above — those are authorised by

@@ -119,7 +119,6 @@ final class FamilyManager: ObservableObject {
                 displayName: displayName,
                 defaultRoleRaw: FamilyRole.mom.rawValue
             )
-            try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
         } else {
             if let existingId, restoreSuppressed {
                 try? await db.collection("families").document(existingId)

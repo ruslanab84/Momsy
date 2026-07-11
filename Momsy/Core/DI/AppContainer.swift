@@ -351,6 +351,7 @@ final class AppContainer {
             "invite_expiry",
             FirestoreInviteService.codeKey,
             FirestoreInviteService.expiryKey,
+            FirestoreInviteService.familyKey,
             FirestoreInviteService.syncedCodeKey,
             PendingFamilyInviteStore.codeKey,
         ]

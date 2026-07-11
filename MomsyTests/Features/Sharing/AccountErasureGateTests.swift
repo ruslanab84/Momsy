@@ -23,4 +23,27 @@ struct AccountErasureGateTests {
     func callerPlusOthers() {
         #expect(!AccountErasureGate.mayTearDownSharedData(memberIds: ["me", "a", "b"], callerUid: "me"))
     }
+
+    @Test("sole parent may tear down shared data")
+    func soleParent() {
+        #expect(AccountErasureGate.mayTearDownSharedData(
+            memberIds: ["me"],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.dad.rawValue
+        ))
+    }
+
+    @Test("sole restricted member may only remove their membership")
+    func soleRestrictedMember() {
+        #expect(!AccountErasureGate.mayTearDownSharedData(
+            memberIds: ["me"],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.nanny.rawValue
+        ))
+        #expect(!AccountErasureGate.mayTearDownSharedData(
+            memberIds: ["me"],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.grandma.rawValue
+        ))
+    }
 }

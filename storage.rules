@@ -7,24 +7,42 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function hasUserDoc(uid) {
-      return isSignedIn()
-             && firestore.exists(/databases/(default)/documents/users/$(uid));
-    }
-
-    function userFamilyId(uid) {
-      return firestore.get(/databases/(default)/documents/users/$(uid)).data.familyId;
-    }
-
-    function isFamilyMember(familyId) {
+    function hasCallerMemberDoc(familyId) {
       return isSignedIn()
              && firestore.exists(/databases/(default)/documents/families/$(familyId)/members/$(request.auth.uid));
     }
 
-    function sharesFamilyWith(uid) {
-      return hasUserDoc(request.auth.uid)
-             && hasUserDoc(uid)
-             && isFamilyMember(userFamilyId(uid));
+    function callerRoleRaw(familyId) {
+      return firestore.get(/databases/(default)/documents/families/$(familyId)/members/$(request.auth.uid)).data.roleRaw;
+    }
+
+    function isParentRole(roleRaw) {
+      return roleRaw in [
+        'Мама', 'Папа',
+        'мама', 'папа',
+        'mom', 'dad',
+        'Mom', 'Dad',
+        'mama', 'papa',
+        'mother', 'father',
+        'parent', 'Parent'
+      ];
+    }
+
+    function isGrandmaRole(roleRaw) {
+      return roleRaw in [
+        'Бабушка', 'бабушка',
+        'grandma', 'Grandma',
+        'grandmother', 'Grandmother'
+      ];
+    }
+
+    function canManageFamilyPhotos(familyId) {
+      return hasCallerMemberDoc(familyId) && isParentRole(callerRoleRaw(familyId));
+    }
+
+    function canViewFamilyPhotos(familyId) {
+      return hasCallerMemberDoc(familyId)
+             && (isParentRole(callerRoleRaw(familyId)) || isGrandmaRole(callerRoleRaw(familyId)));
     }
 
     function isImageUnderLimit() {
@@ -32,18 +50,16 @@ service firebase.storage {
              && request.resource.contentType.matches('image/.*');
     }
 
-    // Shared family photos. Photo paths are synced through Firestore, so every
-    // co-parent in the family must be able to read the object behind that path.
     match /families/{familyId}/photos/{photoName} {
-      allow read: if isFamilyMember(familyId);
-      allow create, update: if isFamilyMember(familyId) && isImageUnderLimit();
-      allow delete: if isFamilyMember(familyId);
+      allow read: if canViewFamilyPhotos(familyId);
+      allow create, update: if canManageFamilyPhotos(familyId) && isImageUnderLimit();
+      allow delete: if canManageFamilyPhotos(familyId);
     }
 
-    // Legacy per-user photo path. Kept readable by same-family members so existing
-    // synced photoPath values do not break for co-parents after the new family path ships.
+    // The legacy path does not encode a family id, so sharing it cannot be authorised
+    // without trusting the mutable users/{uid}.familyId routing field.
     match /users/{uid}/{allPaths=**} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || sharesFamilyWith(uid));
+      allow read: if isSignedIn() && request.auth.uid == uid;
       allow create, update: if isSignedIn()
                             && request.auth.uid == uid
                             && isImageUnderLimit();

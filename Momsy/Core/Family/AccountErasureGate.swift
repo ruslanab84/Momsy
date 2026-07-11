@@ -13,4 +13,15 @@ enum AccountErasureGate {
         // no co-parent to harm, so tearing it down is safe.
         memberIds.allSatisfy { $0 == callerUid }
     }
+
+    static func mayTearDownSharedData(
+        memberIds: [String],
+        callerUid: String,
+        callerRoleRaw: String
+    ) -> Bool {
+        guard FamilyRole(storedRawValue: callerRoleRaw)?.canManageFamilyMembers == true else {
+            return false
+        }
+        return mayTearDownSharedData(memberIds: memberIds, callerUid: callerUid)
+    }
 }
