@@ -26,4 +26,10 @@ struct CloudSyncWatermarkCommitTests {
         let next = CloudSyncDownloader.advancedWatermark(previous: prev, maxObserved: nil)
         #expect(CloudSyncDownloader.watermarkAfterFetch(fetchSucceeded: true, next: next) == prev)
     }
+
+    @Test("a full page continues pagination")
+    func fullPageContinuesPagination() {
+        #expect(BabySyncService.shouldContinuePaginating(pageCount: 500, pageSize: 500))
+        #expect(!BabySyncService.shouldContinuePaginating(pageCount: 499, pageSize: 500))
+    }
 }

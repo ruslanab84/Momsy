@@ -441,24 +441,43 @@ final class BabySyncService {
         return snapshot.documents.compactMap { try? $0.data(as: T.self) }
     }
 
-    /// Fetches all docs from a subcollection (newest first), optionally limited to those
+    /// Fetches every doc from a subcollection (newest first), optionally limited to those
     /// at/after `since`. Used by the launch-time download/merge path.
     func fetchAll<T: Decodable>(from subcollection: String,
                                 dateField: String,
                                 since: Date? = nil,
                                 limit: Int = 500) async throws -> [T] {
         guard hasPath else { return [] }
-        var query: Query = collection(subcollection)
-            .order(by: dateField, descending: true)
-            .limit(to: limit)
-        if let since {
-            query = collection(subcollection)
-                .whereField(dateField, isGreaterThanOrEqualTo: Timestamp(date: since))
-                .order(by: dateField, descending: true)
-                .limit(to: limit)
+        var all: [T] = []
+        var cursor: DocumentSnapshot?
+
+        while true {
+            var query: Query
+            if let since {
+                query = collection(subcollection)
+                    .whereField(dateField, isGreaterThanOrEqualTo: Timestamp(date: since))
+                    .order(by: dateField, descending: true)
+            } else {
+                query = collection(subcollection)
+                    .order(by: dateField, descending: true)
+            }
+            query = query.limit(to: limit)
+            if let cursor {
+                query = query.start(afterDocument: cursor)
+            }
+
+            let snapshot = try await query.getDocuments()
+            all += snapshot.documents.compactMap { try? $0.data(as: T.self) }
+            guard Self.shouldContinuePaginating(pageCount: snapshot.documents.count, pageSize: limit),
+                  let lastDocument = snapshot.documents.last else {
+                return all
+            }
+            cursor = lastDocument
         }
-        let snapshot = try await query.getDocuments()
-        return snapshot.documents.compactMap { try? $0.data(as: T.self) }
+    }
+
+    static func shouldContinuePaginating(pageCount: Int, pageSize: Int) -> Bool {
+        pageSize > 0 && pageCount == pageSize
     }
 
     // MARK: - Incremental reads
