@@ -73,6 +73,58 @@ private final class DelayedAddSleepRepository: SleepRepository {
     }
 }
 
+private final class SnapshotSleepRepository: SleepRepository {
+    var entries: [SleepEntry] = []
+    private var shouldSuspendNextRead = false
+    private var capturedSnapshot = false
+    private var captureContinuation: CheckedContinuation<Void, Never>?
+    private var resumeContinuation: CheckedContinuation<Void, Never>?
+
+    func suspendNextRead() {
+        shouldSuspendNextRead = true
+        capturedSnapshot = false
+    }
+
+    func waitForSnapshotCapture() async {
+        guard !capturedSnapshot else { return }
+        await withCheckedContinuation { captureContinuation = $0 }
+    }
+
+    func resumeSnapshotRead() {
+        resumeContinuation?.resume()
+        resumeContinuation = nil
+    }
+
+    func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
+        let snapshot = entries.filter { $0.startDate >= from && $0.startDate < to }
+        guard shouldSuspendNextRead else { return snapshot }
+        shouldSuspendNextRead = false
+        capturedSnapshot = true
+        captureContinuation?.resume()
+        captureContinuation = nil
+        await withCheckedContinuation { resumeContinuation = $0 }
+        return snapshot
+    }
+
+    func add(_ entry: SleepEntry) async throws {
+        entries.append(entry)
+    }
+
+    func upsert(_ newEntries: [SleepEntry]) async throws {
+        let existing = Set(entries.map(\.id))
+        entries.append(contentsOf: newEntries.filter { !existing.contains($0.id) })
+    }
+
+    func update(_ entry: SleepEntry) async throws {
+        guard let index = entries.firstIndex(where: { $0.id == entry.id }) else { return }
+        entries[index] = entry
+    }
+
+    func delete(id: UUID) async throws {
+        entries.removeAll { $0.id == id }
+    }
+}
+
 @Suite("SleepViewModel", .serialized)
 @MainActor
 struct SleepViewModelTests {
@@ -244,6 +296,26 @@ struct SleepViewModelTests {
         try await Task.sleep(nanoseconds: 50_000_000)
         #expect(vm.todayEntries.isEmpty)
         #expect(vm.saveError != nil)
+    }
+
+    @Test("cloud merge cannot reopen a sleep stopped while its snapshot is loading")
+    func cloudMergeDoesNotReopenStoppedSleep() async throws {
+        let repo = SnapshotSleepRepository()
+        let vm = makeVM(repo: repo)
+        vm.start()
+        try await waitUntil { repo.entries.count == 1 }
+
+        repo.suspendNextRead()
+        NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
+        await repo.waitForSnapshotCapture()
+
+        vm.stop()
+        try await waitUntil { repo.entries.first?.endDate != nil }
+        repo.resumeSnapshotRead()
+        try await waitUntil { vm.todayEntries.first?.endDate != nil }
+
+        #expect(!vm.isSleepActive)
+        #expect(vm.todayEntries.first?.endDate != nil)
     }
 
     // MARK: - loadTodayEntries

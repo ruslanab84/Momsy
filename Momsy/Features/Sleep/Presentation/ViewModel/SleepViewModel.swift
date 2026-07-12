@@ -21,6 +21,8 @@ final class SleepViewModel: ObservableObject {
     private var activeBabyCancellable: AnyCancellable?
     private var reloadTask: Task<Void, Never>?
     private var mergeObserver: NSObjectProtocol?
+    private var pendingStopEntryIds = Set<UUID>()
+    private var sleepStateGeneration = 0
     private var lm: LocalizationManager { .shared }
 
     private let liveActivity = SleepLiveActivityManager()
@@ -218,6 +220,7 @@ final class SleepViewModel: ObservableObject {
     func stop() {
         guard isSleepActive, var entry = activeSleepEntry else { return }
         let babyId = activeSleepBabyId ?? currentBabyId
+        sleepStateGeneration &+= 1
         reloadTask?.cancel()
         let startTask = pendingStartEntryId == entry.id ? pendingStartTask : nil
         if pendingStartEntryId == entry.id {
@@ -229,6 +232,7 @@ final class SleepViewModel: ObservableObject {
         entry.quality = selectedQuality
         var completed = entry
         completed.endDate = Date()
+        pendingStopEntryIds.insert(completed.id)
         if let idx = todayEntries.firstIndex(where: { $0.id == completed.id }) {
             todayEntries[idx] = completed
         } else {
@@ -253,6 +257,7 @@ final class SleepViewModel: ObservableObject {
                 todayEntries.removeAll { $0.id == completed.id }
                 saveError = error.localizedDescription
             }
+            pendingStopEntryIds.remove(completed.id)
         }
     }
 
@@ -348,14 +353,15 @@ final class SleepViewModel: ObservableObject {
         await loadTodayEntries(expectedBabyId: currentBabyId)
     }
 
-    private func loadTodayEntries(expectedBabyId: UUID?) async {
+    private func loadTodayEntries(expectedBabyId: UUID?, expectedSleepStateGeneration: Int? = nil) async {
         let cal = Calendar.current
         let start = cal.startOfDay(for: Date())
         let end = cal.date(byAdding: .day, value: 1, to: start) ?? Date()
         if let entries = try? await withBabyScope(expectedBabyId, operation: {
             try await getSleepUC.executeOverlapping(from: start, to: end)
         }) {
-            guard isCurrentBaby(expectedBabyId), !Task.isCancelled else { return }
+            guard isCurrentBaby(expectedBabyId), !Task.isCancelled,
+                  expectedSleepStateGeneration == nil || expectedSleepStateGeneration == sleepStateGeneration else { return }
             todayEntries = entries.sorted { $0.startDate < $1.startDate }
         }
     }
@@ -458,8 +464,10 @@ final class SleepViewModel: ObservableObject {
 
     private func handleCloudMerge() async {
         let babyId = currentBabyId
-        await loadTodayEntries(expectedBabyId: babyId)
-        guard isCurrentBaby(babyId), !Task.isCancelled else { return }
+        let expectedSleepStateGeneration = sleepStateGeneration
+        await loadTodayEntries(expectedBabyId: babyId, expectedSleepStateGeneration: expectedSleepStateGeneration)
+        guard isCurrentBaby(babyId), !Task.isCancelled,
+              expectedSleepStateGeneration == sleepStateGeneration else { return }
 
         // 1. Remote close: the session this device shows got an endDate elsewhere.
         if let active = activeSleepEntry,
@@ -469,7 +477,9 @@ final class SleepViewModel: ObservableObject {
         }
 
         // 2. Race duplicates: keep the earliest, drop own extras, tell the user.
-        let open = todayEntries.filter { $0.endDate == nil }
+        let open = todayEntries.filter {
+            $0.endDate == nil && !pendingStopEntryIds.contains($0.id)
+        }
         if open.count > 1, let canonical = DuplicateOpenSessionPolicy.canonical(open) {
             let discards = DuplicateOpenSessionPolicy.ownDiscards(
                 open, canonical: canonical, currentUid: currentUid(), window: Self.duplicateStartWindow
@@ -478,6 +488,8 @@ final class SleepViewModel: ObservableObject {
                 try? await withBabyScope(babyId) {
                     try await reconcileStaleSleepUC.execute(dup, end: nil)   // local delete
                 }
+                guard isCurrentBaby(babyId), !Task.isCancelled,
+                      expectedSleepStateGeneration == sleepStateGeneration else { return }
                 // Durable + tombstoned so a co-parent's already-cached copy of this
                 // duplicate is purged on its next merge, even if this device is offline now.
                 BabySyncService().propagateDelete(id: dup.id, in: "sleepLogs")
@@ -487,12 +499,19 @@ final class SleepViewModel: ObservableObject {
             }
             if !discards.isEmpty {
                 coParentSessionNotice = duplicateNotice(for: canonical)
-                await loadTodayEntries(expectedBabyId: babyId)
+                await loadTodayEntries(
+                    expectedBabyId: babyId,
+                    expectedSleepStateGeneration: expectedSleepStateGeneration
+                )
+                guard isCurrentBaby(babyId), !Task.isCancelled,
+                      expectedSleepStateGeneration == sleepStateGeneration else { return }
             }
         }
 
         // 3. Adopt / refresh the single open session, or clean a stale widget mirror.
-        if let openEntry = todayEntries.first(where: { $0.endDate == nil }) {
+        if let openEntry = todayEntries.first(where: {
+            $0.endDate == nil && !pendingStopEntryIds.contains($0.id)
+        }) {
             if activeSleepEntry?.id != openEntry.id {
                 await restoreOpenSession(openEntry, babyId: babyId, reconcileStaleOpenSession: false)
             }
