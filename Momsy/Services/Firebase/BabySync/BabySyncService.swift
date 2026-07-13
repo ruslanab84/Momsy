@@ -376,24 +376,6 @@ final class BabySyncService {
 
     // MARK: - Reads
 
-    func streamLogs<T: Decodable>(
-        from subcollection: String,
-        limit: Int = 50
-    ) -> AsyncStream<[T]> {
-        guard hasPath else { return AsyncStream { $0.finish() } }
-        return AsyncStream { continuation in
-            let listener = collection(subcollection)
-                .order(by: "startedAt", descending: true)
-                .limit(to: limit)
-                .addSnapshotListener { snapshot, _ in
-                    guard let docs = snapshot?.documents else { return }
-                    let items = docs.compactMap { try? $0.data(as: T.self) }
-                    continuation.yield(items)
-                }
-            continuation.onTermination = { _ in listener.remove() }
-        }
-    }
-
     /// Fires once per SERVER write to `subcollection` newer than `since`. The initial
     /// snapshot is empty (0 reads) — this is a change trigger, not a data source; the
     /// consumer runs the watermark downloader to actually merge. Local pending echoes
@@ -407,25 +389,6 @@ final class BabySyncService {
                     guard let snapshot, !snapshot.documentChanges.isEmpty else { return }
                     guard !snapshot.metadata.hasPendingWrites else { return }
                     continuation.yield(())
-                }
-            continuation.onTermination = { _ in listener.remove() }
-        }
-    }
-
-    func streamLogsByField<T: Decodable>(
-        from subcollection: String,
-        orderField: String,
-        limit: Int = 50
-    ) -> AsyncStream<[T]> {
-        guard hasPath else { return AsyncStream { $0.finish() } }
-        return AsyncStream { continuation in
-            let listener = collection(subcollection)
-                .order(by: orderField, descending: true)
-                .limit(to: limit)
-                .addSnapshotListener { snapshot, _ in
-                    guard let docs = snapshot?.documents else { return }
-                    let items = docs.compactMap { try? $0.data(as: T.self) }
-                    continuation.yield(items)
                 }
             continuation.onTermination = { _ in listener.remove() }
         }

@@ -3,10 +3,6 @@ import Testing
 import Foundation
 
 final class MockBabySyncRepository: BabySyncRepositoryProtocol {
-    var feedingLogs: AsyncStream<[FeedingLog]> { AsyncStream { $0.finish() } }
-    var sleepLogs: AsyncStream<[SleepLog]>     { AsyncStream { $0.finish() } }
-    var diaperLogs: AsyncStream<[DiaperLog]>   { AsyncStream { $0.finish() } }
-
     func addFeedingLog(_ log: FeedingLog) async throws {}
     func addSleepLog(_ log: SleepLog) async throws {}
     func addDiaperLog(_ log: DiaperLog) async throws {}

@@ -7,18 +7,6 @@ final class BabySyncRepository: BabySyncRepositoryProtocol {
         self.service = service
     }
 
-    var feedingLogs: AsyncStream<[FeedingLog]> {
-        map(service.streamLogs(from: "feedingLogs") as AsyncStream<[FeedingLogDTO]>) { $0.domain }
-    }
-
-    var sleepLogs: AsyncStream<[SleepLog]> {
-        map(service.streamLogs(from: "sleepLogs") as AsyncStream<[SleepLogDTO]>) { $0.domain }
-    }
-
-    var diaperLogs: AsyncStream<[DiaperLog]> {
-        map(service.streamLogsByField(from: "diaperLogs", orderField: "loggedAt") as AsyncStream<[DiaperLogDTO]>) { $0.domain }
-    }
-
     func addFeedingLog(_ log: FeedingLog) async throws {
         try await service.setLog(FeedingLogDTO(from: log), id: log.id, to: "feedingLogs")
     }
@@ -71,19 +59,5 @@ final class BabySyncRepository: BabySyncRepositoryProtocol {
 
     func deleteBaby(id: UUID) async throws {
         try await service.deleteBaby(id: id)
-    }
-
-    private func map<DTO: Decodable, Model>(
-        _ base: AsyncStream<[DTO]>,
-        transform: @escaping (DTO) -> Model
-    ) -> AsyncStream<[Model]> {
-        AsyncStream { continuation in
-            Task {
-                for await items in base {
-                    continuation.yield(items.map(transform))
-                }
-                continuation.finish()
-            }
-        }
     }
 }

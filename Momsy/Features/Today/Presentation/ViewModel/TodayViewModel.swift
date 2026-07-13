@@ -22,15 +22,12 @@ final class TodayViewModel: ObservableObject {
     private let appState: AppState
     private let syncRepo: any BabySyncRepositoryProtocol
     private let predictNextSleep: PredictNextSleepUseCase
-    private var syncTasks: [Task<Void, Never>] = []
     private var hasFetchedThisSession = false
     private var mergeObserver: NSObjectProtocol?
     private var reloadTask: Task<Void, Never>?
     private var tipRefreshTask: Task<Void, Never>?
     private var reloadGeneration = 0
     private var isReloading = false
-    private var syncedFeedingLogs: [FeedingLog] = []
-    private var syncedSleepLogs: [SleepLog] = []
 
     init(
         getFeeding: GetFeedingEntriesUseCase,
@@ -54,7 +51,6 @@ final class TodayViewModel: ObservableObject {
         self.appState = appState
         self.syncRepo = syncRepo
         self.predictNextSleep = predictNextSleep
-        startSyncListeners()
         Task { await loadDiaperCount() }
         Task { await loadLeap() }
         mergeObserver = NotificationCenter.default.addObserver(
@@ -65,7 +61,6 @@ final class TodayViewModel: ObservableObject {
     }
 
     deinit {
-        syncTasks.forEach { $0.cancel() }
         tipRefreshTask?.cancel()
         if let mergeObserver { NotificationCenter.default.removeObserver(mergeObserver) }
     }
@@ -138,21 +133,6 @@ final class TodayViewModel: ObservableObject {
     var currentLeapName: String? {
         guard let leap = currentLeap else { return nil }
         return leap.name(for: LocalizationManager.shared.current)
-    }
-
-    private func startSyncListeners() {
-        syncTasks.append(Task { [weak self] in
-            guard let feedingLogs = self?.syncRepo.feedingLogs else { return }
-            for await logs in feedingLogs {
-                self?.syncedFeedingLogs = logs
-            }
-        })
-        syncTasks.append(Task { [weak self] in
-            guard let sleepLogs = self?.syncRepo.sleepLogs else { return }
-            for await logs in sleepLogs {
-                self?.syncedSleepLogs = logs
-            }
-        })
     }
 
     func addSyncedFeeding(side: FeedingSide, durationMin: Int, amountMl: Int? = nil) {
