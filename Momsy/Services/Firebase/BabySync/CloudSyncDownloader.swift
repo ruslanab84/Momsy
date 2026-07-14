@@ -188,6 +188,30 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         await downloadAndMerge()
     }
 
+    /// Live sleep trigger path. Unlike `resyncAll`, this must not be time-debounced
+    /// (see protocol doc) and stays cheap: a single incremental `sleepLogs` fetch
+    /// against the existing per-(family, baby) watermark, merged via the same
+    /// last-write-wins upsert the full sync uses. Remote tombstones are NOT pulled
+    /// here — a deleted-vs-updated race is reconciled by the next full sync; only
+    /// local in-flight deletes are honoured so an own delete never resurrects.
+    /// Overlap with itself is harmless (idempotent upsert; a stale watermark commit
+    /// only re-pulls the boundary docs), and a full sync in flight will pick this
+    /// delta up itself.
+    @MainActor
+    func resyncSleepLive() async {
+        guard FirebaseApp.app() != nil else { return }
+        guard hasRun else { return }
+        guard FamilyManager.shared.familyId != nil else { return }
+        guard !isSyncing else { return }
+
+        let pendingDeletes = PendingDeletionsStore.shared.ids()
+        let fetched: PendingFetch<SleepLogDTO> = await fetch("sleepLogs", dateField: "startedAt")
+        await merge(fetched, map: Self.sleepEntry) { entries in
+            try await self.sleepRepo.upsert(entries.filter { !pendingDeletes.contains($0.id) })
+        }
+        NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
+    }
+
     /// Foreground refresh. Re-pulls every child in the roster, skipping the one-time
     /// launch work (migration, legacy purge). Only runs after the launch download has
     /// happened (`hasRun`), so the initial activation never double-syncs with the

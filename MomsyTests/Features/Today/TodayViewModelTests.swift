@@ -160,8 +160,11 @@ struct TodayViewModelTests {
     @Test("loadTodayEntries sorts entries newest first")
     func loadSortsNewestFirst() async throws {
         let repo = MockFeedingRepository()
-        let old = FeedingEntry(date: Date().addingTimeInterval(-3600), durationSeconds: 300, side: .left)
-        let new = FeedingEntry(date: Date(), durationSeconds: 300, side: .right)
+        // Anchor to start-of-day so fixtures never straddle midnight when the suite
+        // runs in the small hours (Date()-offset would land on yesterday and be filtered).
+        let today = Calendar.current.startOfDay(for: Date())
+        let old = FeedingEntry(date: today.addingTimeInterval(3600), durationSeconds: 300, side: .left)
+        let new = FeedingEntry(date: today.addingTimeInterval(7200), durationSeconds: 300, side: .right)
         repo.entries = [old, new]
         let vm = makeVM(repo: repo)
         await vm.loadTodayEntries()
@@ -178,8 +181,11 @@ struct TodayViewModelTests {
         repo.entries = [
             FeedingEntry(id: feedingId, date: Date(), durationSeconds: 600, side: .left)
         ]
+        // Anchor within today; a Date()-offset start/end would fall on yesterday
+        // after midnight and be dropped by the day-overlap window.
+        let today = Calendar.current.startOfDay(for: Date())
         sleepRepo.entries = [
-            SleepEntry(id: sleepId, startDate: Date().addingTimeInterval(-7200), endDate: Date().addingTimeInterval(-3600))
+            SleepEntry(id: sleepId, startDate: today.addingTimeInterval(3600), endDate: today.addingTimeInterval(7200))
         ]
         let vm = makeVM(repo: repo, sleepRepo: sleepRepo)
 

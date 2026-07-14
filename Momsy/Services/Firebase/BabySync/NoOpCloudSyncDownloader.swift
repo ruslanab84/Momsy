@@ -5,4 +5,5 @@ final class NoOpCloudSyncDownloader: CloudSyncDownloaderProtocol {
     func resyncActiveBaby() async { }
     func resyncAll() async { }
     func forceResyncAll() async { }
+    func resyncSleepLive() async { }
 }

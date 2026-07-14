@@ -12,4 +12,9 @@ protocol CloudSyncDownloaderProtocol {
     func resyncAll() async
     /// Re-pulls every child after joining a family. Bypasses the time-debounce.
     func forceResyncAll() async
+    /// Targeted merge of the active baby's `sleepLogs` delta for the live sleep
+    /// trigger. NOT time-debounced: the snapshot fires once per co-parent server
+    /// write with no retry, so a debounce-skipped event would be lost until the
+    /// next foreground sync. One incremental (watermark-scoped) query per event.
+    func resyncSleepLive() async
 }
