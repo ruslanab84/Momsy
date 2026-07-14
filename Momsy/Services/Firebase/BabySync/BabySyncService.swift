@@ -1,7 +1,10 @@
 import FirebaseAuth
 import FirebaseFirestore
+import os
 
 final class BabySyncService {
+    private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "BabySync")
+
     private var db: Firestore { Firestore.firestore() }
 
     /// Both ids are read from UserDefaults (not `FamilyManager`) so the service can build
@@ -57,7 +60,10 @@ final class BabySyncService {
         let ref = collection(subcollection).document()
         let payload = try await encodedPayloadWithAuthor(log)
         // Firestore persists locally and syncs later; awaiting the server ack can hang callers offline.
-        ref.setData(payload) { _ in }
+        ref.setData(payload) { error in
+            guard let error else { return }
+            Self.log.error("addLog(\(subcollection, privacy: .public)) failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     /// Writes a log using the supplied stable id as the Firestore document id.
@@ -78,7 +84,10 @@ final class BabySyncService {
                                           payload: payload, familyId: familyId, babyId: babyId)
             return
         }
-        collection(subcollection).document(id).setData(payload, merge: true) { _ in }
+        collection(subcollection).document(id).setData(payload, merge: true) { error in
+            guard let error else { return }
+            Self.log.error("setLog(\(subcollection, privacy: .public)) failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     private func encodedPayloadWithAuthor<T: Encodable>(_ log: T) async throws -> [String: Any] {
@@ -176,9 +185,26 @@ final class BabySyncService {
                 try await writeTombstone(id: id.uuidString)
                 PendingDeletionsStore.shared.remove(id: id)
             } catch {
-                // Leave it pending; the launch merge will retry.
+                if Self.isPermissionDenied(error) {
+                    // Rules will never allow this delete for the current role — a
+                    // permanent failure. Drop the entry so the sync loop doesn't
+                    // retry it forever; the local delete stays local-only.
+                    PendingDeletionsStore.shared.remove(id: id)
+                    Self.log.error("propagateDelete(\(subcollection, privacy: .public)) denied by rules — dropping pending entry \(id.uuidString, privacy: .public)")
+                } else {
+                    Self.log.info("propagateDelete(\(subcollection, privacy: .public)) failed transiently; kept pending")
+                }
             }
         }
+    }
+
+    /// Rules-denied writes are permanent for the caller's current role/membership —
+    /// retrying them forever only burns requests. Everything else (offline,
+    /// unavailable, transient backend errors) must stay retryable.
+    nonisolated static func isPermissionDenied(_ error: Error) -> Bool {
+        let ns = error as NSError
+        return ns.domain == FirestoreErrorCode.errorDomain
+            && ns.code == FirestoreErrorCode.permissionDenied.rawValue
     }
 
     /// Decides which baby a queued write replays into, or `nil` to skip it.
@@ -224,7 +250,13 @@ final class BabySyncService {
                 }
                 PendingWritesStore.shared.remove(docId: entry.docId)
             } catch {
-                // Leave it pending; the next sync retries.
+                if Self.isPermissionDenied(error) {
+                    // A rules-denied queued write can never succeed for this
+                    // role/membership; keeping it would replay-fail on every sync.
+                    PendingWritesStore.shared.remove(docId: entry.docId)
+                    Self.log.error("replayPendingWrites(\(entry.collection, privacy: .public)) denied by rules — dropping \(entry.docId, privacy: .public)")
+                }
+                // Transient failures stay pending; the next sync retries.
             }
         }
     }
@@ -237,7 +269,11 @@ final class BabySyncService {
                 try await writeTombstone(id: idStr)
                 if let id = UUID(uuidString: idStr) { PendingDeletionsStore.shared.remove(id: id) }
             } catch {
-                // keep pending
+                if Self.isPermissionDenied(error) {
+                    if let id = UUID(uuidString: idStr) { PendingDeletionsStore.shared.remove(id: id) }
+                    Self.log.error("retryPendingDeletions(\(collection, privacy: .public)) denied by rules — dropping \(idStr, privacy: .public)")
+                }
+                // Transient failures stay pending for the next sync.
             }
         }
     }

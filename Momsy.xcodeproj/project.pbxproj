@@ -12,6 +12,7 @@
 		0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */; };
 		0BABF1200000000000000001 /* BabySyncBackfillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1200000000000000002 /* BabySyncBackfillTests.swift */; };
 		0BABF1210000000000000001 /* ResyncDebounceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1210000000000000002 /* ResyncDebounceTests.swift */; };
+		0BABF1220000000000000001 /* BabySyncErrorClassificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1220000000000000002 /* BabySyncErrorClassificationTests.swift */; };
 		0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1220000000000000002 /* JoinDeeplinkTests.swift */; };
 		0BABF1230000000000000001 /* ReplayRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1230000000000000002 /* ReplayRoutingTests.swift */; };
 		0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */; };
@@ -147,6 +148,7 @@
 		0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PendingWritesStoreTests.swift; sourceTree = "<group>"; };
 		0BABF1200000000000000002 /* BabySyncBackfillTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabySyncBackfillTests.swift; sourceTree = "<group>"; };
 		0BABF1210000000000000002 /* ResyncDebounceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ResyncDebounceTests.swift; sourceTree = "<group>"; };
+		0BABF1220000000000000002 /* BabySyncErrorClassificationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabySyncErrorClassificationTests.swift; sourceTree = "<group>"; };
 		0BABF1220000000000000002 /* JoinDeeplinkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JoinDeeplinkTests.swift; sourceTree = "<group>"; };
 		0BABF1230000000000000002 /* ReplayRoutingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReplayRoutingTests.swift; sourceTree = "<group>"; };
 		0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActiveBabySyncOverrideTests.swift; sourceTree = "<group>"; };
@@ -377,6 +379,7 @@
 				0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */,
 				0BABF1200000000000000002 /* BabySyncBackfillTests.swift */,
 				0BABF1210000000000000002 /* ResyncDebounceTests.swift */,
+				0BABF1220000000000000002 /* BabySyncErrorClassificationTests.swift */,
 				0BABF1220000000000000002 /* JoinDeeplinkTests.swift */,
 				0BABF1230000000000000002 /* ReplayRoutingTests.swift */,
 				0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */,
@@ -984,6 +987,7 @@
 				0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */,
 				0BABF1200000000000000001 /* BabySyncBackfillTests.swift in Sources */,
 				0BABF1210000000000000001 /* ResyncDebounceTests.swift in Sources */,
+				0BABF1220000000000000001 /* BabySyncErrorClassificationTests.swift in Sources */,
 				0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */,
 				0BABF1230000000000000001 /* ReplayRoutingTests.swift in Sources */,
 				0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */,
