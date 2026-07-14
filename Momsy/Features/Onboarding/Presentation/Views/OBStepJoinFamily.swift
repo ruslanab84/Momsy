@@ -45,6 +45,13 @@ struct JoinFamilyStep: View {
                         .onSubmit {
                             if canContinue { onContinue() }
                         }
+                        .onChange(of: inviteCode) { _, newValue in
+                            // A pasted deeplink (vs. a manually-typed bare code) can be dismissed
+                            // right away — otherwise the keyboard is still up when the user taps
+                            // Continue, and that first tap gets swallowed by the paste
+                            // menu/keyboard dismissal instead of reaching the button.
+                            if newValue.contains("://") { codeFocused = false }
+                        }
                         .padding(16)
                         .background(Color.bbCard)
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
