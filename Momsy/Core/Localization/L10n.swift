@@ -1288,6 +1288,7 @@ struct L10n {
     // MARK: — Unit abbreviations (charts, age labels)
     var unitHourShort: String  { s("h",   "ч",   "Std", "h",   "h",    "h", "时") }
     var unitMinShort: String   { s("min", "мин", "Min", "min", "min",  "min", "分") }
+    var ageYearShort: String   { s("yr",  "г",   "J",   "a",   "an",   "a", "岁") }
     var ageMonthShort: String  { s("mo",  "мес", "Mon", "m",   "mois", "m", "月") }
     var ageDayShort: String    { s("d",   "дн",  "T",   "d",   "j",    "d", "天") }
 
