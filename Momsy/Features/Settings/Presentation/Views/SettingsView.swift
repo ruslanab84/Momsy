@@ -341,6 +341,11 @@ struct SettingsView: View {
                     chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.feedback)
                 }
                 .buttonStyle(.plain)
+                Divider().opacity(0.2).padding(.leading, 60)
+                Button(action: openRateApp) {
+                    chevronRow(icon: "star.fill",        bg: .bbButter, title: lm.strings.rateApp)
+                }
+                .buttonStyle(.plain)
             }
             .background(Color.bbCard)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -396,6 +401,11 @@ struct SettingsView: View {
     private func openFeedback() {
         guard let feedbackURL = AppLegalLinks.feedbackURL else { return }
         openURL(feedbackURL)
+    }
+
+    private func openRateApp() {
+        guard let appStoreReviewURL = AppLegalLinks.appStoreReviewURL else { return }
+        openURL(appStoreReviewURL)
     }
 
     private func infoRow(icon: String, bg: Color, title: String, value: String) -> some View {

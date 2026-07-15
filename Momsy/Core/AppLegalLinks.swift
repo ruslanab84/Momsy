@@ -5,6 +5,14 @@ enum AppLegalLinks {
     static let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
     static let feedbackEmail = "momsy.app.support@gmail.com"
 
+    // TODO: заполнить после создания записи в App Store Connect
+    static let appStoreID = ""
+
+    static var appStoreReviewURL: URL? {
+        guard !appStoreID.isEmpty else { return nil }
+        return URL(string: "https://apps.apple.com/app/id\(appStoreID)?action=write-review")
+    }
+
     static var feedbackURL: URL? {
         var components = URLComponents()
         components.scheme = "mailto"

@@ -926,6 +926,7 @@ struct L10n {
     var forMoms: String         { s("for moms",      "для мам",       "für Mütter",    "para mamás", "pour les mamans", "para as mamãs", "献给妈妈们") }
     var privacy: String         { s("Privacy",       "Конфиденциальность","Datenschutz", "Privacidad", "Confidentialité", "Privacidade", "隐私") }
     var feedback: String        { s("Feedback",      "Обратная связь", "Feedback",      "Comentarios", "Retour", "Comentários", "反馈") }
+    var rateApp: String         { s("Rate the App",  "Оценить приложение", "App bewerten", "Valorar la app", "Noter l’app", "Avaliar o app", "评价应用") }
     var icloudSyncTitle: String { s("Cloud Sync",    "Облачная синхронизация", "Cloud-Synchronisierung", "Sincronización en la nube", "Synchronisation cloud", "Sincronização na nuvem", "云同步") }
     var icloudSyncDisclosure: String {
         s("Your baby's health records and your well-being entries (including the EPDS screening) are stored on this device and synced through your private Firebase account so they stay in sync across your devices. They are never shared with third parties or used for ads.",
