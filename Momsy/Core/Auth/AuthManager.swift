@@ -68,7 +68,7 @@ final class AuthManager: ObservableObject {
                         AuthManager.log.info("Deferring family setup while onboarding invite join is pending")
                         return
                     }
-                    let name = user.displayName ?? user.email ?? "User"
+                    let name = AccountDisplay.memberName(displayName: user.displayName, email: user.email)
                     do {
                         try await FamilyManager.shared.setup(uid: user.uid, displayName: name)
                     } catch {
@@ -186,7 +186,28 @@ final class AuthManager: ObservableObject {
             rawNonce: nonce,
             fullName: cred.fullName
         )
-        firebaseUser = try await linkOrSignIn(with: credential)
+        let user = try await linkOrSignIn(with: credential)
+        await adoptAppleFullNameIfNeeded(cred.fullName, for: user)
+        firebaseUser = user
+    }
+
+    /// `link(with:)` (the anonymous-promotion path) does not propagate the Apple
+    /// credential's fullName into Firebase `displayName`, and Apple only supplies it
+    /// on the first authorization — persist it here or lose it forever.
+    @MainActor
+    private func adoptAppleFullNameIfNeeded(_ components: PersonNameComponents?,
+                                            for user: FirebaseAuth.User) async {
+        guard (user.displayName ?? "").isEmpty, let components else { return }
+        let name = PersonNameComponentsFormatter.localizedString(from: components, style: .default)
+            .trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty else { return }
+        let change = user.createProfileChangeRequest()
+        change.displayName = name
+        do {
+            try await change.commitChanges()
+        } catch {
+            AuthManager.log.error("displayName commit failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     // MARK: — Google Sign-In

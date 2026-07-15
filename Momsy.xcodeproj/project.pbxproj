@@ -12,13 +12,13 @@
 		0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */; };
 		0BABF1200000000000000001 /* BabySyncBackfillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1200000000000000002 /* BabySyncBackfillTests.swift */; };
 		0BABF1210000000000000001 /* ResyncDebounceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1210000000000000002 /* ResyncDebounceTests.swift */; };
-		0BABF1220000000000000001 /* BabySyncErrorClassificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1220000000000000002 /* BabySyncErrorClassificationTests.swift */; };
 		0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1220000000000000002 /* JoinDeeplinkTests.swift */; };
 		0BABF1230000000000000001 /* ReplayRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1230000000000000002 /* ReplayRoutingTests.swift */; };
 		0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */; };
 		0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */; };
 		0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */; };
 		0BABF1270000000000000001 /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1270000000000000002 /* LanguageTests.swift */; };
+		ACC001DEA000000000000001 /* AccountDisplayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC001DEA000000000000002 /* AccountDisplayTests.swift */; };
 		0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */; };
 		0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */; };
 		0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */; };
@@ -45,11 +45,10 @@
 		8A1C80ECC1124FCF9CAA91E2 /* MockStoolRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B117796E1BA4881A6B15248 /* MockStoolRepository.swift */; };
 		8FF13D35CD4F298D09319CE3 /* MomsyWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B17AAF359406676B720BC3 /* MomsyWidgetView.swift */; };
 		8FF4DECAE6F4B06FFD6E7189 /* MockPushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */; };
+		945D0037F3F17B6FBCADBE12 /* DuplicateOpenSessionPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4623CCFF413B7062AFC625 /* DuplicateOpenSessionPolicyTests.swift */; };
 		9CBCB9DF036CA6355130F76C /* MomsyWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */; };
 		9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */; };
 		A1B2C3D4E5F60718293A4B5C /* SleepDayWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5D /* SleepDayWindowTests.swift */; };
-		C7F9E2D650E4DB928C049225 /* SleepSessionOwnershipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32F8D3BFD0887B5BFB39D82 /* SleepSessionOwnershipTests.swift */; };
-		945D0037F3F17B6FBCADBE12 /* DuplicateOpenSessionPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4623CCFF413B7062AFC625 /* DuplicateOpenSessionPolicyTests.swift */; };
 		A5522FF4A6C0AF27DC5EF07E /* MockSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */; };
 		A63165E2B06D8E9D3DC6D060 /* MockDailyTipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */; };
 		A9F0E002A9F0E002A9F0E002 /* AppPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */; };
@@ -81,6 +80,7 @@
 		BB001122CC33DD44EE55FF82 /* WalkActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF83 /* WalkActivityAttributes.swift */; };
 		BB001122CC33DD44EE55FF84 /* BathActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF85 /* BathActivityAttributes.swift */; };
 		BB001122CC33DD44EE55FF86 /* PumpingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB001122CC33DD44EE55FF87 /* PumpingActivityAttributes.swift */; };
+		C7F9E2D650E4DB928C049225 /* SleepSessionOwnershipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32F8D3BFD0887B5BFB39D82 /* SleepSessionOwnershipTests.swift */; };
 		CC001122CC33DD44EE55FF70 /* SharedActivityUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF71 /* SharedActivityUI.swift */; };
 		CC001122CC33DD44EE55FF72 /* SleepLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF73 /* SleepLiveActivityView.swift */; };
 		CC001122CC33DD44EE55FF74 /* WalkLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF75 /* WalkLiveActivityView.swift */; };
@@ -148,13 +148,13 @@
 		0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PendingWritesStoreTests.swift; sourceTree = "<group>"; };
 		0BABF1200000000000000002 /* BabySyncBackfillTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabySyncBackfillTests.swift; sourceTree = "<group>"; };
 		0BABF1210000000000000002 /* ResyncDebounceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ResyncDebounceTests.swift; sourceTree = "<group>"; };
-		0BABF1220000000000000002 /* BabySyncErrorClassificationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabySyncErrorClassificationTests.swift; sourceTree = "<group>"; };
 		0BABF1220000000000000002 /* JoinDeeplinkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JoinDeeplinkTests.swift; sourceTree = "<group>"; };
 		0BABF1230000000000000002 /* ReplayRoutingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReplayRoutingTests.swift; sourceTree = "<group>"; };
 		0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActiveBabySyncOverrideTests.swift; sourceTree = "<group>"; };
 		0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncWatermarkStoreTests.swift; sourceTree = "<group>"; };
 		0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatermarkAdvanceTests.swift; sourceTree = "<group>"; };
 		0BABF1270000000000000002 /* LanguageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LanguageTests.swift; sourceTree = "<group>"; };
+		ACC001DEA000000000000002 /* AccountDisplayTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountDisplayTests.swift; sourceTree = "<group>"; };
 		0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncWatermarkCommitTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyErrorLocalizationTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinFlowFlagTests.swift; sourceTree = "<group>"; };
@@ -205,8 +205,6 @@
 		99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B5D /* SleepDayWindowTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepDayWindowTests.swift; sourceTree = "<group>"; };
-		E32F8D3BFD0887B5BFB39D82 /* SleepSessionOwnershipTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepSessionOwnershipTests.swift; sourceTree = "<group>"; };
-		FE4623CCFF413B7062AFC625 /* DuplicateOpenSessionPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DuplicateOpenSessionPolicyTests.swift; sourceTree = "<group>"; };
 		A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
 		A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppPersistenceTests.swift; sourceTree = "<group>"; };
 		AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingLiveActivityView.swift; sourceTree = "<group>"; };
@@ -257,6 +255,7 @@
 		DEADBEEF0000000000000019 /* StaticWeeklyInsightServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StaticWeeklyInsightServiceTests.swift; sourceTree = "<group>"; };
 		DEADBEEF000000000000001B /* WeeklyInsightViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeeklyInsightViewModelTests.swift; sourceTree = "<group>"; };
 		DED78F3E8524577CFF50864B /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E32F8D3BFD0887B5BFB39D82 /* SleepSessionOwnershipTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepSessionOwnershipTests.swift; sourceTree = "<group>"; };
 		E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetBundle.swift; sourceTree = "<group>"; };
 		E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		E89BA45A7EB93E4CF6AA23BA /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
@@ -271,6 +270,7 @@
 		FB2828F5A5DB44A9E2563938 /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
 		FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationScheduleTests.swift; sourceTree = "<group>"; };
+		FE4623CCFF413B7062AFC625 /* DuplicateOpenSessionPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DuplicateOpenSessionPolicyTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -379,7 +379,6 @@
 				0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */,
 				0BABF1200000000000000002 /* BabySyncBackfillTests.swift */,
 				0BABF1210000000000000002 /* ResyncDebounceTests.swift */,
-				0BABF1220000000000000002 /* BabySyncErrorClassificationTests.swift */,
 				0BABF1220000000000000002 /* JoinDeeplinkTests.swift */,
 				0BABF1230000000000000002 /* ReplayRoutingTests.swift */,
 				0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */,
@@ -400,11 +399,28 @@
 		0BABF1280000000000000001 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				ACC001DEA000000000000003 /* Auth */,
 				0BABF12B0000000000000003 /* Family */,
 				0BABF1290000000000000001 /* Localization */,
 				A9F0E003A9F0E003A9F0E003 /* Persistence */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		ACC001DEA000000000000003 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				ACC001DEA000000000000002 /* AccountDisplayTests.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		0BABF1290000000000000001 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				0BABF1270000000000000002 /* LanguageTests.swift */,
+			);
+			path = Localization;
 			sourceTree = "<group>";
 		};
 		0BABF12B0000000000000003 /* Family */ = {
@@ -414,14 +430,6 @@
 				0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */,
 			);
 			path = Family;
-			sourceTree = "<group>";
-		};
-		0BABF1290000000000000001 /* Localization */ = {
-			isa = PBXGroup;
-			children = (
-				0BABF1270000000000000002 /* LanguageTests.swift */,
-			);
-			path = Localization;
 			sourceTree = "<group>";
 		};
 		100C67B934D28C1B553835F3 /* Services */ = {
@@ -987,7 +995,7 @@
 				0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */,
 				0BABF1200000000000000001 /* BabySyncBackfillTests.swift in Sources */,
 				0BABF1210000000000000001 /* ResyncDebounceTests.swift in Sources */,
-				0BABF1220000000000000001 /* BabySyncErrorClassificationTests.swift in Sources */,
+				0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */,
 				0BABF1220000000000000001 /* JoinDeeplinkTests.swift in Sources */,
 				0BABF1230000000000000001 /* ReplayRoutingTests.swift in Sources */,
 				0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */,
@@ -999,6 +1007,7 @@
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
 				0BABF1270000000000000001 /* LanguageTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB001 /* FirebaseBootstrapperTests.swift in Sources */,
+				ACC001DEA000000000000001 /* AccountDisplayTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

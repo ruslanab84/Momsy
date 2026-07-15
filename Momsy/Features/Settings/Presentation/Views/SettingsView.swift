@@ -263,6 +263,19 @@ struct SettingsView: View {
 
     // MARK: - Account
 
+    private var accountSubtitle: String? {
+        guard let user = authManager.firebaseUser else { return nil }
+        if let name = user.displayName, !name.isEmpty { return name }
+        if let email = user.email, !email.isEmpty, !AccountDisplay.isPrivateRelay(email) { return email }
+        if user.providerData.contains(where: { $0.providerID == "apple.com" }) {
+            return lm.strings.settingsAppleAccount
+        }
+        if user.providerData.contains(where: { $0.providerID == "google.com" }) {
+            return lm.strings.settingsGoogleAccount
+        }
+        return nil
+    }
+
     private var accountSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             BBSectionLabel(text: lm.strings.settingsAccount)
@@ -274,8 +287,8 @@ struct SettingsView: View {
                         Text(lm.strings.settingsSignedIn)
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundColor(.bbInk)
-                        if let email = authManager.firebaseUser?.email, !email.isEmpty {
-                            Text(email)
+                        if let subtitle = accountSubtitle {
+                            Text(subtitle)
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
                                 .foregroundColor(.bbInkMute)
                                 .lineLimit(1)

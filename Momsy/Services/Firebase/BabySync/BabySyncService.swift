@@ -100,7 +100,7 @@ final class BabySyncService {
         guard FirebaseBootstrapper.isConfigured else { return nil }
         guard let user = Auth.auth().currentUser else { return nil }
 
-        let fallbackName = user.displayName ?? user.email ?? "User"
+        let fallbackName = AccountDisplay.memberName(displayName: user.displayName, email: user.email)
         guard !familyId.isEmpty else {
             return SyncAuthorIdentity(uid: user.uid, displayName: fallbackName)
         }
