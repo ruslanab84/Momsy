@@ -20,11 +20,13 @@ struct PendingFamilyInviteStore {
 
     func save(_ rawCode: String) {
         guard let code = JoinDeeplink.normalize(rawCode: rawCode) else { return }
+        guard defaults.string(forKey: Self.codeKey) != code else { return }
         defaults.set(code, forKey: Self.codeKey)
         NotificationCenter.default.post(name: .pendingFamilyInviteDidChange, object: nil)
     }
 
     func clear() {
+        guard defaults.string(forKey: Self.codeKey) != nil else { return }
         defaults.removeObject(forKey: Self.codeKey)
         NotificationCenter.default.post(name: .pendingFamilyInviteDidChange, object: nil)
     }

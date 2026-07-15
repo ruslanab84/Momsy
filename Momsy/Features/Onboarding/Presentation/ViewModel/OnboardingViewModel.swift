@@ -199,6 +199,12 @@ final class OnboardingViewModel: ObservableObject {
 
     func loadPendingInviteIfNeeded() {
         guard let code = pendingInviteStore.load() else { return }
+        // A store write from this flow (persistPendingInviteForAuth) posts
+        // .pendingFamilyInviteDidChange; re-entering here for the code we're already
+        // handling would reset step back to .join and swallow the Continue tap.
+        if flow == .joinFamily, JoinDeeplink.normalize(rawCode: pendingInviteCode) == code {
+            return
+        }
         startJoinFlow(code: code)
     }
 

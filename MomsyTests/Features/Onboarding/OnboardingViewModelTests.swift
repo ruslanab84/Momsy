@@ -191,6 +191,22 @@ struct OnboardingViewModelTests {
         #expect(harness.pendingStore.load() == "MOMSY-ABCD12")
     }
 
+    @Test("loadPendingInviteIfNeeded after advance does not bounce back to join step")
+    func loadPendingInviteAfterAdvanceDoesNotResetStep() {
+        let harness = makeHarness()
+        harness.vm.startJoinFlow()
+        harness.vm.pendingInviteCode = "momsy://join?code=momsy-abcd12"
+
+        harness.vm.advance()
+        #expect(harness.vm.step == .auth)
+
+        // Simulates the .pendingFamilyInviteDidChange notification fired by the
+        // store write inside advance() -> persistPendingInviteForAuth().
+        harness.vm.loadPendingInviteIfNeeded()
+
+        #expect(harness.vm.step == .auth)
+    }
+
     @Test("pending onboarding invite defers automatic family setup")
     func pendingOnboardingInviteDefersAutomaticFamilySetup() {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
