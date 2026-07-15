@@ -60,36 +60,46 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         let resolvedFamilyId = (userDoc.data()?["familyId"] as? String) ?? FamilyManager.shared.familyId
 
         if let familyId = resolvedFamilyId, !familyId.isEmpty {
-            let familyRef = db.collection("families").document(familyId)
-            let memberDocuments = try await familyRef.collection("members").getDocuments().documents
-            let memberIds = memberDocuments.map(\.documentID)
-            let callerRoleRaw = memberDocuments
-                .first { $0.documentID == uid }?
-                .data()["roleRaw"] as? String ?? ""
-            let mayTearDownSharedData = AccountErasureGate.mayTearDownSharedData(
-                memberIds: memberIds,
-                callerUid: uid,
-                callerRoleRaw: callerRoleRaw
-            )
+            do {
+                let familyRef = db.collection("families").document(familyId)
+                let memberDocuments = try await familyRef.collection("members").getDocuments().documents
+                let memberIds = memberDocuments.map(\.documentID)
+                let callerRoleRaw = memberDocuments
+                    .first { $0.documentID == uid }?
+                    .data()["roleRaw"] as? String ?? ""
+                let mayTearDownSharedData = AccountErasureGate.mayTearDownSharedData(
+                    memberIds: memberIds,
+                    callerUid: uid,
+                    callerRoleRaw: callerRoleRaw
+                )
 
-            if mayTearDownSharedData {
-                let familyDoc = try await familyRef.getDocument(source: .server)
-                let callerCreatedFamily = familyDoc.data()?["createdBy"] as? String == uid
-                let babyIds = try await discoverBabyIds(in: familyRef)
-                for babyId in babyIds {
-                    try await deleteBabyTree(familyRef: familyRef, familyId: familyId, babyId: babyId)
+                if mayTearDownSharedData {
+                    let familyDoc = try await familyRef.getDocument(source: .server)
+                    let callerCreatedFamily = familyDoc.data()?["createdBy"] as? String == uid
+                    let babyIds = try await discoverBabyIds(in: familyRef)
+                    for babyId in babyIds {
+                        try await deleteBabyTree(familyRef: familyRef, familyId: familyId, babyId: babyId)
+                    }
+                    try await deleteLegacyFamilyTree(familyId: familyId)
+                    if callerCreatedFamily {
+                        try await familyRef.delete()
+                    }
+                    // Firestore never cascades into subcollections: the caller's roster doc
+                    // must be removed explicitly or it outlives the erased account as PII.
+                    // Ordered AFTER the deletes above — those are authorised by
+                    // `belongsToFamily`, which reads this very document.
+                    try await familyRef.collection("members").document(uid).delete()
+                } else {
+                    try await familyRef.collection("members").document(uid).delete()
                 }
-                try await deleteLegacyFamilyTree(familyId: familyId)
-                if callerCreatedFamily {
-                    try await familyRef.delete()
-                }
-                // Firestore never cascades into subcollections: the caller's roster doc
-                // must be removed explicitly or it outlives the erased account as PII.
-                // Ordered AFTER the deletes above — those are authorised by
-                // `belongsToFamily`, which reads this very document.
-                try await familyRef.collection("members").document(uid).delete()
-            } else {
-                try await familyRef.collection("members").document(uid).delete()
+            } catch let error as NSError
+                where error.domain == FirestoreErrorDomain
+                && error.code == FirestoreErrorCode.permissionDenied.rawValue {
+                // The caller's members/{uid} doc is already gone (a prior partial run
+                // deleted it), so every family read/write is now denied by
+                // `belongsToFamily`. Nothing in the family branch is reachable or
+                // owned by this account anymore; fall through to deleting users/{uid} —
+                // the only remaining re-resolution signal `isCloudDataPresent` checks.
             }
         }
 

@@ -578,12 +578,22 @@ final class AppContainer {
 
     /// Runs before launch-time migrations/local profile loading, and after a provider sign-in
     /// when that provider maps to the uid being deleted. Returns true while the delete marker
-    /// is still unresolved; callers should skip cloud sync in that state so cached remote data
-    /// cannot refill the freshly wiped device.
+    /// is still unresolved AND applies to the current session; callers should skip cloud sync
+    /// in that state so cached remote data cannot refill the freshly wiped device.
     @MainActor
     func recoverPendingAccountDeletion() async -> Bool {
-        guard pendingAccountDeletionStore.loadPending() != nil else { return false }
+        guard let pendingUid = pendingAccountDeletionStore.loadPending() else { return false }
         await accountDeletionRecovery.runIfNeeded()
+
+        let currentUid = authManager.currentUID
+        let markerAppliesToSession = currentUid == nil || currentUid == pendingUid
+        guard markerAppliesToSession else {
+            // A DIFFERENT account is signed in. The stale marker belongs to another uid;
+            // wiping here would destroy this user's onboarding/family state on every
+            // launch. Leave the marker for the owning account's next sign-in.
+            return false
+        }
+
         try? eraseLocalData()
         FamilyManager.shared.reset()
         return pendingAccountDeletionStore.loadPending() != nil
