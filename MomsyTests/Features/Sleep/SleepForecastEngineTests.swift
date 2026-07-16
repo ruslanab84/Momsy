@@ -207,15 +207,33 @@ struct SleepForecastEngineTests {
         let now = try at(today, 11, 10)
         let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 150),
                                                entries: entries, now: now))
-        // Онсет от реального пробуждения 09:15 + 127 = 11:22 → клампится к now + 15 = 11:25.
-        let expected = now.addingTimeInterval(15 * 60)
+        // Онсет от реального пробуждения 09:15 + 127 ≈ 11:22 (НЕ 11:05 + 127 ≈ 13:12).
+        let expected = try at(today, 11, 22)
         #expect(abs(pred.predictedOnset.timeIntervalSince(expected)) < 90)
-        // НЕ 11:05 + 127 ≈ 13:12.
         let noon = try at(today, 12, 0)
         #expect(pred.predictedOnset < noon)
         #expect(!pred.isOverdue)
         #expect(pred.minutesAwake == 115)          // 09:15 → 11:10, false start игнорируется
         #expect(pred.napsRemaining == 3)           // false start не съедает слот (4 − 1)
+    }
+
+    // MARK: - 12b. False start с истёкшим окном → overdue, а не скользящий прогноз
+
+    @Test("a false start past the natural onset flags overdue instead of sliding forward")
+    func falseStartElapsedWindowIsOverdue() throws {
+        let today = try makeToday()
+        // Реальный сон 08:00–09:15 (окно 127 → onset 11:22); false start 11:30–11:35; сейчас 11:45.
+        let entries = [
+            entry(try at(today, 8, 0), try at(today, 9, 15)),
+            entry(try at(today, 11, 30), try at(today, 11, 35))
+        ]
+        let now = try at(today, 11, 45)
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 150),
+                                               entries: entries, now: now))
+        #expect(pred.isOverdue)
+        let expected = try at(today, 11, 22)
+        #expect(abs(pred.predictedOnset.timeIntervalSince(expected)) < 90)
+        #expect(pred.minutesAwake == 150)          // 09:15 → 11:45
     }
 
     // MARK: - 13. Короткий сон → частичный кредит окна
@@ -270,5 +288,18 @@ struct SleepForecastEngineTests {
         let deltaMin = pred.predictedOnset.timeIntervalSince(anchor) / 60
         #expect(deltaMin >= 55 && deltaMin <= 70)
         #expect(!pred.isOverdue)
+    }
+
+    // MARK: - 15b. Только false starts, окно истекло → overdue
+
+    @Test("only false starts past the reduced window flag overdue")
+    func onlyFalseStartsElapsedIsOverdue() throws {
+        let today = try makeToday()
+        // FS 10:00–10:05; reduced = 0.5 × 127 ≈ 63 → onset ≈ 11:08; сейчас 11:40.
+        let entries = [entry(try at(today, 10, 0), try at(today, 10, 5))]
+        let now = try at(today, 11, 40)
+        let pred = try #require(engine.predict(birthDate: try birth(today, daysOld: 150),
+                                               entries: entries, now: now))
+        #expect(pred.isOverdue)
     }
 }

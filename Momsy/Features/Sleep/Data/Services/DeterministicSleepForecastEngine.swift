@@ -20,9 +20,6 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
         static let shortNapFraction             = 0.5
         /// Floor of the partial-credit ramp (fraction of the full window).
         static let minPartialWindowFactor       = 0.5
-        /// When a recomputed onset lands in the past, suggest settling the
-        /// baby this many minutes from now.
-        static let minLeadMinutes               = 15
     }
 
     func predict(birthDate: Date, entries: [SleepEntry], now: Date) -> SleepPrediction? {
@@ -149,19 +146,19 @@ final class DeterministicSleepForecastEngine: SleepForecastEngine {
             return lastEnd.addingMinutes(windowMinutes)
         }
 
-        // False start: окно продолжает отсчитываться от последнего реального пробуждения.
+        // False start: окно продолжает отсчитываться от последнего реального
+        // пробуждения. Onset в прошлом легитимен — его подхватывает isOverdue.
         if lastDuration < Const.falseStartMaxMinutes {
             let lastRealWake = completed
                 .filter { !$0.isFalseStart(maxMinutes: Const.falseStartMaxMinutes) }
                 .compactMap(\.endDate)
                 .max()
             if let realWake = lastRealWake {
-                let onset = realWake.addingMinutes(windowMinutes)
-                return max(onset, now.addingMinutes(Const.minLeadMinutes))
+                return realWake.addingMinutes(windowMinutes)
             }
             // В истории только false starts: минимальный частичный кредит.
             let reduced = Int(Double(windowMinutes) * Const.minPartialWindowFactor)
-            return max(lastEnd.addingMinutes(reduced), now.addingMinutes(Const.minLeadMinutes))
+            return lastEnd.addingMinutes(reduced)
         }
 
         // Короткий сон: частичный кредит, линейная рампа 0.5 → 1.0.
