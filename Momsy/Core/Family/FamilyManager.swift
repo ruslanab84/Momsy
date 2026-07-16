@@ -15,6 +15,9 @@ extension Notification.Name {
     /// Posted after the caller joins an existing family, so the app re-pulls that
     /// family's data (the joined family's logs aren't local yet).
     static let familyDidJoin = Notification.Name("familyDidJoin")
+    /// Posted after this device detects it was removed from its family (rules deny
+    /// the caller's own member-doc read). UI shows the "removed from family" alert.
+    static let familyMembershipRevoked = Notification.Name("familyMembershipRevoked")
 }
 
 enum FamilyError: LocalizedError {
@@ -46,6 +49,18 @@ final class FamilyManager: ObservableObject {
     /// it into creating a parallel fresh family. In-memory only: the race exists only
     /// within one process lifetime.
     private(set) var joinInFlight = false
+
+    /// Assigned by `AppContainer` at startup. Runs BEFORE the revoked family is
+    /// detached and replaced, so the old family's local children are purged before
+    /// any new-family sync could re-upload them (same invariant as the join-switch
+    /// purge in `observeFamilyJoin`).
+    var onMembershipRevoked: ((_ revokedFamilyId: String) async -> Void)?
+
+    /// One server-truth membership read per process launch on the cached-familyId
+    /// path; revocation while the app keeps running is caught on the next launch.
+    private var hasVerifiedMembershipThisLaunch = false
+
+    enum MembershipCheck { case member, revoked, unknown }
 
     private var db: Firestore { Firestore.firestore() }
     private var isSettingUp = false
@@ -97,8 +112,25 @@ final class FamilyManager: ObservableObject {
         // A uid change since the cache was written (e.g. signing into an existing
         // account that replaced the anonymous user) invalidates the cached familyId.
         resetStaleCacheIfNeeded(for: uid)
-        // Cached familyId is already sufficient — skip remote setup
-        if familyId != nil { isReady = true; return }
+
+        // Cached familyId: verify roster membership against the server ONCE per
+        // launch. A member removed by a family admin otherwise keeps a dead cache
+        // forever — every read/write silently rules-denied. On revocation, fall
+        // through below and start a fresh personal family.
+        if let cachedId = familyId {
+            if hasVerifiedMembershipThisLaunch { isReady = true; return }
+            let check = await confirmMembership(familyId: cachedId, uid: uid)
+            hasVerifiedMembershipThisLaunch = true
+            switch check {
+            case .member, .unknown:
+                isReady = true
+                return
+            case .revoked:
+                await detachFromRevokedFamily(uid: uid, familyId: cachedId)
+                // Continue below: users/{uid}.familyId is cleared, a new family is created.
+            }
+        }
+
         // Prevent concurrent invocations (e.g. state listener fires on launch + sign-in)
         guard !isSettingUp else { return }
         isSettingUp = true
@@ -109,7 +141,16 @@ final class FamilyManager: ObservableObject {
         // family or starts fresh. Read it from the backend, not Firestore's persistent
         // cache, so a just-deleted account cannot reattach to a stale cached familyId.
         let userDoc = try await userRef.getDocument(source: .server)
-        let existingId = userDoc.data()?["familyId"] as? String
+        var existingId = userDoc.data()?["familyId"] as? String
+
+        // Membership must be confirmed BEFORE persisting: a stale routing field
+        // pointing at a family the caller was removed from must not be adopted.
+        if let candidate = existingId, !restoreSuppressed {
+            if await confirmMembership(familyId: candidate, uid: uid) == .revoked {
+                await detachFromRevokedFamily(uid: uid, familyId: candidate)
+                existingId = nil
+            }
+        }
 
         if let existingId, !restoreSuppressed {
             persist(familyId: existingId, ownerUid: uid)
@@ -254,6 +295,43 @@ final class FamilyManager: ObservableObject {
             .collection("members").getDocuments()
         let ids = snap.documents.map { $0.documentID }
         return AccountErasureGate.mayTearDownSharedData(memberIds: ids, callerUid: uid)
+    }
+
+    /// `permissionDenied` on reading one's OWN member doc means the doc no longer
+    /// exists (rules require it to exist for the read) → the caller was removed.
+    /// Anything else (offline, unavailable, transient) must not detach.
+    nonisolated static func classifyMembershipError(_ error: Error) -> MembershipCheck {
+        let ns = error as NSError
+        if ns.domain == FirestoreErrorCode.errorDomain,
+           ns.code == FirestoreErrorCode.permissionDenied.rawValue {
+            return .revoked
+        }
+        return .unknown
+    }
+
+    /// Server-truth check that `uid` still has a member doc in `familyId`.
+    private func confirmMembership(familyId: String, uid: String) async -> MembershipCheck {
+        do {
+            let snap = try await db.collection("families").document(familyId)
+                .collection("members").document(uid)
+                .getDocument(source: .server)
+            return snap.exists ? .member : .revoked
+        } catch {
+            return Self.classifyMembershipError(error)
+        }
+    }
+
+    /// Ordered teardown after a confirmed revocation:
+    /// 1) purge local children of the old family (via `onMembershipRevoked`),
+    /// 2) clear the routing field so no future sign-in re-adopts the family,
+    /// 3) reset local family state, 4) notify the UI.
+    private func detachFromRevokedFamily(uid: String, familyId revokedId: String) async {
+        Self.log.info("Membership revoked in family \(revokedId, privacy: .public) — detaching")
+        await onMembershipRevoked?(revokedId)
+        try? await db.collection("users").document(uid)
+            .updateData(["familyId": FieldValue.delete()])
+        reset()
+        NotificationCenter.default.post(name: .familyMembershipRevoked, object: nil)
     }
 
     func reset() {

@@ -8,12 +8,14 @@ private enum JoinAlert: Identifiable {
     case success
     case failure
     case confirm(String)
+    case removedFromFamily
 
     var id: String {
         switch self {
         case .success: return "success"
         case .failure: return "failure"
         case .confirm(let code): return "confirm-\(code)"
+        case .removedFromFamily: return "removedFromFamily"
         }
     }
 }
@@ -169,6 +171,10 @@ private struct MomsyRootView: View {
                         },
                         secondaryButton: .cancel(Text(localization.strings.cancel))
                     )
+                case .removedFromFamily:
+                    return Alert(title: Text(localization.strings.removedFromFamilyTitle),
+                                 message: Text(localization.strings.removedFromFamilyMessage),
+                                 dismissButton: .default(Text(localization.strings.done)))
                 }
             }
             .sheet(isPresented: $showJoinAuthSheet, onDismiss: {
@@ -187,6 +193,9 @@ private struct MomsyRootView: View {
                 } else {
                     container.sleepLiveSync.stop()
                 }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .familyMembershipRevoked)) { _ in
+                joinAlert = .removedFromFamily
             }
     }
 

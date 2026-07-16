@@ -108,6 +108,19 @@ final class AppContainer {
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
         observeFamilyJoin()
+        wireMembershipRevocation()
+    }
+
+    /// Revocation purge hook. Runs synchronously-before the revoked family is
+    /// replaced (FamilyManager awaits it), reusing the same local-cache purge the
+    /// family-switch path uses — otherwise the old family's children would be
+    /// re-uploaded into the freshly created personal family by `syncBabyProfile`.
+    private func wireMembershipRevocation() {
+        FamilyManager.shared.onMembershipRevoked = { [weak self] revokedFamilyId in
+            guard let self else { return }
+            self.purgeLocalData(previousFamilyId: revokedFamilyId)
+            ActiveBaby.currentId = nil
+        }
     }
 
     /// After a join, drop the active-baby pointer so the downloader adopts the joined
