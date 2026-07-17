@@ -51,14 +51,14 @@ struct WeeklyInsightContextBuilderTests {
         let foodRepo = MockComplementaryFeedingRepository()
         foodRepo.entries = [
             ComplementaryFoodEntry(id: UUID(), date: start.addingTimeInterval(3600), foodName: "Broccoli",
-                                   category: .vegetable, reaction: .none, isAllergen: false, notes: "", photoPath: nil),
+                                   category: .vegetable, reaction: .none, isAllergen: false, notes: ""),
             ComplementaryFoodEntry(id: UUID(), date: start.addingTimeInterval(7200), foodName: "Egg",
-                                   category: .egg, reaction: .none, isAllergen: true, notes: "", photoPath: nil),
+                                   category: .egg, reaction: .none, isAllergen: true, notes: ""),
             ComplementaryFoodEntry(id: UUID(), date: start.addingTimeInterval(10800), foodName: "Strawberry",
-                                   category: .fruit, reaction: .mild, isAllergen: false, notes: "", photoPath: nil),
+                                   category: .fruit, reaction: .mild, isAllergen: false, notes: ""),
             // Outside the window — must be ignored.
             ComplementaryFoodEntry(id: UUID(), date: start.addingTimeInterval(-100000), foodName: "Apple",
-                                   category: .fruit, reaction: .none, isAllergen: false, notes: "", photoPath: nil)
+                                   category: .fruit, reaction: .none, isAllergen: false, notes: "")
         ]
 
         let stats = await WeeklyInsightContextBuilder.buildStats(

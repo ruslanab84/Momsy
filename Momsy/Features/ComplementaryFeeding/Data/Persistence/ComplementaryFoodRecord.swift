@@ -11,12 +11,11 @@ final class ComplementaryFoodRecord {
     var reaction: String = ""
     var isAllergen: Bool = false
     var notes: String = ""
-    var photoPath: String?
     var updatedAt: Date?
 
     init(id: UUID = UUID(), date: Date, foodName: String,
          category: String, reaction: String,
-         isAllergen: Bool, notes: String, photoPath: String?, updatedAt: Date? = nil) {
+         isAllergen: Bool, notes: String, updatedAt: Date? = nil) {
         self.id = id
         self.babyId = ActiveBaby.scope
         self.date = date
@@ -25,7 +24,6 @@ final class ComplementaryFoodRecord {
         self.reaction = reaction
         self.isAllergen = isAllergen
         self.notes = notes
-        self.photoPath = photoPath
         self.updatedAt = updatedAt
     }
 
@@ -36,7 +34,6 @@ final class ComplementaryFoodRecord {
         reaction = entry.reaction.rawValue
         isAllergen = entry.isAllergen
         notes = entry.notes
-        photoPath = entry.photoPath
         updatedAt = entry.updatedAt
     }
 
@@ -45,7 +42,7 @@ final class ComplementaryFoodRecord {
             id: id, date: date, foodName: foodName,
             category: FoodCategory(rawValue: category) ?? .other,
             reaction: FoodReaction(rawValue: reaction) ?? .none,
-            isAllergen: isAllergen, notes: notes, photoPath: photoPath,
+            isAllergen: isAllergen, notes: notes,
             updatedAt: updatedAt
         )
     }

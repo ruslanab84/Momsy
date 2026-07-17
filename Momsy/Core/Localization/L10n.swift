@@ -158,7 +158,6 @@ struct L10n {
     var delete: String     { s("Delete",        "Удалить",      "Löschen",      "Eliminar",     "Supprimer",    "Eliminar", "删除") }
     var notes: String      { s("Notes",         "Заметки",      "Notizen",      "Notas",        "Notes",        "Notas", "备注") }
     var optional: String   { s("optional",      "необязательно","optional",     "opcional",     "facultatif",   "opcional", "可选") }
-    var photo: String      { s("Photo",         "Фото",         "Foto",         "Foto",         "Photo",        "Foto", "照片") }
 
     // MARK: — Time units
     var unitDay: String     { s("d",    "дн",   "T",   "d",    "j",    "d", "天") }

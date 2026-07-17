@@ -539,7 +539,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
             id: uuid, date: log.date, foodName: log.foodName,
             category: FoodCategory(rawValue: log.category) ?? .other,
             reaction: FoodReaction(rawValue: log.reaction) ?? .none,
-            isAllergen: log.isAllergen, notes: log.notes, photoPath: log.photoPath,
+            isAllergen: log.isAllergen, notes: log.notes,
             updatedAt: dto.updatedAt?.dateValue()
         )
     }

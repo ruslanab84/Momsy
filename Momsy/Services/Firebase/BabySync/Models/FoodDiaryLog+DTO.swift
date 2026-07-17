@@ -8,7 +8,6 @@ struct FoodDiaryLogDTO: Codable {
     let reaction: String
     let isAllergen: Bool
     let notes: String
-    let photoPath: String?
     let addedBy: String
     let addedByName: String
     @ServerTimestamp var updatedAt: Timestamp?
@@ -20,7 +19,6 @@ struct FoodDiaryLogDTO: Codable {
         self.reaction    = model.reaction
         self.isAllergen  = model.isAllergen
         self.notes       = model.notes
-        self.photoPath   = model.photoPath
         self.addedBy     = model.addedBy
         self.addedByName = model.addedByName
     }
@@ -34,7 +32,6 @@ struct FoodDiaryLogDTO: Codable {
             reaction:    reaction,
             isAllergen:  isAllergen,
             notes:       notes,
-            photoPath:   photoPath,
             addedBy:     addedBy,
             addedByName: addedByName
         )

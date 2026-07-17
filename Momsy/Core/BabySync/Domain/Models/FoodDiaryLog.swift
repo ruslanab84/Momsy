@@ -8,7 +8,6 @@ struct FoodDiaryLog: Identifiable, Equatable {
     let reaction: String
     let isAllergen: Bool
     let notes: String
-    let photoPath: String?
     let addedBy: String
     let addedByName: String
 }

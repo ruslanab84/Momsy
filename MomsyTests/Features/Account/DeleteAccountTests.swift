@@ -1,7 +1,6 @@
 import Testing
 @testable import Momsy
 import Foundation
-import UIKit
 
 // MARK: - Mocks
 
@@ -41,14 +40,6 @@ private final class MockSuppressedRestoreStore: SuppressedFamilyRestoreStore, @u
     func clearSuppression(for uid: String) { suppressedUIDs.remove(uid) }
 }
 
-private final class MockPhotoStorage: PhotoStorageService, @unchecked Sendable {
-    var deleteAllCount = 0
-    func save(_ image: UIImage, forID id: UUID) async throws -> String { "" }
-    func load(atPath path: String) async -> UIImage? { nil }
-    func delete(atPath path: String) async throws {}
-    func deleteAll() async throws { deleteAllCount += 1 }
-}
-
 @MainActor
 private final class MockAuth: AccountAuthProtocol {
     var currentUID: String?
@@ -81,7 +72,6 @@ struct DeleteAccountTests {
     ) -> (
         DeleteAccountUseCase,
         MockCloudEraser.Calls,
-        MockPhotoStorage,
         MockAuth,
         MockPendingStore,
         MockSuppressedRestoreStore,
@@ -90,7 +80,6 @@ struct DeleteAccountTests {
         let cloudCalls = MockCloudEraser.Calls()
         cloudCalls.error = cloudError
         cloudCalls.stillPresent = stillPresent
-        let photo = MockPhotoStorage()
         let auth = MockAuth(uid: uid)
         auth.deleteError = authError
         let pending = MockPendingStore()
@@ -98,21 +87,19 @@ struct DeleteAccountTests {
         var localWipes = 0
         let uc = DeleteAccountUseCase(
             cloudEraser: MockCloudEraser(calls: cloudCalls),
-            photoStorage: photo,
             auth: auth,
             pendingStore: pending,
             suppressedRestoreStore: suppressed,
             eraseLocal: { localWipes += 1 }
         )
-        return (uc, cloudCalls, photo, auth, pending, suppressed, { localWipes })
+        return (uc, cloudCalls, auth, pending, suppressed, { localWipes })
     }
 
-    @Test("erases cloud, photos, account, and local data for a signed-in user")
+    @Test("erases cloud, account, and local data for a signed-in user")
     func fullErasure() async throws {
-        let (uc, cloud, photo, auth, _, suppressed, wipes) = makeUseCase(uid: "abc")
+        let (uc, cloud, auth, _, suppressed, wipes) = makeUseCase(uid: "abc")
         try await uc.execute()
         #expect(cloud.uids == ["abc"])
-        #expect(photo.deleteAllCount == 1)
         #expect(auth.deleteCount == 1)
         #expect(auth.signOutCount == 0)
         #expect(suppressed.isRestoreSuppressed(for: "abc"))
@@ -121,7 +108,7 @@ struct DeleteAccountTests {
 
     @Test("falls back to sign-out when account deletion needs re-auth")
     func reauthFallback() async throws {
-        let (uc, _, _, auth, _, _, wipes) = makeUseCase(authError: AuthError.reauthRequired)
+        let (uc, _, auth, _, _, wipes) = makeUseCase(authError: AuthError.reauthRequired)
         try await uc.execute()
         #expect(auth.deleteCount == 1)
         #expect(auth.signOutCount == 1)
@@ -130,10 +117,9 @@ struct DeleteAccountTests {
 
     @Test("with no authenticated user, skips cloud steps but still wipes local")
     func noUserWipesLocalOnly() async throws {
-        let (uc, cloud, photo, auth, _, suppressed, wipes) = makeUseCase(uid: nil)
+        let (uc, cloud, auth, _, suppressed, wipes) = makeUseCase(uid: nil)
         try await uc.execute()
         #expect(cloud.uids.isEmpty)
-        #expect(photo.deleteAllCount == 0)
         #expect(auth.deleteCount == 0)
         #expect(suppressed.suppressedUIDs.isEmpty)
         #expect(wipes() == 1)
@@ -141,7 +127,7 @@ struct DeleteAccountTests {
 
     @Test("surfaces a cloud-erase error but still wipes the device clean")
     func cloudErrorStillWipesLocal() async throws {
-        let (uc, _, _, _, _, suppressed, wipes) = makeUseCase(cloudError: DummyError())
+        let (uc, _, _, _, suppressed, wipes) = makeUseCase(cloudError: DummyError())
         await #expect(throws: DummyError.self) {
             try await uc.execute()
         }
@@ -151,7 +137,7 @@ struct DeleteAccountTests {
 
     @Test("marks deletion pending, verifies against the server, then clears the marker")
     func clearsPendingOnceServerConfirmsErasure() async throws {
-        let (uc, cloud, _, _, pending, suppressed, _) = makeUseCase(uid: "abc")
+        let (uc, cloud, _, pending, suppressed, _) = makeUseCase(uid: "abc")
         try await uc.execute()
         #expect(cloud.presentChecks == ["abc"])   // server-truth re-check happened
         #expect(pending.markCount == 1)
@@ -162,7 +148,7 @@ struct DeleteAccountTests {
 
     @Test("keeps the marker and the auth session when the server still reports data after erase")
     func keepsPendingWhenServerStillHasData() async throws {
-        let (uc, _, _, auth, pending, suppressed, wipes) = makeUseCase(uid: "abc", stillPresent: true)
+        let (uc, _, auth, pending, suppressed, wipes) = makeUseCase(uid: "abc", stillPresent: true)
         try await uc.execute()
         #expect(pending.pendingUid == "abc")   // retained so launch recovery finishes the erase
         #expect(auth.deleteCount == 0)         // session kept alive for recovery, not torn down

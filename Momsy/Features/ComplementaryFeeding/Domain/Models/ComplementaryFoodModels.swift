@@ -8,7 +8,6 @@ struct ComplementaryFoodEntry: Identifiable, Codable {
     var reaction: FoodReaction
     var isAllergen: Bool
     var notes: String
-    var photoPath: String?
     var updatedAt: Date? = Date()
 }
 

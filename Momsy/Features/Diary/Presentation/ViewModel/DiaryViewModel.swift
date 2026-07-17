@@ -58,7 +58,7 @@ final class DiaryViewModel: ObservableObject {
     func loadEntries() async {
         let yearAgo = Calendar.current.date(byAdding: .year, value: -1, to: Date()) ?? .distantPast
         let stored = (try? await repo.getEntries(from: yearAgo, to: Date())) ?? []
-        entries = group(stored.filter { $0.kind != .photo }.sorted { $0.date > $1.date })
+        entries = group(stored.sorted { $0.date > $1.date })
     }
 
     // MARK: - Grouping & Mapping
@@ -114,9 +114,6 @@ final class DiaryViewModel: ObservableObject {
             return DiaryItem(id: stored.id, type: .note(text: stored.text))
         case .milestone:
             return DiaryItem(id: stored.id, type: .milestone(icon: blobKind(stored.iconName), label: stored.text))
-        case .photo:
-            // Photo entries no longer supported; filtered out before reaching here
-            return DiaryItem(id: stored.id, type: .note(text: stored.text))
         }
     }
 

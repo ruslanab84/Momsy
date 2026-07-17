@@ -4,7 +4,6 @@ import Combine
 @MainActor
 final class FoodDiaryViewModel: ObservableObject {
     @Published private(set) var entries: [ComplementaryFoodEntry] = []
-    @Published private(set) var photosByID: [UUID: UIImage] = [:]
     @Published var isUploading = false
     @Published var saveError: String? = nil
     @Published var showAddEntry = false
@@ -15,23 +14,19 @@ final class FoodDiaryViewModel: ObservableObject {
     @Published var newReaction: FoodReaction = .none
     @Published var newIsAllergen = false
     @Published var newNotes = ""
-    @Published var pendingPhoto: UIImage? = nil
 
     private let add: AddFoodEntryUseCase
     private let get: GetFoodEntriesUseCase
     private let delete: DeleteFoodEntryUseCase
-    private let photoStorage: any PhotoStorageService
     private let syncRepo: any BabySyncRepositoryProtocol
 
     init(add: AddFoodEntryUseCase,
          get: GetFoodEntriesUseCase,
          delete: DeleteFoodEntryUseCase,
-         photoStorage: any PhotoStorageService,
          syncRepo: any BabySyncRepositoryProtocol) {
         self.add = add
         self.get = get
         self.delete = delete
-        self.photoStorage = photoStorage
         self.syncRepo = syncRepo
     }
 
@@ -48,7 +43,6 @@ final class FoodDiaryViewModel: ObservableObject {
 
     func load() async {
         entries = (try? await get.execute()) ?? []
-        await loadPhotos()
     }
 
     func saveEntry() async {
@@ -56,14 +50,10 @@ final class FoodDiaryViewModel: ObservableObject {
         guard !name.isEmpty else { return }
         isUploading = true
         defer { isUploading = false }
-        var photoPath: String? = nil
-        if let img = pendingPhoto {
-            photoPath = try? await photoStorage.save(img, forID: UUID())
-        }
         do {
             let entry = try await add.execute(
                 name: name, category: newCategory, reaction: newReaction,
-                isAllergen: newIsAllergen, notes: newNotes, photoPath: photoPath
+                isAllergen: newIsAllergen, notes: newNotes
             )
             pushFoodEntryToFirestore(entry)
             resetForm()
@@ -75,12 +65,8 @@ final class FoodDiaryViewModel: ObservableObject {
     }
 
     func deleteEntry(_ entry: ComplementaryFoodEntry) async {
-        if let path = entry.photoPath {
-            try? await photoStorage.delete(atPath: path)
-        }
         await delete.execute(id: entry.id)
         BabySyncService().propagateDelete(id: entry.id, in: "foodDiaryLogs")
-        photosByID.removeValue(forKey: entry.id)
         await load()
     }
 
@@ -94,20 +80,10 @@ final class FoodDiaryViewModel: ObservableObject {
             reaction: entry.reaction.rawValue,
             isAllergen: entry.isAllergen,
             notes: entry.notes,
-            photoPath: entry.photoPath,
             addedBy: "",
             addedByName: ""
         )
         Task { try? await syncRepo.addFoodDiaryLog(log) }
-    }
-
-    private func loadPhotos() async {
-        for entry in entries {
-            guard let path = entry.photoPath, photosByID[entry.id] == nil else { continue }
-            if let img = await photoStorage.load(atPath: path) {
-                photosByID[entry.id] = img
-            }
-        }
     }
 
     private func resetForm() {
@@ -116,6 +92,5 @@ final class FoodDiaryViewModel: ObservableObject {
         newReaction = .none
         newIsAllergen = false
         newNotes = ""
-        pendingPhoto = nil
     }
 }

@@ -95,16 +95,13 @@ struct DiaryViewModelTests {
         #expect(vm.entries[0].items.first?.id == new.id)
     }
 
-    @Test("loadEntries filters out photo-kind stored items")
-    func loadEntriesFiltersPhotos() async throws {
-        let repo = MockDiaryRepository()
-        let note  = StoredDiaryItem(id: UUID(), date: Date(), kind: .note, text: "hello")
-        let photo = StoredDiaryItem(id: UUID(), date: Date(), kind: .photo, text: "pic", photoPath: nil)
-        repo.items = [note, photo]
-        let vm = try await makeVM(repo: repo)
-        await vm.loadEntries()
-        #expect(vm.entries.count == 1)
-        #expect(vm.entries[0].items.count == 1)
+    @Test("legacy photo-kind rows fall back to note on decode")
+    func legacyPhotoKindFallsBackToNote() {
+        let record = DiaryItemRecord(StoredDiaryItem(
+            id: UUID(), date: Date(), kind: .note, text: "pic"
+        ))
+        record.kindRaw = "photo"
+        #expect(record.toDomain().kind == .note)
     }
 
     // MARK: - filteredEntries

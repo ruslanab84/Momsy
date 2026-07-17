@@ -178,13 +178,12 @@ extension AuthManager: AccountAuthProtocol {
 }
 
 /// GDPR "right to erasure" orchestrator. Deletes cloud data while still
-/// authenticated, removes Storage photos, deletes the auth account (falling back
-/// to sign-out when re-auth would be required), then always wipes the device clean
-/// last so the app ends in a fresh, pre-onboarding state even if a cloud step fails.
+/// authenticated, deletes the auth account (falling back to sign-out when
+/// re-auth would be required), then always wipes the device clean last so the
+/// app ends in a fresh, pre-onboarding state even if a cloud step fails.
 @MainActor
 final class DeleteAccountUseCase {
     private let cloudEraser: CloudAccountEraser
-    private let photoStorage: any PhotoStorageService
     private let auth: any AccountAuthProtocol
     private let pendingStore: PendingAccountDeletionStore
     private let suppressedRestoreStore: SuppressedFamilyRestoreStore
@@ -192,14 +191,12 @@ final class DeleteAccountUseCase {
 
     init(
         cloudEraser: CloudAccountEraser,
-        photoStorage: any PhotoStorageService,
         auth: any AccountAuthProtocol,
         pendingStore: PendingAccountDeletionStore,
         suppressedRestoreStore: SuppressedFamilyRestoreStore,
         eraseLocal: @MainActor @escaping () throws -> Void
     ) {
         self.cloudEraser = cloudEraser
-        self.photoStorage = photoStorage
         self.auth = auth
         self.pendingStore = pendingStore
         self.suppressedRestoreStore = suppressedRestoreStore
@@ -216,7 +213,6 @@ final class DeleteAccountUseCase {
             suppressedRestoreStore.suppressRestore(for: uid)
             do {
                 try await cloudEraser.deleteCloudData(uid: uid)
-                try await photoStorage.deleteAll()
 
                 if try await cloudEraser.isCloudDataPresent(uid: uid) {
                     // Cache said done but the SERVER still has the user doc. Keep the marker

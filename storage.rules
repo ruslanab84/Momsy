@@ -1,72 +1,8 @@
 rules_version = '2';
 
+// Photos removed from the product. Storage is not used; deny everything.
 service firebase.storage {
   match /b/{bucket}/o {
-
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function hasCallerMemberDoc(familyId) {
-      return isSignedIn()
-             && firestore.exists(/databases/(default)/documents/families/$(familyId)/members/$(request.auth.uid));
-    }
-
-    function callerRoleRaw(familyId) {
-      return firestore.get(/databases/(default)/documents/families/$(familyId)/members/$(request.auth.uid)).data.roleRaw;
-    }
-
-    function isParentRole(roleRaw) {
-      return roleRaw in [
-        'Мама', 'Папа',
-        'мама', 'папа',
-        'mom', 'dad',
-        'Mom', 'Dad',
-        'mama', 'papa',
-        'mother', 'father',
-        'parent', 'Parent'
-      ];
-    }
-
-    function isGrandmaRole(roleRaw) {
-      return roleRaw in [
-        'Бабушка', 'бабушка',
-        'grandma', 'Grandma',
-        'grandmother', 'Grandmother'
-      ];
-    }
-
-    function canManageFamilyPhotos(familyId) {
-      return hasCallerMemberDoc(familyId) && isParentRole(callerRoleRaw(familyId));
-    }
-
-    function canViewFamilyPhotos(familyId) {
-      return hasCallerMemberDoc(familyId)
-             && (isParentRole(callerRoleRaw(familyId)) || isGrandmaRole(callerRoleRaw(familyId)));
-    }
-
-    function isImageUnderLimit() {
-      return request.resource.size < 10 * 1024 * 1024
-             && request.resource.contentType.matches('image/.*');
-    }
-
-    match /families/{familyId}/photos/{photoName} {
-      allow read: if canViewFamilyPhotos(familyId);
-      allow create, update: if canManageFamilyPhotos(familyId) && isImageUnderLimit();
-      allow delete: if canManageFamilyPhotos(familyId);
-    }
-
-    // The legacy path does not encode a family id, so sharing it cannot be authorised
-    // without trusting the mutable users/{uid}.familyId routing field.
-    match /users/{uid}/{allPaths=**} {
-      allow read: if isSignedIn() && request.auth.uid == uid;
-      allow create, update: if isSignedIn()
-                            && request.auth.uid == uid
-                            && isImageUnderLimit();
-      allow delete: if isSignedIn() && request.auth.uid == uid;
-    }
-
-    // Всё остальное — запрет по умолчанию.
     match /{allPaths=**} {
       allow read, write: if false;
     }

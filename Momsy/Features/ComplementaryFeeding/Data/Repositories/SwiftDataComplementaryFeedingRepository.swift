@@ -28,7 +28,7 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
         context.insert(ComplementaryFoodRecord(
             id: entry.id, date: entry.date, foodName: entry.foodName,
             category: entry.category.rawValue, reaction: entry.reaction.rawValue,
-            isAllergen: entry.isAllergen, notes: entry.notes, photoPath: entry.photoPath,
+            isAllergen: entry.isAllergen, notes: entry.notes,
             updatedAt: entry.updatedAt
         ))
         try context.save()
@@ -53,7 +53,7 @@ final class SwiftDataComplementaryFeedingRepository: ComplementaryFeedingReposit
                 context.insert(ComplementaryFoodRecord(
                     id: entry.id, date: entry.date, foodName: entry.foodName,
                     category: entry.category.rawValue, reaction: entry.reaction.rawValue,
-                    isAllergen: entry.isAllergen, notes: entry.notes, photoPath: entry.photoPath,
+                    isAllergen: entry.isAllergen, notes: entry.notes,
                     updatedAt: entry.updatedAt
                 ))
                 changed = true

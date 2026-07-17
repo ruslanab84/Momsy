@@ -36,9 +36,6 @@ final class AppContainer {
         ? FirestoreFamilyRepository()
         : LocalFamilyRepository()
     let soundRepository: any SoundRepository           = LocalSoundRepository()
-    let photoStorage: any PhotoStorageService = FirebaseBootstrapper.isConfigured
-        ? FirebasePhotoStorageService()
-        : LocalPhotoStorageService()
     lazy var inviteService: any InviteServiceProtocol = FirebaseBootstrapper.isConfigured
         ? FirestoreInviteService()
         : LocalInviteService()
@@ -555,7 +552,6 @@ final class AppContainer {
             add: addFoodEntry,
             get: getFoodEntries,
             delete: deleteFoodEntry,
-            photoStorage: photoStorage,
             syncRepo: babySyncRepository
         )
     }
@@ -572,7 +568,6 @@ final class AppContainer {
     func makeDeleteAccountUseCase() -> DeleteAccountUseCase {
         DeleteAccountUseCase(
             cloudEraser: FirestoreAccountEraser(babySync: BabySyncService()),
-            photoStorage: photoStorage,
             auth: authManager,
             pendingStore: pendingAccountDeletionStore,
             suppressedRestoreStore: suppressedFamilyRestoreStore,

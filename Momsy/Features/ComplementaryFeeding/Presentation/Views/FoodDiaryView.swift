@@ -108,7 +108,7 @@ private struct FoodGroupSection: View {
 
             VStack(spacing: 0) {
                 ForEach(Array(group.items.enumerated()), id: \.element.id) { idx, entry in
-                    FoodEntryRow(entry: entry, photo: vm.photosByID[entry.id], lm: lm) {
+                    FoodEntryRow(entry: entry, lm: lm) {
                         Task { await vm.deleteEntry(entry) }
                     }
                     if idx < group.items.count - 1 {
@@ -127,29 +127,19 @@ private struct FoodGroupSection: View {
 
 private struct FoodEntryRow: View {
     let entry: ComplementaryFoodEntry
-    let photo: UIImage?
     let lm: LocalizationManager
     let onDelete: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
-            // Photo or category icon
-            if let img = photo {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 44, height: 44)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            } else {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(entry.category.color.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                    .overlay(
-                        Image(systemName: entry.category.iconName)
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(entry.category.color)
-                    )
-            }
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(entry.category.color.opacity(0.15))
+                .frame(width: 44, height: 44)
+                .overlay(
+                    Image(systemName: entry.category.iconName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(entry.category.color)
+                )
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
@@ -247,9 +237,6 @@ private struct AddFoodEntrySheet: View {
     @ObservedObject var vm: FoodDiaryViewModel
     let lm: LocalizationManager
 
-    @State private var photoItem: PhotosPickerItem? = nil
-    @State private var isLoadingPhoto = false
-
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
@@ -337,53 +324,6 @@ private struct AddFoodEntrySheet: View {
                             .padding(14)
                             .background(Color.bbCard)
                             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-
-                    // Photo picker
-                    VStack(alignment: .leading, spacing: 6) {
-                        fieldLabel("\(lm.strings.photo) (\(lm.strings.optional))")
-                        PhotosPicker(selection: $photoItem, matching: .images) {
-                            ZStack {
-                                if let img = vm.pendingPhoto {
-                                    Image(uiImage: img)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 140)
-                                        .clipped()
-                                } else {
-                                    Color.bbCoral.opacity(0.12)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 140)
-                                        .overlay(
-                                            VStack(spacing: 8) {
-                                                if isLoadingPhoto {
-                                                    ProgressView().tint(.bbCoralDeep)
-                                                } else {
-                                                    Image(systemName: "camera.fill")
-                                                        .font(.system(size: 28, weight: .light))
-                                                        .foregroundColor(.bbCoralDeep.opacity(0.7))
-                                                    Text(lm.strings.tapToChoose)
-                                                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                                        .foregroundColor(.bbCoralDeep.opacity(0.7))
-                                                }
-                                            }
-                                        )
-                                }
-                            }
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        }
-                        .onChange(of: photoItem) { _, new in
-                            guard let new else { return }
-                            isLoadingPhoto = true
-                            Task {
-                                if let data = try? await new.loadTransferable(type: Data.self),
-                                   let img = UIImage(data: data) {
-                                    vm.pendingPhoto = img
-                                }
-                                isLoadingPhoto = false
-                            }
-                        }
                     }
 
                     // Save button
