@@ -119,8 +119,11 @@ final class FamilyManager: ObservableObject {
         // through below and start a fresh personal family.
         if let cachedId = familyId {
             if hasVerifiedMembershipThisLaunch { isReady = true; return }
-            let check = await confirmMembership(familyId: cachedId, uid: uid)
+            // Set BEFORE the await: setup() is re-entered concurrently (launch +
+            // auth listener) and the suspension below would otherwise let both
+            // callers run the check — double read, double detach, double alert.
             hasVerifiedMembershipThisLaunch = true
+            let check = await confirmMembershipHealthGated(familyId: cachedId, uid: uid)
             switch check {
             case .member, .unknown:
                 isReady = true
@@ -318,6 +321,33 @@ final class FamilyManager: ObservableObject {
             return snap.exists ? .member : .revoked
         } catch {
             return Self.classifyMembershipError(error)
+        }
+    }
+
+    /// Pure gate decision: a raw `.revoked` classification is confirmed only by a
+    /// healthy self read; otherwise it degrades to `.unknown`.
+    nonisolated static func gatedMembershipCheck(raw: MembershipCheck,
+                                                 selfReadSucceeded: Bool) -> MembershipCheck {
+        guard raw == .revoked else { return raw }
+        return selfReadSucceeded ? .revoked : .unknown
+    }
+
+    /// Cached-path probe. `permissionDenied` on the member doc is trusted as a
+    /// revocation ONLY when a self `users/{uid}` read succeeds in the same probe:
+    /// the self read is always permitted by rules, so its success proves the
+    /// connection, auth token, and App Check attestation are healthy — leaving
+    /// "member doc does not exist" as the only cause of the denial. If the self
+    /// read fails too, the denial is environmental → `.unknown`, no detach.
+    private func confirmMembershipHealthGated(familyId: String, uid: String) async -> MembershipCheck {
+        let check = await confirmMembership(familyId: familyId, uid: uid)
+        guard check == .revoked else { return check }
+        do {
+            _ = try await db.collection("users").document(uid)
+                .getDocument(source: .server)
+            return Self.gatedMembershipCheck(raw: check, selfReadSucceeded: true)
+        } catch {
+            Self.log.info("Membership denial not confirmed — self read failed; treating as transient")
+            return Self.gatedMembershipCheck(raw: check, selfReadSucceeded: false)
         }
     }
 

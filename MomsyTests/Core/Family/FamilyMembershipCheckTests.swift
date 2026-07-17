@@ -16,4 +16,14 @@ struct FamilyMembershipCheckTests {
         #expect(FamilyManager.classifyMembershipError(offline) == .unknown)
         #expect(FamilyManager.classifyMembershipError(foreign) == .unknown)
     }
+
+    @Test func revokedConfirmedOnlyByHealthySelfRead() {
+        #expect(FamilyManager.gatedMembershipCheck(raw: .revoked, selfReadSucceeded: true) == .revoked)
+        #expect(FamilyManager.gatedMembershipCheck(raw: .revoked, selfReadSucceeded: false) == .unknown)
+    }
+
+    @Test func nonRevokedResultsBypassTheGate() {
+        #expect(FamilyManager.gatedMembershipCheck(raw: .member, selfReadSucceeded: false) == .member)
+        #expect(FamilyManager.gatedMembershipCheck(raw: .unknown, selfReadSucceeded: false) == .unknown)
+    }
 }
