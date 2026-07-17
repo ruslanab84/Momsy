@@ -1373,6 +1373,43 @@ struct L10n {
                                          "1 mois",
                                          "1 mês",
                                          "1个月") }
+    var paywallAnnualPeriod: String { s("12 months",
+                                        "12 месяцев",
+                                        "12 Monate",
+                                        "12 meses",
+                                        "12 mois",
+                                        "12 meses",
+                                        "12个月") }
+    var paywallPlanMonthly: String { s("Monthly",
+                                       "Ежемесячно",
+                                       "Monatlich",
+                                       "Mensual",
+                                       "Mensuel",
+                                       "Mensal",
+                                       "按月") }
+    var paywallPlanAnnual: String { s("Annual",
+                                      "Ежегодно",
+                                      "Jährlich",
+                                      "Anual",
+                                      "Annuel",
+                                      "Anual",
+                                      "按年") }
+    func paywallSavePercent(_ percent: Int) -> String {
+        s("Save \(percent)%",
+          "Выгода \(percent)%",
+          "\(percent) % sparen",
+          "Ahorra \(percent) %",
+          "Économisez \(percent) %",
+          "Poupe \(percent) %",
+          "省 \(percent)%")
+    }
+    var subscribeCTA: String { s("Subscribe",
+                                 "Оформить подписку",
+                                 "Abonnieren",
+                                 "Suscribirse",
+                                 "S’abonner",
+                                 "Subscrever",
+                                 "订阅") }
     var trialBadge: String         { s("7 days free",
                                        "7 дней бесплатно",
                                        "7 Tage gratis",
@@ -1404,6 +1441,33 @@ struct L10n {
           "7 jours gratuits, puis \(price)/mois. L'abonnement se renouvelle automatiquement chaque mois sauf annulation au moins 24 heures avant la fin de la période.",
           "7 dias grátis, depois \(price)/mês. A subscrição renova automaticamente todos os meses, salvo cancelamento pelo menos 24 horas antes do fim do período.",
           "7 天免费，之后 \(price)/月。订阅每月自动续订，除非在当前周期结束前至少 24 小时取消。")
+    }
+    func paywallRenewalDisclosureAnnual(price: String) -> String {
+        s("7 days free, then \(price)/year. Subscription renews automatically every year unless canceled at least 24 hours before the period ends.",
+          "7 дней бесплатно, затем \(price)/год. Подписка автоматически продлевается каждый год, если не отменить её минимум за 24 часа до конца периода.",
+          "7 Tage gratis, danach \(price)/Jahr. Das Abo verlängert sich jedes Jahr automatisch, sofern es nicht mindestens 24 Stunden vor Periodenende gekündigt wird.",
+          "7 días gratis, luego \(price)/año. La suscripción se renueva automáticamente cada año salvo que se cancele al menos 24 horas antes de que termine el periodo.",
+          "7 jours gratuits, puis \(price)/an. L'abonnement se renouvelle automatiquement chaque année sauf annulation au moins 24 heures avant la fin de la période.",
+          "7 dias grátis, depois \(price)/ano. A subscrição renova automaticamente todos os anos, salvo cancelamento pelo menos 24 horas antes do fim do período.",
+          "7 天免费，之后 \(price)/年。订阅每年自动续订，除非在当前周期结束前至少 24 小时取消。")
+    }
+    func paywallRenewalDisclosureMonthlyNoTrial(price: String) -> String {
+        s("\(price)/month. Subscription renews automatically every month unless canceled at least 24 hours before the period ends.",
+          "\(price)/мес. Подписка автоматически продлевается каждый месяц, если не отменить её минимум за 24 часа до конца периода.",
+          "\(price)/Monat. Das Abo verlängert sich jeden Monat automatisch, sofern es nicht mindestens 24 Stunden vor Periodenende gekündigt wird.",
+          "\(price)/mes. La suscripción se renueva automáticamente cada mes salvo que se cancele al menos 24 horas antes de que termine el periodo.",
+          "\(price)/mois. L'abonnement se renouvelle automatiquement chaque mois sauf annulation au moins 24 heures avant la fin de la période.",
+          "\(price)/mês. A subscrição renova automaticamente todos os meses, salvo cancelamento pelo menos 24 horas antes do fim do período.",
+          "\(price)/月。订阅每月自动续订，除非在当前周期结束前至少 24 小时取消。")
+    }
+    func paywallRenewalDisclosureAnnualNoTrial(price: String) -> String {
+        s("\(price)/year. Subscription renews automatically every year unless canceled at least 24 hours before the period ends.",
+          "\(price)/год. Подписка автоматически продлевается каждый год, если не отменить её минимум за 24 часа до конца периода.",
+          "\(price)/Jahr. Das Abo verlängert sich jedes Jahr automatisch, sofern es nicht mindestens 24 Stunden vor Periodenende gekündigt wird.",
+          "\(price)/año. La suscripción se renueva automáticamente cada año salvo que se cancele al menos 24 horas antes de que termine el periodo.",
+          "\(price)/an. L'abonnement se renouvelle automatiquement chaque année sauf annulation au moins 24 heures avant la fin de la période.",
+          "\(price)/ano. A subscrição renova automaticamente todos os anos, salvo cancelamento pelo menos 24 horas antes do fim do período.",
+          "\(price)/年。订阅每年自动续订，除非在当前周期结束前至少 24 小时取消。")
     }
     var purchaseErrorTitle: String { s("Purchase Error",
                                        "Ошибка покупки",

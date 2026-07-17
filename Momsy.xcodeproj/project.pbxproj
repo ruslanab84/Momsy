@@ -22,9 +22,9 @@
 		0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */; };
 		0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */; };
 		0BABF12B0000000000000006 /* FamilyMembershipCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000007 /* FamilyMembershipCheckTests.swift */; };
-		5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */; };
 		1D0A7E115EA9B00100000001 /* DevelopmentLeapSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0A7E115EA9B00100000002 /* DevelopmentLeapSchedule.swift */; };
 		1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */; };
+		1F2E3D4C5B6A79808172635F /* SubscriptionManagerLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADD5DE86DF74081D750B39F /* SubscriptionManagerLogicTests.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
 		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
@@ -39,6 +39,7 @@
 		5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */; };
 		5A11ABF0000000000000A007 /* FamilySwitchPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */; };
 		5A11ABF0000000000000A00A /* AccountAuthViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A009 /* AccountAuthViewModelTests.swift */; };
+		5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */; };
 		802A6938D28AA6A793B23C06 /* MockFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */; };
 		85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */; };
 		880ACB76F459C0F289D9A8A4 /* MomsyWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4F159218252E2FF5857958F7 /* MomsyWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -159,7 +160,6 @@
 		0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyErrorLocalizationTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinFlowFlagTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000007 /* FamilyMembershipCheckTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyMembershipCheckTests.swift; sourceTree = "<group>"; };
-		321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLegalLinksTests.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipAlgorithmTests.swift; sourceTree = "<group>"; };
@@ -172,12 +172,14 @@
 		1FBC13D67DAB3C192859429B /* GeminiDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GeminiDailyTipService.swift; sourceTree = "<group>"; };
 		27CCA3ED5F2ECE7D8505B730 /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
+		321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLegalLinksTests.swift; sourceTree = "<group>"; };
 		322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetEntry.swift; sourceTree = "<group>"; };
 		33A740574DACB7A766F4A51D /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		3BBE7E66563E0F26A2DFF70C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDiaperRepository.swift; sourceTree = "<group>"; };
 		4820A4E27274110E9256D2F7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		482ADA73C55024953C8197D9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
+		4ADD5DE86DF74081D750B39F /* SubscriptionManagerLogicTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SubscriptionManagerLogicTests.swift; sourceTree = "<group>"; };
 		4F159218252E2FF5857958F7 /* MomsyWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MomsyWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDailyTipService.swift; sourceTree = "<group>"; };
 		53A0E7913296744B89DD122D /* DiaryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryViewModelTests.swift; sourceTree = "<group>"; };
@@ -565,6 +567,14 @@
 			name = Domain;
 			sourceTree = "<group>";
 		};
+		9E8D7C6B5A4938271605F4E3 /* Subscription */ = {
+			isa = PBXGroup;
+			children = (
+				4ADD5DE86DF74081D750B39F /* SubscriptionManagerLogicTests.swift */,
+			);
+			path = Subscription;
+			sourceTree = "<group>";
+		};
 		A9F0E003A9F0E003A9F0E003 /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
@@ -731,6 +741,7 @@
 				0BABF1250000000000000003 /* Report */,
 				FE11AA03FE11AA03FE11AA03 /* Vaccination */,
 				DEADBEEF0000000000000010 /* WeeklyInsights */,
+				9E8D7C6B5A4938271605F4E3 /* Subscription */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -1009,6 +1020,7 @@
 				0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */,
 				0BABF12B0000000000000006 /* FamilyMembershipCheckTests.swift in Sources */,
 				5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */,
+				1F2E3D4C5B6A79808172635F /* SubscriptionManagerLogicTests.swift in Sources */,
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
 				0BABF1270000000000000001 /* LanguageTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB001 /* FirebaseBootstrapperTests.swift in Sources */,
@@ -1323,7 +1335,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1363,7 +1375,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.Release.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

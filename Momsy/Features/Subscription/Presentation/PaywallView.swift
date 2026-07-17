@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
@@ -27,7 +28,7 @@ struct PaywallView: View {
                         Spacer().frame(height: 24)
                         featureList
                         Spacer().frame(height: 18)
-                        planSummary
+                        planSelector
                         Spacer(minLength: 16)
                         ctaSection
                     }
@@ -81,13 +82,15 @@ struct PaywallView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
 
-            Text(lm.trialBadge)
-                .font(.subheadline.weight(.semibold))
-                .foregroundColor(.bbLilacDeep)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 7)
-                .background(Color.white.opacity(0.95))
-                .clipShape(Capsule())
+            if subscriptionManager.trialEligible {
+                Text(lm.trialBadge)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.bbLilacDeep)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 7)
+                    .background(Color.white.opacity(0.95))
+                    .clipShape(Capsule())
+            }
         }
     }
 
@@ -100,20 +103,25 @@ struct PaywallView: View {
         .padding(.horizontal, 40)
     }
 
-    private var planSummary: some View {
+    private var planSelector: some View {
         VStack(spacing: 10) {
-            planRow(title: lm.paywallSubscriptionNameLabel, value: subscriptionNameText)
-            planRow(title: lm.paywallSubscriptionPeriodLabel, value: lm.paywallMonthlyPeriod)
-            planRow(title: lm.paywallSubscriptionPriceLabel, value: subscriptionPriceText)
+            if let annual = subscriptionManager.annualProduct {
+                planCard(
+                    product: annual,
+                    title: lm.paywallPlanAnnual,
+                    period: lm.paywallAnnualPeriod,
+                    badge: subscriptionManager.savingsPercent.map(lm.paywallSavePercent)
+                )
+            }
+            if let monthly = subscriptionManager.monthlyProduct {
+                planCard(
+                    product: monthly,
+                    title: lm.paywallPlanMonthly,
+                    period: lm.paywallMonthlyPeriod,
+                    badge: nil
+                )
+            }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(Color.white.opacity(0.13))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(Color.white.opacity(0.22), lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 14))
         .padding(.horizontal, 24)
     }
 
@@ -133,7 +141,7 @@ struct PaywallView: View {
                     if subscriptionManager.isLoading {
                         ProgressView().tint(.bbLilacDeep)
                     } else {
-                        Text(lm.startTrial)
+                        Text(subscriptionManager.trialEligible ? lm.startTrial : lm.subscribeCTA)
                             .font(.headline)
                             .foregroundColor(.bbLilacDeep)
                     }
@@ -170,18 +178,24 @@ struct PaywallView: View {
     }
 
     private var renewalDisclosureText: String {
-        guard !subscriptionManager.monthlyPrice.isEmpty else {
+        guard let product = subscriptionManager.selectedProduct else {
             return lm.paywallPriceLoadingDisclosure
         }
-        return lm.paywallRenewalDisclosure(price: subscriptionManager.monthlyPrice)
+        let price = product.displayPrice
+        let isAnnual = product.id == ProductID.annual
+        if subscriptionManager.trialEligible {
+            return isAnnual
+                ? lm.paywallRenewalDisclosureAnnual(price: price)
+                : lm.paywallRenewalDisclosure(price: price)
+        }
+        return isAnnual
+            ? lm.paywallRenewalDisclosureAnnualNoTrial(price: price)
+            : lm.paywallRenewalDisclosureMonthlyNoTrial(price: price)
     }
 
     private var subscriptionNameText: String {
-        subscriptionManager.subscriptionName.isEmpty ? lm.paywallPlanFallbackName : subscriptionManager.subscriptionName
-    }
-
-    private var subscriptionPriceText: String {
-        subscriptionManager.monthlyPrice.isEmpty ? lm.paywallPriceLoadingDisclosure : subscriptionManager.monthlyPrice
+        let name = subscriptionManager.selectedProduct?.displayName ?? ""
+        return name.isEmpty ? lm.paywallPlanFallbackName : name
     }
 
     private var legalLinks: some View {
@@ -206,6 +220,56 @@ struct PaywallView: View {
 
     // MARK: — Helpers
 
+    private func planCard(product: Product, title: String, period: String, badge: String?) -> some View {
+        let isSelected = subscriptionManager.selectedProductID == product.id
+        return Button {
+            subscriptionManager.selectedProductID = product.id
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.white)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Text(title)
+                            .font(.subheadline.weight(.bold))
+                            .foregroundColor(.white)
+                        if let badge {
+                            Text(badge)
+                                .font(.caption2.weight(.bold))
+                                .foregroundColor(.bbLilacDeep)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Color.white.opacity(0.95))
+                                .clipShape(Capsule())
+                        }
+                    }
+                    Text(period)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.7))
+                }
+
+                Spacer(minLength: 12)
+
+                Text(product.displayPrice)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.white.opacity(isSelected ? 0.22 : 0.10))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.white.opacity(isSelected ? 0.9 : 0.22), lineWidth: isSelected ? 1.5 : 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
+    }
+
     private func localizedPurchaseError(_ error: Error) -> String {
         switch error {
         case SubscriptionError.failedVerification: return lm.purchaseVerificationFailed
@@ -222,23 +286,6 @@ struct PaywallView: View {
             Text(text)
                 .font(.subheadline)
                 .foregroundColor(.white)
-        }
-    }
-
-    private func planRow(title: String, value: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundColor(.white.opacity(0.72))
-
-            Spacer(minLength: 12)
-
-            Text(value)
-                .font(.caption.weight(.bold))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.trailing)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
         }
     }
 }

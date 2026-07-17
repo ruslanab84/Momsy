@@ -6,22 +6,30 @@ import StoreKit
 final class SubscriptionManager: ObservableObject {
     @Published private(set) var isPremium = false
     @Published private(set) var isLoading = false
-    @Published private(set) var monthlyPrice = ""
-    @Published private(set) var subscriptionName = ""
-    @Published private var product: Product?
+    @Published private(set) var products: [Product] = []
+    @Published private(set) var trialEligible = false
+    @Published var selectedProductID = ProductID.annual
 
-    var canPurchase: Bool {
-        product != nil
+    var canPurchase: Bool { selectedProduct != nil }
+
+    var selectedProduct: Product? { products.first { $0.id == selectedProductID } }
+    var monthlyProduct: Product? { products.first { $0.id == ProductID.monthly } }
+    var annualProduct: Product? { products.first { $0.id == ProductID.annual } }
+
+    var savingsPercent: Int? {
+        guard let monthly = monthlyProduct?.price,
+              let annual = annualProduct?.price else { return nil }
+        return Self.savingsPercent(monthlyPrice: monthly, annualPrice: annual)
     }
 
     private let service: any SubscriptionServicing
     private var listenerTask: Task<Void, Never>?
-    private var productLoadTask: Task<Product, Error>?
+    private var productLoadTask: Task<[Product], Error>?
 
     init(service: any SubscriptionServicing) {
         self.service = service
         listenerTask = Task {
-            _ = await loadProducts()
+            _ = try? await loadProductsIfNeeded()
             await updateStatus()
             for await result in Transaction.updates {
                 guard case .verified(let tx) = result else { continue }
@@ -40,12 +48,16 @@ final class SubscriptionManager: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        let product = try await loadProductIfNeeded()
+        let loaded = try await loadProductsIfNeeded()
+        guard let product = loaded.first(where: { $0.id == selectedProductID }) else {
+            throw SubscriptionError.productUnavailable
+        }
         let result = try await service.purchase(product)
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
-            let grantsPremium = tx.productID == ProductID.monthly && tx.revocationDate == nil
+            let grantsPremium = Self.grantsPremium(productID: tx.productID)
+                && tx.revocationDate == nil
             if grantsPremium {
                 isPremium = true
             }
@@ -67,46 +79,59 @@ final class SubscriptionManager: ObservableObject {
         await updateStatus()
     }
 
-    @discardableResult
-    private func loadProducts() async -> Product? {
-        try? await loadProductIfNeeded()
+    /// Any product in the app's catalog grants premium.
+    nonisolated static func grantsPremium(productID: String) -> Bool {
+        ProductID.all.contains(productID)
     }
 
-    private func loadProductIfNeeded() async throws -> Product {
-        if let product { return product }
+    /// Percentage saved on annual vs paying monthly for a year. Nil when annual
+    /// isn't cheaper or inputs are invalid.
+    nonisolated static func savingsPercent(monthlyPrice: Decimal, annualPrice: Decimal) -> Int? {
+        guard monthlyPrice > 0, annualPrice > 0 else { return nil }
+        let yearAtMonthly = monthlyPrice * 12
+        guard annualPrice < yearAtMonthly else { return nil }
+        let fraction = (yearAtMonthly - annualPrice) / yearAtMonthly
+        // ponytail: NSDecimalNumber.intValue silently returns 0 on this Decimal's
+        // 38-digit mantissa; doubleValue routes around the overflow.
+        let percent = Int(NSDecimalNumber(decimal: fraction * 100).doubleValue)
+        return percent > 0 ? percent : nil
+    }
+
+    @discardableResult
+    private func loadProductsIfNeeded() async throws -> [Product] {
+        if !products.isEmpty { return products }
         if let productLoadTask {
-            let loadedProduct = try await productLoadTask.value
-            cache(loadedProduct)
-            return loadedProduct
+            let loaded = try await productLoadTask.value
+            await adopt(loaded)
+            return loaded
         }
 
         let service = service
-        let task = Task<Product, Error> {
-            let products = try await service.fetchProducts(ids: ProductID.all)
-            guard let product = products.first(where: { $0.id == ProductID.monthly }) else {
-                throw SubscriptionError.productUnavailable
-            }
-            return product
+        let task = Task<[Product], Error> {
+            let fetched = try await service.fetchProducts(ids: ProductID.all)
+            guard !fetched.isEmpty else { throw SubscriptionError.productUnavailable }
+            return fetched
         }
         productLoadTask = task
         defer { productLoadTask = nil }
 
-        let loadedProduct = try await task.value
-        cache(loadedProduct)
-        return loadedProduct
+        let loaded = try await task.value
+        await adopt(loaded)
+        return loaded
     }
 
-    private func cache(_ loadedProduct: Product) {
-        product = loadedProduct
-        monthlyPrice = loadedProduct.displayPrice
-        subscriptionName = loadedProduct.displayName
+    private func adopt(_ loaded: [Product]) async {
+        products = loaded
+        if let subscription = loaded.first?.subscription {
+            trialEligible = await subscription.isEligibleForIntroOffer
+        }
     }
 
     private func updateStatus() async {
         var hasSub = false
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result,
-               tx.productID == ProductID.monthly,
+               Self.grantsPremium(productID: tx.productID),
                tx.revocationDate == nil {
                 hasSub = true
             }
