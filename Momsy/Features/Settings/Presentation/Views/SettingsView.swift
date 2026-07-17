@@ -354,11 +354,13 @@ struct SettingsView: View {
                     chevronRow(icon: "envelope.fill",    bg: .bbLilac, title: lm.strings.feedback)
                 }
                 .buttonStyle(.plain)
-                Divider().opacity(0.2).padding(.leading, 60)
-                Button(action: openRateApp) {
-                    chevronRow(icon: "star.fill",        bg: .bbButter, title: lm.strings.rateApp)
+                if AppLegalLinks.appStoreReviewURL != nil {
+                    Divider().opacity(0.2).padding(.leading, 60)
+                    Button(action: openRateApp) {
+                        chevronRow(icon: "star.fill",        bg: .bbButter, title: lm.strings.rateApp)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             .background(Color.bbCard)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
