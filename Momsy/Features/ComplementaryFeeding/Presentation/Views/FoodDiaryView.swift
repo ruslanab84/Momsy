@@ -1,5 +1,4 @@
 import SwiftUI
-import PhotosUI
 
 struct FoodDiaryView: View {
     @StateObject private var vm: FoodDiaryViewModel

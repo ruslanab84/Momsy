@@ -941,13 +941,13 @@ struct L10n {
     var dangerZone: String      { s("Data & Privacy", "Данные и конфиденциальность", "Daten & Datenschutz", "Datos y privacidad", "Données et confidentialité", "Dados e privacidade", "数据与隐私") }
     var deleteAllData: String   { s("Delete all data", "Удалить все данные", "Alle Daten löschen", "Eliminar todos los datos", "Supprimer toutes les données", "Eliminar todos os dados", "删除所有数据") }
     var deleteAllDataConfirm: String {
-        s("This permanently deletes your account and every record — on this device and in the cloud — including health and well-being data and diary photos. This cannot be undone.",
-          "Это навсегда удалит ваш аккаунт и все записи — на этом устройстве и в облаке — включая данные о здоровье и самочувствии и фото из дневника. Это действие необратимо.",
-          "Dies löscht dauerhaft dein Konto und alle Einträge – auf diesem Gerät und in der Cloud – einschließlich Gesundheits- und Wohlbefindensdaten sowie Tagebuchfotos. Dies kann nicht rückgängig gemacht werden.",
-          "Esto elimina permanentemente tu cuenta y todos los registros — en este dispositivo y en la nube — incluidos los datos de salud y bienestar y las fotos del diario. Esto no se puede deshacer.",
-          "Ceci supprime définitivement votre compte et tous les enregistrements — sur cet appareil et dans le cloud — y compris les données de santé et de bien-être et les photos du journal. Cette action est irréversible.",
-          "Isto elimina permanentemente a sua conta e todos os registos — neste dispositivo e na nuvem — incluindo dados de saúde e bem-estar e fotos do diário. Esta ação não pode ser anulada.",
-          "这将永久删除您的账户和所有记录——包括本设备和云端——其中包括健康和身心状态数据以及日记照片。此操作无法撤销。")
+        s("This permanently deletes your account and every record — on this device and in the cloud — including health and well-being data. This cannot be undone.",
+          "Это навсегда удалит ваш аккаунт и все записи — на этом устройстве и в облаке — включая данные о здоровье и самочувствии. Это действие необратимо.",
+          "Dies löscht dauerhaft dein Konto und alle Einträge – auf diesem Gerät und in der Cloud – einschließlich Gesundheits- und Wohlbefindensdaten. Dies kann nicht rückgängig gemacht werden.",
+          "Esto elimina permanentemente tu cuenta y todos los registros — en este dispositivo y en la nube — incluidos los datos de salud y bienestar. Esto no se puede deshacer.",
+          "Ceci supprime définitivement votre compte et tous les enregistrements — sur cet appareil et dans le cloud — y compris les données de santé et de bien-être. Cette action est irréversible.",
+          "Isto elimina permanentemente a sua conta e todos os registos — neste dispositivo e na nuvem — incluindo dados de saúde e bem-estar. Esta ação não pode ser anulada.",
+          "这将永久删除您的账户和所有记录——包括本设备和云端——其中包括健康和身心状态数据。此操作无法撤销。")
     }
     var deleting: String        { s("Deleting…",     "Удаление…",     "Wird gelöscht…", "Eliminando…", "Suppression…", "A eliminar…", "正在删除…") }
     var deleteFailed: String    { s("Couldn't delete your data. Please try again.", "Не удалось удалить данные. Попробуйте ещё раз.", "Daten konnten nicht gelöscht werden. Bitte versuche es erneut.", "No se pudieron eliminar los datos. Inténtalo de nuevo.", "Impossible de supprimer vos données. Veuillez réessayer.", "Não foi possível eliminar os seus dados. Tente novamente.", "无法删除您的数据。请重试。") }
