@@ -131,7 +131,8 @@ struct SleepViewModelTests {
 
     func makeVM(repo: any SleepRepository = MockSleepRepository(),
                 babyRepo: MockBabyRepository = MockBabyRepository(),
-                appState: AppState? = nil) -> SleepViewModel {
+                appState: AppState? = nil,
+                now: @MainActor @escaping () -> Date = { Date() }) -> SleepViewModel {
         let state = appState ?? AppState(getBabyProfile: GetBabyProfileUseCase(repository: babyRepo),
                                          getAllBabies: GetAllBabiesUseCase(repository: babyRepo))
         return SleepViewModel(
@@ -144,7 +145,8 @@ struct SleepViewModelTests {
             predictNextSleep: PredictNextSleepUseCase(
                 getSleep: GetSleepEntriesUseCase(repository: repo),
                 engine: DeterministicSleepForecastEngine()
-            )
+            ),
+            now: now
         )
     }
 
@@ -202,10 +204,12 @@ struct SleepViewModelTests {
     @Test("stop() closes an optimistic start after the pending add completes")
     func stopWaitsForPendingStartBeforeClosing() async throws {
         let repo = DelayedAddSleepRepository(addDelayNanoseconds: 200_000_000)
-        let vm = makeVM(repo: repo)
+        var clock = Date()
+        let vm = makeVM(repo: repo, now: { clock })
         vm.start()
         #expect(vm.isSleepActive)
 
+        clock = clock.addingTimeInterval(StopSleepUseCase.minimumDuration + 1)
         vm.stop()
         #expect(!vm.isSleepActive)
 
@@ -288,10 +292,12 @@ struct SleepViewModelTests {
     @Test("stop() rolls back optimistic entry on repository error")
     func stopRollsBackOnError() async throws {
         let repo = MockSleepRepository()
-        let vm = makeVM(repo: repo)
+        var clock = Date()
+        let vm = makeVM(repo: repo, now: { clock })
         vm.start()
         try await Task.sleep(nanoseconds: 50_000_000)
         repo.throwOnUpdate = true
+        clock = clock.addingTimeInterval(StopSleepUseCase.minimumDuration + 1)
         vm.stop()
         try await Task.sleep(nanoseconds: 50_000_000)
         #expect(vm.todayEntries.isEmpty)
@@ -301,7 +307,8 @@ struct SleepViewModelTests {
     @Test("cloud merge cannot reopen a sleep stopped while its snapshot is loading")
     func cloudMergeDoesNotReopenStoppedSleep() async throws {
         let repo = SnapshotSleepRepository()
-        let vm = makeVM(repo: repo)
+        var clock = Date()
+        let vm = makeVM(repo: repo, now: { clock })
         vm.start()
         try await waitUntil { repo.entries.count == 1 }
 
@@ -309,6 +316,7 @@ struct SleepViewModelTests {
         NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
         await repo.waitForSnapshotCapture()
 
+        clock = clock.addingTimeInterval(StopSleepUseCase.minimumDuration + 1)
         vm.stop()
         try await waitUntil { repo.entries.first?.endDate != nil }
         repo.resumeSnapshotRead()

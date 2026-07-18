@@ -27,6 +27,8 @@ final class SleepViewModel: ObservableObject {
 
     private let liveActivity = SleepLiveActivityManager()
     private let currentUid: @MainActor () -> String?
+    /// Injectable so tests can simulate elapsed time without real wall-clock sleeps.
+    private let now: @MainActor () -> Date
     /// Longest plausible single sleep; anything beyond this is treated as a corrupt
     /// recovered end and the orphan is discarded instead of closed.
     private static let maxPlausibleSleep: TimeInterval = 24 * 3600
@@ -46,7 +48,8 @@ final class SleepViewModel: ObservableObject {
          getSleep: GetSleepEntriesUseCase, addManualSleep: AddManualSleepUseCase,
          reconcileStaleSleep: ReconcileStaleSleepUseCase, appState: AppState,
          predictNextSleep: PredictNextSleepUseCase,
-         currentUid: @MainActor @escaping () -> String? = { nil }) {
+         currentUid: @MainActor @escaping () -> String? = { nil },
+         now: @MainActor @escaping () -> Date = { Date() }) {
         self.startSleepUC = startSleep
         self.stopSleepUC = stopSleep
         self.getSleepUC = getSleep
@@ -55,6 +58,7 @@ final class SleepViewModel: ObservableObject {
         self.predictNextSleepUC = predictNextSleep
         self.appState = appState
         self.currentUid = currentUid
+        self.now = now
         activeBabyCancellable = appState.$babyProfile
             .map { $0?.id }
             .removeDuplicates()
@@ -171,7 +175,7 @@ final class SleepViewModel: ObservableObject {
     func start() {
         guard !isSleepActive else { return }
         let babyId = currentBabyId
-        let entry = SleepEntry(startDate: Date())
+        let entry = SleepEntry(startDate: now())
         reloadTask?.cancel()
         saveError = nil
         activateTimer(entry: entry, babyId: babyId)
@@ -242,16 +246,27 @@ final class SleepViewModel: ObservableObject {
         activeSleepEntry = nil
         activeSleepBabyId = nil
         liveActivity.endActivity()
+        let previousSleepEnd = WidgetDataStore.shared.lastSleepEndDate(for: babyId)
         WidgetDataStore.shared.setLastSleepEnd(Date(), babyId: babyId)
         WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds, babyId: babyId)
         Task {
             do {
                 _ = try await startTask?.value
-                let saved = try await stopSleepUC.execute(entry)
-                if let idx = todayEntries.firstIndex(where: { $0.id == saved.id }) {
-                    todayEntries[idx] = saved
+                switch try await stopSleepUC.execute(entry, now: now()) {
+                case .saved(let saved):
+                    if let idx = todayEntries.firstIndex(where: { $0.id == saved.id }) {
+                        todayEntries[idx] = saved
+                    }
+                    pushSleepToFirestore(saved, babyId: babyId)
+                case .discarded(let discarded):
+                    todayEntries.removeAll { $0.id == discarded.id }
+                    if let previousSleepEnd {
+                        WidgetDataStore.shared.setLastSleepEnd(previousSleepEnd, babyId: babyId)
+                    }
+                    // The session was already uploaded at start — durable delete +
+                    // tombstone so it can't resurrect from the cloud or a co-parent cache.
+                    BabySyncService().propagateDelete(id: discarded.id, in: "sleepLogs")
                 }
-                pushSleepToFirestore(saved, babyId: babyId)
                 await refreshForecast()
             } catch {
                 todayEntries.removeAll { $0.id == completed.id }

@@ -123,11 +123,20 @@ final class QuickLogCoordinator {
             }
             open.quality = quality
             let secs = max(0, Int(Date().timeIntervalSince(open.startDate)))
+            let previousSleepEnd = WidgetDataStore.shared.lastSleepEndDate(for: babyId)
             WidgetDataStore.shared.setLastSleepEnd(Date(), babyId: babyId)
             WidgetDataStore.shared.clearSleep(lastDurationSeconds: secs, babyId: babyId)
             sleepLA.endActivity()
-            if let saved = try? await stopSleepUC.execute(open) {
+            switch try? await stopSleepUC.execute(open) {
+            case .saved(let saved):
                 pushSleepToFirestore(saved, babyId: babyId)
+            case .discarded(let discarded):
+                if let previousSleepEnd {
+                    WidgetDataStore.shared.setLastSleepEnd(previousSleepEnd, babyId: babyId)
+                }
+                BabySyncService().propagateDelete(id: discarded.id, in: "sleepLogs")
+            case nil:
+                break
             }
         }
     }

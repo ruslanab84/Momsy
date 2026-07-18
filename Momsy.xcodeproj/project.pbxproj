@@ -51,6 +51,7 @@
 		9CBCB9DF036CA6355130F76C /* MomsyWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E335EB553D7A70B11B3A2BC6 /* MomsyWidgetBundle.swift */; };
 		9F9D8473BEC847159E943B0B /* MockDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480FEC47128C499785E19BE4 /* MockDiaperRepository.swift */; };
 		A1B2C3D4E5F60718293A4B5C /* SleepDayWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5D /* SleepDayWindowTests.swift */; };
+		C56A0D6E69513551AC768365 /* StopSleepUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF16DE1BAD5B55BABDAEB7C /* StopSleepUseCaseTests.swift */; };
 		A5522FF4A6C0AF27DC5EF07E /* MockSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B279217D8375F3D5D1F0B8D5 /* MockSoundEngine.swift */; };
 		A63165E2B06D8E9D3DC6D060 /* MockDailyTipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */; };
 		A9F0E002A9F0E002A9F0E002 /* AppPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */; };
@@ -209,6 +210,7 @@
 		99F20C7714FA0A8F2F9B099D /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		A0FDA73DA98D1F77B025BF71 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B5D /* SleepDayWindowTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepDayWindowTests.swift; sourceTree = "<group>"; };
+		9AF16DE1BAD5B55BABDAEB7C /* StopSleepUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StopSleepUseCaseTests.swift; sourceTree = "<group>"; };
 		A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsViewModelTests.swift; sourceTree = "<group>"; };
 		A9F0E001A9F0E001A9F0E001 /* AppPersistenceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppPersistenceTests.swift; sourceTree = "<group>"; };
 		AA001122CC33DD44EE55FF64 /* FeedingLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingLiveActivityView.swift; sourceTree = "<group>"; };
@@ -484,6 +486,7 @@
 				A1B2C3D4E5F60718293A4B5D /* SleepDayWindowTests.swift */,
 				E32F8D3BFD0887B5BFB39D82 /* SleepSessionOwnershipTests.swift */,
 				FE4623CCFF413B7062AFC625 /* DuplicateOpenSessionPolicyTests.swift */,
+				9AF16DE1BAD5B55BABDAEB7C /* StopSleepUseCaseTests.swift */,
 			);
 			path = Sleep;
 			sourceTree = "<group>";
@@ -1005,6 +1008,7 @@
 				A1B2C3D4E5F60718293A4B5C /* SleepDayWindowTests.swift in Sources */,
 				C7F9E2D650E4DB928C049225 /* SleepSessionOwnershipTests.swift in Sources */,
 				945D0037F3F17B6FBCADBE12 /* DuplicateOpenSessionPolicyTests.swift in Sources */,
+				C56A0D6E69513551AC768365 /* StopSleepUseCaseTests.swift in Sources */,
 				0BABF11E0000000000000001 /* MultiChildFoundationTests.swift in Sources */,
 				0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */,
 				0BABF1200000000000000001 /* BabySyncBackfillTests.swift in Sources */,
