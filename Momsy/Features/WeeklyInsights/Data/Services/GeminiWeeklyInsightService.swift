@@ -4,7 +4,7 @@ import FirebaseAI
 final class GeminiWeeklyInsightService: WeeklyInsightService {
 
     private let modelName = "gemini-3.1-flash-lite"
-    private let maxOutputTokens = 700
+    private let maxOutputTokens = 1400
 
     func generate(context: WeeklyInsightContext) async throws -> WeeklyInsightAI {
         try await GeminiRetry.run(label: "GeminiWeeklyInsightService") {

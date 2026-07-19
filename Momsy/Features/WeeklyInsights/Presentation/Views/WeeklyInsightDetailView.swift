@@ -24,6 +24,7 @@ struct WeeklyInsightDetailView: View {
                 if !insight.ai.overallSummary.isEmpty {
                     overallCard
                 }
+                disclaimerFooter
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -73,5 +74,20 @@ struct WeeklyInsightDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.bbLilac.opacity(0.25))
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    private var disclaimerFooter: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "info.circle.fill")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.bbInkMute)
+            Text(lm.strings.weeklyInsightDisclaimer)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 }

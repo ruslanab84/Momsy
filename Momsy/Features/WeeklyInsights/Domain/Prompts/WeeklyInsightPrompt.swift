@@ -30,7 +30,7 @@ enum WeeklyInsightPrompt {
 
         Reply ONLY with a JSON object with exactly these keys: \(jsonKeys).
         Keep JSON keys exactly in English. Write every JSON string value in \(responseLanguage).
-        Each value is 1-2 warm sentences. No markdown, no extra keys, no text outside the JSON.
+        Each value is 3-4 warm, specific sentences with concrete numbers and comparisons from the data. No markdown, no extra keys, no text outside the JSON.
         """
     }
 

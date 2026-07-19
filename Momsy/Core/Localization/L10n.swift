@@ -122,6 +122,15 @@ struct L10n {
           "Não foi possível carregar o relatório. Tente novamente.",
           "无法加载报告，请重试。")
     }
+    var weeklyInsightDisclaimer: String {
+        s("AI-generated insights may be inaccurate. Always consult your pediatrician for medical advice.",
+          "AI-созданные заключения могут быть неточными. Всегда консультируйтесь с педиатром по медицинским вопросам.",
+          "KI-generierte Erkenntnisse können ungenau sein. Konsultieren Sie immer einen Kinderarzt für medizinische Ratschläge.",
+          "Los análisis generados por IA pueden ser inexactos. Siempre consulte a su pediatra para asesoramiento médico.",
+          "Les perspectives générées par l'IA peuvent être inexactes. Consultez toujours votre pédiatre pour des conseils médicaux.",
+          "Os insights gerados por IA podem ser imprecisos. Sempre consulte seu pediatra para aconselhamento médico.",
+          "AI 生成的见解可能不准确。医学建议请始终咨询您的儿科医生。")
+    }
     var unlockPremium: String {
         s("Unlock Premium", "Открыть Premium", "Premium freischalten", "Desbloquear Premium",
           "Débloquer Premium", "Desbloquear Premium", "解锁高级版")
