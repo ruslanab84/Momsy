@@ -104,19 +104,24 @@ enum BabyAgeContext {
     static let leapLookaheadWeeks = DevelopmentLeapSchedule.lookaheadWeeks
 
     /// The leap the baby is currently going through, by age.
-    /// Latest leap whose onset week is within `leapLookaheadWeeks` of the baby's age.
-    /// If that latest eligible leap was manually completed, there is no current leap
-    /// until the next scheduled one starts.
-    static func currentLeap(ageWeeks weeks: Int, completedIDs: Set<Int> = []) -> DevelopmentLeap? {
-        guard let leap = DevelopmentLeap.catalog.last(where: { $0.week <= weeks + leapLookaheadWeeks }) else {
+    /// Latest leap whose onset week is within `leapLookaheadWeeks` of the baby's age,
+    /// promoted to the next leap once its hard days end (consolidation shouldn't keep
+    /// it "current" for the full gap until the next leap's own onset).
+    /// If the resolved leap was manually completed, there is no current leap.
+    static func currentLeap(ageWeeks weeks: Int, ageDays days: Int, completedIDs: Set<Int> = []) -> DevelopmentLeap? {
+        guard var leap = DevelopmentLeap.catalog.last(where: { $0.week <= weeks + leapLookaheadWeeks }) else {
             return nil
+        }
+        while leapPhase(for: leap, ageDays: days) == .consolidation,
+              let next = DevelopmentLeap.catalog.first(where: { $0.id == leap.id + 1 }) {
+            leap = next
         }
         return completedIDs.contains(leap.id) ? nil : leap
     }
 
     /// Name of the current developmental leap for the given age, localized.
-    static func currentLeapName(ageWeeks weeks: Int, lang: String) -> String? {
-        guard let leap = currentLeap(ageWeeks: weeks) else { return nil }
+    static func currentLeapName(ageWeeks weeks: Int, ageDays days: Int, lang: String) -> String? {
+        guard let leap = currentLeap(ageWeeks: weeks, ageDays: days) else { return nil }
         return leap.name(for: Language(rawValue: lang) ?? .english)
     }
 

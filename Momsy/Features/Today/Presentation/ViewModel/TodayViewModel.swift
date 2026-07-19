@@ -122,7 +122,8 @@ final class TodayViewModel: ObservableObject {
         let doneIDs = Set(progress.filter(\.isDone).map(\.id))
         let birth = appState.babyProfile?.birthDate
         let ageWeeks = BabyAgeContext.ageWeeks(birthDate: birth)
-        let leap = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, completedIDs: doneIDs)
+        let ageDays = BabyAgeContext.ageDays(birthDate: birth)
+        let leap = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, ageDays: ageDays, completedIDs: doneIDs)
         currentLeap = leap
         leapPhase = leap.map {
             BabyAgeContext.leapPhase(for: $0, birthDate: birth)

@@ -144,7 +144,8 @@ final class LeapsViewModel: ObservableObject {
         progressByID = Dictionary(uniqueKeysWithValues: progress.map { ($0.id, $0) })
         let doneIDs = Set(progress.filter(\.isDone).map(\.id))
         let ageWeeks = BabyAgeContext.ageWeeks(birthDate: appState.babyProfile?.birthDate)
-        let current = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, completedIDs: doneIDs)
+        let ageDays = BabyAgeContext.ageDays(birthDate: appState.babyProfile?.birthDate)
+        let current = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, ageDays: ageDays, completedIDs: doneIDs)
         leaps = DevelopmentLeap.catalog.map { leap in
             var copy = leap
             copy.isCurrent = leap.id == current?.id

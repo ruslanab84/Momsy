@@ -127,7 +127,10 @@ enum DailyContextBuilder {
         let totalSleepMinutes = sleepEntries.reduce(0) { $0 + ($1.durationMinutes ?? 0) }
 
         let (ageMonths, ageDays) = babyAge(appState: appState)
-        let currentLeapName = currentLeap(ageWeeks: ageWeeks(appState: appState))
+        let currentLeapName = currentLeap(
+            ageWeeks: ageWeeks(appState: appState),
+            ageDays: totalAgeDays(appState: appState)
+        )
 
         // New fields
         let hour = Calendar.current.component(.hour, from: Date())
@@ -188,7 +191,11 @@ enum DailyContextBuilder {
         return max(0, comps.weekOfYear ?? 0)
     }
 
-    private static func currentLeap(ageWeeks weeks: Int) -> String? {
-        BabyAgeContext.currentLeapName(ageWeeks: weeks, lang: LocalizationManager.shared.lang)
+    private static func totalAgeDays(appState: AppState) -> Int {
+        BabyAgeContext.ageDays(birthDate: appState.babyProfile?.birthDate)
+    }
+
+    private static func currentLeap(ageWeeks weeks: Int, ageDays days: Int) -> String? {
+        BabyAgeContext.currentLeapName(ageWeeks: weeks, ageDays: days, lang: LocalizationManager.shared.lang)
     }
 }

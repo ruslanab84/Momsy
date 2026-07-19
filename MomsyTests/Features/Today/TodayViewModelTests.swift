@@ -322,14 +322,13 @@ struct TodayViewModelTests {
 
     // MARK: - Developmental leap
 
-    @Test("9-week-old baby resolves to leap #2 on the Today screen, not hardcoded #4")
+    @Test("9-week-old baby whose leap #2 is past hard days resolves to leap #3 on the Today screen")
     func nineWeekBabyResolvesToLeapTwo() async throws {
-        let birth = Calendar.current.date(byAdding: .day, value: -65, to: Date())! // ~9w2d
+        let birth = Calendar.current.date(byAdding: .day, value: -65, to: Date())! // ~9w2d, leap #2 hard days ended day 55
         let profile = BabyProfile(name: "Test", birthDate: birth)
         let vm = makeVM(profile: profile)
         await vm.loadLeap()
-        #expect(vm.currentLeap?.id == 2)
-        #expect(vm.leapPhase == .consolidation) // hard window of leap #2 has passed by 9w
+        #expect(vm.currentLeap?.id == 3)
     }
 
     @Test("newborn has no active leap, so the badge and card are hidden")

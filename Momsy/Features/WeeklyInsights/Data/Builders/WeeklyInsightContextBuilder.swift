@@ -25,7 +25,8 @@ enum WeeklyInsightContextBuilder {
 
         let ageMonths = BabyAgeContext.ageMonths(birthDate: birthDate, now: weekEnd)
         let ageWeeks = BabyAgeContext.ageWeeks(birthDate: birthDate, now: weekEnd)
-        let currentLeap = BabyAgeContext.currentLeap(ageWeeks: ageWeeks)
+        let ageDays = BabyAgeContext.ageDays(birthDate: birthDate, now: weekEnd)
+        let currentLeap = BabyAgeContext.currentLeap(ageWeeks: ageWeeks, ageDays: ageDays)
         let leap = currentLeap?.name(for: language)
 
         // Sleep — this week + previous week (for trend).

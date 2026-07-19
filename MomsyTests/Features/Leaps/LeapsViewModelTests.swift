@@ -76,15 +76,17 @@ struct LeapsViewModelTests {
         #expect(currentCount == 1)
     }
 
-    @Test("9-week-old baby is in leap #2, leap #1 shows as passed")
+    @Test("9-week-old baby whose leap #2 is past hard days promotes to leap #3")
     func nineWeekBabyIsInLeapTwo() async throws {
         let repo = MockLeapsRepository()                 // no manual completions
-        let birth = Calendar.current.date(byAdding: .day, value: -65, to: Date())! // ~9w2d
+        let birth = Calendar.current.date(byAdding: .day, value: -65, to: Date())! // ~9w2d, leap #2 hard days ended day 55
         let profile = BabyProfile(name: "Test", birthDate: birth)
         let vm = try await makeVM(repo: repo, profile: profile)
-        #expect(vm.currentLeap.id == 2)
+        #expect(vm.currentLeap.id == 3)
         #expect(vm.leaps.first { $0.id == 1 }?.isDone == true)
         #expect(vm.leaps.first { $0.id == 1 }?.isCurrent == false)
+        #expect(vm.leaps.first { $0.id == 2 }?.isDone == true)
+        #expect(vm.leaps.first { $0.id == 2 }?.isCurrent == false)
     }
 
     @Test("catalog contains all ten scheduled leaps")
@@ -111,13 +113,24 @@ struct LeapsViewModelTests {
         #expect(remaining == leap1HardDays)
     }
 
-    @Test("leapPhase is consolidation once the hard window has passed")
-    func leapPhaseConsolidationMidLeap() async throws {
+    @Test("leapPhase(for:ageDays:) reports consolidation once a leap's hard window has passed")
+    func leapPhaseConsolidationMidLeap() {
+        let leap2 = DevelopmentLeap.catalog.first { $0.id == 2 }!
+        #expect(BabyAgeContext.leapPhase(for: leap2, ageDays: 65) == .consolidation) // ~9w2d, mid leap #2
+    }
+
+    @Test("current leap promotes to the next one once consolidation starts, even before its own lookahead window")
+    func currentLeapPromotesPastConsolidation() async throws {
         let repo = MockLeapsRepository()
-        let birth = Calendar.current.date(byAdding: .day, value: -65, to: Date())! // ~9w2d, mid leap #2
+        let birth = Calendar.current.date(byAdding: .day, value: -97, to: Date())! // ~3mo7d, leap #3 mid-consolidation
         let vm = try await makeVM(repo: repo, profile: BabyProfile(name: "Test", birthDate: birth))
-        #expect(vm.currentLeap.id == 2)
-        #expect(vm.currentLeapPhase == .consolidation)
+        #expect(vm.currentLeap.id == 4)
+        guard case .upcoming = vm.currentLeapPhase else {
+            Issue.record("Expected leap #4 to be upcoming")
+            return
+        }
+        #expect(vm.leaps.first { $0.id == 3 }?.isDone == true)
+        #expect(vm.leaps.first { $0.id == 3 }?.isCurrent == false)
     }
 
     @Test("currentLeapPhase is upcoming for a newborn with no active leap")
@@ -164,7 +177,7 @@ struct LeapsViewModelTests {
     func reloadsLeapsOnBabySwitch() async throws {
         let repo = MockLeapsRepository()
         let babyA = BabyProfile(name: "A", birthDate: Date())                                       // newborn
-        let babyB = BabyProfile(name: "B",                                                          // ~9w2d → leap #2
+        let babyB = BabyProfile(name: "B",                                                          // ~9w2d, leap #2 past hard days → leap #3
                                 birthDate: Calendar.current.date(byAdding: .day, value: -65, to: Date())!)
         let babyRepo = MockBabyRepository(initialProfiles: [babyA, babyB])
         let state = AppState(
@@ -192,7 +205,7 @@ struct LeapsViewModelTests {
         NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
         try await Task.sleep(nanoseconds: 100_000_000)
 
-        #expect(vm.currentLeap.id == 2)
+        #expect(vm.currentLeap.id == 3)
         #expect(vm.currentLeap.isCurrent == true)
     }
 
