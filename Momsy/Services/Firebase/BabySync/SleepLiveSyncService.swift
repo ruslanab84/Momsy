@@ -15,6 +15,12 @@ final class SleepLiveSyncService {
     func start() {
         stop()
         streamTask = Task { [weak self] in
+            // Catch-up first: a co-parent write made while this device was detached
+            // (backgrounded) predates the listener's attach time, and the foreground
+            // `resyncAll` is debounced — without this delta merge that open sleep
+            // session stays invisible until the next full sync.
+            await self?.downloader.resyncSleepLive()
+            guard !Task.isCancelled else { return }
             let stream = BabySyncService().streamLogUpdates(from: "sleepLogs", since: Date())
             for await _ in stream {
                 guard !Task.isCancelled, let self else { return }
