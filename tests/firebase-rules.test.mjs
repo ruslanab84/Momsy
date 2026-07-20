@@ -1,10 +1,12 @@
 import { readFileSync } from "node:fs";
+import assert from "node:assert/strict";
 import { after, before, beforeEach, test } from "node:test";
 import {
     assertFails,
     assertSucceeds,
     initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
+import { Timestamp } from "firebase/firestore";
 
 const projectId = "demo-momsy";
 const familyId = "family-a";
@@ -211,6 +213,78 @@ test("invite updates cannot cross families or bypass schema and expiry limits", 
         familyId,
         createdBy: users.mom,
         expiresAt: validExpiry,
+    }));
+});
+
+test("invite create, role update, and self-invite join keep both members visible", async () => {
+    const momDb = firestore(users.mom);
+    const invite = momDb.doc("invites/MOMSY-JOIN01");
+
+    // Mirrors FirestoreInviteService: expiresAt is a client-computed
+    // Timestamp(date:) with full nanosecond precision, not aligned to the
+    // microsecond boundary Firestore stores. The client caches and re-sends
+    // this exact value on every subsequent invite-role update.
+    const expirySeconds = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
+    const cachedExpiry = new Timestamp(expirySeconds, 500000123);
+
+    await assertSucceeds(invite.set({
+        familyId,
+        createdBy: users.mom,
+        expiresAt: cachedExpiry,
+        roleRaw: "Няня",
+    }));
+
+    // FirestoreInviteService.updateInviteRole resends the same cached,
+    // unrounded expiresAt. The stored copy was truncated to microseconds on
+    // write, so exact `==` must not be used to compare them.
+    await assertSucceeds(invite.update({
+        expiresAt: cachedExpiry,
+        roleRaw: "Няня",
+    }));
+
+    // Self-invite join batch: joiner writes their own member doc plus their
+    // users/{uid} routing cache in one atomic batch, exactly as the app's
+    // join flow does.
+    const joinerDb = firestore(users.outsider);
+    const batch = joinerDb.batch();
+    batch.set(joinerDb.doc(`${familyPath}/members/${users.outsider}`), {
+        uid: users.outsider,
+        roleRaw: "Няня",
+        inviteCode: "MOMSY-JOIN01",
+    });
+    batch.set(joinerDb.doc(`users/${users.outsider}`), { familyId });
+    await assertSucceeds(batch.commit());
+
+    // Both the inviter and the joiner now see the full roster.
+    const momRoster = await momDb.collection(`${familyPath}/members`).get();
+    const joinerRoster = await joinerDb.collection(`${familyPath}/members`).get();
+    assert.equal(momRoster.docs.some((doc) => doc.id === users.outsider), true);
+    assert.equal(joinerRoster.docs.some((doc) => doc.id === users.mom), true);
+
+    // ensureMemberDocument self-heal: an idempotent merge that leaves the
+    // role unchanged must not be blocked for a non-parent joiner.
+    await assertSucceeds(joinerDb.doc(`${familyPath}/members/${users.outsider}`).set({
+        uid: users.outsider,
+        roleRaw: "Няня",
+    }, { merge: true }));
+});
+
+test("self-invite join is rejected when the member role does not match the invite", async () => {
+    const momDb = firestore(users.mom);
+    const expirySeconds = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
+
+    await assertSucceeds(momDb.doc("invites/MOMSY-JOIN02").set({
+        familyId,
+        createdBy: users.mom,
+        expiresAt: new Timestamp(expirySeconds, 0),
+        roleRaw: "Няня",
+    }));
+
+    const joinerDb = firestore(users.outsider);
+    await assertFails(joinerDb.doc(`${familyPath}/members/${users.outsider}`).set({
+        uid: users.outsider,
+        roleRaw: "Папа",
+        inviteCode: "MOMSY-JOIN02",
     }));
 });
 

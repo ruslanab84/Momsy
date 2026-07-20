@@ -193,7 +193,10 @@ service cloud.firestore {
         && request.resource.data.createdBy is string
         && request.resource.data.expiresAt is timestamp
         && request.resource.data.expiresAt > request.time
-        && request.resource.data.expiresAt <= request.time + duration.value(24, 'h')
+        // 10 min of client-clock-skew tolerance: expiresAt is client-computed
+        // (Date() + 24h), so a device clock slightly ahead of the server must
+        // not deny the write.
+        && request.resource.data.expiresAt <= request.time + duration.value(24, 'h') + duration.value(10, 'm')
         && (
           !('roleRaw' in request.resource.data)
           || (
@@ -206,7 +209,10 @@ service cloud.firestore {
     function inviteImmutableFieldsUnchanged() {
       return request.resource.data.familyId == resource.data.familyId
         && request.resource.data.createdBy == resource.data.createdBy
-        && request.resource.data.expiresAt == resource.data.expiresAt;
+        // Millisecond equality, not `==`: Firestore truncates stored timestamps
+        // to microseconds while the client re-sends its nanosecond-precision
+        // Timestamp(date:), so exact equality fails on every role update.
+        && request.resource.data.expiresAt.toMillis() == resource.data.expiresAt.toMillis();
     }
 
     // Each user owns only their own doc. familyId may only point at a family the
