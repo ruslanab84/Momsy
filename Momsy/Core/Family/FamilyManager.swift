@@ -285,7 +285,11 @@ final class FamilyManager: ObservableObject {
         // carry the id of the family being left.
         let previousFamilyId = familyId
 
-        let displayName = Auth.auth().currentUser?.displayName ?? Auth.auth().currentUser?.email ?? "User"
+        let currentUser = Auth.auth().currentUser
+        let displayName = AccountDisplay.memberName(
+            displayName: currentUser?.displayName,
+            email: currentUser?.email
+        )
         let targetMemberRef = db.collection("families").document(targetFamilyId)
             .collection("members").document(uid)
         let userRef = db.collection("users").document(uid)
