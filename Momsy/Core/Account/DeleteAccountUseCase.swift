@@ -12,6 +12,9 @@ protocol CloudAccountEraser {
     /// backend (not the local cache) so a cache-only delete can't masquerade as complete.
     /// Returns `true` while anything that could re-resolve the family still exists.
     func isCloudDataPresent(uid: String) async throws -> Bool
+    /// True когда users/{uid}.familyId указывает на семью, где members/{uid}
+    /// существует и содержит inviteCode — членство переустановлено явным join'ом.
+    func hasInviteEstablishedMembership(uid: String) async throws -> Bool
 }
 
 /// The slice of `BabySyncService` the roster-wide erase needs. `deleteAllData()` targets a
@@ -116,6 +119,17 @@ struct FirestoreAccountEraser: CloudAccountEraser {
             .collection("users").document(uid)
             .getDocument(source: .server)
         return userDoc.exists
+    }
+
+    func hasInviteEstablishedMembership(uid: String) async throws -> Bool {
+        let db = Firestore.firestore()
+        let userDoc = try await db.collection("users").document(uid)
+            .getDocument(source: .server)
+        guard let familyId = userDoc.data()?["familyId"] as? String, !familyId.isEmpty
+        else { return false }
+        let member = try? await db.collection("families").document(familyId)
+            .collection("members").document(uid).getDocument(source: .server)
+        return (member?.data()?["inviteCode"] as? String) != nil
     }
 
     private func discoverBabyIds(in familyRef: DocumentReference) async throws -> [String] {
@@ -271,8 +285,19 @@ final class AccountDeletionRecovery {
 
     func runIfNeeded() async {
         guard let pendingUid = pendingStore.loadPending() else { return }
+        guard let currentUid = auth.currentUID, currentUid == pendingUid else {
+            suppressedRestoreStore.suppressRestore(for: pendingUid)
+            return
+        }
+        // Аккаунт "воскрешён" инвайт-join'ом после старта удаления: пользователь
+        // активно пользуется тем же uid в новой семье. Продолжать фоновую зачистку —
+        // значит удалить его свежий member doc (а как sole member — всю семью).
+        if (try? await cloudEraser.hasInviteEstablishedMembership(uid: currentUid)) == true {
+            pendingStore.clearPending()
+            suppressedRestoreStore.clearSuppression(for: currentUid)
+            return
+        }
         suppressedRestoreStore.suppressRestore(for: pendingUid)
-        guard let currentUid = auth.currentUID, currentUid == pendingUid else { return }
         do {
             try await cloudEraser.deleteCloudData(uid: currentUid)
             guard try await cloudEraser.isCloudDataPresent(uid: currentUid) == false else {

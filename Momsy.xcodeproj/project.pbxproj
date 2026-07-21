@@ -22,6 +22,7 @@
 		0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */; };
 		0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */; };
 		0BABF12B0000000000000006 /* FamilyMembershipCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000007 /* FamilyMembershipCheckTests.swift */; };
+		0BABF12B0000000000000008 /* FamilySuppressedRestoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000009 /* FamilySuppressedRestoreTests.swift */; };
 		1D0A7E115EA9B00100000001 /* DevelopmentLeapSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0A7E115EA9B00100000002 /* DevelopmentLeapSchedule.swift */; };
 		1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */; };
 		1F2E3D4C5B6A79808172635F /* SubscriptionManagerLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADD5DE86DF74081D750B39F /* SubscriptionManagerLogicTests.swift */; };
@@ -162,6 +163,7 @@
 		0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyErrorLocalizationTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinFlowFlagTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000007 /* FamilyMembershipCheckTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyMembershipCheckTests.swift; sourceTree = "<group>"; };
+		0BABF12B0000000000000009 /* FamilySuppressedRestoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilySuppressedRestoreTests.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipAlgorithmTests.swift; sourceTree = "<group>"; };
@@ -430,6 +432,7 @@
 				0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */,
 				0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */,
 				0BABF12B0000000000000007 /* FamilyMembershipCheckTests.swift */,
+				0BABF12B0000000000000009 /* FamilySuppressedRestoreTests.swift */,
 			);
 			path = Family;
 			sourceTree = "<group>";
@@ -1026,6 +1029,7 @@
 				0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */,
 				0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */,
 				0BABF12B0000000000000006 /* FamilyMembershipCheckTests.swift in Sources */,
+				0BABF12B0000000000000008 /* FamilySuppressedRestoreTests.swift in Sources */,
 				5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */,
 				1F2E3D4C5B6A79808172635F /* SubscriptionManagerLogicTests.swift in Sources */,
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
@@ -1343,7 +1347,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1383,7 +1387,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Momsy/Momsy.Release.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 58ZSRJHNGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

@@ -165,8 +165,40 @@ final class FamilyManager: ObservableObject {
             )
         } else {
             if let existingId, restoreSuppressed {
-                try? await db.collection("families").document(existingId)
-                    .collection("members").document(uid).delete()
+                let memberRef = db.collection("families").document(existingId)
+                    .collection("members").document(uid)
+                // permissionDenied ⇒ doc отсутствует (rules требуют его существования
+                // для read). Прочие ошибки (сеть, App Check) пробрасываются наверх:
+                // transient-сбой не должен приводить к созданию новой семьи.
+                let memberSnap: DocumentSnapshot?
+                do {
+                    memberSnap = try await memberRef.getDocument(source: .server)
+                } catch let error where Self.classifyMembershipError(error) == .revoked {
+                    memberSnap = nil
+                }
+                let resolution = Self.resolveSuppressedRestore(
+                    memberDocExists: memberSnap?.exists == true,
+                    memberHasInviteCode: (memberSnap?.data()?["inviteCode"] as? String) != nil
+                )
+                switch resolution {
+                case .adoptInviteMembership:
+                    // Членство создано инвайт-join'ом ПОСЛЕ намерения удаления —
+                    // легитимно. Снимаем suppression и адоптируем как обычный вход.
+                    suppressedRestoreStore.clearSuppression(for: uid)
+                    persist(familyId: existingId, ownerUid: uid)
+                    try await ensureMemberDocument(
+                        familyId: existingId,
+                        uid: uid,
+                        displayName: displayName,
+                        defaultRoleRaw: FamilyRole.mom.rawValue
+                    )
+                    isReady = true
+                    return
+                case .discardStaleMembership:
+                    try? await memberRef.delete()
+                case .startFresh:
+                    break
+                }
             }
             let newId = try await createFamily(for: uid)
             try await ensureMemberDocument(
@@ -283,6 +315,12 @@ final class FamilyManager: ObservableObject {
         try await batch.commit()
 
         persist(familyId: targetFamilyId, ownerUid: uid)
+        // An explicit invite join supersedes any pending "start fresh" / deletion
+        // intent for this uid on this device — otherwise the next launch's
+        // suppressed-restore path would delete the freshly created member doc.
+        UserDefaultsSuppressedFamilyRestoreStore().clearSuppression(for: uid)
+        let pendingStore = UserDefaultsPendingAccountDeletionStore()
+        if pendingStore.loadPending() == uid { pendingStore.clearPending() }
         isReady = true
         NotificationCenter.default.post(
             name: .familyDidJoin, object: nil,
@@ -330,6 +368,23 @@ final class FamilyManager: ObservableObject {
                                                  selfReadSucceeded: Bool) -> MembershipCheck {
         guard raw == .revoked else { return raw }
         return selfReadSucceeded ? .revoked : .unknown
+    }
+
+    enum SuppressedRestoreResolution {
+        case adoptInviteMembership
+        case discardStaleMembership
+        case startFresh
+    }
+
+    /// Suppressed-restore решение по состоянию member doc. Только invite-join пишет
+    /// `inviteCode`, поэтому его наличие доказывает, что членство создано явным
+    /// join'ом и не подлежит зачистке при "start fresh".
+    nonisolated static func resolveSuppressedRestore(
+        memberDocExists: Bool,
+        memberHasInviteCode: Bool
+    ) -> SuppressedRestoreResolution {
+        guard memberDocExists else { return .startFresh }
+        return memberHasInviteCode ? .adoptInviteMembership : .discardStaleMembership
     }
 
     /// Cached-path probe. `permissionDenied` on the member doc is trusted as a

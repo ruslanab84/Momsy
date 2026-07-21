@@ -11,8 +11,10 @@ private struct MockCloudEraser: CloudAccountEraser {
         var error: Error?
         /// What `isCloudDataPresent` reports — `false` means "server confirms fully erased".
         var stillPresent = false
+        var deleteCount: Int { uids.count }
     }
     let calls: Calls
+    var inviteMembership = false
     func deleteCloudData(uid: String) async throws {
         calls.uids.append(uid)
         if let error = calls.error { throw error }
@@ -21,6 +23,7 @@ private struct MockCloudEraser: CloudAccountEraser {
         calls.presentChecks.append(uid)
         return calls.stillPresent
     }
+    func hasInviteEstablishedMembership(uid: String) async throws -> Bool { inviteMembership }
 }
 
 private final class MockPendingStore: PendingAccountDeletionStore, @unchecked Sendable {
@@ -274,5 +277,24 @@ struct AccountDeletionRecoveryTests {
         #expect(cloud.uids == ["abc"])         // attempted
         #expect(pending.pendingUid == "abc")   // but not cleared — will retry next launch
         #expect(suppressed.isRestoreSuppressed(for: "abc"))
+    }
+
+    @Test("skips the erase when membership was reestablished by an invite join")
+    func recoverySkipsEraseWhenMembershipReestablishedByInvite() async throws {
+        let cloud = MockCloudEraser.Calls()
+        let pending = MockPendingStore(pendingUid: "u1")
+        let suppressed = MockSuppressedRestoreStore()
+        suppressed.suppressRestore(for: "u1")
+        let rec = AccountDeletionRecovery(
+            cloudEraser: MockCloudEraser(calls: cloud, inviteMembership: true),
+            auth: MockAuth(uid: "u1"),
+            pendingStore: pending,
+            suppressedRestoreStore: suppressed)
+
+        await rec.runIfNeeded()
+
+        #expect(cloud.deleteCount == 0)
+        #expect(pending.pendingUid == nil)
+        #expect(suppressed.suppressedUIDs.isEmpty)
     }
 }
