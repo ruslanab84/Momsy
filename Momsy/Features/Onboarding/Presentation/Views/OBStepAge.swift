@@ -20,7 +20,7 @@ struct AgeStep: View {
                 .padding(.top, 12)
                 .padding(.bottom, 20)
 
-                Text(loc.strings.helloMama)
+                Text(loc.strings.helloParent)
                     .font(.system(size: 30, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
 

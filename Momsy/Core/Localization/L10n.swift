@@ -473,7 +473,7 @@ struct L10n {
     var leapInProgress: String  { s("In progress",       "В процессе",       "Im Gange",        "En curso", "En cours", "Em curso", "进行中") }
     var leapUpcoming: String    { s("Upcoming",          "Предстоит",        "Bevorstehend",    "Próximo", "À venir", "A chegar", "即将到来") }
     var markDone: String        { s("Mark complete",     "Отметить",         "Abschließen",     "Marcar hecho", "Marquer terminé", "Marcar concluído", "标记完成") }
-    var hangInThere: String     { s("hang in there, mama ✿", "держитесь, мама ✿", "Haltet durch, Mama ✿", "ánimo, mamá ✿", "courage, maman ✿", "força, mamã ✿", "坚持住，妈妈 ✿") }
+    var hangInThere: String     { s("hang in there ✿", "вы справитесь ✿", "Haltet durch ✿", "ánimo ✿", "courage ✿", "força ✿", "坚持住 ✿") }
     var leapSettled: String     { s("calmer days now — new skills emerging ✿", "сейчас спокойнее — появляются новые навыки ✿", "ruhigere Tage — neue Fähigkeiten zeigen sich ✿", "días más tranquilos — surgen nuevas habilidades ✿", "des jours plus calmes — de nouvelles compétences apparaissent ✿", "dias mais calmos agora — surgem novas competências ✿", "现在平静些了——新技能正在显现 ✿") }
     var whatYouNotice: String   { s("WHAT YOU NOTICE",   "ЧТО ЗАМЕТНО",      "WAS SIE BEMERKEN", "LO QUE NOTAS", "CE QUE VOUS REMARQUEZ", "O QUE NOTA", "你会注意到") }
     var comingSoon: String      { s("COMING SOON",       "СКОРО НАУЧИТСЯ",   "KOMMT BALD",      "PRONTO", "BIENTÔT", "EM BREVE", "即将学会") }
@@ -1031,7 +1031,7 @@ struct L10n {
     var continueLabel: String   { s("Continue",      "Продолжить",    "Weiter",        "Continuar", "Continuer", "Continuar", "继续") }
     var continueArrow: String   { s("Continue →",    "Продолжить →",  "Weiter →",      "Continuar →", "Continuer →", "Continuar →", "继续 →") }
     var skip: String            { s("Skip",          "Пропустить",    "Überspringen",  "Omitir", "Passer", "Ignorar", "跳过") }
-    var helloMama: String       { s("Hello, mama!",  "Привет, мама!", "Hallo, Mama!",  "¡Hola, mamá!", "Bonjour, maman !", "Olá, mamã!", "你好，妈妈！") }
+    var helloParent: String     { s("Hello!",        "Привет!",       "Hallo!",        "¡Hola!", "Bonjour !", "Olá!", "你好！") }
     var howOldIsYourBaby: String { s("How old is your baby?\nWe'll tailor everything to their age.", "Сколько малышу?\nМы всё адаптируем под его возраст.", "Wie alt ist Ihr Baby?\nWir passen alles an.", "¿Cuántos meses tiene tu bebé?\nLo adaptaremos todo a su edad.", "Quel âge a votre bébé ?\nNous adapterons tout à son âge.", "Que idade tem o seu bebé?\nVamos adaptar tudo à idade dele.", "宝宝多大了？\n我们会根据他的年龄量身定制一切。") }
     var ageChangeNote: String   { s("Age can be changed later. We'll highlight developmental leaps specifically for you.", "Возраст можно изменить позже. Мы выделим скачки развития специально для вас.", "Alter kann später geändert werden.", "La edad se puede cambiar después. Destacaremos los saltos del desarrollo especialmente para ti.", "L’âge peut être modifié plus tard. Nous mettrons en avant les bonds de développement spécialement pour vous.", "A idade pode ser alterada mais tarde. Vamos destacar os saltos de desenvolvimento especialmente para si.", "年龄之后可以修改。我们会专门为您标出发育猛长期。") }
     var ageStageNewbornLabel: String { s("0–3 mo", "0–3 мес", "0–3 Mon", "0–3 m", "0–3 mois", "0–3 m", "0–3 个月") }
