@@ -11,7 +11,9 @@ struct BathLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    BabyFaceIcon(size: 20)
+                    Image(systemName: "drop.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.cyan)
                     Text(context.attributes.babyName.isEmpty
                          ? WidgetL10n.current.bath
                          : context.attributes.babyName)
@@ -69,7 +71,7 @@ struct BathLiveActivity: Widget {
                     Label {
                         Text(WidgetL10n.current.bath)
                     } icon: {
-                        BabyFaceIcon(size: 14)
+                        Image(systemName: "drop.fill")
                     }
                     .font(.caption)
                     .foregroundStyle(.cyan)
@@ -97,7 +99,8 @@ struct BathLiveActivity: Widget {
                     .foregroundStyle(.cyan)
                 }
             } compactLeading: {
-                BabyFaceIcon(size: 14)
+                Image(systemName: "drop.fill")
+                    .foregroundStyle(.cyan)
             } compactTrailing: {
                 Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
                      countsDown: false)
@@ -105,7 +108,8 @@ struct BathLiveActivity: Widget {
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                BabyFaceIcon(size: 14)
+                Image(systemName: "drop.fill")
+                    .foregroundStyle(.cyan)
             }
             .keylineTint(.cyan)
         }

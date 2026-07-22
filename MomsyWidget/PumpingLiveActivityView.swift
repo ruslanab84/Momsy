@@ -15,7 +15,9 @@ struct PumpingLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    BabyFaceIcon(size: 20)
+                    Image(systemName: "drop.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.pink)
                     Text(context.attributes.babyName.isEmpty
                          ? WidgetL10n.current.pumping
                          : context.attributes.babyName)
@@ -34,7 +36,7 @@ struct PumpingLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        Image(systemName: "drop.fill")
+                        Image(systemName: "drop.circle.fill")
                             .font(.system(size: 14))
                             .foregroundStyle(.pink)
                     }
@@ -73,7 +75,7 @@ struct PumpingLiveActivity: Widget {
                     Label {
                         Text(pumpSideLabel(context.attributes.side))
                     } icon: {
-                        BabyFaceIcon(size: 14)
+                        Image(systemName: "drop.fill")
                     }
                     .font(.caption)
                     .foregroundStyle(.pink)
@@ -101,7 +103,8 @@ struct PumpingLiveActivity: Widget {
                     .foregroundStyle(.pink)
                 }
             } compactLeading: {
-                BabyFaceIcon(size: 14)
+                Image(systemName: "drop.circle.fill")
+                    .foregroundStyle(.pink)
             } compactTrailing: {
                 Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
                      countsDown: false)
@@ -109,7 +112,8 @@ struct PumpingLiveActivity: Widget {
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                BabyFaceIcon(size: 14)
+                Image(systemName: "drop.circle.fill")
+                    .foregroundStyle(.pink)
             }
             .keylineTint(.pink)
         }

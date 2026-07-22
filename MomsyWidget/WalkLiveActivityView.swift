@@ -11,7 +11,9 @@ struct WalkLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    BabyFaceIcon(size: 20)
+                    Image(systemName: "stroller")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.green)
                     Text(context.attributes.babyName.isEmpty
                          ? WidgetL10n.current.walk
                          : context.attributes.babyName)
@@ -30,7 +32,7 @@ struct WalkLockScreenView: View {
                             .font(.subheadline)
                             .foregroundStyle(.white)
                     } icon: {
-                        Image(systemName: "stroller.fill")
+                        Image(systemName: "stroller")
                             .font(.system(size: 14))
                             .foregroundStyle(.green)
                     }
@@ -69,7 +71,7 @@ struct WalkLiveActivity: Widget {
                     Label {
                         Text(WidgetL10n.current.walk)
                     } icon: {
-                        BabyFaceIcon(size: 14)
+                        Image(systemName: "stroller.fill")
                     }
                     .font(.caption)
                     .foregroundStyle(.green)
@@ -97,7 +99,8 @@ struct WalkLiveActivity: Widget {
                     .foregroundStyle(.green)
                 }
             } compactLeading: {
-                BabyFaceIcon(size: 14)
+                Image(systemName: "stroller")
+                    .foregroundStyle(.green)
             } compactTrailing: {
                 Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
                      countsDown: false)
@@ -105,7 +108,8 @@ struct WalkLiveActivity: Widget {
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                BabyFaceIcon(size: 14)
+                Image(systemName: "stroller")
+                    .foregroundStyle(.green)
             }
             .keylineTint(.green)
         }

@@ -11,7 +11,9 @@ struct SleepLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    BabyFaceIcon(size: 20)
+                    Image(systemName: "moon.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.purple)
                     Text(context.attributes.babyName.isEmpty
                          ? WidgetL10n.current.sleep
                          : context.attributes.babyName)
@@ -69,7 +71,7 @@ struct SleepLiveActivity: Widget {
                     Label {
                         Text(WidgetL10n.current.sleep)
                     } icon: {
-                        BabyFaceIcon(size: 14)
+                        Image(systemName: "moon.fill")
                     }
                     .font(.caption)
                     .foregroundStyle(.purple)
@@ -97,7 +99,8 @@ struct SleepLiveActivity: Widget {
                     .foregroundStyle(.purple)
                 }
             } compactLeading: {
-                BabyFaceIcon(size: 14)
+                Image(systemName: "moon.fill")
+                    .foregroundStyle(.purple)
             } compactTrailing: {
                 Text(timerInterval: context.state.timerInterval,
                      countsDown: false)
@@ -105,7 +108,8 @@ struct SleepLiveActivity: Widget {
                     .font(.caption2)
                     .frame(width: 44)
             } minimal: {
-                BabyFaceIcon(size: 14)
+                Image(systemName: "moon.fill")
+                    .foregroundStyle(.purple)
             }
             .keylineTint(.purple)
         }
