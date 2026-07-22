@@ -4,7 +4,12 @@ struct ContentView: View {
     @AppStorage("onboardingDone") private var onboardingDone = false
     @AppStorage("paywallShown") private var paywallShown = false
     @Environment(\.appContainer) private var container
+    @Binding private var widgetFeatureRoute: WidgetFeatureRoute?
     @State private var showSplash = true
+
+    init(widgetFeatureRoute: Binding<WidgetFeatureRoute?> = .constant(nil)) {
+        _widgetFeatureRoute = widgetFeatureRoute
+    }
 
     var body: some View {
         ZStack {
@@ -24,7 +29,7 @@ struct ContentView: View {
                 )
                 .transition(.opacity)
             } else {
-                MainTabView()
+                MainTabView(widgetFeatureRoute: $widgetFeatureRoute)
                     .transition(.opacity)
             }
         }

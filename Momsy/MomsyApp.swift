@@ -107,6 +107,7 @@ private struct MomsyRootView: View {
     @State private var showJoinAuthSheet = false
     @State private var pendingAuthenticatedJoinCode: String?
     @State private var pendingAuthenticatedJoinForce = false
+    @State private var widgetFeatureRoute: WidgetFeatureRoute?
 
     let runtime: AppRuntime
 
@@ -117,7 +118,7 @@ private struct MomsyRootView: View {
     private var appState: AppState { container.appState }
 
     var body: some View {
-        ContentView()
+        ContentView(widgetFeatureRoute: $widgetFeatureRoute)
             .withContainer(container)
             .environmentObject(localization)
             .environmentObject(unitSystem)
@@ -141,6 +142,10 @@ private struct MomsyRootView: View {
 #if canImport(GoogleSignIn)
                 GIDSignIn.sharedInstance.handle(url)
 #endif
+                if let route = WidgetFeatureRoute(url: url) {
+                    widgetFeatureRoute = route
+                    return
+                }
                 guard let code = JoinDeeplink.code(from: url) else { return }
                 guard onboardingDone else {
                     PendingFamilyInviteStore().save(code)

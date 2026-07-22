@@ -16,19 +16,21 @@ struct MomsySleepWidgetView: View {
 
     var body: some View {
         content
-            .widgetURL(URL(string: "momsy://today"))
     }
 
     @ViewBuilder private var content: some View {
         switch family {
         case .systemSmall:
             SleepSmallView(entry: entry)
+                .widgetURL(URL(string: "momsy://today"))
         case .systemMedium:
             SleepMediumView(entry: entry)
         case .accessoryRectangular:
             SleepAccessoryRectView(entry: entry)
+                .widgetURL(URL(string: "momsy://today"))
         default:
             SleepSmallView(entry: entry)
+                .widgetURL(URL(string: "momsy://today"))
         }
     }
 }
@@ -90,36 +92,80 @@ private struct SleepMediumView: View {
             }
 
             HStack {
-                WidgetActivityIcon(color: bbQuickLilac) {
+                WidgetActivityLink(
+                    destination: "momsy://sleep",
+                    accessibilityLabel: WidgetL10n.current.sleep,
+                    color: bbQuickLilac
+                ) {
                     Image(systemName: "moon.fill")
                         .font(.system(size: 20, weight: .semibold))
                 }
                 Spacer()
-                WidgetActivityIcon(color: bbQuickCoral) {
+                WidgetActivityLink(
+                    destination: "momsy://feeding",
+                    accessibilityLabel: WidgetL10n.current.feeding,
+                    color: bbQuickCoral
+                ) {
                     WidgetBottleIcon()
                 }
                 Spacer()
                 WidgetActivityIcon(color: bbQuickSky) {
                     WidgetDiaperIcon()
                 }
+                .accessibilityHidden(true)
                 Spacer()
-                WidgetActivityIcon(color: bbQuickMint) {
+                WidgetActivityLink(
+                    destination: "momsy://walk",
+                    accessibilityLabel: WidgetL10n.current.walk,
+                    color: bbQuickMint
+                ) {
                     Image(systemName: "stroller")
                         .font(.system(size: 20, weight: .semibold))
                 }
                 Spacer()
-                WidgetActivityIcon(color: bbQuickSky) {
+                WidgetActivityLink(
+                    destination: "momsy://bath",
+                    accessibilityLabel: WidgetL10n.current.bath,
+                    color: bbQuickSky
+                ) {
                     Image(systemName: "drop.fill")
                         .font(.system(size: 20, weight: .semibold))
                 }
             }
             .padding(.horizontal, 4)
-            .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(12)
         .colorScheme(.light)
         .containerBackground(bbCream, for: .widget)
+    }
+}
+
+private struct WidgetActivityLink<Content: View>: View {
+    let destination: String
+    let accessibilityLabel: String
+    let color: Color
+    let content: Content
+
+    init(
+        destination: String,
+        accessibilityLabel: String,
+        color: Color,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.destination = destination
+        self.accessibilityLabel = accessibilityLabel
+        self.color = color
+        self.content = content()
+    }
+
+    var body: some View {
+        if let url = URL(string: destination) {
+            Link(destination: url) {
+                WidgetActivityIcon(color: color) { content }
+            }
+            .accessibilityLabel(accessibilityLabel)
+        }
     }
 }
 

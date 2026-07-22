@@ -33,11 +33,16 @@ struct TodayView: View {
     @State private var showAllEntries = false
     @State private var showAddChild = false
     @State private var now = Date()
+    @Binding private var widgetFeatureRoute: WidgetFeatureRoute?
 
     private let container: AppContainer
 
-    init(container: AppContainer) {
+    init(
+        container: AppContainer,
+        widgetFeatureRoute: Binding<WidgetFeatureRoute?> = .constant(nil)
+    ) {
         self.container = container
+        _widgetFeatureRoute = widgetFeatureRoute
         _vm         = StateObject(wrappedValue: container.makeTodayViewModel())
         _featureVMs = StateObject(wrappedValue: TodayFeatureViewModels(container: container))
     }
@@ -95,6 +100,9 @@ struct TodayView: View {
         .task { await vm.refreshForecast() }
         .task { feedingVM.restoreOrStartFeeding(side: .left) }
         .onChange(of: loc.current) { _, _ in Task { await vm.refreshTip() } }
+        .onChange(of: widgetFeatureRoute, initial: true) { _, route in
+            presentWidgetFeature(route)
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 feedingVM.syncTimerWithStartDate()
@@ -160,6 +168,17 @@ struct TodayView: View {
             .environmentObject(loc)
         }
         .errorToast($vm.saveError)
+    }
+
+    private func presentWidgetFeature(_ route: WidgetFeatureRoute?) {
+        guard let route else { return }
+        switch route {
+        case .sleep: showSleep = true
+        case .feeding: showFeeding = true
+        case .walk: showWalk = true
+        case .bath: showBath = true
+        }
+        widgetFeatureRoute = nil
     }
 
     // MARK: - Header Row
