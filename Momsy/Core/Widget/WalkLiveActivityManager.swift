@@ -31,10 +31,11 @@ final class WalkLiveActivityManager {
     }
 
     func endActivity() {
-        guard let activity else { return }
+        activity = nil
         Task {
-            await activity.end(nil, dismissalPolicy: .immediate)
-            self.activity = nil
+            for existing in Activity<WalkActivityAttributes>.activities {
+                await existing.end(nil, dismissalPolicy: .immediate)
+            }
         }
     }
 

@@ -31,10 +31,11 @@ final class BathLiveActivityManager {
     }
 
     func endActivity() {
-        guard let activity else { return }
+        activity = nil
         Task {
-            await activity.end(nil, dismissalPolicy: .immediate)
-            self.activity = nil
+            for existing in Activity<BathActivityAttributes>.activities {
+                await existing.end(nil, dismissalPolicy: .immediate)
+            }
         }
     }
 
