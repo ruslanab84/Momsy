@@ -118,11 +118,43 @@ struct LogReportView: View {
             LogReportDayList(items: vm.items, emptyText: loc.strings.logReportEmpty)
         case .week:
             LogReportWeekTimeline(vm: vm)
-            selectedDayList
+            weekLegend
         case .month:
             LogReportMonthGrid(vm: vm)
             selectedDayList
         }
+    }
+
+    private var weekLegend: some View {
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 130), spacing: 8, alignment: .leading)],
+            alignment: .leading,
+            spacing: 8
+        ) {
+            legendItem(.sleep, label: loc.strings.sleep)
+            legendItem(.bottle, label: loc.strings.feeding)
+            legendItem(.drop, label: "\(loc.strings.diaper) / \(loc.strings.bath)")
+            legendItem(.stool, label: "\(loc.strings.stoolLabel) / \(loc.strings.walk)")
+            legendItem(.pump, label: loc.strings.pumping)
+            legendItem(.vitamin, label: loc.strings.vitamins)
+        }
+        .bbCard(pad: 14)
+    }
+
+    private func legendItem(_ kind: BlobKind, label: String) -> some View {
+        HStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                .fill(kind.defaultTone)
+                .frame(width: 18, height: 6)
+                .accessibilityHidden(true)
+            Text(label)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(label)
     }
 
     private var selectedDayList: some View {

@@ -46,10 +46,10 @@ private struct SleepSmallView: View {
                 Text(WidgetL10n.current.sleeping).font(.caption).foregroundStyle(.secondary)
             case .idle:
                 if let end = entry.lastSleepEndDate {
-                    Text(end, style: .relative)
+                    Text(end, style: .time)
                         .font(.system(.title2, design: .rounded, weight: .semibold).monospacedDigit())
                         .minimumScaleFactor(0.6)
-                    Text(WidgetL10n.current.ago).font(.caption).foregroundStyle(.secondary)
+                    Text(WidgetL10n.current.wokeUp).font(.caption).foregroundStyle(.secondary)
                 } else if let name = entry.babyName.nilIfEmpty {
                     Text(WidgetL10n.current.openMomsyFor(name))
                         .font(.caption)
@@ -104,7 +104,7 @@ private struct SleepStatusColumn: View {
                 Text(WidgetL10n.current.sleepingNow).font(.caption).foregroundStyle(.green)
             case .idle:
                 if let end = entry.lastSleepEndDate {
-                    Text(end, style: .relative)
+                    Text(end, style: .time)
                         .font(.subheadline.monospacedDigit())
                     Text(WidgetL10n.current.wokeUp).font(.caption).foregroundStyle(.secondary)
                 } else {
@@ -157,7 +157,7 @@ private struct SleepAccessoryRectView: View {
             case .idle:
                 if let end = entry.lastSleepEndDate {
                     Text(WidgetL10n.current.wokeUp)
-                    Text(end, style: .relative).monospacedDigit()
+                    Text(end, style: .time).monospacedDigit()
                 } else {
                     Text(WidgetL10n.current.noData)
                 }
