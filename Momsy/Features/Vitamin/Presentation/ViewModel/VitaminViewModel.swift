@@ -6,6 +6,7 @@ final class VitaminViewModel: ObservableObject {
 
     @Published var vitaminName: String = ""
     @Published var todayEntries: [QuickLogEntry] = []
+    @Published private(set) var categories: [String] = []
 
     var onEntrySaved: (() -> Void)?
 
@@ -20,6 +21,25 @@ final class VitaminViewModel: ObservableObject {
 
     func loadToday() {
         todayEntries = quickLogRepo.load().filter { $0.kind == .vitamin }
+        categories = vitaminRepo.loadCategories()
+    }
+
+    func addCategory(_ name: String) {
+        let category = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !category.isEmpty else { return }
+
+        if let existing = categories.first(where: { $0.caseInsensitiveCompare(category) == .orderedSame }) {
+            vitaminName = existing
+            return
+        }
+
+        categories.append(category)
+        vitaminRepo.saveCategories(categories)
+        vitaminName = category
+    }
+
+    func selectCategory(_ category: String) {
+        vitaminName = category
     }
 
     func add() {

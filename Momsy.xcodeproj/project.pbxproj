@@ -108,6 +108,7 @@
 		FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */; };
 		FC2E77342D0D91D52C40605A /* MockDiaryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7744983E8EF2AF6D12E3DE /* MockDiaryRepository.swift */; };
 		FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */; };
+		2A98F7575F5748A0BF198500 /* VitaminCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12001E51A26A48C69072B882 /* VitaminCategoryTests.swift */; };
 		FF136D2C455F9FBD0E166DED /* MockSleepRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0ED0FC63356D42900B3E456 /* MockSleepRepository.swift */; };
 		FF93FE7B3A6F5DDA40F2B2D6 /* SoundsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */; };
 /* End PBXBuildFile section */
@@ -281,6 +282,7 @@
 		FB2828F5A5DB44A9E2563938 /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
 		FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationScheduleTests.swift; sourceTree = "<group>"; };
+		12001E51A26A48C69072B882 /* VitaminCategoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VitaminCategoryTests.swift; sourceTree = "<group>"; };
 		FE4623CCFF413B7062AFC625 /* DuplicateOpenSessionPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DuplicateOpenSessionPolicyTests.swift; sourceTree = "<group>"; };
 		FEED0001AAAA1111BBBB0001 /* MockWalkRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockWalkRepository.swift; sourceTree = "<group>"; };
 		FEED0002AAAA1111BBBB0001 /* MockBathRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBathRepository.swift; sourceTree = "<group>"; };
@@ -766,6 +768,7 @@
 				0BABF1250000000000000003 /* Report */,
 				FEED0006AAAA1111BBBB0001 /* LogReport */,
 				FE11AA03FE11AA03FE11AA03 /* Vaccination */,
+				F94EBA0100654CF0862AB203 /* Vitamin */,
 				DEADBEEF0000000000000010 /* WeeklyInsights */,
 				9E8D7C6B5A4938271605F4E3 /* Subscription */,
 			);
@@ -837,6 +840,14 @@
 				FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */,
 			);
 			path = Vaccination;
+			sourceTree = "<group>";
+		};
+		F94EBA0100654CF0862AB203 /* Vitamin */ = {
+			isa = PBXGroup;
+			children = (
+				12001E51A26A48C69072B882 /* VitaminCategoryTests.swift */,
+			);
+			path = Vitamin;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -995,6 +1006,7 @@
 				2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */,
 				3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */,
 				FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */,
+				2A98F7575F5748A0BF198500 /* VitaminCategoryTests.swift in Sources */,
 				AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */,
 				FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */,
 				5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */,

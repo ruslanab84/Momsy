@@ -4,8 +4,16 @@ import Foundation
 @MainActor
 final class SwiftDataVitaminRepository: VitaminRepository {
     private let context: ModelContext
+    private let defaults: UserDefaults
 
-    init(context: ModelContext) { self.context = context }
+    private var categoriesKey: String {
+        "local_vitamin_categories_\(ActiveBaby.scope.uuidString)"
+    }
+
+    init(context: ModelContext, defaults: UserDefaults = .standard) {
+        self.context = context
+        self.defaults = defaults
+    }
 
     func add(_ entry: VitaminEntry) async throws {
         context.insert(VitaminRecord(id: entry.id, date: entry.date, label: entry.label))
@@ -33,5 +41,13 @@ final class SwiftDataVitaminRepository: VitaminRepository {
         )
         descriptor.sortBy = [SortDescriptor(\.date)]
         return try context.fetch(descriptor).map { $0.toDomain() }
+    }
+
+    func loadCategories() -> [String] {
+        defaults.stringArray(forKey: categoriesKey) ?? []
+    }
+
+    func saveCategories(_ categories: [String]) {
+        defaults.set(categories, forKey: categoriesKey)
     }
 }

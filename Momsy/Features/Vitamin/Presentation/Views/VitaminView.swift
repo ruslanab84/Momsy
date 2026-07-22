@@ -13,6 +13,7 @@ struct VitaminView: View {
     @ObservedObject var vm: VitaminViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
+    @State private var showAddCategory = false
 
     private let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -48,6 +49,14 @@ struct VitaminView: View {
             }
         }
         .tint(Color.bbButterDeep)
+        .sheet(isPresented: $showAddCategory) {
+            AddVitaminCategorySheet { name in
+                vm.addCategory(name)
+            }
+            .presentationDetents([.height(280)])
+            .presentationCornerRadius(30)
+            .presentationBackground(Color.bbButter)
+        }
     }
 
     private var inputSection: some View {
@@ -90,6 +99,8 @@ struct VitaminView: View {
                     }
                 }
 
+                categorySection
+
                 HStack(spacing: 10) {
                     TextField(loc.strings.vitaminNamePlaceholder, text: $vm.vitaminName)
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
@@ -120,6 +131,60 @@ struct VitaminView: View {
                 .stroke(Color.white.opacity(0.70), lineWidth: 1)
         )
         .bbShadowSoft()
+    }
+
+    private var categorySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Text(loc.strings.vitaminCategories)
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .foregroundStyle(VitaminPosterPalette.inkMute)
+                    .kerning(0.5)
+
+                Spacer(minLength: 8)
+
+                Button {
+                    showAddCategory = true
+                } label: {
+                    Label(loc.strings.addVitaminCategory, systemImage: "plus")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color.bbButterDeep)
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 7)
+                        .background(Color.bbButter.opacity(0.24))
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+
+            if !vm.categories.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(vm.categories, id: \.self) { category in
+                            let isSelected = vm.vitaminName == category
+                            Button {
+                                vm.selectCategory(category)
+                            } label: {
+                                HStack(spacing: 5) {
+                                    if isSelected {
+                                        Image(systemName: "checkmark")
+                                    }
+                                    Text(category)
+                                        .lineLimit(1)
+                                }
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .foregroundStyle(isSelected ? Color.white : VitaminPosterPalette.inkSoft)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(isSelected ? Color.bbButterDeep : Color.bbButter.opacity(0.18))
+                                .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -196,6 +261,68 @@ struct VitaminView: View {
         )
         .bbShadowSoft()
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: vm.todayEntries.count)
+    }
+}
+
+private struct AddVitaminCategorySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var loc: LocalizationManager
+    @State private var name = ""
+
+    let onSave: (String) -> Void
+
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.bbButter.ignoresSafeArea()
+
+                VStack(spacing: 18) {
+                    CuteBlobView(kind: .vitamin, size: 58, tone: Color.bbButter.opacity(0.34))
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+                    TextField(loc.strings.vitaminCategoryName, text: $name)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(VitaminPosterPalette.ink)
+                        .submitLabel(.done)
+                        .onSubmit(save)
+                        .padding(14)
+                        .background(VitaminPosterPalette.paper.opacity(0.96))
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.white.opacity(0.68), lineWidth: 1)
+                        )
+                }
+                .padding(20)
+            }
+            .navigationTitle(loc.strings.addVitaminCategory)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.bbButter, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(loc.strings.cancel) { dismiss() }
+                        .foregroundStyle(Color.white)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(loc.strings.save, action: save)
+                        .foregroundStyle(Color.white)
+                        .disabled(trimmedName.isEmpty)
+                }
+            }
+        }
+        .tint(Color.bbButterDeep)
+    }
+
+    private func save() {
+        guard !trimmedName.isEmpty else { return }
+        onSave(trimmedName)
+        dismiss()
     }
 }
 

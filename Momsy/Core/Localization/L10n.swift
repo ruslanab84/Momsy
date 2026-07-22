@@ -256,6 +256,9 @@ struct L10n {
     var todaysVitamins: String         { s("Today's vitamins","Витамины сегодня",    "Vitamine heute",   "Vitaminas de hoy", "Vitamines du jour", "Vitaminas de hoje", "今日维生素") }
     var noVitaminsYet: String          { s("No vitamins added yet","Витамины ещё не добавлены","Noch keine Vitamine","Aún sin vitaminas", "Aucune vitamine ajoutée", "Ainda sem vitaminas", "尚未添加维生素") }
     var vitaminNameLabel: String       { s("VITAMIN NAME", "НАЗВАНИЕ ВИТАМИНА",    "VITAMINNAME",      "NOMBRE DE LA VITAMINA", "NOM DE LA VITAMINE", "NOME DA VITAMINA", "维生素名称") }
+    var vitaminCategories: String      { s("SAVED CATEGORIES", "СОХРАНЁННЫЕ КАТЕГОРИИ", "GESPEICHERTE KATEGORIEN", "CATEGORÍAS GUARDADAS", "CATÉGORIES ENREGISTRÉES", "CATEGORIAS GUARDADAS", "已保存的类别") }
+    var addVitaminCategory: String     { s("Add category", "Добавить категорию", "Kategorie hinzufügen", "Añadir categoría", "Ajouter une catégorie", "Adicionar categoria", "添加类别") }
+    var vitaminCategoryName: String    { s("Vitamin name", "Название витамина", "Vitaminname", "Nombre de la vitamina", "Nom de la vitamine", "Nome da vitamina", "维生素名称") }
     func vitaminAdded(name: String) -> String { s("Vitamins · \(name)", "Витамины · \(name)", "Vitamine · \(name)", "Vitaminas · \(name)", "Vitamines · \(name)", "Vitaminas · \(name)", "维生素 · \(name)") }
     var walkTracker: String  { s("WALK TRACKER",    "ТРЕКЕР ПРОГУЛКИ",       "GEHTRACKER",       "REGISTRO DE PASEO", "SUIVI DE PROMENADE", "REGISTO DE PASSEIO", "散步记录") }
     var walking: String      { s("walking…",        "гуляем…",               "gehen…",           "paseando…", "en promenade…", "a passear…", "散步中…") }

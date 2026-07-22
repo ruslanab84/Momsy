@@ -3,6 +3,7 @@ import Foundation
 
 final class MockVitaminRepository: VitaminRepository {
     var entries: [VitaminEntry] = []
+    var categories: [String] = []
 
     func add(_ entry: VitaminEntry) async throws { entries.append(entry) }
     func upsert(_ newEntries: [VitaminEntry]) async throws {
@@ -12,4 +13,6 @@ final class MockVitaminRepository: VitaminRepository {
     func getEntries(from: Date, to: Date) async throws -> [VitaminEntry] {
         entries.filter { $0.date >= from && $0.date < to }
     }
+    func loadCategories() -> [String] { categories }
+    func saveCategories(_ categories: [String]) { self.categories = categories }
 }
