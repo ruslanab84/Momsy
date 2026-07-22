@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 enum VitaminPosterPalette {
     static let paper = Color(bbHex: "FFF9F0")
@@ -357,6 +358,9 @@ struct VitaminDottedLine: Shape {
 }
 
 #Preview {
-    VitaminView(vm: VitaminViewModel(quickLogRepo: QuickLogRepository()))
+    let container = try! ModelContainer(for: VitaminRecord.self,
+                                         configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+    VitaminView(vm: VitaminViewModel(quickLogRepo: QuickLogRepository(),
+                                     vitaminRepo: SwiftDataVitaminRepository(context: ModelContext(container))))
         .environmentObject(LocalizationManager.shared)
 }

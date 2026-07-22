@@ -31,6 +31,7 @@ final class AppContainer {
     lazy var momSleepRepository: any MomSleepRepository                         = SwiftDataMomSleepRepository(context: context)
     lazy var waterIntakeRepository: any WaterIntakeRepository                    = SwiftDataWaterIntakeRepository(context: context)
     lazy var pumpingRepository: any PumpingRepository                            = SwiftDataPumpingRepository(context: context)
+    lazy var vitaminRepository: any VitaminRepository                            = SwiftDataVitaminRepository(context: context)
 
     lazy var familyRepository: any FamilyRepository = FirebaseBootstrapper.isConfigured
         ? FirestoreFamilyRepository()
@@ -57,6 +58,7 @@ final class AppContainer {
             walkRepo: walkRepository,
             bathRepo: bathRepository,
             pumpingRepo: pumpingRepository,
+            vitaminRepo: vitaminRepository,
             measurementRepo: measurementRepository,
             vaccinationRepo: vaccinationRepository,
             foodDiaryRepo: complementaryFeedingRepository,
@@ -515,7 +517,22 @@ final class AppContainer {
     }
 
     func makeVitaminViewModel() -> VitaminViewModel {
-        VitaminViewModel(quickLogRepo: quickLogRepository)
+        VitaminViewModel(quickLogRepo: quickLogRepository, vitaminRepo: vitaminRepository)
+    }
+
+    lazy var getLogReportEntries = GetLogReportEntriesUseCase(
+        feedingRepo: feedingRepository,
+        sleepRepo: sleepRepository,
+        diaperRepo: diaperRepository,
+        stoolRepo: stoolRepository,
+        walkRepo: walkRepository,
+        bathRepo: bathRepository,
+        pumpingRepo: pumpingRepository,
+        vitaminRepo: vitaminRepository
+    )
+
+    func makeLogReportViewModel() -> LogReportViewModel {
+        LogReportViewModel(getEntries: getLogReportEntries)
     }
 
     func makePumpingViewModel() -> PumpingViewModel {

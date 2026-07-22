@@ -10,9 +10,11 @@ final class VitaminViewModel: ObservableObject {
     var onEntrySaved: (() -> Void)?
 
     private let quickLogRepo: QuickLogRepository
+    private let vitaminRepo: any VitaminRepository
 
-    init(quickLogRepo: QuickLogRepository) {
+    init(quickLogRepo: QuickLogRepository, vitaminRepo: any VitaminRepository) {
         self.quickLogRepo = quickLogRepo
+        self.vitaminRepo = vitaminRepo
         loadToday()
     }
 
@@ -26,6 +28,7 @@ final class VitaminViewModel: ObservableObject {
         let label = LocalizationManager.shared.strings.vitaminAdded(name: name)
         let entry = QuickLogEntry(id: UUID(), time: Date(), kind: .vitamin, label: label)
         quickLogRepo.append(entry)
+        Task { try? await vitaminRepo.add(VitaminEntry(id: entry.id, date: entry.time, label: label)) }
         pushVitaminToFirestore(entry)
         todayEntries.insert(entry, at: 0)
         vitaminName = ""

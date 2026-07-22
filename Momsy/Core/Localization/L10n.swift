@@ -1563,4 +1563,10 @@ struct L10n {
     func notifLeapSkillsBody(name: String) -> String { s("The hard stretch of «\(name)» is easing. Record what your baby learned.", "Сложная часть «\(name)» стихает. Запишите, чему малыш научился.", "Die schwere Phase von «\(name)» lässt nach. Notiere, was dein Baby gelernt hat.", "La parte difícil de «\(name)» se calma. Registra lo que aprendió tu bebé.", "La phase difficile de «\(name)» s’apaise. Notez ce que bébé a appris.", "A parte difícil de «\(name)» está a acalmar. Registe o que o bebé aprendeu.", "「\(name)」的困难阶段正在缓和。记录宝宝学会了什么。") }
     var notifVaccinationTitle: String { s("Vaccination reminder", "Напоминание о прививке", "Impferinnerung", "Recordatorio de vacuna", "Rappel de vaccin", "Lembrete de vacina", "疫苗接种提醒") }
     func notifVaccinationBody(name: String) -> String { s("\(name) — in 7 days", "\(name) — через 7 дней", "\(name) — in 7 Tagen", "\(name) — en 7 días", "\(name) — dans 7 jours", "\(name) — em 7 dias", "\(name) — 7 天后") }
+
+    // MARK: — Log Report (Doctor)
+    var logReportTitle: String { s("Report", "Отчёт", "Bericht", "Informe", "Rapport", "Relatório", "报告") }
+    var logReportSub: String   { s("All entries — day, week, month", "Все записи — день, неделя, месяц", "Alle Einträge — Tag, Woche, Monat", "Todos los registros — día, semana, mes", "Toutes les entrées — jour, semaine, mois", "Todos os registos — dia, semana, mês", "全部记录——日、周、月") }
+    var logReportDay: String   { s("Day", "День", "Tag", "Día", "Jour", "Dia", "日") }
+    var logReportEmpty: String { s("No entries for this period", "Нет записей за этот период", "Keine Einträge für diesen Zeitraum", "No hay registros en este período", "Aucune entrée pour cette période", "Sem registos neste período", "此时段暂无记录") }
 }

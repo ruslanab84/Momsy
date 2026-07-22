@@ -17,6 +17,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     private let walkRepo: any WalkRepository
     private let bathRepo: any BathRepository
     private let pumpingRepo: any PumpingRepository
+    private let vitaminRepo: any VitaminRepository
     private let measurementRepo: any MeasurementRepository
     private let vaccinationRepo: any VaccinationRepository
     private let foodDiaryRepo: any ComplementaryFeedingRepository
@@ -42,6 +43,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
          walkRepo: any WalkRepository,
          bathRepo: any BathRepository,
          pumpingRepo: any PumpingRepository,
+         vitaminRepo: any VitaminRepository,
          measurementRepo: any MeasurementRepository,
          vaccinationRepo: any VaccinationRepository,
          foodDiaryRepo: any ComplementaryFeedingRepository,
@@ -62,6 +64,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         self.walkRepo = walkRepo
         self.bathRepo = bathRepo
         self.pumpingRepo = pumpingRepo
+        self.vitaminRepo = vitaminRepo
         self.measurementRepo = measurementRepo
         self.vaccinationRepo = vaccinationRepo
         self.foodDiaryRepo = foodDiaryRepo
@@ -359,6 +362,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         await merge(walkFetch,           map: Self.walkEntry)        { try await self.walkRepo.upsert($0) }
         await merge(bathFetch,           map: Self.bathEntry)        { try await self.bathRepo.upsert($0) }
         await merge(pumpingFetch,        map: Self.pumpingEntry)     { try await self.pumpingRepo.upsert($0) }
+        await merge(vitaminFetch,        map: Self.vitaminEntry)     { try await self.vitaminRepo.upsert($0) }
         await merge(await measureFetch,  map: Self.measurementEntry) { try await self.measurementRepo.upsert($0) }
         await merge(await vaccineFetch,  map: Self.vaccinationEntry) { entries in
             try await self.vaccinationRepo.upsert(entries.filter { !deletedIds.contains($0.id) })
@@ -372,8 +376,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         await merge(await leapFetch,     map: Self.leapProgress)     { try await self.leapsRepo.upsert($0) }
         await merge(await visitFetch,    map: Self.doctorVisit)      { try await self.doctorVisitRepo.upsert($0) }
 
-        // Quick-log "today" strip. `appendUnique` cannot throw; vitamins have no
-        // entry repo, so their watermark commits here.
+        // Quick-log "today" strip. `appendUnique` cannot throw.
         if recordQuickLogs {
             let quickEventDTOs = walkFetch.dtos + bathFetch.dtos + vitaminFetch.dtos + stoolFetch.dtos
             let quickToday = quickEventDTOs.compactMap(Self.todayQuickLog)
@@ -381,7 +384,6 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
                 + pumpingFetch.dtos.compactMap(Self.todayPumpingQuickLog)
             quickToday.forEach { quickLogRepo.appendUnique($0) }
         }
-        commit(vitaminFetch)
 
         // Propagate deletes made on other devices: remove any local row whose id was
         // explicitly tombstoned. Only ever deletes ids we have a tombstone for.
@@ -493,6 +495,12 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         let log = dto.domain
         let start = log.startDate ?? log.loggedAt
         return WalkEntry(id: uuid, startDate: start, endDate: log.endDate ?? log.loggedAt)
+    }
+
+    private static func vitaminEntry(_ dto: QuickEventLogDTO) -> VitaminEntry? {
+        guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
+        let log = dto.domain
+        return VitaminEntry(id: uuid, date: log.loggedAt, label: log.label)
     }
 
     private static func bathEntry(_ dto: QuickEventLogDTO) -> BathEntry? {
