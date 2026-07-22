@@ -31,10 +31,21 @@ final class SleepLiveActivityManager {
     }
 
     func endActivity() {
+        var activities = Activity<SleepActivityAttributes>.activities
+        if let activity, !activities.contains(where: { $0.id == activity.id }) {
+            activities.append(activity)
+        }
+        let activitiesToEnd = activities
+        let endDate = Date()
         activity = nil
         Task {
-            for existing in Activity<SleepActivityAttributes>.activities {
-                await existing.end(nil, dismissalPolicy: .immediate)
+            for existing in activitiesToEnd {
+                var state = existing.content.state
+                state.endDate = endDate
+                await existing.end(
+                    ActivityContent(state: state, staleDate: nil, relevanceScore: 0),
+                    dismissalPolicy: .immediate
+                )
             }
         }
     }

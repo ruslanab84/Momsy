@@ -6,5 +6,10 @@ struct SleepActivityAttributes: ActivityAttributes {
 
     struct ContentState: Codable, Hashable, Sendable {
         var effectiveStartDate: Date
+        var endDate: Date? = nil
+
+        var timerInterval: ClosedRange<Date> {
+            effectiveStartDate...max(endDate ?? .distantFuture, effectiveStartDate)
+        }
     }
 }

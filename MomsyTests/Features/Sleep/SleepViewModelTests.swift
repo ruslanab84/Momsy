@@ -279,6 +279,18 @@ struct SleepViewModelTests {
         #expect(!vm.isSleepActive)
     }
 
+    @Test("ended Live Activity freezes the sleep timer")
+    func endedLiveActivityFreezesTimer() {
+        let start = Date(timeIntervalSince1970: 1_000)
+        let end = Date(timeIntervalSince1970: 2_000)
+        let state = SleepActivityAttributes.ContentState(
+            effectiveStartDate: start,
+            endDate: end
+        )
+
+        #expect(state.timerInterval == start...end)
+    }
+
     @Test("stop() optimistically appends entry to todayEntries")
     func stopOptimisticallyAppendsEntry() async throws {
         let vm = makeVM()

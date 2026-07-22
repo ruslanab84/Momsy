@@ -50,7 +50,7 @@ struct SleepLockScreenView: View {
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
         } else {
-            Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
+            Text(timerInterval: context.state.timerInterval,
                  countsDown: false)
                 .monospacedDigit()
                 .font(.title3.bold())
@@ -75,7 +75,7 @@ struct SleepLiveActivity: Widget {
                     .foregroundStyle(.purple)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
+                    Text(timerInterval: context.state.timerInterval,
                          countsDown: false)
                         .monospacedDigit()
                         .font(.caption)
@@ -99,7 +99,7 @@ struct SleepLiveActivity: Widget {
             } compactLeading: {
                 BabyFaceIcon(size: 14)
             } compactTrailing: {
-                Text(timerInterval: context.state.effectiveStartDate...Date.distantFuture,
+                Text(timerInterval: context.state.timerInterval,
                      countsDown: false)
                     .monospacedDigit()
                     .font(.caption2)
