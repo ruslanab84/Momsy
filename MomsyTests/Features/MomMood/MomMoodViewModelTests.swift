@@ -31,6 +31,15 @@ struct MomMoodViewModelTests {
         #expect(vm.entries[0].id == recent.id)
     }
 
+    @Test("Persisted moods are clamped to the display range")
+    func persistedMoodIsClamped() {
+        let tooLow = MomMoodRecord(mood: 0, energy: 3, note: "").toDomain()
+        let tooHigh = MomMoodRecord(mood: 6, energy: 3, note: "").toDomain()
+
+        #expect(tooLow.mood == 1)
+        #expect(tooHigh.mood == 5)
+    }
+
     // MARK: - saveCheckin
 
     @Test("saveCheckin adds entry and reloads")

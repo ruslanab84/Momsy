@@ -23,6 +23,6 @@ final class MomMoodRecord {
     }
 
     func toDomain() -> MomMoodEntry {
-        MomMoodEntry(id: id, date: date, mood: mood, energy: energy, note: note, epdsScore: epdsScore)
+        MomMoodEntry(id: id, date: date, mood: min(max(mood, 1), 5), energy: energy, note: note, epdsScore: epdsScore)
     }
 }
