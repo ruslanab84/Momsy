@@ -2,6 +2,7 @@ import Testing
 import SwiftData
 @testable import Momsy
 import Foundation
+import CryptoKit
 
 /// Phase-1 multi-child foundation: roster + cap, active-baby log scoping, and the
 /// legacy backfill. Serialized because `ActiveBaby` is backed by shared UserDefaults.
@@ -109,13 +110,17 @@ struct MultiChildFoundationTests {
     /// child's quick events into the new child's strip.
     @Test func quickLogStripIsScopedToActiveChild() {
         freshActive()
-        let repo = QuickLogRepository()
+        let suite = "MultiChildFoundationTests.quickLog"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        let secureDefaults = SecurePreferences(
+            defaults: defaults,
+            encryptionKey: SymmetricKey(size: .bits256)
+        )
+        let repo = QuickLogRepository(defaults: secureDefaults)
         let babyA = UUID(), babyB = UUID()
         defer {
-            for id in [babyA, babyB] {
-                UserDefaults.standard.removeObject(forKey: "quick_log_today_entries_\(id.uuidString)")
-                UserDefaults.standard.removeObject(forKey: "quick_log_today_date_\(id.uuidString)")
-            }
+            defaults.removePersistentDomain(forName: suite)
             freshActive()
         }
 
@@ -132,6 +137,10 @@ struct MultiChildFoundationTests {
         // Switch back to A → only A's own entry, never B's.
         ActiveBaby.currentId = babyA
         #expect(repo.load().map(\.label) == ["A diaper"])
+        #expect(defaults.object(forKey: "quick_log_today_entries_\(babyA.uuidString)") == nil)
+        #expect(defaults.data(forKey: SecurePreferences.encryptedKey(
+            for: "quick_log_today_entries_\(babyA.uuidString)"
+        )) != nil)
     }
 
     // MARK: Backfill

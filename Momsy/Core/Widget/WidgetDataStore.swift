@@ -1,5 +1,265 @@
 import Foundation
+import CryptoKit
+import os
+import Security
 import WidgetKit
+
+nonisolated struct SecurePreferencesError: Error {
+    let status: OSStatus
+}
+
+nonisolated final class SecurePreferences: @unchecked Sendable {
+    static let standard = SecurePreferences(defaults: .standard)
+
+    private static let suffix = ".secure_v1"
+    private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "SecurePreferences")
+
+    private let defaults: UserDefaults
+    private let encryptionKey: SymmetricKey?
+    private let lock = NSLock()
+    private var volatileValues: [String: Any] = [:]
+
+    init(defaults: UserDefaults, encryptionKey: SymmetricKey? = nil) {
+        self.defaults = defaults
+        self.encryptionKey = encryptionKey
+    }
+
+    func object(forKey key: String) -> Any? {
+        lock.lock()
+        defer { lock.unlock() }
+
+        if let value = volatileValues[key] {
+            if persist(value, forKey: key) {
+                volatileValues[key] = nil
+                defaults.removeObject(forKey: key)
+            }
+            return value
+        }
+
+        if let encrypted = defaults.data(forKey: Self.encryptedKey(for: key)) {
+            do {
+                return try decrypt(encrypted, forKey: key)
+            } catch {
+                Self.log.error("Secure preferences read failed: \(String(describing: error), privacy: .public)")
+            }
+        }
+
+        guard let legacy = defaults.object(forKey: key) else { return nil }
+        if persist(legacy, forKey: key) {
+            defaults.removeObject(forKey: key)
+        }
+        return legacy
+    }
+
+    func data(forKey key: String) -> Data? {
+        object(forKey: key) as? Data
+    }
+
+    func array(forKey key: String) -> [Any]? {
+        object(forKey: key) as? [Any]
+    }
+
+    func string(forKey key: String) -> String? {
+        object(forKey: key) as? String
+    }
+
+    func double(forKey key: String) -> Double {
+        (object(forKey: key) as? NSNumber)?.doubleValue ?? 0
+    }
+
+    func integer(forKey key: String) -> Int {
+        (object(forKey: key) as? NSNumber)?.intValue ?? 0
+    }
+
+    func bool(forKey key: String) -> Bool {
+        (object(forKey: key) as? NSNumber)?.boolValue ?? false
+    }
+
+    @discardableResult
+    func set(_ value: Any, forKey key: String) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard persist(value, forKey: key) else {
+            volatileValues[key] = value
+            return false
+        }
+        volatileValues[key] = nil
+        defaults.removeObject(forKey: key)
+        return true
+    }
+
+    func removeObject(forKey key: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        volatileValues[key] = nil
+        defaults.removeObject(forKey: key)
+        defaults.removeObject(forKey: Self.encryptedKey(for: key))
+    }
+
+    func removeAll(withPrefix prefix: String) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        for key in defaults.dictionaryRepresentation().keys {
+            if key.hasPrefix(prefix) {
+                defaults.removeObject(forKey: key)
+            }
+        }
+        volatileValues.keys.filter { $0.hasPrefix(prefix) }.forEach {
+            volatileValues[$0] = nil
+        }
+    }
+
+    static func encryptedKey(for key: String) -> String {
+        "\(key)\(suffix)"
+    }
+
+    private func persist(_ value: Any, forKey key: String) -> Bool {
+        do {
+            let encrypted = try encrypt(value, forKey: key)
+            let storageKey = Self.encryptedKey(for: key)
+            defaults.set(encrypted, forKey: storageKey)
+            guard defaults.data(forKey: storageKey) == encrypted,
+                  try decrypt(encrypted, forKey: key) != nil else {
+                return false
+            }
+            return true
+        } catch {
+            Self.log.error("Secure preferences write failed: \(String(describing: error), privacy: .public)")
+            return false
+        }
+    }
+
+    private func encrypt(_ value: Any, forKey key: String) throws -> Data {
+        let encoded = try PropertyListSerialization.data(
+            fromPropertyList: ["value": value],
+            format: .binary,
+            options: 0
+        )
+        let sealed = try AES.GCM.seal(
+            encoded,
+            using: try resolvedEncryptionKey(),
+            authenticating: Data(key.utf8)
+        )
+        guard let combined = sealed.combined else {
+            throw CocoaError(.fileWriteUnknown)
+        }
+        return combined
+    }
+
+    private func decrypt(_ encrypted: Data, forKey key: String) throws -> Any? {
+        let box = try AES.GCM.SealedBox(combined: encrypted)
+        let data = try AES.GCM.open(
+            box,
+            using: try resolvedEncryptionKey(),
+            authenticating: Data(key.utf8)
+        )
+        let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
+        return (plist as? [String: Any])?["value"]
+    }
+
+    private func resolvedEncryptionKey() throws -> SymmetricKey {
+        if let encryptionKey {
+            return encryptionKey
+        }
+        return try SharedPreferencesEncryptionKey.loadOrCreate()
+    }
+}
+
+private nonisolated enum SharedPreferencesEncryptionKey {
+    private static let service = "RuslanAbd.Momsy.secure-preferences"
+    private static let account = "encryption-key-v1"
+    private static let accessGroup = "group.RuslanAbd.Momsy"
+    private static let queue = DispatchQueue(label: "RuslanAbd.Momsy.secure-preferences.keychain")
+    private static let cache = KeyCache()
+
+    static func loadOrCreate() throws -> SymmetricKey {
+        if let cached = cache.value {
+            return cached
+        }
+
+        return try queue.sync {
+            if let cached = cache.value {
+                return cached
+            }
+            if let stored = try read() {
+                let key = SymmetricKey(data: stored)
+                cache.value = key
+                return key
+            }
+
+            let key = SymmetricKey(size: .bits256)
+            let data = key.withUnsafeBytes { Data($0) }
+            do {
+                try add(data)
+                cache.value = key
+                return key
+            } catch let error as SecurePreferencesError where error.status == errSecDuplicateItem {
+                guard let stored = try read() else { throw error }
+                let existing = SymmetricKey(data: stored)
+                cache.value = existing
+                return existing
+            }
+        }
+    }
+
+    private static func read() throws -> Data? {
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching([
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: account,
+            kSecAttrAccessGroup: accessGroup,
+            kSecReturnData: true,
+            kSecMatchLimit: kSecMatchLimitOne
+        ] as CFDictionary, &result)
+
+        switch status {
+        case errSecSuccess:
+            guard let data = result as? Data, data.count == 32 else {
+                throw SecurePreferencesError(status: errSecDecode)
+            }
+            return data
+        case errSecItemNotFound:
+            return nil
+        default:
+            throw SecurePreferencesError(status: status)
+        }
+    }
+
+    private static func add(_ data: Data) throws {
+        let status = SecItemAdd([
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: account,
+            kSecAttrAccessGroup: accessGroup,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            kSecValueData: data
+        ] as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            throw SecurePreferencesError(status: status)
+        }
+    }
+
+    private nonisolated final class KeyCache: @unchecked Sendable {
+        private let lock = NSLock()
+        private var key: SymmetricKey?
+
+        var value: SymmetricKey? {
+            get {
+                lock.lock()
+                defer { lock.unlock() }
+                return key
+            }
+            set {
+                lock.lock()
+                defer { lock.unlock() }
+                key = newValue
+            }
+        }
+    }
+}
 
 enum FeedingWidgetState {
     case idle(lastFeedingDate: Date?)
@@ -25,11 +285,13 @@ enum BathWidgetState {
 final class WidgetDataStore {
     static let shared = WidgetDataStore()
 
-    private let defaults: UserDefaults
+    private let defaults: SecurePreferences
     private var reloadTask: Task<Void, Never>?
 
     private init() {
-        defaults = UserDefaults(suiteName: "group.RuslanAbd.Momsy") ?? .standard
+        defaults = SecurePreferences(
+            defaults: UserDefaults(suiteName: "group.RuslanAbd.Momsy") ?? .standard
+        )
     }
 
     // MARK: - Feeding writes (called from FeedingViewModel)
@@ -268,9 +530,7 @@ final class WidgetDataStore {
     }
 
     func clearAll() {
-        for key in defaults.dictionaryRepresentation().keys where key.hasPrefix("w_") {
-            defaults.removeObject(forKey: key)
-        }
+        defaults.removeAll(withPrefix: "w_")
         reload()
     }
 

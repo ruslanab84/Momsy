@@ -28,8 +28,12 @@ struct TodayViewModelTests {
         // Quick-log storage is scoped per active child. Pin to a clean, child-less
         // state and clear that scope's bucket so each test starts empty.
         ActiveBaby.currentId = nil
-        UserDefaults.standard.removeObject(forKey: "quick_log_today_entries_\(ActiveBaby.scope.uuidString)")
-        UserDefaults.standard.removeObject(forKey: "quick_log_today_date_\(ActiveBaby.scope.uuidString)")
+        SecurePreferences.standard.removeObject(
+            forKey: "quick_log_today_entries_\(ActiveBaby.scope.uuidString)"
+        )
+        SecurePreferences.standard.removeObject(
+            forKey: "quick_log_today_date_\(ActiveBaby.scope.uuidString)"
+        )
     }
 
     private func makeAppState(profile: BabyProfile? = nil) -> AppState {

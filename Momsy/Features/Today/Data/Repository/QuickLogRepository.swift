@@ -8,6 +8,12 @@ struct QuickLogEntry: Codable {
 }
 
 final class QuickLogRepository {
+    private let defaults: SecurePreferences
+
+    init(defaults: SecurePreferences = .standard) {
+        self.defaults = defaults
+    }
+
     // Scoped per active child so switching the active baby never leaks the previous
     // child's quick events into "Today so far". `ActiveBaby.scope` is read at access
     // time, mirroring the query-time scoping used by the SwiftData repositories.
@@ -15,9 +21,9 @@ final class QuickLogRepository {
     private var dateKey: String { "quick_log_today_date_\(ActiveBaby.scope.uuidString)" }
 
     func load() -> [QuickLogEntry] {
-        guard let saved = UserDefaults.standard.object(forKey: dateKey) as? Date,
+        guard let saved = defaults.object(forKey: dateKey) as? Date,
               Calendar.current.isDateInToday(saved),
-              let data = UserDefaults.standard.data(forKey: key),
+              let data = defaults.data(forKey: key),
               let entries = try? JSONDecoder().decode([QuickLogEntry].self, from: data)
         else { return [] }
         return entries
@@ -57,8 +63,8 @@ final class QuickLogRepository {
 
     private func persist(_ entries: [QuickLogEntry]) {
         if let data = try? JSONEncoder().encode(entries) {
-            UserDefaults.standard.set(data, forKey: key)
-            UserDefaults.standard.set(Date(), forKey: dateKey)
+            defaults.set(data, forKey: key)
+            defaults.set(Date(), forKey: dateKey)
         }
     }
 }

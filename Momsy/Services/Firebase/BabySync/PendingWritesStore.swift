@@ -6,8 +6,8 @@ import FirebaseFirestore
 /// `PendingDeletionsStore`: survives launches and is replayed by `BabySyncService`
 /// once the path resolves, so a log created before setup still reaches the cloud.
 ///
-/// Payloads are stored plist-safe: Firestore `Timestamp` values are normalized to
-/// `Date` (Firestore converts them back to `Timestamp` on `setData`).
+/// Payloads are normalized to plist-safe values, then encrypted before persistence.
+/// Firestore converts normalized `Date` values back to `Timestamp` on `setData`.
 nonisolated final class PendingWritesStore: @unchecked Sendable {
     static let shared = PendingWritesStore()
 
@@ -23,10 +23,12 @@ nonisolated final class PendingWritesStore: @unchecked Sendable {
     }
 
     private let key = "pending_writes_v1"
-    private let defaults: UserDefaults
+    private let defaults: SecurePreferences
     private let lock = NSLock()
 
-    init(defaults: UserDefaults = .standard) { self.defaults = defaults }
+    init(defaults: UserDefaults = .standard, secureDefaults: SecurePreferences? = nil) {
+        self.defaults = secureDefaults ?? SecurePreferences(defaults: defaults)
+    }
 
     private var raw: [[String: Any]] {
         get { defaults.array(forKey: key) as? [[String: Any]] ?? [] }
@@ -80,7 +82,7 @@ nonisolated final class PendingWritesStore: @unchecked Sendable {
     }
 
     /// Recursively replaces Firestore `Timestamp` with `Date` so the payload is
-    /// plist-codable for UserDefaults persistence.
+    /// plist-codable for encrypted preferences persistence.
     static func plistSafe(_ value: Any) -> Any {
         switch value {
         case let ts as Timestamp:       return ts.dateValue()
