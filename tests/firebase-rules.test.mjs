@@ -216,6 +216,54 @@ test("invite updates cannot cross families or bypass schema and expiry limits", 
     }));
 });
 
+test("an account owner can enumerate and delete only their own invites", async () => {
+    const ownInvitePath = "invites/MOMSY-ERASE1";
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        await adminContext.firestore().doc(ownInvitePath).set({
+            familyId: "deleted-family",
+            createdBy: users.mom,
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        });
+    });
+
+    const ownerDb = firestore(users.mom);
+    const ownInvites = ownerDb.collection("invites")
+        .where("createdBy", "==", users.mom);
+    const otherUsersInvite = firestore(users.outsider).collection("invites")
+        .where("createdBy", "==", users.mom);
+
+    const snapshot = await assertSucceeds(ownInvites.get());
+    assert.deepEqual(snapshot.docs.map((doc) => doc.id), ["MOMSY-ERASE1"]);
+    await assertFails(otherUsersInvite.get());
+    await assertSucceeds(ownerDb.doc(ownInvitePath).delete());
+});
+
+test("an invite cannot expose or recreate a deleted family", async () => {
+    const staleFamilyId = "deleted-family";
+    const staleInviteCode = "MOMSY-STALE1";
+    const staleInvitePath = `invites/${staleInviteCode}`;
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        await adminContext.firestore().doc(staleInvitePath).set({
+            familyId: staleFamilyId,
+            createdBy: users.mom,
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+            roleRaw: "Папа",
+        });
+    });
+
+    const joinerDb = firestore(users.outsider);
+    await assertFails(joinerDb.doc(staleInvitePath).get());
+
+    const batch = joinerDb.batch();
+    batch.set(joinerDb.doc(`families/${staleFamilyId}/members/${users.outsider}`), {
+        uid: users.outsider,
+        roleRaw: "Папа",
+        inviteCode: staleInviteCode,
+    });
+    batch.set(joinerDb.doc(`users/${users.outsider}`), { familyId: staleFamilyId });
+    await assertFails(batch.commit());
+});
+
 test("invite create, role update, and self-invite join keep both members visible", async () => {
     const momDb = firestore(users.mom);
     const invite = momDb.doc("invites/MOMSY-JOIN01");

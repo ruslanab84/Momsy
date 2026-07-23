@@ -25,6 +25,11 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
     }
 
+    function familyExists(familyId) {
+      return familyId is string
+        && exists(/databases/$(database)/documents/families/$(familyId));
+    }
+
     function isFamilyMemberAfter(familyId) {
       return isSignedIn()
         && getAfter(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.uid == request.auth.uid;
@@ -128,6 +133,7 @@ service cloud.firestore {
 
     function inviteMatchesFamily(familyId) {
       return hasInviteCode()
+        && familyExists(familyId)
         && exists(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode))
         && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.familyId == familyId
         && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt > request.time;
@@ -228,15 +234,15 @@ service cloud.firestore {
       allow delete: if isSignedIn() && request.auth.uid == uid;
     }
 
-    // A signed-in user may look up ONE invite by its exact code to discover the
-    // familyId to join — but only while it is unexpired. `list` is denied outright:
-    // allowing it would let any signed-in user enumerate every family's code and
-    // familyId, then self-assign membership via their own users/{uid} doc.
-    // Only full-access members of the referenced family may manage a code.
+    // A signed-in user may look up ONE invite by its exact code to discover an
+    // existing familyId to join. Owner-constrained queries/deletes support account
+    // erasure without allowing callers to enumerate other families' codes.
     match /invites/{code} {
       allow get:    if isSignedIn()
+                    && familyExists(resource.data.familyId)
                     && resource.data.expiresAt > request.time;
-      allow list:   if false;
+      allow list:   if isSignedIn()
+                    && resource.data.createdBy == request.auth.uid;
       allow create: if isSignedIn()
                     && hasValidInviteData()
                     && request.resource.data.createdBy == request.auth.uid
@@ -245,7 +251,9 @@ service cloud.firestore {
                     && inviteImmutableFieldsUnchanged()
                     && canManageFamilyRoster(resource.data.familyId)
                     && canManageFamilyRoster(request.resource.data.familyId);
-      allow delete: if canManageFamilyRoster(resource.data.familyId);
+      allow delete: if (isSignedIn()
+                        && resource.data.createdBy == request.auth.uid)
+                    || canManageFamilyRoster(resource.data.familyId);
     }
 
     match /families/{familyId} {

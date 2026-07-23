@@ -62,6 +62,10 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         let userDoc = try await userRef.getDocument(source: .server)
         let resolvedFamilyId = (userDoc.data()?["familyId"] as? String) ?? FamilyManager.shared.familyId
 
+        try await deleteAllDocs(
+            in: db.collection("invites").whereField("createdBy", isEqualTo: uid)
+        )
+
         if let familyId = resolvedFamilyId, !familyId.isEmpty {
             do {
                 let familyRef = db.collection("families").document(familyId)
@@ -109,16 +113,18 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         try await userRef.delete()
     }
 
-    /// Re-resolution on the next sign-in happens ONLY through `users/{uid}.familyId`
-    /// (FamilyManager.setup) — there is no membership/reverse lookup. So the user doc still
-    /// existing on the SERVER is the one signal that the data can resurface. Read it with
-    /// `source: .server` so a cache-confirmed-but-not-yet-flushed delete can't pass as done;
-    /// an offline read throws here and is treated as "not yet verified" by the caller.
+    /// Reads from the server so a cache-confirmed-but-not-yet-flushed delete can't pass as
+    /// complete while either the routing document or account-owned invites still exist.
     func isCloudDataPresent(uid: String) async throws -> Bool {
-        let userDoc = try await Firestore.firestore()
-            .collection("users").document(uid)
+        let db = Firestore.firestore()
+        let userDoc = try await db.collection("users").document(uid)
             .getDocument(source: .server)
-        return userDoc.exists
+        guard !userDoc.exists else { return true }
+        let invites = try await db.collection("invites")
+            .whereField("createdBy", isEqualTo: uid)
+            .limit(to: 1)
+            .getDocuments(source: .server)
+        return !invites.isEmpty
     }
 
     func hasInviteEstablishedMembership(uid: String) async throws -> Bool {
@@ -162,7 +168,7 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         try? await oldParent.delete()
     }
 
-    private func deleteAllDocs(in ref: CollectionReference) async throws {
+    private func deleteAllDocs(in ref: Query) async throws {
         let docs = try await ref.getDocuments().documents
         guard !docs.isEmpty else { return }
         let db = Firestore.firestore()
