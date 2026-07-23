@@ -8,6 +8,7 @@ struct MomsyWidgetEntry: TimelineEntry {
     let babyBirthDate: Date?
     let diaperCount: Int
     let lastSleepEndDate: Date?
+    let lastSleepStartDate: Date?
 
     static let placeholder = MomsyWidgetEntry(
         date: .now,
@@ -19,6 +20,7 @@ struct MomsyWidgetEntry: TimelineEntry {
         babyName: "Лёва",
         babyBirthDate: Calendar.current.date(byAdding: .month, value: -4, to: .now),
         diaperCount: 5,
-        lastSleepEndDate: Date().addingTimeInterval(-13200)
+        lastSleepEndDate: Date().addingTimeInterval(-13200),
+        lastSleepStartDate: Date().addingTimeInterval(-18600)
     )
 }

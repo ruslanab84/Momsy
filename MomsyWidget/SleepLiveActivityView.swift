@@ -11,9 +11,7 @@ struct SleepLockScreenView: View {
             BabyPatternBackground()
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Image(systemName: "moon.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.purple)
+                    babyIcon
                     Text(context.attributes.babyName.isEmpty
                          ? WidgetL10n.current.sleep
                          : context.attributes.babyName)
@@ -43,6 +41,18 @@ struct SleepLockScreenView: View {
             .padding()
         }
         .activityBackgroundTint(.clear)
+    }
+
+    @ViewBuilder
+    private var babyIcon: some View {
+        switch context.attributes.babyGender {
+        case "girl":
+            BabyGenderIconView(kind: .girl, size: 20, tone: .bbCoral)
+        case "boy":
+            BabyGenderIconView(kind: .boy, size: 20, tone: .bbSky)
+        default:
+            BabyGenderIconView(kind: .unknown, size: 20, tone: .bbButter)
+        }
     }
 
     @ViewBuilder

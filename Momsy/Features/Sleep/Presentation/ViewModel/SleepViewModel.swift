@@ -210,7 +210,11 @@ final class SleepViewModel: ObservableObject {
         isSleepActive = true
         sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
         WidgetDataStore.shared.setSleepActive(startDate: entry.startDate, babyId: babyId)
-        liveActivity.startActivity(startDate: entry.startDate, babyName: appState.babyProfile?.name ?? "")
+        liveActivity.startActivity(
+            startDate: entry.startDate,
+            babyName: appState.babyProfile?.name ?? "",
+            babyGender: appState.babyProfile?.gender
+        )
         timerTask?.cancel()
         timerTask = Task { [weak self] in
             while !Task.isCancelled {

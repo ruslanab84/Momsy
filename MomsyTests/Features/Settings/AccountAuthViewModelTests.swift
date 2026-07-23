@@ -1,12 +1,15 @@
 import Testing
 import AuthenticationServices
+import FirebaseAuth
 @testable import Momsy
 
 @MainActor
 private final class AuthMock: AccountAuthProviding {
+    var appleResult: Result<Void, Error> = .success(())
     var googleResult: Result<Void, Error> = .success(())
     func prepareAppleRequest(_ request: ASAuthorizationAppleIDRequest) {}
     func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) async throws {
+        if case .failure(let e) = appleResult { throw e }
         if case .failure(let e) = result { throw e }
     }
     func signInWithGoogle() async throws {
@@ -40,6 +43,59 @@ struct AccountAuthViewModelTests {
         #expect(!vm.didSignIn)
         #expect(!post.value)
         #expect(!vm.isSigningIn)
+    }
+
+    @Test func appleProviderConflictSetsExactErrorAndDoesNotSignIn() async throws {
+        let mock = AuthMock()
+        mock.appleResult = .failure(AuthError.providerAccountConflict)
+        let post = Flag()
+        let vm = AccountAuthViewModel(auth: mock) { post.value = true }
+
+        vm.completeApple(.failure(DummyError()))
+        try await waitUntil { vm.authError != nil }
+
+        guard case AuthError.providerAccountConflict? = vm.authError as? AuthError else {
+            Issue.record("Expected providerAccountConflict")
+            return
+        }
+        #expect(!vm.didSignIn)
+        #expect(!post.value)
+        #expect(!vm.isSigningIn)
+    }
+
+    @Test func fallbackCredentialUsesUpdatedCredentialFromFirebaseError() {
+        let original = EmailAuthProvider.credential(
+            withEmail: "original@example.com",
+            password: "password"
+        )
+        let updated = EmailAuthProvider.credential(
+            withEmail: "updated@example.com",
+            password: "password"
+        )
+        let error = NSError(
+            domain: AuthErrorDomain,
+            code: AuthErrorCode.credentialAlreadyInUse.rawValue,
+            userInfo: [AuthErrorUserInfoUpdatedCredentialKey: updated]
+        )
+
+        let result = AuthManager.fallbackCredential(original: original, linkError: error)
+
+        #expect(result === updated)
+    }
+
+    @Test func fallbackCredentialUsesOriginalWhenFirebaseProvidesNoReplacement() {
+        let original = EmailAuthProvider.credential(
+            withEmail: "original@example.com",
+            password: "password"
+        )
+        let error = NSError(
+            domain: AuthErrorDomain,
+            code: AuthErrorCode.credentialAlreadyInUse.rawValue
+        )
+
+        let result = AuthManager.fallbackCredential(original: original, linkError: error)
+
+        #expect(result === original)
     }
 
     @Test func appleCancelIsSilent() async throws {

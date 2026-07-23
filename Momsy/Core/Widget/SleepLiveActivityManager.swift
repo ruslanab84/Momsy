@@ -7,7 +7,7 @@ final class SleepLiveActivityManager {
     private var activity: Activity<SleepActivityAttributes>?
     private let logger = Logger(subsystem: "RuslanAbd.Momsy", category: "LiveActivity")
 
-    func startActivity(startDate: Date, babyName: String) {
+    func startActivity(startDate: Date, babyName: String, babyGender: String?) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             logger.error("Sleep: Live Activities disabled in Settings (areActivitiesEnabled=false)")
             return
@@ -16,7 +16,7 @@ final class SleepLiveActivityManager {
             Task { await existing.end(nil, dismissalPolicy: .immediate) }
         }
         activity = nil
-        let attributes = SleepActivityAttributes(babyName: babyName)
+        let attributes = SleepActivityAttributes(babyName: babyName, babyGender: babyGender)
         let state = SleepActivityAttributes.ContentState(effectiveStartDate: startDate)
         do {
             activity = try Activity.request(

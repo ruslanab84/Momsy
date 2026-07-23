@@ -99,7 +99,8 @@ final class QuickLogCoordinator {
             WidgetDataStore.shared.setSleepActive(startDate: entry.startDate, babyId: babyId)
             sleepLA.startActivity(
                 startDate: entry.startDate,
-                babyName: appState.babyProfile?.name ?? WidgetDataStore.shared.babyName
+                babyName: appState.babyProfile?.name ?? WidgetDataStore.shared.babyName,
+                babyGender: appState.babyProfile?.gender
             )
             pushSleepToFirestore(entry, babyId: babyId)
         }

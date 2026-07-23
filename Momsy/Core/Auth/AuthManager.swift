@@ -19,6 +19,7 @@ enum AuthError: LocalizedError {
     case accountDeletionFinished
     case nonceGenerationFailed
     case anonymousSignInRestricted
+    case providerAccountConflict
 
     var errorDescription: String? {
         switch self {
@@ -30,6 +31,7 @@ enum AuthError: LocalizedError {
         case .accountDeletionFinished: return "Previous account deletion finished. Please sign in again."
         case .nonceGenerationFailed: return "Could not start Sign in with Apple. Please try again."
         case .anonymousSignInRestricted: return "Sign in with Apple or Google before creating or joining a family."
+        case .providerAccountConflict: return "This email is already linked to a different sign-in method. Use the provider you originally signed in with."
         }
     }
 }
@@ -132,15 +134,33 @@ final class AuthManager: ObservableObject {
     /// orphan anything logged anonymously. Falls back to a plain sign-in when the
     /// credential already belongs to another account (that account's data is then
     /// adopted on next launch via CloudSyncDownloader).
+    nonisolated static func fallbackCredential(
+        original: AuthCredential,
+        linkError: NSError
+    ) -> AuthCredential {
+        (linkError.userInfo[AuthErrorUserInfoUpdatedCredentialKey] as? AuthCredential) ?? original
+    }
+
     @MainActor
     private func linkOrSignIn(with credential: AuthCredential) async throws -> FirebaseAuth.User {
         if let current = Auth.auth().currentUser, current.isAnonymous {
+            let anonymousUid = current.uid
+            let cachedFamilyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey)
             do {
                 return try await current.link(with: credential).user
-            } catch let error as NSError where error.code == AuthErrorCode.credentialAlreadyInUse.rawValue
-                || error.code == AuthErrorCode.emailAlreadyInUse.rawValue {
-                // Credential belongs to an existing account → sign into it directly.
-                return try await Auth.auth().signIn(with: credential).user
+            } catch let error as NSError where error.code == AuthErrorCode.credentialAlreadyInUse.rawValue {
+                let fallback = Self.fallbackCredential(original: credential, linkError: error)
+                let user = try await Auth.auth().signIn(with: fallback).user
+                Task { @MainActor in
+                    await FamilyManager.shared.removeStaleAnonymousMemberIfNeeded(
+                        anonymousUid: anonymousUid,
+                        signedInUid: user.uid,
+                        familyId: cachedFamilyId
+                    )
+                }
+                return user
+            } catch let error as NSError where error.code == AuthErrorCode.emailAlreadyInUse.rawValue {
+                throw AuthError.providerAccountConflict
             }
         }
         return try await Auth.auth().signIn(with: credential).user

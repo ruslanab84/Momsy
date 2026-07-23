@@ -33,7 +33,8 @@ struct MomsyWidgetProvider: TimelineProvider {
             babyName: WidgetDataStore.shared.babyName,
             babyBirthDate: WidgetDataStore.shared.babyBirthDate,
             diaperCount: WidgetDataStore.shared.diaperCount,
-            lastSleepEndDate: WidgetDataStore.shared.lastSleepEndDate
+            lastSleepEndDate: WidgetDataStore.shared.lastSleepEndDate,
+            lastSleepStartDate: WidgetDataStore.shared.lastSleepStartDate
         )
     }
 }

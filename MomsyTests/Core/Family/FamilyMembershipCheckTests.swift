@@ -17,6 +17,34 @@ struct FamilyMembershipCheckTests {
         #expect(FamilyManager.classifyMembershipError(foreign) == .unknown)
     }
 
+    @Test func onlyConfirmedRevocationMakesCurrentFamilyDataOptional() {
+        let permissionDenied = NSError(
+            domain: FirestoreErrorCode.errorDomain,
+            code: FirestoreErrorCode.permissionDenied.rawValue
+        )
+        let unavailable = NSError(
+            domain: FirestoreErrorCode.errorDomain,
+            code: FirestoreErrorCode.unavailable.rawValue
+        )
+
+        #expect(FamilyManager.canTreatCurrentFamilyAsEmpty(
+            dataReadError: permissionDenied,
+            confirmedMembership: .revoked
+        ))
+        #expect(!FamilyManager.canTreatCurrentFamilyAsEmpty(
+            dataReadError: permissionDenied,
+            confirmedMembership: .member
+        ))
+        #expect(!FamilyManager.canTreatCurrentFamilyAsEmpty(
+            dataReadError: permissionDenied,
+            confirmedMembership: .unknown
+        ))
+        #expect(!FamilyManager.canTreatCurrentFamilyAsEmpty(
+            dataReadError: unavailable,
+            confirmedMembership: .revoked
+        ))
+    }
+
     @Test func revokedConfirmedOnlyByHealthySelfRead() {
         #expect(FamilyManager.gatedMembershipCheck(raw: .revoked, selfReadSucceeded: true) == .revoked)
         #expect(FamilyManager.gatedMembershipCheck(raw: .revoked, selfReadSucceeded: false) == .unknown)

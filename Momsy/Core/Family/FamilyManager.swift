@@ -272,8 +272,27 @@ final class FamilyManager: ObservableObject {
         if familyId == targetFamilyId { isReady = true; return }
 
         // Only pay for the data read when actually switching to a different family.
-        let switchingFamily = (familyId != nil && familyId != targetFamilyId)
-        let hasData = switchingFamily ? try await currentFamilyHasData() : false
+        let currentFamilyId = familyId
+        let switchingFamily = (currentFamilyId != nil && currentFamilyId != targetFamilyId)
+        let hasData: Bool
+        if switchingFamily, let currentFamilyId {
+            do {
+                hasData = try await currentFamilyHasData()
+            } catch {
+                guard Self.classifyMembershipError(error) == .revoked else { throw error }
+                let membership = await confirmMembershipHealthGated(
+                    familyId: currentFamilyId,
+                    uid: uid
+                )
+                guard Self.canTreatCurrentFamilyAsEmpty(
+                    dataReadError: error,
+                    confirmedMembership: membership
+                ) else { throw error }
+                hasData = false
+            }
+        } else {
+            hasData = false
+        }
         if FamilyJoinGuard.requiresConfirmation(
             currentFamilyId: familyId, targetFamilyId: targetFamilyId,
             currentFamilyHasData: hasData, force: force
@@ -332,6 +351,25 @@ final class FamilyManager: ObservableObject {
         )
     }
 
+    /// Removes the abandoned anonymous roster entry after Firebase switches to an
+    /// existing provider account. Best-effort because only a parent in that family
+    /// may remove another member.
+    func removeStaleAnonymousMemberIfNeeded(
+        anonymousUid: String,
+        signedInUid: String,
+        familyId: String?
+    ) async {
+        guard anonymousUid != signedInUid, let familyId else { return }
+        do {
+            try await db.collection("families").document(familyId)
+                .collection("members").document(anonymousUid)
+                .delete()
+            Self.log.info("Removed stale anonymous member \(anonymousUid, privacy: .private)")
+        } catch {
+            Self.log.error("Stale member cleanup failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
     /// True when the caller is the only remaining member (or the roster is empty).
     /// Gates whether account deletion may tear down shared family data.
     func isSoleMember(uid: String) async throws -> Bool {
@@ -352,6 +390,16 @@ final class FamilyManager: ObservableObject {
             return .revoked
         }
         return .unknown
+    }
+
+    nonisolated static func canTreatCurrentFamilyAsEmpty(
+        dataReadError: Error,
+        confirmedMembership: MembershipCheck
+    ) -> Bool {
+        guard case .revoked = classifyMembershipError(dataReadError),
+              case .revoked = confirmedMembership
+        else { return false }
+        return true
     }
 
     /// Server-truth check that `uid` still has a member doc in `familyId`.

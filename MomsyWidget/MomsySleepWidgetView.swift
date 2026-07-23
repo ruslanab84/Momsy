@@ -52,11 +52,11 @@ private struct SleepSmallView: View {
                     .minimumScaleFactor(0.6)
                 Text(WidgetL10n.current.sleeping).font(.caption).foregroundStyle(.secondary)
             case .idle:
-                if let end = entry.lastSleepEndDate {
-                    Text(end, style: .time)
+                if let start = entry.lastSleepStartDate {
+                    Text(start, style: .time)
                         .font(.system(.title2, design: .rounded, weight: .semibold).monospacedDigit())
                         .minimumScaleFactor(0.6)
-                    Text(WidgetL10n.current.wokeUp).font(.caption).foregroundStyle(.secondary)
+                    Text(WidgetL10n.current.last).font(.caption).foregroundStyle(.secondary)
                 } else if let name = entry.babyName.nilIfEmpty {
                     Text(WidgetL10n.current.openMomsyFor(name))
                         .font(.caption)
@@ -273,10 +273,10 @@ private struct SleepStatusColumn: View {
                     .minimumScaleFactor(0.7)
                 Text(WidgetL10n.current.sleepingNow).font(.caption).foregroundStyle(.green)
             case .idle:
-                if let end = entry.lastSleepEndDate {
-                    Text(end, style: .time)
+                if let start = entry.lastSleepStartDate {
+                    Text(start, style: .time)
                         .font(.subheadline.monospacedDigit())
-                    Text(WidgetL10n.current.wokeUp).font(.caption).foregroundStyle(.secondary)
+                    Text(WidgetL10n.current.last).font(.caption).foregroundStyle(.secondary)
                 } else {
                     Text("—").font(.title2).foregroundStyle(.tertiary)
                 }
@@ -325,9 +325,9 @@ private struct SleepAccessoryRectView: View {
                     .monospacedDigit()
                     .minimumScaleFactor(0.7)
             case .idle:
-                if let end = entry.lastSleepEndDate {
-                    Text(WidgetL10n.current.wokeUp)
-                    Text(end, style: .time).monospacedDigit()
+                if let start = entry.lastSleepStartDate {
+                    Text(WidgetL10n.current.last)
+                    Text(start, style: .time).monospacedDigit()
                 } else {
                     Text(WidgetL10n.current.noData)
                 }

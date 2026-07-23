@@ -1,0 +1,144 @@
+diff --git a/Momsy/Core/Widget/WidgetDataStore.swift b/Momsy/Core/Widget/WidgetDataStore.swift
+index b0cb699..0000000 100644
+--- a/Momsy/Core/Widget/WidgetDataStore.swift
++++ b/Momsy/Core/Widget/WidgetDataStore.swift
+@@ -69,11 +69,19 @@ final class WidgetDataStore {
+     }
+
+     func clearSleep(lastDurationSeconds: Int, babyId: UUID? = nil) {
++        let startKey = sleepStartKey(for: babyId)
++        let startTime = defaults.double(forKey: startKey)
++
+         defaults.set(false, forKey: sleepActiveKey(for: babyId))
+         defaults.set(lastDurationSeconds, forKey: sleepDurationKey(for: babyId))
++        if startTime > 0 {
++            defaults.set(startTime, forKey: sleepLastStartKey(for: babyId))
++        }
++
+         if babyId == nil || sleepActiveBabyId == nil || sleepActiveBabyId == babyId {
+             defaults.set(false, forKey: "w_sleep_active")
+             defaults.set(lastDurationSeconds, forKey: "w_last_sleep_dur")
++            if startTime > 0 {
++                defaults.set(startTime, forKey: "w_last_sleep_start")
++            }
+             defaults.removeObject(forKey: "w_sleep_active_baby_id")
+         }
+         reload()
+@@ -241,6 +249,25 @@ final class WidgetDataStore {
+         return Date(timeIntervalSinceReferenceDate: ti)
+     }
+
++    var lastSleepStartDate: Date? {
++        lastSleepStartDate(for: currentBabyId)
++    }
++
++    func lastSleepStartDate(for babyId: UUID?) -> Date? {
++        let key = sleepLastStartKey(for: babyId)
++        let scopedValue = defaults.double(forKey: key)
++        let fallbackValue: Double
++        if babyId == nil || lastSleepEndBabyId == nil || lastSleepEndBabyId == babyId {
++            fallbackValue = defaults.double(forKey: "w_last_sleep_start")
++        } else {
++            fallbackValue = 0
++        }
++        let ti = scopedValue > 0 ? scopedValue : fallbackValue
++        guard ti > 0 else { return nil }
++        return Date(timeIntervalSinceReferenceDate: ti)
++    }
++
+     func clearAll() {
+         for key in defaults.dictionaryRepresentation().keys where key.hasPrefix("w_") {
+             defaults.removeObject(forKey: key)
+@@ -281,6 +308,10 @@ final class WidgetDataStore {
+         scopedSleepKey("w_last_sleep_dur", for: babyId)
+     }
+
++    private func sleepLastStartKey(for babyId: UUID?) -> String {
++        scopedSleepKey("w_last_sleep_start", for: babyId)
++    }
++
+     private func sleepEndKey(for babyId: UUID?) -> String {
+         scopedSleepKey("w_last_sleep_end", for: babyId)
+     }
+diff --git a/MomsyWidget/MomsyWidgetEntry.swift b/MomsyWidget/MomsyWidgetEntry.swift
+index 284b591..0000000 100644
+--- a/MomsyWidget/MomsyWidgetEntry.swift
++++ b/MomsyWidget/MomsyWidgetEntry.swift
+@@ -10,6 +10,7 @@ struct MomsyWidgetEntry: TimelineEntry {
+     let babyBirthDate: Date?
+     let diaperCount: Int
+     let lastSleepEndDate: Date?
++    let lastSleepStartDate: Date?
+
+     static let placeholder = MomsyWidgetEntry(
+         date: .now,
+@@ -21,6 +22,7 @@ struct MomsyWidgetEntry: TimelineEntry {
+         babyName: "Лёва",
+         babyBirthDate: Calendar.current.date(byAdding: .month, value: -4, to: .now),
+         diaperCount: 5,
+-        lastSleepEndDate: Date().addingTimeInterval(-13200)
++        lastSleepEndDate: Date().addingTimeInterval(-13200),
++        lastSleepStartDate: Date().addingTimeInterval(-18600)
+     )
+ }
+diff --git a/MomsyWidget/MomsyWidgetProvider.swift b/MomsyWidget/MomsyWidgetProvider.swift
+index 75969ff..0000000 100644
+--- a/MomsyWidget/MomsyWidgetProvider.swift
++++ b/MomsyWidget/MomsyWidgetProvider.swift
+@@ -35,7 +35,8 @@ struct MomsyWidgetProvider: TimelineProvider {
+             babyName: WidgetDataStore.shared.babyName,
+             babyBirthDate: WidgetDataStore.shared.babyBirthDate,
+             diaperCount: WidgetDataStore.shared.diaperCount,
+-            lastSleepEndDate: WidgetDataStore.shared.lastSleepEndDate
++            lastSleepEndDate: WidgetDataStore.shared.lastSleepEndDate,
++            lastSleepStartDate: WidgetDataStore.shared.lastSleepStartDate
+         )
+     }
+ }
+diff --git a/MomsyWidget/MomsySleepWidgetView.swift b/MomsyWidget/MomsySleepWidgetView.swift
+index 6613a29..0000000 100644
+--- a/MomsyWidget/MomsySleepWidgetView.swift
++++ b/MomsyWidget/MomsySleepWidgetView.swift
+@@ -54,11 +54,11 @@ private struct SleepSmallView: View {
+                     .minimumScaleFactor(0.6)
+                 Text(WidgetL10n.current.sleeping).font(.caption).foregroundStyle(.secondary)
+             case .idle:
+-                if let end = entry.lastSleepEndDate {
+-                    Text(end, style: .time)
++                if let start = entry.lastSleepStartDate {
++                    Text(start, style: .time)
+                         .font(.system(.title2, design: .rounded, weight: .semibold).monospacedDigit())
+                         .minimumScaleFactor(0.6)
+-                    Text(WidgetL10n.current.wokeUp).font(.caption).foregroundStyle(.secondary)
++                    Text(WidgetL10n.current.last).font(.caption).foregroundStyle(.secondary)
+                 } else if let name = entry.babyName.nilIfEmpty {
+                     Text(WidgetL10n.current.openMomsyFor(name))
+                         .font(.caption)
+@@ -275,11 +275,11 @@ private struct SleepStatusColumn: View {
+                     .minimumScaleFactor(0.7)
+                 Text(WidgetL10n.current.sleepingNow).font(.caption).foregroundStyle(.green)
+             case .idle:
+-                if let end = entry.lastSleepEndDate {
+-                    Text(end, style: .time)
++                if let start = entry.lastSleepStartDate {
++                    Text(start, style: .time)
+                         .font(.subheadline.monospacedDigit())
+-                    Text(WidgetL10n.current.wokeUp).font(.caption).foregroundStyle(.secondary)
++                    Text(WidgetL10n.current.last).font(.caption).foregroundStyle(.secondary)
+                 } else {
+                     Text("—").font(.title2).foregroundStyle(.tertiary)
+                 }
+@@ -326,10 +326,10 @@ private struct SleepAccessoryRectView: View {
+                 Text(timerInterval: start...Date.distantFuture, countsDown: false)
+                     .monospacedDigit()
+                     .minimumScaleFactor(0.7)
+             case .idle:
+-                if let end = entry.lastSleepEndDate {
+-                    Text(WidgetL10n.current.wokeUp)
+-                    Text(end, style: .time).monospacedDigit()
++                if let start = entry.lastSleepStartDate {
++                    Text(WidgetL10n.current.last)
++                    Text(start, style: .time).monospacedDigit()
+                 } else {
+                     Text(WidgetL10n.current.noData)
+                 }

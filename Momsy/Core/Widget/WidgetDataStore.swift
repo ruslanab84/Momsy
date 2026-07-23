@@ -68,11 +68,21 @@ final class WidgetDataStore {
     }
 
     func clearSleep(lastDurationSeconds: Int, babyId: UUID? = nil) {
+        let startKey = sleepStartKey(for: babyId)
+        let startTime = defaults.double(forKey: startKey)
+
         defaults.set(false, forKey: sleepActiveKey(for: babyId))
         defaults.set(lastDurationSeconds, forKey: sleepDurationKey(for: babyId))
+        if startTime > 0 {
+            defaults.set(startTime, forKey: sleepLastStartKey(for: babyId))
+        }
+
         if babyId == nil || sleepActiveBabyId == nil || sleepActiveBabyId == babyId {
             defaults.set(false, forKey: "w_sleep_active")
             defaults.set(lastDurationSeconds, forKey: "w_last_sleep_dur")
+            if startTime > 0 {
+                defaults.set(startTime, forKey: "w_last_sleep_start")
+            }
             defaults.removeObject(forKey: "w_sleep_active_baby_id")
         }
         reload()
@@ -239,6 +249,24 @@ final class WidgetDataStore {
         return Date(timeIntervalSinceReferenceDate: ti)
     }
 
+    var lastSleepStartDate: Date? {
+        lastSleepStartDate(for: currentBabyId)
+    }
+
+    func lastSleepStartDate(for babyId: UUID?) -> Date? {
+        let key = sleepLastStartKey(for: babyId)
+        let scopedValue = defaults.double(forKey: key)
+        let fallbackValue: Double
+        if babyId == nil || lastSleepEndBabyId == nil || lastSleepEndBabyId == babyId {
+            fallbackValue = defaults.double(forKey: "w_last_sleep_start")
+        } else {
+            fallbackValue = 0
+        }
+        let ti = scopedValue > 0 ? scopedValue : fallbackValue
+        guard ti > 0 else { return nil }
+        return Date(timeIntervalSinceReferenceDate: ti)
+    }
+
     func clearAll() {
         for key in defaults.dictionaryRepresentation().keys where key.hasPrefix("w_") {
             defaults.removeObject(forKey: key)
@@ -277,6 +305,10 @@ final class WidgetDataStore {
 
     private func sleepDurationKey(for babyId: UUID?) -> String {
         scopedSleepKey("w_last_sleep_dur", for: babyId)
+    }
+
+    private func sleepLastStartKey(for babyId: UUID?) -> String {
+        scopedSleepKey("w_last_sleep_start", for: babyId)
     }
 
     private func sleepEndKey(for babyId: UUID?) -> String {

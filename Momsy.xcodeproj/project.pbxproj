@@ -91,6 +91,8 @@
 		CC001122CC33DD44EE55FF76 /* BathLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF77 /* BathLiveActivityView.swift */; };
 		CC001122CC33DD44EE55FF78 /* PumpingLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF79 /* PumpingLiveActivityView.swift */; };
 		CFE0C4DB867A5136830C1D5A /* MomsyWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153EC2593BB4DFAA617A8E4A /* MomsyWidgetProvider.swift */; };
+		D3516E510000000000000001 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3516E510000000000000002 /* DesignSystem.swift */; };
+		D3516E510000000000000003 /* SemanticColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3516E510000000000000004 /* SemanticColor.swift */; };
 		D7C1A0B2E3F40516A7B8C9D0 /* MomsyStandByWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C1A0B2E3F40516A7B8C9D1 /* MomsyStandByWidgetView.swift */; };
 		DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C118A36FCB09993B8CBD0D /* DiaryViewModelTests.swift */; };
 		DEADBEEF0000000000000012 /* MockComplementaryFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000011 /* MockComplementaryFeedingRepository.swift */; };
@@ -253,6 +255,8 @@
 		CC001122CC33DD44EE55FF79 /* PumpingLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PumpingLiveActivityView.swift; sourceTree = "<group>"; };
 		CC3164FDFBF5812A759E9204 /* MockLeapsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockLeapsRepository.swift; sourceTree = "<group>"; };
 		D2D8FBFA13BEAB5198BAAF2E /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
+		D3516E510000000000000002 /* DesignSystem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DesignSystem.swift; path = Momsy/Core/DesignSystem/DesignSystem.swift; sourceTree = "<group>"; };
+		D3516E510000000000000004 /* SemanticColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SemanticColor.swift; path = Momsy/Core/Domain/Models/SemanticColor.swift; sourceTree = "<group>"; };
 		D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WidgetDataStore.swift; path = Momsy/Core/Widget/WidgetDataStore.swift; sourceTree = "<group>"; };
 		D45F950517BF58D078B26608 /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		D5F6EA2A332CF39167F1C2CB /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
@@ -710,6 +714,8 @@
 				B1AA2EA0D382D4DC3EE6C09A /* WidgetKit.framework */,
 				4820A4E27274110E9256D2F7 /* SwiftUI.framework */,
 				D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */,
+				D3516E510000000000000002 /* DesignSystem.swift */,
+				D3516E510000000000000004 /* SemanticColor.swift */,
 				AA001122CC33DD44EE55FF66 /* FeedingActivityAttributes.swift */,
 				BB001122CC33DD44EE55FF81 /* SleepActivityAttributes.swift */,
 				BB001122CC33DD44EE55FF83 /* WalkActivityAttributes.swift */,
@@ -1095,6 +1101,8 @@
 				BB001122CC33DD44EE55FF84 /* BathActivityAttributes.swift in Sources */,
 				BB001122CC33DD44EE55FF86 /* PumpingActivityAttributes.swift in Sources */,
 				CC001122CC33DD44EE55FF70 /* SharedActivityUI.swift in Sources */,
+				D3516E510000000000000001 /* DesignSystem.swift in Sources */,
+				D3516E510000000000000003 /* SemanticColor.swift in Sources */,
 				CC001122CC33DD44EE55FF72 /* SleepLiveActivityView.swift in Sources */,
 				CC001122CC33DD44EE55FF74 /* WalkLiveActivityView.swift in Sources */,
 				CC001122CC33DD44EE55FF76 /* BathLiveActivityView.swift in Sources */,
