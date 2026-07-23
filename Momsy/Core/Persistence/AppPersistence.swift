@@ -33,7 +33,7 @@ enum AppPersistence {
             let existingStoreError = error
             log.error("Failed to open existing SwiftData store: \(existingStoreError.localizedDescription, privacy: .public)")
             log.error("Store incompatible with current schema; backing up and recreating.")
-            backupStore(at: storeURL, fileManager: fileManager)
+            try backupStore(at: storeURL, fileManager: fileManager)
             deleteStore(at: storeURL, fileManager: fileManager)
             defaults.removeObject(forKey: schemaVersionKey)
 
@@ -105,18 +105,21 @@ enum AppPersistence {
     /// Copies the current store aside before a destructive recreate, so a failed
     /// migration is recoverable rather than permanent data loss. Keeps only the
     /// most recent backup to avoid unbounded disk growth.
-    private static func backupStore(at store: URL?, fileManager: FileManager) {
+    private static func backupStore(at store: URL?, fileManager: FileManager) throws {
         guard let store else { return }
         let backupBase = URL(fileURLWithPath: store.path + ".backup")
         for suffix in storeSuffixes {
             let src = URL(fileURLWithPath: store.path + suffix)
             let dst = URL(fileURLWithPath: backupBase.path + suffix)
             guard fileManager.fileExists(atPath: src.path) else { continue }
-            try? fileManager.removeItem(at: dst)
             do {
+                if fileManager.fileExists(atPath: dst.path) {
+                    try fileManager.removeItem(at: dst)
+                }
                 try fileManager.copyItem(at: src, to: dst)
             } catch {
                 log.error("Store backup failed for \(src.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                throw error
             }
         }
     }

@@ -5,6 +5,36 @@ import SwiftData
 
 @MainActor
 struct AppPersistenceTests {
+    @Test func backupFailureKeepsOriginalStore() throws {
+        let fileManager = FailingCopyFileManager()
+        let directory = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: directory) }
+
+        let store = directory.appendingPathComponent("default.store")
+        let wal = URL(fileURLWithPath: store.path + "-wal")
+        try Data("store".utf8).write(to: store)
+        try Data("wal".utf8).write(to: wal)
+
+        var attempts = 0
+
+        do {
+            _ = try AppPersistence.makeContainer(
+                fileManager: fileManager,
+                storeURL: store
+            ) { _, _ in
+                attempts += 1
+                throw StubContainerError()
+            }
+            Issue.record("Expected AppPersistence.makeContainer to throw")
+        } catch is StubBackupError {
+        }
+
+        #expect(attempts == 1)
+        #expect(fileManager.fileExists(atPath: store.path))
+        #expect(fileManager.fileExists(atPath: wal.path))
+    }
+
     @Test func freshStoreFailureThrowsAndKeepsBackup() throws {
         let fileManager = FileManager.default
         let directory = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
@@ -49,4 +79,12 @@ struct AppPersistenceTests {
 
 private struct StubContainerError: LocalizedError {
     var errorDescription: String? { "Stub container failure" }
+}
+
+private struct StubBackupError: Error {}
+
+private final class FailingCopyFileManager: FileManager {
+    override func copyItem(at srcURL: URL, to dstURL: URL) throws {
+        throw StubBackupError()
+    }
 }
