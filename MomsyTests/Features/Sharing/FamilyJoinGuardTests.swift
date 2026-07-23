@@ -66,3 +66,18 @@ struct StoredFamilyMemberFirestoreMappingTests {
         #expect(!member.isMe)
     }
 }
+
+@Suite("Family role avatars")
+struct FamilyRoleAvatarTests {
+    @Test("every family role uses its matching person avatar")
+    func roleAvatarMapping() {
+        #expect(FamilyRole.mom.defaultBlob == .mom)
+        #expect(FamilyRole.dad.defaultBlob == .dad)
+        #expect(FamilyRole.nanny.defaultBlob == .nanny)
+        #expect(FamilyRole.grandma.defaultBlob == .grandma)
+
+        var member = FamilyMember(name: "Alex", role: .mom, isMe: true)
+        member.role = .grandma
+        #expect(member.blob == .grandma)
+    }
+}

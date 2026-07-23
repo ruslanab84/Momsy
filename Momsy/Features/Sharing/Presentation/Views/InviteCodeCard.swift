@@ -19,13 +19,6 @@ struct InviteSheet: View {
     @State private var expiryLabel = ""
     @EnvironmentObject var loc: LocalizationManager
 
-    private let blobsByRole: [FamilyRole: (BlobKind, Color)] = [
-        .mom:     (.baby,  .bbCoral),
-        .dad:     (.bear,  .bbSky),
-        .nanny:   (.sun,   .bbMint),
-        .grandma: (.heart, .bbLilac),
-    ]
-
     private var qrImage: Image? {
         guard let data = inviteURL.data(using: .utf8),
               let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
@@ -140,8 +133,7 @@ struct InviteSheet: View {
                                     onRoleChange(role)
                                 } label: {
                                     VStack(spacing: 6) {
-                                        let (blob, tone) = blobsByRole[role] ?? (.star, .bbButter)
-                                        CuteBlobView(kind: blob, size: 36, tone: tone)
+                                        CuteBlobView(kind: role.defaultBlob, size: 36, tone: role.defaultTone)
                                         Text(role.displayName(lang: loc.lang))
                                             .font(.system(size: 11, weight: .bold, design: .rounded))
                                             .foregroundColor(selectedRole == role ? .bbCoralDeep : .bbInk)
@@ -197,14 +189,12 @@ struct InviteSheet: View {
                         .disabled(isSyncing)
 
                         Button {
-                            let (blob, tone) = blobsByRole[selectedRole] ?? (.star, .bbButter)
                             let name = nameText.trimmingCharacters(in: .whitespaces).isEmpty
                                 ? selectedRole.displayName(lang: loc.lang)
                                 : nameText.trimmingCharacters(in: .whitespaces)
                             onInvite(FamilyMember(
                                 name: name, role: selectedRole, isMe: false, isOnline: false,
-                                activity: loc.strings.invitationSent,
-                                blob: blob, tone: tone
+                                activity: loc.strings.invitationSent
                             ))
                             dismiss()
                         } label: {

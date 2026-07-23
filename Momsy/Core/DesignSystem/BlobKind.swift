@@ -3,7 +3,7 @@ import SwiftUI
 enum BlobKind: String, Codable {
     case baby, sleep, bottle, moon, sun, drop, star, heart, cloud, bear
     case walk, bath, vitamin, stool, pump
-    case mom, dad, nanny, other
+    case mom, dad, nanny, grandma, other
 }
 
 extension BlobKind {
@@ -27,6 +27,7 @@ extension BlobKind {
         case .mom:     return "mom"
         case .dad:     return "dad"
         case .nanny:   return "nanny"
+        case .grandma: return "grandma"
         case .other:   return "other"
         }
     }
@@ -51,6 +52,7 @@ extension BlobKind {
         case .mom:     return .bbCoral
         case .dad:     return .bbSky
         case .nanny:   return .bbMint
+        case .grandma: return .bbLilac
         case .other:   return .bbButter
         }
     }

@@ -68,10 +68,10 @@ enum FamilyRole: String, CaseIterable, Identifiable {
 
     var defaultBlob: BlobKind {
         switch self {
-        case .mom:     return .baby
-        case .dad:     return .bear
-        case .nanny:   return .sun
-        case .grandma: return .heart
+        case .mom:     return .mom
+        case .dad:     return .dad
+        case .nanny:   return .nanny
+        case .grandma: return .grandma
         }
     }
 
@@ -92,18 +92,16 @@ struct FamilyMember: Identifiable {
     let isMe: Bool
     var isOnline: Bool
     var activity: String
-    let blob: BlobKind
-    let tone: Color
+    var blob: BlobKind { role.defaultBlob }
+    var tone: Color { role.defaultTone }
 
     init(id: UUID = UUID(), name: String, role: FamilyRole, isMe: Bool,
-         isOnline: Bool = false, activity: String = "", blob: BlobKind, tone: Color) {
+         isOnline: Bool = false, activity: String = "") {
         self.id = id
         self.name = name
         self.role = role
         self.isMe = isMe
         self.isOnline = isOnline
         self.activity = activity
-        self.blob = blob
-        self.tone = tone
     }
 }

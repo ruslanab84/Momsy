@@ -230,7 +230,7 @@ private extension StoredFamilyMember {
         let role = FamilyRole(storedRawValue: roleRaw) ?? .mom
         return FamilyMember(
             id: id, name: name, role: role, isMe: isMe,
-            isOnline: false, activity: "", blob: role.defaultBlob, tone: role.defaultTone
+            isOnline: false, activity: ""
         )
     }
 }

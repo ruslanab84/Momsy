@@ -36,6 +36,7 @@ struct CuteBlobView: View {
         case .mom:     MomBlob(s: size)
         case .dad:     DadBlob(s: size)
         case .nanny:   NannyBlob(s: size)
+        case .grandma: GrandmaBlob(s: size)
         case .other:   OtherBlob(s: size)
         }
     }
@@ -117,9 +118,33 @@ private struct DadBlob: View {
     }
 }
 
-// MARK: - Nanny (grandma, grey bun + glasses)
+// MARK: - Nanny
 
 private struct NannyBlob: View {
+    let s: CGFloat
+    var body: some View {
+        let f = s * 0.52
+        let hair = Color(bbHex: "7A4E32")
+        ZStack {
+            Circle().fill(hair).frame(width: f * 0.38, height: f * 0.38).offset(x: f * 0.42, y: -f * 0.3)
+            Ellipse().fill(hair).frame(width: f * 1.08, height: f * 0.72).offset(y: -f * 0.28)
+            Ellipse().fill(BlobFace.skin).frame(width: f, height: f * 1.06)
+            Ellipse().fill(hair).frame(width: f * 0.98, height: f * 0.45).offset(y: -f * 0.42)
+            Capsule().fill(Color.bbMintDeep).frame(width: f * 0.72, height: f * 0.09).offset(y: -f * 0.48)
+            Circle().fill(BlobFace.ink).frame(width: f * 0.1, height: f * 0.1).offset(x: -f * 0.17, y: -f * 0.02)
+            Circle().fill(BlobFace.ink).frame(width: f * 0.1, height: f * 0.1).offset(x:  f * 0.17, y: -f * 0.02)
+            Circle().fill(Color.bbCoral).opacity(0.55).frame(width: f * 0.19, height: f * 0.19).offset(x: -f * 0.27, y: f * 0.15)
+            Circle().fill(Color.bbCoral).opacity(0.55).frame(width: f * 0.19, height: f * 0.19).offset(x:  f * 0.27, y: f * 0.15)
+            BlobSmile()
+                .stroke(BlobFace.ink, style: StrokeStyle(lineWidth: f * 0.05, lineCap: .round))
+                .frame(width: f * 0.2, height: f * 0.09).offset(y: f * 0.23)
+        }
+    }
+}
+
+// MARK: - Grandma
+
+private struct GrandmaBlob: View {
     let s: CGFloat
     var body: some View {
         let f = s * 0.52
