@@ -40,7 +40,7 @@ final class MomMoodViewModel: ObservableObject {
     }
 
     func saveEPDS(scores: [Int], mood: Int, energy: Int) async {
-        let total = scores.reduce(0, +)
+        let total = Self.epdsScore(for: scores)
         let entry = MomMoodEntry(id: UUID(), date: Date(), mood: mood, energy: energy,
                                  note: "", epdsScore: total)
         do {
@@ -49,6 +49,14 @@ final class MomMoodViewModel: ObservableObject {
         } catch {
             saveError = error.localizedDescription
         }
+    }
+
+    static func epdsScore(for answers: [Int]) -> Int {
+        answers.reduce(0, +)
+    }
+
+    static func requiresEPDSSafetySupport(for answers: [Int]) -> Bool {
+        answers.indices.contains(9) && answers[9] > 0
     }
 
     var latestEPDSScore: Int? {

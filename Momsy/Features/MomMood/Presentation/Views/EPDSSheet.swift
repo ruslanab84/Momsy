@@ -19,22 +19,20 @@ struct EPDSSheet: View {
          lm.strings.epdsQ9, lm.strings.epdsQ10]
     }
 
-    // EPDS scoring: Q1/Q2 are reverse-scored (0→3, 1→2, 2→1, 3→0)
-    private func score(at index: Int) -> Int {
-        let raw = answers[index]
-        if index == 0 || index == 1 { return 3 - raw }
-        return raw
+    private var totalScore: Int { MomMoodViewModel.epdsScore(for: answers) }
+    private var requiresSafetySupport: Bool {
+        MomMoodViewModel.requiresEPDSSafetySupport(for: answers)
     }
 
-    private var totalScore: Int { (0..<10).map { score(at: $0) }.reduce(0, +) }
-
     private var riskLabel: String {
+        if requiresSafetySupport { return lm.strings.epdsSafetyTitle }
         if totalScore >= 13 { return lm.strings.epdsHighRisk }
         if totalScore >= 10 { return lm.strings.epdsMildRisk }
         return lm.strings.epdsLowRisk
     }
 
     private var riskColor: Color {
+        if requiresSafetySupport { return .bbCoral }
         if totalScore >= 13 { return .bbCoral }
         if totalScore >= 10 { return .bbButter }
         return .bbMint
@@ -198,6 +196,10 @@ struct EPDSSheet: View {
     private var resultView: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
+                if requiresSafetySupport {
+                    safetySupportCard
+                }
+
                 VStack(spacing: 8) {
                     Text(lm.strings.epdsYourScore.uppercased())
                         .font(.system(size: 11, weight: .heavy, design: .rounded))
@@ -265,5 +267,33 @@ struct EPDSSheet: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.epdsTitle)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var safetySupportCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.bbCoral)
+                    .accessibilityHidden(true)
+                Text(lm.strings.epdsSafetyMessage)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if let url = URL(string: "https://findahelpline.com/i/iasp") {
+                Link(destination: url) {
+                    Label(lm.strings.epdsFindLocalSupport, systemImage: "arrow.up.right.square")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(Color.bbCoral)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.bbCoral.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }

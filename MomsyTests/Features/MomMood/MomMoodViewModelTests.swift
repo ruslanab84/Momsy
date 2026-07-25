@@ -60,10 +60,29 @@ struct MomMoodViewModelTests {
     func saveEPDSScore() async {
         let repo = MockMomMoodRepository()
         let vm = makeVM(repo: repo)
-        let scores = [2, 1, 3, 2, 1, 0, 2, 1, 1, 0] // sum = 13 (before reversal)
+        let scores = [2, 1, 3, 2, 1, 0, 2, 1, 1, 0]
         await vm.saveEPDS(scores: scores, mood: 3, energy: 3)
         #expect(repo.entries.count == 1)
         #expect(repo.entries[0].epdsScore == scores.reduce(0, +))
+    }
+
+    @Test("EPDS uses displayed scores and flags every positive Q10 response")
+    func epdsScoringAndSafetySupport() {
+        let healthyAnswers = Array(repeating: 0, count: 10)
+        #expect(MomMoodViewModel.epdsScore(for: healthyAnswers) == 0)
+        #expect(MomMoodViewModel.requiresEPDSSafetySupport(for: healthyAnswers) == false)
+
+        var severeQ1AndQ2 = healthyAnswers
+        severeQ1AndQ2[0] = 3
+        severeQ1AndQ2[1] = 3
+        #expect(MomMoodViewModel.epdsScore(for: severeQ1AndQ2) == 6)
+        #expect(MomMoodViewModel.epdsScore(for: Array(repeating: 3, count: 10)) == 30)
+
+        for response in 1...3 {
+            var answers = healthyAnswers
+            answers[9] = response
+            #expect(MomMoodViewModel.requiresEPDSSafetySupport(for: answers))
+        }
     }
 
     // MARK: - epdsRiskColor
