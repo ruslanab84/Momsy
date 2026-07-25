@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseAuth
+import StoreKit
 
 struct SettingsView: View {
     @StateObject private var vm: SettingsViewModel
@@ -18,6 +19,7 @@ struct SettingsView: View {
 
     @State private var showDeleteConfirm = false
     @State private var showAuthSheet = false
+    @State private var showManageSubscriptions = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -41,13 +43,44 @@ struct SettingsView: View {
         .sheet(isPresented: $showAuthSheet) {
             AccountAuthSheet(container: container)
         }
+        .sheet(isPresented: $vm.showsDeletionReauthentication) {
+            NavigationStack {
+                AuthStep(
+                    title: lm.strings.deleteAccountReauthenticationTitle,
+                    subtitle: lm.strings.deleteAccountReauthenticationSubtitle,
+                    isSigningIn: vm.isReauthenticating,
+                    authError: vm.reauthenticationError,
+                    allowsSkip: false,
+                    showsApple: vm.accountDeletionProvider == .apple,
+                    showsGoogle: vm.accountDeletionProvider == .google,
+                    prepareAppleRequest: vm.prepareAppleDeletion,
+                    onAppleCompletion: vm.completeAppleDeletion,
+                    onGoogle: vm.reauthenticateDeletionWithGoogle,
+                    onSkip: {}
+                )
+                .background(Color.bbCream.ignoresSafeArea())
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { vm.showsDeletionReauthentication = false } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.bbInkMute)
+                        }
+                    }
+                }
+            }
+        }
+        .manageSubscriptionsSheet(isPresented: $showManageSubscriptions)
         .confirmationDialog(
-            lm.strings.deleteAllDataConfirm,
+            deletionConfirmationText,
             isPresented: $showDeleteConfirm,
             titleVisibility: .visible
         ) {
             Button(lm.strings.deleteAllData, role: .destructive) {
-                Task { await vm.deleteAllData() }
+                Task { await vm.requestAccountDeletion() }
+            }
+            Button(lm.strings.manageSubscriptions) {
+                showManageSubscriptions = true
             }
             Button(lm.strings.cancel, role: .cancel) {}
         }
@@ -75,6 +108,10 @@ struct SettingsView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: vm.isDeleting)
+    }
+
+    private var deletionConfirmationText: String {
+        return "\(lm.strings.deleteAllDataConfirm)\n\n\(lm.strings.deleteAccountSubscriptionWarning)"
     }
 
     // MARK: - Theme

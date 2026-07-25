@@ -36,6 +36,11 @@ enum AuthError: LocalizedError {
     }
 }
 
+enum AccountDeletionProvider: Equatable {
+    case apple
+    case google
+}
+
 final class AuthManager: ObservableObject {
     @Published private(set) var firebaseUser: FirebaseAuth.User?
 
@@ -45,6 +50,9 @@ final class AuthManager: ObservableObject {
 
     private(set) var currentNonce: String?
     private var appleRequestPreparationError: Error?
+    private var pendingAppleDeletionAuthorizationCode: String?
+    private var appleDeletionReauthenticatedUID: String?
+    private var googleDeletionReauthenticatedUID: String?
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "Auth")
@@ -208,7 +216,67 @@ final class AuthManager: ObservableObject {
         )
         let user = try await linkOrSignIn(with: credential)
         await adoptAppleFullNameIfNeeded(cred.fullName, for: user)
+        if UserDefaultsPendingAccountDeletionStore().loadPending() == user.uid,
+           let authorizationCode = cred.authorizationCode
+            .flatMap({ String(data: $0, encoding: .utf8) }) {
+            pendingAppleDeletionAuthorizationCode = authorizationCode
+            appleDeletionReauthenticatedUID = user.uid
+        }
         firebaseUser = user
+    }
+
+    @MainActor
+    var accountDeletionProvider: AccountDeletionProvider? {
+        guard let user = Auth.auth().currentUser, !user.isAnonymous else { return nil }
+        let providerIDs = Set(user.providerData.map(\.providerID))
+        if providerIDs.contains("apple.com"),
+           (appleDeletionReauthenticatedUID != user.uid
+            || pendingAppleDeletionAuthorizationCode == nil) {
+            return .apple
+        }
+        if providerIDs.contains("google.com"), googleDeletionReauthenticatedUID != user.uid {
+            return .google
+        }
+        return nil
+    }
+
+    func prepareAppleDeletionRequest(_ request: ASAuthorizationAppleIDRequest) {
+        prepareAppleRequest(request)
+    }
+
+    @MainActor
+    func reauthenticateForDeletionWithApple(
+        _ result: Result<ASAuthorization, Error>
+    ) async throws {
+        installStateListenerIfPossible()
+        defer {
+            currentNonce = nil
+            appleRequestPreparationError = nil
+        }
+        let auth = try result.get()
+        if let appleRequestPreparationError {
+            throw appleRequestPreparationError
+        }
+        guard
+            let user = Auth.auth().currentUser,
+            let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+            let tokenData = credential.identityToken,
+            let token = String(data: tokenData, encoding: .utf8),
+            let authorizationCodeData = credential.authorizationCode,
+            let authorizationCode = String(data: authorizationCodeData, encoding: .utf8),
+            let nonce = currentNonce
+        else { throw AuthError.tokenMissing }
+
+        let firebaseCredential = OAuthProvider.appleCredential(
+            withIDToken: token,
+            rawNonce: nonce,
+            fullName: credential.fullName
+        )
+        let reauthenticated = try await user.reauthenticate(with: firebaseCredential).user
+        guard reauthenticated.uid == user.uid else { throw AuthError.providerAccountConflict }
+        pendingAppleDeletionAuthorizationCode = authorizationCode
+        appleDeletionReauthenticatedUID = user.uid
+        firebaseUser = reauthenticated
     }
 
     /// `link(with:)` (the anonymous-promotion path) does not propagate the Apple
@@ -236,27 +304,26 @@ final class AuthManager: ObservableObject {
     func signInWithGoogle() async throws {
         installStateListenerIfPossible()
 #if canImport(GoogleSignIn)
-        guard let clientID = FirebaseApp.app()?.options.clientID else {
-            throw AuthError.tokenMissing
-        }
-        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
-
-        guard
-            let windowScene = UIApplication.shared.connectedScenes
-                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-            let rootVC = windowScene.windows.first?.rootViewController
-        else { throw AuthError.tokenMissing }
-
-        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
-
-        guard let idToken = result.user.idToken?.tokenString else {
-            throw AuthError.tokenMissing
-        }
-        let credential = GoogleAuthProvider.credential(
-            withIDToken: idToken,
-            accessToken: result.user.accessToken.tokenString
-        )
+        let credential = try await googleCredentialFromInteractiveSignIn()
         firebaseUser = try await linkOrSignIn(with: credential)
+        if UserDefaultsPendingAccountDeletionStore().loadPending() == firebaseUser?.uid {
+            googleDeletionReauthenticatedUID = firebaseUser?.uid
+        }
+#else
+        throw AuthError.notImplemented
+#endif
+    }
+
+    @MainActor
+    func reauthenticateForDeletionWithGoogle() async throws {
+        installStateListenerIfPossible()
+#if canImport(GoogleSignIn)
+        guard let user = Auth.auth().currentUser else { throw AuthError.reauthRequired }
+        let credential = try await googleCredentialFromInteractiveSignIn()
+        let reauthenticated = try await user.reauthenticate(with: credential).user
+        guard reauthenticated.uid == user.uid else { throw AuthError.providerAccountConflict }
+        googleDeletionReauthenticatedUID = user.uid
+        firebaseUser = reauthenticated
 #else
         throw AuthError.notImplemented
 #endif
@@ -268,19 +335,43 @@ final class AuthManager: ObservableObject {
     func signOut() throws {
         installStateListenerIfPossible()
         try Auth.auth().signOut()
+        pendingAppleDeletionAuthorizationCode = nil
+        appleDeletionReauthenticatedUID = nil
+        googleDeletionReauthenticatedUID = nil
         firebaseUser = nil
     }
 
     // MARK: — Account deletion (GDPR)
 
-    /// Deletes the Firebase Auth account. Anonymous users delete cleanly; a provider
-    /// account that hasn't authenticated recently throws `requiresRecentLogin`, which
-    /// we surface as `.reauthRequired` so the caller can fall back to `signOut()`.
+    /// Revokes linked provider access, then deletes the Firebase Auth account.
     @MainActor
-    func deleteAccount() async throws {
+    func deleteAccount(expectedUID: String) async throws {
         installStateListenerIfPossible()
-        guard let user = Auth.auth().currentUser else { return }
+        guard let user = Auth.auth().currentUser, user.uid == expectedUID else {
+            throw AuthError.accountDeletionPending
+        }
+        let providerIDs = Set(user.providerData.map(\.providerID))
         do {
+            if providerIDs.contains("apple.com") {
+                guard appleDeletionReauthenticatedUID == user.uid,
+                      let authorizationCode = pendingAppleDeletionAuthorizationCode else {
+                    throw AuthError.reauthRequired
+                }
+                defer {
+                    pendingAppleDeletionAuthorizationCode = nil
+                    appleDeletionReauthenticatedUID = nil
+                }
+                try await Auth.auth().revokeToken(withAuthorizationCode: authorizationCode)
+            }
+#if canImport(GoogleSignIn)
+            if providerIDs.contains("google.com") {
+                guard googleDeletionReauthenticatedUID == user.uid else {
+                    throw AuthError.reauthRequired
+                }
+                defer { googleDeletionReauthenticatedUID = nil }
+                try await GIDSignIn.sharedInstance.disconnect()
+            }
+#endif
             try await user.delete()
             firebaseUser = nil
         } catch let error as NSError where error.code == AuthErrorCode.requiresRecentLogin.rawValue {
@@ -305,4 +396,29 @@ final class AuthManager: ObservableObject {
             .compactMap { String(format: "%02x", $0) }
             .joined()
     }
+
+#if canImport(GoogleSignIn)
+    @MainActor
+    private func googleCredentialFromInteractiveSignIn() async throws -> AuthCredential {
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            throw AuthError.tokenMissing
+        }
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+
+        guard
+            let windowScene = UIApplication.shared.connectedScenes
+                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+            let rootVC = windowScene.windows.first?.rootViewController
+        else { throw AuthError.tokenMissing }
+
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+        guard let idToken = result.user.idToken?.tokenString else {
+            throw AuthError.tokenMissing
+        }
+        return GoogleAuthProvider.credential(
+            withIDToken: idToken,
+            accessToken: result.user.accessToken.tokenString
+        )
+    }
+#endif
 }

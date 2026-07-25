@@ -987,6 +987,30 @@ struct L10n {
           "Isto elimina permanentemente a sua conta e todos os registos — neste dispositivo e na nuvem — incluindo dados de saúde e bem-estar. Esta ação não pode ser anulada.",
           "这将永久删除您的账户和所有记录——包括本设备和云端——其中包括健康和身心状态数据。此操作无法撤销。")
     }
+    var deleteAccountSubscriptionWarning: String {
+        s("If you have an active Apple subscription, deleting your Momsy account does not cancel it. Billing continues until you cancel in the App Store.",
+          "Если у вас есть активная подписка Apple, удаление аккаунта Momsy не отменит её. Списания продолжатся, пока вы не отмените подписку в App Store.",
+          "Wenn du ein aktives Apple-Abonnement hast, wird es durch das Löschen deines Momsy-Kontos nicht gekündigt. Die Abrechnung läuft weiter, bis du es im App Store kündigst.",
+          "Si tienes una suscripción activa de Apple, eliminar tu cuenta de Momsy no la cancela. La facturación continuará hasta que la canceles en el App Store.",
+          "Si vous avez un abonnement Apple actif, la suppression de votre compte Momsy ne l’annule pas. La facturation continue jusqu’à son annulation dans l’App Store.",
+          "Se tiver uma assinatura Apple ativa, eliminar a sua conta Momsy não a cancela. A cobrança continuará até a cancelar na App Store.",
+          "如果您有有效的 Apple 订阅，删除 Momsy 账户不会取消订阅。除非您在 App Store 中取消，否则仍会继续计费。")
+    }
+    var manageSubscriptions: String {
+        s("Manage Subscriptions", "Управление подписками", "Abonnements verwalten", "Gestionar suscripciones", "Gérer les abonnements", "Gerir assinaturas", "管理订阅")
+    }
+    var deleteAccountReauthenticationTitle: String {
+        s("Confirm your identity", "Подтвердите личность", "Identität bestätigen", "Confirma tu identidad", "Confirmez votre identité", "Confirme a sua identidade", "确认您的身份")
+    }
+    var deleteAccountReauthenticationSubtitle: String {
+        s("Sign in again with the account linked to Momsy to finish deleting it.",
+          "Снова войдите через аккаунт, связанный с Momsy, чтобы завершить удаление.",
+          "Melde dich erneut mit dem mit Momsy verknüpften Konto an, um die Löschung abzuschließen.",
+          "Vuelve a iniciar sesión con la cuenta vinculada a Momsy para terminar de eliminarla.",
+          "Reconnectez-vous avec le compte lié à Momsy pour terminer sa suppression.",
+          "Inicie sessão novamente com a conta associada ao Momsy para concluir a eliminação.",
+          "请使用与 Momsy 关联的账户重新登录，以完成删除。")
+    }
     var deleting: String        { s("Deleting…",     "Удаление…",     "Wird gelöscht…", "Eliminando…", "Suppression…", "A eliminar…", "正在删除…") }
     var deleteFailed: String    { s("Couldn't delete your data. Please try again.", "Не удалось удалить данные. Попробуйте ещё раз.", "Daten konnten nicht gelöscht werden. Bitte versuche es erneut.", "No se pudieron eliminar los datos. Inténtalo de nuevo.", "Impossible de supprimer vos données. Veuillez réessayer.", "Não foi possível eliminar os seus dados. Tente novamente.", "无法删除您的数据。请重试。") }
     var themeSystem: String     { s("System",        "Системная",     "System",        "Sistema", "Système", "Sistema", "系统") }

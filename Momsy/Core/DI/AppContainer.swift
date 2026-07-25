@@ -627,7 +627,11 @@ final class AppContainer {
     }
 
     func makeSettingsViewModel() -> SettingsViewModel {
-        SettingsViewModel(repo: preferencesRepository, deleteAccount: makeDeleteAccountUseCase())
+        SettingsViewModel(
+            repo: preferencesRepository,
+            deleteAccount: makeDeleteAccountUseCase(),
+            accountAuth: authManager
+        )
     }
 
     func makeMomMoodViewModel() -> MomMoodViewModel {

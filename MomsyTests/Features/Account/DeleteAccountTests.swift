@@ -1,6 +1,7 @@
 import Testing
 @testable import Momsy
 import Foundation
+import AuthenticationServices
 
 // MARK: - Mocks
 
@@ -9,6 +10,7 @@ private struct MockCloudEraser: CloudAccountEraser {
         var uids: [String] = []
         var presentChecks: [String] = []
         var error: Error?
+        var onDelete: (@MainActor () -> Void)?
         /// What `isCloudDataPresent` reports — `false` means "server confirms fully erased".
         var stillPresent = false
         var deleteCount: Int { uids.count }
@@ -17,6 +19,7 @@ private struct MockCloudEraser: CloudAccountEraser {
     var inviteMembership = false
     func deleteCloudData(uid: String) async throws {
         calls.uids.append(uid)
+        await calls.onDelete?()
         if let error = calls.error { throw error }
     }
     func isCloudDataPresent(uid: String) async throws -> Bool {
@@ -49,17 +52,55 @@ private final class MockAuth: AccountAuthProtocol {
     var deleteError: Error?
     var deleteCount = 0
     var signOutCount = 0
+    var expectedUIDs: [String] = []
 
     init(uid: String?) { currentUID = uid }
 
-    func deleteAccount() async throws {
+    func deleteAccount(expectedUID: String) async throws {
         deleteCount += 1
+        expectedUIDs.append(expectedUID)
+        guard currentUID == expectedUID else { throw AuthError.accountDeletionPending }
         if let deleteError { throw deleteError }
     }
     func signOut() throws { signOutCount += 1 }
 }
 
 private struct DummyError: Error {}
+
+private final class MockPreferencesRepository: UserPreferencesRepository {
+    func load() -> UserPreferences {
+        UserPreferences(appTheme: "system", appLanguage: "en", unitSystem: "metric")
+    }
+    func save(_ prefs: UserPreferences) {}
+}
+
+@MainActor
+private final class MockDeletionAuthenticator: AccountDeletionAuthenticating {
+    var accountDeletionProvider: AccountDeletionProvider?
+    var error: Error?
+    var appleCount = 0
+    var googleCount = 0
+
+    init(provider: AccountDeletionProvider) {
+        accountDeletionProvider = provider
+    }
+
+    func prepareAppleDeletionRequest(_ request: ASAuthorizationAppleIDRequest) {}
+
+    func reauthenticateForDeletionWithApple(
+        _ result: Result<ASAuthorization, Error>
+    ) async throws {
+        appleCount += 1
+        if let error { throw error }
+        accountDeletionProvider = nil
+    }
+
+    func reauthenticateForDeletionWithGoogle() async throws {
+        googleCount += 1
+        if let error { throw error }
+        accountDeletionProvider = nil
+    }
+}
 
 // MARK: - Tests
 
@@ -109,13 +150,54 @@ struct DeleteAccountTests {
         #expect(wipes() == 1)
     }
 
-    @Test("falls back to sign-out when account deletion needs re-auth")
-    func reauthFallback() async throws {
-        let (uc, _, auth, _, _, wipes) = makeUseCase(authError: AuthError.reauthRequired)
-        try await uc.execute()
+    @Test("keeps the session and deletion marker when recent authentication is required")
+    func reauthRequiredDoesNotSignOutOrWipe() async {
+        let (uc, _, auth, pending, _, wipes) = makeUseCase(authError: AuthError.reauthRequired)
+
+        await #expect {
+            try await uc.execute()
+        } throws: { error in
+            guard case AuthError.reauthRequired = error else { return false }
+            return true
+        }
+
         #expect(auth.deleteCount == 1)
-        #expect(auth.signOutCount == 1)
-        #expect(wipes() == 1)
+        #expect(auth.signOutCount == 0)
+        #expect(pending.pendingUid == "user-1")
+        #expect(pending.clearCount == 0)
+        #expect(wipes() == 0)
+    }
+
+    @Test("keeps deletion pending when provider revoke or Auth deletion fails")
+    func authRetirementFailureKeepsPending() async {
+        let (uc, _, auth, pending, _, wipes) = makeUseCase(authError: DummyError())
+
+        await #expect(throws: DummyError.self) {
+            try await uc.execute()
+        }
+
+        #expect(auth.signOutCount == 0)
+        #expect(pending.pendingUid == "user-1")
+        #expect(pending.clearCount == 0)
+        #expect(wipes() == 0)
+    }
+
+    @Test("never deletes a different Auth account if the session changes during cloud erase")
+    func authRetirementIsBoundToOriginalUID() async {
+        let (uc, cloud, auth, pending, _, wipes) = makeUseCase(uid: "user-1")
+        cloud.onDelete = { auth.currentUID = "user-2" }
+
+        await #expect {
+            try await uc.execute()
+        } throws: { error in
+            guard case AuthError.accountDeletionPending = error else { return false }
+            return true
+        }
+
+        #expect(auth.expectedUIDs == ["user-1"])
+        #expect(pending.pendingUid == "user-1")
+        #expect(pending.clearCount == 0)
+        #expect(wipes() == 0)
     }
 
     @Test("with no authenticated user, skips cloud steps but still wipes local")
@@ -158,6 +240,91 @@ struct DeleteAccountTests {
         #expect(auth.signOutCount == 0)
         #expect(suppressed.isRestoreSuppressed(for: "abc"))
         #expect(wipes() == 1)                  // device still left clean for the user
+    }
+}
+
+@Suite("Settings account deletion reauthentication", .serialized)
+@MainActor
+struct SettingsAccountDeletionReauthenticationTests {
+    private func makeViewModel(
+        provider: AccountDeletionProvider
+    ) -> (SettingsViewModel, MockAuth, MockDeletionAuthenticator, () -> Int) {
+        let cloud = MockCloudEraser.Calls()
+        let auth = MockAuth(uid: "user-1")
+        let pending = MockPendingStore()
+        let authenticator = MockDeletionAuthenticator(provider: provider)
+        var wipes = 0
+        let useCase = DeleteAccountUseCase(
+            cloudEraser: MockCloudEraser(calls: cloud),
+            auth: auth,
+            pendingStore: pending,
+            suppressedRestoreStore: MockSuppressedRestoreStore(),
+            eraseLocal: { wipes += 1 }
+        )
+        let viewModel = SettingsViewModel(
+            repo: MockPreferencesRepository(),
+            deleteAccount: useCase,
+            accountAuth: authenticator
+        )
+        return (viewModel, auth, authenticator, { wipes })
+    }
+
+    @Test("Apple reauthentication retries account deletion")
+    func appleSuccessRetriesDeletion() async throws {
+        let (viewModel, auth, authenticator, wipes) = makeViewModel(provider: .apple)
+        await viewModel.requestAccountDeletion()
+        #expect(viewModel.showsDeletionReauthentication)
+        #expect(auth.deleteCount == 0)
+        #expect(wipes() == 0)
+
+        viewModel.completeAppleDeletion(.failure(DummyError()))
+        try await waitForDeletion { auth.deleteCount == 1 }
+
+        #expect(authenticator.appleCount == 1)
+        #expect(wipes() == 1)
+        #expect(!viewModel.showsDeletionReauthentication)
+    }
+
+    @Test("Google reauthentication retries account deletion")
+    func googleSuccessRetriesDeletion() async throws {
+        let (viewModel, auth, authenticator, wipes) = makeViewModel(provider: .google)
+        await viewModel.requestAccountDeletion()
+        #expect(auth.deleteCount == 0)
+        #expect(wipes() == 0)
+
+        viewModel.reauthenticateDeletionWithGoogle()
+        try await waitForDeletion { auth.deleteCount == 1 }
+
+        #expect(authenticator.googleCount == 1)
+        #expect(wipes() == 1)
+        #expect(!viewModel.showsDeletionReauthentication)
+    }
+
+    @Test("provider failure keeps deletion pending in the UI")
+    func providerFailureDoesNotDelete() async throws {
+        let (viewModel, auth, authenticator, wipes) = makeViewModel(provider: .google)
+        authenticator.error = DummyError()
+        await viewModel.requestAccountDeletion()
+
+        viewModel.reauthenticateDeletionWithGoogle()
+        try await waitForDeletion { viewModel.reauthenticationError != nil }
+
+        #expect(auth.deleteCount == 0)
+        #expect(wipes() == 0)
+        #expect(viewModel.showsDeletionReauthentication)
+    }
+}
+
+@MainActor
+private func waitForDeletion(
+    timeout: Duration = .seconds(2),
+    until condition: @escaping () -> Bool
+) async throws {
+    let clock = ContinuousClock()
+    let deadline = clock.now.advanced(by: timeout)
+    while !condition() {
+        guard clock.now < deadline else { throw DummyError() }
+        await Task.yield()
     }
 }
 
@@ -277,6 +444,26 @@ struct AccountDeletionRecoveryTests {
         #expect(cloud.uids == ["abc"])         // attempted
         #expect(pending.pendingUid == "abc")   // but not cleared — will retry next launch
         #expect(suppressed.isRestoreSuppressed(for: "abc"))
+    }
+
+    @Test("keeps the session and marker when recovery needs recent authentication")
+    func recoveryReauthRequiredKeepsSessionAndMarker() async {
+        let cloud = MockCloudEraser.Calls()
+        let auth = MockAuth(uid: "abc")
+        auth.deleteError = AuthError.reauthRequired
+        let pending = MockPendingStore(pendingUid: "abc")
+        let rec = AccountDeletionRecovery(
+            cloudEraser: MockCloudEraser(calls: cloud),
+            auth: auth,
+            pendingStore: pending,
+            suppressedRestoreStore: MockSuppressedRestoreStore())
+
+        await rec.runIfNeeded()
+
+        #expect(auth.deleteCount == 1)
+        #expect(auth.signOutCount == 0)
+        #expect(pending.pendingUid == "abc")
+        #expect(pending.clearCount == 0)
     }
 
     @Test("skips the erase when membership was reestablished by an invite join")

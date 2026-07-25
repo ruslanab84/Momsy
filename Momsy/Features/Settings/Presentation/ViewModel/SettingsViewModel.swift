@@ -1,5 +1,18 @@
 import SwiftUI
 import Combine
+import AuthenticationServices
+
+@MainActor
+protocol AccountDeletionAuthenticating: AnyObject {
+    var accountDeletionProvider: AccountDeletionProvider? { get }
+    func prepareAppleDeletionRequest(_ request: ASAuthorizationAppleIDRequest)
+    func reauthenticateForDeletionWithApple(
+        _ result: Result<ASAuthorization, Error>
+    ) async throws
+    func reauthenticateForDeletionWithGoogle() async throws
+}
+
+extension AuthManager: AccountDeletionAuthenticating {}
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
@@ -30,15 +43,24 @@ final class SettingsViewModel: ObservableObject {
     let availableScheduleKeys: [VaccinationScheduleKey] = VaccinationScheduleProvider.shared.availableKeys
 
     @Published private(set) var isDeleting = false
+    @Published private(set) var isReauthenticating = false
+    @Published var showsDeletionReauthentication = false
+    @Published var reauthenticationError: Error?
     @Published var deletionError: String?
 
     private let repo: any UserPreferencesRepository
     private let deleteAccount: DeleteAccountUseCase
+    private let accountAuth: any AccountDeletionAuthenticating
 
-    init(repo: any UserPreferencesRepository, deleteAccount: DeleteAccountUseCase) {
+    init(
+        repo: any UserPreferencesRepository,
+        deleteAccount: DeleteAccountUseCase,
+        accountAuth: any AccountDeletionAuthenticating
+    ) {
         let prefs = repo.load()
         self.repo                   = repo
         self.deleteAccount          = deleteAccount
+        self.accountAuth             = accountAuth
         self.appTheme               = prefs.appTheme
         self.appLanguage            = prefs.appLanguage
         self.unitSystem             = prefs.unitSystem
@@ -48,14 +70,49 @@ final class SettingsViewModel: ObservableObject {
     /// Performs full GDPR erasure. On success the cleared `onboardingDone` /
     /// `paywallShown` flags (removed inside the use case's local wipe) make
     /// `ContentView` reroute back to onboarding automatically.
+    func requestAccountDeletion() async {
+        reauthenticationError = nil
+        guard accountAuth.accountDeletionProvider == nil else {
+            showsDeletionReauthentication = true
+            return
+        }
+        await deleteAllData()
+    }
+
     func deleteAllData() async {
         guard !isDeleting else { return }
         isDeleting = true
         defer { isDeleting = false }
         do {
             try await deleteAccount.execute()
+        } catch AuthError.reauthRequired {
+            showsDeletionReauthentication = true
         } catch {
             deletionError = error.localizedDescription
+        }
+    }
+
+    var accountDeletionProvider: AccountDeletionProvider? {
+        accountAuth.accountDeletionProvider
+    }
+
+    func prepareAppleDeletion(_ request: ASAuthorizationAppleIDRequest) {
+        accountAuth.prepareAppleDeletionRequest(request)
+    }
+
+    func completeAppleDeletion(_ result: Result<ASAuthorization, Error>) {
+        if case .failure(let error) = result,
+           (error as? ASAuthorizationError)?.code == .canceled {
+            return
+        }
+        reauthenticate {
+            try await self.accountAuth.reauthenticateForDeletionWithApple(result)
+        }
+    }
+
+    func reauthenticateDeletionWithGoogle() {
+        reauthenticate {
+            try await self.accountAuth.reauthenticateForDeletionWithGoogle()
         }
     }
 
@@ -69,5 +126,23 @@ final class SettingsViewModel: ObservableObject {
 
     private func save() {
         repo.save(UserPreferences(appTheme: appTheme, appLanguage: appLanguage, unitSystem: unitSystem))
+    }
+
+    private func reauthenticate(_ operation: @escaping () async throws -> Void) {
+        guard !isReauthenticating else { return }
+        isReauthenticating = true
+        reauthenticationError = nil
+        Task {
+            do {
+                try await operation()
+                if accountAuth.accountDeletionProvider == nil {
+                    showsDeletionReauthentication = false
+                    await deleteAllData()
+                }
+            } catch {
+                reauthenticationError = error
+            }
+            isReauthenticating = false
+        }
     }
 }

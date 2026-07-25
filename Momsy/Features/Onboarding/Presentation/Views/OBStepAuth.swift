@@ -9,12 +9,40 @@ struct AuthStep: View {
     let isSigningIn: Bool
     let authError: Error?
     let allowsSkip: Bool
+    let showsApple: Bool
+    let showsGoogle: Bool
     let prepareAppleRequest: (ASAuthorizationAppleIDRequest) -> Void
     let onAppleCompletion: (Result<ASAuthorization, Error>) -> Void
     let onGoogle: () -> Void
     let onSkip: () -> Void
 
     @EnvironmentObject var loc: LocalizationManager
+
+    init(
+        title: String,
+        subtitle: String,
+        isSigningIn: Bool,
+        authError: Error?,
+        allowsSkip: Bool,
+        showsApple: Bool = true,
+        showsGoogle: Bool = true,
+        prepareAppleRequest: @escaping (ASAuthorizationAppleIDRequest) -> Void,
+        onAppleCompletion: @escaping (Result<ASAuthorization, Error>) -> Void,
+        onGoogle: @escaping () -> Void,
+        onSkip: @escaping () -> Void
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.isSigningIn = isSigningIn
+        self.authError = authError
+        self.allowsSkip = allowsSkip
+        self.showsApple = showsApple
+        self.showsGoogle = showsGoogle
+        self.prepareAppleRequest = prepareAppleRequest
+        self.onAppleCompletion = onAppleCompletion
+        self.onGoogle = onGoogle
+        self.onSkip = onSkip
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -65,16 +93,20 @@ struct AuthStep: View {
 
     private var authButtons: some View {
         VStack(spacing: 12) {
-            SignInWithAppleButton(.signIn) { request in
-                prepareAppleRequest(request)
-            } onCompletion: { result in
-                onAppleCompletion(result)
+            if showsApple {
+                SignInWithAppleButton(.signIn) { request in
+                    prepareAppleRequest(request)
+                } onCompletion: { result in
+                    onAppleCompletion(result)
+                }
+                .signInWithAppleButtonStyle(.black)
+                .frame(height: 50)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
-            .signInWithAppleButtonStyle(.black)
-            .frame(height: 50)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-            googleButton
+            if showsGoogle {
+                googleButton
+            }
 
             if allowsSkip {
                 Button(action: onSkip) {

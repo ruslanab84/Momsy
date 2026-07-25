@@ -186,8 +186,7 @@ struct FirestoreAccountEraser: CloudAccountEraser {
 @MainActor
 protocol AccountAuthProtocol: AnyObject {
     var currentUID: String? { get }
-    func deleteAccount() async throws
-    func signOut() throws
+    func deleteAccount(expectedUID: String) async throws
 }
 
 extension AuthManager: AccountAuthProtocol {
@@ -198,9 +197,7 @@ extension AuthManager: AccountAuthProtocol {
 }
 
 /// GDPR "right to erasure" orchestrator. Deletes cloud data while still
-/// authenticated, deletes the auth account (falling back to sign-out when
-/// re-auth would be required), then always wipes the device clean last so the
-/// app ends in a fresh, pre-onboarding state even if a cloud step fails.
+/// authenticated, deletes the auth account, then wipes the device clean last.
 @MainActor
 final class DeleteAccountUseCase {
     private let cloudEraser: CloudAccountEraser
@@ -225,6 +222,7 @@ final class DeleteAccountUseCase {
 
     func execute() async throws {
         var cloudError: Error?
+        var authError: Error?
 
         if let uid = auth.currentUID {
             // Persist the intent FIRST so a deletion that doesn't reach the backend is
@@ -239,13 +237,11 @@ final class DeleteAccountUseCase {
                     // AND keep the session alive so launch recovery can finish the erase while
                     // still authenticated — do NOT delete/sign out the account yet.
                 } else {
-                    // Server confirms the footprint is gone: safe to retire the marker and
-                    // tear down the account (falling back to sign-out if re-auth is required).
-                    pendingStore.clearPending()
                     do {
-                        try await auth.deleteAccount()
-                    } catch AuthError.reauthRequired {
-                        try? auth.signOut()
+                        try await auth.deleteAccount(expectedUID: uid)
+                        pendingStore.clearPending()
+                    } catch {
+                        authError = error
                     }
                 }
             } catch {
@@ -253,6 +249,10 @@ final class DeleteAccountUseCase {
                 cloudError = error
             }
         }
+
+        // Keep the current session, retry marker, and local UI available so provider
+        // reauthentication/revocation can finish before the deletion is reported complete.
+        if let authError { throw authError }
 
         // Always leave the device clean, even if the cloud erase didn't fully confirm.
         try eraseLocal()
@@ -309,11 +309,11 @@ final class AccountDeletionRecovery {
             guard try await cloudEraser.isCloudDataPresent(uid: currentUid) == false else {
                 return // still on the server — keep the marker and retry next launch
             }
-            pendingStore.clearPending()
             do {
-                try await auth.deleteAccount()
-            } catch AuthError.reauthRequired {
-                try? auth.signOut()
+                try await auth.deleteAccount(expectedUID: currentUid)
+                pendingStore.clearPending()
+            } catch {
+                return // keep the authenticated session and marker for interactive re-auth
             }
         } catch {
             // Leave the marker in place; the next launch retries.
