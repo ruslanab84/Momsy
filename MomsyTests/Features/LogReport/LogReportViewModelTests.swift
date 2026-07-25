@@ -90,4 +90,23 @@ struct LogReportViewModelTests {
         #expect(!vm.timelineSegments(on: yesterday).isEmpty || !vm.weekDays.contains(yesterday))
         #expect(!vm.timelineSegments(on: today).isEmpty)
     }
+
+    @Test func sessionEndingAtDayStartIsExcludedButInstantAtDayStartRemains() async throws {
+        let (vm, _, sleep, diaper, _) = makeSUT()
+        let cal = Calendar.current
+        vm.mode = .week
+        vm.selectedDate = Date()
+        let dayStart = try #require(cal.date(byAdding: .day, value: 1, to: vm.range.from))
+        sleep.entries = [
+            SleepEntry(startDate: dayStart.addingTimeInterval(-3_600), endDate: dayStart)
+        ]
+        diaper.entries = [DiaperEntry(date: dayStart)]
+
+        await vm.load()
+
+        #expect(!vm.items(on: dayStart).contains { $0.kind == .sleep })
+        #expect(vm.items(on: dayStart).contains { $0.kind == .drop })
+        #expect(!vm.timelineSegments(on: dayStart).contains { $0.kind == .sleep })
+        #expect(vm.timelineSegments(on: dayStart).contains { $0.kind == .drop })
+    }
 }

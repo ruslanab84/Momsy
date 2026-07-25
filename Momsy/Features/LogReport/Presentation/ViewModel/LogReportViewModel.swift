@@ -87,10 +87,7 @@ final class LogReportViewModel: ObservableObject {
     func items(on day: Date) -> [LogReportItem] {
         let dayStart = calendar.startOfDay(for: day)
         guard let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else { return [] }
-        return items.filter { item in
-            let end = item.end ?? item.start
-            return item.start < dayEnd && end >= dayStart
-        }
+        return items.filter { overlaps($0, dayStart: dayStart, dayEnd: dayEnd) }
     }
 
     func timelineSegments(on day: Date) -> [LogReportTimelineSegment] {
@@ -99,7 +96,7 @@ final class LogReportViewModel: ObservableObject {
         return items.compactMap { item in
             let isInstant = item.end == nil
             let end = item.end ?? item.start
-            guard item.start < dayEnd, end >= dayStart else { return nil }
+            guard overlaps(item, dayStart: dayStart, dayEnd: dayEnd) else { return nil }
             let clippedStart = max(item.start, dayStart)
             let clippedEnd = min(end, dayEnd)
             let startMinute = Int(clippedStart.timeIntervalSince(dayStart) / 60)
@@ -112,6 +109,13 @@ final class LogReportViewModel: ObservableObject {
                 isInstant: isInstant
             )
         }
+    }
+
+    private func overlaps(_ item: LogReportItem, dayStart: Date, dayEnd: Date) -> Bool {
+        if let end = item.end {
+            return item.start < dayEnd && end > dayStart
+        }
+        return item.start >= dayStart && item.start < dayEnd
     }
 
     func kinds(on day: Date) -> [BlobKind] {

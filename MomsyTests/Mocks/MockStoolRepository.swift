@@ -27,6 +27,6 @@ final class MockStoolRepository: StoolRepository, @unchecked Sendable {
     }
 
     func getEntries(from: Date, to: Date) async throws -> [Date] {
-        entries.filter { $0 >= from && $0 <= to }
+        entries.filter { $0 >= from && $0 < to }
     }
 }

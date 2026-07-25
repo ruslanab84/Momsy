@@ -113,6 +113,11 @@
 		FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */; };
 		FF136D2C455F9FBD0E166DED /* MockSleepRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0ED0FC63356D42900B3E456 /* MockSleepRepository.swift */; };
 		FF93FE7B3A6F5DDA40F2B2D6 /* SoundsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40BC4D4F74FDBEE9B314901 /* SoundsViewModelTests.swift */; };
+		FEED0001AAAA1111BBBB0002 /* MockWalkRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED0001AAAA1111BBBB0001 /* MockWalkRepository.swift */; };
+		FEED0002AAAA1111BBBB0002 /* MockBathRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED0002AAAA1111BBBB0001 /* MockBathRepository.swift */; };
+		FEED0003AAAA1111BBBB0002 /* MockPumpingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED0003AAAA1111BBBB0001 /* MockPumpingRepository.swift */; };
+		FEED0004AAAA1111BBBB0002 /* MockVitaminRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED0004AAAA1111BBBB0001 /* MockVitaminRepository.swift */; };
+		FEED0005AAAA1111BBBB0002 /* LogReportViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED0005AAAA1111BBBB0001 /* LogReportViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1073,6 +1078,11 @@
 				F1AEB007F1AEB007F1AEB001 /* FirebaseBootstrapperTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB011 /* SleepLiveSyncServiceTests.swift in Sources */,
 				ACC001DEA000000000000001 /* AccountDisplayTests.swift in Sources */,
+				FEED0001AAAA1111BBBB0002 /* MockWalkRepository.swift in Sources */,
+				FEED0002AAAA1111BBBB0002 /* MockBathRepository.swift in Sources */,
+				FEED0003AAAA1111BBBB0002 /* MockPumpingRepository.swift in Sources */,
+				FEED0004AAAA1111BBBB0002 /* MockVitaminRepository.swift in Sources */,
+				FEED0005AAAA1111BBBB0002 /* LogReportViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

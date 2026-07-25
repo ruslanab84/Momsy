@@ -10,7 +10,7 @@ final class SwiftDataSleepRepository: SleepRepository {
     func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
         let scope = ActiveBaby.scope
         var descriptor = FetchDescriptor<SleepRecord>(
-            predicate: #Predicate { $0.startDate >= from && $0.startDate <= to && $0.babyId == scope }
+            predicate: #Predicate { $0.startDate >= from && $0.startDate < to && $0.babyId == scope }
         )
         descriptor.sortBy = [SortDescriptor(\.startDate)]
         return try context.fetch(descriptor).uniqued(by: { $0.id }).map { $0.toDomain() }

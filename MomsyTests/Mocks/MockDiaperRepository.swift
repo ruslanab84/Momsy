@@ -7,7 +7,7 @@ final class MockDiaperRepository: DiaperRepository {
 
     func getEntries(from: Date, to: Date) async throws -> [DiaperEntry] {
         if shouldThrow { throw TestError.mock }
-        return entries.filter { $0.date >= from && $0.date <= to }
+        return entries.filter { $0.date >= from && $0.date < to }
     }
 
     func add(_ entry: DiaperEntry) async throws {
