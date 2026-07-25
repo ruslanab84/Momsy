@@ -232,9 +232,14 @@ struct DeleteAccountTests {
     }
 
     @Test("keeps the marker and the auth session when the server still reports data after erase")
-    func keepsPendingWhenServerStillHasData() async throws {
+    func keepsPendingWhenServerStillHasData() async {
         let (uc, _, auth, pending, suppressed, wipes) = makeUseCase(uid: "abc", stillPresent: true)
-        try await uc.execute()
+        await #expect {
+            try await uc.execute()
+        } throws: { error in
+            guard case AuthError.accountDeletionPending = error else { return false }
+            return true
+        }
         #expect(pending.pendingUid == "abc")   // retained so launch recovery finishes the erase
         #expect(auth.deleteCount == 0)         // session kept alive for recovery, not torn down
         #expect(auth.signOutCount == 0)

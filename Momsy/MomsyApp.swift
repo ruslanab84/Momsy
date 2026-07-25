@@ -9,6 +9,7 @@ private enum JoinAlert: Identifiable {
     case failure
     case confirm(String)
     case removedFromFamily
+    case cloudSyncConsent
     case weeklyInsightAIConsent
 
     var id: String {
@@ -17,6 +18,7 @@ private enum JoinAlert: Identifiable {
         case .failure: return "failure"
         case .confirm(let code): return "confirm-\(code)"
         case .removedFromFamily: return "removedFromFamily"
+        case .cloudSyncConsent: return "cloudSyncConsent"
         case .weeklyInsightAIConsent: return "weeklyInsightAIConsent"
         }
     }
@@ -136,10 +138,15 @@ private struct MomsyRootView: View {
                     await setupNotificationsOnLaunch(appState: appState)
                     return
                 }
-                await container.authManager.signInAnonymouslyIfNeeded()
-                await container.cloudSyncDownloader.downloadAndMergeWhenReady()
                 await setupNotificationsOnLaunch(appState: appState)
-                await maybeGenerateWeeklyReport()
+                switch CloudSyncConsent.status() {
+                case .granted:
+                    await startCloudServices()
+                case .notDetermined where onboardingDone:
+                    joinAlert = .cloudSyncConsent
+                case .notDetermined, .denied:
+                    await maybeGenerateWeeklyReport()
+                }
             }
             .onOpenURL { url in
 #if canImport(GoogleSignIn)
@@ -183,6 +190,19 @@ private struct MomsyRootView: View {
                     return Alert(title: Text(localization.strings.removedFromFamilyTitle),
                                  message: Text(localization.strings.removedFromFamilyMessage),
                                  dismissButton: .default(Text(localization.strings.done)))
+                case .cloudSyncConsent:
+                    return Alert(
+                        title: Text(localization.strings.cloudSyncConsentTitle),
+                        message: Text(localization.strings.cloudSyncConsentMessage),
+                        primaryButton: .default(Text(localization.strings.cloudSyncAllow)) {
+                            CloudSyncConsent.set(.granted)
+                            Task { await startCloudServices() }
+                        },
+                        secondaryButton: .cancel(Text(localization.strings.cloudSyncKeepLocal)) {
+                            CloudSyncConsent.set(.denied)
+                            Task { await maybeGenerateWeeklyReport() }
+                        }
+                    )
                 case .weeklyInsightAIConsent:
                     return Alert(
                         title: Text(localization.strings.weeklyInsightAIConsentTitle),
@@ -207,9 +227,13 @@ private struct MomsyRootView: View {
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
                     WidgetCenter.shared.reloadAllTimelines()
-                    Task { await container.cloudSyncDownloader.resyncAll() }
+                    if CloudSyncConsent.isGranted() {
+                        Task { await container.cloudSyncDownloader.resyncAll() }
+                        container.sleepLiveSync.start()
+                    } else {
+                        container.sleepLiveSync.stop()
+                    }
                     Task { await maybeGenerateWeeklyReport() }
-                    container.sleepLiveSync.start()
                 } else {
                     container.sleepLiveSync.stop()
                 }
@@ -221,6 +245,14 @@ private struct MomsyRootView: View {
 
     /// Generates the weekly AI report for the last completed week (Premium only).
     /// No-ops if a report already exists for that week.
+    @MainActor
+    private func startCloudServices() async {
+        await container.authManager.signInAnonymouslyIfNeeded()
+        await container.cloudSyncDownloader.downloadAndMergeWhenReady()
+        container.sleepLiveSync.start()
+        await maybeGenerateWeeklyReport()
+    }
+
     @MainActor
     private func maybeGenerateWeeklyReport() async {
         guard onboardingDone, container.subscriptionManager.isPremium else { return }

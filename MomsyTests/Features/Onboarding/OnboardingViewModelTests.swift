@@ -2,6 +2,19 @@ import Testing
 @testable import Momsy
 import Foundation
 
+@Suite("Cloud sync consent")
+struct CloudSyncConsentTests {
+    @Test("defaults to not determined and persists the user's choice")
+    func persistsChoice() {
+        let defaults = UserDefaults(suiteName: UUID().uuidString)!
+        #expect(CloudSyncConsent.status(defaults: defaults) == .notDetermined)
+        CloudSyncConsent.set(.granted, defaults: defaults)
+        #expect(CloudSyncConsent.isGranted(defaults: defaults))
+        CloudSyncConsent.set(.denied, defaults: defaults)
+        #expect(!CloudSyncConsent.isGranted(defaults: defaults))
+    }
+}
+
 @Suite("OnboardingViewModel", .serialized)
 @MainActor
 struct OnboardingViewModelTests {
@@ -71,6 +84,8 @@ struct OnboardingViewModelTests {
 
     func makeHarness(
         pendingCode: String? = nil,
+        cloudSyncEnabled: Bool = false,
+        setCloudSyncConsent: @escaping (CloudSyncConsent.Status) -> Void = { _ in },
         onDone: @escaping () -> Void = {}
     ) -> Harness {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
@@ -104,6 +119,8 @@ struct OnboardingViewModelTests {
             },
             analytics: analytics,
             pushNotifications: push,
+            initialCloudSyncEnabled: cloudSyncEnabled,
+            setCloudSyncConsent: setCloudSyncConsent,
             onDone: onDone
         )
         return Harness(
@@ -151,13 +168,15 @@ struct OnboardingViewModelTests {
         #expect(vm.canContinue)
     }
 
-    @Test("canContinue is true on role, invite, auth, and ready steps")
+    @Test("canContinue is true on ordinary later steps")
     func canContinueTrueOnLaterSteps() {
         let (vm, _, _, _) = makeVM()
         for s in [OBStep.role, OBStep.invite, OBStep.auth, OBStep.ready] {
             vm.step = s
             #expect(vm.canContinue)
         }
+        vm.step = .privacy
+        #expect(!vm.canContinue)
     }
 
     @Test("canContinue is false on join step without an invite code")
@@ -174,7 +193,7 @@ struct OnboardingViewModelTests {
         #expect(harness.vm.flow == .joinFamily)
         #expect(harness.vm.step == .join)
         #expect(harness.vm.pendingInviteCode == "MOMSY-ABCD12")
-        #expect(harness.vm.steps == [.join, .auth, .ready])
+        #expect(harness.vm.steps == [.join, .privacy, .auth, .ready])
         #expect(harness.vm.canContinue)
     }
 
@@ -186,7 +205,7 @@ struct OnboardingViewModelTests {
 
         harness.vm.advance()
 
-        #expect(harness.vm.step == .auth)
+        #expect(harness.vm.step == .privacy)
         #expect(harness.vm.pendingInviteCode == "MOMSY-ABCD12")
         #expect(harness.pendingStore.load() == "MOMSY-ABCD12")
     }
@@ -198,13 +217,13 @@ struct OnboardingViewModelTests {
         harness.vm.pendingInviteCode = "momsy://join?code=momsy-abcd12"
 
         harness.vm.advance()
-        #expect(harness.vm.step == .auth)
+        #expect(harness.vm.step == .privacy)
 
         // Simulates the .pendingFamilyInviteDidChange notification fired by the
         // store write inside advance() -> persistPendingInviteForAuth().
         harness.vm.loadPendingInviteIfNeeded()
 
-        #expect(harness.vm.step == .auth)
+        #expect(harness.vm.step == .privacy)
     }
 
     @Test("pending onboarding invite defers automatic family setup")
@@ -238,6 +257,8 @@ struct OnboardingViewModelTests {
         vm.advance()
         #expect(vm.step == .role)
         vm.advance()
+        #expect(vm.step == .privacy)
+        vm.chooseCloudSync(true)
         #expect(vm.step == .invite)
         vm.advance()
         #expect(vm.step == .auth)
@@ -298,7 +319,7 @@ struct OnboardingViewModelTests {
 
     @Test("prepareInvite() saves baby profile, syncs it, and prepares role invite")
     func prepareInviteSavesAndSyncsProfile() async throws {
-        let harness = makeHarness()
+        let harness = makeHarness(cloudSyncEnabled: true)
         harness.vm.babyName = "Mia"
         harness.vm.parentName = "Anna"
         harness.vm.selectedInviteRole = .nanny
@@ -313,6 +334,30 @@ struct OnboardingViewModelTests {
         #expect(harness.vm.inviteCode == "MOMSY-TEST1")
         #expect(harness.vm.inviteURL == "momsy://join?code=MOMSY-TEST1")
         #expect(harness.recorder.ensuredDisplayNames == ["Anna"])
+    }
+
+    @Test("declining cloud sync skips cloud onboarding and keeps the profile local")
+    func decliningCloudSyncKeepsProfileLocal() async throws {
+        var consent: CloudSyncConsent.Status?
+        var done = false
+        let harness = makeHarness(
+            setCloudSyncConsent: { consent = $0 },
+            onDone: { done = true }
+        )
+        harness.vm.babyName = "Mia"
+        harness.vm.step = .privacy
+
+        harness.vm.chooseCloudSync(false)
+        harness.vm.finish()
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let saved = try await harness.repo.getProfile()
+
+        #expect(consent == .denied)
+        #expect(harness.vm.step == .ready)
+        #expect(harness.recorder.ensuredDisplayNames.isEmpty)
+        #expect(harness.sync.syncedProfiles.isEmpty)
+        #expect(saved?.name == "Mia")
+        #expect(done)
     }
 
     @Test("confirmJoinReplacingFamily() joins with force and advances to ready")

@@ -1,43 +1,69 @@
 # App Store Connect — App Privacy Checklist
 
-Use this checklist when submitting the next build. These settings live in
-**App Store Connect → your app → App Privacy** and **cannot** be changed from
-code. They must stay consistent with `Momsy/PrivacyInfo.xcprivacy` and
-`PRIVACY.md`.
+Use this checklist for the next build. App Store Connect answers must match
+`Momsy/PrivacyInfo.xcprivacy`, `PRIVACY.md`, the runtime consent flows, and the
+privacy manifests included by third-party SDKs.
 
-## Data Collection — declare these types
+## Data collection
 
-For each, set **Purpose = App Functionality**, **Linked to identity = No** (for
-on-device/iCloud-only types), **Used for tracking = No**.
+Declare each item for **App Functionality**, **Used for tracking = No**:
 
-- [ ] **Health & Fitness → Health** — baby health/care logs (feeding, sleep,
-      temperature, growth, diaper/stool, vaccinations).
-- [ ] **Sensitive Info** — parent's EPDS mental-health screening + mood/well-being
-      entries. (Apple classifies mental-health screening as sensitive.)
-- [ ] **Contact Info → Name** — baby's name (and account name if Sign in used).
-- [ ] **User Content → Other User Content** — AI assistant chat messages.
-- [ ] **Identifiers / Contact Info** — only if you collect account email via
-      Sign in with Apple / Google (Linked = Yes).
+- [ ] **Health & Fitness → Health** — baby health/care logs and caregiver sleep
+      records. **Linked to identity = Yes** because optional Firestore sync is
+      scoped to a Firebase user/family.
+- [ ] **Sensitive Info** — EPDS and mood/well-being records. These are currently
+      local-only, but review App Store Connect's current definition and declare
+      the app's processing accurately.
+- [ ] **Contact Info → Name** — baby's name and provider display name.
+      **Linked = Yes** when cloud sync is enabled.
+- [ ] **Contact Info → Email Address** — only when Apple/Google provides it to
+      Firebase Authentication. **Linked = Yes**.
+- [ ] **Identifiers → User ID** — anonymous or provider-backed Firebase Auth ID.
+      **Linked = Yes**.
+- [ ] **User Content → Other User Content** — synced diary text and free-form
+      care records. **Linked = Yes**.
 
-## Storage / sync note
+Optional collection still counts as collection for App Store privacy answers.
 
-- [ ] The App Privacy questionnaire has **no field for cloud storage location**.
-      Ensure the **Health** and **Sensitive Info** types above are declared —
-      that is what reflects the sensitive data flow.
+## Consent and runtime checks
 
-## Tracking
+- [ ] Fresh onboarding shows the Firebase Authentication/Firestore disclosure
+      before anonymous auth, family setup, or cloud sync.
+- [ ] **Keep data on this device** reaches the app without a Firebase user or
+      Firestore writes.
+- [ ] Existing installs without a stored choice receive the migration prompt.
+- [ ] Settings → Data & Privacy → Cloud sync can withdraw consent; after
+      withdrawal, new data remains local and live sync stops.
+- [ ] Weekly Gemini processing has separate explicit consent and sends only the
+      pre-aggregated fields named in `PRIVACY.md`.
+- [ ] Delete all data reports success only after server verification and
+      Firebase Auth deletion; pending/reauth states remain visible and retryable.
 
-- [ ] Confirm **"Data Not Used to Track You."** (`NSPrivacyTracking = false` in
-      the manifest.)
+## Third-party SDK cross-check
 
-## Privacy Policy URL
+- [ ] Archive contains Firebase Core, Authentication, Firestore, App Check, and
+      Firebase AI Logic plus Google Sign-In.
+- [ ] Archive does **not** contain Firebase Analytics, Firebase Realtime
+      Database, Firebase Storage, advertising, or tracking SDKs.
+- [ ] Review the current Firebase Apple data-disclosure page for every Firebase
+      build target present in the archive, including transitive targets.
+- [ ] Confirm whether Firebase AI monitoring is enabled in Firebase Console. If
+      enabled, update policy/App Store answers for sampled prompts, outputs, and
+      performance metrics or disable monitoring.
 
-- [ ] Set the **Privacy Policy URL** field to the public page hosting the
-      contents of `PRIVACY.md`.
-- [ ] Set the same URL in the in-app Settings → Privacy row
-      (`SettingsView.swift`, `privacyPolicyURL` constant).
+## Tracking and manifests
 
-## Cross-check before submit
+- [ ] App and widget manifests declare `NSPrivacyTracking = false`.
+- [ ] Required-reason API declarations match the APIs used in each bundle.
+- [ ] Third-party SDK privacy manifests are present and valid in the archive.
+- [ ] Generate Xcode's privacy report from the release archive and reconcile it
+      against App Store Connect before submission.
 
-- [ ] `Momsy/PrivacyInfo.xcprivacy` declared types match the App Privacy answers.
-- [ ] `PRIVACY.md` is published and reachable at the configured URL.
+## Public policy
+
+- [ ] Publish the current `PRIVACY.md` content at
+      `https://ruslanab84.github.io/-momsy-site/`.
+- [ ] Confirm the page is reachable from Settings and the paywall.
+- [ ] Confirm the effective date, support email, deletion behavior, consent
+      behavior, Firebase SDK list, and Gemini weekly-insight description match
+      the submitted binary.

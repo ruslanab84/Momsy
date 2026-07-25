@@ -10,6 +10,7 @@ struct ReadyStep: View {
     let role: String
     let lang: String
     let isJoinFlow: Bool
+    let cloudSyncEnabled: Bool
     let onStart: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
@@ -112,7 +113,9 @@ struct ReadyStep: View {
                 .bbCard(pad: 16)
                 .padding(.horizontal, 24)
 
-                Text(isJoinFlow ? loc.strings.familyJoinedReadyFootnote : loc.strings.dataStoredLocally)
+                Text(isJoinFlow
+                     ? loc.strings.familyJoinedReadyFootnote
+                     : (cloudSyncEnabled ? loc.strings.dataSyncedWithConsent : loc.strings.dataStoredLocally))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkMute)
                     .multilineTextAlignment(.center)

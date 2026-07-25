@@ -6,7 +6,7 @@ import FirebaseAI
 /// `SafetySetting`s are enforced by the model backend and block harmful
 /// generations regardless of how the prompt is phrased. Medium-and-above is
 /// the appropriate threshold for a parenting app whose only model inputs are
-/// app-built context (daily tips, weekly insights), never free-form user chat.
+/// app-built weekly-insight context, never free-form user chat.
 enum GeminiSafety {
     static let settings: [SafetySetting] = [
         SafetySetting(harmCategory: .harassment, threshold: .blockMediumAndAbove),

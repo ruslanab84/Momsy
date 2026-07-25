@@ -17,6 +17,7 @@ enum AuthError: LocalizedError {
     case reauthRequired
     case accountDeletionPending
     case accountDeletionFinished
+    case cloudSyncConsentRequired
     case nonceGenerationFailed
     case anonymousSignInRestricted
     case providerAccountConflict
@@ -29,6 +30,7 @@ enum AuthError: LocalizedError {
         case .reauthRequired:        return "Please sign in again to delete your account."
         case .accountDeletionPending: return "Previous account deletion is still finishing. Please try again."
         case .accountDeletionFinished: return "Previous account deletion finished. Please sign in again."
+        case .cloudSyncConsentRequired: return "Allow cloud sync before using family sharing."
         case .nonceGenerationFailed: return "Could not start Sign in with Apple. Please try again."
         case .anonymousSignInRestricted: return "Sign in with Apple or Google before creating or joining a family."
         case .providerAccountConflict: return "This email is already linked to a different sign-in method. Use the provider you originally signed in with."
@@ -62,6 +64,7 @@ final class AuthManager: ObservableObject {
     }
 
     private func installStateListenerIfPossible() {
+        guard CloudSyncConsent.isGranted() else { return }
         guard FirebaseApp.app() != nil else { return }
         guard authStateHandle == nil else { return }
         firebaseUser = Auth.auth().currentUser
@@ -112,6 +115,7 @@ final class AuthManager: ObservableObject {
 
     @MainActor
     func requireAnonymousSignInIfNeeded() async throws {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         installStateListenerIfPossible()
         guard FirebaseApp.app() != nil else { return }
         guard Auth.auth().currentUser == nil else {

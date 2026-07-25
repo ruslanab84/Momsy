@@ -3,7 +3,7 @@ import Combine
 import AuthenticationServices
 
 enum OBStep: Int, CaseIterable, Equatable {
-    case join, age, profile, role, invite, auth, ready
+    case join, age, profile, role, privacy, invite, auth, ready
 }
 
 enum OnboardingFlow: Equatable {
@@ -34,6 +34,7 @@ final class OnboardingViewModel: ObservableObject {
     @Published var inviteError: Error?
     @Published var pendingInviteCode = ""
     @Published var showJoinConfirm = false
+    @Published private(set) var cloudSyncEnabled: Bool
 
     let authManager: AuthManager
 
@@ -48,6 +49,7 @@ final class OnboardingViewModel: ObservableObject {
     private let joinFamily: @MainActor (_ code: String, _ force: Bool) async throws -> Void
     private let syncAfterJoiningFamily: @MainActor () async -> Void
     private let recoverPendingAccountDeletion: @MainActor () async -> Bool
+    private let setCloudSyncConsent: (CloudSyncConsent.Status) -> Void
     private let onDone: () -> Void
     private var savedProfile: BabyProfile?
     private var hasSyncedSavedProfile = false
@@ -64,6 +66,8 @@ final class OnboardingViewModel: ObservableObject {
          analytics: any AnalyticsServiceProtocol,
          pushNotifications: any PushNotificationServiceProtocol,
          recoverPendingAccountDeletion: @MainActor @escaping () async -> Bool = { false },
+         initialCloudSyncEnabled: Bool = false,
+         setCloudSyncConsent: @escaping (CloudSyncConsent.Status) -> Void = { _ in },
          onDone: @escaping () -> Void) {
         self.saveBabyProfileUC = saveBabyProfile
         self.appState = appState
@@ -77,6 +81,8 @@ final class OnboardingViewModel: ObservableObject {
         self.analytics = analytics
         self.pushNotifications = pushNotifications
         self.recoverPendingAccountDeletion = recoverPendingAccountDeletion
+        self.cloudSyncEnabled = initialCloudSyncEnabled
+        self.setCloudSyncConsent = setCloudSyncConsent
         self.onDone = onDone
 
         if let code = pendingInviteStore.load() {
@@ -89,9 +95,9 @@ final class OnboardingViewModel: ObservableObject {
     var steps: [OBStep] {
         switch flow {
         case .createProfile:
-            return [.age, .profile, .role, .invite, .auth, .ready]
+            return [.age, .profile, .role, .privacy, .invite, .auth, .ready]
         case .joinFamily:
-            return [.join, .auth, .ready]
+            return [.join, .privacy, .auth, .ready]
         }
     }
 
@@ -105,6 +111,8 @@ final class OnboardingViewModel: ObservableObject {
             return !babyName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         case .join:
             return JoinDeeplink.normalize(rawCode: pendingInviteCode) != nil
+        case .privacy:
+            return false
         default:
             return true
         }
@@ -116,6 +124,7 @@ final class OnboardingViewModel: ObservableObject {
         case .age:     return .bbCoral
         case .profile: return .bbMint
         case .role:    return .bbLilac
+        case .privacy: return .bbMint
         case .invite:  return .bbRose
         case .auth:    return .bbSky
         case .ready:   return .bbButter
@@ -151,6 +160,25 @@ final class OnboardingViewModel: ObservableObject {
         if step == .join {
             guard persistPendingInviteForAuth() else { return }
         }
+        moveForward()
+    }
+
+    func chooseCloudSync(_ enabled: Bool) {
+        cloudSyncEnabled = enabled
+        setCloudSyncConsent(enabled ? .granted : .denied)
+        if enabled {
+            moveForward()
+        } else if flow == .joinFamily {
+            startCreateFlow()
+        } else {
+            forward = true
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                step = .ready
+            }
+        }
+    }
+
+    private func moveForward() {
         forward = true
         if let idx = steps.firstIndex(of: step), idx + 1 < steps.count {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
@@ -319,6 +347,10 @@ final class OnboardingViewModel: ObservableObject {
         }
         Task {
             let profile = try? await saveBabyProfileLocallyIfNeeded()
+            guard cloudSyncEnabled else {
+                onDone()
+                return
+            }
             try? await ensureFamilyReady(familyDisplayName)
             if let profile, !hasSyncedSavedProfile {
                 try? await syncRepo.syncBabyProfile(profile)
@@ -359,6 +391,7 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     private func prepareInvite(regenerate: Bool) async {
+        guard cloudSyncEnabled else { return }
         guard !isPreparingInvite else { return }
         isPreparingInvite = true
         inviteError = nil

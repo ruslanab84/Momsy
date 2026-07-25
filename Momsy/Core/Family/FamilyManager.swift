@@ -98,6 +98,7 @@ final class FamilyManager: ObservableObject {
     /// Called by AuthManager's state listener on every sign-in / app launch with existing session.
     /// Reads the user's familyId from Firestore; creates a new family if none exists.
     func setup(uid: String, displayName: String) async throws {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         guard !joinInFlight else {
             Self.log.info("Deferring family setup — invite join in flight")
             return
@@ -224,6 +225,7 @@ final class FamilyManager: ObservableObject {
 
     @discardableResult
     func createFamily(for uid: String) async throws -> String {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         let ref = db.collection("families").document()
         try await ref.setData([
             "createdAt": Timestamp(date: Date()),
@@ -244,6 +246,7 @@ final class FamilyManager: ObservableObject {
 
     /// Accepts an invite code, looks it up in Firestore, and assigns this user to that family.
     func joinFamily(code: String, uid: String, force: Bool = false) async throws {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         resetStaleCacheIfNeeded(for: uid)
         // Accept either a bare code or a full `momsy://join?code=…` link a user may
         // have pasted; reject anything else so it can't become a `//` Firestore path.

@@ -59,7 +59,7 @@ struct BabySyncBackfillTests {
         PendingWritesStore.shared.clear()
         defer { PendingWritesStore.shared.clear() }
 
-        let service = BabySyncService()
+        let service = BabySyncService(cloudSyncAllowed: { true })
         try await service.setLog(DummyLog(id: "log-1", amountMl: 120),
                                  id: "log-1", to: "feedingLogs")
 
@@ -81,8 +81,8 @@ struct BabySyncBackfillTests {
         PendingWritesStore.shared.clear()
         defer { PendingWritesStore.shared.clear() }
 
-        try await BabySyncService(defaults: defaults).setLog(DummyLog(id: "log-9", amountMl: 60),
-                                                             id: "log-9", to: "feedingLogs")
+        try await BabySyncService(defaults: defaults, cloudSyncAllowed: { true })
+            .setLog(DummyLog(id: "log-9", amountMl: 60), id: "log-9", to: "feedingLogs")
 
         let queued = PendingWritesStore.shared.all()
         #expect(queued.count == 1)
@@ -95,7 +95,7 @@ struct BabySyncBackfillTests {
         PendingWritesStore.shared.clear()
         defer { PendingWritesStore.shared.clear() }
 
-        let repo = BabySyncRepository(service: BabySyncService())
+        let repo = BabySyncRepository(service: BabySyncService(cloudSyncAllowed: { true }))
         let log = FeedingLog(id: "feed-7", startedAt: Date(), endedAt: nil,
                              durationMin: 10, side: .left, amountMl: 80,
                              addedBy: "u", addedByName: "U")
@@ -105,5 +105,17 @@ struct BabySyncBackfillTests {
         #expect(queued.count == 1)
         #expect(queued[0].collection == "feedingLogs")
         #expect(queued[0].docId == "feed-7")   // stable id, not an auto-generated doc id
+    }
+
+    @Test func setLogDoesNotQueueWithoutCloudConsent() async throws {
+        clearPath()
+        PendingWritesStore.shared.clear()
+        defer { PendingWritesStore.shared.clear() }
+
+        try await BabySyncService(cloudSyncAllowed: { false })
+            .setLog(DummyLog(id: "local-only", amountMl: 60),
+                    id: "local-only", to: "feedingLogs")
+
+        #expect(PendingWritesStore.shared.all().isEmpty)
     }
 }

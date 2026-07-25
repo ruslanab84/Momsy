@@ -103,6 +103,58 @@ struct L10n {
     var weeklyInsightAIConsentDeny: String {
         s("Don’t Share", "Не передавать", "Nicht teilen", "No compartir", "Ne pas partager", "Não partilhar", "不共享")
     }
+    var cloudSyncConsentTitle: String {
+        s("Choose where your data lives", "Выберите, где хранить данные", "Speicherort der Daten wählen", "Elige dónde guardar tus datos", "Choisissez où stocker vos données", "Escolha onde guardar os dados", "选择数据存储位置")
+    }
+    var cloudSyncConsentMessage: String {
+        s("Cloud sync is optional. If you allow it, Momsy creates a private Firebase account and sends your family and care data to Google Firestore for backup and sync.",
+          "Облачная синхронизация необязательна. Если вы разрешите её, Momsy создаст приватный аккаунт Firebase и отправит семейные данные и записи ухода в Google Firestore для резервного копирования и синхронизации.",
+          "Cloud-Sync ist optional. Mit Ihrer Zustimmung erstellt Momsy ein privates Firebase-Konto und sendet Familien- und Betreuungsdaten zur Sicherung und Synchronisierung an Google Firestore.",
+          "La sincronización es opcional. Si la permites, Momsy crea una cuenta privada de Firebase y envía datos familiares y de cuidados a Google Firestore para guardarlos y sincronizarlos.",
+          "La synchronisation est facultative. Si vous l’autorisez, Momsy crée un compte Firebase privé et envoie les données familiales et de soins à Google Firestore pour les sauvegarder et les synchroniser.",
+          "A sincronização é opcional. Se permitir, a Momsy cria uma conta Firebase privada e envia dados familiares e de cuidados para o Google Firestore para cópia e sincronização.",
+          "云同步是可选的。允许后，Momsy 会创建私有 Firebase 账户，并将家庭和护理数据发送到 Google Firestore 进行备份和同步。")
+    }
+    var cloudSyncConsentJoinMessage: String {
+        s("Joining a family requires cloud sync. Momsy uses Firebase Authentication and Google Firestore to access the shared family workspace.",
+          "Для присоединения к семье нужна облачная синхронизация. Momsy использует Firebase Authentication и Google Firestore для доступа к общему семейному пространству.",
+          "Der Familienbeitritt erfordert Cloud-Sync. Momsy nutzt Firebase Authentication und Google Firestore für den gemeinsamen Familienbereich.",
+          "Unirse a una familia requiere sincronización. Momsy usa Firebase Authentication y Google Firestore para acceder al espacio familiar compartido.",
+          "Rejoindre une famille nécessite la synchronisation. Momsy utilise Firebase Authentication et Google Firestore pour accéder à l’espace familial partagé.",
+          "Entrar numa família requer sincronização. A Momsy usa Firebase Authentication e Google Firestore para aceder ao espaço partilhado.",
+          "加入家庭需要云同步。Momsy 使用 Firebase Authentication 和 Google Firestore 访问共享家庭空间。")
+    }
+    var cloudSyncAnonymousAccountDisclosure: String {
+        s("If you skip Apple or Google sign-in, Firebase creates an anonymous account identifier.",
+          "Если вы пропустите вход через Apple или Google, Firebase создаст анонимный идентификатор аккаунта.",
+          "Ohne Apple- oder Google-Anmeldung erstellt Firebase eine anonyme Konto-ID.",
+          "Si omites el inicio con Apple o Google, Firebase crea un identificador de cuenta anónimo.",
+          "Sans connexion Apple ou Google, Firebase crée un identifiant de compte anonyme.",
+          "Sem início de sessão Apple ou Google, o Firebase cria um identificador anónimo.",
+          "如果跳过 Apple 或 Google 登录，Firebase 会创建匿名账户标识符。")
+    }
+    var cloudSyncFirestoreDisclosure: String {
+        s("Baby profile, health, care, diary text, and selected caregiver records sync through Google Firestore.",
+          "Профиль ребёнка, данные о здоровье и уходе, текст дневника и отдельные записи родителя синхронизируются через Google Firestore.",
+          "Babyprofil, Gesundheits- und Betreuungsdaten, Tagebuchtext und ausgewählte Betreuungsperson-Daten werden über Google Firestore synchronisiert.",
+          "El perfil, los datos de salud y cuidados, el texto del diario y algunos registros del cuidador se sincronizan mediante Google Firestore.",
+          "Le profil, les données de santé et de soins, le texte du journal et certains dossiers du parent sont synchronisés via Google Firestore.",
+          "O perfil, os dados de saúde e cuidados, o texto do diário e alguns registos do cuidador são sincronizados pelo Google Firestore.",
+          "宝宝资料、健康与护理数据、日记文本及部分照护者记录会通过 Google Firestore 同步。")
+    }
+    var cloudSyncOptionalDisclosure: String {
+        s("You can turn cloud sync off later in Settings. Weekly AI insights ask for separate permission.",
+          "Синхронизацию можно отключить позже в Настройках. Для еженедельных AI-отчётов запрашивается отдельное разрешение.",
+          "Cloud-Sync kann später in den Einstellungen deaktiviert werden. Wöchentliche KI-Berichte benötigen eine separate Zustimmung.",
+          "Puedes desactivar la sincronización en Ajustes. Los informes semanales con IA piden un permiso aparte.",
+          "Vous pourrez désactiver la synchronisation dans Réglages. Les bilans IA demandent une autorisation distincte.",
+          "Pode desativar a sincronização nas Definições. Os relatórios semanais com IA pedem autorização separada.",
+          "之后可在“设置”中关闭云同步。每周 AI 洞察会另行请求许可。")
+    }
+    var cloudSyncAllow: String { s("Allow cloud sync", "Разрешить синхронизацию", "Cloud-Sync erlauben", "Permitir sincronización", "Autoriser la synchronisation", "Permitir sincronização", "允许云同步") }
+    var cloudSyncKeepLocal: String { s("Keep data on this device", "Хранить только на устройстве", "Daten auf diesem Gerät behalten", "Guardar en este dispositivo", "Garder sur cet appareil", "Guardar neste dispositivo", "仅保存在此设备") }
+    var cloudSyncUseLocally: String { s("Use Momsy locally instead", "Использовать Momsy локально", "Momsy stattdessen lokal verwenden", "Usar Momsy localmente", "Utiliser Momsy localement", "Usar a Momsy localmente", "改为本地使用 Momsy") }
+    var readPrivacyPolicy: String { s("Read Privacy Policy", "Открыть Политику конфиденциальности", "Datenschutzrichtlinie lesen", "Leer la Política de privacidad", "Lire la Politique de confidentialité", "Ler a Política de Privacidade", "阅读隐私政策") }
     var weeklyInsightSleepHeader: String {
         s("Sleep", "Сон", "Schlaf", "Sueño", "Sommeil", "Sono", "睡眠")
     }
@@ -977,15 +1029,34 @@ struct L10n {
           "您宝宝的健康记录和您的身心状态记录（包括 EPDS 筛查）保存在本设备上，并通过您的私人 Firebase 账户同步，以便在您的各设备间保持一致。它们绝不会与第三方共享或用于广告。")
     }
     var dangerZone: String      { s("Data & Privacy", "Данные и конфиденциальность", "Daten & Datenschutz", "Datos y privacidad", "Données et confidentialité", "Dados e privacidade", "数据与隐私") }
+    var cloudSync: String { s("Cloud sync", "Облачная синхронизация", "Cloud-Synchronisierung", "Sincronización en la nube", "Synchronisation cloud", "Sincronização na nuvem", "云同步") }
+    var cloudSyncEnabledHint: String {
+        s("Firebase Authentication and Firestore keep your data backed up and synced.",
+          "Firebase Authentication и Firestore сохраняют резервную копию и синхронизируют данные.",
+          "Firebase Authentication und Firestore sichern und synchronisieren Ihre Daten.",
+          "Firebase Authentication y Firestore guardan y sincronizan tus datos.",
+          "Firebase Authentication et Firestore sauvegardent et synchronisent vos données.",
+          "Firebase Authentication e Firestore guardam e sincronizam os seus dados.",
+          "Firebase Authentication 和 Firestore 会备份并同步您的数据。")
+    }
+    var cloudSyncDisabledHint: String {
+        s("New data stays on this device. Existing cloud data remains until you delete it.",
+          "Новые данные остаются на этом устройстве. Ранее загруженные данные хранятся до удаления.",
+          "Neue Daten bleiben auf diesem Gerät. Vorhandene Cloud-Daten bleiben bis zur Löschung gespeichert.",
+          "Los datos nuevos permanecen en este dispositivo. Los datos existentes en la nube se conservan hasta que los elimines.",
+          "Les nouvelles données restent sur cet appareil. Les données cloud existantes restent jusqu’à leur suppression.",
+          "Os novos dados ficam neste dispositivo. Os dados existentes na nuvem permanecem até serem eliminados.",
+          "新数据仅保存在此设备。已有云端数据会保留至您将其删除。")
+    }
     var deleteAllData: String   { s("Delete all data", "Удалить все данные", "Alle Daten löschen", "Eliminar todos los datos", "Supprimer toutes les données", "Eliminar todos os dados", "删除所有数据") }
     var deleteAllDataConfirm: String {
-        s("This permanently deletes your account and every record — on this device and in the cloud — including health and well-being data. This cannot be undone.",
-          "Это навсегда удалит ваш аккаунт и все записи — на этом устройстве и в облаке — включая данные о здоровье и самочувствии. Это действие необратимо.",
-          "Dies löscht dauerhaft dein Konto und alle Einträge – auf diesem Gerät und in der Cloud – einschließlich Gesundheits- und Wohlbefindensdaten. Dies kann nicht rückgängig gemacht werden.",
-          "Esto elimina permanentemente tu cuenta y todos los registros — en este dispositivo y en la nube — incluidos los datos de salud y bienestar. Esto no se puede deshacer.",
-          "Ceci supprime définitivement votre compte et tous les enregistrements — sur cet appareil et dans le cloud — y compris les données de santé et de bien-être. Cette action est irréversible.",
-          "Isto elimina permanentemente a sua conta e todos os registos — neste dispositivo e na nuvem — incluindo dados de saúde e bem-estar. Esta ação não pode ser anulada.",
-          "这将永久删除您的账户和所有记录——包括本设备和云端——其中包括健康和身心状态数据。此操作无法撤销。")
+        s("This deletes local data immediately and requests permanent deletion of your cloud data and account. If Firebase needs a network connection or recent sign-in, Momsy keeps the request pending and asks you to finish it. Shared family records needed by other members may remain.",
+          "Локальные данные удалятся сразу, а облачные данные и аккаунт будут отправлены на безвозвратное удаление. Если Firebase потребуется интернет или повторный вход, Momsy сохранит запрос и попросит завершить его. Общие семейные записи, нужные другим участникам, могут сохраниться.",
+          "Lokale Daten werden sofort gelöscht und die dauerhafte Löschung von Cloud-Daten und Konto wird angefordert. Falls Firebase Internet oder eine erneute Anmeldung benötigt, bleibt die Anfrage offen. Von anderen Familienmitgliedern benötigte gemeinsame Daten können bestehen bleiben.",
+          "Los datos locales se eliminan de inmediato y se solicita la eliminación permanente de los datos en la nube y la cuenta. Si Firebase necesita conexión o un inicio de sesión reciente, la solicitud queda pendiente. Los datos familiares compartidos que otros miembros necesiten pueden conservarse.",
+          "Les données locales sont supprimées immédiatement et la suppression définitive des données cloud et du compte est demandée. Si Firebase exige une connexion ou une reconnexion récente, la demande reste en attente. Les données familiales partagées utiles aux autres membres peuvent être conservées.",
+          "Os dados locais são eliminados de imediato e é pedida a eliminação permanente dos dados na nuvem e da conta. Se o Firebase precisar de ligação ou início de sessão recente, o pedido fica pendente. Dados familiares partilhados necessários a outros membros podem permanecer.",
+          "本地数据会立即删除，并请求永久删除云端数据和账户。如果 Firebase 需要网络或重新登录，请求会保持待处理状态。其他家庭成员需要的共享记录可能会保留。")
     }
     var deleteAccountSubscriptionWarning: String {
         s("If you have an active Apple subscription, deleting your Momsy account does not cancel it. Billing continues until you cancel in the App Store.",
@@ -1133,6 +1204,15 @@ struct L10n {
     var caregiver: String       { s("Caregiver",     "Кто следит",    "Betreuer",      "Cuidador", "Personne en charge", "Cuidador", "照护者") }
     var stage: String           { s("Stage",         "Стадия",        "Stufe",         "Etapa", "Étape", "Fase", "阶段") }
     var dataStoredLocally: String { s("Data is stored only on your phone. Nothing extra.", "Данные хранятся только на вашем телефоне. Ничего лишнего.", "Daten werden nur auf Ihrem Telefon gespeichert.", "Los datos se guardan solo en tu teléfono. Nada más.", "Les données sont stockées uniquement sur votre téléphone. Rien de plus.", "Os dados são guardados apenas no seu telefone. Nada mais.", "数据仅保存在您的手机上。别无其他。") }
+    var dataSyncedWithConsent: String {
+        s("Cloud sync is on. You can turn it off anytime in Settings.",
+          "Облачная синхронизация включена. Её можно отключить в Настройках.",
+          "Cloud-Sync ist aktiviert und kann jederzeit in den Einstellungen deaktiviert werden.",
+          "La sincronización está activada. Puedes desactivarla en Ajustes.",
+          "La synchronisation est activée. Vous pouvez la désactiver dans Réglages.",
+          "A sincronização está ativa. Pode desativá-la nas Definições.",
+          "云同步已开启，可随时在“设置”中关闭。")
+    }
     var genderLabel: String      { s("GENDER",         "ПОЛ",           "GESCHLECHT",   "SEXO", "SEXE", "SEXO", "性别") }
     var genderBoy: String        { s("Boy",            "Мальчик",       "Junge",        "Niño", "Garçon", "Menino", "男孩") }
     var genderGirl: String       { s("Girl",           "Девочка",       "Mädchen",      "Niña", "Fille", "Menina", "女孩") }

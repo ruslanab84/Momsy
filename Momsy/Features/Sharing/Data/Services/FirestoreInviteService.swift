@@ -68,6 +68,7 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
         }
         defaults.removeObject(forKey: syncedCodeKey)
         pendingWrite = Task {
+            guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
             guard let familyId else { throw FamilyError.noFamilyId }
             try await self.writeToFirestore(code: code, expiry: exp, familyId: familyId)
             await self.revokeInvite(previousCode, replacedBy: code)
@@ -90,6 +91,7 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
     /// before the user can share it. Call this from SharingViewModel before showing InviteSheet.
     @discardableResult
     func prepareInvite() async throws -> String {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         let code = currentCode()
         try await pendingWrite?.value
         return code
@@ -97,12 +99,14 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
 
     @discardableResult
     func regenerateAndSync() async throws -> String {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         let code = regenerate()
         try await pendingWrite?.value
         return code
     }
 
     func updateInviteRole(code: String, role: FamilyRole) async throws {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         let familyId = defaults.string(forKey: kFamilyIdDefaultsKey)
         let expiry = defaults.object(forKey: expiryKey) as? Date
         guard
@@ -124,6 +128,7 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
     }
 
     private func syncIfNeeded(code: String, expiry: Date, familyId: String) {
+        guard CloudSyncConsent.isGranted() else { return }
         guard defaults.string(forKey: syncedCodeKey) != "\(familyId)|\(code)" else { return }
         pendingWrite = Task {
             try await self.writeToFirestore(code: code, expiry: expiry, familyId: familyId)

@@ -223,6 +223,7 @@ final class DeleteAccountUseCase {
     func execute() async throws {
         var cloudError: Error?
         var authError: Error?
+        var completionError: Error?
 
         if let uid = auth.currentUID {
             // Persist the intent FIRST so a deletion that doesn't reach the backend is
@@ -236,6 +237,7 @@ final class DeleteAccountUseCase {
                     // Cache said done but the SERVER still has the user doc. Keep the marker
                     // AND keep the session alive so launch recovery can finish the erase while
                     // still authenticated — do NOT delete/sign out the account yet.
+                    completionError = AuthError.accountDeletionPending
                 } else {
                     do {
                         try await auth.deleteAccount(expectedUID: uid)
@@ -259,6 +261,7 @@ final class DeleteAccountUseCase {
         FamilyManager.shared.reset()
 
         if let cloudError { throw cloudError }
+        if let completionError { throw completionError }
     }
 }
 

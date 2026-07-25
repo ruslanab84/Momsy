@@ -120,6 +120,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
 
     @MainActor
     func downloadAndMergeWhenReady() async {
+        guard CloudSyncConsent.isGranted() else { return }
         guard FirebaseApp.app() != nil else { return }
         guard !hasRun else { return }
         if FamilyManager.shared.familyId == nil {
@@ -185,6 +186,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// read the active babyId at query time, so the merge targets the new child.
     @MainActor
     func resyncActiveBaby() async {
+        guard CloudSyncConsent.isGranted() else { return }
         guard FirebaseApp.app() != nil else { return }
         guard FamilyManager.shared.familyId != nil else { return }
         await syncBabyProfile()
@@ -202,6 +204,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// delta up itself.
     @MainActor
     func resyncSleepLive() async {
+        guard CloudSyncConsent.isGranted() else { return }
         guard FirebaseApp.app() != nil else { return }
         guard hasRun else { return }
         guard FamilyManager.shared.familyId != nil else { return }
@@ -221,6 +224,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// `.task` download. Debounced so a quick background→foreground bounce is a no-op.
     @MainActor
     func resyncAll() async {
+        guard CloudSyncConsent.isGranted() else { return }
         guard FirebaseApp.app() != nil else { return }
         guard hasRun else { return }
         // Foreground re-pull is a cheap delta now (incremental sync), but a quick
@@ -240,6 +244,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// so two `downloadAllBabies` never interleave their `ActiveBaby` mutations.
     @MainActor
     func forceResyncAll() async {
+        guard CloudSyncConsent.isGranted() else { return }
         guard FirebaseApp.app() != nil else { return }
         guard FamilyManager.shared.familyId != nil else { return }
         let deadline = Date().addingTimeInterval(8)

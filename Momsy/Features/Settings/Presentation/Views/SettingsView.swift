@@ -30,6 +30,7 @@ struct SettingsView: View {
                 vaccinationScheduleSection
                 childrenSection
                 accountSection
+                cloudSyncSection
                 aboutSection
                 dangerSection
             }
@@ -365,6 +366,39 @@ struct SettingsView: View {
                     .foregroundColor(.bbInkMute)
                     .padding(.horizontal, 2)
             }
+        }
+    }
+
+    // MARK: - About
+
+    private var cloudSyncSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BBSectionLabel(text: lm.strings.dangerZone)
+
+            Toggle(isOn: Binding(
+                get: { vm.cloudSyncEnabled },
+                set: vm.setCloudSyncEnabled
+            )) {
+                HStack(spacing: 14) {
+                    iconSquare(systemName: "arrow.triangle.2.circlepath", bg: .bbMint)
+                    Text(lm.strings.cloudSync)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInk)
+                }
+            }
+            .tint(.bbCoralDeep)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color.bbCard)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .bbShadow()
+
+            Text(vm.cloudSyncEnabled
+                 ? lm.strings.cloudSyncEnabledHint
+                 : lm.strings.cloudSyncDisabledHint)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .padding(.horizontal, 2)
         }
     }
 

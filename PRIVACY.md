@@ -1,82 +1,145 @@
 # Momsy Privacy Policy
 
-**Effective date:** 2 June 2026
+**Effective date:** 25 July 2026
 
-Momsy ("the app", "we", "us") helps parents track their baby's care and the
-parent's own well-being. We take the privacy of your family's data seriously.
-This policy explains what we collect, where it is stored, and the choices you
-have. We **do not** sell your data and we **do not** use it for cross-app
-tracking or advertising.
+Momsy ("the app", "we", "us") helps parents and caregivers track a baby's care
+and their own well-being. This policy explains what Momsy processes, when data
+leaves your device, which service providers receive it, and the choices you
+have. We do **not** sell data, serve ads, or track you across other companies'
+apps or websites.
 
-## 1. Information we process
+## 1. Information Momsy processes
 
-| Category | Examples | Stored on device | Synced to your private cloud |
-|----------|----------|:---:|:---:|
-| Baby profile | Baby's name, birth date, gender | ✓ | Firestore |
-| Baby health & care | Feeding, sleep, diaper & stool logs, temperature, growth measurements, vaccinations, bath, walks, pumping | ✓ | Firestore |
-| Parent well-being | Mood and energy entries, sleep, water intake, and the **EPDS postpartum-depression screening score** | ✓ | Firestore |
-| AI daily tips | A short summary of your baby's age and care context used to generate the daily tip | — | Google AI (Gemini) |
-| Family sharing | Invite codes, family/member records | — | Firestore |
-| Account | Anonymous device identity, or Sign in with Apple / Google identity | — | Firebase Authentication |
+| Category | Examples | On device | With optional cloud sync |
+|---|---|:---:|:---:|
+| Baby profile | Name, birth date, stage, gender | Yes | Google Cloud Firestore |
+| Baby health and care | Feeding, sleep, diaper and stool, temperature, growth, vaccinations, symptoms, pumping, foods and reactions, doctor visits, bath and walk records | Yes | Google Cloud Firestore |
+| Diary | Diary text and dates | Yes | Google Cloud Firestore |
+| Caregiver records | Parent sleep and water intake | Yes | Google Cloud Firestore |
+| Parent well-being | Mood, energy, and EPDS postpartum-depression screening score | Yes | No; these records remain local |
+| Family sharing | Invite codes, family membership, member name and role | Limited local state | Google Cloud Firestore |
+| Account | Anonymous Firebase user ID, or Apple/Google account ID, name, and email when provided by that sign-in service | Limited local state | Firebase Authentication |
+| Subscription | StoreKit entitlement status | Yes | Processed by Apple; Momsy does not send it to Firebase |
 
-**Sensitive data notice.** Baby health records and the parent's EPDS
-mental-health screening are health-related and sensitive. We process them only
-to provide the app's tracking, charts, and reminders — never for advertising,
-profiling, or sharing with third parties beyond the infrastructure providers
-listed below.
+Momsy has no diary-photo feature and does not include or use Firebase Storage.
+The daily tip shown in Today uses built-in local content; it is not generated
+by Gemini.
 
-## 2. Where your data is stored
+## 2. Optional Firebase cloud sync
 
-- **On your device.** All entries are stored locally on your iPhone.
-- **Firebase (Google).** Momsy uses Google Firebase as its single cloud backend.
-  Your data — including baby health records and your EPDS / well-being entries —
-  is stored in **Firebase Firestore** under a private account so it stays in sync across your own devices and any
-  family members you invite. To give you sync without a mandatory login, the app
-  signs in **anonymously** by default; you can optionally link a Sign in with
-  Apple or Google account. We cannot use your data for any purpose other than
-  operating the app. Google's handling of this infrastructure is governed by
-  [Google's Privacy Policy](https://policies.google.com/privacy).
-- **Google AI (Gemini).** To generate the daily tip, a short, non-identifying
-  summary of your baby's age and care context is sent to Google's Gemini model.
-  No EPDS scores or account identifiers are sent.
+Cloud sync is off until you choose whether to allow it during onboarding. If
+you allow it:
 
-## 3. How we use your data
+- Momsy initializes a private Firebase identity. If you skip Apple or Google
+  sign-in, Firebase Authentication creates an anonymous account identifier.
+- The cloud-enabled categories in the table above are sent to Google Cloud
+  Firestore so they can be backed up, restored on your devices, and shared with
+  family members you invite.
+- Firebase App Check sends app/device attestation material and short-lived
+  tokens to verify that requests come from the genuine app.
+- Firebase SDK requests may include service data such as device and OS type,
+  app bundle/version, SDK version, model name for AI calls, and IP address.
 
-- To provide core functionality: tracking, charts, reminders, and the daily tip.
-- To sync your data across your own devices and, optionally, with family members
-  you invite.
-- To generate the AI daily tip.
+You can turn cloud sync off in **Settings → Data & Privacy → Cloud sync**.
+After you turn it off, Momsy stops new Firestore sync and live cloud updates.
+Data already stored in Firebase remains there until you delete it through the
+app or request deletion from us. Turning cloud sync off does not delete data.
 
-We do **not** use your data for advertising and we do **not** track you across
-other apps or websites (`NSPrivacyTracking = false`). We do **not** share your
-data with third parties other than the infrastructure providers named above.
+Joining or using a shared family requires cloud sync because the shared family
+workspace exists in Firestore.
 
-## 4. Data retention and deletion
+## 3. Weekly AI insights
 
-- Local data remains until you delete entries in the app or delete the app.
-- Cloud data in Firebase is retained while your account is active.
-- **Delete everything yourself, anytime.** Open **Settings → Data & Privacy →
-  Delete all data**. This permanently erases your account and every record — on
-  this device and in the cloud — including health and well-being data. The action
-  cannot be undone, and the app returns to its first-launch state.
-- You may also email us (below) to request deletion.
+For Premium users, Momsy can automatically create one insight for the last
+completed week. Before the first Gemini request, Momsy asks for separate
+permission to share the weekly-report data with Google Gemini.
 
-## 5. Children's data
+If you allow it, Momsy sends **pre-aggregated statistics**, not raw log rows:
+the baby's age, sleep totals and trends, feeding counts, diaper count, names of
+new foods and flagged allergens/reactions, and developmental-leap signals.
+Momsy does not send account identifiers, EPDS scores, diary text, or photos to
+Gemini. The generated insight is stored on your device.
 
-Momsy is intended for use by parents and caregivers. Information about a child is
-entered by the parent and processed solely to provide care-tracking features for
-that family. The app is not directed at children.
+If you choose **Don't Share**, Momsy uses its non-AI fallback and does not send
+weekly-report data to Gemini. Firebase AI Logic processes the prompt and model
+output through the configured Gemini Developer API; Firebase AI Logic itself
+does not store that content, but the Gemini provider's terms and retention
+rules apply.
 
-## 6. Your choices
+## 4. Service providers and SDKs
 
-- Use the app with the default anonymous account to avoid linking your identity.
-- Link or unlink a Sign in with Apple / Google account at any time.
-- Delete individual entries, or erase all data and your account, from
-  **Settings → Data & Privacy → Delete all data**.
+Momsy includes only the following third-party services that process app data:
 
-## 7. Contact
+- **Google Firebase:** Firebase Core, Authentication, Cloud Firestore, App
+  Check, and Firebase AI Logic. These provide authentication, optional cloud
+  sync, backend abuse protection, and consented weekly AI insights.
+- **Google Sign-In:** used only when you choose Google as an account provider.
+- **Apple:** Sign in with Apple and StoreKit, used when you choose Apple
+  sign-in or manage a subscription.
 
-Questions or deletion requests: **rusikabdulov@gmail.com**
+Momsy does not include Firebase Analytics, Firebase Realtime Database,
+Firebase Storage, advertising SDKs, or third-party tracking SDKs.
 
-We may update this policy; material changes will be reflected by a new effective
-date above.
+Google's processing is governed by
+[Google's Privacy Policy](https://policies.google.com/privacy) and applicable
+Firebase/Gemini service terms. Apple's processing is governed by
+[Apple's Privacy Policy](https://www.apple.com/legal/privacy/).
+
+## 5. How data is used
+
+We use data only to:
+
+- provide local tracking, charts, reminders, and daily tips;
+- provide cloud backup, restore, and invited-family sync when you allow it;
+- authenticate and protect private Firebase access;
+- generate weekly AI insights when you separately allow Gemini processing;
+- verify subscription access through StoreKit.
+
+We do not use data for advertising, data-broker sales, or cross-app tracking.
+
+## 6. Retention and deletion
+
+- Local records remain until you delete them, use **Delete all data**, or
+  delete the app.
+- Firebase data remains while the related account/family is active or until a
+  deletion request completes.
+- Open **Settings → Data & Privacy → Delete all data** to erase local data and
+  request permanent deletion of your Firebase cloud footprint and Firebase
+  Authentication account. Momsy reports completion only after the backend
+  confirms the cloud footprint is gone and Firebase Auth deletion succeeds.
+- Firebase may require a network connection or recent Apple/Google
+  reauthentication. In that case, Momsy keeps the deletion request pending,
+  blocks cloud restore for that account, prompts you to reauthenticate when
+  needed, and retries before cloud sync on a later launch. Do not treat the
+  account as deleted until Momsy confirms completion.
+- In a shared family, records that belong to the shared workspace and are still
+  needed by other family members may remain; Momsy removes your membership and
+  account data. Contact us if you need help with shared-family deletion.
+- Deleting a Momsy account does not cancel an Apple subscription. Subscriptions
+  are managed separately in the App Store.
+
+You may also email us to request or finish deletion.
+
+## 7. Children's data
+
+Momsy is intended for parents and caregivers, not children. Information about
+a child is entered by an adult and processed only to provide the features
+described in this policy. The adult is responsible for having authority to
+enter and share that child's information.
+
+## 8. Your choices
+
+- Keep Momsy local-only by declining cloud sync.
+- Enable or withdraw cloud-sync consent in Settings.
+- Separately allow or decline Google Gemini weekly-insight processing.
+- Use an anonymous Firebase account after enabling sync, or link Apple/Google.
+- Delete individual entries, all local/cloud data, and the account as described
+  above.
+
+## 9. Contact
+
+Privacy questions and deletion requests:
+**momsy.app.support@gmail.com**
+
+We may update this policy. Material changes will be reflected by a new
+effective date.

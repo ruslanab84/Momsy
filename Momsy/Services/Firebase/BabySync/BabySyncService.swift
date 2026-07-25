@@ -41,7 +41,15 @@ final class BabySyncService {
     /// The store backing the family/baby path. Injectable so tests can isolate it in a
     /// private suite instead of racing other suites on the process-wide `.standard`.
     private let defaults: UserDefaults
-    init(defaults: UserDefaults = .standard) { self.defaults = defaults }
+    private let cloudSyncAllowed: () -> Bool
+
+    init(
+        defaults: UserDefaults = .standard,
+        cloudSyncAllowed: @escaping () -> Bool = { CloudSyncConsent.isGranted() }
+    ) {
+        self.defaults = defaults
+        self.cloudSyncAllowed = cloudSyncAllowed
+    }
 
     // MARK: - Path helpers
 
@@ -56,6 +64,7 @@ final class BabySyncService {
     }
 
     func addLog<T: Encodable>(_ log: T, to subcollection: String) async throws {
+        guard cloudSyncAllowed() else { return }
         guard hasPath else { return }
         let ref = collection(subcollection).document()
         let payload = try await encodedPayloadWithAuthor(log)
@@ -72,6 +81,7 @@ final class BabySyncService {
     /// (onboarding window), the write is queued in `PendingWritesStore` and replayed later
     /// instead of being silently dropped.
     func setLog<T: Encodable>(_ log: T, id: String, to subcollection: String) async throws {
+        guard cloudSyncAllowed() else { return }
         guard !id.isEmpty else { return }
         var payload = try await encodedPayloadWithAuthor(log)
         guard hasPath else {
@@ -225,6 +235,7 @@ final class BabySyncService {
     /// write is routed to the baby/family it was stamped for (see `replayTargetBabyId`)
     /// via a task-local override, so a queued log can never land under the wrong child.
     func replayPendingWrites() async {
+        guard cloudSyncAllowed() else { return }
         let currentFamily = familyId
         let currentBaby = babyId
         guard !currentFamily.isEmpty else { return }
@@ -263,6 +274,7 @@ final class BabySyncService {
 
     /// Retries cloud deletes that didn't complete earlier (e.g. made while offline).
     func retryPendingDeletions() async {
+        guard cloudSyncAllowed() else { return }
         for (idStr, collection) in PendingDeletionsStore.shared.all() {
             do {
                 try await deleteLog(id: idStr, from: collection)
@@ -352,6 +364,7 @@ final class BabySyncService {
     /// (`setData` merge); the old tree is left in place so not-yet-updated devices keep
     /// working during rollout. Erasure later cleans it via `deleteLegacyFamilyTree()`.
     func migrateFromFamilyPathIfNeeded() async {
+        guard cloudSyncAllowed() else { return }
         guard !defaults.bool(forKey: Self.migrationFlagKey) else { return }
         guard !familyId.isEmpty else { return }
 
@@ -417,6 +430,7 @@ final class BabySyncService {
     /// consumer runs the watermark downloader to actually merge. Local pending echoes
     /// are ignored so a device does not resync in response to its own writes.
     func streamLogUpdates(from subcollection: String, since: Date) -> AsyncStream<Void> {
+        guard cloudSyncAllowed() else { return AsyncStream { $0.finish() } }
         guard hasPath else { return AsyncStream { $0.finish() } }
         return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
             let listener = collection(subcollection)
@@ -431,6 +445,7 @@ final class BabySyncService {
     }
 
     func fetchToday<T: Decodable>(from subcollection: String, dateField: String = "startedAt") async throws -> [T] {
+        guard cloudSyncAllowed() else { return [] }
         guard hasPath else { return [] }
         let start = Calendar.current.startOfDay(for: Date())
         let snapshot = try await collection(subcollection)
@@ -446,6 +461,7 @@ final class BabySyncService {
                                 dateField: String,
                                 since: Date? = nil,
                                 limit: Int = 500) async throws -> [T] {
+        guard cloudSyncAllowed() else { return [] }
         guard hasPath else { return [] }
         var all: [T] = []
         var cursor: DocumentSnapshot?
@@ -491,6 +507,7 @@ final class BabySyncService {
     func fetchChanged<T: Decodable>(from subcollection: String,
                                     since: Date,
                                     limit: Int = 500) async throws -> [T] {
+        guard cloudSyncAllowed() else { return [] }
         guard hasPath else { return [] }
         let snapshot = try await collection(subcollection)
             .whereField("updatedAt", isGreaterThanOrEqualTo: Timestamp(date: since))
@@ -507,6 +524,7 @@ final class BabySyncService {
     /// resolve before the first log is written). `merge: true` keeps it alongside any
     /// other parent fields.
     func setBabyProfile(_ profile: BabyProfile) async throws {
+        guard cloudSyncAllowed() else { return }
         guard !familyId.isEmpty else { return }
         defaults.set(profile.id.uuidString, forKey: kBabyIdDefaultsKey)
         try babyDoc().setData(from: BabyProfileDTO(from: profile), merge: true)
@@ -514,6 +532,7 @@ final class BabySyncService {
 
     /// Reads the baby profile from the per-baby parent document, if present.
     func fetchBabyProfile() async throws -> BabyProfileDTO? {
+        guard cloudSyncAllowed() else { return nil }
         guard hasPath else { return nil }
         let snapshot = try await babyDoc().getDocument()
         guard snapshot.exists else { return nil }
@@ -521,6 +540,7 @@ final class BabySyncService {
     }
 
     func setupBabyProfile(uid: String, displayName: String) async throws {
+        guard cloudSyncAllowed() else { return }
         guard hasPath else { return }
         let profileRef = babyDoc().collection("profile").document("info")
         let snapshot = try await profileRef.getDocument()

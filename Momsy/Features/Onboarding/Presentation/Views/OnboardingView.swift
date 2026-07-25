@@ -122,6 +122,12 @@ struct OnboardingView: View {
                         lang: loc.lang, canContinue: vm.canContinue, onContinue: vm.advance)
         case .role:
             RoleStep(parentName: $vm.parentName, selectedRole: $vm.parentRole, lang: loc.lang, onContinue: vm.advance)
+        case .privacy:
+            CloudSyncConsentStep(
+                isJoinFlow: vm.isJoinFlow,
+                onAllow: { vm.chooseCloudSync(true) },
+                onKeepLocal: { vm.chooseCloudSync(false) }
+            )
         case .invite:
             FamilyInviteStep(
                 selectedRole: vm.selectedInviteRole,
@@ -157,8 +163,89 @@ struct OnboardingView: View {
                 role: vm.parentRole,
                 lang: loc.lang,
                 isJoinFlow: vm.isJoinFlow,
+                cloudSyncEnabled: vm.cloudSyncEnabled,
                 onStart: vm.finish
             )
+        }
+    }
+}
+
+private struct CloudSyncConsentStep: View {
+    let isJoinFlow: Bool
+    let onAllow: () -> Void
+    let onKeepLocal: () -> Void
+
+    @EnvironmentObject private var loc: LocalizationManager
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 22) {
+                CuteBlobView(kind: .cloud, size: 72, tone: .bbMint)
+                    .padding(.top, 12)
+
+                VStack(spacing: 8) {
+                    Text(loc.strings.cloudSyncConsentTitle)
+                        .font(.system(size: 28, weight: .heavy, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Text(isJoinFlow
+                         ? loc.strings.cloudSyncConsentJoinMessage
+                         : loc.strings.cloudSyncConsentMessage)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(.bbInkSoft)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                }
+
+                VStack(alignment: .leading, spacing: 14) {
+                    consentRow(icon: "person.crop.circle.badge.checkmark",
+                               text: loc.strings.cloudSyncAnonymousAccountDisclosure)
+                    consentRow(icon: "arrow.triangle.2.circlepath",
+                               text: loc.strings.cloudSyncFirestoreDisclosure)
+                    consentRow(icon: "hand.raised.fill",
+                               text: loc.strings.cloudSyncOptionalDisclosure)
+                }
+                .bbCard(pad: 18)
+
+                Button(action: onAllow) {
+                    Text(loc.strings.cloudSyncAllow)
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 17)
+                        .background(Color.bbCoralDeep)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
+
+                Button(action: onKeepLocal) {
+                    Text(isJoinFlow ? loc.strings.cloudSyncUseLocally : loc.strings.cloudSyncKeepLocal)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbInkMute)
+                        .padding(.vertical, 6)
+                }
+
+                Button {
+                    if let url = AppLegalLinks.privacyPolicyURL { openURL(url) }
+                } label: {
+                    Text(loc.strings.readPrivacyPolicy)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundColor(.bbCoralDeep)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 50)
+        }
+    }
+
+    private func consentRow(icon: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .foregroundColor(.bbCoralDeep)
+                .frame(width: 22)
+            Text(text)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

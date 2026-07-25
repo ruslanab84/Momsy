@@ -3,7 +3,7 @@ import FirebaseAI
 import os
 
 /// Shared retry/backoff for Firebase AI Logic (Gemini) calls.
-/// Mirrors the resilience logic proven in `GeminiDailyTipService`: 3 attempts,
+/// Retries transient failures up to 3 times,
 /// exponential backoff, retry only on transient (429/500/503/network) errors.
 enum GeminiRetry {
 

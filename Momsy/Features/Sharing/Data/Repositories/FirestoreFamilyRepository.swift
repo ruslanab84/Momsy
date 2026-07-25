@@ -7,6 +7,7 @@ final class FirestoreFamilyRepository: FamilyRepository {
     private var db: Firestore { Firestore.firestore() }
 
     private func col() throws -> CollectionReference {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         guard let id = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey) else {
             throw FamilyError.noFamilyId
         }

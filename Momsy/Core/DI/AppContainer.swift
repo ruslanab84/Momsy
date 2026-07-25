@@ -368,6 +368,7 @@ final class AppContainer {
             FirestoreInviteService.familyKey,
             FirestoreInviteService.syncedCodeKey,
             PendingFamilyInviteStore.codeKey,
+            CloudSyncConsent.storageKey,
         ]
         exactKeys.forEach { defaults.removeObject(forKey: $0) }
 
@@ -439,6 +440,8 @@ final class AppContainer {
             recoverPendingAccountDeletion: { [unowned self] in
                 await self.recoverPendingAccountDeletion()
             },
+            initialCloudSyncEnabled: CloudSyncConsent.isGranted(),
+            setCloudSyncConsent: { CloudSyncConsent.set($0) },
             onDone: onDone
         )
     }
@@ -630,7 +633,18 @@ final class AppContainer {
         SettingsViewModel(
             repo: preferencesRepository,
             deleteAccount: makeDeleteAccountUseCase(),
-            accountAuth: authManager
+            accountAuth: authManager,
+            cloudSyncEnabled: CloudSyncConsent.isGranted(),
+            updateCloudSync: { [unowned self] enabled in
+                CloudSyncConsent.set(enabled ? .granted : .denied)
+                if enabled {
+                    await self.authManager.signInAnonymouslyIfNeeded()
+                    await self.cloudSyncDownloader.downloadAndMergeWhenReady()
+                    self.sleepLiveSync.start()
+                } else {
+                    self.sleepLiveSync.stop()
+                }
+            }
         )
     }
 

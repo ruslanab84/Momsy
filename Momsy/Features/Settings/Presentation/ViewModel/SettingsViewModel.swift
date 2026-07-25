@@ -47,20 +47,28 @@ final class SettingsViewModel: ObservableObject {
     @Published var showsDeletionReauthentication = false
     @Published var reauthenticationError: Error?
     @Published var deletionError: String?
+    @Published private(set) var cloudSyncEnabled: Bool
 
     private let repo: any UserPreferencesRepository
     private let deleteAccount: DeleteAccountUseCase
     private let accountAuth: any AccountDeletionAuthenticating
+    private let updateCloudSync: @MainActor (Bool) async -> Void
 
     init(
         repo: any UserPreferencesRepository,
         deleteAccount: DeleteAccountUseCase,
-        accountAuth: any AccountDeletionAuthenticating
+        accountAuth: any AccountDeletionAuthenticating,
+        cloudSyncEnabled: Bool = CloudSyncConsent.isGranted(),
+        updateCloudSync: @MainActor @escaping (Bool) async -> Void = {
+            CloudSyncConsent.set($0 ? .granted : .denied)
+        }
     ) {
         let prefs = repo.load()
         self.repo                   = repo
         self.deleteAccount          = deleteAccount
         self.accountAuth             = accountAuth
+        self.cloudSyncEnabled        = cloudSyncEnabled
+        self.updateCloudSync         = updateCloudSync
         self.appTheme               = prefs.appTheme
         self.appLanguage            = prefs.appLanguage
         self.unitSystem             = prefs.unitSystem
@@ -122,6 +130,11 @@ final class SettingsViewModel: ObservableObject {
 
     func setUnitSystem(_ id: String) {
         withAnimation(.spring(response: 0.3)) { unitSystem = id }
+    }
+
+    func setCloudSyncEnabled(_ enabled: Bool) {
+        cloudSyncEnabled = enabled
+        Task { await updateCloudSync(enabled) }
     }
 
     private func save() {

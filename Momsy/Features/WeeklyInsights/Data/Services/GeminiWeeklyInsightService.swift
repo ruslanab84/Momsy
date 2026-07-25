@@ -8,8 +8,7 @@ final class GeminiWeeklyInsightService: WeeklyInsightService {
 
     func generate(context: WeeklyInsightContext) async throws -> WeeklyInsightAI {
         try await GeminiRetry.run(label: "GeminiWeeklyInsightService") {
-            // Prompt-enforced JSON (system prompt mandates it) + tolerant decode,
-            // matching the GenerationConfig surface proven in GeminiDailyTipService.
+            // Prompt-enforced JSON (system prompt mandates it) + tolerant decode.
             let config = GenerationConfig(maxOutputTokens: maxOutputTokens)
             let model = FirebaseAI.firebaseAI(backend: .googleAI()).generativeModel(
                 modelName: modelName,

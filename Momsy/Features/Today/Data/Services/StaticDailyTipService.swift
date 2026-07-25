@@ -1,7 +1,7 @@
 import Foundation
 
 /// Returns a tip from a local static list, rotating daily.
-/// Replaces GeminiDailyTipService — no network call required.
+/// Built-in daily tips; no network call required.
 /// Future: swap fetch() body to query a local SwiftData/JSON tip database.
 final class StaticDailyTipService: DailyTipService {
 
