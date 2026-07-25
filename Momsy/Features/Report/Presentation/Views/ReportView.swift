@@ -210,7 +210,33 @@ struct ReportView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                 .animation(.easeInOut(duration: 0.2), value: vm.isGenerating)
             }
-            .disabled(vm.isGenerating)
+            .disabled(vm.isExporting)
+
+            Button {
+                Task { await vm.generateCSVAndShare() }
+            } label: {
+                HStack(spacing: 6) {
+                    if vm.isGeneratingCSV {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(.bbInkSoft)
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: "tablecells")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    Text(vm.isGeneratingCSV ? loc.strings.preparingCsv : loc.strings.exportCSV)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                }
+                .foregroundColor(.bbInkSoft)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .strokeBorder(Color.bbInkMute.opacity(0.35), lineWidth: 1.5)
+                )
+            }
+            .disabled(vm.isExporting)
 
             Button {
                 Task { await vm.printReport() }
@@ -229,7 +255,7 @@ struct ReportView: View {
                         .strokeBorder(Color.bbInkMute.opacity(0.35), lineWidth: 1.5)
                 )
             }
-            .disabled(vm.isGenerating)
+            .disabled(vm.isExporting)
         }
     }
 }

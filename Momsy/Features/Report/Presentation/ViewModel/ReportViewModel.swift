@@ -65,6 +65,7 @@ final class ReportViewModel: ObservableObject {
     @Published var selectedPeriod: ReportPeriod = .week
     @Published private var includedSections: Set<ReportSection> = ReportSection.defaultIncluded
     @Published var isGenerating = false
+    @Published var isGeneratingCSV = false
     @Published var shareURL: URL? = nil
     @Published var showShare = false
     @Published private(set) var currentStats: [(label: String, value: String, sub: String, tone: Color)] = []
@@ -113,6 +114,10 @@ final class ReportViewModel: ObservableObject {
 
     var selectedPeriodTitle: String {
         title(for: selectedPeriod)
+    }
+
+    var isExporting: Bool {
+        isGenerating || isGeneratingCSV
     }
 
     var periodLabel: String {
@@ -390,7 +395,7 @@ final class ReportViewModel: ObservableObject {
     // MARK: - Actions
 
     func generateAndShare() async {
-        guard !isGenerating else { return }
+        guard !isExporting else { return }
         isGenerating = true
         defer { isGenerating = false }
         await loadData()
@@ -406,8 +411,24 @@ final class ReportViewModel: ObservableObject {
         showShare = true
     }
 
+    func generateCSVAndShare() async {
+        guard !isExporting else { return }
+        isGeneratingCSV = true
+        defer { isGeneratingCSV = false }
+        await loadData()
+        guard let url = generateReport.executeCSV(
+            babyName: displayName,
+            periodLabel: selectedPeriodTitle,
+            stats: currentStats,
+            sparklines: currentSparklines
+        ) else { return }
+        analytics.track(.reportGenerated(period: selectedPeriodTitle))
+        shareURL = url
+        showShare = true
+    }
+
     func printReport() async {
-        guard !isGenerating else { return }
+        guard !isExporting else { return }
         isGenerating = true
         defer { isGenerating = false }
         await loadData()

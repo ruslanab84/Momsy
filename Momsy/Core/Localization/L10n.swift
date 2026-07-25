@@ -817,6 +817,8 @@ struct L10n {
     var includeInReport: String { s("INCLUDE IN REPORT", "ВКЛЮЧИТЬ В ОТЧЁТ", "IN BERICHT EINSCHLIESSEN", "INCLUIR EN EL INFORME", "INCLURE DANS LE RAPPORT", "INCLUIR NO RELATÓRIO", "纳入报告") }
     var preparingPdf: String    { s("Preparing PDF…","Готовим PDF…",  "PDF vorbereiten…", "Preparando PDF…", "Préparation du PDF…", "A preparar PDF…", "正在生成 PDF…") }
     var sharePdf: String        { s("Share PDF",     "Поделиться PDF","PDF teilen",     "Compartir PDF", "Partager le PDF", "Partilhar PDF", "分享 PDF") }
+    var preparingCsv: String    { s("Preparing CSV…","Готовим CSV…",  "CSV vorbereiten…", "Preparando CSV…", "Préparation du CSV…", "A preparar CSV…", "正在生成 CSV…") }
+    var exportCSV: String       { s("Export CSV",    "Экспорт CSV",   "CSV exportieren", "Exportar CSV", "Exporter en CSV", "Exportar CSV", "导出 CSV") }
     var printAction: String     { s("Print",         "Распечатать",   "Drucken",       "Imprimir", "Imprimer", "Imprimir", "打印") }
     var reportJobName: String   { s("Momsy — report","Momsy — отчёт", "Momsy — Bericht", "Momsy — informe", "Momsy — rapport", "Momsy — relatório", "Momsy — 报告") }
     var reportPeriod3Days: String      { s("3 days",       "3 дня",                "3 Tage",        "3 días", "3 jours", "3 dias", "3 天") }

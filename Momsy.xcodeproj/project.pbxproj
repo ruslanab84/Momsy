@@ -118,6 +118,7 @@
 		FEED0003AAAA1111BBBB0002 /* MockPumpingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED0003AAAA1111BBBB0001 /* MockPumpingRepository.swift */; };
 		FEED0004AAAA1111BBBB0002 /* MockVitaminRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED0004AAAA1111BBBB0001 /* MockVitaminRepository.swift */; };
 		FEED0005AAAA1111BBBB0002 /* LogReportViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED0005AAAA1111BBBB0001 /* LogReportViewModelTests.swift */; };
+		C5A000000000000000000003 /* CSVReportServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A000000000000000000002 /* CSVReportServiceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -298,6 +299,7 @@
 		FEED0003AAAA1111BBBB0001 /* MockPumpingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPumpingRepository.swift; sourceTree = "<group>"; };
 		FEED0004AAAA1111BBBB0001 /* MockVitaminRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockVitaminRepository.swift; sourceTree = "<group>"; };
 		FEED0005AAAA1111BBBB0001 /* LogReportViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LogReportViewModelTests.swift; sourceTree = "<group>"; };
+		C5A000000000000000000002 /* CSVReportServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CSVReportServiceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -418,6 +420,7 @@
 		0BABF1250000000000000003 /* Report */ = {
 			isa = PBXGroup;
 			children = (
+				C5A000000000000000000002 /* CSVReportServiceTests.swift */,
 			);
 			path = Report;
 			sourceTree = "<group>";
@@ -1083,6 +1086,7 @@
 				FEED0003AAAA1111BBBB0002 /* MockPumpingRepository.swift in Sources */,
 				FEED0004AAAA1111BBBB0002 /* MockVitaminRepository.swift in Sources */,
 				FEED0005AAAA1111BBBB0002 /* LogReportViewModelTests.swift in Sources */,
+				C5A000000000000000000003 /* CSVReportServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
