@@ -30,6 +30,7 @@ struct LogReportView: View {
         .task { await vm.load() }
         .onChange(of: vm.mode) { _, _ in Task { await vm.load() } }
         .onChange(of: vm.selectedDate) { _, _ in Task { await vm.load() } }
+        .errorToast($vm.loadError)
     }
 
     // MARK: - Header

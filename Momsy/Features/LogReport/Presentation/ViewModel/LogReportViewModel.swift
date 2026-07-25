@@ -6,9 +6,11 @@ final class LogReportViewModel: ObservableObject {
     @Published var mode: LogReportMode = .day
     @Published var selectedDate: Date = Date()
     @Published private(set) var items: [LogReportItem] = []
+    @Published var loadError: String?
 
     private let getEntries: GetLogReportEntriesUseCase
     private let calendar = Calendar.current
+    private var loadGeneration = 0
 
     init(getEntries: GetLogReportEntriesUseCase) {
         self.getEntries = getEntries
@@ -68,8 +70,19 @@ final class LogReportViewModel: ObservableObject {
     // MARK: - Loading
 
     func load() async {
+        loadGeneration &+= 1
+        let generation = loadGeneration
         let bounds = range
-        items = await getEntries.execute(from: bounds.from, to: bounds.to)
+        do {
+            let loadedItems = try await getEntries.execute(from: bounds.from, to: bounds.to)
+            guard generation == loadGeneration, !Task.isCancelled else { return }
+            items = loadedItems
+            loadError = nil
+        } catch {
+            guard generation == loadGeneration, !Task.isCancelled else { return }
+            items = []
+            loadError = LocalizationManager.shared.strings.weeklyInsightError
+        }
     }
 
     func shift(_ delta: Int) {

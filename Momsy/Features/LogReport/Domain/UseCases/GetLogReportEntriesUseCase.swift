@@ -29,18 +29,18 @@ final class GetLogReportEntriesUseCase {
     }
 
     /// Every local log whose activity overlaps [from, to), newest first.
-    func execute(from: Date, to: Date) async -> [LogReportItem] {
+    func execute(from: Date, to: Date) async throws -> [LogReportItem] {
         let lm = LocalizationManager.shared
         let cal = Calendar.current
 
-        let feedings = (try? await feedingRepo.getEntries(from: from, to: to)) ?? []
-        let sleeps   = (try? await sleepRepo.getEntries(overlapping: from, until: to)) ?? []
-        let diapers  = (try? await diaperRepo.getEntries(from: from, to: to)) ?? []
-        let stools   = (try? await stoolRepo.getEntries(from: from, to: to)) ?? []
-        let walks    = (try? await walkRepo.getEntries(from: from, to: to)) ?? []
-        let baths    = (try? await bathRepo.getEntries(from: from, to: to)) ?? []
-        let pumpings = (try? await pumpingRepo.getEntries(from: from, to: to)) ?? []
-        let vitamins = (try? await vitaminRepo.getEntries(from: from, to: to)) ?? []
+        let feedings = try await feedingRepo.getEntries(from: from, to: to)
+        let sleeps   = try await sleepRepo.getEntries(overlapping: from, until: to)
+        let diapers  = try await diaperRepo.getEntries(from: from, to: to)
+        let stools   = try await stoolRepo.getEntries(from: from, to: to)
+        let walks    = try await walkRepo.getEntries(from: from, to: to)
+        let baths    = try await bathRepo.getEntries(from: from, to: to)
+        let pumpings = try await pumpingRepo.getEntries(from: from, to: to)
+        let vitamins = try await vitaminRepo.getEntries(from: from, to: to)
 
         let feedingItems = feedings.map { entry -> LogReportItem in
             let side = entry.side.displayName(lang: lm.lang).lowercased()
