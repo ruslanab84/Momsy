@@ -12,6 +12,7 @@ final class GenerateWeeklyInsightUseCase {
     private let service: any WeeklyInsightService
     private let fallback: any WeeklyInsightService
     private let appState: AppState
+    private let hasAIConsent: () -> Bool
     private let leapCheckInRepo: (any LeapCheckInRepository)?
     private let diaryRepo: (any DiaryRepository)?
 
@@ -24,6 +25,7 @@ final class GenerateWeeklyInsightUseCase {
         service: any WeeklyInsightService,
         fallback: any WeeklyInsightService,
         appState: AppState,
+        hasAIConsent: @escaping () -> Bool,
         leapCheckInRepo: (any LeapCheckInRepository)? = nil,
         diaryRepo: (any DiaryRepository)? = nil
     ) {
@@ -35,6 +37,7 @@ final class GenerateWeeklyInsightUseCase {
         self.service = service
         self.fallback = fallback
         self.appState = appState
+        self.hasAIConsent = hasAIConsent
         self.leapCheckInRepo = leapCheckInRepo
         self.diaryRepo = diaryRepo
     }
@@ -44,6 +47,7 @@ final class GenerateWeeklyInsightUseCase {
     @MainActor
     @discardableResult
     func generateIfNeeded(now: Date = Date()) async -> WeeklyInsight? {
+        guard hasAIConsent() else { return nil }
         let language = LocalizationManager.shared.current
         guard let (weekStart, weekEnd) = Self.weekBounds(now: now) else { return nil }
         // A report for this week already exists — keep it in whatever language it was
@@ -75,7 +79,7 @@ final class GenerateWeeklyInsightUseCase {
 
         let ctx = WeeklyInsightContext(stats: stats, language: language)
 
-        if let ai = try? await service.generate(context: ctx) {
+        if hasAIConsent(), let ai = try? await service.generate(context: ctx) {
             return WeeklyInsight(stats: stats, ai: ai, isAIGenerated: true, generatedAt: Date(), language: language)
         }
         let ai = (try? await fallback.generate(context: ctx)) ?? Self.emptyAI

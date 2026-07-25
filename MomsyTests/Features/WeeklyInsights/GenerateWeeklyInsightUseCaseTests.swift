@@ -13,11 +13,13 @@ struct GenerateWeeklyInsightUseCaseTests {
         diaperRepo: MockDiaperRepository = MockDiaperRepository(),
         repo: MockWeeklyInsightRepository = MockWeeklyInsightRepository(),
         service: MockWeeklyInsightService = MockWeeklyInsightService(),
+        hasAIConsent: @escaping () -> Bool = { true },
         appState: AppState
     ) -> GenerateWeeklyInsightUseCase {
         GenerateWeeklyInsightUseCase(
             sleepRepo: sleepRepo, feedingRepo: feedingRepo, foodRepo: foodRepo, diaperRepo: diaperRepo,
-            repo: repo, service: service, fallback: StaticWeeklyInsightService(), appState: appState
+            repo: repo, service: service, fallback: StaticWeeklyInsightService(), appState: appState,
+            hasAIConsent: hasAIConsent
         )
     }
 
@@ -60,6 +62,27 @@ struct GenerateWeeklyInsightUseCaseTests {
 
         #expect(!insight.isAIGenerated)
         #expect(!insight.ai.sleepSummary.isEmpty)
+    }
+
+    @Test("without consent, never calls AI or saves a report")
+    func noConsent() async throws {
+        let appState = makeAppState(profile: BabyProfile(name: "Mia"))
+        let service = MockWeeklyInsightService()
+        let bounds = GenerateWeeklyInsightUseCase.weekBounds(now: Date())!
+        let repo = MockWeeklyInsightRepository()
+        let uc = makeUseCase(
+            sleepRepo: seededSleepRepo(bounds: bounds),
+            repo: repo,
+            service: service,
+            hasAIConsent: { false },
+            appState: appState
+        )
+
+        let insight = await uc.generateIfNeeded()
+
+        #expect(insight == nil)
+        #expect(service.callCount == 0)
+        #expect(repo.saveCount == 0)
     }
 
     @Test("a week with no logged data skips the AI service and reflects the gap")

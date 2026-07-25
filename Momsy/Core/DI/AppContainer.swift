@@ -299,6 +299,7 @@ final class AppContainer {
         service: weeklyInsightService,
         fallback: StaticWeeklyInsightService(),
         appState: appState,
+        hasAIConsent: { WeeklyInsightAIConsent.status() == .granted },
         leapCheckInRepo: leapCheckInRepository,
         diaryRepo: diaryRepository
     )
@@ -361,6 +362,7 @@ final class AppContainer {
             "watch_processed_cmd_ids",
             "invite_code",
             "invite_expiry",
+            WeeklyInsightAIConsent.storageKey,
             FirestoreInviteService.codeKey,
             FirestoreInviteService.expiryKey,
             FirestoreInviteService.familyKey,

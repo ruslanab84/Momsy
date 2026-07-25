@@ -79,6 +79,30 @@ struct L10n {
           "Resumo de IA do sono e da alimentação",
           "AI 睡眠与喂养摘要")
     }
+    var weeklyInsightAIConsentTitle: String {
+        s("Share data with Google Gemini?",
+          "Передавать данные в Google Gemini?",
+          "Daten mit Google Gemini teilen?",
+          "¿Compartir datos con Google Gemini?",
+          "Partager des données avec Google Gemini ?",
+          "Partilhar dados com o Google Gemini?",
+          "与 Google Gemini 共享数据？")
+    }
+    var weeklyInsightAIConsentMessage: String {
+        s("To create your AI weekly report, Momsy will send your child’s age, sleep, feedings, diaper changes, foods, allergies or reactions, and developmental leap signals to Google Gemini for processing. This weekly-report data is not sent to Gemini unless you allow it.",
+          "Чтобы создать недельный AI-отчёт, Momsy передаст в Google Gemini возраст ребёнка, данные о сне, кормлениях, смене подгузников, продуктах, аллергиях или реакциях и сигналах скачков развития. Эти данные недельного отчёта не отправляются в Gemini без вашего разрешения.",
+          "Für deinen wöchentlichen KI-Bericht sendet Momsy Alter, Schlaf, Mahlzeiten, Windelwechsel, Lebensmittel, Allergien oder Reaktionen und Entwicklungssprung-Signale deines Kindes zur Verarbeitung an Google Gemini. Diese Wochenberichtsdaten werden nur mit deiner Erlaubnis an Gemini gesendet.",
+          "Para crear el informe semanal con IA, Momsy enviará a Google Gemini la edad, el sueño, las tomas, los cambios de pañal, los alimentos, las alergias o reacciones y las señales de saltos de desarrollo de tu bebé. Estos datos del informe semanal solo se envían a Gemini con tu permiso.",
+          "Pour créer votre rapport hebdomadaire par IA, Momsy enverra à Google Gemini l’âge, le sommeil, les repas, les changements de couche, les aliments, les allergies ou réactions et les signes de bonds de développement de votre enfant. Ces données ne sont envoyées à Gemini qu’avec votre autorisation.",
+          "Para criar o relatório semanal com IA, a Momsy enviará ao Google Gemini a idade, o sono, as mamadas, as mudanças de fralda, os alimentos, as alergias ou reações e os sinais de saltos de desenvolvimento do bebé. Estes dados só são enviados ao Gemini com a sua autorização.",
+          "为生成 AI 周报，Momsy 会将孩子的年龄、睡眠、喂养、尿布更换、食物、过敏或不良反应以及发育飞跃信号发送给 Google Gemini 处理。只有获得您的许可后，这些周报数据才会发送给 Gemini。")
+    }
+    var weeklyInsightAIConsentAllow: String {
+        s("Allow", "Разрешить", "Erlauben", "Permitir", "Autoriser", "Permitir", "允许")
+    }
+    var weeklyInsightAIConsentDeny: String {
+        s("Don’t Share", "Не передавать", "Nicht teilen", "No compartir", "Ne pas partager", "Não partilhar", "不共享")
+    }
     var weeklyInsightSleepHeader: String {
         s("Sleep", "Сон", "Schlaf", "Sueño", "Sommeil", "Sono", "睡眠")
     }

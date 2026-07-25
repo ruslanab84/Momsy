@@ -18,7 +18,8 @@ struct WeeklyInsightViewModelTests {
         let generate = GenerateWeeklyInsightUseCase(
             sleepRepo: sleepRepo, feedingRepo: MockFeedingRepository(),
             foodRepo: MockComplementaryFeedingRepository(), diaperRepo: MockDiaperRepository(),
-            repo: repo, service: service, fallback: StaticWeeklyInsightService(), appState: appState
+            repo: repo, service: service, fallback: StaticWeeklyInsightService(), appState: appState,
+            hasAIConsent: { true }
         )
         let get = GetWeeklyInsightsUseCase(repository: repo)
         return (WeeklyInsightViewModel(generate: generate, get: get), appState)
@@ -50,7 +51,8 @@ struct WeeklyInsightViewModelTests {
         let generate = GenerateWeeklyInsightUseCase(
             sleepRepo: MockSleepRepository(), feedingRepo: MockFeedingRepository(),
             foodRepo: MockComplementaryFeedingRepository(), diaperRepo: MockDiaperRepository(),
-            repo: repo, service: MockWeeklyInsightService(), fallback: StaticWeeklyInsightService(), appState: appState
+            repo: repo, service: MockWeeklyInsightService(), fallback: StaticWeeklyInsightService(), appState: appState,
+            hasAIConsent: { true }
         )
         let vm = WeeklyInsightViewModel(generate: generate, get: GetWeeklyInsightsUseCase(repository: repo))
         await vm.load(isPremium: false)

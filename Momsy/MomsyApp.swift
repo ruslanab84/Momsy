@@ -9,6 +9,7 @@ private enum JoinAlert: Identifiable {
     case failure
     case confirm(String)
     case removedFromFamily
+    case weeklyInsightAIConsent
 
     var id: String {
         switch self {
@@ -16,6 +17,7 @@ private enum JoinAlert: Identifiable {
         case .failure: return "failure"
         case .confirm(let code): return "confirm-\(code)"
         case .removedFromFamily: return "removedFromFamily"
+        case .weeklyInsightAIConsent: return "weeklyInsightAIConsent"
         }
     }
 }
@@ -102,6 +104,7 @@ struct MomsyApp: App {
 
 private struct MomsyRootView: View {
     @AppStorage("onboardingDone") private var onboardingDone = false
+    @AppStorage(WeeklyInsightAIConsent.storageKey) private var weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.notDetermined.rawValue
     @Environment(\.scenePhase) private var scenePhase
     @State private var joinAlert: JoinAlert?
     @State private var showJoinAuthSheet = false
@@ -180,6 +183,18 @@ private struct MomsyRootView: View {
                     return Alert(title: Text(localization.strings.removedFromFamilyTitle),
                                  message: Text(localization.strings.removedFromFamilyMessage),
                                  dismissButton: .default(Text(localization.strings.done)))
+                case .weeklyInsightAIConsent:
+                    return Alert(
+                        title: Text(localization.strings.weeklyInsightAIConsentTitle),
+                        message: Text(localization.strings.weeklyInsightAIConsentMessage),
+                        primaryButton: .default(Text(localization.strings.weeklyInsightAIConsentAllow)) {
+                            weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.granted.rawValue
+                            Task { await maybeGenerateWeeklyReport() }
+                        },
+                        secondaryButton: .cancel(Text(localization.strings.weeklyInsightAIConsentDeny)) {
+                            weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.denied.rawValue
+                        }
+                    )
                 }
             }
             .sheet(isPresented: $showJoinAuthSheet, onDismiss: {
@@ -208,8 +223,15 @@ private struct MomsyRootView: View {
     /// No-ops if a report already exists for that week.
     @MainActor
     private func maybeGenerateWeeklyReport() async {
-        guard container.subscriptionManager.isPremium else { return }
-        _ = await container.generateWeeklyInsight.generateIfNeeded()
+        guard onboardingDone, container.subscriptionManager.isPremium else { return }
+        switch WeeklyInsightAIConsent.status() {
+        case .notDetermined:
+            joinAlert = .weeklyInsightAIConsent
+        case .granted:
+            _ = await container.generateWeeklyInsight.generateIfNeeded()
+        case .denied:
+            break
+        }
     }
 
     @MainActor
