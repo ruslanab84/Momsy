@@ -15,7 +15,7 @@
 	<key>NSPrivacyAccessedAPITypes</key>
 	<array>
 
-		<!-- UserDefaults — app preferences, localization, sound/timer state -->
+		<!-- UserDefaults — app preferences and shared App Group preferences -->
 		<dict>
 			<key>NSPrivacyAccessedAPIType</key>
 			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
@@ -23,6 +23,8 @@
 			<array>
 				<!-- CA92.1: read/write own app preferences only -->
 				<string>CA92.1</string>
+				<!-- 1C8F.1: read/write preferences shared through an App Group -->
+				<string>1C8F.1</string>
 			</array>
 		</dict>
 
