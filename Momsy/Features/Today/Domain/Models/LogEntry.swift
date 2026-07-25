@@ -33,14 +33,4 @@ struct LogEntry: Identifiable, Equatable {
         self.feedSide = feedSide
         self.isBottleFeed = isBottleFeed
     }
-
-    var timeString: String { DateFormatter.bbTime.string(from: time) }
-}
-
-extension DateFormatter {
-    static let bbTime: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f
-    }()
 }

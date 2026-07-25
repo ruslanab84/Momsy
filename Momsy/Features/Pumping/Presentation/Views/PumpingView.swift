@@ -13,6 +13,7 @@ struct PumpingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject private var units: UnitSystemManager
     @State private var showAddManual = false
 
     private var completedEntries: [PumpingEntry] {
@@ -412,10 +413,10 @@ struct PumpingView: View {
 
                     ForEach(Array(completedEntries.enumerated()), id: \.element.id) { idx, entry in
                         HStack(spacing: 12) {
-                            Text(DateFormatter.bbTime.string(from: entry.date))
+                            Text(entry.date, format: units.current.timeFormatStyle())
                                 .font(.system(size: 12, weight: .bold, design: .monospaced))
                                 .foregroundStyle(PumpingPosterPalette.inkMute)
-                                .frame(width: 46, alignment: .leading)
+                                .frame(width: units.isImperial ? 68 : 46, alignment: .leading)
 
                             Image(systemName: "drop.fill")
                                 .font(.system(size: 13, weight: .bold))

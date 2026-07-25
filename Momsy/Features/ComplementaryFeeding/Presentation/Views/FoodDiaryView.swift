@@ -128,6 +128,7 @@ private struct FoodEntryRow: View {
     let entry: ComplementaryFoodEntry
     let lm: LocalizationManager
     let onDelete: () -> Void
+    @EnvironmentObject private var units: UnitSystemManager
 
     var body: some View {
         HStack(spacing: 12) {
@@ -163,7 +164,7 @@ private struct FoodEntryRow: View {
 
             Spacer()
 
-            Text(entry.date.formatted(.dateTime.hour().minute()))
+            Text(entry.date, format: units.current.timeFormatStyle())
                 .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
         }

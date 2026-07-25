@@ -3,6 +3,7 @@ import SwiftUI
 struct LogReportDayList: View {
     let items: [LogReportItem]
     let emptyText: String
+    @EnvironmentObject private var units: UnitSystemManager
 
     var body: some View {
         VStack(spacing: 10) {
@@ -23,10 +24,10 @@ struct LogReportDayList: View {
 
     private func row(_ item: LogReportItem) -> some View {
         HStack(spacing: 12) {
-            Text(DateFormatter.bbTime.string(from: item.start))
+            Text(item.start, format: units.current.timeFormatStyle())
                 .font(.system(size: 12, weight: .bold, design: .monospaced))
                 .foregroundColor(.bbInkMute)
-                .frame(width: 44, alignment: .leading)
+                .frame(width: units.isImperial ? 68 : 44, alignment: .leading)
             CuteBlobView(kind: item.kind, size: 32, tone: item.kind.defaultTone)
             Text(item.label)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))

@@ -4,6 +4,29 @@ import Combine
 enum UnitSystem: String, CaseIterable {
     case metric   = "metric"
     case imperial = "imperial"
+
+    func timeFormatStyle(
+        includingMinutes: Bool = true,
+        locale: Locale = .autoupdatingCurrent,
+        calendar: Calendar = .autoupdatingCurrent,
+        timeZone: TimeZone = .autoupdatingCurrent
+    ) -> Date.FormatStyle {
+        var components = Locale.Components(locale: locale)
+        components.hourCycle = self == .imperial ? .oneToTwelve : .zeroToTwentyThree
+        let locale = Locale(components: components)
+        let style = Date.FormatStyle(
+            date: .omitted,
+            time: .omitted,
+            locale: locale,
+            calendar: calendar,
+            timeZone: timeZone
+        )
+
+        let hourStyle = self == .imperial
+            ? style.hour(.defaultDigits(amPM: .abbreviated))
+            : style.hour(.twoDigits(amPM: .omitted))
+        return includingMinutes ? hourStyle.minute(.twoDigits) : hourStyle
+    }
 }
 
 enum TempCategory {

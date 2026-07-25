@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LogReportWeekTimeline: View {
     @ObservedObject var vm: LogReportViewModel
+    @EnvironmentObject private var units: UnitSystemManager
 
     private let hourHeight: CGFloat = 24
     private var timelineHeight: CGFloat { hourHeight * 24 }
@@ -25,7 +26,7 @@ struct LogReportWeekTimeline: View {
 
     private var weekHeader: some View {
         HStack(spacing: 0) {
-            Color.clear.frame(width: 34)
+            Color.clear.frame(width: units.isImperial ? 48 : 34)
             ForEach(vm.weekDays, id: \.self) { day in
                 let selected = calendar.isDate(day, inSameDayAs: vm.selectedDate)
                 VStack(spacing: 2) {
@@ -51,13 +52,13 @@ struct LogReportWeekTimeline: View {
     private var hourAxis: some View {
         ZStack(alignment: .topLeading) {
             ForEach(Array(stride(from: 0, through: 22, by: 2)), id: \.self) { hour in
-                Text(String(format: "%02d", hour))
+                Text(hourDate(hour), format: units.current.timeFormatStyle(includingMinutes: false))
                     .font(.system(size: 9, weight: .bold, design: .monospaced))
                     .foregroundColor(.bbInkMute)
                     .offset(y: CGFloat(hour) * hourHeight - 5)
             }
         }
-        .frame(width: 34, height: timelineHeight, alignment: .topLeading)
+        .frame(width: units.isImperial ? 48 : 34, height: timelineHeight, alignment: .topLeading)
     }
 
     private func dayColumn(_ day: Date) -> some View {
@@ -102,5 +103,10 @@ struct LogReportWeekTimeline: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE"
         return formatter.string(from: day)
+    }
+
+    private func hourDate(_ hour: Int) -> Date {
+        calendar.date(bySettingHour: hour, minute: 0, second: 0, of: vm.range.from)
+            ?? vm.range.from
     }
 }

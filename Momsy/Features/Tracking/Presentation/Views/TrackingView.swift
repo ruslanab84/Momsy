@@ -49,7 +49,7 @@ struct TrackingView: View {
                 Text(loc.strings.heightAndWeight)
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
-                Text(vm.headerSummary)
+                Text(headerSummary)
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
                     .animation(.easeInOut(duration: 0.2), value: vm.selectedTab)
@@ -58,6 +58,18 @@ struct TrackingView: View {
             BBPill(text: vm.pillText, color: vm.pillColor, fg: vm.pillFg)
                 .animation(.easeInOut(duration: 0.2), value: vm.selectedTab)
         }
+    }
+
+    private var headerSummary: String {
+        guard vm.selectedTab == 3, let entry = vm.tempLog.first else {
+            return vm.headerSummary
+        }
+        return String(
+            format: "%.1f°C · %@ %@",
+            entry.value,
+            entry.dateLabel,
+            entry.date.formatted(units.current.timeFormatStyle())
+        )
     }
 
     // MARK: - Tab Picker
@@ -255,11 +267,11 @@ struct TrackingView: View {
                         Text(entry.dateLabel)
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundColor(.bbInkMute)
-                        Text(entry.timeLabel)
+                        Text(entry.date, format: units.current.timeFormatStyle())
                             .font(.system(size: 10, weight: .semibold, design: .monospaced))
                             .foregroundColor(.bbInkMute)
                     }
-                    .frame(width: 50, alignment: .leading)
+                    .frame(width: units.isImperial ? 68 : 50, alignment: .leading)
                     Text(String(format: "%.1f%@", units.displayTemp(fromCelsius: entry.value), units.tempUnit))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundColor(tempValueColor(entry.value))

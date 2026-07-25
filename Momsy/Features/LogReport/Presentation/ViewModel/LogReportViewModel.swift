@@ -7,8 +7,12 @@ final class LogReportViewModel: ObservableObject {
     @Published var selectedDate: Date = Date()
     @Published private(set) var items: [LogReportItem] = []
     @Published var loadError: String?
+    @Published private(set) var isExportingCSV = false
+    @Published private(set) var shareURL: URL?
+    @Published var showShare = false
 
     private let getEntries: GetLogReportEntriesUseCase
+    private let generateReport = GenerateReportUseCase()
     private let calendar = Calendar.current
     private var loadGeneration = 0
 
@@ -83,6 +87,17 @@ final class LogReportViewModel: ObservableObject {
             items = []
             loadError = LocalizationManager.shared.strings.weeklyInsightError
         }
+    }
+
+    func exportCSV() async {
+        guard !isExportingCSV else { return }
+        isExportingCSV = true
+        defer { isExportingCSV = false }
+        await load()
+        guard loadError == nil,
+              let url = generateReport.executeCSV(periodLabel: periodTitle, items: items) else { return }
+        shareURL = url
+        showShare = true
     }
 
     func shift(_ delta: Int) {

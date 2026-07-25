@@ -19,6 +19,7 @@ struct LogReportView: View {
                     periodNavigator
                 }
                 content
+                exportButton
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -31,6 +32,11 @@ struct LogReportView: View {
         .onChange(of: vm.mode) { _, _ in Task { await vm.load() } }
         .onChange(of: vm.selectedDate) { _, _ in Task { await vm.load() } }
         .errorToast($vm.loadError)
+        .sheet(isPresented: $vm.showShare) {
+            if let url = vm.shareURL {
+                ActivityView(items: [url])
+            }
+        }
     }
 
     // MARK: - Header
@@ -108,6 +114,32 @@ struct LogReportView: View {
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
+    }
+
+    private var exportButton: some View {
+        Button {
+            Task { await vm.exportCSV() }
+        } label: {
+            HStack(spacing: 8) {
+                if vm.isExportingCSV {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.white)
+                        .scaleEffect(0.8)
+                } else {
+                    Image(systemName: "tablecells")
+                        .font(.system(size: 15, weight: .bold))
+                }
+                Text(vm.isExportingCSV ? loc.strings.preparingCsv : loc.strings.exportCSV)
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(vm.isExportingCSV ? Color.bbCoralDeep.opacity(0.6) : Color.bbCoralDeep)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        }
+        .disabled(vm.isExportingCSV)
     }
 
     // MARK: - Content

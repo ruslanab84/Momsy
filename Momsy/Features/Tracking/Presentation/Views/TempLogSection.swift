@@ -47,7 +47,7 @@ struct TempBarChart: View {
                                 RoundedRectangle(cornerRadius: 5, style: .continuous)
                                     .fill(barColor(entry.value).opacity(0.75))
                                     .frame(width: barW, height: max(14, CGFloat(ratio) * 80))
-                                Text(entry.timeLabel)
+                                Text(entry.date, format: units.current.timeFormatStyle())
                                     .font(.system(size: 7, weight: .bold, design: .rounded))
                                     .foregroundColor(.bbInkMute)
                                     .lineLimit(1)

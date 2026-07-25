@@ -4,6 +4,7 @@ struct WaterIntakeView: View {
     @ObservedObject var vm: WaterIntakeViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject private var units: UnitSystemManager
 
     var body: some View {
         ZStack {
@@ -207,7 +208,7 @@ struct WaterIntakeView: View {
                                 .font(.system(size: 16))
                                 .foregroundColor(.bbSkyDeep)
                                 .frame(width: 32)
-                            Text(timeString(entry.date))
+                            Text(entry.date, format: units.current.timeFormatStyle())
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundColor(.bbInkSoft)
                             Spacer()
@@ -224,11 +225,5 @@ struct WaterIntakeView: View {
                 .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
             }
         }
-    }
-
-    private func timeString(_ date: Date) -> String {
-        let df = DateFormatter()
-        df.dateFormat = "HH:mm"
-        return df.string(from: date)
     }
 }

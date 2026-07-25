@@ -26,4 +26,33 @@ struct CSVReportServiceTests {
         #expect(csv.contains("\"Trend\",\"Sleep\",\"2\",\"2.0\",\"2\""))
         #expect(csv.hasSuffix("\r\n"))
     }
+
+    @Test func exportsLogItemsForSelectedPeriod() throws {
+        let service = CSVReportService()
+        defer { try? FileManager.default.removeItem(at: service.logOutputURL) }
+        let start = Date(timeIntervalSince1970: 0)
+        let timeZone = try #require(TimeZone(secondsFromGMT: 4 * 3_600))
+
+        let url = try #require(service.exportLog(
+            periodLabel: "Week 1",
+            entries: [
+                (
+                    label: "=formula, \"value\"",
+                    start: start,
+                    end: start.addingTimeInterval(90)
+                ),
+                (label: "Instant", start: start.addingTimeInterval(120), end: nil),
+            ],
+            timeZone: timeZone
+        ))
+        let data = try Data(contentsOf: url)
+        let csv = String(decoding: data.dropFirst(3), as: UTF8.self)
+
+        #expect(url.pathExtension == "csv")
+        #expect(Array(data.prefix(3)) == [0xEF, 0xBB, 0xBF])
+        #expect(csv.hasPrefix("\"Period\",\"Label\",\"Start\",\"End\",\"Duration Seconds\"\r\n"))
+        #expect(csv.contains("\"Week 1\",\"'=formula, \"\"value\"\"\""))
+        #expect(csv.contains("\"1970-01-01T04:00:00+04:00\",\"1970-01-01T04:01:30+04:00\",\"90\""))
+        #expect(csv.contains("\"Week 1\",\"Instant\",\"1970-01-01T04:02:00+04:00\",\"\",\"\""))
+    }
 }

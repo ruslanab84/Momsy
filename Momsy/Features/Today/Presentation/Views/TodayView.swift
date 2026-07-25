@@ -57,6 +57,7 @@ struct TodayView: View {
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject private var units: UnitSystemManager
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: now)
@@ -477,10 +478,10 @@ struct TodayView: View {
             VStack(spacing: 10) {
                 ForEach(vm.logEntries.prefix(7)) { entry in
                     HStack(spacing: 12) {
-                        Text(entry.timeString)
+                        Text(entry.time, format: units.current.timeFormatStyle())
                             .font(.system(size: 12, weight: .bold, design: .monospaced))
                             .foregroundColor(.bbInkMute)
-                            .frame(width: 44, alignment: .leading)
+                            .frame(width: units.isImperial ? 68 : 44, alignment: .leading)
                         CuteBlobView(kind: entry.kind, size: 32, tone: entry.kind.defaultTone)
                         Text(entry.label)
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
@@ -721,4 +722,5 @@ private struct TodayDiaperCard: View {
 #Preview {
     TodayView(container: AppContainer())
         .environmentObject(LocalizationManager.shared)
+        .environmentObject(UnitSystemManager.shared)
 }

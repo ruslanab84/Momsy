@@ -2,9 +2,14 @@ import Foundation
 
 final class CSVReportService {
     private let fileName = "momsy_report.csv"
+    private let logFileName = "momsy_log_report.csv"
 
     var outputURL: URL {
         FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+    }
+
+    var logOutputURL: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent(logFileName)
     }
 
     func export(
@@ -26,13 +31,42 @@ final class CSVReportService {
             }
         }
 
+        return write(rows, to: outputURL)
+    }
+
+    func exportLog(
+        periodLabel: String,
+        entries: [(label: String, start: Date, end: Date?)],
+        timeZone: TimeZone = .current
+    ) -> URL? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
+        var rows = [["Period", "Label", "Start", "End", "Duration Seconds"]]
+
+        for entry in entries {
+            rows.append([
+                periodLabel,
+                entry.label,
+                formatter.string(from: entry.start),
+                entry.end.map { formatter.string(from: $0) } ?? "",
+                entry.end.map { String(Int($0.timeIntervalSince(entry.start))) } ?? "",
+            ])
+        }
+
+        return write(rows, to: logOutputURL)
+    }
+
+    private func write(_ rows: [[String]], to url: URL) -> URL? {
         let csv = rows
             .map { $0.map(Self.escape).joined(separator: ",") }
             .joined(separator: "\r\n") + "\r\n"
 
         do {
-            try Data(("\u{FEFF}" + csv).utf8).write(to: outputURL, options: .atomic)
-            return outputURL
+            try Data(("\u{FEFF}" + csv).utf8).write(to: url, options: .atomic)
+            return url
         } catch {
             return nil
         }

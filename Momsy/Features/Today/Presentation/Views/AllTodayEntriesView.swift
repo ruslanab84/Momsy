@@ -5,6 +5,7 @@ struct AllTodayEntriesView: View {
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject private var units: UnitSystemManager
 
     var body: some View {
         NavigationStack {
@@ -37,10 +38,10 @@ struct AllTodayEntriesView: View {
 
     private func entryRow(_ entry: LogEntry) -> some View {
         HStack(spacing: 12) {
-            Text(entry.timeString)
+            Text(entry.time, format: units.current.timeFormatStyle())
                 .font(.system(size: 12, weight: .bold, design: .monospaced))
                 .foregroundColor(.bbInkMute)
-                .frame(width: 44, alignment: .leading)
+                .frame(width: units.isImperial ? 68 : 44, alignment: .leading)
             CuteBlobView(kind: entry.kind, size: 32, tone: entry.kind.defaultTone)
             Text(entry.label)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
@@ -77,4 +78,5 @@ struct AllTodayEntriesView: View {
         LogEntry(time: Date().addingTimeInterval(-7200), kind: .drop, label: "Diaper #3"),
     ])
     .environmentObject(LocalizationManager.shared)
+    .environmentObject(UnitSystemManager.shared)
 }

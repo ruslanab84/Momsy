@@ -13,13 +13,8 @@ struct VitaminView: View {
     @ObservedObject var vm: VitaminViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject private var units: UnitSystemManager
     @State private var showAddCategory = false
-
-    private let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f
-    }()
 
     var body: some View {
         NavigationStack {
@@ -218,10 +213,10 @@ struct VitaminView: View {
                 VStack(spacing: 0) {
                     ForEach(Array(vm.todayEntries.enumerated()), id: \.element.id) { index, entry in
                         HStack(spacing: 12) {
-                            Text(timeFormatter.string(from: entry.time))
+                            Text(entry.time, format: units.current.timeFormatStyle())
                                 .font(.system(size: 12, weight: .bold, design: .monospaced))
                                 .foregroundStyle(VitaminPosterPalette.inkMute)
-                                .frame(width: 44, alignment: .leading)
+                                .frame(width: units.isImperial ? 68 : 44, alignment: .leading)
 
                             CuteBlobView(kind: .vitamin, size: 32, tone: .bbButter)
 
@@ -490,4 +485,5 @@ struct VitaminDottedLine: Shape {
     VitaminView(vm: VitaminViewModel(quickLogRepo: QuickLogRepository(),
                                      vitaminRepo: SwiftDataVitaminRepository(context: ModelContext(container))))
         .environmentObject(LocalizationManager.shared)
+        .environmentObject(UnitSystemManager.shared)
 }

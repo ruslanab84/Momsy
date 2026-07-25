@@ -43,4 +43,11 @@ final class GenerateReportUseCase {
             trends: sparklines.map { ($0.label, $0.values, $0.peak) }
         )
     }
+
+    func executeCSV(periodLabel: String, items: [LogReportItem]) -> URL? {
+        csvService.exportLog(
+            periodLabel: periodLabel,
+            entries: items.map { ($0.label, $0.start, $0.end) }
+        )
+    }
 }
