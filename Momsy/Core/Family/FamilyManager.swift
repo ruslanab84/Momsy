@@ -250,7 +250,10 @@ final class FamilyManager: ObservableObject {
         resetStaleCacheIfNeeded(for: uid)
         // Accept either a bare code or a full `momsy://join?code=…` link a user may
         // have pasted; reject anything else so it can't become a `//` Firestore path.
-        guard let trimmed = JoinDeeplink.normalize(rawCode: code) else {
+        // Формат проверяется до сети: rules всё равно откажут коду вне канонического
+        // вида, а каждый отклонённый `get` стоит биллируемого чтения в `familyExists()`.
+        guard let trimmed = JoinDeeplink.normalize(rawCode: code),
+              InviteCodeFormat.isValid(trimmed) else {
             throw FamilyError.invalidOrExpiredCode
         }
         let inviteDoc: DocumentSnapshot

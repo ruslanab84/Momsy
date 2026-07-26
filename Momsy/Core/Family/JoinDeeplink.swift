@@ -13,7 +13,7 @@ enum JoinDeeplink {
     }
 
     /// Canonical invite code for raw user-entered text, which may be a bare code
-    /// (`MOMSY-XXXX`) or a full `momsy://join?code=…` link the user pasted into the
+    /// (`MOMSY-XXXX-XXXX-XXXX`) or a full `momsy://join?code=…` link the user pasted into the
     /// join field. Returns `nil` when no usable code can be extracted — including any
     /// other URL/path, which must never reach Firestore as a `//`-containing doc id.
     static func normalize(rawCode input: String) -> String? {

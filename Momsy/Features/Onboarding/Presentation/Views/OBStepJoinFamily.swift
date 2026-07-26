@@ -34,7 +34,7 @@ struct JoinFamilyStep: View {
                         .foregroundColor(.bbInkMute)
                         .kerning(0.6)
 
-                    TextField("MOMSY-XXXX", text: $inviteCode)
+                    TextField(InviteCodeFormat.placeholder, text: $inviteCode)
                         .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()
                         .font(.system(size: 17, weight: .semibold, design: .monospaced))

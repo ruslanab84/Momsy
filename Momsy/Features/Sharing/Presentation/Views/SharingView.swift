@@ -140,7 +140,7 @@ struct SharingView: View {
         VStack(alignment: .leading, spacing: 10) {
             BBSectionLabel(text: loc.strings.joinFamilyTitle)
             HStack(spacing: 10) {
-                TextField("MOMSY-XXXX", text: $vm.joinCode)
+                TextField(InviteCodeFormat.placeholder, text: $vm.joinCode)
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
                     .font(.system(size: 15, weight: .semibold, design: .monospaced))
