@@ -94,8 +94,15 @@ final class LogReportViewModel: ObservableObject {
         isExportingCSV = true
         defer { isExportingCSV = false }
         await load()
+        let averageDayCount = mode == .day
+            ? nil
+            : calendar.dateComponents([.day], from: range.from, to: range.to).day
         guard loadError == nil,
-              let url = generateReport.executeCSV(periodLabel: periodTitle, items: items) else { return }
+              let url = generateReport.executeCSV(
+                periodLabel: periodTitle,
+                items: items,
+                averageDayCount: averageDayCount
+              ) else { return }
         shareURL = url
         showShare = true
     }

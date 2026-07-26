@@ -36,7 +36,9 @@ final class CSVReportService {
 
     func exportLog(
         periodLabel: String,
-        entries: [(label: String, start: Date, end: Date?)],
+        entries: [(category: String, label: String, start: Date, end: Date?)],
+        averageDayCount: Int? = nil,
+        averageCategories: [String] = [],
         timeZone: TimeZone = .current
     ) -> URL? {
         let formatter = DateFormatter()
@@ -44,7 +46,7 @@ final class CSVReportService {
         formatter.calendar = Calendar(identifier: .gregorian)
         formatter.timeZone = timeZone
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
-        var rows = [["Period", "Label", "Start", "End", "Duration Seconds"]]
+        var rows = [["Period", "Label", "Start", "End"]]
 
         for entry in entries {
             rows.append([
@@ -52,8 +54,21 @@ final class CSVReportService {
                 entry.label,
                 formatter.string(from: entry.start),
                 entry.end.map { formatter.string(from: $0) } ?? "",
-                entry.end.map { String(Int($0.timeIntervalSince(entry.start))) } ?? "",
             ])
+        }
+
+        if let averageDayCount, averageDayCount > 0 {
+            let counts = Dictionary(grouping: entries, by: { $0.category }).mapValues(\.count)
+            rows.append(["Summary", "Category", "Average entries per day", ""])
+            for category in averageCategories {
+                let average = Double(counts[category, default: 0]) / Double(averageDayCount)
+                rows.append([
+                    "Average",
+                    category,
+                    String(format: "%.1f", locale: Locale(identifier: "en_US_POSIX"), average),
+                    "",
+                ])
+            }
         }
 
         return write(rows, to: logOutputURL)

@@ -44,10 +44,47 @@ final class GenerateReportUseCase {
         )
     }
 
-    func executeCSV(periodLabel: String, items: [LogReportItem]) -> URL? {
+    func executeCSV(
+        periodLabel: String,
+        items: [LogReportItem],
+        averageDayCount: Int?
+    ) -> URL? {
         csvService.exportLog(
             periodLabel: periodLabel,
-            entries: items.map { ($0.label, $0.start, $0.end) }
+            entries: items.map {
+                (categoryLabel(for: $0.kind), $0.label, $0.start, $0.end)
+            },
+            averageDayCount: averageDayCount,
+            averageCategories: averageCategories
         )
+    }
+
+    private var averageCategories: [String] {
+        let strings = LocalizationManager.shared.strings
+        return [
+            strings.feeding,
+            strings.sleep,
+            strings.diaper,
+            strings.stoolLabel,
+            strings.walk,
+            strings.bath,
+            strings.pumping,
+            strings.vitamins,
+        ]
+    }
+
+    private func categoryLabel(for kind: BlobKind) -> String {
+        let strings = LocalizationManager.shared.strings
+        switch kind {
+        case .bottle:  return strings.feeding
+        case .sleep:   return strings.sleep
+        case .drop:    return strings.diaper
+        case .stool:   return strings.stoolLabel
+        case .walk:    return strings.walk
+        case .bath:    return strings.bath
+        case .pump:    return strings.pumping
+        case .vitamin: return strings.vitamins
+        default:       return kind.rawValue.capitalized
+        }
     }
 }
