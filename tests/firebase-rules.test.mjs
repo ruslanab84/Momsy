@@ -16,7 +16,7 @@ const familyPath = `families/${familyId}`;
 const familyBPath = `families/${familyBId}`;
 const babyPath = `${familyPath}/babies/${babyId}`;
 const legacyBabyPath = `babies/${familyId}`;
-const familyBInvitePath = "invites/MOMSY-BBB234";
+const familyBInvitePath = "invites/MOMSY-B2B3-B4B5-B6B7";
 
 const users = {
     mom: "mom",
@@ -193,23 +193,23 @@ test("invite updates cannot cross families or bypass schema and expiry limits", 
     await assertFails(firestore(users.parentB).doc(familyBInvitePath).update({
         expiresAt: validExpiry,
     }));
-    await assertFails(firestore(users.mom).doc("invites/MOMSY-EXTRA1").set({
+    await assertFails(firestore(users.mom).doc("invites/MOMSY-E2X3-T4R5-A6B7").set({
         familyId,
         createdBy: users.mom,
         expiresAt: validExpiry,
         unexpected: true,
     }));
-    await assertFails(firestore(users.mom).doc("invites/MOMSY-LONG01").set({
+    await assertFails(firestore(users.mom).doc("invites/MOMSY-L2N3-G4H5-J6K7").set({
         familyId,
         createdBy: users.mom,
         expiresAt: new Date(Date.now() + 25 * 60 * 60 * 1000),
     }));
-    await assertFails(firestore(users.mom).doc("invites/MOMSY-OLD001").set({
+    await assertFails(firestore(users.mom).doc("invites/MOMSY-L2D3-M4N5-P6Q7").set({
         familyId,
         createdBy: users.mom,
         expiresAt: new Date(Date.now() - 60 * 1000),
     }));
-    await assertSucceeds(firestore(users.mom).doc("invites/MOMSY-VALID1").set({
+    await assertSucceeds(firestore(users.mom).doc("invites/MOMSY-V2L3-D4F5-G6H7").set({
         familyId,
         createdBy: users.mom,
         expiresAt: validExpiry,
@@ -217,7 +217,7 @@ test("invite updates cannot cross families or bypass schema and expiry limits", 
 });
 
 test("an account owner can enumerate and delete only their own invites", async () => {
-    const ownInvitePath = "invites/MOMSY-ERASE1";
+    const ownInvitePath = "invites/MOMSY-E2R3-S4T5-U6V7";
     await testEnv.withSecurityRulesDisabled(async (adminContext) => {
         await adminContext.firestore().doc(ownInvitePath).set({
             familyId: "deleted-family",
@@ -233,14 +233,14 @@ test("an account owner can enumerate and delete only their own invites", async (
         .where("createdBy", "==", users.mom);
 
     const snapshot = await assertSucceeds(ownInvites.get());
-    assert.deepEqual(snapshot.docs.map((doc) => doc.id), ["MOMSY-ERASE1"]);
+    assert.deepEqual(snapshot.docs.map((doc) => doc.id), ["MOMSY-E2R3-S4T5-U6V7"]);
     await assertFails(otherUsersInvite.get());
     await assertSucceeds(ownerDb.doc(ownInvitePath).delete());
 });
 
 test("an invite cannot expose or recreate a deleted family", async () => {
     const staleFamilyId = "deleted-family";
-    const staleInviteCode = "MOMSY-STALE1";
+    const staleInviteCode = "MOMSY-S2T3-L4M5-N6P7";
     const staleInvitePath = `invites/${staleInviteCode}`;
     await testEnv.withSecurityRulesDisabled(async (adminContext) => {
         await adminContext.firestore().doc(staleInvitePath).set({
@@ -266,7 +266,7 @@ test("an invite cannot expose or recreate a deleted family", async () => {
 
 test("invite create, role update, and self-invite join keep both members visible", async () => {
     const momDb = firestore(users.mom);
-    const invite = momDb.doc("invites/MOMSY-JOIN01");
+    const invite = momDb.doc("invites/MOMSY-J2N3-K4L5-M6N7");
 
     // Mirrors FirestoreInviteService: expiresAt is a client-computed
     // Timestamp(date:) with full nanosecond precision, not aligned to the
@@ -298,7 +298,7 @@ test("invite create, role update, and self-invite join keep both members visible
     batch.set(joinerDb.doc(`${familyPath}/members/${users.outsider}`), {
         uid: users.outsider,
         roleRaw: "Няня",
-        inviteCode: "MOMSY-JOIN01",
+        inviteCode: "MOMSY-J2N3-K4L5-M6N7",
     });
     batch.set(joinerDb.doc(`users/${users.outsider}`), { familyId });
     await assertSucceeds(batch.commit());
@@ -321,7 +321,7 @@ test("self-invite join is rejected when the member role does not match the invit
     const momDb = firestore(users.mom);
     const expirySeconds = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
 
-    await assertSucceeds(momDb.doc("invites/MOMSY-JOIN02").set({
+    await assertSucceeds(momDb.doc("invites/MOMSY-J2N3-K4L5-M6P8").set({
         familyId,
         createdBy: users.mom,
         expiresAt: new Timestamp(expirySeconds, 0),
@@ -332,7 +332,7 @@ test("self-invite join is rejected when the member role does not match the invit
     await assertFails(joinerDb.doc(`${familyPath}/members/${users.outsider}`).set({
         uid: users.outsider,
         roleRaw: "Папа",
-        inviteCode: "MOMSY-JOIN02",
+        inviteCode: "MOMSY-J2N3-K4L5-M6P8",
     }));
 });
 
@@ -430,4 +430,54 @@ test("legacy user photos are owner-only", async () => {
     await assertSucceeds(storage(users.mom).ref(path).getMetadata());
     await assertFails(storage(users.dad).ref(path).getMetadata());
     await assertFails(storage(users.grandma).ref(path).getMetadata());
+});
+
+test("a weak invite code cannot be minted", async () => {
+    const momDb = firestore(users.mom);
+    const expiresAt = Timestamp.fromMillis(Date.now() + 3_600_000);
+
+    await assertFails(momDb.doc("invites/MOMSY-WEAK12").set({
+        familyId,
+        createdBy: users.mom,
+        expiresAt,
+    }));
+    await assertFails(momDb.doc("invites/MOMSY-A2B3-C4D5").set({
+        familyId,
+        createdBy: users.mom,
+        expiresAt,
+    }));
+    await assertFails(momDb.doc("invites/MOMSY-A2B3-C4D5-E6FI").set({
+        familyId,
+        createdBy: users.mom,
+        expiresAt,
+    }));
+    await assertSucceeds(momDb.doc("invites/MOMSY-A2B3-C4D5-E6F7").set({
+        familyId,
+        createdBy: users.mom,
+        expiresAt,
+    }));
+});
+
+test("a weak invite code cannot be probed even when the document exists", async () => {
+    const weakCode = "MOMSY-WEAK34";
+    const strongCode = "MOMSY-H7J8-K9L2-M3N4";
+    const expiresAt = Timestamp.fromMillis(Date.now() + 3_600_000);
+
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const db = adminContext.firestore();
+        await db.doc(`invites/${weakCode}`).set({
+            familyId,
+            createdBy: users.mom,
+            expiresAt,
+        });
+        await db.doc(`invites/${strongCode}`).set({
+            familyId,
+            createdBy: users.mom,
+            expiresAt,
+        });
+    });
+
+    // Перебор шестисимвольного пространства отсекается до `familyExists()`.
+    await assertFails(firestore(users.outsider).doc(`invites/${weakCode}`).get());
+    await assertSucceeds(firestore(users.outsider).doc(`invites/${strongCode}`).get());
 });

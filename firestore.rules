@@ -212,6 +212,14 @@ service cloud.firestore {
         );
     }
 
+    // Инвайт-код обязан нести ≥60 бит энтропии: MOMSY-XXXX-XXXX-XXXX над
+    // 32-символьным алфавитом без визуально неоднозначных знаков. Прежние
+    // шестисимвольные коды давали 2^30 и перебирались, а join по угаданному коду
+    // выдаёт роль родителя — полный доступ к данным ребёнка и к ростеру.
+    function isStrongInviteCode(code) {
+      return code.matches('^MOMSY(-[A-HJ-NP-Z2-9]{4}){3}$');
+    }
+
     function inviteImmutableFieldsUnchanged() {
       return request.resource.data.familyId == resource.data.familyId
         && request.resource.data.createdBy == resource.data.createdBy
@@ -239,11 +247,15 @@ service cloud.firestore {
     // erasure without allowing callers to enumerate other families' codes.
     match /invites/{code} {
       allow get:    if isSignedIn()
+                    // ПЕРВЫМ предикатом: `familyExists()` — биллируемое чтение
+                    // даже при отказе, и перебор не должен его оплачивать.
+                    && isStrongInviteCode(code)
                     && familyExists(resource.data.familyId)
                     && resource.data.expiresAt > request.time;
       allow list:   if isSignedIn()
                     && resource.data.createdBy == request.auth.uid;
       allow create: if isSignedIn()
+                    && isStrongInviteCode(code)
                     && hasValidInviteData()
                     && request.resource.data.createdBy == request.auth.uid
                     && canManageFamilyRoster(request.resource.data.familyId);
