@@ -29,15 +29,31 @@ struct InviteCacheScopeTests {
     func familyAndExpiryMustMatch() {
         let now = Date(timeIntervalSince1970: 1_000)
         let future = now.addingTimeInterval(60)
+        let strong = "MOMSY-A2B3-C4D5-E6F7"
 
         #expect(FirestoreInviteService.canReuseCachedInvite(
-            cachedFamilyId: "A", currentFamilyId: "A", expiry: future, now: now
+            cachedCode: strong, cachedFamilyId: "A", currentFamilyId: "A", expiry: future, now: now
         ))
         #expect(!FirestoreInviteService.canReuseCachedInvite(
-            cachedFamilyId: "A", currentFamilyId: "B", expiry: future, now: now
+            cachedCode: strong, cachedFamilyId: "A", currentFamilyId: "B", expiry: future, now: now
         ))
         #expect(!FirestoreInviteService.canReuseCachedInvite(
-            cachedFamilyId: "A", currentFamilyId: "A", expiry: now, now: now
+            cachedCode: strong, cachedFamilyId: "A", currentFamilyId: "A", expiry: now, now: now
+        ))
+    }
+
+    @Test("a cached legacy-format code is never reused")
+    func legacyCachedCodeForcesRegeneration() {
+        let now = Date(timeIntervalSince1970: 1_000)
+        let future = now.addingTimeInterval(60)
+
+        #expect(!FirestoreInviteService.canReuseCachedInvite(
+            cachedCode: "MOMSY-ABC234", cachedFamilyId: "A", currentFamilyId: "A",
+            expiry: future, now: now
+        ))
+        #expect(!FirestoreInviteService.canReuseCachedInvite(
+            cachedCode: nil, cachedFamilyId: "A", currentFamilyId: "A",
+            expiry: future, now: now
         ))
     }
 }

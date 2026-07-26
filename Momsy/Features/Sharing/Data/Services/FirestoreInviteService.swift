@@ -24,6 +24,7 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
            let code = defaults.string(forKey: codeKey),
            let expiry = defaults.object(forKey: expiryKey) as? Date,
            Self.canReuseCachedInvite(
+               cachedCode: code,
                cachedFamilyId: cachedFamilyId,
                currentFamilyId: familyId,
                expiry: expiry
@@ -39,6 +40,7 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
     func expiry() -> Date {
         guard let expiry = defaults.object(forKey: expiryKey) as? Date,
               Self.canReuseCachedInvite(
+            cachedCode: defaults.string(forKey: codeKey),
             cachedFamilyId: defaults.string(forKey: familyKey),
             currentFamilyId: defaults.string(forKey: kFamilyIdDefaultsKey),
             expiry: expiry
@@ -57,7 +59,7 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
         } else {
             previousCode = nil
         }
-        let code = generateCode()
+        let code = InviteCodeFormat.generate()
         let exp = Date().addingTimeInterval(86400)
         defaults.set(code, forKey: codeKey)
         defaults.set(exp, forKey: expiryKey)
@@ -112,6 +114,7 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
         guard
             defaults.string(forKey: codeKey) == code,
             Self.canReuseCachedInvite(
+                cachedCode: code,
                 cachedFamilyId: defaults.string(forKey: familyKey),
                 currentFamilyId: familyId,
                 expiry: expiry
@@ -153,20 +156,18 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
     }
 
     static func canReuseCachedInvite(
+        cachedCode: String?,
         cachedFamilyId: String?,
         currentFamilyId: String?,
         expiry: Date?,
         now: Date = Date()
     ) -> Bool {
+        // Код, выданный старой сборкой, короче и новые rules откажут ему в `get`.
+        // Отбрасываем его здесь, чтобы `regenerate()` выпустил сильный код.
+        guard let cachedCode, InviteCodeFormat.isValid(cachedCode) else { return false }
         guard let currentFamilyId, cachedFamilyId == currentFamilyId, let expiry else {
             return false
         }
         return expiry > now
-    }
-
-    private func generateCode() -> String {
-        let chars = Array("ABCDEFGHJKLMNPQRSTUVWXYZ23456789")
-        let suffix = (0..<6).map { _ in chars[Int.random(in: chars.indices)] }
-        return "MOMSY-" + String(suffix)
     }
 }
