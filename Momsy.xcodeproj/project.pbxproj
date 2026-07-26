@@ -40,6 +40,7 @@
 		5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */; };
 		5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */; };
 		5A11ABF0000000000000A007 /* FamilySwitchPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */; };
+		5A11ABF0000000000000B007 /* InviteCodeFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000B006 /* InviteCodeFormatTests.swift */; };
 		5A11ABF0000000000000A00A /* AccountAuthViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A009 /* AccountAuthViewModelTests.swift */; };
 		5A11ABF0000000000000A00C /* UnitSystemTimeFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A00B /* UnitSystemTimeFormatTests.swift */; };
 		5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */; };
@@ -200,6 +201,7 @@
 		5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountErasureGateTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinGuardTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilySwitchPolicyTests.swift; sourceTree = "<group>"; };
+		5A11ABF0000000000000B006 /* InviteCodeFormatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InviteCodeFormatTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A009 /* AccountAuthViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountAuthViewModelTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A00B /* UnitSystemTimeFormatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UnitSystemTimeFormatTests.swift; sourceTree = "<group>"; };
 		5C108DEF939A1DFF17A30728 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -520,6 +522,7 @@
 				5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */,
 				5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */,
 				5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */,
+				5A11ABF0000000000000B006 /* InviteCodeFormatTests.swift */,
 			);
 			path = Sharing;
 			sourceTree = "<group>";
@@ -1017,6 +1020,7 @@
 				5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */,
 				5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */,
 				5A11ABF0000000000000A007 /* FamilySwitchPolicyTests.swift in Sources */,
+				5A11ABF0000000000000B007 /* InviteCodeFormatTests.swift in Sources */,
 				5A11ABF0000000000000A00A /* AccountAuthViewModelTests.swift in Sources */,
 				5A11ABF0000000000000A00C /* UnitSystemTimeFormatTests.swift in Sources */,
 				A9F0E002A9F0E002A9F0E002 /* AppPersistenceTests.swift in Sources */,
