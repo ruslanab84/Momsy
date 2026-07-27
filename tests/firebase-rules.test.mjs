@@ -6,7 +6,7 @@ import {
     assertSucceeds,
     initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { Timestamp } from "firebase/firestore";
+import { serverTimestamp, Timestamp } from "firebase/firestore";
 
 const projectId = "demo-momsy";
 const familyId = "family-a";
@@ -480,4 +480,20 @@ test("a weak invite code cannot be probed even when the document exists", async 
     // Перебор шестисимвольного пространства отсекается до `familyExists()`.
     await assertFails(firestore(users.outsider).doc(`invites/${weakCode}`).get());
     await assertSucceeds(firestore(users.outsider).doc(`invites/${strongCode}`).get());
+});
+
+test("a tombstone may be written with a server timestamp sentinel", async () => {
+    const momDb = firestore(users.mom);
+
+    await assertSucceeds(momDb.doc(`${babyPath}/deletions/server-stamped`).set({
+        deletedAt: serverTimestamp(),
+    }));
+
+    // Роли без прав на ростер по-прежнему не могут ставить надгробия.
+    await assertFails(firestore(users.nanny).doc(`${babyPath}/deletions/nanny-delete`).set({
+        deletedAt: serverTimestamp(),
+    }));
+    await assertFails(firestore(users.grandma).doc(`${babyPath}/deletions/granny-delete`).set({
+        deletedAt: serverTimestamp(),
+    }));
 });

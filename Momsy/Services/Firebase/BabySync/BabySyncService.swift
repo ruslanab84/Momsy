@@ -156,6 +156,12 @@ final class BabySyncService {
     ///
     /// Идемпотентно: удаление отсутствующего документа успешно, а `setData` tombstone'а
     /// перезаписывает ту же форму — повторная постановка на следующем запуске безвредна.
+    ///
+    /// `deletedAt` обязан быть СЕРВЕРНЫМ временем. Раньше здесь стоял `Timestamp(date: Date())`,
+    /// и tombstone от устройства с отстающими часами попадал «в прошлое» относительно
+    /// watermark'а других устройств — фильтр `deletedAt >= watermark` его не возвращал
+    /// никогда, и удаление не доезжало до второго родителя вообще. Часы, спешащие вперёд,
+    /// зеркально отравляли watermark и отсекали чужие удаления на всё время опережения.
     private func enqueueDelete(idStr: String, in subcollection: String) {
         guard hasPath, !idStr.isEmpty, let id = UUID(uuidString: idStr) else { return }
 
@@ -176,12 +182,18 @@ final class BabySyncService {
 
         collection(subcollection).document(idStr).delete { pair.report($0) }
         collection("deletions").document(idStr)
-            .setData(["deletedAt": Timestamp(date: Date())]) { pair.report($0) }
+            .setData(["deletedAt": FieldValue.serverTimestamp()]) { pair.report($0) }
     }
 
     /// Tombstoned ids deleted on any device, optionally only those at/after `since`.
     /// Ordered by `deletedAt` so the caller can advance a watermark; every tombstone is
     /// written with a `deletedAt`, so the order clause excludes nothing.
+    ///
+    /// Пока сервер не подтвердил запись, локальный кэш отдаёт документ с НЕразрешённым
+    /// sentinel'ом (`deletedAt == nil` при поведении по умолчанию). Такие документы
+    /// отбрасываются: собственные незавершённые удаления и так учтены через
+    /// `PendingDeletionsStore.ids()` в `downloadAndMerge`, а пустить их в расчёт максимума
+    /// значило бы двигать watermark по метке, которой ещё не существует.
     func fetchTombstones(since: Date?, limit: Int = 1000) async throws -> [(id: String, deletedAt: Date)] {
         guard hasPath else { return [] }
         var query: Query = collection("deletions")
@@ -195,7 +207,9 @@ final class BabySyncService {
         }
         let snapshot = try await query.getDocuments()
         return snapshot.documents.compactMap { doc in
-            guard let ts = doc.data()["deletedAt"] as? Timestamp else { return nil }
+            // `serverTimestampBehavior: .none` — неразрешённый sentinel приходит как `nil`
+            // и здесь же отсеивается.
+            guard let ts = doc.data(with: .none)["deletedAt"] as? Timestamp else { return nil }
             return (doc.documentID, ts.dateValue())
         }
     }
