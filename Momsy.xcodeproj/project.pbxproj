@@ -40,9 +40,12 @@
 		5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */; };
 		5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */; };
 		5A11ABF0000000000000A007 /* FamilySwitchPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */; };
-		5A11ABF0000000000000B007 /* InviteCodeFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000B006 /* InviteCodeFormatTests.swift */; };
 		5A11ABF0000000000000A00A /* AccountAuthViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A009 /* AccountAuthViewModelTests.swift */; };
 		5A11ABF0000000000000A00C /* UnitSystemTimeFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000A00B /* UnitSystemTimeFormatTests.swift */; };
+		5A11ABF0000000000000B007 /* InviteCodeFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000B006 /* InviteCodeFormatTests.swift */; };
+		5A11ABF0000000000000C005 /* LocalInviteServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000C006 /* LocalInviteServiceTests.swift */; };
+		5A11ABF0000000000000C003 /* AckLatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000C004 /* AckLatchTests.swift */; };
+		5A11ABF0000000000000C001 /* DeleteAckPairTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000C002 /* DeleteAckPairTests.swift */; };
 		5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */; };
 		802A6938D28AA6A793B23C06 /* MockFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */; };
 		85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */; };
@@ -201,9 +204,12 @@
 		5A11ABF0000000000000A002 /* AccountErasureGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountErasureGateTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinGuardTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilySwitchPolicyTests.swift; sourceTree = "<group>"; };
-		5A11ABF0000000000000B006 /* InviteCodeFormatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InviteCodeFormatTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A009 /* AccountAuthViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountAuthViewModelTests.swift; sourceTree = "<group>"; };
 		5A11ABF0000000000000A00B /* UnitSystemTimeFormatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UnitSystemTimeFormatTests.swift; sourceTree = "<group>"; };
+		5A11ABF0000000000000B006 /* InviteCodeFormatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InviteCodeFormatTests.swift; sourceTree = "<group>"; };
+		5A11ABF0000000000000C006 /* LocalInviteServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalInviteServiceTests.swift; sourceTree = "<group>"; };
+		5A11ABF0000000000000C004 /* AckLatchTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AckLatchTests.swift; sourceTree = "<group>"; };
+		5A11ABF0000000000000C002 /* DeleteAckPairTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAckPairTests.swift; sourceTree = "<group>"; };
 		5C108DEF939A1DFF17A30728 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		6284D94988BAA9F30D148420 /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
@@ -414,6 +420,8 @@
 				0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */,
 				0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */,
 				0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */,
+				5A11ABF0000000000000C004 /* AckLatchTests.swift */,
+				5A11ABF0000000000000C002 /* DeleteAckPairTests.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -523,6 +531,7 @@
 				5A11ABF0000000000000A004 /* FamilyJoinGuardTests.swift */,
 				5A11ABF0000000000000A006 /* FamilySwitchPolicyTests.swift */,
 				5A11ABF0000000000000B006 /* InviteCodeFormatTests.swift */,
+				5A11ABF0000000000000C006 /* LocalInviteServiceTests.swift */,
 			);
 			path = Sharing;
 			sourceTree = "<group>";
@@ -1021,6 +1030,9 @@
 				5A11ABF0000000000000A005 /* FamilyJoinGuardTests.swift in Sources */,
 				5A11ABF0000000000000A007 /* FamilySwitchPolicyTests.swift in Sources */,
 				5A11ABF0000000000000B007 /* InviteCodeFormatTests.swift in Sources */,
+				5A11ABF0000000000000C005 /* LocalInviteServiceTests.swift in Sources */,
+				5A11ABF0000000000000C003 /* AckLatchTests.swift in Sources */,
+				5A11ABF0000000000000C001 /* DeleteAckPairTests.swift in Sources */,
 				5A11ABF0000000000000A00A /* AccountAuthViewModelTests.swift in Sources */,
 				5A11ABF0000000000000A00C /* UnitSystemTimeFormatTests.swift in Sources */,
 				A9F0E002A9F0E002A9F0E002 /* AppPersistenceTests.swift in Sources */,
