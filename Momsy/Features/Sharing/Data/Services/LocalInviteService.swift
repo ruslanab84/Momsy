@@ -24,7 +24,9 @@ final class LocalInviteService: InviteServiceProtocol, @unchecked Sendable {
 
     @discardableResult
     func regenerate() -> String {
-        let code = "MOMSY-\(String(format: "%04d", Int.random(in: 1000...9999)))"
+        // Тот же формат, что и в облачном сервисе: `FamilyManager.joinFamily`
+        // валидирует код через `InviteCodeFormat` до сети и отклонит любой другой.
+        let code = InviteCodeFormat.generate()
         UserDefaults.standard.set(code, forKey: codeKey)
         UserDefaults.standard.set(Date().addingTimeInterval(ttl), forKey: expiryKey)
         return code
