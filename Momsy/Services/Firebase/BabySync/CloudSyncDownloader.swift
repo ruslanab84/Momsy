@@ -176,6 +176,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         // sync every child in the roster.
         await service.migrateFromFamilyPathIfNeeded()
         await service.replayPendingWrites()
+        // До первого пула: отравленный watermark иначе отсечёт надгробия этого же прогона.
+        resetTombstoneWatermarkOnce()
         await downloadAllBabies()
         await purgeLegacyQuickLogsOnce()
     }
@@ -339,6 +341,22 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         } catch {
             // Leave the flag unset so cleanup retries on a future launch.
         }
+    }
+
+    /// Одноразовый сброс `deletions`-watermark'а после перехода надгробий на серверное
+    /// время. Сборки до этого писали `deletedAt` часами устройства, поэтому сохранённый
+    /// watermark мог уехать в будущее — и тогда фильтр `deletedAt >= watermark` отсекал
+    /// бы все новые (корректные, серверные) надгробия до тех пор, пока реальное время не
+    /// догонит. Сброс возвращает коллекцию к одному полному пулу; `applyDeletions`
+    /// идемпотентен, поэтому повторное применение уже применённых удалений безвредно.
+    private func resetTombstoneWatermarkOnce() {
+        let flag = "babysync_deletions_watermark_reset_v1_done"
+        guard !UserDefaults.standard.bool(forKey: flag) else { return }
+        let scope = service.currentScope()
+        guard !scope.familyId.isEmpty, !scope.babyId.isEmpty else { return }
+        watermarks.set(family: scope.familyId, baby: scope.babyId,
+                       collection: "deletions", to: Date(timeIntervalSince1970: 0))
+        UserDefaults.standard.set(true, forKey: flag)
     }
 
     @MainActor
