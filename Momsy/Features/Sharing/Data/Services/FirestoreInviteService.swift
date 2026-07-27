@@ -73,20 +73,20 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
             guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
             guard let familyId else { throw FamilyError.noFamilyId }
             try await self.writeToFirestore(code: code, expiry: exp, familyId: familyId)
-            await self.revokeInvite(previousCode, replacedBy: code)
+            self.revokeInvite(previousCode, replacedBy: code)
         }
         return code
     }
 
     /// Best-effort revocation of the superseded code. Failure is non-fatal — the old
     /// document still self-expires via `expiresAt` (≤24h) and rules deny expired gets.
-    private func revokeInvite(_ oldCode: String?, replacedBy newCode: String) async {
+    /// Не ждём ack: результат никого не блокирует, а офлайн-ожидание удерживало
+    /// `pendingWrite` и вместе с ним весь экран «Поделиться». Firestore сам повторит
+    /// удаление, когда сеть вернётся.
+    private func revokeInvite(_ oldCode: String?, replacedBy newCode: String) {
         guard let oldCode, oldCode != newCode else { return }
-        do {
-            try await db.collection("invites").document(oldCode).delete()
-        } catch {
-            // Old code may belong to a previous family (rules deny) or be gone already.
-        }
+        // Old code may belong to a previous family (rules deny) or be gone already.
+        db.collection("invites").document(oldCode).delete { _ in }
     }
 
     /// Awaits the pending Firestore write so the invite code is guaranteed to exist
@@ -151,9 +151,20 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
             "expiresAt": Timestamp(date: expiry)
         ]
         if let roleRaw { data["roleRaw"] = roleRaw }
-        try await db.collection("invites").document(code).setData(data, merge: true)
+        // Ограниченное ожидание: `try await setData` офлайн не возвращает управление,
+        // и весь экран «Поделиться» зависал со спиннером навсегда. Здесь ack нужен
+        // по-настоящему — показывать QR для несуществующего инвайта нельзя, — поэтому
+        // ожидание не убирается, а ограничивается и превращается в видимую ошибку.
+        let ref = db.collection("invites").document(code)
+        try await FirestoreAck.confirm(timeout: Self.ackTimeout) { done in
+            ref.setData(data, merge: true, completion: done)
+        }
         defaults.set("\(familyId)|\(code)", forKey: syncedCodeKey)
     }
+
+    /// Столько ждём подтверждения бэкендом, прежде чем показать пользователю ошибку.
+    /// Хватает на медленную сотовую сеть и при этом не превращается в «зависание».
+    static let ackTimeout: TimeInterval = 10
 
     static func canReuseCachedInvite(
         cachedCode: String?,
