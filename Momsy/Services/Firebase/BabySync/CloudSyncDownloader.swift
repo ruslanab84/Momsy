@@ -117,6 +117,29 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         return candidate
     }
 
+    /// Допуск, в пределах которого метка «в будущем» считается нормальным расхождением
+    /// между часами сервера и устройства, а не аномалией.
+    static let tombstoneClockTolerance: TimeInterval = 300
+
+    /// Watermark для `deletions`, устойчивый к отравлению одиночной аномальной меткой.
+    ///
+    /// Отличается от `advancedWatermark` тем, что игнорирует метки дальше `now + tolerance`.
+    /// Такие метки остались от сборок, писавших `deletedAt` часами клиента: устройство со
+    /// спешащими часами ставило надгробие в будущее, watermark уезжал туда же, и всё это
+    /// время удаления от других родителей отсекались фильтром `deletedAt >= watermark`.
+    /// Проигнорированная метка ничего не ломает — окно просто перечитается на следующем
+    /// sync'е, а `applyDeletions` идемпотентен.
+    ///
+    /// Чистая → покрыта тестами.
+    static func advancedTombstoneWatermark(previous: Date?,
+                                           observed: [Date],
+                                           now: Date,
+                                           tolerance: TimeInterval = tombstoneClockTolerance) -> Date {
+        let ceiling = now.addingTimeInterval(tolerance)
+        let sane = observed.filter { $0 <= ceiling }.max()
+        return advancedWatermark(previous: previous, maxObserved: sane)
+    }
+
     /// One collection's fetch result with its watermark commit deferred until the
     /// merge lands. `commitTo == nil` when the fetch itself failed — the previous
     /// watermark must stay untouched so the next sync retries the same window.
@@ -425,8 +448,11 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
             }
         }
         if deletionsApplied, let tombstones {
-            let maxTomb = tombstones.map(\.deletedAt).max()
-            let nextTomb = Self.advancedWatermark(previous: tombWatermark, maxObserved: maxTomb)
+            let nextTomb = Self.advancedTombstoneWatermark(
+                previous: tombWatermark,
+                observed: tombstones.map(\.deletedAt),
+                now: Date()
+            )
             watermarks.set(family: tombScope.familyId, baby: tombScope.babyId,
                            collection: "deletions", to: nextTomb)
         }
