@@ -145,17 +145,38 @@ final class BabySyncService {
 
     // MARK: - Deletes & tombstones
 
-    /// Deletes a single log document by its stable id.
-    func deleteLog(id: String, from subcollection: String) async throws {
-        guard hasPath, !id.isEmpty else { return }
-        try await collection(subcollection).document(id).delete()
-    }
+    /// Ставит в очередь удаление документа и tombstone для одного id и очищает запись
+    /// в `PendingDeletionsStore`, когда подтверждены ОБА.
+    ///
+    /// Записи именно ставятся в очередь, а не ожидаются: completion Firestore срабатывает
+    /// только после ack бэкенда, поэтому `try await ...delete()` офлайн не возвращает
+    /// управление и раньше вешал весь sync-пайплайн (`syncStartedAt` не сбрасывался).
+    /// Firestore сам сохраняет обе записи в персистентном кэше и повторяет их между
+    /// запусками, так что долговечность не теряется. Тот же приём уже применён в `addLog`.
+    ///
+    /// Идемпотентно: удаление отсутствующего документа успешно, а `setData` tombstone'а
+    /// перезаписывает ту же форму — повторная постановка на следующем запуске безвредна.
+    private func enqueueDelete(idStr: String, in subcollection: String) {
+        guard hasPath, !idStr.isEmpty, let id = UUID(uuidString: idStr) else { return }
 
-    /// Records a tombstone so other devices remove the entry and the launch merge
-    /// never resurrects it. Keyed by the entry's stable id; collection-agnostic.
-    func writeTombstone(id: String) async throws {
-        guard hasPath, !id.isEmpty else { return }
-        try await collection("deletions").document(id).setData(["deletedAt": Timestamp(date: Date())])
+        let pair = DeleteAckPair { outcome in
+            switch outcome {
+            case .acknowledged:
+                PendingDeletionsStore.shared.remove(id: id)
+            case .permanentlyDenied:
+                // Rules никогда не пропустят это удаление для текущей роли — постоянный
+                // отказ. Снимаем запись, чтобы sync-цикл не повторял её вечно; локальное
+                // удаление остаётся только на этом устройстве.
+                PendingDeletionsStore.shared.remove(id: id)
+                Self.log.error("enqueueDelete(\(subcollection, privacy: .public)) denied by rules — dropping \(idStr, privacy: .public)")
+            case .transientFailure:
+                Self.log.info("enqueueDelete(\(subcollection, privacy: .public)) not acknowledged yet; kept pending")
+            }
+        }
+
+        collection(subcollection).document(idStr).delete { pair.report($0) }
+        collection("deletions").document(idStr)
+            .setData(["deletedAt": Timestamp(date: Date())]) { pair.report($0) }
     }
 
     /// Tombstoned ids deleted on any device, optionally only those at/after `since`.
@@ -186,26 +207,11 @@ final class BabySyncService {
 
     /// Propagates a local delete to the cloud: removes the doc and writes a tombstone,
     /// recording the id locally first so an offline delete is retried on next launch.
+    /// Возвращается немедленно — вызывающий никогда не ждёт сеть.
     func propagateDelete(id: UUID, in subcollection: String) {
         guard hasPath else { return }
         PendingDeletionsStore.shared.add(id: id, collection: subcollection)
-        Task {
-            do {
-                try await deleteLog(id: id.uuidString, from: subcollection)
-                try await writeTombstone(id: id.uuidString)
-                PendingDeletionsStore.shared.remove(id: id)
-            } catch {
-                if Self.isPermissionDenied(error) {
-                    // Rules will never allow this delete for the current role — a
-                    // permanent failure. Drop the entry so the sync loop doesn't
-                    // retry it forever; the local delete stays local-only.
-                    PendingDeletionsStore.shared.remove(id: id)
-                    Self.log.error("propagateDelete(\(subcollection, privacy: .public)) denied by rules — dropping pending entry \(id.uuidString, privacy: .public)")
-                } else {
-                    Self.log.info("propagateDelete(\(subcollection, privacy: .public)) failed transiently; kept pending")
-                }
-            }
-        }
+        enqueueDelete(idStr: id.uuidString, in: subcollection)
     }
 
     /// Rules-denied writes are permanent for the caller's current role/membership —
@@ -246,47 +252,46 @@ final class BabySyncService {
                     currentFamilyId: currentFamily, currentBabyId: currentBaby),
                 let targetUUID = UUID(uuidString: targetBaby)
             else { continue }
-            do {
-                // Re-stamp a server `updatedAt` at replay so the watermark sees the real
-                // write time (not the offline enqueue time). The sentinel was stripped at
-                // enqueue because `UserDefaults` can't persist a `FieldValue`.
-                var payload = SyncAuthorMetadata.stamp(
-                    entry.payload,
-                    author: await currentAuthorIdentity()
-                )
-                payload["updatedAt"] = FieldValue.serverTimestamp()
-                try await ActiveBaby.$syncTargetOverride.withValue(targetUUID) {
-                    try await collection(entry.collection).document(entry.docId)
-                        .setData(payload, merge: true)
-                }
-                PendingWritesStore.shared.remove(docId: entry.docId)
-            } catch {
-                if Self.isPermissionDenied(error) {
-                    // A rules-denied queued write can never succeed for this
-                    // role/membership; keeping it would replay-fail on every sync.
-                    PendingWritesStore.shared.remove(docId: entry.docId)
-                    Self.log.error("replayPendingWrites(\(entry.collection, privacy: .public)) denied by rules — dropping \(entry.docId, privacy: .public)")
-                }
-                // Transient failures stay pending; the next sync retries.
+            // Re-stamp a server `updatedAt` at replay so the watermark sees the real
+            // write time (not the offline enqueue time). The sentinel was stripped at
+            // enqueue because `UserDefaults` can't persist a `FieldValue`.
+            var payload = SyncAuthorMetadata.stamp(
+                entry.payload,
+                author: await currentAuthorIdentity()
+            )
+            payload["updatedAt"] = FieldValue.serverTimestamp()
+            // Ставим в очередь без ожидания ack: офлайн `try await setData` не
+            // возвращает управление и вешает весь sync-пайплайн. Запись остаётся
+            // в `PendingWritesStore` до подтверждения и будет поставлена снова на
+            // следующем sync'е — `setData(merge:)` идемпотентен.
+            let docId = entry.docId
+            let subcollection = entry.collection
+            ActiveBaby.$syncTargetOverride.withValue(targetUUID) {
+                collection(subcollection).document(docId)
+                    .setData(payload, merge: true) { error in
+                        guard let error else {
+                            PendingWritesStore.shared.remove(docId: docId)
+                            return
+                        }
+                        if Self.isPermissionDenied(error) {
+                            // A rules-denied queued write can never succeed for this
+                            // role/membership; keeping it would replay-fail on every sync.
+                            PendingWritesStore.shared.remove(docId: docId)
+                            Self.log.error("replayPendingWrites(\(subcollection, privacy: .public)) denied by rules — dropping \(docId, privacy: .public)")
+                        }
+                        // Transient failures stay pending; the next sync retries.
+                    }
             }
         }
     }
 
-    /// Retries cloud deletes that didn't complete earlier (e.g. made while offline).
-    func retryPendingDeletions() async {
+    /// Повторно ставит в очередь облачные удаления, которые ещё не подтверждены
+    /// (например, сделанные офлайн). Не `async`: постановка в очередь не блокирует,
+    /// поэтому sync-пайплайн на ней зависнуть не может.
+    func retryPendingDeletions() {
         guard cloudSyncAllowed() else { return }
-        for (idStr, collection) in PendingDeletionsStore.shared.all() {
-            do {
-                try await deleteLog(id: idStr, from: collection)
-                try await writeTombstone(id: idStr)
-                if let id = UUID(uuidString: idStr) { PendingDeletionsStore.shared.remove(id: id) }
-            } catch {
-                if Self.isPermissionDenied(error) {
-                    if let id = UUID(uuidString: idStr) { PendingDeletionsStore.shared.remove(id: id) }
-                    Self.log.error("retryPendingDeletions(\(collection, privacy: .public)) denied by rules — dropping \(idStr, privacy: .public)")
-                }
-                // Transient failures stay pending for the next sync.
-            }
+        for (idStr, subcollection) in PendingDeletionsStore.shared.all() {
+            enqueueDelete(idStr: idStr, in: subcollection)
         }
     }
 
@@ -554,5 +559,44 @@ final class BabySyncService {
                 "members": FieldValue.arrayUnion([["uid": uid, "role": "parent", "name": displayName]])
             ])
         }
+    }
+}
+
+/// Сводит два ack одного удаления (документ + tombstone) в один исход и вызывает
+/// колбэк ровно один раз. Нужен потому, что обе записи ставятся в очередь Firestore
+/// и подтверждаются независимо, а `PendingDeletionsStore` можно очищать только когда
+/// подтверждены обе — иначе tombstone может не доехать, и запись воскреснет.
+nonisolated final class DeleteAckPair: @unchecked Sendable {
+    enum Outcome: Equatable {
+        /// Обе записи подтверждены бэкендом.
+        case acknowledged
+        /// Rules отказали — для текущей роли это никогда не пройдёт.
+        case permanentlyDenied
+        /// Офлайн или временный сбой — повторить позже.
+        case transientFailure
+    }
+
+    private let lock = NSLock()
+    private var remaining = 2
+    private var failure: Error?
+    private let onComplete: (Outcome) -> Void
+
+    init(onComplete: @escaping (Outcome) -> Void) {
+        self.onComplete = onComplete
+    }
+
+    func report(_ error: Error?) {
+        lock.lock()
+        guard remaining > 0 else { lock.unlock(); return }
+        if let error, failure == nil { failure = error }
+        remaining -= 1
+        let isDone = remaining == 0
+        let recorded = failure
+        lock.unlock()
+
+        guard isDone else { return }
+        guard let recorded else { return onComplete(.acknowledged) }
+        onComplete(BabySyncService.isPermissionDenied(recorded) ? .permanentlyDenied
+                                                                : .transientFailure)
     }
 }

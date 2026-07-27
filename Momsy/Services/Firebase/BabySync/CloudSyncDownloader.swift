@@ -31,7 +31,10 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     private let watermarks: SyncWatermarkStore
 
     private var hasRun = false
-    private var isSyncing = false
+    /// Момент старта текущего sync'а, `nil` если ни один не выполняется. Дата, а не
+    /// `Bool`: зависший await не даёт отработать `defer`, и булев флаг оставался бы
+    /// поднятым до конца процесса, навсегда отсекая все последующие синхронизации.
+    private var syncStartedAt: Date?
     private var lastSyncAt: Date?
 
     init(service: BabySyncService,
@@ -80,12 +83,27 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
 
     // MARK: - Entry point
 
+    /// Аренда: sync старше неё считается зависшим и больше не блокирует новую попытку.
+    /// Полный пул из 17 коллекций при холодном старте укладывается в единицы секунд,
+    /// так что 120 с не отрезают легитимный долгий пул и при этом дают восстановление
+    /// в пределах одной пользовательской сессии.
+    static let syncLease: TimeInterval = 120
+
+    /// Выполняется ли sync прямо сейчас — с учётом истечения аренды. Чистая → покрыта тестами.
+    static func isSyncInFlight(syncStartedAt: Date?,
+                               now: Date,
+                               lease: TimeInterval) -> Bool {
+        guard let syncStartedAt else { return false }
+        return now.timeIntervalSince(syncStartedAt) < lease
+    }
+
     /// Pure debounce/reentrancy decision, extracted for testability.
-    static func shouldSkipResync(isSyncing: Bool,
+    static func shouldSkipResync(syncStartedAt: Date?,
                                  lastSyncAt: Date?,
                                  now: Date,
-                                 minInterval: TimeInterval) -> Bool {
-        if isSyncing { return true }
+                                 minInterval: TimeInterval,
+                                 lease: TimeInterval = syncLease) -> Bool {
+        if isSyncInFlight(syncStartedAt: syncStartedAt, now: now, lease: lease) { return true }
         if let last = lastSyncAt, now.timeIntervalSince(last) < minInterval { return true }
         return false
     }
@@ -128,8 +146,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         }
         guard FamilyManager.shared.familyId != nil else { return }
         hasRun = true
-        isSyncing = true
-        defer { isSyncing = false; lastSyncAt = Date() }
+        syncStartedAt = Date()
+        defer { syncStartedAt = nil; lastSyncAt = Date() }
         // Migrate the old family-keyed tree first (derives the canonical babyId for a
         // pre-per-baby family), flush any writes queued before the path was ready, then
         // sync every child in the roster.
@@ -208,7 +226,8 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard FirebaseApp.app() != nil else { return }
         guard hasRun else { return }
         guard FamilyManager.shared.familyId != nil else { return }
-        guard !isSyncing else { return }
+        guard !Self.isSyncInFlight(syncStartedAt: syncStartedAt, now: Date(),
+                                   lease: Self.syncLease) else { return }
 
         let pendingDeletes = PendingDeletionsStore.shared.ids()
         let fetched: PendingFetch<SleepLogDTO> = await fetch("sleepLogs", dateField: "startedAt")
@@ -229,11 +248,11 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard hasRun else { return }
         // Foreground re-pull is a cheap delta now (incremental sync), but a quick
         // background→foreground bounce still needn't re-hit Firestore: debounce wide.
-        if Self.shouldSkipResync(isSyncing: isSyncing, lastSyncAt: lastSyncAt,
+        if Self.shouldSkipResync(syncStartedAt: syncStartedAt, lastSyncAt: lastSyncAt,
                                  now: Date(), minInterval: 300) { return }
         guard FamilyManager.shared.familyId != nil else { return }
-        isSyncing = true
-        defer { isSyncing = false; lastSyncAt = Date() }
+        syncStartedAt = Date()
+        defer { syncStartedAt = nil; lastSyncAt = Date() }
         await service.replayPendingWrites()
         await downloadAllBabies()
     }
@@ -248,11 +267,12 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard FirebaseApp.app() != nil else { return }
         guard FamilyManager.shared.familyId != nil else { return }
         let deadline = Date().addingTimeInterval(8)
-        while isSyncing && Date() < deadline {
+        while Self.isSyncInFlight(syncStartedAt: syncStartedAt, now: Date(),
+                                  lease: Self.syncLease), Date() < deadline {
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
         }
-        isSyncing = true
-        defer { isSyncing = false; lastSyncAt = Date() }
+        syncStartedAt = Date()
+        defer { syncStartedAt = nil; lastSyncAt = Date() }
         await service.replayPendingWrites()
         await downloadAllBabies()
     }
@@ -333,7 +353,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         // every tombstoned id so the merge neither resurrects nor re-inserts a deleted
         // entry. Pending-local ids are unioned in so an in-flight delete is honoured
         // even before its tombstone round-trips.
-        await service.retryPendingDeletions()
+        service.retryPendingDeletions()
 
         // Incremental tombstone pull. The `deletions` watermark is committed only after
         // `applyDeletions` below succeeds — a failed apply must re-pull the same
