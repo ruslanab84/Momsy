@@ -17,6 +17,7 @@
 		0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */; };
 		0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */; };
 		0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */; };
+		0BABF1300000000000000001 /* TombstoneWatermarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1300000000000000002 /* TombstoneWatermarkTests.swift */; };
 		0BABF1270000000000000001 /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1270000000000000002 /* LanguageTests.swift */; };
 		0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */; };
 		0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */; };
@@ -171,6 +172,7 @@
 		0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActiveBabySyncOverrideTests.swift; sourceTree = "<group>"; };
 		0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncWatermarkStoreTests.swift; sourceTree = "<group>"; };
 		0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatermarkAdvanceTests.swift; sourceTree = "<group>"; };
+		0BABF1300000000000000002 /* TombstoneWatermarkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TombstoneWatermarkTests.swift; sourceTree = "<group>"; };
 		0BABF1270000000000000002 /* LanguageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LanguageTests.swift; sourceTree = "<group>"; };
 		0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncWatermarkCommitTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyErrorLocalizationTests.swift; sourceTree = "<group>"; };
@@ -419,6 +421,7 @@
 				0BABF1240000000000000002 /* ActiveBabySyncOverrideTests.swift */,
 				0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */,
 				0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */,
+				0BABF1300000000000000002 /* TombstoneWatermarkTests.swift */,
 				0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */,
 				5A11ABF0000000000000C004 /* AckLatchTests.swift */,
 				5A11ABF0000000000000C002 /* DeleteAckPairTests.swift */,
@@ -1077,6 +1080,7 @@
 				0BABF1240000000000000001 /* ActiveBabySyncOverrideTests.swift in Sources */,
 				0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */,
 				0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */,
+				0BABF1300000000000000001 /* TombstoneWatermarkTests.swift in Sources */,
 				0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */,
 				0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */,
 				0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */,
