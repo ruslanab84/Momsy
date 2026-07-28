@@ -2,7 +2,8 @@ import Foundation
 
 enum WhoNorms {
 
-    /// Maximum feeding interval in minutes before alert triggers.
+    /// App-level reminder heuristic for the longest interval between logged milk feeds.
+    /// WHO recommends feeding on demand and does not define one universal numeric feed count.
     static func maxFeedingInterval(ageMonths: Int) -> Int {
         switch ageMonths {
         case 0...1:  return 180
@@ -14,16 +15,36 @@ enum WhoNorms {
         }
     }
 
-    /// Minimum total sleep per day in minutes (alert threshold is this minus 90).
-    static func minSleepMinutes(ageMonths: Int) -> Int {
+    /// WHO 24-hour sleep-duration range, including naps.
+    /// 0–3 months: 14–17 h; 4–11 months: 12–16 h;
+    /// 1–2 years: 11–14 h; 3–4 years: 10–13 h.
+    static func sleepRangeMinutes(ageMonths: Int) -> ClosedRange<Int> {
         switch ageMonths {
-        case 0...1:  return 840   // 14 h
-        case 2...3:  return 810   // 13.5 h
-        case 4...5:  return 780   // 13 h
-        case 6...8:  return 720   // 12 h
-        case 9...12: return 700   // ~11.7 h
-        default:     return 660   // 11 h
+        case 0...3:   return 840...1_020
+        case 4...11:  return 720...960
+        case 12...35: return 660...840
+        default:      return 600...780
         }
+    }
+
+    /// Lower bound of the WHO sleep range. Existing alert rules use this value.
+    static func minSleepMinutes(ageMonths: Int) -> Int {
+        sleepRangeMinutes(ageMonths: ageMonths).lowerBound
+    }
+
+    /// WHO complementary-meal frequency for ages where a numeric recommendation exists.
+    /// Milk feeding should continue; food-diary entries are not automatically equivalent to meals.
+    static func complementaryMealsPerDay(ageMonths: Int) -> ClosedRange<Int>? {
+        switch ageMonths {
+        case 6...8:  return 2...3
+        case 9...23: return 3...4
+        default:      return nil
+        }
+    }
+
+    /// WHO additional snack guidance where applicable and desired by the child.
+    static func complementarySnacksPerDay(ageMonths: Int) -> ClosedRange<Int>? {
+        (9...23).contains(ageMonths) ? 1...2 : nil
     }
 
     /// Max consecutive days without stool before alert triggers.
@@ -35,7 +56,7 @@ enum WhoNorms {
         }
     }
 
-    /// Maximum awake window in minutes before overtiredness tip triggers.
+    /// App routine-planning estimate for an awake window. This is not a WHO standard.
     static func awakeWindowMax(ageMonths: Int) -> Int {
         switch ageMonths {
         case 0:       return 45
