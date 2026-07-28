@@ -56,7 +56,7 @@ Momsy is an AI-powered baby care assistant for iOS, built with SwiftUI, SwiftDat
 - **Local persistence**: SwiftData (per-entity repositories)
 - **Cloud sync**: Firebase (Firestore, Auth, Storage, App Check, Analytics), Google Sign-In
 - **AI**: Gemini (on-device fallback aware, iOS 17+)
-- **Companion surfaces**: WidgetKit widgets, Live Activities (`Core/Widget/*ActivityAttributes.swift`), Apple Watch connectivity (`Core/WatchSync`) — note the `MomsyWatch`/`MomsyWatchWidget` source directories exist on disk but are **not currently wired into `Momsy.xcodeproj`** as build targets
+- **Companion surfaces**: WidgetKit widgets, Live Activities (`Core/Widget/*ActivityAttributes.swift`), Apple Watch connectivity (`Core/WatchSync`) — note the `MomsyWatch`/`MomsyWatchWidget` source directories exist on disk but are **not currently wired into `Momsy.xcodeproj`** as build targets; adding the target can't be scripted via `project.pbxproj` edits and requires the one-time manual Xcode setup in `docs/AppleWatch-Setup.md`
 - **Localization**: 7 languages (en, ru, de, es, fr, pt, zh) via a custom `L10n`/`LocalizationManager` system (see below), not `.lproj`/`String Catalog` bundles
 
 ## Common Commands
@@ -65,21 +65,31 @@ Build and test via `xcodebuild` (no CocoaPods/fastlane; dependencies are Swift P
 
 ```bash
 # Build the app for a simulator
-xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 17' build
 
-# Run the full unit test suite
-xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 16' test
+# Run the full unit test suite (~391 tests, ~7-8 min)
+xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 17' test
 
-# Run a single test class or method
-xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 16' \
+# Run a single test suite or method (use the Swift type name, not the @Suite("Display Name") string)
+xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 17' \
   test -only-testing:MomsyTests/SleepViewModelTests
-xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 16' \
+xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 17' \
   test -only-testing:MomsyTests/SleepViewModelTests/testStartSleepCreatesOpenEntry
 ```
+
+Pick whatever simulator is actually installed (`xcrun simctl list devices available`) — the exact model varies by machine/Xcode version.
 
 Targets: `Momsy` (app), `MomsyTests` (unit tests, Swift Testing framework), `MomsyWidget` (widget extension).
 
 A `GoogleService-Info.plist` is required at `Momsy/Momsy/GoogleService-Info.plist` (never committed — see `.template` file); without it, `FirebaseBootstrapper.isConfigured` is `false` and `AppContainer` falls back to local-only (`No-Op`/`Local*`) repository implementations, so the app still builds and runs without cloud sync.
+
+### Firestore/Storage security rules tests
+
+```bash
+npm run test:firebase-rules   # firebase emulators:exec --only firestore,storage + node --test tests/firebase-rules.test.mjs
+```
+
+Requires JDK 21+ on `JAVA_HOME` (the emulator fails fast on an older default JVM). `firestore.rules` / `storage.rules` changes should be verified here before deploy.
 
 ## Architecture
 
@@ -126,11 +136,15 @@ When touching sync code, check both the Firestore write path (`*SyncRepository`)
 - `Core/Units` — metric/imperial unit system
 - `Core/Widget` — Live Activity attributes/managers per activity type (feeding, sleep, walk, bath, pumping)
 - `Core/WatchSync` — `PhoneSessionManager`/`QuickLogCoordinator` for `WatchConnectivity` messaging to the (currently unbuilt) watch target
-- `Core/Persistence` — `AppPersistence` (SwiftData container bootstrap with recovery-on-corruption), `UserDefaultsMigration`
+- `Core/Persistence` — `AppPersistence` (SwiftData container bootstrap with recovery-on-corruption; bump its private `schemaVersion` string whenever a new `@Model` class is added to the schema array), `UserDefaultsMigration`
 
 ## Testing
 
 `MomsyTests/` mirrors the `Core/`/`Features/`/`Services/` source tree using the **Swift Testing** framework (not XCTest). Business logic — use cases, domain services/policies, ViewModels — is unit tested; there is no XCUITest target currently in the project.
+
+The `Momsy` app target auto-discovers new files via a `PBXFileSystemSynchronizedRootGroup`, but `MomsyTests` does not — a new test file needs manual registration in `project.pbxproj` (`PBXBuildFile` + `PBXFileReference` entries, the group's children list, and the Sources build phase) or `xcodebuild` silently reports 0 tests from it. Mirror an existing sibling test file's four entries and run `plutil -lint` after hand-editing. When filtering with `-only-testing`, use the Swift type name (e.g. `InviteCodeFormatTests`), not the `@Suite("Display Name")` string — a non-matching filter still reports `TEST SUCCEEDED` with 0 tests run.
+
+`SleepViewModelTests.stopClosesAnOptimisticStartAfterThePendingAddCompletes` is a known pre-existing flake under full-suite/simulator contention (a real ~200ms delay racing a mocked clock) — it passes reliably in isolation; don't treat a full-suite-only failure there as a regression without re-running it standalone first.
 
 ## Code Style
 
