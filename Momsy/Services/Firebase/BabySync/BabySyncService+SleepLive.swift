@@ -1,27 +1,30 @@
 import FirebaseFirestore
 import Foundation
 
-/// Suppresses exactly one server echo for a live-state write made by this process. The
-/// filter is memory-only: after an app restart the initial snapshot is deliberately
-/// processed again so an active co-parent session can restore a cleared local cache.
+/// Suppresses a prompt server echo for a live-state write made by this process. Entries
+/// expire quickly: after an app restart, a long offline period, or a delayed acknowledgement,
+/// the snapshot is processed again so recovery is preferred over saving one extra read.
 private final class SleepLiveEchoFilter: @unchecked Sendable {
     static let shared = SleepLiveEchoFilter()
 
     private let lock = NSLock()
-    private var pending = Set<String>()
+    private let lifetime: TimeInterval = 30
+    private var pendingUntil: [String: Date] = [:]
 
     private func signature(sessionId: String, status: String) -> String {
         "\(sessionId)|\(status)"
     }
 
-    func mark(sessionId: String, status: String) {
+    func mark(sessionId: String, status: String, now: Date = Date()) {
         lock.lock(); defer { lock.unlock() }
-        pending.insert(signature(sessionId: sessionId, status: status))
+        pendingUntil[signature(sessionId: sessionId, status: status)] = now.addingTimeInterval(lifetime)
     }
 
-    func consumeIfLocalEcho(sessionId: String, status: String) -> Bool {
+    func consumeIfLocalEcho(sessionId: String, status: String, now: Date = Date()) -> Bool {
         lock.lock(); defer { lock.unlock() }
-        return pending.remove(signature(sessionId: sessionId, status: status)) != nil
+        let key = signature(sessionId: sessionId, status: status)
+        guard let deadline = pendingUntil.removeValue(forKey: key) else { return false }
+        return deadline >= now
     }
 }
 
