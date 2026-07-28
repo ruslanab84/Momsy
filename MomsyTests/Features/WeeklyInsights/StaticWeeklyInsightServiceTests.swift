@@ -175,6 +175,24 @@ struct WeeklyInsightPromptTests {
     }
 }
 
+@Suite("WhoNorms weekly report ranges")
+struct WhoNormsWeeklyReportTests {
+
+    @Test("uses the complete WHO sleep range without changing legacy Today thresholds")
+    func separatesWeeklyRangeFromTodayThreshold() {
+        #expect(WhoNorms.sleepRangeMinutes(ageMonths: 2) == 840...1_020)
+        #expect(WhoNorms.minSleepMinutes(ageMonths: 2) == 810)
+        #expect(WhoNorms.sleepRangeMinutes(ageMonths: 7) == 720...960)
+    }
+
+    @Test("uses WHO complementary meal frequency only where defined")
+    func complementaryMealRanges() {
+        #expect(WhoNorms.complementaryMealsPerDay(ageMonths: 5) == nil)
+        #expect(WhoNorms.complementaryMealsPerDay(ageMonths: 7) == 2...3)
+        #expect(WhoNorms.complementaryMealsPerDay(ageMonths: 12) == 3...4)
+    }
+}
+
 @Suite("GeminiWeeklyInsightService decoding")
 struct GeminiWeeklyInsightServiceDecodingTests {
 
@@ -193,8 +211,8 @@ struct GeminiWeeklyInsightServiceDecodingTests {
         let decoded = GeminiWeeklyInsightService.decode(raw)
 
         #expect(decoded?.sleepSummary == "Sleep one. Sleep two. Sleep three. Sleep four.")
-        #expect(decoded?.feedingRecommendation.contains("Feed action three."))
-        #expect(decoded?.overallSummary.contains("Overall three."))
+        #expect(decoded?.feedingRecommendation.contains("Feed action three.") == true)
+        #expect(decoded?.overallSummary.contains("Overall three.") == true)
     }
 
     @Test("rejects schema arrays that are too shallow")
