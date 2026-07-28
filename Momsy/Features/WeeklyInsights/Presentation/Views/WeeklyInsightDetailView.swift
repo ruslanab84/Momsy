@@ -35,8 +35,14 @@ struct WeeklyInsightDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func section(icon: String, color: Color, header: String, summary: String, recommendation: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+    private func section(
+        icon: String,
+        color: Color,
+        header: String,
+        summary: String,
+        recommendation: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .bold))
@@ -49,12 +55,16 @@ struct WeeklyInsightDetailView: View {
                 Text(summary)
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(.bbInk)
+                    .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if !recommendation.isEmpty {
+                Divider()
+                    .overlay(color.opacity(0.18))
                 Text(recommendation)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(color)
+                    .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -69,6 +79,7 @@ struct WeeklyInsightDetailView: View {
         Text(insight.ai.overallSummary)
             .font(.system(size: 14, weight: .medium, design: .rounded))
             .foregroundColor(.bbInk)
+            .lineSpacing(4)
             .fixedSize(horizontal: false, vertical: true)
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -84,6 +95,7 @@ struct WeeklyInsightDetailView: View {
             Text(lm.strings.weeklyInsightDisclaimer)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
