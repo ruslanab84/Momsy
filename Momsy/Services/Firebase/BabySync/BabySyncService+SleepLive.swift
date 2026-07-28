@@ -1,19 +1,27 @@
 import FirebaseFirestore
 import Foundation
 
-/// A per-install identifier lets the document listener ignore writes produced by this
-/// exact device while still receiving updates from another iPhone signed into the same
-/// Firebase account.
-private enum SleepLiveDeviceIdentity {
-    private static let key = "babysync_live_sleep_device_id_v1"
+/// Suppresses exactly one server echo for a live-state write made by this process. The
+/// filter is memory-only: after an app restart the initial snapshot is deliberately
+/// processed again so an active co-parent session can restore a cleared local cache.
+private final class SleepLiveEchoFilter: @unchecked Sendable {
+    static let shared = SleepLiveEchoFilter()
 
-    static func current(defaults: UserDefaults = .standard) -> String {
-        if let existing = defaults.string(forKey: key), !existing.isEmpty {
-            return existing
-        }
-        let created = UUID().uuidString
-        defaults.set(created, forKey: key)
-        return created
+    private let lock = NSLock()
+    private var pending = Set<String>()
+
+    private func signature(sessionId: String, status: String) -> String {
+        "\(sessionId)|\(status)"
+    }
+
+    func mark(sessionId: String, status: String) {
+        lock.lock(); defer { lock.unlock() }
+        pending.insert(signature(sessionId: sessionId, status: status))
+    }
+
+    func consumeIfLocalEcho(sessionId: String, status: String) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return pending.remove(signature(sessionId: sessionId, status: status)) != nil
     }
 }
 
@@ -32,8 +40,10 @@ extension BabySyncService {
         else { return }
 
         if log.endedAt == nil {
+            let status = "active"
+            SleepLiveEchoFilter.shared.mark(sessionId: id, status: status)
             document.setData(
-                ["liveSleep": liveSleepPayload(log: log, id: id, status: "active")],
+                ["liveSleep": liveSleepPayload(log: log, id: id, status: status)],
                 merge: true
             )
             return
@@ -42,16 +52,15 @@ extension BabySyncService {
         // A completed manual entry must not stop a running timer. The baby document is
         // already in the local Firestore cache whenever this device owns or mirrors the
         // active timer, so this check costs no billed server read.
-        document.getDocument(source: .cache) { [weak document] snapshot, _ in
-            guard let document,
-                  let liveSleep = snapshot?.data()?["liveSleep"] as? [String: Any],
+        let status = "completed"
+        let completedPayload = liveSleepPayload(log: log, id: id, status: status)
+        document.getDocument(source: .cache) { snapshot, _ in
+            guard let liveSleep = snapshot?.data()?["liveSleep"] as? [String: Any],
                   liveSleep["sessionId"] as? String == id
             else { return }
 
-            document.setData(
-                ["liveSleep": self.liveSleepPayload(log: log, id: id, status: "completed")],
-                merge: true
-            )
+            SleepLiveEchoFilter.shared.mark(sessionId: id, status: status)
+            document.setData(["liveSleep": completedPayload], merge: true)
         }
     }
 
@@ -64,19 +73,22 @@ extension BabySyncService {
               let document = liveSleepDocument()
         else { return AsyncStream { $0.finish() } }
 
-        let localDeviceId = SleepLiveDeviceIdentity.current()
         return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
             let listener = document.addSnapshotListener { snapshot, _ in
                 guard let snapshot, snapshot.exists else { return }
                 guard !snapshot.metadata.hasPendingWrites else { return }
                 guard let liveSleep = snapshot.data()?["liveSleep"] as? [String: Any],
-                      liveSleep["updatedAt"] is Timestamp
+                      liveSleep["updatedAt"] is Timestamp,
+                      let sessionId = liveSleep["sessionId"] as? String,
+                      let status = liveSleep["status"] as? String
                 else { return }
 
-                // The local SwiftData write already updated this device's UI. Avoid a
-                // redundant delta query for our own Start/Stop, but do not suppress a
-                // second device that happens to use the same Firebase account.
-                guard liveSleep["originDeviceId"] as? String != localDeviceId else { return }
+                // The local SwiftData mutation already updated this process's UI. A
+                // co-parent device has a separate in-memory filter and is never skipped.
+                guard !SleepLiveEchoFilter.shared.consumeIfLocalEcho(
+                    sessionId: sessionId,
+                    status: status
+                ) else { return }
                 continuation.yield(())
             }
             continuation.onTermination = { _ in listener.remove() }
@@ -113,7 +125,6 @@ extension BabySyncService {
             "isActive": status == "active",
             "startedAt": log.startedAt,
             "endedAt": log.endedAt ?? NSNull(),
-            "originDeviceId": SleepLiveDeviceIdentity.current(),
             "updatedAt": FieldValue.serverTimestamp(),
         ]
     }
