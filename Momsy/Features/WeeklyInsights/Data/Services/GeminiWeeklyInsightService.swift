@@ -3,7 +3,9 @@ import FirebaseAI
 
 final class GeminiWeeklyInsightService: WeeklyInsightService {
 
-    private let modelName = "gemini-3.1-flash-lite"
+    /// Weekly generation is low-frequency, so prefer the current stable Flash model's
+    /// response quality over the older Flash-Lite model's marginal latency/cost advantage.
+    private let modelName = "gemini-3.6-flash"
     private let maxOutputTokens = 2_600
 
     func generate(context: WeeklyInsightContext) async throws -> WeeklyInsightAI {
