@@ -15,18 +15,38 @@ private final class SpyCloudSyncDownloader: CloudSyncDownloaderProtocol {
 @MainActor
 struct SleepLiveSyncServiceTests {
 
-    /// A sleep started by a co-parent while this device was backgrounded is invisible
-    /// to the realtime listener (it only sees writes newer than attach time) and to
-    /// the foreground `resyncAll` (debounced 5 min). `start()` must therefore run one
-    /// catch-up delta merge so the open session appears immediately on foreground.
-    @Test func startRunsCatchUpDeltaMerge() async throws {
+    @Test func startDoesNotIssueAnUnconditionalDeltaQuery() async throws {
         let spy = SpyCloudSyncDownloader()
-        let service = SleepLiveSyncService(downloader: spy)
+        let service = SleepLiveSyncService(
+            downloader: spy,
+            streamFactory: { AsyncStream { $0.finish() } }
+        )
+
+        service.start()
+        try await Task.sleep(for: .milliseconds(50))
+        service.stop()
+
+        #expect(spy.sleepLiveResyncs == 0)
+    }
+
+    @Test func liveDocumentSignalRunsOneTargetedSleepMerge() async throws {
+        let spy = SpyCloudSyncDownloader()
+        let service = SleepLiveSyncService(
+            downloader: spy,
+            streamFactory: {
+                AsyncStream { continuation in
+                    continuation.yield(())
+                    continuation.finish()
+                }
+            }
+        )
+
         service.start()
         for _ in 0..<100 where spy.sleepLiveResyncs == 0 {
             try await Task.sleep(for: .milliseconds(10))
         }
         service.stop()
+
         #expect(spy.sleepLiveResyncs == 1)
     }
 }

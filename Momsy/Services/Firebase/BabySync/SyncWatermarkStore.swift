@@ -6,11 +6,21 @@ import Foundation
 /// fetches only newer documents. Backed by `UserDefaults`; injectable for tests.
 final class SyncWatermarkStore {
     private let defaults: UserDefaults
+    private let now: () -> Date
+
     /// Serializes the read-modify-write of the shared per-`(family, baby)` bucket. The downloader
-    /// fires all 17 collections' watermark updates concurrently into one `UserDefaults` dictionary,
-    /// so an unguarded `set` would lose updates and silently drop collections back to full pulls.
+    /// fires all collections' watermark updates concurrently into one `UserDefaults` dictionary,
+    /// so an unguarded `set` would lose updates and silently re-bootstrap a collection.
     private let lock = NSLock()
-    init(defaults: UserDefaults = .standard) { self.defaults = defaults }
+
+    init(
+        defaults: UserDefaults = .standard,
+        now: @escaping () -> Date = { Date() }
+    ) {
+        self.defaults = defaults
+        self.now = now
+        CloudSyncBootstrapPolicy.preparePreProductionDefaults(defaults)
+    }
 
     private func bucketKey(_ family: String, _ baby: String) -> String {
         "babysync_watermarks_v1_\(family)_\(baby)"
@@ -20,13 +30,25 @@ final class SyncWatermarkStore {
         defaults.dictionary(forKey: bucketKey(family, baby)) as? [String: Double] ?? [:]
     }
 
-    /// The stored watermark for a collection, or `nil` if this collection has never synced under
-    /// this `(family, baby)` (→ caller does a one-time full pull).
+    /// Returns the stored watermark. On a clean scope it atomically creates a bounded
+    /// bootstrap checkpoint instead of returning `nil`; this keeps the downloader on its
+    /// delta-query path and prevents an automatic full-history Firestore read.
+    ///
+    /// `sleepLogs` receives a 24-hour lookback so an open sleep started by the other parent
+    /// before this device attached is still recovered. Every other log starts at `now`.
     func watermark(family: String, baby: String, collection: String) -> Date? {
         guard !family.isEmpty, !baby.isEmpty else { return nil }
         lock.lock(); defer { lock.unlock() }
-        guard let seconds = bucket(family, baby)[collection] else { return nil }
-        return Date(timeIntervalSince1970: seconds)
+
+        var dict = bucket(family, baby)
+        if let seconds = dict[collection] {
+            return Date(timeIntervalSince1970: seconds)
+        }
+
+        let initial = CloudSyncBootstrapPolicy.initialWatermark(for: collection, now: now())
+        dict[collection] = initial.timeIntervalSince1970
+        defaults.set(dict, forKey: bucketKey(family, baby))
+        return initial
     }
 
     /// Sets the watermark unconditionally. No-op when the path isn't ready.
@@ -38,8 +60,8 @@ final class SyncWatermarkStore {
         defaults.set(dict, forKey: bucketKey(family, baby))
     }
 
-    /// Clears every watermark for a `(family, baby)` — call on full cloud erasure so a re-add
-    /// re-seeds from a clean full pull.
+    /// Clears every watermark for a `(family, baby)`. The next access creates fresh
+    /// bounded checkpoints; it never falls back to downloading the complete cloud history.
     func reset(family: String, baby: String) {
         guard !family.isEmpty, !baby.isEmpty else { return }
         lock.lock(); defer { lock.unlock() }
