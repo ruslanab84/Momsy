@@ -18,6 +18,7 @@ enum WhoNorms {
     /// WHO 24-hour sleep-duration range, including naps.
     /// 0–3 months: 14–17 h; 4–11 months: 12–16 h;
     /// 1–2 years: 11–14 h; 2–4 years: 10–13 h.
+    /// Weekly reports use this full range for below/within/above classification.
     static func sleepRangeMinutes(ageMonths: Int) -> ClosedRange<Int> {
         switch ageMonths {
         case 0...3:   return 840...1_020
@@ -27,9 +28,17 @@ enum WhoNorms {
         }
     }
 
-    /// Lower bound of the WHO sleep range. Existing alert rules use this value.
+    /// Existing Today-screen alert threshold. Kept unchanged to avoid altering unrelated
+    /// alert behavior; weekly reports use `sleepRangeMinutes(ageMonths:)` instead.
     static func minSleepMinutes(ageMonths: Int) -> Int {
-        sleepRangeMinutes(ageMonths: ageMonths).lowerBound
+        switch ageMonths {
+        case 0...1:  return 840
+        case 2...3:  return 810
+        case 4...5:  return 780
+        case 6...8:  return 720
+        case 9...12: return 700
+        default:     return 660
+        }
     }
 
     /// WHO complementary-meal frequency for ages where a numeric recommendation exists.
