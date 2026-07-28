@@ -612,21 +612,17 @@ final class AppContainer {
     /// in that state so cached remote data cannot refill the freshly wiped device.
     @MainActor
     func recoverPendingAccountDeletion() async -> Bool {
-        guard let pendingUid = pendingAccountDeletionStore.loadPending() else { return false }
+        guard pendingAccountDeletionStore.loadPending() != nil else { return false }
         await accountDeletionRecovery.runIfNeeded()
 
-        let currentUid = authManager.currentUID
-        let markerAppliesToSession = currentUid == nil || currentUid == pendingUid
-        guard markerAppliesToSession else {
-            // A DIFFERENT account is signed in. The stale marker belongs to another uid;
-            // wiping here would destroy this user's onboarding/family state on every
-            // launch. Leave the marker for the owning account's next sign-in.
-            return false
-        }
+        guard AccountDeletionRecovery.shouldWipeDevice(
+            pendingUid: pendingAccountDeletionStore.loadPending(),
+            currentUid: authManager.currentUID
+        ) else { return false }
 
         try? eraseLocalData()
         FamilyManager.shared.reset()
-        return pendingAccountDeletionStore.loadPending() != nil
+        return true
     }
 
     func makeSettingsViewModel() -> SettingsViewModel {
