@@ -368,6 +368,7 @@ final class AppContainer {
             FirestoreInviteService.familyKey,
             FirestoreInviteService.syncedCodeKey,
             PendingFamilyInviteStore.codeKey,
+            PendingOnboardingSetupStore.storageKey,
             CloudSyncConsent.storageKey,
         ]
         exactKeys.forEach { defaults.removeObject(forKey: $0) }
@@ -422,11 +423,15 @@ final class AppContainer {
             saveBabyProfile: saveBabyProfile,
             appState: appState,
             authManager: authManager,
-            syncRepo: babySyncRepository,
             inviteService: inviteService,
             pendingInviteStore: PendingFamilyInviteStore(),
-            ensureFamilyReady: { [unowned self] displayName in
-                try await self.ensureFamilyReady(displayName: displayName)
+            pendingSetupStore: PendingOnboardingSetupStore(),
+            ensureFamilyReady: { [unowned self] displayName, role, profile in
+                try await self.ensureFamilyReady(
+                    displayName: displayName,
+                    role: role,
+                    initialProfile: profile
+                )
             },
             joinFamily: { [unowned self] code, force in
                 try await self.joinFamilyFromOnboarding(code: code, force: force)
@@ -446,10 +451,19 @@ final class AppContainer {
         )
     }
 
-    func ensureFamilyReady(displayName: String) async throws {
+    func ensureFamilyReady(
+        displayName: String,
+        role: FamilyRole,
+        initialProfile: BabyProfile
+    ) async throws {
         try await authManager.requireAnonymousSignInIfNeeded()
         guard let uid = authManager.currentUID else { throw FamilyError.noFamilyId }
-        try await FamilyManager.shared.setup(uid: uid, displayName: displayName)
+        try await FamilyManager.shared.setup(
+            uid: uid,
+            displayName: displayName,
+            role: role,
+            initialProfile: initialProfile
+        )
     }
 
     func joinFamilyFromOnboarding(code: String, force: Bool = false) async throws {

@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum FamilyRole: String, CaseIterable, Identifiable {
+enum FamilyRole: String, CaseIterable, Codable, Identifiable {
     case mom     = "Мама"
     case dad     = "Папа"
     case nanny   = "Няня"

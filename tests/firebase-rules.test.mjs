@@ -169,6 +169,31 @@ test("family lifecycle cannot be reopened or deleted by restricted roles", async
     await assertSucceeds(momDb.doc(familyPath).delete());
 });
 
+test("family creator can bootstrap with any supported onboarding role", async () => {
+    for (const [suffix, roleRaw] of [
+        ["mom", "Мама"],
+        ["dad", "Папа"],
+        ["nanny", "Няня"],
+        ["grandma", "Бабушка"],
+    ]) {
+        const uid = `creator-${suffix}`;
+        const path = `families/bootstrap-${suffix}`;
+        const db = firestore(uid);
+
+        await assertSucceeds(db.doc(path).set({
+            createdBy: uid,
+            bootstrapComplete: false,
+        }));
+        await assertSucceeds(db.doc(`${path}/members/${uid}`).set({ uid, roleRaw }));
+        await assertSucceeds(db.doc(`${path}/babies/baby`).set({ name: "Baby" }));
+        await assertSucceeds(db.doc(path).update({ bootstrapComplete: true }));
+
+        if (roleRaw === "Няня" || roleRaw === "Бабушка") {
+            await assertFails(db.doc(`${path}/babies/baby`).update({ name: "Changed" }));
+        }
+    }
+});
+
 test("a restricted member cannot promote their own roster role", async () => {
     const member = firestore(users.nanny).doc(`${familyPath}/members/${users.nanny}`);
 

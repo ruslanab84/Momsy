@@ -76,6 +76,12 @@ service cloud.firestore {
       ];
     }
 
+    function isSupportedFamilyRole(roleRaw) {
+      return isParentRole(roleRaw)
+        || isNannyRole(roleRaw)
+        || isGrandmaRole(roleRaw);
+    }
+
     function canManageFamilyRoster(familyId) {
       return belongsToFamily(familyId)
         && isParentRole(callerRoleRaw(familyId));
@@ -162,7 +168,7 @@ service cloud.firestore {
       return isSignedIn()
         && memberId == request.auth.uid
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.roleRaw == 'Мама'
+        && isSupportedFamilyRole(request.resource.data.roleRaw)
         && isFamilyCreator(familyId);
     }
 
@@ -273,9 +279,9 @@ service cloud.firestore {
       allow create: if isSignedIn()
                     && request.resource.data.createdBy == request.auth.uid
                     && request.resource.data.bootstrapComplete == false;
-      // Bootstrap may only move false -> true; otherwise a downgraded creator could
-      // reopen bootstrap and recreate their member doc as Mom.
-      allow update: if canManageFamilyRoster(familyId)
+      // Bootstrap may only move false -> true; otherwise a creator could reopen
+      // bootstrap and recreate their member document.
+      allow update: if (canManageFamilyRoster(familyId) || isFamilyCreator(familyId))
                     && request.resource.data.createdBy == resource.data.createdBy
                     && request.resource.data.bootstrapComplete == true
                     && request.resource.data.diff(resource.data).affectedKeys()
@@ -302,13 +308,17 @@ service cloud.firestore {
 
       match /babies/{babyId} {
         allow read: if canViewBabyStatus(familyId);
-        allow create, update, delete: if canManageFamilyRoster(familyId);
+        allow create, update: if canManageFamilyRoster(familyId)
+                              || isFamilyCreator(familyId);
+        allow delete: if canManageFamilyRoster(familyId);
 
         match /{subcollection}/{document=**} {
           allow read: if canReadBabyCollection(familyId, subcollection);
           allow create: if canManageFamilyRoster(familyId)
+                        || isFamilyCreator(familyId)
                         || canCreateRoutineLog(familyId, subcollection);
           allow update: if canManageFamilyRoster(familyId)
+                        || isFamilyCreator(familyId)
                         || canUpdateRoutineLog(familyId, subcollection);
           // ponytail: Nanny deletes stay parent-only until tombstones identify
           // both the source collection and author.

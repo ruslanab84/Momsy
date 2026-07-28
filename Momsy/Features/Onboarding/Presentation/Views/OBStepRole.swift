@@ -4,21 +4,11 @@ import SwiftUI
 
 struct RoleStep: View {
     @Binding var parentName: String
-    @Binding var selectedRole: String
-    let lang: String
+    @Binding var selectedRole: FamilyRole
     let onContinue: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
     @FocusState private var nameFocused: Bool
-
-    private var roles: [(String, String, BlobKind, Color)] {
-        [
-            ("mom",   loc.strings.roleMom,    .mom,   .bbCoral),
-            ("dad",   loc.strings.roleDad,    .dad,   .bbSky),
-            ("nanny", loc.strings.roleNanny,  .nanny, .bbMint),
-            ("other", loc.strings.roleOther,  .other, .bbButter),
-        ]
-    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -37,11 +27,11 @@ struct RoleStep: View {
 
                 let columns = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
                 LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(roles, id: \.0) { id, label, blob, tone in
-                        let isSelected = selectedRole == id
+                    ForEach(FamilyRole.allCases) { role in
+                        let isSelected = selectedRole == role
                         VStack(spacing: 10) {
-                            CuteBlobView(kind: blob, size: 52, tone: tone)
-                            Text(label)
+                            CuteBlobView(kind: role.defaultBlob, size: 52, tone: role.defaultTone)
+                            Text(role.displayName(loc.strings))
                                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                                 .foregroundColor(.bbInk)
                         }
@@ -57,7 +47,7 @@ struct RoleStep: View {
                         .scaleEffect(isSelected ? 1.02 : 1.0)
                         .animation(.spring(response: 0.3), value: selectedRole)
                         .onTapGesture {
-                            withAnimation(.spring(response: 0.3)) { selectedRole = id }
+                            withAnimation(.spring(response: 0.3)) { selectedRole = role }
                         }
                     }
                 }

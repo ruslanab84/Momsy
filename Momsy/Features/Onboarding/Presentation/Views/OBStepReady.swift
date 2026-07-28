@@ -7,7 +7,7 @@ struct ReadyStep: View {
     let birthDate: Date
     let stage: BabyAgeStage
     let parentName: String
-    let role: String
+    let role: FamilyRole
     let lang: String
     let isJoinFlow: Bool
     let cloudSyncEnabled: Bool
@@ -27,29 +27,15 @@ struct ReadyStep: View {
     private var parentLabel: String {
         let name = parentName.isEmpty ? nil : parentName
         switch role {
-        case "mom":   return name.map { "\($0)!" } ?? loc.strings.greetMom
-        case "dad":   return name.map { "\($0)!" } ?? loc.strings.greetDad
-        case "nanny": return name.map { "\($0)!" } ?? loc.strings.greetNanny
-        default:      return name.map { "\($0)!" } ?? loc.strings.greetDefault
-        }
-    }
-
-    private var roleBlob: BlobKind {
-        switch role {
-        case "dad":   return .dad
-        case "nanny": return .nanny
-        case "other": return .other
-        default:      return .mom
+        case .mom:     return name.map { "\($0)!" } ?? loc.strings.greetMom
+        case .dad:     return name.map { "\($0)!" } ?? loc.strings.greetDad
+        case .nanny:   return name.map { "\($0)!" } ?? loc.strings.greetNanny
+        case .grandma: return name.map { "\($0)!" } ?? loc.strings.greetDefault
         }
     }
 
     private var roleName: String {
-        switch role {
-        case "mom":   return loc.strings.roleMom
-        case "dad":   return loc.strings.roleDad
-        case "nanny": return loc.strings.roleNanny
-        default:      return loc.strings.roleOther
-        }
+        role.displayName(loc.strings)
     }
 
     var body: some View {
@@ -101,7 +87,7 @@ struct ReadyStep: View {
                                    label: loc.strings.age,
                                    value: ageDescription)
                         Divider().opacity(0.3)
-                        summaryRow(blob: roleBlob, tone: .bbSky,
+                        summaryRow(blob: role.defaultBlob, tone: role.defaultTone,
                                    label: loc.strings.caregiver,
                                    value: roleName)
                         Divider().opacity(0.3)

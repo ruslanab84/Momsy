@@ -11,6 +11,41 @@ let kBabyIdDefaultsKey = "babyId_v1"
 // uid; a different uid means the cache is stale and must be re-read from Firestore.
 let kFamilyOwnerUidDefaultsKey = "familyOwnerUid_v1"
 
+@MainActor
+struct PendingOnboardingSetupStore {
+    static let storageKey = "pending_onboarding_family_setup_v1"
+
+    private struct Payload: Codable {
+        let role: FamilyRole
+        let profile: BabyProfile
+    }
+
+    private let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
+
+    func load() -> (role: FamilyRole, profile: BabyProfile)? {
+        guard
+            let data = defaults.data(forKey: Self.storageKey),
+            let payload = try? JSONDecoder().decode(Payload.self, from: data)
+        else { return nil }
+        return (payload.role, payload.profile)
+    }
+
+    func save(role: FamilyRole, profile: BabyProfile) {
+        guard let data = try? JSONEncoder().encode(Payload(role: role, profile: profile)) else {
+            return
+        }
+        defaults.set(data, forKey: Self.storageKey)
+    }
+
+    func clear() {
+        defaults.removeObject(forKey: Self.storageKey)
+    }
+}
+
 extension Notification.Name {
     /// Posted after the caller joins an existing family, so the app re-pulls that
     /// family's data (the joined family's logs aren't local yet).
@@ -97,7 +132,12 @@ final class FamilyManager: ObservableObject {
 
     /// Called by AuthManager's state listener on every sign-in / app launch with existing session.
     /// Reads the user's familyId from Firestore; creates a new family if none exists.
-    func setup(uid: String, displayName: String) async throws {
+    func setup(
+        uid: String,
+        displayName: String,
+        role: FamilyRole = .mom,
+        initialProfile: BabyProfile? = nil
+    ) async throws {
         guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         guard !joinInFlight else {
             Self.log.info("Deferring family setup — invite join in flight")
@@ -119,7 +159,11 @@ final class FamilyManager: ObservableObject {
         // forever — every read/write silently rules-denied. On revocation, fall
         // through below and start a fresh personal family.
         if let cachedId = familyId {
-            if hasVerifiedMembershipThisLaunch { isReady = true; return }
+            if hasVerifiedMembershipThisLaunch {
+                try await syncInitialProfileIfNeeded(initialProfile)
+                isReady = true
+                return
+            }
             // Set BEFORE the await: setup() is re-entered concurrently (launch +
             // auth listener) and the suspension below would otherwise let both
             // callers run the check — double read, double detach, double alert.
@@ -127,6 +171,7 @@ final class FamilyManager: ObservableObject {
             let check = await confirmMembershipHealthGated(familyId: cachedId, uid: uid)
             switch check {
             case .member, .unknown:
+                try await syncInitialProfileIfNeeded(initialProfile)
                 isReady = true
                 return
             case .revoked:
@@ -162,8 +207,9 @@ final class FamilyManager: ObservableObject {
                 familyId: existingId,
                 uid: uid,
                 displayName: displayName,
-                defaultRoleRaw: FamilyRole.mom.rawValue
+                defaultRoleRaw: role.rawValue
             )
+            try await syncInitialProfileIfNeeded(initialProfile)
         } else {
             if let existingId, restoreSuppressed {
                 let memberRef = db.collection("families").document(existingId)
@@ -191,8 +237,9 @@ final class FamilyManager: ObservableObject {
                         familyId: existingId,
                         uid: uid,
                         displayName: displayName,
-                        defaultRoleRaw: FamilyRole.mom.rawValue
+                        defaultRoleRaw: role.rawValue
                     )
+                    try await syncInitialProfileIfNeeded(initialProfile)
                     isReady = true
                     return
                 case .discardStaleMembership:
@@ -206,9 +253,19 @@ final class FamilyManager: ObservableObject {
                 familyId: newId,
                 uid: uid,
                 displayName: displayName,
-                defaultRoleRaw: FamilyRole.mom.rawValue,
+                defaultRoleRaw: role.rawValue,
                 bootstrapCreator: true
             )
+            let bootstrapSync = BabySyncService(
+                familyId: newId,
+                babyId: initialProfile?.id.uuidString
+            )
+            if role.canManageFamilyMembers {
+                try await bootstrapSync.setupBabyProfile(uid: uid, displayName: displayName)
+            }
+            if let initialProfile {
+                try await bootstrapSync.setBabyProfile(initialProfile)
+            }
             try await db.collection("families").document(newId)
                 .updateData(["bootstrapComplete": true])
             try await userRef.setData(
@@ -216,11 +273,15 @@ final class FamilyManager: ObservableObject {
                 merge: true
             )
             persist(familyId: newId, ownerUid: uid)
-            try await BabySyncService().setupBabyProfile(uid: uid, displayName: displayName)
             suppressedRestoreStore.clearSuppression(for: uid)
             Self.log.info("Created new family \(newId, privacy: .public) for user")
         }
         isReady = true
+    }
+
+    private func syncInitialProfileIfNeeded(_ profile: BabyProfile?) async throws {
+        guard let profile else { return }
+        try await BabySyncService().setBabyProfile(profile)
     }
 
     @discardableResult

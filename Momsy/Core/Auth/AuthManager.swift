@@ -78,12 +78,20 @@ final class AuthManager: ObservableObject {
                     }
                     FamilyManager.shared.resetStaleCacheIfNeeded(for: user.uid)
                     if Self.shouldDeferAutomaticFamilySetup(defaults: .standard) {
-                        AuthManager.log.info("Deferring family setup while onboarding invite join is pending")
+                        AuthManager.log.info("Deferring family setup until onboarding is complete")
                         return
                     }
                     let name = AccountDisplay.memberName(displayName: user.displayName, email: user.email)
+                    let pendingSetupStore = PendingOnboardingSetupStore()
+                    let pendingSetup = pendingSetupStore.load()
                     do {
-                        try await FamilyManager.shared.setup(uid: user.uid, displayName: name)
+                        try await FamilyManager.shared.setup(
+                            uid: user.uid,
+                            displayName: name,
+                            role: pendingSetup?.role ?? .mom,
+                            initialProfile: pendingSetup?.profile
+                        )
+                        pendingSetupStore.clear()
                     } catch {
                         // Don't fail silently — a denied write here (rules/permissions)
                         // means the user/family/baby never reach Firestore.
@@ -98,8 +106,7 @@ final class AuthManager: ObservableObject {
 
     @MainActor
     static func shouldDeferAutomaticFamilySetup(defaults: UserDefaults) -> Bool {
-        guard !defaults.bool(forKey: "onboardingDone") else { return false }
-        return PendingFamilyInviteStore(defaults: defaults).load() != nil
+        !defaults.bool(forKey: "onboardingDone")
     }
 
     // MARK: — Anonymous fallback

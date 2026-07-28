@@ -19,26 +19,6 @@ struct CloudSyncConsentTests {
 @MainActor
 struct OnboardingViewModelTests {
 
-    final class TrackingBabySyncRepository: BabySyncRepositoryProtocol {
-        private(set) var syncedProfiles: [BabyProfile] = []
-
-        func addFeedingLog(_ log: FeedingLog) async throws {}
-        func addSleepLog(_ log: SleepLog) async throws {}
-        func addDiaperLog(_ log: DiaperLog) async throws {}
-        func addSymptomLog(_ log: SymptomLog) async throws {}
-        func addDiaryLog(_ log: DiaryLog) async throws {}
-        func addMeasurementLog(_ log: MeasurementLog) async throws {}
-        func addVaccinationLog(_ log: VaccinationLog) async throws {}
-        func addFoodDiaryLog(_ log: FoodDiaryLog) async throws {}
-        func fetchTodayFeedings() async throws -> [FeedingLog] { [] }
-        func fetchTodaySleep() async throws -> [SleepLog] { [] }
-        func syncBabyProfile(_ profile: BabyProfile) async throws {
-            syncedProfiles.append(profile)
-        }
-        func fetchBabyProfile() async throws -> BabyProfile? { nil }
-        func deleteBaby(id: UUID) async throws {}
-    }
-
     final class MockInviteService: InviteServiceProtocol, @unchecked Sendable {
         var code = "MOMSY-TEST1"
         var preparedCount = 0
@@ -67,6 +47,8 @@ struct OnboardingViewModelTests {
 
     final class JoinRecorder {
         var ensuredDisplayNames: [String] = []
+        var ensuredRoles: [FamilyRole] = []
+        var ensuredProfiles: [BabyProfile] = []
         var joinRequests: [(code: String, force: Bool)] = []
         var syncAfterJoinCount = 0
     }
@@ -76,20 +58,22 @@ struct OnboardingViewModelTests {
         let repo: MockBabyRepository
         let analytics: MockAnalyticsService
         let push: MockPushNotificationService
-        let sync: TrackingBabySyncRepository
         let invite: MockInviteService
         let recorder: JoinRecorder
         let pendingStore: PendingFamilyInviteStore
+        let pendingSetupStore: PendingOnboardingSetupStore
     }
 
     func makeHarness(
         pendingCode: String? = nil,
         cloudSyncEnabled: Bool = false,
+        familySetupError: Error? = nil,
         setCloudSyncConsent: @escaping (CloudSyncConsent.Status) -> Void = { _ in },
         onDone: @escaping () -> Void = {}
     ) -> Harness {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
         let pendingStore = PendingFamilyInviteStore(defaults: defaults)
+        let pendingSetupStore = PendingOnboardingSetupStore(defaults: defaults)
         if let pendingCode {
             pendingStore.save(pendingCode)
         }
@@ -98,18 +82,20 @@ struct OnboardingViewModelTests {
         let analytics = MockAnalyticsService()
         let push      = MockPushNotificationService()
         let state     = makeAppState()
-        let sync      = TrackingBabySyncRepository()
         let invite    = MockInviteService()
         let recorder  = JoinRecorder()
         let vm = OnboardingViewModel(
             saveBabyProfile: SaveBabyProfileUseCase(repository: repo),
             appState: state,
             authManager: AuthManager(),
-            syncRepo: sync,
             inviteService: invite,
             pendingInviteStore: pendingStore,
-            ensureFamilyReady: { displayName in
+            pendingSetupStore: pendingSetupStore,
+            ensureFamilyReady: { displayName, role, profile in
                 recorder.ensuredDisplayNames.append(displayName)
+                recorder.ensuredRoles.append(role)
+                recorder.ensuredProfiles.append(profile)
+                if let familySetupError { throw familySetupError }
             },
             joinFamily: { code, force in
                 recorder.joinRequests.append((code, force))
@@ -128,10 +114,10 @@ struct OnboardingViewModelTests {
             repo: repo,
             analytics: analytics,
             push: push,
-            sync: sync,
             invite: invite,
             recorder: recorder,
-            pendingStore: pendingStore
+            pendingStore: pendingStore,
+            pendingSetupStore: pendingSetupStore
         )
     }
 
@@ -226,10 +212,9 @@ struct OnboardingViewModelTests {
         #expect(harness.vm.step == .privacy)
     }
 
-    @Test("pending onboarding invite defers automatic family setup")
-    func pendingOnboardingInviteDefersAutomaticFamilySetup() {
+    @Test("automatic family setup waits for onboarding to finish")
+    func automaticFamilySetupWaitsForOnboarding() {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
-        PendingFamilyInviteStore(defaults: defaults).save("MOMSY-JOIN1")
 
         #expect(AuthManager.shouldDeferAutomaticFamilySetup(defaults: defaults))
 
@@ -328,12 +313,41 @@ struct OnboardingViewModelTests {
 
         let saved = try await harness.repo.getProfile()
         #expect(saved?.name == "Mia")
-        #expect(harness.sync.syncedProfiles.map(\.name) == ["Mia"])
+        #expect(harness.recorder.ensuredProfiles.map(\.name) == ["Mia"])
         #expect(harness.invite.preparedCount == 1)
         #expect(harness.invite.updatedRoles == [.nanny])
         #expect(harness.vm.inviteCode == "MOMSY-TEST1")
         #expect(harness.vm.inviteURL == "momsy://join?code=MOMSY-TEST1")
         #expect(harness.recorder.ensuredDisplayNames == ["Anna"])
+        #expect(harness.pendingSetupStore.load() == nil)
+    }
+
+    @Test("family setup receives every onboarding caregiver role")
+    func familySetupReceivesSelectedRole() async {
+        for role in FamilyRole.allCases {
+            let harness = makeHarness(cloudSyncEnabled: true)
+            harness.vm.babyName = "Mia"
+            harness.vm.parentRole = role
+
+            await harness.vm.prepareInvite()
+
+            #expect(harness.recorder.ensuredRoles == [role])
+        }
+    }
+
+    @Test("selected role and profile survive a transient family setup failure")
+    func selectedSetupSurvivesSetupFailure() async {
+        let harness = makeHarness(
+            cloudSyncEnabled: true,
+            familySetupError: FamilyError.noFamilyId
+        )
+        harness.vm.babyName = "Mia"
+        harness.vm.parentRole = .dad
+
+        await harness.vm.prepareInvite()
+
+        #expect(harness.pendingSetupStore.load()?.role == .dad)
+        #expect(harness.pendingSetupStore.load()?.profile.name == "Mia")
     }
 
     @Test("declining cloud sync skips cloud onboarding and keeps the profile local")
@@ -355,7 +369,7 @@ struct OnboardingViewModelTests {
         #expect(consent == .denied)
         #expect(harness.vm.step == .ready)
         #expect(harness.recorder.ensuredDisplayNames.isEmpty)
-        #expect(harness.sync.syncedProfiles.isEmpty)
+        #expect(harness.recorder.ensuredProfiles.isEmpty)
         #expect(saved?.name == "Mia")
         #expect(done)
     }

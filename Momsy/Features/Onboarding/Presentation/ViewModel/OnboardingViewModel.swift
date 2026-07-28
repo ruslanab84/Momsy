@@ -23,7 +23,7 @@ final class OnboardingViewModel: ObservableObject {
     }()
     @Published var babyGender = ""
     @Published var parentName = ""
-    @Published var parentRole = "mom"
+    @Published var parentRole: FamilyRole = .mom
     @Published var isSigningIn = false
     @Published var authError: Error?
     @Published var selectedInviteRole: FamilyRole = .dad
@@ -42,25 +42,32 @@ final class OnboardingViewModel: ObservableObject {
     private let appState: AppState
     private let analytics: any AnalyticsServiceProtocol
     private let pushNotifications: any PushNotificationServiceProtocol
-    private let syncRepo: any BabySyncRepositoryProtocol
     private let inviteService: any InviteServiceProtocol
     private let pendingInviteStore: PendingFamilyInviteStore
-    private let ensureFamilyReady: @MainActor (_ displayName: String) async throws -> Void
+    private let pendingSetupStore: PendingOnboardingSetupStore
+    private let ensureFamilyReady: @MainActor (
+        _ displayName: String,
+        _ role: FamilyRole,
+        _ profile: BabyProfile
+    ) async throws -> Void
     private let joinFamily: @MainActor (_ code: String, _ force: Bool) async throws -> Void
     private let syncAfterJoiningFamily: @MainActor () async -> Void
     private let recoverPendingAccountDeletion: @MainActor () async -> Bool
     private let setCloudSyncConsent: (CloudSyncConsent.Status) -> Void
     private let onDone: () -> Void
     private var savedProfile: BabyProfile?
-    private var hasSyncedSavedProfile = false
 
     init(saveBabyProfile: SaveBabyProfileUseCase,
          appState: AppState,
          authManager: AuthManager,
-         syncRepo: any BabySyncRepositoryProtocol,
          inviteService: any InviteServiceProtocol,
          pendingInviteStore: PendingFamilyInviteStore,
-         ensureFamilyReady: @MainActor @escaping (_ displayName: String) async throws -> Void,
+         pendingSetupStore: PendingOnboardingSetupStore,
+         ensureFamilyReady: @MainActor @escaping (
+            _ displayName: String,
+            _ role: FamilyRole,
+            _ profile: BabyProfile
+         ) async throws -> Void,
          joinFamily: @MainActor @escaping (_ code: String, _ force: Bool) async throws -> Void,
          syncAfterJoiningFamily: @MainActor @escaping () async -> Void,
          analytics: any AnalyticsServiceProtocol,
@@ -72,9 +79,9 @@ final class OnboardingViewModel: ObservableObject {
         self.saveBabyProfileUC = saveBabyProfile
         self.appState = appState
         self.authManager = authManager
-        self.syncRepo = syncRepo
         self.inviteService = inviteService
         self.pendingInviteStore = pendingInviteStore
+        self.pendingSetupStore = pendingSetupStore
         self.ensureFamilyReady = ensureFamilyReady
         self.joinFamily = joinFamily
         self.syncAfterJoiningFamily = syncAfterJoiningFamily
@@ -351,10 +358,12 @@ final class OnboardingViewModel: ObservableObject {
                 onDone()
                 return
             }
-            try? await ensureFamilyReady(familyDisplayName)
-            if let profile, !hasSyncedSavedProfile {
-                try? await syncRepo.syncBabyProfile(profile)
-                hasSyncedSavedProfile = true
+            if let profile {
+                pendingSetupStore.save(role: parentRole, profile: profile)
+                do {
+                    try await ensureFamilyReady(familyDisplayName, parentRole, profile)
+                    pendingSetupStore.clear()
+                } catch {}
             }
             onDone()
         }
@@ -397,11 +406,9 @@ final class OnboardingViewModel: ObservableObject {
         inviteError = nil
         do {
             let profile = try await saveBabyProfileLocallyIfNeeded()
-            try await ensureFamilyReady(familyDisplayName)
-            if !hasSyncedSavedProfile {
-                try await syncRepo.syncBabyProfile(profile)
-                hasSyncedSavedProfile = true
-            }
+            pendingSetupStore.save(role: parentRole, profile: profile)
+            try await ensureFamilyReady(familyDisplayName, parentRole, profile)
+            pendingSetupStore.clear()
 
             let code = regenerate
                 ? try await inviteService.regenerateAndSync()

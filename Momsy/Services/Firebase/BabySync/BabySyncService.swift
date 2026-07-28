@@ -11,10 +11,13 @@ final class BabySyncService {
     /// paths from any actor without hopping. `FamilyManager` keeps `kFamilyIdDefaultsKey`
     /// in sync; `kBabyIdDefaultsKey` is written wherever the local baby profile is saved
     /// (`SwiftDataBabyRepository.saveProfile`) and on cloud writes/discovery below.
-    private var familyId: String { defaults.string(forKey: kFamilyIdDefaultsKey) ?? "" }
+    private var familyId: String {
+        familyIdOverride ?? defaults.string(forKey: kFamilyIdDefaultsKey) ?? ""
+    }
     /// Honours a background sync's task-local target so the roster download (and queued-write
     /// replay) writes to the child being processed, not the user's currently-selected one.
     private var babyId: String {
+        if let babyIdOverride { return babyIdOverride }
         if let override = ActiveBaby.syncTargetOverride { return override.uuidString }
         return defaults.string(forKey: kBabyIdDefaultsKey) ?? ""
     }
@@ -41,13 +44,19 @@ final class BabySyncService {
     /// The store backing the family/baby path. Injectable so tests can isolate it in a
     /// private suite instead of racing other suites on the process-wide `.standard`.
     private let defaults: UserDefaults
+    private let familyIdOverride: String?
+    private let babyIdOverride: String?
     private let cloudSyncAllowed: () -> Bool
 
     init(
         defaults: UserDefaults = .standard,
+        familyId: String? = nil,
+        babyId: String? = nil,
         cloudSyncAllowed: @escaping () -> Bool = { CloudSyncConsent.isGranted() }
     ) {
         self.defaults = defaults
+        self.familyIdOverride = familyId
+        self.babyIdOverride = babyId
         self.cloudSyncAllowed = cloudSyncAllowed
     }
 

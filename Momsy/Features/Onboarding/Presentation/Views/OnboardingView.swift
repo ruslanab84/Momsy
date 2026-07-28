@@ -121,7 +121,7 @@ struct OnboardingView: View {
             ProfileStep(babyName: $vm.babyName, birthDate: $vm.birthDate, gender: $vm.babyGender,
                         lang: loc.lang, canContinue: vm.canContinue, onContinue: vm.advance)
         case .role:
-            RoleStep(parentName: $vm.parentName, selectedRole: $vm.parentRole, lang: loc.lang, onContinue: vm.advance)
+            RoleStep(parentName: $vm.parentName, selectedRole: $vm.parentRole, onContinue: vm.advance)
         case .privacy:
             CloudSyncConsentStep(
                 isJoinFlow: vm.isJoinFlow,
