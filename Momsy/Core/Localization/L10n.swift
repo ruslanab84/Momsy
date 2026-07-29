@@ -849,7 +849,7 @@ struct L10n {
     var inviteQrHint: String    { s("QR code or link · choose role", "QR-код или ссылка · выбор роли", "QR-Code oder Link · Rolle wählen", "Código QR o enlace · elige rol", "QR code ou lien · choisir le rôle", "Código QR ou ligação · escolher função", "二维码或链接 · 选择角色") }
     var matrixFeedingSleep: String { s("Feedings & sleep", "Кормления и сон", "Fütterung & Schlaf", "Tomas y sueño", "Tétées et sommeil", "Mamadas e sono", "喂养与睡眠") }
     var matrixTempMedicine: String { s("Temp / medicine", "Температура / лекарства", "Temperatur / Medizin", "Temp. / medicina", "Temp. / médicaments", "Temp. / medicação", "体温 / 用药") }
-    var matrixPhotosDiary: String  { s("Photos & diary", "Фото и дневник", "Fotos & Tagebuch", "Fotos y diario", "Photos et journal", "Fotos e diário", "照片与日记") }
+    var matrixPhotosDiary: String  { s("Diary", "Дневник", "Tagebuch", "Diario", "Journal", "Diário", "日记") }
     var matrixPaedsReport: String  { s("Paediatric report", "Отчёт педиатру", "Kinderbericht", "Informe pediátrico", "Rapport pédiatrique", "Relatório pediátrico", "儿科报告") }
     var whatEachRoleSees: String{ s("What each role sees", "Что видит каждая роль", "Was jede Rolle sieht", "Qué ve cada rol", "Ce que voit chaque rôle", "O que cada função vê", "每个角色可见的内容") }
     var joinFamilyTitle: String { s("Join a Family",    "Присоединиться к семье", "Familie beitreten", "Unirse a una familia", "Rejoindre une famille", "Juntar-se a uma família", "加入家庭") }
