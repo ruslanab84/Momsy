@@ -19,6 +19,12 @@ struct FirebaseBootstrapperTests {
         #expect(FirebaseBootstrapper.googleServiceInfoPath(in: bundle) != nil)
     }
 
+    @Test("App Check uses debug only in the simulator")
+    func appCheckProviderModeMatchesRuntime() {
+        #expect(MomsyAppCheckProviderFactory.providerMode(isSimulator: true) == .debug)
+        #expect(MomsyAppCheckProviderFactory.providerMode(isSimulator: false) == .appAttest)
+    }
+
     private static func makeBundle(files: [String: String] = [:]) throws -> Bundle {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
