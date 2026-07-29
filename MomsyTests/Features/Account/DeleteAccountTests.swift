@@ -16,6 +16,7 @@ private struct MockCloudEraser: CloudAccountEraser {
         var deleteCount: Int { uids.count }
     }
     let calls: Calls
+    // Retains the removed faulty signal so the regression fails if recovery consults it again.
     var inviteMembership = false
     func deleteCloudData(uid: String) async throws {
         calls.uids.append(uid)
@@ -471,23 +472,25 @@ struct AccountDeletionRecoveryTests {
         #expect(pending.clearCount == 0)
     }
 
-    @Test("skips the erase when membership was reestablished by an invite join")
-    func recoverySkipsEraseWhenMembershipReestablishedByInvite() async throws {
+    @Test("continues a pending erase when the existing membership has an old invite code")
+    func recoveryContinuesEraseForLegacyInviteMembership() async throws {
         let cloud = MockCloudEraser.Calls()
         let pending = MockPendingStore(pendingUid: "u1")
         let suppressed = MockSuppressedRestoreStore()
         suppressed.suppressRestore(for: "u1")
+        let auth = MockAuth(uid: "u1")
         let rec = AccountDeletionRecovery(
             cloudEraser: MockCloudEraser(calls: cloud, inviteMembership: true),
-            auth: MockAuth(uid: "u1"),
+            auth: auth,
             pendingStore: pending,
             suppressedRestoreStore: suppressed)
 
         await rec.runIfNeeded()
 
-        #expect(cloud.deleteCount == 0)
+        #expect(cloud.deleteCount == 1)
+        #expect(auth.deleteCount == 1)
         #expect(pending.pendingUid == nil)
-        #expect(suppressed.suppressedUIDs.isEmpty)
+        #expect(suppressed.isRestoreSuppressed(for: "u1"))
     }
 
     // MARK: - shouldWipeDevice (guards AppContainer.recoverPendingAccountDeletion)
