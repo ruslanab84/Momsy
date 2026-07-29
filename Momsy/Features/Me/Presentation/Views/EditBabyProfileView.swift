@@ -216,9 +216,7 @@ struct EditBabyProfileView: View {
         updated.gender    = gender
         Task {
             do {
-                try await container.saveBabyProfile.execute(updated)
-                appState.update(updated)
-                try? await container.babySyncRepository.syncBabyProfile(updated)
+                try await container.updateChildProfile(updated)
                 dismiss()
             } catch {
                 saveError = error.localizedDescription

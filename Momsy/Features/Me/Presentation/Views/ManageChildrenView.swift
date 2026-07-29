@@ -4,13 +4,15 @@ struct ManageChildrenView: View {
     @EnvironmentObject private var lm: LocalizationManager
     @EnvironmentObject private var appState: AppState
     @Environment(\.appContainer) private var container
+    @ObservedObject private var familyManager = FamilyManager.shared
 
     @State private var showAdd = false
     @State private var busy = false
     @State private var errorMessage: String?
     @State private var pendingDeletion: BabyProfile?
 
-    private var canDeleteChildren: Bool { appState.babies.count > 1 && !busy }
+    private var canManageChildren: Bool { familyManager.canPerform(.manageBabyProfiles) }
+    private var canDeleteChildren: Bool { canManageChildren && appState.babies.count > 1 && !busy }
 
     var body: some View {
         List {
@@ -24,9 +26,11 @@ struct ManageChildrenView: View {
         }
         .navigationTitle(lm.strings.children)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showAdd = true } label: { Image(systemName: "plus") }
-                    .disabled(appState.babies.count >= ActiveBaby.maxChildren || busy)
+            if canManageChildren {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showAdd = true } label: { Image(systemName: "plus") }
+                        .disabled(appState.babies.count >= ActiveBaby.maxChildren || busy)
+                }
             }
         }
         .sheet(isPresented: $showAdd) {
@@ -83,27 +87,31 @@ struct ManageChildrenView: View {
             .buttonStyle(.plain)
             .disabled(busy)
 
-            Button(role: .destructive) {
-                requestDelete(baby)
-            } label: {
-                Image(systemName: "trash")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(canDeleteChildren ? Color.bbCoralDeep : Color.bbInkMute.opacity(0.55))
-                    .frame(width: 36, height: 36)
-                    .background(canDeleteChildren ? Color.bbCoral.opacity(0.14) : Color.bbInkMute.opacity(0.08))
-                    .clipShape(Circle())
+            if canManageChildren {
+                Button(role: .destructive) {
+                    requestDelete(baby)
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(canDeleteChildren ? Color.bbCoralDeep : Color.bbInkMute.opacity(0.55))
+                        .frame(width: 36, height: 36)
+                        .background(canDeleteChildren ? Color.bbCoral.opacity(0.14) : Color.bbInkMute.opacity(0.08))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .disabled(!canDeleteChildren)
+                .accessibilityLabel(lm.strings.deleteChildTitle(displayName(for: baby)))
             }
-            .buttonStyle(.plain)
-            .disabled(!canDeleteChildren)
-            .accessibilityLabel(lm.strings.deleteChildTitle(displayName(for: baby)))
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            Button(role: .destructive) {
-                requestDelete(baby)
-            } label: {
-                Label(lm.strings.delete, systemImage: "trash")
+            if canManageChildren {
+                Button(role: .destructive) {
+                    requestDelete(baby)
+                } label: {
+                    Label(lm.strings.delete, systemImage: "trash")
+                }
+                .disabled(!canDeleteChildren)
             }
-            .disabled(!canDeleteChildren)
         }
     }
 

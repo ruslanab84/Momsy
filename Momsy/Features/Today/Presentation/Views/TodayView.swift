@@ -58,6 +58,12 @@ struct TodayView: View {
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
     @EnvironmentObject private var units: UnitSystemManager
+    @ObservedObject private var familyManager = FamilyManager.shared
+
+    private var canWriteRoutine: Bool { familyManager.canPerform(.writeRoutineTracking) }
+    private var canDeleteRoutine: Bool { familyManager.canPerform(.deleteRoutineTracking) }
+    private var canWritePrivate: Bool { familyManager.canPerform(.writePrivateData) }
+    private var canManageProfiles: Bool { familyManager.canPerform(.manageBabyProfiles) }
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: now)
@@ -87,7 +93,9 @@ struct TodayView: View {
                 mainCards
                 dailyTipCard
                 if vm.currentLeap != nil { leapCard }
-                quickLogSection
+                if !quickItems.isEmpty {
+                    quickLogSection
+                }
                 historyCard
             }
             .padding(.horizontal, 20)
@@ -101,6 +109,8 @@ struct TodayView: View {
         .task { await vm.refreshForecast() }
         .task { feedingVM.restoreOrStartFeeding(side: .left) }
         .onChange(of: loc.current) { _, _ in Task { await vm.refreshTip() } }
+        .onChange(of: familyManager.currentRole) { _, _ in enforceCurrentAccess() }
+        .onChange(of: familyManager.familyId) { _, _ in enforceCurrentAccess() }
         .onChange(of: widgetFeatureRoute, initial: true) { _, route in
             presentWidgetFeature(route)
         }
@@ -173,6 +183,10 @@ struct TodayView: View {
 
     private func presentWidgetFeature(_ route: WidgetFeatureRoute?) {
         guard let route else { return }
+        guard canWriteRoutine else {
+            widgetFeatureRoute = nil
+            return
+        }
         switch route {
         case .sleep: showSleep = true
         case .feeding: showFeeding = true
@@ -180,6 +194,28 @@ struct TodayView: View {
         case .bath: showBath = true
         }
         widgetFeatureRoute = nil
+    }
+
+    private func enforceCurrentAccess() {
+        if !canWriteRoutine {
+            showFeeding = false
+            showSleep = false
+            showWalk = false
+            showBath = false
+            showStool = false
+        }
+        if !canWritePrivate {
+            showSymptom = false
+            showVitamins = false
+            showPumping = false
+        }
+        if !canManageProfiles {
+            showAddChild = false
+        }
+        Task {
+            await vm.loadTodayEntries()
+            await vm.refreshTip()
+        }
     }
 
     // MARK: - Header Row
@@ -200,7 +236,7 @@ struct TodayView: View {
                         }
                     }
                 }
-                if appState.babies.count < ActiveBaby.maxChildren {
+                if canManageProfiles, appState.babies.count < ActiveBaby.maxChildren {
                     Divider()
                     Button {
                         showAddChild = true
@@ -263,13 +299,16 @@ struct TodayView: View {
             TodayFeedingCard(
                 vm: feedingVM,
                 now: now,
+                canWrite: canWriteRoutine,
                 openFeeding: { showFeeding = true },
                 reloadTodayEntries: { Task { await vm.loadTodayEntries() } }
             )
             HStack(spacing: 10) {
-                TodaySleepCard(vm: sleepVM) { showSleep = true }
+                TodaySleepCard(vm: sleepVM, canWrite: canWriteRoutine) { showSleep = true }
                 TodayDiaperCard(
                     count: vm.diaperCount,
+                    canLog: canWriteRoutine,
+                    canRemove: canDeleteRoutine,
                     remove: { vm.removeDiaper() },
                     log: { vm.logDiaper() }
                 )
@@ -412,17 +451,23 @@ struct TodayView: View {
     }
 
     private var quickItems: [QuickItem] {
-        [
+        guard canWriteRoutine else { return [] }
+        var items = [
             QuickItem(kind: .bottle,  tone: .bbCoral,  label: loc.strings.feedLabel)   { showFeeding = true },
             QuickItem(kind: .sleep,   tone: .bbLilac,  label: loc.strings.sleep)       { showSleep = true },
             QuickItem(kind: .drop,    tone: .bbSky,    label: loc.strings.diaperQuick) { vm.logDiaper() },
             QuickItem(kind: .stool,   tone: .bbMint,   label: loc.strings.stoolLabel)  { showStool = true },
-            QuickItem(kind: .heart,   tone: .bbRose,   label: loc.strings.symptom)     { showSymptom = true },
             QuickItem(kind: .walk,    tone: .bbMint,   label: loc.strings.walk)        { showWalk = true },
             QuickItem(kind: .bath,    tone: .bbSky,    label: loc.strings.bath)        { showBath = true },
-            QuickItem(kind: .vitamin, tone: .bbButter, label: loc.strings.vitamins)    { showVitamins = true },
-            QuickItem(kind: .pump,    tone: .bbRose,   label: loc.strings.pumping)     { showPumping = true },
         ]
+        if canWritePrivate {
+            items += [
+                QuickItem(kind: .heart,   tone: .bbRose,   label: loc.strings.symptom)     { showSymptom = true },
+                QuickItem(kind: .vitamin, tone: .bbButter, label: loc.strings.vitamins)    { showVitamins = true },
+                QuickItem(kind: .pump,    tone: .bbRose,   label: loc.strings.pumping)     { showPumping = true },
+            ]
+        }
+        return items
     }
 
     private var quickLogSection: some View {
@@ -504,6 +549,7 @@ struct TodayView: View {
 private struct TodayFeedingCard: View {
     @ObservedObject var vm: FeedingViewModel
     let now: Date
+    let canWrite: Bool
     let openFeeding: () -> Void
     let reloadTodayEntries: () -> Void
 
@@ -545,7 +591,7 @@ private struct TodayFeedingCard: View {
 
             Spacer(minLength: 8)
 
-            if vm.feedingSessionExists {
+            if vm.feedingSessionExists, canWrite {
                 VStack(spacing: 8) {
                     Button(action: toggleFeeding) {
                         Circle()
@@ -566,7 +612,7 @@ private struct TodayFeedingCard: View {
                             )
                     }
                 }
-            } else {
+            } else if canWrite {
                 Button(action: openFeeding) {
                     Circle()
                         .fill(Color.white)
@@ -627,6 +673,7 @@ private struct TodayFeedingCard: View {
 
 private struct TodaySleepCard: View {
     @ObservedObject var vm: SleepViewModel
+    let canWrite: Bool
     let openSleep: () -> Void
 
     @EnvironmentObject private var loc: LocalizationManager
@@ -668,12 +715,16 @@ private struct TodaySleepCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .bbCard(pad: 14)
         .animation(.spring(response: 0.3), value: vm.isSleepActive)
-        .onTapGesture(perform: openSleep)
+        .onTapGesture {
+            if canWrite { openSleep() }
+        }
     }
 }
 
 private struct TodayDiaperCard: View {
     let count: Int
+    let canLog: Bool
+    let canRemove: Bool
     let remove: () -> Void
     let log: () -> Void
 
@@ -690,28 +741,34 @@ private struct TodayDiaperCard: View {
                 .foregroundColor(.bbInk)
                 .contentTransition(.numericText())
                 .animation(.spring(response: 0.35), value: count)
-            HStack(spacing: 8) {
-                Button(action: remove) {
-                    Image(systemName: "minus")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(count > 0 ? .bbInkSoft : .bbInkMute.opacity(0.35))
-                        .frame(width: 28, height: 28)
-                        .background(Color.bbCreamSoft)
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .disabled(count == 0)
-                .animation(.spring(response: 0.25), value: count)
+            if canLog || canRemove {
+                HStack(spacing: 8) {
+                    if canRemove {
+                        Button(action: remove) {
+                            Image(systemName: "minus")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(count > 0 ? .bbInkSoft : .bbInkMute.opacity(0.35))
+                                .frame(width: 28, height: 28)
+                                .background(Color.bbCreamSoft)
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(count == 0)
+                        .animation(.spring(response: 0.25), value: count)
+                    }
 
-                Button(action: log) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.bbSkyDeep)
-                        .frame(width: 28, height: 28)
-                        .background(Color.bbSky.opacity(0.45))
-                        .clipShape(Circle())
+                    if canLog {
+                        Button(action: log) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.bbSkyDeep)
+                                .frame(width: 28, height: 28)
+                                .background(Color.bbSky.opacity(0.45))
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .buttonStyle(.plain)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

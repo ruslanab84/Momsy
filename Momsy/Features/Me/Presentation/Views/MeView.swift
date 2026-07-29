@@ -4,6 +4,7 @@ struct MeView: View {
     @EnvironmentObject private var lm: LocalizationManager
     @EnvironmentObject private var appState: AppState
     @Environment(\.appContainer) private var container
+    @ObservedObject private var familyManager = FamilyManager.shared
     @State private var showEditProfile = false
 
     var body: some View {
@@ -61,18 +62,20 @@ struct MeView: View {
                 }
             }
             Spacer()
-            Button {
-                showEditProfile = true
-            } label: {
-                Text(lm.strings.editProfile)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbCoralDeep)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(Color.bbCoral.opacity(0.15))
-                    .clipShape(Capsule())
+            if familyManager.canPerform(.manageBabyProfiles) {
+                Button {
+                    showEditProfile = true
+                } label: {
+                    Text(lm.strings.editProfile)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbCoralDeep)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(Color.bbCoral.opacity(0.15))
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .bbCard(pad: 16)
     }

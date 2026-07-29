@@ -41,6 +41,7 @@ final class QuickLogCoordinator {
     // MARK: - Feeding (mirrors FeedingViewModel)
 
     func startFeeding(sideToken: String) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let side = FeedingSide(token: sideToken)
         let start = Date()
         WidgetDataStore.shared.setFeedingRunning(effectiveStartDate: start, side: side.rawValue)
@@ -49,6 +50,7 @@ final class QuickLogCoordinator {
     }
 
     func pauseFeeding() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         guard case .running(let start, let sideRaw) = WidgetDataStore.shared.feedingState else { return }
         let elapsed = max(0, Int(Date().timeIntervalSince(start)))
         WidgetDataStore.shared.setFeedingPaused(elapsedSeconds: elapsed, side: sideRaw)
@@ -56,6 +58,7 @@ final class QuickLogCoordinator {
     }
 
     func resumeFeeding() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         guard case .paused(let elapsed, let sideRaw) = WidgetDataStore.shared.feedingState else { return }
         let effectiveStart = Date().addingTimeInterval(-TimeInterval(elapsed))
         WidgetDataStore.shared.setFeedingRunning(effectiveStartDate: effectiveStart, side: sideRaw)
@@ -63,6 +66,7 @@ final class QuickLogCoordinator {
     }
 
     func stopFeeding() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let seconds: Int
         let sideRaw: String
         switch WidgetDataStore.shared.feedingState {
@@ -91,6 +95,7 @@ final class QuickLogCoordinator {
     // MARK: - Sleep (mirrors SleepViewModel)
 
     func startSleep() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let babyId = currentBabyId
         Task {
             guard let entry = try? await withBabyScope(babyId, operation: {
@@ -107,6 +112,7 @@ final class QuickLogCoordinator {
     }
 
     func stopSleep(qualityRaw: String) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let quality = SleepQuality(rawValue: qualityRaw) ?? .normal
         let babyId = currentBabyId
         Task {
@@ -122,13 +128,23 @@ final class QuickLogCoordinator {
                 sleepLA.endActivity()
                 return
             }
+            let canDelete = FamilyManager.shared.canPerform(.deleteRoutineTracking)
+            let currentUid = UserDefaults.standard.string(forKey: kFamilyOwnerUidDefaultsKey)
+            guard canDelete ||
+                    !SleepSessionOwnership.isRemoteOwned(startedBy: open.startedBy, currentUid: currentUid)
+            else { return }
             open.quality = quality
-            let secs = max(0, Int(Date().timeIntervalSince(open.startDate)))
+            let stoppedAt = Date()
+            let secs = max(0, Int(stoppedAt.timeIntervalSince(open.startDate)))
             let previousSleepEnd = WidgetDataStore.shared.lastSleepEndDate(for: babyId)
-            WidgetDataStore.shared.setLastSleepEnd(Date(), babyId: babyId)
+            WidgetDataStore.shared.setLastSleepEnd(stoppedAt, babyId: babyId)
             WidgetDataStore.shared.clearSleep(lastDurationSeconds: secs, babyId: babyId)
             sleepLA.endActivity()
-            switch try? await stopSleepUC.execute(open) {
+            switch try? await stopSleepUC.execute(
+                open,
+                now: stoppedAt,
+                shortSessionPolicy: canDelete ? .discard : .save
+            ) {
             case .saved(let saved):
                 pushSleepToFirestore(saved, babyId: babyId)
             case .discarded(let discarded):
@@ -145,6 +161,7 @@ final class QuickLogCoordinator {
     // MARK: - Diaper (mirrors TodayViewModel)
 
     func logDiaper() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let entry = DiaperEntry()
         pushDiaperToFirestore(entry)
         Task {

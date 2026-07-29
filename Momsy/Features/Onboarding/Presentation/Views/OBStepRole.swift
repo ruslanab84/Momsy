@@ -27,7 +27,7 @@ struct RoleStep: View {
 
                 let columns = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
                 LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(FamilyRole.allCases) { role in
+                    ForEach(FamilyRole.allCases.filter(\.canCreateFamily)) { role in
                         let isSelected = selectedRole == role
                         VStack(spacing: 10) {
                             CuteBlobView(kind: role.defaultBlob, size: 52, tone: role.defaultTone)

@@ -172,7 +172,15 @@ final class SleepViewModel: ObservableObject {
         return lm.strings.sleepStartedBy(name)
     }
 
+    var canUsePrimaryAction: Bool {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return false }
+        guard isSleepActive, let entry = activeSleepEntry else { return true }
+        return FamilyManager.shared.canPerform(.deleteRoutineTracking)
+            || !SleepSessionOwnership.isRemoteOwned(startedBy: entry.startedBy, currentUid: currentUid())
+    }
+
     func start() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         guard !isSleepActive else { return }
         let babyId = currentBabyId
         let entry = SleepEntry(startDate: now())
@@ -227,7 +235,13 @@ final class SleepViewModel: ObservableObject {
 
     func stop() {
         guard isSleepActive, var entry = activeSleepEntry else { return }
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
+        let canDelete = FamilyManager.shared.canPerform(.deleteRoutineTracking)
+        guard canDelete ||
+                !SleepSessionOwnership.isRemoteOwned(startedBy: entry.startedBy, currentUid: currentUid())
+        else { return }
         let babyId = activeSleepBabyId ?? currentBabyId
+        let stoppedAt = now()
         sleepStateGeneration &+= 1
         reloadTask?.cancel()
         let startTask = pendingStartEntryId == entry.id ? pendingStartTask : nil
@@ -239,7 +253,7 @@ final class SleepViewModel: ObservableObject {
         timerTask = nil
         entry.quality = selectedQuality
         var completed = entry
-        completed.endDate = Date()
+        completed.endDate = stoppedAt
         pendingStopEntryIds.insert(completed.id)
         if let idx = todayEntries.firstIndex(where: { $0.id == completed.id }) {
             todayEntries[idx] = completed
@@ -251,12 +265,16 @@ final class SleepViewModel: ObservableObject {
         activeSleepBabyId = nil
         liveActivity.endActivity()
         let previousSleepEnd = WidgetDataStore.shared.lastSleepEndDate(for: babyId)
-        WidgetDataStore.shared.setLastSleepEnd(Date(), babyId: babyId)
+        WidgetDataStore.shared.setLastSleepEnd(stoppedAt, babyId: babyId)
         WidgetDataStore.shared.clearSleep(lastDurationSeconds: sleepSeconds, babyId: babyId)
         Task {
             do {
                 _ = try await startTask?.value
-                switch try await stopSleepUC.execute(entry, now: now()) {
+                switch try await stopSleepUC.execute(
+                    entry,
+                    now: stoppedAt,
+                    shortSessionPolicy: canDelete ? .discard : .save
+                ) {
                 case .saved(let saved):
                     if let idx = todayEntries.firstIndex(where: { $0.id == saved.id }) {
                         todayEntries[idx] = saved
@@ -338,6 +356,7 @@ final class SleepViewModel: ObservableObject {
     }
 
     func logManualEntry(startDate: Date, endDate: Date, quality: SleepQuality, note: String) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let babyId = currentBabyId
         Task {
             do {
@@ -388,6 +407,9 @@ final class SleepViewModel: ObservableObject {
     /// Closes an orphaned open sleep at the end time the widget recorded when `stop()`
     /// ran, or discards it when that end is unknown / implausible.
     private func reconcileStaleSleep(_ entry: SleepEntry, babyId: UUID?) async {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking),
+              !SleepSessionOwnership.isRemoteOwned(startedBy: entry.startedBy, currentUid: currentUid())
+        else { return }
         let resolution = StaleSessionReconciler.resolve(
             start: entry.startDate,
             recoveredEnd: WidgetDataStore.shared.lastSleepEndDate(for: babyId),
@@ -395,7 +417,9 @@ final class SleepViewModel: ObservableObject {
         )
         switch resolution {
         case .close(let end): try? await reconcileStaleSleepUC.execute(entry, end: end)
-        case .discard:        try? await reconcileStaleSleepUC.execute(entry, end: nil)
+        case .discard:
+            guard FamilyManager.shared.canPerform(.deleteRoutineTracking) else { return }
+            try? await reconcileStaleSleepUC.execute(entry, end: nil)
         }
     }
 
@@ -500,9 +524,11 @@ final class SleepViewModel: ObservableObject {
             $0.endDate == nil && !pendingStopEntryIds.contains($0.id)
         }
         if open.count > 1, let canonical = DuplicateOpenSessionPolicy.canonical(open) {
-            let discards = DuplicateOpenSessionPolicy.ownDiscards(
-                open, canonical: canonical, currentUid: currentUid(), window: Self.duplicateStartWindow
-            )
+            let discards = FamilyManager.shared.canPerform(.deleteRoutineTracking)
+                ? DuplicateOpenSessionPolicy.ownDiscards(
+                    open, canonical: canonical, currentUid: currentUid(), window: Self.duplicateStartWindow
+                )
+                : []
             for dup in discards {
                 try? await withBabyScope(babyId) {
                     try await reconcileStaleSleepUC.execute(dup, end: nil)   // local delete

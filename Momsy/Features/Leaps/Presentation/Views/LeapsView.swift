@@ -6,6 +6,7 @@ struct LeapsView: View {
     @State private var isSkillDiarySheetPresented = false
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var appState: AppState
+    @ObservedObject private var familyManager = FamilyManager.shared
 
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeLeapsViewModel())
@@ -18,7 +19,9 @@ struct LeapsView: View {
                 currentLeapCard
                 calendarGridSection
                 todayActionsSection
-                checkInSection
+                if familyManager.canPerform(.writePrivateData) {
+                    checkInSection
+                }
                 behaviorInsightsSection
                 normalDoctorCard
                 timelineSection
@@ -117,26 +120,28 @@ struct LeapsView: View {
                 )
             }
 
-            Button {
-                isSkillDiarySheetPresented = true
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "square.and.pencil")
-                        .font(.system(size: 13, weight: .bold))
-                    Text(loc.strings.leapRecordSkillButton)
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .bold))
+            if familyManager.canPerform(.writePrivateData) {
+                Button {
+                    isSkillDiarySheetPresented = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "square.and.pencil")
+                            .font(.system(size: 13, weight: .bold))
+                        Text(loc.strings.leapRecordSkillButton)
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.vertical, 11)
+                    .padding(.horizontal, 12)
+                    .background(Color.bbSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
-                .foregroundColor(.white)
-                .padding(.vertical, 11)
-                .padding(.horizontal, 12)
-                .background(Color.bbSurface)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .buttonStyle(.plain)
+                .disabled(vm.isRecordingSkill)
             }
-            .buttonStyle(.plain)
-            .disabled(vm.isRecordingSkill)
 
             if let message = vm.skillDiaryMessage {
                 Text(message)

@@ -17,6 +17,7 @@ struct MainTabView: View {
     @Environment(\.appContainer) private var container
     @Binding private var widgetFeatureRoute: WidgetFeatureRoute?
     @State private var selectedTab = 0
+    @ObservedObject private var familyManager = FamilyManager.shared
 
     init(widgetFeatureRoute: Binding<WidgetFeatureRoute?> = .constant(nil)) {
         _widgetFeatureRoute = widgetFeatureRoute
@@ -32,15 +33,17 @@ struct MainTabView: View {
                 .tabItem { Label(lm.strings.tabLeaps, systemImage: "star.fill") }
                 .tag(1)
 
-            DiaryView(container: container)
-                .tabItem { Label(lm.strings.diary, systemImage: "heart.fill") }
-                .tag(2)
+            if familyManager.canPerform(.viewPrivateData) {
+                DiaryView(container: container)
+                    .tabItem { Label(lm.strings.diary, systemImage: "heart.fill") }
+                    .tag(2)
 
-            NavigationStack {
-                DoctorMenuView()
+                NavigationStack {
+                    DoctorMenuView()
+                }
+                .tabItem { Label(lm.strings.tabDoctor, systemImage: "drop.fill") }
+                .tag(3)
             }
-            .tabItem { Label(lm.strings.tabDoctor, systemImage: "drop.fill") }
-            .tag(3)
 
             NavigationStack {
                 MeView()
@@ -49,11 +52,23 @@ struct MainTabView: View {
             .tag(4)
         }
         .tint(.bbCoralDeep)
+        .onChange(of: familyManager.currentRole) { _, _ in
+            resetRestrictedSelectionIfNeeded()
+        }
+        .onChange(of: familyManager.familyId) { _, _ in
+            resetRestrictedSelectionIfNeeded()
+        }
         .onOpenURL { url in
             switch url.host {
             case "sleep", "feeding", "walk", "bath", "today": selectedTab = 0
             default: break
             }
+        }
+    }
+
+    private func resetRestrictedSelectionIfNeeded() {
+        if !familyManager.canPerform(.viewPrivateData), selectedTab == 2 || selectedTab == 3 {
+            selectedTab = 0
         }
     }
 }

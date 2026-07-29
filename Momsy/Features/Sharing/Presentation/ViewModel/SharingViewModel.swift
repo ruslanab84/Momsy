@@ -95,8 +95,9 @@ final class SharingViewModel: ObservableObject {
             try? await repo.prepareForRosterManagement(currentMember: currentMember)
             stored = (try? await repo.getMembers()) ?? stored
         }
+        stored = stored.filter { FamilyRole(storedRawValue: $0.roleRaw) != nil }
         storedMembers = stored
-        members = stored.map { $0.toFamilyMember() }
+        members = stored.compactMap { $0.toFamilyMember() }
     }
 
     func addMember(_ member: FamilyMember) {
@@ -226,8 +227,8 @@ final class SharingViewModel: ObservableObject {
 // MARK: - Mapping
 
 private extension StoredFamilyMember {
-    func toFamilyMember() -> FamilyMember {
-        let role = FamilyRole(storedRawValue: roleRaw) ?? .mom
+    func toFamilyMember() -> FamilyMember? {
+        guard let role = FamilyRole(storedRawValue: roleRaw) else { return nil }
         return FamilyMember(
             id: id, name: name, role: role, isMe: isMe,
             isOnline: false, activity: ""

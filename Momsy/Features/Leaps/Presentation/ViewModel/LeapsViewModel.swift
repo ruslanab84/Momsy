@@ -213,6 +213,7 @@ final class LeapsViewModel: ObservableObject {
     }
 
     func toggleSymptom(_ symptom: LeapCheckInSymptom) async {
+        guard FamilyManager.shared.canPerform(.writePrivateData) else { return }
         var symptoms = selectedSymptoms
         if symptoms.contains(symptom) {
             symptoms.remove(symptom)
@@ -456,7 +457,10 @@ final class LeapsViewModel: ObservableObject {
     }
 
     func recordSkillToDiary(label: String) async {
-        guard let recordLeapSkillUC else { return }
+        guard
+            FamilyManager.shared.canPerform(.writePrivateData),
+            let recordLeapSkillUC
+        else { return }
         isRecordingSkill = true
         skillDiaryMessage = nil
         do {
@@ -469,6 +473,7 @@ final class LeapsViewModel: ObservableObject {
     }
 
     func markComplete(id: Int) async {
+        guard FamilyManager.shared.canPerform(.writePrivateData) else { return }
         try? await markLeapCompleteUC.execute(leapId: id)
         pushLeapToFirestore(LeapProgress(id: id, isDone: true, completedDate: Date()))
         await loadLeaps()

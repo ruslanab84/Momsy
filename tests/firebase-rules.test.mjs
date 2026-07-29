@@ -169,12 +169,10 @@ test("family lifecycle cannot be reopened or deleted by restricted roles", async
     await assertSucceeds(momDb.doc(familyPath).delete());
 });
 
-test("family creator can bootstrap with any supported onboarding role", async () => {
+test("family creator bootstrap requires a parent role", async () => {
     for (const [suffix, roleRaw] of [
         ["mom", "Мама"],
         ["dad", "Папа"],
-        ["nanny", "Няня"],
-        ["grandma", "Бабушка"],
     ]) {
         const uid = `creator-${suffix}`;
         const path = `families/bootstrap-${suffix}`;
@@ -187,10 +185,21 @@ test("family creator can bootstrap with any supported onboarding role", async ()
         await assertSucceeds(db.doc(`${path}/members/${uid}`).set({ uid, roleRaw }));
         await assertSucceeds(db.doc(`${path}/babies/baby`).set({ name: "Baby" }));
         await assertSucceeds(db.doc(path).update({ bootstrapComplete: true }));
+    }
 
-        if (roleRaw === "Няня" || roleRaw === "Бабушка") {
-            await assertFails(db.doc(`${path}/babies/baby`).update({ name: "Changed" }));
-        }
+    for (const [suffix, roleRaw] of [
+        ["nanny", "Няня"],
+        ["grandma", "Бабушка"],
+    ]) {
+        const uid = `creator-${suffix}`;
+        const path = `families/bootstrap-${suffix}`;
+        const db = firestore(uid);
+
+        await assertSucceeds(db.doc(path).set({
+            createdBy: uid,
+            bootstrapComplete: false,
+        }));
+        await assertFails(db.doc(`${path}/members/${uid}`).set({ uid, roleRaw }));
     }
 });
 
@@ -390,6 +399,10 @@ test("nanny can track routine care only under their own identity", async () => {
         addedBy: users.mom,
         startedAt: new Date("2026-07-11T12:30:00Z"),
     }));
+    await assertFails(db.doc(`${babyPath}/feedingLogs/missing-author-name`).set({
+        addedBy: users.nanny,
+        startedAt: new Date("2026-07-11T12:45:00Z"),
+    }));
     await assertFails(db.doc(`${babyPath}/feedingLogs/feed-mom`).update({ amount: 30 }));
 });
 
@@ -428,33 +441,19 @@ test("unknown roles and outsiders have no baby access", async () => {
     await assertFails(testEnv.unauthenticatedContext().firestore().doc(familyPath).get());
 });
 
-test("family photos are parent-managed and grandma-readable", async () => {
-    const path = `${familyPath}/photos/photo.jpg`;
+test("storage stays disabled for every family role and legacy path", async () => {
+    const familyPhotoPath = `${familyPath}/photos/photo.jpg`;
+    const legacyPhotoPath = `users/${users.mom}/diary/legacy.jpg`;
     const bytes = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
 
-    await assertSucceeds(storage(users.mom).ref(path).put(bytes, { contentType: "image/jpeg" }));
-    await assertSucceeds(storage(users.grandma).ref(path).getMetadata());
-    await assertFails(storage(users.nanny).ref(path).getMetadata());
-    await assertFails(testEnv.unauthenticatedContext().storage().ref(path).getMetadata());
-    await assertFails(storage(users.grandma).ref(`${familyPath}/photos/grandma.jpg`).put(
+    await assertFails(storage(users.mom).ref(familyPhotoPath).put(
         bytes,
-        { contentType: "image/jpeg" },
+        { contentType: "image/jpeg" }
     ));
-    await assertFails(storage(users.mom).ref(`${familyPath}/photos/not-image.txt`).put(
-        bytes,
-        { contentType: "text/plain" },
-    ));
-    await assertSucceeds(storage(users.mom).ref(path).delete());
-});
-
-test("legacy user photos are owner-only", async () => {
-    const path = `users/${users.mom}/diary/legacy.jpg`;
-    const bytes = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
-
-    await assertSucceeds(storage(users.mom).ref(path).put(bytes, { contentType: "image/jpeg" }));
-    await assertSucceeds(storage(users.mom).ref(path).getMetadata());
-    await assertFails(storage(users.dad).ref(path).getMetadata());
-    await assertFails(storage(users.grandma).ref(path).getMetadata());
+    await assertFails(storage(users.nanny).ref(familyPhotoPath).put(bytes));
+    await assertFails(storage(users.grandma).ref(familyPhotoPath).put(bytes));
+    await assertFails(storage(users.mom).ref(legacyPhotoPath).put(bytes));
+    await assertFails(testEnv.unauthenticatedContext().storage().ref(familyPhotoPath).put(bytes));
 });
 
 test("a weak invite code cannot be minted", async () => {

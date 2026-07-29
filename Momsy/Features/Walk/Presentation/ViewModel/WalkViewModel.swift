@@ -46,6 +46,7 @@ final class WalkViewModel: ObservableObject {
     /// Closes an orphaned open walk at the end derived from the widget's last recorded
     /// duration, or discards it when that is unknown / implausible.
     private func reconcileStaleWalk(_ entry: WalkEntry) async {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         var recoveredEnd: Date?
         if case .idle(let secs) = WidgetDataStore.shared.walkState, let secs, secs > 0 {
             recoveredEnd = entry.startDate.addingTimeInterval(TimeInterval(secs))
@@ -55,7 +56,9 @@ final class WalkViewModel: ObservableObject {
             start: entry.startDate, recoveredEnd: recoveredEnd, maxDuration: Self.maxPlausibleWalk
         ) {
         case .close(let at): end = at
-        case .discard:       end = nil
+        case .discard:
+            guard FamilyManager.shared.canPerform(.deleteRoutineTracking) else { return }
+            end = nil
         }
         try? await walkRepository.resolveOrphan(id: entry.id, endDate: end)
     }
@@ -89,6 +92,7 @@ final class WalkViewModel: ObservableObject {
     }
 
     func start() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         Task {
             do {
                 let entry = try await walkRepository.start()
@@ -100,6 +104,7 @@ final class WalkViewModel: ObservableObject {
     }
 
     func stop() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         guard isWalkActive, let entry = activeWalkEntry else { return }
         timerTask?.cancel()
         timerTask = nil
@@ -145,6 +150,7 @@ final class WalkViewModel: ObservableObject {
     }
 
     func logManualEntry(startDate: Date, endDate: Date, note: String) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         Task {
             do {
                 let saved = try await addManualWalkUC.execute(startDate: startDate, endDate: endDate)

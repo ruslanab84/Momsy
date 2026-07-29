@@ -83,6 +83,7 @@ final class FeedingViewModel: ObservableObject {
     }
 
     func startFeeding(side: FeedingSide) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         feedingSide = side
         isFeedingActive = true
         feedingSessionExists = true
@@ -99,6 +100,7 @@ final class FeedingViewModel: ObservableObject {
     }
 
     func pauseFeeding() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         guard isFeedingActive else { return }
         isFeedingActive = false
         pausedFeedingSeconds = feedingSeconds
@@ -108,6 +110,7 @@ final class FeedingViewModel: ObservableObject {
     }
 
     func resumeFeeding() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         guard !isFeedingActive else { return }
         isFeedingActive = true
         let effectiveStart = Date().addingTimeInterval(-TimeInterval(pausedFeedingSeconds))
@@ -119,6 +122,7 @@ final class FeedingViewModel: ObservableObject {
     }
 
     func stopFeeding(mood: String? = nil, milliliters: Int? = nil) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         guard isFeedingActive || feedingSessionExists else { return }
         isFeedingActive = false
         feedingSessionExists = false
@@ -160,6 +164,7 @@ final class FeedingViewModel: ObservableObject {
 
     func logManualEntry(date: Date, durationMinutes: Int, side: FeedingSide,
                         mood: String?, milliliters: Int? = nil) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         Task {
             do {
                 let saved = try await logFeeding.execute(

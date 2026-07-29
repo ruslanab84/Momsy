@@ -323,6 +323,8 @@ struct SleepView: View {
             )
         }
         .buttonStyle(SleepPressButtonStyle())
+        .disabled(!vm.canUsePrimaryAction)
+        .opacity(vm.canUsePrimaryAction ? 1 : 0.5)
     }
 
     // MARK: - Action Button
@@ -344,6 +346,8 @@ struct SleepView: View {
                 .bbShadowSoft()
         }
         .buttonStyle(SleepPressButtonStyle())
+        .disabled(!vm.canUsePrimaryAction)
+        .opacity(vm.canUsePrimaryAction ? 1 : 0.5)
     }
 
     private func sectionLabel(_ label: String) -> some View {

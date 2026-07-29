@@ -1,5 +1,30 @@
 import SwiftUI
 
+enum FamilyAccessCapability: CaseIterable {
+    case viewBabyStatus
+    case writeRoutineTracking
+    case deleteRoutineTracking
+    case viewPrivateData
+    case writePrivateData
+    case manageBabyProfiles
+    case manageFamilyMembers
+}
+
+enum FamilyAccessPolicy {
+    static func allows(_ capability: FamilyAccessCapability, for role: FamilyRole?) -> Bool {
+        guard let role else { return false }
+
+        switch role {
+        case .mom, .dad:
+            return true
+        case .nanny:
+            return capability == .viewBabyStatus || capability == .writeRoutineTracking
+        case .grandma:
+            return capability == .viewBabyStatus
+        }
+    }
+}
+
 enum FamilyRole: String, CaseIterable, Codable, Identifiable {
     case mom     = "Мама"
     case dad     = "Папа"
@@ -54,7 +79,15 @@ enum FamilyRole: String, CaseIterable, Codable, Identifiable {
     }
 
     var canManageFamilyMembers: Bool {
-        self == .mom || self == .dad
+        allows(.manageFamilyMembers)
+    }
+
+    var canCreateFamily: Bool {
+        allows(.manageBabyProfiles)
+    }
+
+    func allows(_ capability: FamilyAccessCapability) -> Bool {
+        FamilyAccessPolicy.allows(capability, for: self)
     }
 
     var icon: String {

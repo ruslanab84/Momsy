@@ -112,10 +112,14 @@ extension StoredFamilyMember {
         let id = (data["id"] as? String).flatMap(UUID.init(uuidString:)) ?? Self.stableId(for: docId)
         let uid = data["uid"] as? String ?? docId
         let isCurrentUser = currentUid.map { $0 == uid || $0 == docId }
-        guard let name = data["name"] as? String else { return nil }
+        guard
+            let name = data["name"] as? String,
+            let roleRaw = data["roleRaw"] as? String,
+            let role = FamilyRole(storedRawValue: roleRaw)
+        else { return nil }
         self.id = id
         self.name = name
-        self.roleRaw = data["roleRaw"] as? String ?? FamilyRole.dad.rawValue
+        self.roleRaw = role.rawValue
         self.isMe = isCurrentUser ?? (data["isMe"] as? Bool ?? false)
         self.uid = uid
         self.inviteEmail = data["inviteEmail"] as? String

@@ -57,6 +57,26 @@ struct StopSleepUseCaseTests {
         #expect(repo.entries.first?.endDate == now)
     }
 
+    @Test func shortSessionCanBeSavedWhenDeletionIsNotAllowed() async throws {
+        let repo = MockSleepRepository()
+        let now = Date()
+        let entry = SleepEntry(startDate: now.addingTimeInterval(-10))
+        repo.entries = [entry]
+
+        let outcome = try await StopSleepUseCase(repository: repo).execute(
+            entry,
+            now: now,
+            shortSessionPolicy: .save
+        )
+
+        guard case .saved(let saved) = outcome else {
+            Issue.record("Expected .saved when short-session deletion is disabled")
+            return
+        }
+        #expect(saved.endDate == now)
+        #expect(repo.entries.first?.endDate == now)
+    }
+
     @Test func boundarySessionAtExactlyMinimumIsSaved() async throws {
         let repo = MockSleepRepository()
         let now = Date()

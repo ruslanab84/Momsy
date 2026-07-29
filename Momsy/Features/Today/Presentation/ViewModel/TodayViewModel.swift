@@ -137,6 +137,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     func addSyncedFeeding(side: FeedingSide, durationMin: Int, amountMl: Int? = nil) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let log = FeedingLog(
             id: UUID().uuidString,
             startedAt: Date(),
@@ -180,7 +181,10 @@ final class TodayViewModel: ObservableObject {
         let endOfDay = cal.date(byAdding: .day, value: 1, to: startOfDay) ?? Date()
         guard let sleeps = try? await getSleep.executeOverlapping(from: startOfDay, to: endOfDay) else { return }
         let sleepEntries: [LogEntry] = sleeps.map { sleepLabel($0) }
-        let quickEntries: [LogEntry] = quickLogRepo.load().map {
+        let canViewPrivateData = FamilyManager.shared.canPerform(.viewPrivateData)
+        let quickEntries: [LogEntry] = quickLogRepo.load().filter {
+            canViewPrivateData || [.drop, .stool, .walk, .bath].contains($0.kind)
+        }.map {
             LogEntry(id: "quick:\($0.id.uuidString)", time: $0.time, kind: $0.kind, label: $0.label)
         }
         let merged = (feedingEntries + sleepEntries + quickEntries).sorted { $0.time > $1.time }
@@ -236,6 +240,7 @@ final class TodayViewModel: ObservableObject {
     // MARK: - Quick log actions
 
     func logDiaper() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let lm = LocalizationManager.shared
         let newCount = diaperCount + 1
         diaperCount = newCount
@@ -257,6 +262,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     func removeDiaper() {
+        guard FamilyManager.shared.canPerform(.deleteRoutineTracking) else { return }
         guard diaperCount > 0 else { return }
         diaperCount -= 1
         WidgetDataStore.shared.updateDiaperCount(diaperCount)
@@ -275,6 +281,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     func logWalk() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let id = UUID()
         let date = Date()
         let label = LocalizationManager.shared.strings.walkLogged
@@ -284,6 +291,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     func logBath() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let id = UUID()
         let date = Date()
         let label = LocalizationManager.shared.strings.bathLogged
@@ -293,6 +301,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     func logVitamins() {
+        guard FamilyManager.shared.canPerform(.writePrivateData) else { return }
         let id = UUID()
         let date = Date()
         let label = LocalizationManager.shared.strings.vitaminsGiven
@@ -302,6 +311,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     func logStool(date: Date) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         let id = UUID()
         let lm = LocalizationManager.shared
         let label = lm.strings.stoolLogged
@@ -330,6 +340,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     func logSymptom() {
+        guard FamilyManager.shared.canPerform(.writePrivateData) else { return }
         addEntry(LogEntry(time: Date(), kind: .heart, label: LocalizationManager.shared.strings.symptomRecorded))
     }
 

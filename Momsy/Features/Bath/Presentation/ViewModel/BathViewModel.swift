@@ -46,6 +46,7 @@ final class BathViewModel: ObservableObject {
     /// Closes an orphaned open bath at the end derived from the widget's last recorded
     /// duration, or discards it when that is unknown / implausible.
     private func reconcileStaleBath(_ entry: BathEntry) async {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         var recoveredEnd: Date?
         if case .idle(let secs) = WidgetDataStore.shared.bathState, let secs, secs > 0 {
             recoveredEnd = entry.startDate.addingTimeInterval(TimeInterval(secs))
@@ -55,7 +56,9 @@ final class BathViewModel: ObservableObject {
             start: entry.startDate, recoveredEnd: recoveredEnd, maxDuration: Self.maxPlausibleBath
         ) {
         case .close(let at): end = at
-        case .discard:       end = nil
+        case .discard:
+            guard FamilyManager.shared.canPerform(.deleteRoutineTracking) else { return }
+            end = nil
         }
         try? await bathRepository.resolveOrphan(id: entry.id, endDate: end)
     }
@@ -89,6 +92,7 @@ final class BathViewModel: ObservableObject {
     }
 
     func start() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         Task {
             do {
                 let entry = try await bathRepository.start()
@@ -100,6 +104,7 @@ final class BathViewModel: ObservableObject {
     }
 
     func stop() {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         guard isBathActive, let entry = activeBathEntry else { return }
         timerTask?.cancel()
         timerTask = nil
@@ -140,6 +145,7 @@ final class BathViewModel: ObservableObject {
     }
 
     func logManualEntry(startDate: Date, endDate: Date, note: String) {
+        guard FamilyManager.shared.canPerform(.writeRoutineTracking) else { return }
         Task {
             do {
                 let saved = try await addManualBathUC.execute(startDate: startDate, endDate: endDate)

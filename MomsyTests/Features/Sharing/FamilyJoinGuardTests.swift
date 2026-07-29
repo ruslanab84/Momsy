@@ -35,10 +35,10 @@ struct FamilyJoinGuardTests {
 
 @Suite("StoredFamilyMember Firestore mapping")
 struct StoredFamilyMemberFirestoreMappingTests {
-    @Test("legacy member doc without id or role still maps into roster")
-    func legacyMemberDocMaps() throws {
+    @Test("member doc without id uses stable id when role is valid")
+    func memberDocWithoutIdMaps() throws {
         let member = try #require(StoredFamilyMember(
-            firestoreData: ["name": "Alex"],
+            firestoreData: ["name": "Alex", "roleRaw": FamilyRole.dad.rawValue],
             docId: "firebase-uid-1",
             currentUid: "firebase-uid-1"
         ))
@@ -47,6 +47,18 @@ struct StoredFamilyMemberFirestoreMappingTests {
         #expect(member.roleRaw == FamilyRole.dad.rawValue)
         #expect(member.uid == "firebase-uid-1")
         #expect(member.isMe)
+    }
+
+    @Test("missing or invalid role fails closed")
+    func invalidRoleDoesNotMap() {
+        #expect(StoredFamilyMember(
+            firestoreData: ["name": "Alex"],
+            docId: "firebase-uid-1"
+        ) == nil)
+        #expect(StoredFamilyMember(
+            firestoreData: ["name": "Alex", "roleRaw": "owner"],
+            docId: "firebase-uid-1"
+        ) == nil)
     }
 
     @Test("current uid overrides persisted isMe flag")
@@ -79,5 +91,37 @@ struct FamilyRoleAvatarTests {
         var member = FamilyMember(name: "Alex", role: .mom, isMe: true)
         member.role = .grandma
         #expect(member.blob == .grandma)
+    }
+}
+
+@Suite("FamilyAccessPolicy")
+struct FamilyAccessPolicyTests {
+    @Test("roles have the exact Firestore capability matrix")
+    func roleMatrix() {
+        let all = Set(FamilyAccessCapability.allCases)
+
+        #expect(allowed(for: .mom) == all)
+        #expect(allowed(for: .dad) == all)
+        #expect(allowed(for: .nanny) == [.viewBabyStatus, .writeRoutineTracking])
+        #expect(allowed(for: .grandma) == [.viewBabyStatus])
+    }
+
+    @Test("missing role fails closed")
+    func missingRole() {
+        #expect(allowed(for: nil).isEmpty)
+    }
+
+    @Test("only parents can create a family")
+    func familyCreation() {
+        #expect(FamilyRole.mom.canCreateFamily)
+        #expect(FamilyRole.dad.canCreateFamily)
+        #expect(!FamilyRole.nanny.canCreateFamily)
+        #expect(!FamilyRole.grandma.canCreateFamily)
+    }
+
+    private func allowed(for role: FamilyRole?) -> Set<FamilyAccessCapability> {
+        Set(FamilyAccessCapability.allCases.filter {
+            FamilyAccessPolicy.allows($0, for: role)
+        })
     }
 }

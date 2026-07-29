@@ -195,11 +195,11 @@ struct SharingView: View {
 
     private var matrixRows: [(String, [Bool])] {
         [
-            (loc.strings.matrixFeedingSleep,  [true,  true,  true,  false]),
-            (loc.strings.diapers,             [true,  true,  true,  false]),
+            (loc.strings.matrixFeedingSleep,  [true,  true,  true,  true ]),
+            (loc.strings.diapers,             [true,  true,  true,  true ]),
             (loc.strings.matrixTempMedicine,  [true,  true,  false, false]),
             (loc.strings.symptoms,             [true,  true,  false, false]),
-            (loc.strings.matrixPhotosDiary,   [true,  true,  true,  true ]),
+            (loc.strings.matrixPhotosDiary,   [true,  true,  false, false]),
             (loc.strings.matrixPaedsReport,   [true,  true,  false, false]),
         ]
     }

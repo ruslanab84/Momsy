@@ -59,12 +59,17 @@ enum FamilyError: LocalizedError {
     case noFamilyId
     case invalidOrExpiredCode
     case wouldAbandonExistingFamily
+    case accessDenied
+    case restrictedRoleCannotCreateFamily
 
     var errorDescription: String? {
         switch self {
         case .noFamilyId:                 return "Family not set up. Please sign in."
         case .invalidOrExpiredCode:       return LocalizationManager.shared.strings.joinFailedMessage
         case .wouldAbandonExistingFamily: return "You already belong to a family."
+        case .accessDenied:               return LocalizationManager.shared.strings.familyAccessDeniedMessage
+        case .restrictedRoleCannotCreateFamily:
+            return LocalizationManager.shared.strings.restrictedRoleCannotCreateFamilyMessage
         }
     }
 }
@@ -77,6 +82,7 @@ final class FamilyManager: ObservableObject {
     nonisolated static let previousFamilyIdUserInfoKey = "previousFamilyId"
 
     @Published private(set) var familyId: String?
+    @Published private(set) var currentRole: FamilyRole?
     @Published private(set) var isReady = false
 
     /// True while an explicit invite-join flow owns family state. `setup()` bails while
@@ -92,8 +98,9 @@ final class FamilyManager: ObservableObject {
     var onMembershipRevoked: ((_ revokedFamilyId: String) async -> Void)?
 
     /// One server-truth membership read per process launch on the cached-familyId
-    /// path; revocation while the app keeps running is caught on the next launch.
+    /// path; the member listener keeps role access fail-closed afterward.
     private var hasVerifiedMembershipThisLaunch = false
+    private var memberRoleListener: ListenerRegistration?
 
     enum MembershipCheck { case member, revoked, unknown }
 
@@ -103,7 +110,16 @@ final class FamilyManager: ObservableObject {
 
     private init() {
         familyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey)
+        currentRole = nil
         isReady = familyId != nil
+    }
+
+    func allows(_ capability: FamilyAccessCapability) -> Bool {
+        FamilyAccessPolicy.allows(capability, for: currentRole)
+    }
+
+    func canPerform(_ capability: FamilyAccessCapability) -> Bool {
+        familyId == nil || allows(capability)
     }
 
     /// True when a cached familyId belongs to a different uid than the one now
@@ -209,6 +225,7 @@ final class FamilyManager: ObservableObject {
                 displayName: displayName,
                 defaultRoleRaw: role.rawValue
             )
+            _ = await confirmMembership(familyId: existingId, uid: uid)
             try await syncInitialProfileIfNeeded(initialProfile)
         } else {
             if let existingId, restoreSuppressed {
@@ -233,6 +250,8 @@ final class FamilyManager: ObservableObject {
                     // легитимно. Снимаем suppression и адоптируем как обычный вход.
                     suppressedRestoreStore.clearSuppression(for: uid)
                     persist(familyId: existingId, ownerUid: uid)
+                    currentRole = (memberSnap?.data()?["roleRaw"] as? String)
+                        .flatMap(FamilyRole.init(storedRawValue:))
                     try await ensureMemberDocument(
                         familyId: existingId,
                         uid: uid,
@@ -247,6 +266,9 @@ final class FamilyManager: ObservableObject {
                 case .startFresh:
                     break
                 }
+            }
+            guard role.canCreateFamily else {
+                throw FamilyError.restrictedRoleCannotCreateFamily
             }
             let newId = try await createFamily(for: uid)
             try await ensureMemberDocument(
@@ -273,6 +295,7 @@ final class FamilyManager: ObservableObject {
                 merge: true
             )
             persist(familyId: newId, ownerUid: uid)
+            _ = await confirmMembership(familyId: newId, uid: uid)
             suppressedRestoreStore.clearSuppression(for: uid)
             Self.log.info("Created new family \(newId, privacy: .public) for user")
         }
@@ -285,7 +308,7 @@ final class FamilyManager: ObservableObject {
     }
 
     @discardableResult
-    func createFamily(for uid: String) async throws -> String {
+    private func createFamily(for uid: String) async throws -> String {
         guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         let ref = db.collection("families").document()
         try await ref.setData([
@@ -336,7 +359,11 @@ final class FamilyManager: ObservableObject {
         let inviteRoleRaw = data["roleRaw"] as? String
 
         // Already in the target family — idempotent no-op.
-        if familyId == targetFamilyId { isReady = true; return }
+        if familyId == targetFamilyId {
+            _ = await confirmMembership(familyId: targetFamilyId, uid: uid)
+            isReady = true
+            return
+        }
 
         // Only pay for the data read when actually switching to a different family.
         let currentFamilyId = familyId
@@ -405,6 +432,7 @@ final class FamilyManager: ObservableObject {
         try await batch.commit()
 
         persist(familyId: targetFamilyId, ownerUid: uid)
+        _ = await confirmMembership(familyId: targetFamilyId, uid: uid)
         // An explicit invite join supersedes any pending "start fresh" / deletion
         // intent for this uid on this device — otherwise the next launch's
         // suppressed-restore path would delete the freshly created member doc.
@@ -471,11 +499,18 @@ final class FamilyManager: ObservableObject {
 
     /// Server-truth check that `uid` still has a member doc in `familyId`.
     private func confirmMembership(familyId: String, uid: String) async -> MembershipCheck {
+        currentRole = nil
         do {
             let snap = try await db.collection("families").document(familyId)
                 .collection("members").document(uid)
                 .getDocument(source: .server)
-            return snap.exists ? .member : .revoked
+            guard snap.exists else { return .revoked }
+            currentRole = (snap.data()?["roleRaw"] as? String)
+                .flatMap(FamilyRole.init(storedRawValue:))
+            if self.familyId == familyId {
+                observeCurrentRole(familyId: familyId, uid: uid)
+            }
+            return .member
         } catch {
             return Self.classifyMembershipError(error)
         }
@@ -539,7 +574,10 @@ final class FamilyManager: ObservableObject {
     }
 
     func reset() {
+        memberRoleListener?.remove()
+        memberRoleListener = nil
         familyId = nil
+        currentRole = nil
         isReady = false
         UserDefaults.standard.removeObject(forKey: kFamilyIdDefaultsKey)
         UserDefaults.standard.removeObject(forKey: kFamilyOwnerUidDefaultsKey)
@@ -547,9 +585,36 @@ final class FamilyManager: ObservableObject {
     }
 
     private func persist(familyId id: String, ownerUid uid: String) {
+        if familyId != id {
+            currentRole = nil
+        }
         familyId = id
         UserDefaults.standard.set(id, forKey: kFamilyIdDefaultsKey)
         UserDefaults.standard.set(uid, forKey: kFamilyOwnerUidDefaultsKey)
+        observeCurrentRole(familyId: id, uid: uid)
+    }
+
+    private func observeCurrentRole(familyId: String, uid: String) {
+        memberRoleListener?.remove()
+        memberRoleListener = db.collection("families").document(familyId)
+            .collection("members").document(uid)
+            .addSnapshotListener { [weak self] snapshot, error in
+                let exists = snapshot?.exists == true
+                let roleRaw = snapshot?.data()?["roleRaw"] as? String
+                let failed = error != nil
+                let isFromCache = snapshot?.metadata.isFromCache == true
+                Task { @MainActor [weak self] in
+                    guard
+                        let self,
+                        self.familyId == familyId,
+                        Auth.auth().currentUser?.uid == uid
+                    else { return }
+                    guard !isFromCache else { return }
+                    self.currentRole = failed || !exists
+                        ? nil
+                        : roleRaw.flatMap(FamilyRole.init(storedRawValue:))
+                }
+            }
     }
 
     private func ensureMemberDocument(

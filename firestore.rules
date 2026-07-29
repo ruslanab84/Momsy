@@ -76,12 +76,6 @@ service cloud.firestore {
       ];
     }
 
-    function isSupportedFamilyRole(roleRaw) {
-      return isParentRole(roleRaw)
-        || isNannyRole(roleRaw)
-        || isGrandmaRole(roleRaw);
-    }
-
     function canManageFamilyRoster(familyId) {
       return belongsToFamily(familyId)
         && isParentRole(callerRoleRaw(familyId));
@@ -119,17 +113,24 @@ service cloud.firestore {
         );
     }
 
+    function hasValidRoutineAuthor() {
+      return request.resource.data.keys().hasAll(['addedBy', 'addedByName'])
+        && request.resource.data.addedBy is string
+        && request.resource.data.addedBy == request.auth.uid
+        && request.resource.data.addedByName is string;
+    }
+
     function canCreateRoutineLog(familyId, subcollection) {
       return canTrackBaby(familyId)
         && isRoutineTrackingCollection(subcollection)
-        && request.resource.data.addedBy == request.auth.uid;
+        && hasValidRoutineAuthor();
     }
 
     function canUpdateRoutineLog(familyId, subcollection) {
       return canTrackBaby(familyId)
         && isRoutineTrackingCollection(subcollection)
         && resource.data.addedBy == request.auth.uid
-        && request.resource.data.addedBy == request.auth.uid;
+        && hasValidRoutineAuthor();
     }
 
     function hasInviteCode() {
@@ -168,7 +169,7 @@ service cloud.firestore {
       return isSignedIn()
         && memberId == request.auth.uid
         && request.resource.data.uid == request.auth.uid
-        && isSupportedFamilyRole(request.resource.data.roleRaw)
+        && isParentRole(request.resource.data.roleRaw)
         && isFamilyCreator(familyId);
     }
 

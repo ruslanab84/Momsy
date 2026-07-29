@@ -336,9 +336,9 @@ struct OnboardingViewModelTests {
         #expect(harness.pendingSetupStore.load() == nil)
     }
 
-    @Test("family setup receives every onboarding caregiver role")
+    @Test("family setup receives each parent creator role")
     func familySetupReceivesSelectedRole() async {
-        for role in FamilyRole.allCases {
+        for role in FamilyRole.allCases.filter(\.canCreateFamily) {
             let harness = makeHarness(cloudSyncEnabled: true)
             harness.vm.babyName = "Mia"
             harness.vm.parentRole = role

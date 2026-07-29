@@ -183,9 +183,22 @@ final class AppContainer {
     /// Add a child to the roster (cap-enforced), switch focus to it, push to cloud.
     @MainActor
     func addChild(_ profile: BabyProfile) async throws {
+        guard FamilyManager.shared.canPerform(.manageBabyProfiles) else {
+            throw FamilyError.accessDenied
+        }
         try await saveBabyProfile.execute(profile)
         appState.update(profile)
         await switchActiveBaby(to: profile.id)
+        try? await babySyncRepository.syncBabyProfile(profile)
+    }
+
+    @MainActor
+    func updateChildProfile(_ profile: BabyProfile) async throws {
+        guard FamilyManager.shared.canPerform(.manageBabyProfiles) else {
+            throw FamilyError.accessDenied
+        }
+        try await saveBabyProfile.execute(profile)
+        appState.update(profile)
         try? await babySyncRepository.syncBabyProfile(profile)
     }
 
@@ -201,6 +214,9 @@ final class AppContainer {
     /// Remove a child: cascade-delete its logs, drop the profile, re-point active.
     @MainActor
     func deleteChild(id: UUID) async throws {
+        guard FamilyManager.shared.canPerform(.manageBabyProfiles) else {
+            throw FamilyError.accessDenied
+        }
         let profiles = try await babyRepository.getAllProfiles()
         guard profiles.contains(where: { $0.id == id }) else { return }
         guard profiles.count > 1 else { throw BabyError.cannotDeleteLastChild }
