@@ -77,6 +77,21 @@ struct StoredFamilyMemberFirestoreMappingTests {
 
         #expect(!member.isMe)
     }
+
+    @Test("legacy Add to team placeholder does not map as a real member")
+    func legacyPlaceholderDoesNotMap() {
+        let documentId = "9517DE8C-7EE9-4D88-962B-8D609F48CB48"
+
+        #expect(StoredFamilyMember(
+            firestoreData: [
+                "id": documentId,
+                "name": "Invited parent",
+                "roleRaw": FamilyRole.dad.rawValue,
+                "isMe": false
+            ],
+            docId: documentId
+        ) == nil)
+    }
 }
 
 @Suite("Family role avatars")

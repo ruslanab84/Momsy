@@ -40,8 +40,7 @@ struct SharingView: View {
                 inviteExpiry: vm.inviteExpiry,
                 isSyncing: vm.isPreparingInvite,
                 onRegenerate: { role in vm.regenerateInvite(role: role) },
-                onRoleChange: { role in vm.updateInviteRole(role) },
-                onInvite: { member in vm.addMember(member) }
+                onRoleChange: { role in vm.updateInviteRole(role) }
             )
         }
         .sheet(item: $vm.editingMember) { member in

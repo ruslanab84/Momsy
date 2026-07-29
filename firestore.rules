@@ -295,8 +295,7 @@ service cloud.firestore {
       // write their own doc during setup; Mom/Dad members may manage the roster.
       match /members/{memberId} {
         allow read:   if belongsToFamily(familyId);
-        allow create: if canManageFamilyRoster(familyId)
-                      || isSelfCreatorBootstrap(familyId, memberId)
+        allow create: if isSelfCreatorBootstrap(familyId, memberId)
                       || isSelfInviteJoin(familyId, memberId);
         allow update: if canManageFamilyRoster(familyId)
                       || (isSignedIn()

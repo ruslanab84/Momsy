@@ -210,6 +210,16 @@ test("a restricted member cannot promote their own roster role", async () => {
     await assertFails(member.update({ roleRaw: "Мама" }));
 });
 
+test("a parent cannot create a placeholder member without an authenticated join", async () => {
+    const placeholderId = "9517DE8C-7EE9-4D88-962B-8D609F48CB48";
+    await assertFails(firestore(users.mom).doc(`${familyPath}/members/${placeholderId}`).set({
+        id: placeholderId,
+        name: "Invited parent",
+        roleRaw: "Папа",
+        isMe: false,
+    }));
+});
+
 test("invite updates cannot cross families or bypass schema and expiry limits", async () => {
     const validExpiry = new Date(Date.now() + 23 * 60 * 60 * 1000);
     const invite = firestore(users.mom).doc(familyBInvitePath);

@@ -16,12 +16,6 @@ final class LocalFamilyRepository: FamilyRepository {
         try load()
     }
 
-    func add(_ member: StoredFamilyMember) async throws {
-        var members = try load()
-        members.append(member)
-        try save(members)
-    }
-
     func update(_ member: StoredFamilyMember) async throws {
         var members = try load()
         if let idx = members.firstIndex(where: { $0.id == member.id }) { members[idx] = member }

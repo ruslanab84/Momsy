@@ -67,12 +67,25 @@ struct FirestoreAccountEraser: CloudAccountEraser {
             do {
                 let familyRef = db.collection("families").document(familyId)
                 let memberDocuments = try await familyRef.collection("members").getDocuments().documents
-                let memberIds = memberDocuments.map(\.documentID)
+                let partition = AccountErasureGate.partitionMemberDocuments(
+                    memberDocuments.map {
+                        (id: $0.documentID, data: $0.data())
+                    }
+                )
+                let placeholderIds = Set(partition.placeholderIds)
+                let legacyPlaceholders = memberDocuments.filter {
+                    placeholderIds.contains($0.documentID)
+                }
                 let callerRoleRaw = memberDocuments
                     .first { $0.documentID == uid }?
                     .data()["roleRaw"] as? String ?? ""
+                if FamilyRole(storedRawValue: callerRoleRaw)?.canManageFamilyMembers == true {
+                    for placeholder in legacyPlaceholders {
+                        try await placeholder.reference.delete()
+                    }
+                }
                 let mayTearDownSharedData = AccountErasureGate.mayTearDownSharedData(
-                    memberIds: memberIds,
+                    memberIds: partition.realIds,
                     callerUid: uid,
                     callerRoleRaw: callerRoleRaw
                 )

@@ -275,7 +275,6 @@ final class AppContainer {
     // MARK: — Use Cases — Sharing
 
     lazy var getFamily          = GetFamilyUseCase(repository: familyRepository)
-    lazy var inviteFamilyMember = InviteFamilyMemberUseCase(repository: familyRepository)
 
     // MARK: — Use Cases — Leaps
 

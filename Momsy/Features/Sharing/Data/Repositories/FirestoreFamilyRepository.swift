@@ -22,11 +22,6 @@ final class FirestoreFamilyRepository: FamilyRepository {
         }
     }
 
-    func add(_ member: StoredFamilyMember) async throws {
-        let docId = documentId(for: member)
-        try await col().document(docId).setData(member.toFirestoreData(), merge: true)
-    }
-
     func update(_ member: StoredFamilyMember) async throws {
         let docId = documentId(for: member)
         try await col().document(docId).updateData(member.toFirestoreData())
@@ -56,6 +51,14 @@ final class FirestoreFamilyRepository: FamilyRepository {
 
         if let documentId = currentMember.documentId, documentId != uid {
             try? await collection.document(documentId).delete()
+        }
+
+        let documents = try await collection.getDocuments().documents
+        for document in documents where AccountErasureGate.isLegacyPlaceholder(
+            documentId: document.documentID,
+            data: document.data()
+        ) {
+            try await document.reference.delete()
         }
     }
 
@@ -109,6 +112,9 @@ extension StoredFamilyMember {
     }
 
     init?(firestoreData data: [String: Any], docId: String, currentUid: String? = nil) {
+        guard !AccountErasureGate.isLegacyPlaceholder(documentId: docId, data: data) else {
+            return nil
+        }
         let id = (data["id"] as? String).flatMap(UUID.init(uuidString:)) ?? Self.stableId(for: docId)
         let uid = data["uid"] as? String ?? docId
         let isCurrentUser = currentUid.map { $0 == uid || $0 == docId }

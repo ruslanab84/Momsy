@@ -9,11 +9,9 @@ struct InviteSheet: View {
     let isSyncing: Bool
     let onRegenerate: (FamilyRole) -> Void
     let onRoleChange: (FamilyRole) -> Void
-    let onInvite: (FamilyMember) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var selectedRole: FamilyRole = .dad
-    @State private var nameText = ""
     @State private var showShare = false
     @State private var isCopied = false
     @State private var expiryLabel = ""
@@ -158,58 +156,20 @@ struct InviteSheet: View {
                             .padding(.top, 2)
                     }
 
-                    // Name field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(loc.strings.nameOptional)
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .foregroundColor(.bbInkMute)
-                            .kerning(0.5)
-                        TextField(loc.strings.memberNamePlaceholder, text: $nameText)
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .padding(14)
-                            .background(Color.bbCard)
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-
-                    // Action buttons
-                    VStack(spacing: 8) {
-                        Button { showShare = true } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "square.and.arrow.up")
-                                    .font(.system(size: 15, weight: .bold))
-                                Text(loc.strings.shareLink)
-                                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.bbSurface)
-                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    Button { showShare = true } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 15, weight: .bold))
+                            Text(loc.strings.shareLink)
+                                .font(.system(size: 16, weight: .heavy, design: .rounded))
                         }
-                        .disabled(isSyncing)
-
-                        Button {
-                            let name = nameText.trimmingCharacters(in: .whitespaces).isEmpty
-                                ? selectedRole.displayName(lang: loc.lang)
-                                : nameText.trimmingCharacters(in: .whitespaces)
-                            onInvite(FamilyMember(
-                                name: name, role: selectedRole, isMe: false, isOnline: false,
-                                activity: loc.strings.invitationSent
-                            ))
-                            dismiss()
-                        } label: {
-                            Text(loc.strings.addToTeam)
-                                .font(.system(size: 14, weight: .bold, design: .rounded))
-                                .foregroundColor(.bbCoralDeep)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                        .strokeBorder(Color.bbCoralDeep.opacity(0.4), lineWidth: 1.5)
-                                )
-                        }
-                        .disabled(isSyncing)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.bbSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     }
+                    .disabled(isSyncing)
                 }
                 .padding(20)
             }

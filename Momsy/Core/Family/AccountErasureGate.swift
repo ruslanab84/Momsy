@@ -8,6 +8,32 @@ import Foundation
 ///
 /// Pure and synchronous so the policy is unit-tested without Firestore.
 enum AccountErasureGate {
+    static func isLegacyPlaceholder(documentId: String, data: [String: Any]) -> Bool {
+        guard
+            UUID(uuidString: documentId) != nil,
+            data["id"] as? String == documentId,
+            (data["uid"] as? String).map({ $0 == documentId }) ?? true,
+            data["joinedAt"] == nil,
+            data["inviteCode"] == nil
+        else { return false }
+        return data["isMe"] as? Bool != true
+    }
+
+    static func partitionMemberDocuments(
+        _ documents: [(id: String, data: [String: Any])]
+    ) -> (realIds: [String], placeholderIds: [String]) {
+        var realIds: [String] = []
+        var placeholderIds: [String] = []
+        for document in documents {
+            if isLegacyPlaceholder(documentId: document.id, data: document.data) {
+                placeholderIds.append(document.id)
+            } else {
+                realIds.append(document.id)
+            }
+        }
+        return (realIds, placeholderIds)
+    }
+
     static func mayTearDownSharedData(memberIds: [String], callerUid: String) -> Bool {
         // `allSatisfy` on an empty roster returns true: an empty/orphaned family has
         // no co-parent to harm, so tearing it down is safe.

@@ -871,11 +871,7 @@ struct L10n {
     var removeFromTeamAction: String { s("Remove from team", "Удалить из команды", "Aus Team entfernen", "Quitar del equipo", "Retirer de l’équipe", "Remover da equipa", "移出团队") }
     var editMember: String      { s("Edit",          "Редактировать", "Bearbeiten",    "Editar", "Modifier", "Editar", "编辑") }
     var roleInTeam: String      { s("ROLE IN TEAM",  "РОЛЬ В КОМАНДЕ","ROLLE IM TEAM", "ROL EN EL EQUIPO", "RÔLE DANS L’ÉQUIPE", "FUNÇÃO NA EQUIPA", "团队中的角色") }
-    var nameOptional: String    { s("NAME (optional)","ИМЯ (необязательно)","NAME (optional)", "NOMBRE (opcional)", "NOM (facultatif)", "NOME (opcional)", "姓名（可选）") }
-    var memberNamePlaceholder: String { s("E.g.: Mike, Grandma Olga…", "Например: Миша, Бабушка Оля…", "Z.B.: Mike, Oma Olga…", "P. ej.: Miguel, Abuela Olga…", "P. ex. : Marc, Grand-mère Olga…", "Ex.: Miguel, Avó Olga…", "例如：小明、奥尔加奶奶…") }
     var shareLink: String       { s("Share link",    "Поделиться ссылкой", "Link teilen", "Compartir enlace", "Partager le lien", "Partilhar ligação", "分享链接") }
-    var invitationSent: String  { s("invitation sent","приглашение отправлено", "Einladung gesendet", "invitación enviada", "invitation envoyée", "convite enviado", "邀请已发送") }
-    var addToTeam: String       { s("Add to team",   "Добавить в команду", "Zum Team hinzufügen", "Añadir al equipo", "Ajouter à l’équipe", "Adicionar à equipa", "加入团队") }
     var copyLink: String        { s("Copy link",     "Копировать",    "Link kopieren", "Copiar enlace", "Copier le lien", "Copiar ligação", "复制链接") }
     var newCode: String         { s("New code",      "Новый код",     "Neuer Code",    "Nuevo código", "Nouveau code", "Novo código", "新的邀请码") }
 

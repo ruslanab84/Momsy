@@ -100,19 +100,6 @@ final class SharingViewModel: ObservableObject {
         members = stored.compactMap { $0.toFamilyMember() }
     }
 
-    func addMember(_ member: FamilyMember) {
-        guard canManageMembers else { return }
-        withAnimation(.spring(response: 0.38, dampingFraction: 0.8)) {
-            members.append(member)
-        }
-        let stored = member.toStored()
-        storedMembers.append(stored)
-        Task {
-            do { try await repo.add(stored) }
-            catch { saveError = error.localizedDescription }
-        }
-    }
-
     func changeRole(id: UUID, to newRole: FamilyRole) {
         guard canManageMembers else { return }
         guard
@@ -233,11 +220,5 @@ private extension StoredFamilyMember {
             id: id, name: name, role: role, isMe: isMe,
             isOnline: false, activity: ""
         )
-    }
-}
-
-private extension FamilyMember {
-    func toStored() -> StoredFamilyMember {
-        StoredFamilyMember(id: id, name: name, roleRaw: role.rawValue, isMe: isMe)
     }
 }
