@@ -334,14 +334,23 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     private func finishPendingAccountDeletionIfNeeded() async -> Bool {
-        guard
-            let uid = authManager.currentUID,
-            UserDefaultsPendingAccountDeletionStore().loadPending() == uid
-        else { return false }
+        guard Self.shouldRecoverPendingAccountDeletion(
+            flow: flow,
+            currentUID: authManager.currentUID,
+            pendingUID: UserDefaultsPendingAccountDeletionStore().loadPending()
+        ) else { return false }
 
         let stillPending = await recoverPendingAccountDeletion()
         authError = stillPending ? AuthError.accountDeletionPending : AuthError.accountDeletionFinished
         return true
+    }
+
+    static func shouldRecoverPendingAccountDeletion(
+        flow: OnboardingFlow,
+        currentUID: String?,
+        pendingUID: String?
+    ) -> Bool {
+        flow == .createProfile && currentUID != nil && currentUID == pendingUID
     }
 
     func finish() {

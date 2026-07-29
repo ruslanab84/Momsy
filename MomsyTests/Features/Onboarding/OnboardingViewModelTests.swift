@@ -300,6 +300,20 @@ struct OnboardingViewModelTests {
         #expect(harness.vm.step == .auth)
     }
 
+    @Test("invite rejoin supersedes a pending deletion for the same account")
+    func inviteRejoinSkipsPendingDeletionRecovery() {
+        #expect(!OnboardingViewModel.shouldRecoverPendingAccountDeletion(
+            flow: .joinFamily,
+            currentUID: "user-1",
+            pendingUID: "user-1"
+        ))
+        #expect(OnboardingViewModel.shouldRecoverPendingAccountDeletion(
+            flow: .createProfile,
+            currentUID: "user-1",
+            pendingUID: "user-1"
+        ))
+    }
+
     // MARK: - invite
 
     @Test("prepareInvite() saves baby profile, syncs it, and prepares role invite")
