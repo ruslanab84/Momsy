@@ -278,18 +278,15 @@ final class AccountDeletionRecovery {
         self.suppressedRestoreStore = suppressedRestoreStore
     }
 
-    /// The device is wiped only while a deletion is BOTH unresolved AND owned by this session.
-    ///
-    /// `pendingUid == nil` — `runIfNeeded()` just finished the erase. Wiping again would clear
-    /// `cloudSyncConsent`, which gates `AuthManager`'s auth-state listener and `FamilyManager.setup`;
-    /// the next sign-in would then create a Firebase user with no users/{uid} doc and no family.
-    ///
-    /// `currentUid != pendingUid` (including signed out) — the marker belongs to an account that
-    /// isn't in this session, so nothing of its can be downloaded here. `DeleteAccountUseCase`
-    /// already wiped this device; repeating it every launch resets onboarding forever.
-    nonisolated static func shouldWipeDevice(pendingUid: String?, currentUid: String?) -> Bool {
-        guard let pendingUid else { return false }
-        return currentUid == pendingUid
+    /// Captures ownership before recovery can clear Auth and the marker. A different account
+    /// becoming active while recovery awaits must not have its local data wiped.
+    nonisolated static func shouldWipeDevice(
+        pendingUidAtStart: String?,
+        currentUidAtStart: String?,
+        currentUidAfterRecovery: String?
+    ) -> Bool {
+        guard let pendingUidAtStart, currentUidAtStart == pendingUidAtStart else { return false }
+        return currentUidAfterRecovery == nil || currentUidAfterRecovery == pendingUidAtStart
     }
 
     func runIfNeeded() async {

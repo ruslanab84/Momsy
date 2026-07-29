@@ -642,17 +642,23 @@ final class AppContainer {
     /// in that state so cached remote data cannot refill the freshly wiped device.
     @MainActor
     func recoverPendingAccountDeletion() async -> Bool {
-        guard pendingAccountDeletionStore.loadPending() != nil else { return false }
+        guard let pendingUidAtStart = pendingAccountDeletionStore.loadPending() else { return false }
+        let currentUidAtStart = authManager.currentUID
         await accountDeletionRecovery.runIfNeeded()
 
+        let currentUidAfterRecovery = authManager.currentUID
+        let deletionStillPending =
+            pendingAccountDeletionStore.loadPending() == pendingUidAtStart &&
+            currentUidAfterRecovery == pendingUidAtStart
         guard AccountDeletionRecovery.shouldWipeDevice(
-            pendingUid: pendingAccountDeletionStore.loadPending(),
-            currentUid: authManager.currentUID
+            pendingUidAtStart: pendingUidAtStart,
+            currentUidAtStart: currentUidAtStart,
+            currentUidAfterRecovery: currentUidAfterRecovery
         ) else { return false }
 
         try? eraseLocalData()
         FamilyManager.shared.reset()
-        return true
+        return deletionStillPending
     }
 
     func makeSettingsViewModel() -> SettingsViewModel {

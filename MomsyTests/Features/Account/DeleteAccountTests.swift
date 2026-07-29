@@ -495,28 +495,50 @@ struct AccountDeletionRecoveryTests {
 
     // MARK: - shouldWipeDevice (guards AppContainer.recoverPendingAccountDeletion)
 
-    @Test("no device wipe once the recovery cleared the marker")
-    func skipsWipeAfterRecoveryCompleted() {
-        // The wipe clears cloudSyncConsent, which gates the auth-state listener and
-        // FamilyManager.setup. Running it here would clear the consent onboarding just
-        // granted, leaving the next sign-in with no users/{uid} doc and no family.
-        #expect(AccountDeletionRecovery.shouldWipeDevice(pendingUid: nil, currentUid: "u1") == false)
+    @Test("wipes after recovery clears Auth and the marker for the owning session")
+    func recoveryCompletionStillRequiresWipe() {
+        #expect(AccountDeletionRecovery.shouldWipeDevice(
+            pendingUidAtStart: "u1",
+            currentUidAtStart: "u1",
+            currentUidAfterRecovery: nil
+        ))
     }
 
     @Test("wipes the device while the pending deletion owns the session")
     func wipesForOwningSession() {
-        #expect(AccountDeletionRecovery.shouldWipeDevice(pendingUid: "u1", currentUid: "u1"))
+        #expect(AccountDeletionRecovery.shouldWipeDevice(
+            pendingUidAtStart: "u1",
+            currentUidAtStart: "u1",
+            currentUidAfterRecovery: "u1"
+        ))
     }
 
     @Test("no device wipe for a stale marker with nobody signed in")
     func skipsWipeWhenSignedOut() {
         // Otherwise a marker whose uid never signs in again re-wipes — and so resets
         // onboarding — on every cold launch, forever.
-        #expect(AccountDeletionRecovery.shouldWipeDevice(pendingUid: "u1", currentUid: nil) == false)
+        #expect(AccountDeletionRecovery.shouldWipeDevice(
+            pendingUidAtStart: "u1",
+            currentUidAtStart: nil,
+            currentUidAfterRecovery: nil
+        ) == false)
     }
 
     @Test("no device wipe when a different account is signed in")
     func skipsWipeForOtherUser() {
-        #expect(AccountDeletionRecovery.shouldWipeDevice(pendingUid: "u1", currentUid: "u2") == false)
+        #expect(AccountDeletionRecovery.shouldWipeDevice(
+            pendingUidAtStart: "u1",
+            currentUidAtStart: "u2",
+            currentUidAfterRecovery: "u2"
+        ) == false)
+    }
+
+    @Test("no device wipe if the session switches accounts during recovery")
+    func skipsWipeAfterAccountSwitch() {
+        #expect(AccountDeletionRecovery.shouldWipeDevice(
+            pendingUidAtStart: "u1",
+            currentUidAtStart: "u1",
+            currentUidAfterRecovery: "u2"
+        ) == false)
     }
 }
