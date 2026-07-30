@@ -448,22 +448,21 @@ final class FamilyManager: ObservableObject {
         )
     }
 
-    /// Removes the abandoned anonymous roster entry after Firebase switches to an
-    /// existing provider account. Best-effort because only a parent in that family
-    /// may remove another member.
-    func removeStaleAnonymousMemberIfNeeded(
+    /// Removes the anonymous user's own roster entry before Firebase switches to an
+    /// existing provider account.
+    func removeAnonymousMemberBeforeAccountSwitch(
         anonymousUid: String,
-        signedInUid: String,
         familyId: String?
-    ) async {
-        guard anonymousUid != signedInUid, let familyId else { return }
+    ) async throws {
+        guard let familyId else { return }
         do {
             try await db.collection("families").document(familyId)
                 .collection("members").document(anonymousUid)
                 .delete()
-            Self.log.info("Removed stale anonymous member \(anonymousUid, privacy: .private)")
+            Self.log.info("Removed anonymous member \(anonymousUid, privacy: .private)")
         } catch {
-            Self.log.error("Stale member cleanup failed: \(error.localizedDescription, privacy: .public)")
+            Self.log.error("Anonymous member cleanup failed: \(error.localizedDescription, privacy: .public)")
+            throw error
         }
     }
 

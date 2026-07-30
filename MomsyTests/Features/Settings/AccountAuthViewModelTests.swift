@@ -98,6 +98,21 @@ struct AccountAuthViewModelTests {
         #expect(result === original)
     }
 
+    @Test func anonymousMemberCleanupPrecedesExistingAccountSignIn() async throws {
+        var events: [String] = []
+
+        let uid = try await AuthManager.switchFromAnonymousAccount(
+            cleanup: { events.append("cleanup") },
+            signIn: {
+                events.append("signIn")
+                return "provider-uid"
+            }
+        )
+
+        #expect(uid == "provider-uid")
+        #expect(events == ["cleanup", "signIn"])
+    }
+
     @Test func appleCancelIsSilent() async throws {
         let vm = AccountAuthViewModel(auth: AuthMock()) {}
         vm.completeApple(.failure(ASAuthorizationError(.canceled)))

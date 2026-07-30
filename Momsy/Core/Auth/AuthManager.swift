@@ -161,6 +161,15 @@ final class AuthManager: ObservableObject {
     }
 
     @MainActor
+    static func switchFromAnonymousAccount<Result>(
+        cleanup: () async throws -> Void,
+        signIn: () async throws -> Result
+    ) async throws -> Result {
+        try await cleanup()
+        return try await signIn()
+    }
+
+    @MainActor
     private func linkOrSignIn(with credential: AuthCredential) async throws -> FirebaseAuth.User {
         if let current = Auth.auth().currentUser, current.isAnonymous {
             let anonymousUid = current.uid
@@ -169,15 +178,17 @@ final class AuthManager: ObservableObject {
                 return try await current.link(with: credential).user
             } catch let error as NSError where error.code == AuthErrorCode.credentialAlreadyInUse.rawValue {
                 let fallback = Self.fallbackCredential(original: credential, linkError: error)
-                let user = try await Auth.auth().signIn(with: fallback).user
-                Task { @MainActor in
-                    await FamilyManager.shared.removeStaleAnonymousMemberIfNeeded(
-                        anonymousUid: anonymousUid,
-                        signedInUid: user.uid,
-                        familyId: cachedFamilyId
-                    )
-                }
-                return user
+                return try await Self.switchFromAnonymousAccount(
+                    cleanup: {
+                        try await FamilyManager.shared.removeAnonymousMemberBeforeAccountSwitch(
+                            anonymousUid: anonymousUid,
+                            familyId: cachedFamilyId
+                        )
+                    },
+                    signIn: {
+                        try await Auth.auth().signIn(with: fallback).user
+                    }
+                )
             } catch let error as NSError where error.code == AuthErrorCode.emailAlreadyInUse.rawValue {
                 throw AuthError.providerAccountConflict
             }
