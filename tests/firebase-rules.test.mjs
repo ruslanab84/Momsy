@@ -25,6 +25,7 @@ const users = {
     grandma: "grandma",
     unknown: "unknown",
     outsider: "outsider",
+    outsider2: "outsider-2",
     parentB: "parent-b",
 };
 
@@ -220,7 +221,7 @@ test("a parent cannot create a placeholder member without an authenticated join"
     }));
 });
 
-test("invite updates cannot cross families or bypass schema and expiry limits", async () => {
+test("invite roles are immutable and replacement revokes the old code", async () => {
     const validExpiry = new Date(Date.now() + 23 * 60 * 60 * 1000);
     const invite = firestore(users.mom).doc(familyBInvitePath);
 
@@ -231,7 +232,7 @@ test("invite updates cannot cross families or bypass schema and expiry limits", 
         roleRaw: "Няня",
     }, { merge: true }));
     await assertFails(firestore(users.dad).doc(familyBInvitePath).update({ familyId }));
-    await assertSucceeds(firestore(users.parentB).doc(familyBInvitePath).update({
+    await assertFails(firestore(users.parentB).doc(familyBInvitePath).update({
         roleRaw: "Няня",
     }));
     await assertFails(firestore(users.parentB).doc(familyBInvitePath).update({
@@ -242,22 +243,40 @@ test("invite updates cannot cross families or bypass schema and expiry limits", 
         createdBy: users.mom,
         expiresAt: validExpiry,
         unexpected: true,
+        roleRaw: "Папа",
     }));
     await assertFails(firestore(users.mom).doc("invites/MOMSY-L2N3-G4H5-J6K7").set({
         familyId,
         createdBy: users.mom,
         expiresAt: new Date(Date.now() + 25 * 60 * 60 * 1000),
+        roleRaw: "Папа",
     }));
     await assertFails(firestore(users.mom).doc("invites/MOMSY-L2D3-M4N5-P6Q7").set({
         familyId,
         createdBy: users.mom,
         expiresAt: new Date(Date.now() - 60 * 1000),
+        roleRaw: "Папа",
     }));
     await assertSucceeds(firestore(users.mom).doc("invites/MOMSY-V2L3-D4F5-G6H7").set({
         familyId,
         createdBy: users.mom,
         expiresAt: validExpiry,
+        roleRaw: "Папа",
     }));
+
+    const parentBDb = firestore(users.parentB);
+    const replacement = parentBDb.doc("invites/MOMSY-R2S3-T4U5-V6W7");
+    const replacementBatch = parentBDb.batch();
+    replacementBatch.set(replacement, {
+        familyId: familyBId,
+        createdBy: users.parentB,
+        expiresAt: validExpiry,
+        roleRaw: "Няня",
+    });
+    replacementBatch.delete(parentBDb.doc(familyBInvitePath));
+    await assertSucceeds(replacementBatch.commit());
+    await assertFails(parentBDb.doc(familyBInvitePath).get());
+    await assertSucceeds(replacement.get());
 });
 
 test("an account owner can enumerate and delete only their own invites", async () => {
@@ -308,14 +327,10 @@ test("an invite cannot expose or recreate a deleted family", async () => {
     await assertFails(batch.commit());
 });
 
-test("invite create, role update, and self-invite join keep both members visible", async () => {
+test("self-invite join consumes the code before another UID can use it", async () => {
     const momDb = firestore(users.mom);
     const invite = momDb.doc("invites/MOMSY-J2N3-K4L5-M6N7");
 
-    // Mirrors FirestoreInviteService: expiresAt is a client-computed
-    // Timestamp(date:) with full nanosecond precision, not aligned to the
-    // microsecond boundary Firestore stores. The client caches and re-sends
-    // this exact value on every subsequent invite-role update.
     const expirySeconds = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
     const cachedExpiry = new Timestamp(expirySeconds, 500000123);
 
@@ -326,18 +341,18 @@ test("invite create, role update, and self-invite join keep both members visible
         roleRaw: "Няня",
     }));
 
-    // FirestoreInviteService.updateInviteRole resends the same cached,
-    // unrounded expiresAt. The stored copy was truncated to microseconds on
-    // write, so exact `==` must not be used to compare them.
-    await assertSucceeds(invite.update({
-        expiresAt: cachedExpiry,
-        roleRaw: "Няня",
-    }));
-
     // Self-invite join batch: joiner writes their own member doc plus their
-    // users/{uid} routing cache in one atomic batch, exactly as the app's
-    // join flow does.
+    // users/{uid} routing cache and consumes the invite atomically.
     const joinerDb = firestore(users.outsider);
+    const incompleteBatch = joinerDb.batch();
+    incompleteBatch.set(joinerDb.doc(`${familyPath}/members/${users.outsider}`), {
+        uid: users.outsider,
+        roleRaw: "Няня",
+        inviteCode: "MOMSY-J2N3-K4L5-M6N7",
+    });
+    incompleteBatch.set(joinerDb.doc(`users/${users.outsider}`), { familyId });
+    await assertFails(incompleteBatch.commit());
+
     const batch = joinerDb.batch();
     batch.set(joinerDb.doc(`${familyPath}/members/${users.outsider}`), {
         uid: users.outsider,
@@ -345,7 +360,20 @@ test("invite create, role update, and self-invite join keep both members visible
         inviteCode: "MOMSY-J2N3-K4L5-M6N7",
     });
     batch.set(joinerDb.doc(`users/${users.outsider}`), { familyId });
+    batch.delete(joinerDb.doc("invites/MOMSY-J2N3-K4L5-M6N7"));
     await assertSucceeds(batch.commit());
+    await assertFails(joinerDb.doc("invites/MOMSY-J2N3-K4L5-M6N7").get());
+
+    const secondJoinerDb = firestore(users.outsider2);
+    const secondBatch = secondJoinerDb.batch();
+    secondBatch.set(secondJoinerDb.doc(`${familyPath}/members/${users.outsider2}`), {
+        uid: users.outsider2,
+        roleRaw: "Няня",
+        inviteCode: "MOMSY-J2N3-K4L5-M6N7",
+    });
+    secondBatch.set(secondJoinerDb.doc(`users/${users.outsider2}`), { familyId });
+    secondBatch.delete(secondJoinerDb.doc("invites/MOMSY-J2N3-K4L5-M6N7"));
+    await assertFails(secondBatch.commit());
 
     // Both the inviter and the joiner now see the full roster.
     const momRoster = await momDb.collection(`${familyPath}/members`).get();
@@ -373,11 +401,15 @@ test("self-invite join is rejected when the member role does not match the invit
     }));
 
     const joinerDb = firestore(users.outsider);
-    await assertFails(joinerDb.doc(`${familyPath}/members/${users.outsider}`).set({
+    const batch = joinerDb.batch();
+    batch.set(joinerDb.doc(`${familyPath}/members/${users.outsider}`), {
         uid: users.outsider,
         roleRaw: "Папа",
         inviteCode: "MOMSY-J2N3-K4L5-M6P8",
-    }));
+    });
+    batch.set(joinerDb.doc(`users/${users.outsider}`), { familyId });
+    batch.delete(joinerDb.doc("invites/MOMSY-J2N3-K4L5-M6P8"));
+    await assertFails(batch.commit());
 });
 
 test("parents retain full baby and medical access", async () => {
@@ -474,21 +506,25 @@ test("a weak invite code cannot be minted", async () => {
         familyId,
         createdBy: users.mom,
         expiresAt,
+        roleRaw: "Папа",
     }));
     await assertFails(momDb.doc("invites/MOMSY-A2B3-C4D5").set({
         familyId,
         createdBy: users.mom,
         expiresAt,
+        roleRaw: "Папа",
     }));
     await assertFails(momDb.doc("invites/MOMSY-A2B3-C4D5-E6FI").set({
         familyId,
         createdBy: users.mom,
         expiresAt,
+        roleRaw: "Папа",
     }));
     await assertSucceeds(momDb.doc("invites/MOMSY-A2B3-C4D5-E6F7").set({
         familyId,
         createdBy: users.mom,
         expiresAt,
+        roleRaw: "Папа",
     }));
 });
 

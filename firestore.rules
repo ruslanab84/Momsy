@@ -147,14 +147,14 @@ service cloud.firestore {
     }
 
     function memberRoleMatchesInvite() {
-      return (
-          'roleRaw' in get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data
-          && request.resource.data.roleRaw == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.roleRaw
-        )
-        || (
-          !('roleRaw' in get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data)
-          && request.resource.data.roleRaw == 'Папа'
-        );
+      return request.resource.data.roleRaw
+        == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.roleRaw;
+    }
+
+    function inviteIsDeletedAfterJoin() {
+      return !existsAfter(
+        /databases/$(database)/documents/invites/$(request.resource.data.inviteCode)
+      );
     }
 
     function isSelfInviteJoin(familyId, memberId) {
@@ -162,7 +162,8 @@ service cloud.firestore {
         && memberId == request.auth.uid
         && request.resource.data.uid == request.auth.uid
         && inviteMatchesFamily(familyId)
-        && memberRoleMatchesInvite();
+        && memberRoleMatchesInvite()
+        && inviteIsDeletedAfterJoin();
     }
 
     function isSelfCreatorBootstrap(familyId, memberId) {
@@ -199,7 +200,7 @@ service cloud.firestore {
 
     function hasValidInviteData() {
       return request.resource.data.keys()
-          .hasAll(['familyId', 'createdBy', 'expiresAt'])
+          .hasAll(['familyId', 'createdBy', 'expiresAt', 'roleRaw'])
         && request.resource.data.keys()
           .hasOnly(['familyId', 'createdBy', 'expiresAt', 'roleRaw'])
         && request.resource.data.familyId is string
@@ -210,13 +211,8 @@ service cloud.firestore {
         // (Date() + 24h), so a device clock slightly ahead of the server must
         // not deny the write.
         && request.resource.data.expiresAt <= request.time + duration.value(24, 'h') + duration.value(10, 'm')
-        && (
-          !('roleRaw' in request.resource.data)
-          || (
-            request.resource.data.roleRaw is string
-            && request.resource.data.roleRaw in ['Мама', 'Папа', 'Няня', 'Бабушка']
-          )
-        );
+        && request.resource.data.roleRaw is string
+        && request.resource.data.roleRaw in ['Мама', 'Папа', 'Няня', 'Бабушка'];
     }
 
     // Инвайт-код обязан нести ≥60 бит энтропии: MOMSY-XXXX-XXXX-XXXX над
@@ -227,13 +223,23 @@ service cloud.firestore {
       return code.matches('^MOMSY(-[A-HJ-NP-Z2-9]{4}){3}$');
     }
 
-    function inviteImmutableFieldsUnchanged() {
-      return request.resource.data.familyId == resource.data.familyId
-        && request.resource.data.createdBy == resource.data.createdBy
-        // Millisecond equality, not `==`: Firestore truncates stored timestamps
-        // to microseconds while the client re-sends its nanosecond-precision
-        // Timestamp(date:), so exact equality fails on every role update.
-        && request.resource.data.expiresAt.toMillis() == resource.data.expiresAt.toMillis();
+    function callerConsumesInvite(code, familyId, roleRaw) {
+      return isSignedIn()
+        && isStrongInviteCode(code)
+        && familyExists(familyId)
+        && !isFamilyMember(familyId)
+        && getAfter(
+          /databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)
+        ).data.uid == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)
+        ).data.inviteCode == code
+        && getAfter(
+          /databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)
+        ).data.roleRaw == roleRaw
+        && getAfter(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.familyId == familyId;
     }
 
     // Each user owns only their own doc. familyId may only point at a family the
@@ -266,13 +272,20 @@ service cloud.firestore {
                     && hasValidInviteData()
                     && request.resource.data.createdBy == request.auth.uid
                     && canManageFamilyRoster(request.resource.data.familyId);
-      allow update: if hasValidInviteData()
-                    && inviteImmutableFieldsUnchanged()
-                    && canManageFamilyRoster(resource.data.familyId)
-                    && canManageFamilyRoster(request.resource.data.familyId);
-      allow delete: if (isSignedIn()
-                        && resource.data.createdBy == request.auth.uid)
-                    || canManageFamilyRoster(resource.data.familyId);
+      allow delete: if isSignedIn()
+                    && (
+                      !exists(/databases/$(database)/documents/invites/$(code))
+                      || resource.data.createdBy == request.auth.uid
+                      || canManageFamilyRoster(resource.data.familyId)
+                      || (
+                        resource.data.expiresAt > request.time
+                        && callerConsumesInvite(
+                          code,
+                          resource.data.familyId,
+                          resource.data.roleRaw
+                        )
+                      )
+                    );
     }
 
     match /families/{familyId} {

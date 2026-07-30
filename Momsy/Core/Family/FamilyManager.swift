@@ -354,9 +354,10 @@ final class FamilyManager: ObservableObject {
             let data = inviteDoc.data(),
             let targetFamilyId = data["familyId"] as? String,
             let expiresAt = (data["expiresAt"] as? Timestamp)?.dateValue(),
-            expiresAt > Date()
+            expiresAt > Date(),
+            let inviteRoleRaw = data["roleRaw"] as? String,
+            FamilyRole(storedRawValue: inviteRoleRaw) != nil
         else { throw FamilyError.invalidOrExpiredCode }
-        let inviteRoleRaw = data["roleRaw"] as? String
 
         // Already in the target family — idempotent no-op.
         if familyId == targetFamilyId {
@@ -414,7 +415,7 @@ final class FamilyManager: ObservableObject {
             memberDocumentData(
                 uid: uid,
                 displayName: displayName,
-                defaultRoleRaw: inviteRoleRaw ?? FamilyRole.dad.rawValue,
+                defaultRoleRaw: inviteRoleRaw,
                 inviteCode: trimmed,
                 includeLifecycleFields: true
             ),
@@ -429,6 +430,7 @@ final class FamilyManager: ObservableObject {
         }
 
         batch.setData(["familyId": targetFamilyId], forDocument: userRef, merge: true)
+        batch.deleteDocument(inviteDoc.reference)
         try await batch.commit()
 
         persist(familyId: targetFamilyId, ownerUid: uid)

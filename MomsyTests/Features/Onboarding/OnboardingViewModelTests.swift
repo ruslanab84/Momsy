@@ -21,27 +21,26 @@ struct OnboardingViewModelTests {
 
     final class MockInviteService: InviteServiceProtocol, @unchecked Sendable {
         var code = "MOMSY-TEST1"
+        var role: FamilyRole?
         var preparedCount = 0
-        var regeneratedCount = 0
-        var updatedRoles: [FamilyRole] = []
+        var issuedRoles: [FamilyRole] = []
+        var issueError: Error?
 
         func currentCode() -> String { code }
+        func currentRole() -> FamilyRole { role ?? .dad }
         func inviteURL(for code: String) -> String { "momsy://join?code=\(code)" }
         func expiry() -> Date { Date().addingTimeInterval(86400) }
-        func regenerate() -> String {
-            code = "MOMSY-TEST2"
-            return code
-        }
-        func prepareInvite() async throws -> String {
+        func prepareInvite(defaultRole: FamilyRole) async throws -> String {
             preparedCount += 1
+            role = role ?? defaultRole
             return code
         }
-        func regenerateAndSync() async throws -> String {
-            regeneratedCount += 1
-            return regenerate()
-        }
-        func updateInviteRole(code: String, role: FamilyRole) async throws {
-            updatedRoles.append(role)
+        func issueInvite(role: FamilyRole) async throws -> String {
+            issuedRoles.append(role)
+            if let issueError { throw issueError }
+            code = "MOMSY-TEST2"
+            self.role = role
+            return code
         }
     }
 
@@ -329,11 +328,30 @@ struct OnboardingViewModelTests {
         #expect(saved?.name == "Mia")
         #expect(harness.recorder.ensuredProfiles.map(\.name) == ["Mia"])
         #expect(harness.invite.preparedCount == 1)
-        #expect(harness.invite.updatedRoles == [.nanny])
+        #expect(harness.invite.currentRole() == .nanny)
+        #expect(harness.invite.issuedRoles.isEmpty)
         #expect(harness.vm.inviteCode == "MOMSY-TEST1")
         #expect(harness.vm.inviteURL == "momsy://join?code=MOMSY-TEST1")
         #expect(harness.recorder.ensuredDisplayNames == ["Anna"])
         #expect(harness.pendingSetupStore.load() == nil)
+    }
+
+    @Test("failed role replacement clears the unconfirmed invite and restores the role")
+    func failedRoleReplacementRollsBack() async {
+        let harness = makeHarness(cloudSyncEnabled: true)
+        harness.vm.babyName = "Mia"
+        await harness.vm.prepareInvite()
+        harness.invite.issueError = FamilyError.invalidOrExpiredCode
+
+        harness.vm.updateInviteRole(.nanny)
+        for _ in 0..<100 {
+            if harness.vm.inviteError != nil { break }
+            await Task.yield()
+        }
+
+        #expect(harness.vm.selectedInviteRole == .dad)
+        #expect(harness.vm.inviteCode.isEmpty)
+        #expect(harness.vm.inviteURL.isEmpty)
     }
 
     @Test("family setup receives each parent creator role")

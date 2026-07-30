@@ -38,6 +38,7 @@ struct SharingView: View {
                 inviteCode: vm.inviteCode,
                 inviteURL:  vm.inviteURL,
                 inviteExpiry: vm.inviteExpiry,
+                initialRole: vm.inviteRole,
                 isSyncing: vm.isPreparingInvite,
                 onRegenerate: { role in vm.regenerateInvite(role: role) },
                 onRoleChange: { role in vm.updateInviteRole(role) }

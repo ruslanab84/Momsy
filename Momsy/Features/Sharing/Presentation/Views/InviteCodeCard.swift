@@ -6,16 +6,36 @@ struct InviteSheet: View {
     let inviteCode: String
     let inviteURL:  String
     let inviteExpiry: Date
+    let initialRole: FamilyRole
     let isSyncing: Bool
     let onRegenerate: (FamilyRole) -> Void
     let onRoleChange: (FamilyRole) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedRole: FamilyRole = .dad
+    @State private var selectedRole: FamilyRole
     @State private var showShare = false
     @State private var isCopied = false
     @State private var expiryLabel = ""
     @EnvironmentObject var loc: LocalizationManager
+
+    init(
+        inviteCode: String,
+        inviteURL: String,
+        inviteExpiry: Date,
+        initialRole: FamilyRole,
+        isSyncing: Bool,
+        onRegenerate: @escaping (FamilyRole) -> Void,
+        onRoleChange: @escaping (FamilyRole) -> Void
+    ) {
+        self.inviteCode = inviteCode
+        self.inviteURL = inviteURL
+        self.inviteExpiry = inviteExpiry
+        self.initialRole = initialRole
+        self.isSyncing = isSyncing
+        self.onRegenerate = onRegenerate
+        self.onRoleChange = onRoleChange
+        _selectedRole = State(initialValue: initialRole)
+    }
 
     private var qrImage: Image? {
         guard let data = inviteURL.data(using: .utf8),
@@ -185,8 +205,10 @@ struct InviteSheet: View {
                 ActivityView(items: [inviteURL])
             }
             .onAppear { expiryLabel = formatExpiry(inviteExpiry) }
-            .task(id: inviteCode) {
-                onRoleChange(selectedRole)
+            .onChange(of: isSyncing) { _, syncing in
+                if !syncing {
+                    selectedRole = initialRole
+                }
             }
             .task {
                 while !Task.isCancelled {

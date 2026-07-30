@@ -2,37 +2,30 @@ import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 
-/// Firestore-backed invite service. Synchronous protocol methods read from UserDefaults cache;
-/// Firestore writes happen asynchronously in the background.
+/// Firestore-backed invite service. Synchronous protocol methods read from UserDefaults cache.
+@MainActor
 final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
     private var db: Firestore { Firestore.firestore() }
     static let codeKey = "firestore_invite_code_v1"
     static let expiryKey = "firestore_invite_expiry_v1"
     static let familyKey = "firestore_invite_family_v1"
+    static let roleKey = "firestore_invite_role_v1"
     static let syncedCodeKey = "firestore_invite_synced_code_v1"
 
     private let codeKey = FirestoreInviteService.codeKey
     private let expiryKey = FirestoreInviteService.expiryKey
     private let familyKey = FirestoreInviteService.familyKey
+    private let roleKey = FirestoreInviteService.roleKey
     private let syncedCodeKey = FirestoreInviteService.syncedCodeKey
     private let defaults  = UserDefaults.standard
 
     func currentCode() -> String {
-        let familyId = defaults.string(forKey: kFamilyIdDefaultsKey)
-        let cachedFamilyId = defaults.string(forKey: familyKey)
-        if let familyId,
-           let code = defaults.string(forKey: codeKey),
-           let expiry = defaults.object(forKey: expiryKey) as? Date,
-           Self.canReuseCachedInvite(
-               cachedCode: code,
-               cachedFamilyId: cachedFamilyId,
-               currentFamilyId: familyId,
-               expiry: expiry
-           ) {
-            syncIfNeeded(code: code, expiry: expiry, familyId: familyId)
-            return code
-        }
-        return regenerate()
+        defaults.string(forKey: codeKey) ?? ""
+    }
+
+    func currentRole() -> FamilyRole {
+        defaults.string(forKey: roleKey)
+            .flatMap(FamilyRole.init(storedRawValue:)) ?? .dad
     }
 
     func inviteURL(for code: String) -> String { "momsy://join?code=\(code)" }
@@ -48,118 +41,108 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
         return expiry
     }
 
-    private var pendingWrite: Task<Void, Error>?
-
     @discardableResult
-    func regenerate() -> String {
-        let familyId = defaults.string(forKey: kFamilyIdDefaultsKey)
-        let previousCode: String?
-        if let familyId, defaults.string(forKey: familyKey) == familyId {
-            previousCode = defaults.string(forKey: codeKey)
-        } else {
-            previousCode = nil
-        }
-        let code = InviteCodeFormat.generate()
-        let exp = Date().addingTimeInterval(86400)
-        defaults.set(code, forKey: codeKey)
-        defaults.set(exp, forKey: expiryKey)
-        if let familyId {
-            defaults.set(familyId, forKey: familyKey)
-        } else {
-            defaults.removeObject(forKey: familyKey)
-        }
-        defaults.removeObject(forKey: syncedCodeKey)
-        pendingWrite = Task {
-            guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
-            guard let familyId else { throw FamilyError.noFamilyId }
-            try await self.writeToFirestore(code: code, expiry: exp, familyId: familyId)
-            self.revokeInvite(previousCode, replacedBy: code)
-        }
-        return code
-    }
-
-    /// Best-effort revocation of the superseded code. Failure is non-fatal — the old
-    /// document still self-expires via `expiresAt` (≤24h) and rules deny expired gets.
-    /// Не ждём ack: результат никого не блокирует, а офлайн-ожидание удерживало
-    /// `pendingWrite` и вместе с ним весь экран «Поделиться». Firestore сам повторит
-    /// удаление, когда сеть вернётся.
-    private func revokeInvite(_ oldCode: String?, replacedBy newCode: String) {
-        guard let oldCode, oldCode != newCode else { return }
-        // Old code may belong to a previous family (rules deny) or be gone already.
-        db.collection("invites").document(oldCode).delete { _ in }
-    }
-
-    /// Awaits the pending Firestore write so the invite code is guaranteed to exist
-    /// before the user can share it. Call this from SharingViewModel before showing InviteSheet.
-    @discardableResult
-    func prepareInvite() async throws -> String {
-        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
-        let code = currentCode()
-        try await pendingWrite?.value
-        return code
-    }
-
-    @discardableResult
-    func regenerateAndSync() async throws -> String {
-        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
-        let code = regenerate()
-        try await pendingWrite?.value
-        return code
-    }
-
-    func updateInviteRole(code: String, role: FamilyRole) async throws {
+    func prepareInvite(defaultRole: FamilyRole) async throws -> String {
         guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         let familyId = defaults.string(forKey: kFamilyIdDefaultsKey)
+        let code = defaults.string(forKey: codeKey)
         let expiry = defaults.object(forKey: expiryKey) as? Date
-        guard
-            defaults.string(forKey: codeKey) == code,
-            Self.canReuseCachedInvite(
-                cachedCode: code,
-                cachedFamilyId: defaults.string(forKey: familyKey),
-                currentFamilyId: familyId,
-                expiry: expiry
-            ),
-            let familyId,
-            let expiry
-        else { throw FamilyError.invalidOrExpiredCode }
-        try await writeToFirestore(
-            code: code,
-            expiry: expiry,
-            roleRaw: role.rawValue,
-            familyId: familyId
-        )
-    }
-
-    private func syncIfNeeded(code: String, expiry: Date, familyId: String) {
-        guard CloudSyncConsent.isGranted() else { return }
-        guard defaults.string(forKey: syncedCodeKey) != "\(familyId)|\(code)" else { return }
-        pendingWrite = Task {
-            try await self.writeToFirestore(code: code, expiry: expiry, familyId: familyId)
+        if let familyId,
+           let code,
+           Self.canReuseCachedInvite(
+               cachedCode: code,
+               cachedFamilyId: defaults.string(forKey: familyKey),
+               currentFamilyId: familyId,
+               expiry: expiry
+           ) {
+            do {
+                let snapshot = try await db.collection("invites").document(code)
+                    .getDocument(source: .server)
+                if let data = snapshot.data(),
+                   data["familyId"] as? String == familyId,
+                   let serverExpiry = (data["expiresAt"] as? Timestamp)?.dateValue(),
+                   serverExpiry > Date(),
+                   let roleRaw = data["roleRaw"] as? String,
+                   let role = FamilyRole(storedRawValue: roleRaw) {
+                    defaults.set(serverExpiry, forKey: expiryKey)
+                    defaults.set(role.rawValue, forKey: roleKey)
+                    defaults.set("\(familyId)|\(code)", forKey: syncedCodeKey)
+                    return code
+                }
+            } catch let error as NSError where error.domain == FirestoreErrorCode.errorDomain
+                && error.code == FirestoreErrorCode.permissionDenied.rawValue {
+                // Missing, expired and consumed invites are hidden by rules.
+            }
         }
+        return try await issueInvite(role: defaultRole)
     }
 
-    private func writeToFirestore(
-        code: String,
-        expiry: Date,
-        roleRaw: String? = nil,
-        familyId: String
-    ) async throws {
+    @discardableResult
+    func issueInvite(role: FamilyRole) async throws -> String {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
+        guard let familyId = defaults.string(forKey: kFamilyIdDefaultsKey) else {
+            throw FamilyError.noFamilyId
+        }
         guard let uid = Auth.auth().currentUser?.uid else { throw FamilyError.noFamilyId }
-        var data: [String: Any] = [
+        let oldCode = defaults.string(forKey: familyKey) == familyId
+            ? defaults.string(forKey: codeKey)
+            : nil
+        let code = InviteCodeFormat.generate()
+        let expiry = Date().addingTimeInterval(86400)
+        let data: [String: Any] = [
             "familyId": familyId,
             "createdBy": uid,
-            "expiresAt": Timestamp(date: expiry)
+            "expiresAt": Timestamp(date: expiry),
+            "roleRaw": role.rawValue
         ]
-        if let roleRaw { data["roleRaw"] = roleRaw }
         // Ограниченное ожидание: `try await setData` офлайн не возвращает управление,
         // и весь экран «Поделиться» зависал со спиннером навсегда. Здесь ack нужен
         // по-настоящему — показывать QR для несуществующего инвайта нельзя, — поэтому
         // ожидание не убирается, а ограничивается и превращается в видимую ошибку.
-        let ref = db.collection("invites").document(code)
-        try await FirestoreAck.confirm(timeout: Self.ackTimeout) { done in
-            ref.setData(data, merge: true, completion: done)
+        let invites = db.collection("invites")
+        let batch = db.batch()
+        batch.setData(data, forDocument: invites.document(code))
+        if let oldCode, oldCode != code {
+            batch.deleteDocument(invites.document(oldCode))
         }
+        let previousCode = defaults.object(forKey: codeKey)
+        let previousExpiry = defaults.object(forKey: expiryKey)
+        let previousFamily = defaults.object(forKey: familyKey)
+        let previousRole = defaults.object(forKey: roleKey)
+        let previousSyncedCode = defaults.object(forKey: syncedCodeKey)
+        cache(code: code, expiry: expiry, familyId: familyId, role: role)
+        do {
+            try await FirestoreAck.confirm(timeout: Self.ackTimeout) { done in
+                batch.commit(completion: done)
+            }
+        } catch FirestoreAckError.notConfirmed {
+            // The batch remains queued; keep its identity so a late commit is recoverable.
+            throw FirestoreAckError.notConfirmed
+        } catch {
+            restore(previousCode, forKey: codeKey)
+            restore(previousExpiry, forKey: expiryKey)
+            restore(previousFamily, forKey: familyKey)
+            restore(previousRole, forKey: roleKey)
+            restore(previousSyncedCode, forKey: syncedCodeKey)
+            throw error
+        }
+        return code
+    }
+
+    private func cache(code: String, expiry: Date, familyId: String, role: FamilyRole) {
+        defaults.set(code, forKey: codeKey)
+        defaults.set(expiry, forKey: expiryKey)
+        defaults.set(familyId, forKey: familyKey)
+        defaults.set(role.rawValue, forKey: roleKey)
         defaults.set("\(familyId)|\(code)", forKey: syncedCodeKey)
+    }
+
+    private func restore(_ value: Any?, forKey key: String) {
+        if let value {
+            defaults.set(value, forKey: key)
+        } else {
+            defaults.removeObject(forKey: key)
+        }
     }
 
     /// Столько ждём подтверждения бэкендом, прежде чем показать пользователю ошибку.
@@ -174,7 +157,7 @@ final class FirestoreInviteService: InviteServiceProtocol, @unchecked Sendable {
         now: Date = Date()
     ) -> Bool {
         // Код, выданный старой сборкой, короче и новые rules откажут ему в `get`.
-        // Отбрасываем его здесь, чтобы `regenerate()` выпустил сильный код.
+        // Отбрасываем его здесь, чтобы `issueInvite` выпустил сильный код.
         guard let cachedCode, InviteCodeFormat.isValid(cachedCode) else { return false }
         guard let currentFamilyId, cachedFamilyId == currentFamilyId, let expiry else {
             return false

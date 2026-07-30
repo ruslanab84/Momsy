@@ -14,6 +14,7 @@ final class SharingViewModel: ObservableObject {
     @Published var showJoinConfirm = false
     @Published var isPreparingInvite = false
     @Published var showJoinAuthSheet = false
+    @Published private(set) var inviteRole: FamilyRole
 
     private let repo: any FamilyRepository
     private let inviteService: any InviteServiceProtocol
@@ -42,26 +43,20 @@ final class SharingViewModel: ObservableObject {
         saveError = nil
         Task {
             do {
-                let code = try await inviteService.prepareInvite()
-                try await inviteService.updateInviteRole(code: code, role: .dad)
+                _ = try await inviteService.prepareInvite(defaultRole: inviteRole)
+                inviteRole = inviteService.currentRole()
                 showInvite = true
             } catch {
                 saveError = error.localizedDescription
+                showInvite = false
             }
             isPreparingInvite = false
         }
     }
 
     func updateInviteRole(_ role: FamilyRole) {
-        guard canManageMembers else { return }
-        guard !isPreparingInvite else { return }
-        Task {
-            do {
-                try await inviteService.updateInviteRole(code: inviteCode, role: role)
-            } catch {
-                saveError = error.localizedDescription
-            }
-        }
+        guard role != inviteRole else { return }
+        regenerateInvite(role: role)
     }
 
     func regenerateInvite(role: FamilyRole) {
@@ -71,21 +66,23 @@ final class SharingViewModel: ObservableObject {
         saveError = nil
         Task {
             do {
-                let code = try await inviteService.regenerateAndSync()
-                try await inviteService.updateInviteRole(code: code, role: role)
+                _ = try await inviteService.issueInvite(role: role)
+                inviteRole = role
                 objectWillChange.send()
             } catch {
                 saveError = error.localizedDescription
+                showInvite = false
             }
             isPreparingInvite = false
         }
     }
 
-    init(repo: any FamilyRepository, inviteService: any InviteServiceProtocol = LocalInviteService(), appState: AppState, auth: any JoinAuthProviding) {
+    init(repo: any FamilyRepository, inviteService: any InviteServiceProtocol, appState: AppState, auth: any JoinAuthProviding) {
         self.repo = repo
         self.inviteService = inviteService
         self.appState = appState
         self.auth = auth
+        self.inviteRole = inviteService.currentRole()
         Task { await loadMembers() }
     }
 

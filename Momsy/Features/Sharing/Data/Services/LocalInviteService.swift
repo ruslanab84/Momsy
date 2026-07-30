@@ -1,8 +1,10 @@
 import Foundation
 
+@MainActor
 final class LocalInviteService: InviteServiceProtocol, @unchecked Sendable {
     private let codeKey   = "invite_code"
     private let expiryKey = "invite_expiry"
+    private let roleKey   = "invite_role"
     private let ttl: TimeInterval = 24 * 60 * 60
 
     func currentCode() -> String {
@@ -11,7 +13,12 @@ final class LocalInviteService: InviteServiceProtocol, @unchecked Sendable {
            exp > Date() {
             return code
         }
-        return regenerate()
+        return issueLocalInvite(role: currentRole())
+    }
+
+    func currentRole() -> FamilyRole {
+        UserDefaults.standard.string(forKey: roleKey)
+            .flatMap(FamilyRole.init(storedRawValue:)) ?? .dad
     }
 
     func inviteURL(for code: String) -> String {
@@ -22,25 +29,28 @@ final class LocalInviteService: InviteServiceProtocol, @unchecked Sendable {
         (UserDefaults.standard.object(forKey: expiryKey) as? Date) ?? Date()
     }
 
-    @discardableResult
-    func regenerate() -> String {
+    private func issueLocalInvite(role: FamilyRole) -> String {
         // Тот же формат, что и в облачном сервисе: `FamilyManager.joinFamily`
         // валидирует код через `InviteCodeFormat` до сети и отклонит любой другой.
         let code = InviteCodeFormat.generate()
         UserDefaults.standard.set(code, forKey: codeKey)
         UserDefaults.standard.set(Date().addingTimeInterval(ttl), forKey: expiryKey)
+        UserDefaults.standard.set(role.rawValue, forKey: roleKey)
         return code
     }
 
     @discardableResult
-    func prepareInvite() async throws -> String {
-        currentCode()
+    func prepareInvite(defaultRole: FamilyRole) async throws -> String {
+        if let code = UserDefaults.standard.string(forKey: codeKey),
+           let expiry = UserDefaults.standard.object(forKey: expiryKey) as? Date,
+           expiry > Date() {
+            return code
+        }
+        return issueLocalInvite(role: defaultRole)
     }
 
     @discardableResult
-    func regenerateAndSync() async throws -> String {
-        regenerate()
+    func issueInvite(role: FamilyRole) async throws -> String {
+        issueLocalInvite(role: role)
     }
-
-    func updateInviteRole(code: String, role: FamilyRole) async throws { }
 }

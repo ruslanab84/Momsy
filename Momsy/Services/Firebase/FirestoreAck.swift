@@ -49,7 +49,7 @@ enum FirestoreAck {
     /// пользователю данные, зависящие от его существования.
     static func confirm(
         timeout: TimeInterval,
-        _ write: (@escaping (Error?) -> Void) -> Void
+        _ write: (@escaping @Sendable (Error?) -> Void) -> Void
     ) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             let latch = AckLatch { continuation.resume(with: $0) }

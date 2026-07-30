@@ -256,14 +256,26 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     func updateInviteRole(_ role: FamilyRole) {
+        guard !isPreparingInvite else { return }
+        let previousRole = selectedInviteRole
         selectedInviteRole = role
         guard !inviteCode.isEmpty else { return }
+        isPreparingInvite = true
+        inviteError = nil
         Task {
             do {
-                try await inviteService.updateInviteRole(code: inviteCode, role: role)
+                let code = try await inviteService.issueInvite(role: role)
+                inviteCode = code
+                inviteURL = inviteService.inviteURL(for: code)
+                inviteExpiry = inviteService.expiry()
             } catch {
+                selectedInviteRole = previousRole
+                inviteCode = ""
+                inviteURL = ""
+                inviteExpiry = Date()
                 inviteError = error
             }
+            isPreparingInvite = false
         }
     }
 
@@ -419,14 +431,19 @@ final class OnboardingViewModel: ObservableObject {
             try await ensureFamilyReady(familyDisplayName, parentRole, profile)
             pendingSetupStore.clear()
 
-            let code = regenerate
-                ? try await inviteService.regenerateAndSync()
-                : try await inviteService.prepareInvite()
-            try await inviteService.updateInviteRole(code: code, role: selectedInviteRole)
+            var code = regenerate
+                ? try await inviteService.issueInvite(role: selectedInviteRole)
+                : try await inviteService.prepareInvite(defaultRole: selectedInviteRole)
+            if inviteService.currentRole() != selectedInviteRole {
+                code = try await inviteService.issueInvite(role: selectedInviteRole)
+            }
             inviteCode = code
             inviteURL = inviteService.inviteURL(for: code)
             inviteExpiry = inviteService.expiry()
         } catch {
+            inviteCode = ""
+            inviteURL = ""
+            inviteExpiry = Date()
             inviteError = error
         }
         isPreparingInvite = false
