@@ -154,7 +154,7 @@ after(async () => {
     await testEnv?.cleanup();
 });
 
-test("family lifecycle cannot be reopened or deleted by restricted roles", async () => {
+test("family lifecycle cannot be reopened or client-deleted", async () => {
     const nannyDb = firestore(users.nanny);
     const dadDb = firestore(users.dad);
     const momDb = firestore(users.mom);
@@ -172,7 +172,7 @@ test("family lifecycle cannot be reopened or deleted by restricted roles", async
     await assertSucceeds(momDb.doc("families/family-bootstrap").update({
         bootstrapComplete: true,
     }));
-    await assertSucceeds(momDb.doc(familyPath).delete());
+    await assertFails(momDb.doc(familyPath).delete());
 });
 
 test("family creator bootstrap requires a parent role", async () => {

@@ -335,8 +335,8 @@ service cloud.firestore {
                     && request.resource.data.bootstrapComplete == true
                     && request.resource.data.diff(resource.data).affectedKeys()
                       .hasOnly(['bootstrapComplete']);
-      allow delete: if canManageFamilyRoster(familyId)
-                    && resource.data.createdBy == request.auth.uid;
+      // Keep the parent as a non-reusable tombstone; trusted backends bypass rules.
+      allow delete: if false;
 
       // Members roster. A joining member may create their own membership doc only
       // with a valid, unexpired invite code for this family; the family creator may

@@ -3,9 +3,9 @@ import FirebaseAuth
 import FirebaseCore
 import FirebaseFirestore
 
-/// Erases the user's cloud footprint: the `babies/{babyId}` log tree plus the
-/// `families/{familyId}` and `users/{uid}` documents. Abstracted so the deletion
-/// flow can be unit-tested without Firestore.
+/// Erases the user's cloud footprint while retaining `families/{familyId}` as a
+/// non-reusable tombstone. Abstracted so the deletion flow can be unit-tested
+/// without Firestore.
 protocol CloudAccountEraser {
     func deleteCloudData(uid: String) async throws
     /// Server-truth check that the user's cloud footprint is gone. MUST read from the
@@ -100,16 +100,11 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                 )
 
                 if mayTearDownSharedData {
-                    let familyDoc = try await familyRef.getDocument(source: .server)
-                    let callerCreatedFamily = familyDoc.data()?["createdBy"] as? String == uid
                     let babyIds = try await discoverBabyIds(in: familyRef)
                     for babyId in babyIds {
                         try await deleteBabyTree(familyRef: familyRef, familyId: familyId, babyId: babyId)
                     }
                     try await deleteLegacyFamilyTree(familyId: familyId)
-                    if callerCreatedFamily {
-                        try await familyRef.delete()
-                    }
                 } else {
                     let babyIds = try await discoverBabyIds(in: familyRef)
                     for babyId in babyIds {

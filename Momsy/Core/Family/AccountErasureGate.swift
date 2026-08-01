@@ -1,10 +1,10 @@
 import Foundation
 
-/// Decides whether "delete account" may tear down *shared* family data (every
-/// child's cloud log tree + the family document) or must be scoped to the caller's
-/// own membership. Shared data may only be destroyed when the caller is the last
-/// remaining member — otherwise erasing it is data loss for a co-parent (and, under
-/// GDPR, processing another person's data without basis), not right-to-erasure.
+/// Decides whether "delete account" may tear down *shared* health data or must be
+/// scoped to the caller's own membership. Shared data may only be destroyed when
+/// the caller is the last remaining member — otherwise erasing it is data loss for
+/// a co-parent (and, under GDPR, processing another person's data without basis),
+/// not right-to-erasure.
 ///
 /// Pure and synchronous so the policy is unit-tested without Firestore.
 enum AccountErasureGate {
