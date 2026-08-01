@@ -1,7 +1,9 @@
 import Foundation
 
 /// Deterministic offline fallback. Builds a warm narrative purely from
-/// `WeeklyStats` + WHO norms, so a report is always available without network.
+/// `WeeklyStats` + the app's own age thresholds (`WhoNorms`), so a report is
+/// always available without network. Those thresholds are in-house heuristics,
+/// not WHO publications — never attribute them to WHO in user-facing copy.
 final class StaticWeeklyInsightService: WeeklyInsightService {
 
     func generate(context: WeeklyInsightContext) async throws -> WeeklyInsightAI {
@@ -67,7 +69,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Introduce one new food at a time and watch for reactions."
             : "Avoid re-introducing flagged foods (\(s.allergensFlagged.joined(separator: ", "))) and consult your pediatrician."
         return WeeklyInsightAI(
-            sleepSummary: "This week baby slept on average \(hEn(s.avgSleepMinutesPerDay)) per day (\(String(format: "%.1f", s.avgNapsPerDay)) naps). WHO suggests ≥ \(hEn(s.whoMinSleepMinutes)).",
+            sleepSummary: "This week baby slept on average \(hEn(s.avgSleepMinutesPerDay)) per day (\(String(format: "%.1f", s.avgNapsPerDay)) naps). Typical for this age is ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
             feedingSummary: "Around \(feeds) feedings per day. New foods this week: \(foods).",
             feedingRecommendation: feedingRec,
@@ -88,7 +90,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Вводите по одному новому продукту и следите за реакцией."
             : "Не вводите повторно продукты с реакцией (\(s.allergensFlagged.joined(separator: ", "))) и проконсультируйтесь с педиатром."
         return WeeklyInsightAI(
-            sleepSummary: "На этой неделе малыш спал в среднем \(h(s.avgSleepMinutesPerDay)) в сутки (\(String(format: "%.1f", s.avgNapsPerDay)) дневных снов). ВОЗ рекомендует ≥ \(h(s.whoMinSleepMinutes)).",
+            sleepSummary: "На этой неделе малыш спал в среднем \(h(s.avgSleepMinutesPerDay)) в сутки (\(String(format: "%.1f", s.avgNapsPerDay)) дневных снов). Обычно в этом возрасте ≥ \(h(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
             feedingSummary: "Около \(feeds) кормлений в сутки. Новые продукты за неделю: \(foods).",
             feedingRecommendation: feedingRec,
@@ -109,7 +111,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Führe neue Lebensmittel einzeln ein und achte auf Reaktionen."
             : "Führe markierte Lebensmittel (\(s.allergensFlagged.joined(separator: ", "))) nicht erneut ein und frage den Kinderarzt."
         return WeeklyInsightAI(
-            sleepSummary: "Diese Woche schlief das Baby Ø \(hEn(s.avgSleepMinutesPerDay)) pro Tag (\(String(format: "%.1f", s.avgNapsPerDay)) Schläfchen). WHO empfiehlt ≥ \(hEn(s.whoMinSleepMinutes)).",
+            sleepSummary: "Diese Woche schlief das Baby Ø \(hEn(s.avgSleepMinutesPerDay)) pro Tag (\(String(format: "%.1f", s.avgNapsPerDay)) Schläfchen). Üblich in diesem Alter sind ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
             feedingSummary: "Etwa \(feeds) Mahlzeiten pro Tag. Neue Lebensmittel diese Woche: \(foods).",
             feedingRecommendation: feedingRec,
@@ -130,7 +132,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Introduce un alimento nuevo cada vez y observa posibles reacciones."
             : "Evita reintroducir los alimentos marcados (\(s.allergensFlagged.joined(separator: ", "))) y consulta con tu pediatra."
         return WeeklyInsightAI(
-            sleepSummary: "Esta semana el bebé durmió una media de \(hEn(s.avgSleepMinutesPerDay)) al día (\(String(format: "%.1f", s.avgNapsPerDay)) siestas). La OMS recomienda ≥ \(hEn(s.whoMinSleepMinutes)).",
+            sleepSummary: "Esta semana el bebé durmió una media de \(hEn(s.avgSleepMinutesPerDay)) al día (\(String(format: "%.1f", s.avgNapsPerDay)) siestas). Lo habitual a esta edad es ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
             feedingSummary: "Unas \(feeds) tomas al día. Nuevos alimentos esta semana: \(foods).",
             feedingRecommendation: feedingRec,
@@ -151,7 +153,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Introduisez un seul nouvel aliment à la fois et surveillez les réactions."
             : "Évitez de réintroduire les aliments signalés (\(s.allergensFlagged.joined(separator: ", "))) et consultez votre pédiatre."
         return WeeklyInsightAI(
-            sleepSummary: "Cette semaine, bébé a dormi en moyenne \(hEn(s.avgSleepMinutesPerDay)) par jour (\(String(format: "%.1f", s.avgNapsPerDay)) siestes). L’OMS recommande ≥ \(hEn(s.whoMinSleepMinutes)).",
+            sleepSummary: "Cette semaine, bébé a dormi en moyenne \(hEn(s.avgSleepMinutesPerDay)) par jour (\(String(format: "%.1f", s.avgNapsPerDay)) siestes). À cet âge, on compte plutôt ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
             feedingSummary: "Environ \(feeds) tétées par jour. Nouveaux aliments cette semaine : \(foods).",
             feedingRecommendation: feedingRec,
@@ -172,7 +174,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Introduza um novo alimento de cada vez e observe possíveis reações."
             : "Evite reintroduzir os alimentos assinalados (\(s.allergensFlagged.joined(separator: ", "))) e consulte o seu pediatra."
         return WeeklyInsightAI(
-            sleepSummary: "Esta semana o bebé dormiu em média \(hEn(s.avgSleepMinutesPerDay)) por dia (\(String(format: "%.1f", s.avgNapsPerDay)) sestas). A OMS recomenda ≥ \(hEn(s.whoMinSleepMinutes)).",
+            sleepSummary: "Esta semana o bebé dormiu em média \(hEn(s.avgSleepMinutesPerDay)) por dia (\(String(format: "%.1f", s.avgNapsPerDay)) sestas). O habitual nesta idade é ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
             feedingSummary: "Cerca de \(feeds) mamadas por dia. Alimentos novos esta semana: \(foods).",
             feedingRecommendation: feedingRec,
@@ -200,7 +202,7 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "每次只引入一种新食物，并留意是否有反应。"
             : "不要再次引入已标记的食物（\(s.allergensFlagged.joined(separator: "、"))），并咨询儿科医生。"
         return WeeklyInsightAI(
-            sleepSummary: "本周宝宝平均每天睡 \(hZh(s.avgSleepMinutesPerDay))（\(String(format: "%.1f", s.avgNapsPerDay)) 次小睡）。世卫组织建议 ≥ \(hZh(s.whoMinSleepMinutes))。",
+            sleepSummary: "本周宝宝平均每天睡 \(hZh(s.avgSleepMinutesPerDay))（\(String(format: "%.1f", s.avgNapsPerDay)) 次小睡）。这个月龄通常需要 ≥ \(hZh(s.whoMinSleepMinutes))。",
             sleepRecommendation: sleepRec,
             feedingSummary: "每天约 \(feeds) 次喂养。本周的新食物：\(foods)。",
             feedingRecommendation: feedingRec,

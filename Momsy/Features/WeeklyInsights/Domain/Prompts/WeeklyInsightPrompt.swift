@@ -11,7 +11,8 @@ enum WeeklyInsightPrompt {
         let responseLanguage = responseLanguageName(for: language)
         return """
         You are a warm, caring pediatric assistant for mothers. Analyze a baby's weekly stats.
-        Compare to WHO age norms. Be encouraging, never give medical diagnoses, and NEVER recommend
+        Compare to the typical age ranges given in the user prompt. Never cite WHO or any other
+        organisation as the source of those ranges. Be encouraging, never give medical diagnoses, and NEVER recommend
         re-introducing a food that is flagged as an allergen or caused a reaction.
 
         Use the baby's age from the user prompt as a hard constraint for all recommendations.
@@ -62,7 +63,7 @@ enum WeeklyInsightPrompt {
         if let leapSignals, let leapID = s.currentLeapID {
             lines.append("Leap signals this week: leap #\(leapID) - \(leapSignals). Mention this in overallSummary.")
         }
-        lines.append("WHO: total sleep target >= \(whoH)/day; max awake window ~\(s.whoAwakeWindowMax) min.")
+        lines.append("Typical for this age: total sleep target >= \(whoH)/day; max awake window ~\(s.whoAwakeWindowMax) min.")
         lines.append("Sleep this week: avg \(sleepH)/day (night \(nightH), day \(dayH), \(naps) naps/day), \(trend).")
         lines.append("Feeding this week: \(feeds)/day, \(s.totalFeedings) total. Diaper changes: \(s.totalDiapers).")
         if let feedingNote = feedingNote(for: s) {
@@ -71,7 +72,7 @@ enum WeeklyInsightPrompt {
         lines.append(newFoodsLine(for: s, foods: foods))
         lines.append("Allergen/reaction flagged: \(allergens).")
         lines.append("Response language: \(responseLanguage). Write every JSON string value in \(responseLanguage) and keep JSON keys exactly in English.")
-        lines.append("Return JSON {\(jsonKeys)} comparing to WHO norms with one practical recommendation each.")
+        lines.append("Return JSON {\(jsonKeys)} comparing to the typical ranges above with one practical recommendation each.")
         return lines.joined(separator: "\n")
     }
 

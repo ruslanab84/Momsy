@@ -571,49 +571,49 @@ enum CareRules {
             "Первые шаги начинаются с хождения вдоль опоры. Не держите [name] за руки постоянно — нужен баланс самостоятельности.",
             "Речь: понимание слов опережает произношение. В 9–10 мес [name] понимает «нет», «дай», «иди». Говорите медленно и чётко.",
             "Ночные пробуждения в 9–10 мес — нормальный регресс сна. Это связано с новыми двигательными навыками. Пройдёт за 2–4 нед.",
-            "Стаканчик с носиком — хорошее время вводить. В 12 мес ВОЗ рекомендует отказаться от ночного кормления при нормальном весе.",
+            "Стаканчик с носиком — хорошее время вводить.",
             "Сортеры, стаканчики, коробки с крышками — лучшие игрушки для [name]. Концепция «внутри/снаружи» активно формируется."
         ]
         case .english: return [
             "First steps begin with cruising along furniture. Don't always hold [name]'s hands — independent balance needs practice.",
             "Speech: comprehension precedes production. At 9–10 months [name] understands no, give, come. Speak slowly and clearly.",
             "Night wakings at 9–10 months are a normal sleep regression linked to new motor skills. It passes in 2–4 weeks.",
-            "A sippy cup is a good time to introduce. By 12 months the WHO recommends dropping night feeds at normal weight.",
+            "Now is a good time to introduce a sippy cup.",
             "Sorters, stacking cups, boxes with lids — the best toys for [name] right now. The inside/outside concept is forming."
         ]
         case .portuguese: return [
             "Os primeiros passos começam a andar apoiado nos móveis. Não segure sempre as mãos de [name] — o equilíbrio autónomo precisa de prática.",
             "Fala: a compreensão precede a produção. Aos 9–10 meses [name] entende «não», «dá», «vem». Fale devagar e com clareza.",
             "Os despertares noturnos aos 9–10 meses são uma regressão do sono normal ligada a novas competências motoras. Passa em 2–4 semanas.",
-            "É boa altura para introduzir o copo com bico. Por volta dos 12 meses, a OMS recomenda deixar as mamadas noturnas se o peso for normal.",
+            "É boa altura para introduzir o copo com bico.",
             "Encaixes, copos de empilhar, caixas com tampa — os melhores brinquedos para [name] agora. O conceito dentro/fora está a formar-se."
         ]
         case .spanish: return [
             "Los primeros pasos empiezan caminando apoyado en los muebles. No le sujetes siempre las manos a [name] — el equilibrio autónomo necesita práctica.",
             "Habla: la comprensión va antes que la producción. A los 9–10 meses [name] entiende «no», «dame», «ven». Habla despacio y claro.",
             "Los despertares nocturnos a los 9–10 meses son una regresión del sueño normal ligada a nuevas destrezas motoras. Pasa en 2–4 semanas.",
-            "Es buen momento para introducir el vaso con boquilla. Hacia los 12 meses la OMS recomienda dejar las tomas nocturnas si el peso es normal.",
+            "Es buen momento para introducir el vaso con boquilla.",
             "Encajables, vasos apilables, cajas con tapa — los mejores juguetes para [name] ahora. El concepto dentro/fuera se está formando."
         ]
         case .german: return [
             "Erste Schritte beginnen mit Laufen entlang von Möbeln. Halte [name] nicht immer an den Händen — Balance braucht Eigenständigkeit.",
             "Sprache: Verstehen geht dem Sprechen voraus. Mit 9–10 Mon. versteht [name] nein, gib, komm. Langsam und deutlich sprechen.",
             "Nächtliches Aufwachen mit 9–10 Mon. ist eine normale Schlafregression durch neue Motorikfortschritte. Dauert 2–4 Wochen.",
-            "Ein Schnabelbecher eignet sich jetzt gut. Ab 12 Mon. empfiehlt die WHO, bei normalem Gewicht auf Nachtmahlzeiten zu verzichten.",
+            "Ein Schnabelbecher eignet sich jetzt gut.",
             "Sortierer, Stapelbecher, Dosen mit Deckel — die besten Spielzeuge für [name]. Das Konzept innen/außen entwickelt sich gerade."
         ]
         case .french: return [
             "Les premiers pas commencent en marchant le long des meubles. Ne tenez pas toujours [name] par les mains — l’équilibre autonome a besoin de pratique.",
             "Langage : la compréhension précède la production. À 9–10 mois, [name] comprend « non », « donne », « viens ». Parlez lentement et clairement.",
             "Les réveils nocturnes à 9–10 mois sont une régression du sommeil normale liée aux nouvelles habiletés motrices. Cela passe en 2 à 4 semaines.",
-            "C’est un bon moment pour introduire le gobelet à bec. Vers 12 mois, l’OMS recommande d’arrêter les tétées nocturnes si le poids est normal.",
+            "C’est un bon moment pour introduire le gobelet à bec.",
             "Boîtes à formes, gobelets à empiler, boîtes à couvercle — les meilleurs jouets pour [name] en ce moment. La notion dedans/dehors se construit."
         ]
         case .chinese: return [
             "迈出第一步从扶着家具横走开始。不要一直牵着 [name] 的手——独立平衡需要练习。",
             "语言：理解先于表达。9–10 个月时 [name] 能听懂「不」「给」「过来」。说话要慢而清晰。",
             "9–10 个月的夜醒是正常的睡眠倒退，与新学会的动作技能有关。2–4 周会过去。",
-            "现在是引入鸭嘴杯的好时机。体重正常时，世卫组织建议 12 个月起断掉夜奶。",
+            "现在是引入鸭嘴杯的好时机。",
             "形状分类盒、套叠杯、带盖的盒子是 [name] 现在最好的玩具。「里面/外面」的概念正在形成。"
         ]
         }
