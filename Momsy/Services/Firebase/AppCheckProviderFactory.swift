@@ -1,3 +1,4 @@
+import DeviceCheck
 import FirebaseAppCheck
 import FirebaseCore
 
@@ -5,17 +6,25 @@ final class MomsyAppCheckProviderFactory: NSObject, AppCheckProviderFactory {
     enum ProviderMode {
         case debug
         case appAttest
+        case deviceCheck
     }
 
-    static func providerMode(isSimulator: Bool) -> ProviderMode {
-        isSimulator ? .debug : .appAttest
+    static func providerMode(
+        isSimulator: Bool,
+        isAppAttestSupported: Bool
+    ) -> ProviderMode {
+        if isSimulator { return .debug }
+        return isAppAttestSupported ? .appAttest : .deviceCheck
     }
 
     func createProvider(with app: FirebaseApp) -> AppCheckProvider? {
         #if targetEnvironment(simulator)
-        let mode = Self.providerMode(isSimulator: true)
+        let mode = Self.providerMode(isSimulator: true, isAppAttestSupported: false)
         #else
-        let mode = Self.providerMode(isSimulator: false)
+        let mode = Self.providerMode(
+            isSimulator: false,
+            isAppAttestSupported: DCAppAttestService.shared.isSupported
+        )
         #endif
 
         switch mode {
@@ -23,6 +32,8 @@ final class MomsyAppCheckProviderFactory: NSObject, AppCheckProviderFactory {
             return AppCheckDebugProvider(app: app)
         case .appAttest:
             return AppAttestProvider(app: app)
+        case .deviceCheck:
+            return DeviceCheckProvider(app: app)
         }
     }
 }

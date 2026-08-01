@@ -116,8 +116,8 @@ final class AuthManager: ObservableObject {
     /// CloudKit previously gave login-free cross-device sync; anonymous auth restores
     /// that guarantee now that Firebase is the single backend.
     @MainActor
-    func signInAnonymouslyIfNeeded() async {
-        try? await requireAnonymousSignInIfNeeded()
+    func signInAnonymouslyIfNeeded() async throws {
+        try await requireAnonymousSignInIfNeeded()
     }
 
     @MainActor

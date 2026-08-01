@@ -10,6 +10,7 @@ private enum JoinAlert: Identifiable {
     case confirm(String)
     case removedFromFamily
     case cloudSyncConsent
+    case cloudSyncFailure(String)
     case weeklyInsightAIConsent
 
     var id: String {
@@ -19,6 +20,7 @@ private enum JoinAlert: Identifiable {
         case .confirm(let code): return "confirm-\(code)"
         case .removedFromFamily: return "removedFromFamily"
         case .cloudSyncConsent: return "cloudSyncConsent"
+        case .cloudSyncFailure(let message): return "cloudSyncFailure-\(message)"
         case .weeklyInsightAIConsent: return "weeklyInsightAIConsent"
         }
     }
@@ -203,6 +205,12 @@ private struct MomsyRootView: View {
                             Task { await maybeGenerateWeeklyReport() }
                         }
                     )
+                case .cloudSyncFailure(let message):
+                    return Alert(
+                        title: Text(localization.strings.cloudSync),
+                        message: Text(message),
+                        dismissButton: .default(Text(localization.strings.done))
+                    )
                 case .weeklyInsightAIConsent:
                     return Alert(
                         title: Text(localization.strings.weeklyInsightAIConsentTitle),
@@ -247,9 +255,15 @@ private struct MomsyRootView: View {
     /// No-ops if a report already exists for that week.
     @MainActor
     private func startCloudServices() async {
-        await container.authManager.signInAnonymouslyIfNeeded()
-        await container.cloudSyncDownloader.downloadAndMergeWhenReady()
-        container.sleepLiveSync.start()
+        do {
+            try await container.authManager.signInAnonymouslyIfNeeded()
+            await container.cloudSyncDownloader.downloadAndMergeWhenReady()
+            container.sleepLiveSync.start()
+        } catch {
+            await maybeGenerateWeeklyReport()
+            joinAlert = .cloudSyncFailure(error.localizedDescription)
+            return
+        }
         await maybeGenerateWeeklyReport()
     }
 

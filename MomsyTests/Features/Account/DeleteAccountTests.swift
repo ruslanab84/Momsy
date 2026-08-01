@@ -253,7 +253,8 @@ struct DeleteAccountTests {
 @MainActor
 struct SettingsAccountDeletionReauthenticationTests {
     private func makeViewModel(
-        provider: AccountDeletionProvider
+        provider: AccountDeletionProvider,
+        updateCloudSync: @MainActor @escaping (Bool) async throws -> Void = { _ in }
     ) -> (SettingsViewModel, MockAuth, MockDeletionAuthenticator, () -> Int) {
         let cloud = MockCloudEraser.Calls()
         let auth = MockAuth(uid: "user-1")
@@ -270,7 +271,9 @@ struct SettingsAccountDeletionReauthenticationTests {
         let viewModel = SettingsViewModel(
             repo: MockPreferencesRepository(),
             deleteAccount: useCase,
-            accountAuth: authenticator
+            accountAuth: authenticator,
+            cloudSyncEnabled: false,
+            updateCloudSync: updateCloudSync
         )
         return (viewModel, auth, authenticator, { wipes })
     }
@@ -318,6 +321,19 @@ struct SettingsAccountDeletionReauthenticationTests {
         #expect(auth.deleteCount == 0)
         #expect(wipes() == 0)
         #expect(viewModel.showsDeletionReauthentication)
+    }
+
+    @Test("cloud sync error is surfaced and restores the toggle")
+    func cloudSyncFailureRestoresToggle() async throws {
+        let (viewModel, _, _, _) = makeViewModel(
+            provider: .apple,
+            updateCloudSync: { _ in throw DummyError() }
+        )
+
+        viewModel.setCloudSyncEnabled(true)
+        try await waitForDeletion { viewModel.cloudSyncError != nil }
+
+        #expect(!viewModel.cloudSyncEnabled)
     }
 }
 

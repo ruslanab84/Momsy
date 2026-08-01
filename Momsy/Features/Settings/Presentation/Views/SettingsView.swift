@@ -91,6 +91,14 @@ struct SettingsView: View {
         )) {
             Button("OK", role: .cancel) { vm.deletionError = nil }
         }
+        .alert(lm.strings.cloudSync, isPresented: Binding(
+            get: { vm.cloudSyncError != nil },
+            set: { if !$0 { vm.cloudSyncError = nil } }
+        )) {
+            Button("OK", role: .cancel) { vm.cloudSyncError = nil }
+        } message: {
+            Text(vm.cloudSyncError?.localizedDescription ?? "")
+        }
         .overlay {
             if vm.isDeleting {
                 ZStack {

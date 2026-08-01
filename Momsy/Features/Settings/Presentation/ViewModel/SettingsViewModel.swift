@@ -47,19 +47,20 @@ final class SettingsViewModel: ObservableObject {
     @Published var showsDeletionReauthentication = false
     @Published var reauthenticationError: Error?
     @Published var deletionError: String?
+    @Published var cloudSyncError: Error?
     @Published private(set) var cloudSyncEnabled: Bool
 
     private let repo: any UserPreferencesRepository
     private let deleteAccount: DeleteAccountUseCase
     private let accountAuth: any AccountDeletionAuthenticating
-    private let updateCloudSync: @MainActor (Bool) async -> Void
+    private let updateCloudSync: @MainActor (Bool) async throws -> Void
 
     init(
         repo: any UserPreferencesRepository,
         deleteAccount: DeleteAccountUseCase,
         accountAuth: any AccountDeletionAuthenticating,
         cloudSyncEnabled: Bool = CloudSyncConsent.isGranted(),
-        updateCloudSync: @MainActor @escaping (Bool) async -> Void = {
+        updateCloudSync: @MainActor @escaping (Bool) async throws -> Void = {
             CloudSyncConsent.set($0 ? .granted : .denied)
         }
     ) {
@@ -133,8 +134,17 @@ final class SettingsViewModel: ObservableObject {
     }
 
     func setCloudSyncEnabled(_ enabled: Bool) {
+        let previousValue = cloudSyncEnabled
         cloudSyncEnabled = enabled
-        Task { await updateCloudSync(enabled) }
+        cloudSyncError = nil
+        Task {
+            do {
+                try await updateCloudSync(enabled)
+            } catch {
+                cloudSyncEnabled = previousValue
+                cloudSyncError = error
+            }
+        }
     }
 
     private func save() {

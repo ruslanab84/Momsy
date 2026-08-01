@@ -21,8 +21,18 @@ struct FirebaseBootstrapperTests {
 
     @Test("App Check uses debug only in the simulator")
     func appCheckProviderModeMatchesRuntime() {
-        #expect(MomsyAppCheckProviderFactory.providerMode(isSimulator: true) == .debug)
-        #expect(MomsyAppCheckProviderFactory.providerMode(isSimulator: false) == .appAttest)
+        #expect(MomsyAppCheckProviderFactory.providerMode(
+            isSimulator: true,
+            isAppAttestSupported: false
+        ) == .debug)
+        #expect(MomsyAppCheckProviderFactory.providerMode(
+            isSimulator: false,
+            isAppAttestSupported: true
+        ) == .appAttest)
+        #expect(MomsyAppCheckProviderFactory.providerMode(
+            isSimulator: false,
+            isAppAttestSupported: false
+        ) == .deviceCheck)
     }
 
     private static func makeBundle(files: [String: String] = [:]) throws -> Bundle {

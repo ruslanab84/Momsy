@@ -671,7 +671,12 @@ final class AppContainer {
             updateCloudSync: { [unowned self] enabled in
                 CloudSyncConsent.set(enabled ? .granted : .denied)
                 if enabled {
-                    await self.authManager.signInAnonymouslyIfNeeded()
+                    do {
+                        try await self.authManager.signInAnonymouslyIfNeeded()
+                    } catch {
+                        CloudSyncConsent.set(.denied)
+                        throw error
+                    }
                     await self.cloudSyncDownloader.downloadAndMergeWhenReady()
                     self.sleepLiveSync.start()
                 } else {
