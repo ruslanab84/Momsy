@@ -305,7 +305,6 @@ private struct MomsyRootView: View {
 
 private func setupNotificationsOnLaunch(appState: AppState) async {
     let push = LocalPushNotificationService.shared
-    await push.requestPermission()
     push.scheduleWeeklyReport(hour: 7, minute: 0)
 
     guard let birth = appState.babyProfile?.birthDate else { return }
