@@ -27,7 +27,8 @@ struct LeapsViewModelTests {
         sleepRepo: MockSleepRepository? = nil,
         feedingRepo: MockFeedingRepository? = nil,
         recordLeapSkill: RecordLeapSkillUseCase? = nil,
-        profile: BabyProfile? = nil
+        profile: BabyProfile? = nil,
+        canViewPrivateData: Bool = true
     ) async throws -> LeapsViewModel {
         let repo = repo ?? MockLeapsRepository()
         let checkInRepo = checkInRepo ?? MockLeapCheckInRepository()
@@ -42,7 +43,8 @@ struct LeapsViewModelTests {
             getSleep: GetSleepEntriesUseCase(repository: sleepRepo),
             getFeeding: GetFeedingEntriesUseCase(repository: feedingRepo),
             appState: state,
-            recordLeapSkill: recordLeapSkill
+            recordLeapSkill: recordLeapSkill,
+            canViewPrivateData: { canViewPrivateData }
         )
         try await Task.sleep(nanoseconds: 50_000_000)
         return vm
@@ -312,6 +314,41 @@ struct LeapsViewModelTests {
         let summary = vm.historySummaries.first { $0.leapID == 1 }
         #expect(summary?.symptomDays == 1)
         #expect(summary?.dominantSymptoms == [.sleepWorse])
+    }
+
+    @Test("a role without viewPrivateData sees no saved symptom check-ins")
+    func restrictedRoleSeesNoSymptomHistory() async throws {
+        let calendar = Calendar.current
+        let birth = calendar.date(byAdding: .day, value: -40, to: Date())!
+        let leapStart = BabyAgeContext.leapStartDate(
+            for: DevelopmentLeap.catalog.first { $0.id == 1 }!,
+            birthDate: birth,
+            calendar: calendar
+        )
+        let profile = BabyProfile(name: "Test", birthDate: birth)
+        func seededRepo() -> MockLeapCheckInRepository {
+            let repo = MockLeapCheckInRepository()
+            repo.checkIns = [
+                LeapDailyCheckIn(leapID: 1, date: leapStart, symptoms: [.sleepWorse, .appetiteShift]),
+                LeapDailyCheckIn(leapID: 1, date: Date(), symptoms: [.fussiness])
+            ]
+            return repo
+        }
+
+        // Anchors the test: the same seed must actually produce history for a full-access
+        // role, otherwise the restricted assertions below would pass on an empty fixture.
+        let allowed = try await makeVM(checkInRepo: seededRepo(), profile: profile)
+        #expect(!allowed.historySummaries.isEmpty)
+
+        let restricted = try await makeVM(
+            checkInRepo: seededRepo(),
+            profile: profile,
+            canViewPrivateData: false
+        )
+        #expect(restricted.historySummaries.isEmpty)
+        #expect(restricted.checkIns.isEmpty)
+        #expect(restricted.selectedSymptoms.isEmpty)
+        #expect(!restricted.calendarDays(scope: .month).contains { $0.hasCheckIn })
     }
 
     @Test("recordSkillToDiary creates a milestone diary item")

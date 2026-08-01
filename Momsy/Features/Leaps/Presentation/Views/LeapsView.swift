@@ -25,7 +25,9 @@ struct LeapsView: View {
                 behaviorInsightsSection
                 normalDoctorCard
                 timelineSection
-                historySection
+                if familyManager.canPerform(.viewPrivateData) {
+                    historySection
+                }
                 tipCard
             }
             .padding(.horizontal, 20)
@@ -33,6 +35,10 @@ struct LeapsView: View {
             .padding(.bottom, 24)
         }
         .background(Color.bbCream.ignoresSafeArea())
+        // A downgrade to a restricted role must drop already-loaded symptom data, not just
+        // hide the sections that render it.
+        .onChange(of: familyManager.currentRole) { _, _ in Task { await vm.loadLeaps() } }
+        .onChange(of: familyManager.familyId) { _, _ in Task { await vm.loadLeaps() } }
         .sheet(isPresented: $isSkillDiarySheetPresented) {
             LeapSkillDiarySheet(skills: vm.leapSkills(vm.currentLeap)) { skill in
                 Task { await vm.recordSkillToDiary(label: skill) }

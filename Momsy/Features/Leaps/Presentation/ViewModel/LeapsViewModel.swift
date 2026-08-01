@@ -20,6 +20,7 @@ final class LeapsViewModel: ObservableObject {
     private let getFeedingUC: GetFeedingEntriesUseCase
     private let recordLeapSkillUC: RecordLeapSkillUseCase?
     private let scheduleLeapNotificationsUC: ScheduleLeapNotificationsUseCase?
+    private let canViewPrivateData: @MainActor () -> Bool
     private let appState: AppState
     private let calendar: Calendar
     private var progressByID: [Int: LeapProgress] = [:]
@@ -36,6 +37,9 @@ final class LeapsViewModel: ObservableObject {
         appState: AppState,
         recordLeapSkill: RecordLeapSkillUseCase? = nil,
         scheduleLeapNotifications: ScheduleLeapNotificationsUseCase? = nil,
+        canViewPrivateData: @MainActor @escaping () -> Bool = {
+            FamilyManager.shared.canPerform(.viewPrivateData)
+        },
         calendar: Calendar = .current
     ) {
         self.getLeapsUC = getLeaps
@@ -46,6 +50,7 @@ final class LeapsViewModel: ObservableObject {
         self.getFeedingUC = getFeeding
         self.recordLeapSkillUC = recordLeapSkill
         self.scheduleLeapNotificationsUC = scheduleLeapNotifications
+        self.canViewPrivateData = canViewPrivateData
         self.appState = appState
         self.calendar = calendar
         Task { await loadLeaps() }
@@ -245,6 +250,14 @@ final class LeapsViewModel: ObservableObject {
     }
 
     private func loadCheckIns() async {
+        // Symptom check-ins are private data: a restricted role (nanny/grandma) must not
+        // see them, and every symptom-derived surface — calendar dots, today-actions —
+        // reads off these two properties, so clearing here empties all of them at once.
+        guard canViewPrivateData() else {
+            checkIns = []
+            selectedSymptoms = []
+            return
+        }
         checkIns = (try? await getCheckInsUC.execute(leapID: currentLeap.id)) ?? []
         let today = calendar.startOfDay(for: Date())
         selectedSymptoms = checkIns.first { calendar.isDate($0.date, inSameDayAs: today) }?.symptoms ?? []
@@ -278,6 +291,13 @@ final class LeapsViewModel: ObservableObject {
     }
 
     private func loadHistory() async {
+        // Needs its own guard, not just empty check-ins: `historySummary` still emits a
+        // summary for a leap with progress or in flight, which would render a fabricated
+        // "light · no symptoms" row for a role that simply isn't allowed to see it.
+        guard canViewPrivateData() else {
+            historySummaries = []
+            return
+        }
         guard let birthDate = appState.babyProfile?.birthDate else {
             historySummaries = []
             return
