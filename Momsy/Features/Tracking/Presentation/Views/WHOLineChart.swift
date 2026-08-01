@@ -3,7 +3,9 @@ import SwiftUI
 // MARK: - WHO Line Chart
 
 struct WHOLineChart: View {
-    let data: [WHOPoint]
+    /// `nil` when the baby's sex is unknown: WHO bands are sex-specific, so none
+    /// are drawn rather than defaulting to one sex's reference.
+    let data: [WHOPoint]?
     let babyPoints: [BabyGrowthPoint]
     let gridVals: [Int]
     let unit: String
@@ -23,9 +25,13 @@ struct WHOLineChart: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
-            let whoVals = data.flatMap { [$0.p3, $0.p97] }
+            let reference = data ?? []
+            let whoVals = reference.flatMap { [$0.p3, $0.p97] }
             let babyVals = babyPoints.map { $0.value }
-            let allVals = whoVals + babyVals
+            // Without a WHO band the measurements alone can span a range far from the
+            // fixed grid values, which would push the gridlines outside the plot rect.
+            let axisVals = reference.isEmpty ? gridVals.map(Double.init) : []
+            let allVals = whoVals + babyVals + axisVals
             let minV = (allVals.min() ?? 2.5) - 0.5
             let maxV = (allVals.max() ?? 15.0) + 0.5
             let sorted = babyPoints.sorted { $0.month < $1.month }
@@ -34,29 +40,29 @@ struct WHOLineChart: View {
 
                 // Outer band: P3–P97
                 Path { p in
-                    guard let first = data.first else { return }
+                    guard let first = reference.first else { return }
                     p.move(to: CGPoint(x: xPos(month: first.month, width: w), y: yPos(first.p3, height: h, minV: minV, maxV: maxV)))
-                    for pt in data { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p3, height: h, minV: minV, maxV: maxV))) }
-                    for pt in data.reversed() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p97, height: h, minV: minV, maxV: maxV))) }
+                    for pt in reference { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p3, height: h, minV: minV, maxV: maxV))) }
+                    for pt in reference.reversed() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p97, height: h, minV: minV, maxV: maxV))) }
                     p.closeSubpath()
                 }
                 .fill(Color.bbMint.opacity(0.10))
 
                 // Inner band: P15–P85
                 Path { p in
-                    guard let first = data.first else { return }
+                    guard let first = reference.first else { return }
                     p.move(to: CGPoint(x: xPos(month: first.month, width: w), y: yPos(first.p15, height: h, minV: minV, maxV: maxV)))
-                    for pt in data { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p15, height: h, minV: minV, maxV: maxV))) }
-                    for pt in data.reversed() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p85, height: h, minV: minV, maxV: maxV))) }
+                    for pt in reference { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p15, height: h, minV: minV, maxV: maxV))) }
+                    for pt in reference.reversed() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p85, height: h, minV: minV, maxV: maxV))) }
                     p.closeSubpath()
                 }
                 .fill(Color.bbMint.opacity(0.30))
 
                 // Median P50
                 Path { p in
-                    guard let first = data.first else { return }
+                    guard let first = reference.first else { return }
                     p.move(to: CGPoint(x: xPos(month: first.month, width: w), y: yPos(first.p50, height: h, minV: minV, maxV: maxV)))
-                    for pt in data.dropFirst() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p50, height: h, minV: minV, maxV: maxV))) }
+                    for pt in reference.dropFirst() { p.addLine(to: CGPoint(x: xPos(month: pt.month, width: w), y: yPos(pt.p50, height: h, minV: minV, maxV: maxV))) }
                 }
                 .stroke(Color.bbMintDeep.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
 

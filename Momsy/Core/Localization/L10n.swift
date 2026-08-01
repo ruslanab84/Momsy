@@ -777,6 +777,7 @@ struct L10n {
     var heightAndWeight: String { s("Height & Weight","Рост и вес",   "Größe & Gewicht", "Altura y peso", "Taille et poids", "Altura e peso", "身高与体重") }
     var whoRange: String        { s("0–24 mo · WHO", "0–24 мес · ВОЗ","0–24 Mon. · WHO", "0–24 meses · OMS", "0–24 mois · OMS", "0–24 meses · OMS", "0–24 月 · WHO") }
     var median: String          { s("Median",        "Медиана",       "Median",        "Mediana", "Médiane", "Mediana", "中位数") }
+    var setSexForPercentiles: String { s("Set your baby's sex to see WHO percentiles", "Укажите пол малыша, чтобы видеть перцентили ВОЗ", "Geschlecht des Babys angeben, um WHO-Perzentile zu sehen", "Indica el sexo del bebé para ver los percentiles de la OMS", "Indiquez le sexe du bébé pour voir les percentiles de l’OMS", "Indique o sexo do bebé para ver os percentis da OMS", "设置宝宝性别以查看 WHO 百分位") }
     var temperatureHistory: String { s("Temperature history", "История температуры", "Temperaturverlauf", "Historial de temperatura", "Historique de température", "Histórico de temperatura", "体温历史") }
     var recentMeasurements: String { s("Recent measurements", "Последние замеры", "Letzte Messungen", "Medidas recientes", "Mesures récentes", "Medições recentes", "近期测量") }
     var weightKg: String        { s("Weight, kg",    "Вес, кг",       "Gewicht, kg",   "Peso, kg", "Poids, kg", "Peso, kg", "体重，kg") }

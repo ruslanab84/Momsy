@@ -6,8 +6,14 @@ struct TrackingView: View {
     @StateObject private var vm: TrackingViewModel
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var units: UnitSystemManager
+    @EnvironmentObject var appState: AppState
+    @ObservedObject private var familyManager = FamilyManager.shared
+    @State private var showEditProfile = false
+
+    private let container: AppContainer
 
     init(container: AppContainer) {
+        self.container = container
         _vm = StateObject(wrappedValue: container.makeTrackingViewModel())
     }
 
@@ -28,6 +34,7 @@ struct TrackingView: View {
             .padding(.top, 8)
             .padding(.bottom, 24)
         }
+        .task(id: appState.babyProfile?.id) { await vm.loadAll() }
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
@@ -36,6 +43,14 @@ struct TrackingView: View {
         }
         .sheet(isPresented: $vm.showAddTemp) {
             AddTempSheet { entry in vm.addTemp(entry) }
+        }
+        .sheet(isPresented: $showEditProfile) {
+            if let profile = appState.babyProfile {
+                EditBabyProfileView(profile: profile)
+                    .environmentObject(loc)
+                    .environmentObject(appState)
+                    .withContainer(container)
+            }
         }
         .errorToast($vm.saveError)
     }
@@ -100,7 +115,7 @@ struct TrackingView: View {
     private struct ChartConfig {
         let title: String
         let unit: String
-        let data: [WHOPoint]
+        let data: [WHOPoint]?
         let gridVals: [Int]
         let babyPoints: [BabyGrowthPoint]
     }
@@ -111,7 +126,7 @@ struct TrackingView: View {
             case 1:
                 return ChartConfig(
                     title: "Height, in", unit: "in",
-                    data:  whoHeightData.scaledBy(units.heightChartFactor),
+                    data:  vm.currentReference?.scaledBy(units.heightChartFactor),
                     gridVals: [20, 26, 31, 37],
                     babyPoints: vm.babyHeightPoints.map {
                         BabyGrowthPoint(month: $0.month, value: $0.value * units.heightChartFactor)
@@ -120,7 +135,7 @@ struct TrackingView: View {
             case 2:
                 return ChartConfig(
                     title: "Head circ., in", unit: "in",
-                    data:  whoHeadData.scaledBy(units.heightChartFactor),
+                    data:  vm.currentReference?.scaledBy(units.heightChartFactor),
                     gridVals: [13, 15, 17, 19],
                     babyPoints: vm.babyHeadPoints.map {
                         BabyGrowthPoint(month: $0.month, value: $0.value * units.heightChartFactor)
@@ -129,7 +144,7 @@ struct TrackingView: View {
             default:
                 return ChartConfig(
                     title: "Weight, lb", unit: "lb",
-                    data:  whoWeightData.scaledBy(units.weightChartFactor),
+                    data:  vm.currentReference?.scaledBy(units.weightChartFactor),
                     gridVals: [9, 15, 22, 29],
                     babyPoints: vm.babyWeightPoints.map {
                         BabyGrowthPoint(month: $0.month, value: $0.value * units.weightChartFactor)
@@ -138,9 +153,9 @@ struct TrackingView: View {
             }
         } else {
             switch vm.selectedTab {
-            case 1: return ChartConfig(title: loc.strings.heightCm,   unit: "cm", data: whoHeightData, gridVals: [50, 65, 80, 95], babyPoints: vm.babyHeightPoints)
-            case 2: return ChartConfig(title: loc.strings.headCircCm, unit: "cm", data: whoHeadData,   gridVals: [33, 38, 43, 48], babyPoints: vm.babyHeadPoints)
-            default: return ChartConfig(title: loc.strings.weightKg,  unit: "kg", data: whoWeightData,  gridVals: [4, 7, 10, 13],  babyPoints: vm.babyWeightPoints)
+            case 1: return ChartConfig(title: loc.strings.heightCm,   unit: "cm", data: vm.currentReference, gridVals: [50, 65, 80, 95], babyPoints: vm.babyHeightPoints)
+            case 2: return ChartConfig(title: loc.strings.headCircCm, unit: "cm", data: vm.currentReference, gridVals: [33, 38, 43, 48], babyPoints: vm.babyHeadPoints)
+            default: return ChartConfig(title: loc.strings.weightKg,  unit: "kg", data: vm.currentReference, gridVals: [4, 7, 10, 13],  babyPoints: vm.babyWeightPoints)
             }
         }
     }
@@ -154,7 +169,7 @@ struct TrackingView: View {
                     .foregroundColor(.bbInk)
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(loc.strings.whoRange)
+                    Text(whoRangeLabel)
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                     let pLabel = vm.currentPercentileLabel
@@ -172,12 +187,61 @@ struct TrackingView: View {
 
             HStack(spacing: 12) {
                 legendItem(color: .bbCoralDeep, isDashed: false, label: vm.displayName)
-                legendItem(color: .bbMint,      isDashed: false, label: "P15–P85")
-                legendItem(color: .bbMintDeep,  isDashed: true,  label: loc.strings.median)
+                if vm.currentReference != nil {
+                    legendItem(color: .bbMint,     isDashed: false, label: "P15–P85")
+                    legendItem(color: .bbMintDeep, isDashed: true,  label: loc.strings.median)
+                }
             }
             .padding(.top, 4)
+
+            if vm.babySex == nil {
+                sexHint
+            }
         }
         .bbCard(pad: 14)
+    }
+
+    private var whoRangeLabel: String {
+        switch vm.babySex {
+        case .boy:  return "\(loc.strings.whoRange) · \(loc.strings.genderBoy)"
+        case .girl: return "\(loc.strings.whoRange) · \(loc.strings.genderGirl)"
+        case nil:   return loc.strings.whoRange
+        }
+    }
+
+    /// A co-parent without profile rights cannot fix the missing sex, so the hint
+    /// stays informational for them instead of leading into a denied save.
+    private var canEditProfile: Bool {
+        appState.babyProfile != nil && familyManager.canPerform(.manageBabyProfiles)
+    }
+
+    private var sexHint: some View {
+        Group {
+            if canEditProfile {
+                Button { showEditProfile = true } label: {
+                    sexHintLabel(showsChevron: true)
+                }
+            } else {
+                sexHintLabel(showsChevron: false)
+            }
+        }
+    }
+
+    private func sexHintLabel(showsChevron: Bool) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: "info.circle.fill")
+                .font(.system(size: 11, weight: .bold))
+            Text(loc.strings.setSexForPercentiles)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .multilineTextAlignment(.leading)
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .heavy))
+            }
+        }
+        .foregroundColor(.bbInkSoft)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 6)
     }
 
     private func legendItem(color: Color, isDashed: Bool, label: String) -> some View {

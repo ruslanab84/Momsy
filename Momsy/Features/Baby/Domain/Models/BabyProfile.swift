@@ -1,5 +1,12 @@
 import Foundation
 
+/// Biological sex, as needed by sex-specific medical reference data (WHO growth
+/// standards). Absent whenever `BabyProfile.gender` is unset or "unknown".
+enum BabySex: String {
+    case boy
+    case girl
+}
+
 struct BabyProfile: Identifiable, Codable, Equatable {
     var id: UUID
     var name: String
@@ -15,4 +22,6 @@ struct BabyProfile: Identifiable, Codable, Equatable {
         self.stage = stage
         self.gender = gender
     }
+
+    var sex: BabySex? { BabySex(rawValue: gender) }
 }

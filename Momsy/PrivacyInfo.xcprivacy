@@ -67,22 +67,11 @@
 			</array>
 		</dict>
 
-		<!-- Parent mental-health data: EPDS postpartum-depression screening score
-		     (MomMoodRecord.epdsScore) and mood/well-being entries. Sensitive; stored
-		     locally and synced to the developer's Firebase backend (Cloud Firestore)
-		     under the user's Firebase Auth account — linked to the user's identity. -->
-		<dict>
-			<key>NSPrivacyCollectedDataType</key>
-			<string>NSPrivacyCollectedDataTypeSensitiveInfo</string>
-			<key>NSPrivacyCollectedDataTypeLinked</key>
-			<true/>
-			<key>NSPrivacyCollectedDataTypeTracking</key>
-			<false/>
-			<key>NSPrivacyCollectedDataTypePurposes</key>
-			<array>
-				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
-			</array>
-		</dict>
+		<!-- Parent mental-health data (MomMoodRecord: mood, energy, note, EPDS
+		     postpartum-depression score) is deliberately NOT declared: it never leaves
+		     the device, so it is not "collected" under Apple's definition. `momMood` has
+		     no Firestore subcollection, no CloudSyncDownloader wiring, and is excluded
+		     from the Gemini weekly-insight payload. Guarded by MomMoodStaysLocalTests. -->
 
 		<!-- Diary text and other free-form records are synced to Firestore when cloud
 		     consent is enabled. Weekly Gemini requests contain only pre-aggregated

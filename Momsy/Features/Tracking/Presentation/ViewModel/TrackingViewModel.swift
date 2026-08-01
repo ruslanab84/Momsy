@@ -24,7 +24,6 @@ final class TrackingViewModel: ObservableObject {
         self.measurementRepo = measurementRepo
         self.temperatureRepo = temperatureRepo
         self.appState = appState
-        Task { await loadAll() }
     }
 
     func loadAll() async {
@@ -44,11 +43,26 @@ final class TrackingViewModel: ObservableObject {
         growthPoints(keyPath: \.headCirc)
     }
 
-    var currentPercentileLabel: String {
+    /// WHO growth standards are sex-specific, so without a known sex there is no
+    /// reference to plot or classify against.
+    var babySex: BabySex? { appState.babyProfile?.sex }
+
+    var currentReference: [WHOPoint]? {
+        guard let sex = babySex else { return nil }
         switch selectedTab {
-        case 0: return percentileLabel(babyPoints: babyWeightPoints, reference: whoWeightData)
-        case 1: return percentileLabel(babyPoints: babyHeightPoints, reference: whoHeightData)
-        case 2: return percentileLabel(babyPoints: babyHeadPoints,  reference: whoHeadData)
+        case 0: return WHOGrowthStandards.weight(sex)
+        case 1: return WHOGrowthStandards.height(sex)
+        case 2: return WHOGrowthStandards.head(sex)
+        default: return nil
+        }
+    }
+
+    var currentPercentileLabel: String {
+        guard let reference = currentReference else { return "" }
+        switch selectedTab {
+        case 0: return percentileLabel(babyPoints: babyWeightPoints, reference: reference)
+        case 1: return percentileLabel(babyPoints: babyHeightPoints, reference: reference)
+        case 2: return percentileLabel(babyPoints: babyHeadPoints,  reference: reference)
         default: return ""
         }
     }

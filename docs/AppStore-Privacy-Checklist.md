@@ -11,9 +11,13 @@ Declare each item for **App Functionality**, **Used for tracking = No**:
 - [ ] **Health & Fitness → Health** — baby health/care logs and caregiver sleep
       records. **Linked to identity = Yes** because optional Firestore sync is
       scoped to a Firebase user/family.
-- [ ] **Sensitive Info** — EPDS and mood/well-being records. These are currently
-      local-only, but review App Store Connect's current definition and declare
-      the app's processing accurately.
+- [ ] **Sensitive Info** — do **not** declare. EPDS and mood/well-being records
+      (`MomMoodRecord`) never leave the device, and on-device-only data is not
+      "collected" under Apple's definition. If App Store Connect currently has
+      Sensitive Info checked from an earlier submission, uncheck it. Re-verify
+      before each submission: `momMood` absent from
+      `BabySyncService.allSubcollections`, absent from `CloudSyncDownloader`,
+      and absent from `WeeklyStats` (the Gemini payload).
 - [ ] **Contact Info → Name** — baby's name and provider display name.
       **Linked = Yes** when cloud sync is enabled.
 - [ ] **Contact Info → Email Address** — only when Apple/Google provides it to
