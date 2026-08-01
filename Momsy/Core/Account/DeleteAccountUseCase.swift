@@ -66,16 +66,9 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         if let familyId = resolvedFamilyId, !familyId.isEmpty {
             do {
                 let familyRef = db.collection("families").document(familyId)
-                let memberDocuments: [QueryDocumentSnapshot]
-                do {
-                    memberDocuments = try await familyRef.collection("members").getDocuments().documents
-                } catch let error as NSError
-                    where error.domain == FirestoreErrorDomain
-                    && error.code == FirestoreErrorCode.permissionDenied.rawValue {
-                    // A previously interrupted deletion may already have removed membership.
-                    try await userRef.delete()
-                    return
-                }
+                let memberDocuments = try await familyRef.collection("members")
+                    .getDocuments(source: .server)
+                    .documents
                 let partition = AccountErasureGate.partitionMemberDocuments(
                     memberDocuments.map {
                         (id: $0.documentID, data: $0.data())
@@ -98,15 +91,19 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                     callerUid: uid,
                     callerRoleRaw: callerRoleRaw
                 )
+                let babyIds = try await discoverBabyIds(in: familyRef)
+                let healthDataParentPaths = Self.healthDataParentPaths(
+                    familyId: familyId,
+                    babyIds: babyIds
+                )
 
                 if mayTearDownSharedData {
-                    let babyIds = try await discoverBabyIds(in: familyRef)
                     for babyId in babyIds {
                         try await deleteBabyTree(familyRef: familyRef, familyId: familyId, babyId: babyId)
                     }
                     try await deleteLegacyFamilyTree(familyId: familyId)
+                    try await verifyHealthDataAbsent(parentPaths: healthDataParentPaths)
                 } else {
-                    let babyIds = try await discoverBabyIds(in: familyRef)
                     for babyId in babyIds {
                         try await eraseAuthoredData(
                             under: familyRef.collection("babies").document(babyId),
@@ -116,6 +113,10 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                     try await eraseAuthoredData(
                         under: db.collection("babies").document(familyId),
                         uid: uid
+                    )
+                    try await verifyHealthDataAbsent(
+                        parentPaths: healthDataParentPaths,
+                        authoredBy: uid
                     )
                 }
 
@@ -127,26 +128,26 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                 try await batch.commit()
             }
         } else {
-            try await userRef.delete()
+            throw AuthError.accountDeletionPending
         }
     }
 
-    /// Reads from the server so a cache-confirmed-but-not-yet-flushed delete can't pass as
-    /// complete while either the routing document or account-owned invites still exist.
+    /// Final server check for routing data after health paths were verified while membership
+    /// still existed. Pending local writes are not accepted as backend confirmation.
     func isCloudDataPresent(uid: String) async throws -> Bool {
         let db = Firestore.firestore()
         let userDoc = try await db.collection("users").document(uid)
             .getDocument(source: .server)
-        guard !userDoc.exists else { return true }
+        guard !userDoc.exists, !userDoc.metadata.hasPendingWrites else { return true }
         let invites = try await db.collection("invites")
             .whereField("createdBy", isEqualTo: uid)
             .limit(to: 1)
             .getDocuments(source: .server)
-        return !invites.isEmpty
+        return invites.metadata.hasPendingWrites || !invites.isEmpty
     }
 
     private func discoverBabyIds(in familyRef: DocumentReference) async throws -> [String] {
-        var ids = try await familyRef.collection("babies").getDocuments()
+        var ids = try await familyRef.collection("babies").getDocuments(source: .server)
             .documents
             .map(\.documentID)
             .filter { !$0.isEmpty }
@@ -169,10 +170,79 @@ struct FirestoreAccountEraser: CloudAccountEraser {
     private func deleteLegacyFamilyTree(familyId: String) async throws {
         let oldParent = Firestore.firestore().collection("babies").document(familyId)
         for subcollection in BabySyncService.allSubcollections {
-            try? await deleteAllDocs(in: oldParent.collection(subcollection))
+            try await Self.performLegacyDeletion {
+                try await deleteAllDocs(in: oldParent.collection(subcollection))
+            }
         }
-        try? await oldParent.collection("profile").document("info").delete()
-        try? await oldParent.delete()
+        try await Self.performLegacyDeletion {
+            try await oldParent.collection("profile").document("info").delete()
+        }
+        try await Self.performLegacyDeletion {
+            try await oldParent.delete()
+        }
+    }
+
+    static func performLegacyDeletion(_ operation: () async throws -> Void) async throws {
+        do {
+            try await operation()
+        } catch {
+            let nsError = error as NSError
+            guard nsError.domain == FirestoreErrorCode.errorDomain,
+                  nsError.code == FirestoreErrorCode.notFound.rawValue else {
+                throw error
+            }
+        }
+    }
+
+    static func healthDataParentPaths(familyId: String, babyIds: [String]) -> [String] {
+        babyIds.map { "families/\(familyId)/babies/\($0)" } + ["babies/\(familyId)"]
+    }
+
+    static func healthDataCollectionPaths(
+        parentPaths: [String],
+        includingDeletionMarkers: Bool
+    ) -> [String] {
+        let subcollections = includingDeletionMarkers
+            ? BabySyncService.allSubcollections
+            : BabySyncService.allSubcollections.filter { $0 != "deletions" }
+        return parentPaths.flatMap { parent in
+            subcollections.map { "\(parent)/\($0)" }
+        }
+    }
+
+    static func healthDataDocumentPaths(parentPaths: [String]) -> [String] {
+        parentPaths.flatMap { [$0, "\($0)/profile/info"] }
+    }
+
+    private func verifyHealthDataAbsent(
+        parentPaths: [String],
+        authoredBy uid: String? = nil
+    ) async throws {
+        let db = Firestore.firestore()
+        for path in Self.healthDataCollectionPaths(
+            parentPaths: parentPaths,
+            includingDeletionMarkers: uid == nil
+        ) {
+            let collection = db.collection(path)
+            let query: Query
+            if let uid {
+                query = collection.whereField("addedBy", isEqualTo: uid)
+            } else {
+                query = collection
+            }
+            let snapshot = try await query.limit(to: 1).getDocuments(source: .server)
+            guard snapshot.isEmpty, !snapshot.metadata.hasPendingWrites else {
+                throw AuthError.accountDeletionPending
+            }
+        }
+
+        guard uid == nil else { return }
+        for path in Self.healthDataDocumentPaths(parentPaths: parentPaths) {
+            let snapshot = try await db.document(path).getDocument(source: .server)
+            guard !snapshot.exists, !snapshot.metadata.hasPendingWrites else {
+                throw AuthError.accountDeletionPending
+            }
+        }
     }
 
     private func eraseAuthoredData(under parent: DocumentReference, uid: String) async throws {
@@ -207,7 +277,7 @@ struct FirestoreAccountEraser: CloudAccountEraser {
     }
 
     private func deleteAllDocs(in ref: Query) async throws {
-        let docs = try await ref.getDocuments().documents
+        let docs = try await ref.getDocuments(source: .server).documents
         guard !docs.isEmpty else { return }
         let db = Firestore.firestore()
         for start in stride(from: 0, to: docs.count, by: 400) {

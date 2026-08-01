@@ -2,6 +2,7 @@ import Testing
 @testable import Momsy
 import Foundation
 import AuthenticationServices
+import FirebaseFirestore
 
 // MARK: - Mocks
 
@@ -213,10 +214,13 @@ struct DeleteAccountTests {
 
     @Test("surfaces a cloud-erase error but still wipes the device clean")
     func cloudErrorStillWipesLocal() async throws {
-        let (uc, _, _, _, suppressed, wipes) = makeUseCase(cloudError: DummyError())
+        let (uc, _, auth, pending, suppressed, wipes) = makeUseCase(cloudError: DummyError())
         await #expect(throws: DummyError.self) {
             try await uc.execute()
         }
+        #expect(auth.deleteCount == 0)
+        #expect(pending.pendingUid == "user-1")
+        #expect(pending.clearCount == 0)
         #expect(suppressed.isRestoreSuppressed(for: "user-1"))
         #expect(wipes() == 1)
     }
@@ -246,6 +250,68 @@ struct DeleteAccountTests {
         #expect(auth.signOutCount == 0)
         #expect(suppressed.isRestoreSuppressed(for: "abc"))
         #expect(wipes() == 1)                  // device still left clean for the user
+    }
+}
+
+@Suite("FirestoreAccountEraser")
+struct FirestoreAccountEraserTests {
+    @Test("legacy deletion ignores notFound but propagates every other error")
+    func legacyDeletionErrorPolicy() async throws {
+        let notFound = NSError(
+            domain: FirestoreErrorCode.errorDomain,
+            code: FirestoreErrorCode.notFound.rawValue
+        )
+        try await FirestoreAccountEraser.performLegacyDeletion { throw notFound }
+
+        let propagatedErrors = [
+            NSError(
+                domain: FirestoreErrorCode.errorDomain,
+                code: FirestoreErrorCode.unavailable.rawValue
+            ),
+            NSError(
+                domain: FirestoreErrorCode.errorDomain,
+                code: FirestoreErrorCode.permissionDenied.rawValue
+            ),
+            NSError(domain: "not-firestore", code: FirestoreErrorCode.notFound.rawValue),
+        ]
+        for expected in propagatedErrors {
+            await #expect {
+                try await FirestoreAccountEraser.performLegacyDeletion { throw expected }
+            } throws: { error in
+                let actual = error as NSError
+                return actual.domain == expected.domain && actual.code == expected.code
+            }
+        }
+    }
+
+    @Test("server verification covers every current and legacy health path")
+    func serverVerificationPathPlan() {
+        let parents = FirestoreAccountEraser.healthDataParentPaths(
+            familyId: "family-1",
+            babyIds: ["baby-1", "baby-2"]
+        )
+        #expect(parents == [
+            "families/family-1/babies/baby-1",
+            "families/family-1/babies/baby-2",
+            "babies/family-1",
+        ])
+
+        let collectionPaths = FirestoreAccountEraser.healthDataCollectionPaths(
+            parentPaths: parents,
+            includingDeletionMarkers: true
+        )
+        let documentPaths = FirestoreAccountEraser.healthDataDocumentPaths(parentPaths: parents)
+        #expect(collectionPaths.count == parents.count * BabySyncService.allSubcollections.count)
+        #expect(documentPaths.count == parents.count * 2)
+        #expect(collectionPaths.count + documentPaths.count == 66)
+
+        for parent in parents {
+            #expect(documentPaths.contains(parent))
+            #expect(documentPaths.contains("\(parent)/profile/info"))
+            for subcollection in BabySyncService.allSubcollections {
+                #expect(collectionPaths.contains("\(parent)/\(subcollection)"))
+            }
+        }
     }
 }
 
