@@ -409,7 +409,7 @@ struct SettingsView: View {
             BBSectionLabel(text: lm.strings.about)
 
             VStack(spacing: 0) {
-                infoRow(icon: "info.circle.fill",  bg: .bbSky,    title: lm.strings.version,       value: "1.0.0 (1)")
+                infoRow(icon: "info.circle.fill",  bg: .bbSky,    title: lm.strings.version,       value: "\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"))")
                 Divider().opacity(0.2).padding(.leading, 60)
                 Button(action: openPrivacyPolicy) {
                     chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: lm.strings.privacy)
