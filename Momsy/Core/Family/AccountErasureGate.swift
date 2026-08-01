@@ -8,6 +8,22 @@ import Foundation
 ///
 /// Pure and synchronous so the policy is unit-tested without Firestore.
 enum AccountErasureGate {
+    enum AuthoredDataAction: Equatable {
+        case anonymize
+        case delete
+    }
+
+    static func authoredDataAction(
+        subcollection: String,
+        documentData: [String: Any],
+        deletingUid: String
+    ) -> AuthoredDataAction? {
+        guard documentData["addedBy"] as? String == deletingUid else { return nil }
+        return BabySyncService.privateWellbeingSubcollections.contains(subcollection)
+            ? .delete
+            : .anonymize
+    }
+
     static func authorAnonymizationUpdate(
         documentData: [String: Any],
         deletingUid: String

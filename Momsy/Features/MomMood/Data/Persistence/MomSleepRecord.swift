@@ -10,10 +10,14 @@ final class MomSleepRecord {
     var note: String = ""
     var qualityRaw: String = ""
     var updatedAt: Date?
+    var ownerUID: String = ""
+    var ownerName: String = ""
 
-    init(_ entry: SleepEntry) {
+    init(_ entry: SleepEntry, ownerUID: String = "") {
         id = entry.id
         babyId = ActiveBaby.scope
+        self.ownerUID = entry.startedBy ?? ownerUID
+        ownerName = entry.startedByName ?? ""
         apply(entry)
     }
 
@@ -32,6 +36,8 @@ final class MomSleepRecord {
         endDate    = entry.endDate
         qualityRaw = entry.quality.rawValue
         updatedAt  = entry.updatedAt
+        ownerUID   = entry.startedBy ?? ownerUID
+        ownerName  = entry.startedByName ?? ownerName
     }
 
     func toDomain() -> SleepEntry {
@@ -41,7 +47,9 @@ final class MomSleepRecord {
             endDate: endDate,
             note: note,
             quality: SleepQuality(rawValue: qualityRaw) ?? .normal,
-            updatedAt: updatedAt
+            updatedAt: updatedAt,
+            startedBy: ownerUID.isEmpty ? nil : ownerUID,
+            startedByName: ownerName.isEmpty ? nil : ownerName
         )
     }
 }

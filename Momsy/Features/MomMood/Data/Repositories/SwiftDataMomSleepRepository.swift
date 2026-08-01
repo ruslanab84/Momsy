@@ -3,27 +3,39 @@ import Foundation
 
 @MainActor
 final class SwiftDataMomSleepRepository: MomSleepRepository {
+    private static let pendingOwnerUID = "__momsy_local_pending_owner__"
     private let context: ModelContext
+    private let currentUID: () -> String?
 
-    init(context: ModelContext) { self.context = context }
+    init(context: ModelContext, currentUID: @escaping () -> String? = { nil }) {
+        self.context = context
+        self.currentUID = currentUID
+    }
 
     func getEntries(from: Date, to: Date) async throws -> [SleepEntry] {
         let scope = ActiveBaby.scope
+        let ownerUID = try resolvedOwnerUID()
         var descriptor = FetchDescriptor<MomSleepRecord>(
-            predicate: #Predicate { $0.startDate >= from && $0.startDate <= to && $0.babyId == scope }
+            predicate: #Predicate {
+                $0.startDate >= from && $0.startDate <= to
+                    && $0.babyId == scope && $0.ownerUID == ownerUID
+            }
         )
         descriptor.sortBy = [SortDescriptor(\.startDate)]
         return try context.fetch(descriptor).map { $0.toDomain() }
     }
 
     func add(_ entry: SleepEntry) async throws {
-        context.insert(MomSleepRecord(entry))
+        context.insert(MomSleepRecord(entry, ownerUID: try resolvedOwnerUID()))
         try context.save()
     }
 
     func update(_ entry: SleepEntry) async throws {
         let id = entry.id
-        var descriptor = FetchDescriptor<MomSleepRecord>(predicate: #Predicate { $0.id == id })
+        let ownerUID = try resolvedOwnerUID()
+        var descriptor = FetchDescriptor<MomSleepRecord>(
+            predicate: #Predicate { $0.id == id && $0.ownerUID == ownerUID }
+        )
         descriptor.fetchLimit = 1
         if let record = try context.fetch(descriptor).first {
             record.apply(entry)
@@ -46,20 +58,46 @@ final class SwiftDataMomSleepRepository: MomSleepRepository {
             switch SyncMerge.decide(localExists: record != nil,
                                     localUpdatedAt: record?.updatedAt,
                                     incomingUpdatedAt: entry.updatedAt) {
-            case .insert: context.insert(MomSleepRecord(entry)); changed = true
+            case .insert:
+                context.insert(MomSleepRecord(entry, ownerUID: currentUID() ?? Self.pendingOwnerUID))
+                changed = true
             case .update: record?.merge(entry); changed = true
-            case .skip:   break
+            case .skip:
+                if let record, record.ownerUID.isEmpty, let ownerUID = entry.startedBy {
+                    record.ownerUID = ownerUID
+                    record.ownerName = entry.startedByName ?? ""
+                    changed = true
+                }
             }
         }
         if changed { try context.save() }
     }
 
     func delete(id: UUID) async throws {
-        var descriptor = FetchDescriptor<MomSleepRecord>(predicate: #Predicate { $0.id == id })
+        let ownerUID = try resolvedOwnerUID()
+        var descriptor = FetchDescriptor<MomSleepRecord>(
+            predicate: #Predicate { $0.id == id && $0.ownerUID == ownerUID }
+        )
         descriptor.fetchLimit = 1
         if let record = try context.fetch(descriptor).first {
             context.delete(record)
             try context.save()
         }
+    }
+
+    private func resolvedOwnerUID() throws -> String {
+        guard let ownerUID = currentUID(), !ownerUID.isEmpty else {
+            return Self.pendingOwnerUID
+        }
+        let pendingOwnerUID = Self.pendingOwnerUID
+        let records = try context.fetch(
+            FetchDescriptor<MomSleepRecord>(
+                predicate: #Predicate { $0.ownerUID == pendingOwnerUID }
+            )
+        )
+        guard !records.isEmpty else { return ownerUID }
+        records.forEach { $0.ownerUID = ownerUID }
+        try context.save()
+        return ownerUID
     }
 }

@@ -454,6 +454,40 @@ test("parents retain full baby and medical access", async () => {
     await assertSucceeds(db.doc(`${babyPath}/profile/info`).update({ label: "family" }));
 });
 
+test("parents can read and delete only their own private wellbeing logs", async () => {
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const db = adminContext.firestore();
+        const batch = db.batch();
+        for (const collection of ["momSleepLogs", "waterIntakeLogs"]) {
+            batch.set(db.doc(`${babyPath}/${collection}/mom-private`), {
+                addedBy: users.mom,
+                addedByName: "Mom",
+                updatedAt: new Date("2026-07-11T10:00:00Z"),
+            });
+            batch.set(db.doc(`${babyPath}/${collection}/dad-private`), {
+                addedBy: users.dad,
+                addedByName: "Dad",
+                updatedAt: new Date("2026-07-11T11:00:00Z"),
+            });
+        }
+        await batch.commit();
+    });
+
+    const momDb = firestore(users.mom);
+    for (const collection of ["momSleepLogs", "waterIntakeLogs"]) {
+        await assertFails(momDb.collection(`${babyPath}/${collection}`).get());
+        const own = await assertSucceeds(
+            momDb.collection(`${babyPath}/${collection}`)
+                .where("addedBy", "==", users.mom)
+                .get()
+        );
+        assert.deepEqual(own.docs.map((doc) => doc.id), ["mom-private"]);
+        await assertFails(momDb.doc(`${babyPath}/${collection}/dad-private`).get());
+        await assertFails(momDb.doc(`${babyPath}/${collection}/dad-private`).delete());
+        await assertSucceeds(momDb.doc(`${babyPath}/${collection}/mom-private`).delete());
+    }
+});
+
 test("nanny can track routine care only under their own identity", async () => {
     const db = firestore(users.nanny);
     const ownLog = db.doc(`${babyPath}/feedingLogs/feed-nanny`);

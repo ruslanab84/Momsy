@@ -19,6 +19,32 @@ struct AccountErasureGateTests {
         ) == nil)
     }
 
+    @Test("deletes private wellbeing but anonymizes shared authored logs")
+    func privateWellbeingDeletionPolicy() {
+        let own = ["addedBy": "me", "addedByName": "Mom"]
+
+        #expect(AccountErasureGate.authoredDataAction(
+            subcollection: "momSleepLogs",
+            documentData: own,
+            deletingUid: "me"
+        ) == .delete)
+        #expect(AccountErasureGate.authoredDataAction(
+            subcollection: "waterIntakeLogs",
+            documentData: own,
+            deletingUid: "me"
+        ) == .delete)
+        #expect(AccountErasureGate.authoredDataAction(
+            subcollection: "sleepLogs",
+            documentData: own,
+            deletingUid: "me"
+        ) == .anonymize)
+        #expect(AccountErasureGate.authoredDataAction(
+            subcollection: "momSleepLogs",
+            documentData: ["addedBy": "partner"],
+            deletingUid: "me"
+        ) == nil)
+    }
+
     @Test("sole member may tear down shared data")
     func soleMember() {
         #expect(AccountErasureGate.mayTearDownSharedData(memberIds: ["me"], callerUid: "me"))

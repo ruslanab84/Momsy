@@ -32,4 +32,36 @@ struct CloudSyncWatermarkCommitTests {
         #expect(BabySyncService.shouldContinuePaginating(pageCount: 500, pageSize: 500))
         #expect(!BabySyncService.shouldContinuePaginating(pageCount: 499, pageSize: 500))
     }
+
+    @Test("private wellbeing mapping preserves the owner")
+    func wellbeingMappingPreservesOwner() throws {
+        let sleepId = UUID()
+        var sleepDTO = SleepLogDTO(from: SleepLog(
+            id: sleepId.uuidString,
+            startedAt: Date(),
+            endedAt: Date().addingTimeInterval(3_600),
+            durationMin: 60,
+            quality: .good,
+            addedBy: "mom-uid",
+            addedByName: "Mom"
+        ))
+        sleepDTO.id = sleepId.uuidString
+
+        let waterId = UUID()
+        var waterDTO = WaterIntakeLogDTO(from: WaterIntakeLog(
+            id: waterId.uuidString,
+            date: Date(),
+            amountMl: 250,
+            addedBy: "mom-uid",
+            addedByName: "Mom"
+        ))
+        waterDTO.id = waterId.uuidString
+
+        let sleep = try #require(CloudSyncDownloader.momSleepEntry(sleepDTO))
+        let water = try #require(CloudSyncDownloader.waterIntakeEntry(waterDTO))
+        #expect(sleep.startedBy == "mom-uid")
+        #expect(sleep.startedByName == "Mom")
+        #expect(water.ownerUID == "mom-uid")
+        #expect(water.ownerName == "Mom")
+    }
 }

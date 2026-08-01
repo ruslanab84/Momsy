@@ -102,15 +102,22 @@ service cloud.firestore {
       ];
     }
 
+    function isPrivateWellbeingCollection(subcollection) {
+      return subcollection in ['momSleepLogs', 'waterIntakeLogs'];
+    }
+
     function canReadBabyCollection(familyId, subcollection) {
-      return canManageFamilyRoster(familyId)
+      return !isPrivateWellbeingCollection(subcollection)
+        && (
+          canManageFamilyRoster(familyId)
         || (
           canViewBabyStatus(familyId)
           && (
             isRoutineTrackingCollection(subcollection)
             || subcollection == 'deletions'
           )
-        );
+        )
+      );
     }
 
     function hasValidRoutineAuthor() {
@@ -135,6 +142,25 @@ service cloud.firestore {
 
     function canListOwnAuthoredData(familyId) {
       return belongsToFamily(familyId)
+        && resource.data.addedBy == request.auth.uid;
+    }
+
+    function canCreatePrivateWellbeing(familyId, subcollection) {
+      return isPrivateWellbeingCollection(subcollection)
+        && (canManageFamilyRoster(familyId) || isFamilyCreator(familyId))
+        && hasValidRoutineAuthor();
+    }
+
+    function canUpdatePrivateWellbeing(familyId, subcollection) {
+      return isPrivateWellbeingCollection(subcollection)
+        && (canManageFamilyRoster(familyId) || isFamilyCreator(familyId))
+        && resource.data.addedBy == request.auth.uid
+        && hasValidRoutineAuthor();
+    }
+
+    function canDeletePrivateWellbeing(familyId, subcollection) {
+      return isPrivateWellbeingCollection(subcollection)
+        && canManageFamilyRoster(familyId)
         && resource.data.addedBy == request.auth.uid;
     }
 
@@ -362,19 +388,36 @@ service cloud.firestore {
         allow delete: if canManageFamilyRoster(familyId);
 
         match /{subcollection}/{document=**} {
-          allow get: if canReadBabyCollection(familyId, subcollection);
+          allow get: if canReadBabyCollection(familyId, subcollection)
+                     || canListOwnAuthoredData(familyId);
           allow list: if canReadBabyCollection(familyId, subcollection)
                       || canListOwnAuthoredData(familyId);
-          allow create: if canManageFamilyRoster(familyId)
-                        || isFamilyCreator(familyId)
-                        || canCreateRoutineLog(familyId, subcollection);
-          allow update: if canManageFamilyRoster(familyId)
-                        || isFamilyCreator(familyId)
-                        || canUpdateRoutineLog(familyId, subcollection)
-                        || anonymizesOwnAuthorMetadata(familyId);
+          allow create: if (
+                          !isPrivateWellbeingCollection(subcollection)
+                          && (
+                            canManageFamilyRoster(familyId)
+                            || isFamilyCreator(familyId)
+                            || canCreateRoutineLog(familyId, subcollection)
+                          )
+                        )
+                        || canCreatePrivateWellbeing(familyId, subcollection);
+          allow update: if (
+                          !isPrivateWellbeingCollection(subcollection)
+                          && (
+                            canManageFamilyRoster(familyId)
+                            || isFamilyCreator(familyId)
+                            || canUpdateRoutineLog(familyId, subcollection)
+                            || anonymizesOwnAuthorMetadata(familyId)
+                          )
+                        )
+                        || canUpdatePrivateWellbeing(familyId, subcollection);
           // ponytail: Nanny deletes stay parent-only until tombstones identify
           // both the source collection and author.
-          allow delete: if canManageFamilyRoster(familyId);
+          allow delete: if (
+                          !isPrivateWellbeingCollection(subcollection)
+                          && canManageFamilyRoster(familyId)
+                        )
+                        || canDeletePrivateWellbeing(familyId, subcollection);
         }
       }
     }
@@ -385,15 +428,32 @@ service cloud.firestore {
       allow read, write: if canManageFamilyRoster(familyId);
 
       match /{subcollection}/{document=**} {
-        allow get: if canReadBabyCollection(familyId, subcollection);
+        allow get: if canReadBabyCollection(familyId, subcollection)
+                   || canListOwnAuthoredData(familyId);
         allow list: if canReadBabyCollection(familyId, subcollection)
                     || canListOwnAuthoredData(familyId);
-        allow create: if canManageFamilyRoster(familyId)
-                      || canCreateRoutineLog(familyId, subcollection);
-        allow update: if canManageFamilyRoster(familyId)
-                      || canUpdateRoutineLog(familyId, subcollection)
-                      || anonymizesOwnAuthorMetadata(familyId);
-        allow delete: if canManageFamilyRoster(familyId);
+        allow create: if (
+                        !isPrivateWellbeingCollection(subcollection)
+                        && (
+                          canManageFamilyRoster(familyId)
+                          || canCreateRoutineLog(familyId, subcollection)
+                        )
+                      )
+                      || canCreatePrivateWellbeing(familyId, subcollection);
+        allow update: if (
+                        !isPrivateWellbeingCollection(subcollection)
+                        && (
+                          canManageFamilyRoster(familyId)
+                          || canUpdateRoutineLog(familyId, subcollection)
+                          || anonymizesOwnAuthorMetadata(familyId)
+                        )
+                      )
+                      || canUpdatePrivateWellbeing(familyId, subcollection);
+        allow delete: if (
+                        !isPrivateWellbeingCollection(subcollection)
+                        && canManageFamilyRoster(familyId)
+                      )
+                      || canDeletePrivateWellbeing(familyId, subcollection);
       }
     }
   }

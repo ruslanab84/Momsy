@@ -28,8 +28,14 @@ final class AppContainer {
     lazy var diaperRepository: any DiaperRepository                             = SwiftDataDiaperRepository(context: context)
     lazy var momMoodRepository: any MomMoodRepository                           = SwiftDataMomMoodRepository(context: context)
     lazy var stoolRepository: any StoolRepository                               = SwiftDataStoolRepository(context: context)
-    lazy var momSleepRepository: any MomSleepRepository                         = SwiftDataMomSleepRepository(context: context)
-    lazy var waterIntakeRepository: any WaterIntakeRepository                    = SwiftDataWaterIntakeRepository(context: context)
+    lazy var momSleepRepository: any MomSleepRepository = SwiftDataMomSleepRepository(
+        context: context,
+        currentUID: { [weak authManager] in authManager?.currentUID }
+    )
+    lazy var waterIntakeRepository: any WaterIntakeRepository = SwiftDataWaterIntakeRepository(
+        context: context,
+        currentUID: { [weak authManager] in authManager?.currentUID }
+    )
     lazy var pumpingRepository: any PumpingRepository                            = SwiftDataPumpingRepository(context: context)
     lazy var vitaminRepository: any VitaminRepository                            = SwiftDataVitaminRepository(context: context)
 

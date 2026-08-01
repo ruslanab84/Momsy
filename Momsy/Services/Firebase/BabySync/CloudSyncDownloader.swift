@@ -371,6 +371,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
 
     @MainActor
     private func downloadAndMerge(recordQuickLogs: Bool = true) async {
+        let wellbeingOwnerUID = service.currentUserUID()
         // Fetch all collections concurrently (network runs off the main actor).
         async let feedingFetch:  PendingFetch<FeedingLogDTO>     = fetch("feedingLogs",     dateField: "startedAt")
         async let sleepFetch:    PendingFetch<SleepLogDTO>       = fetch("sleepLogs",       dateField: "startedAt")
@@ -385,8 +386,12 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         async let vaccineFetch:  PendingFetch<VaccinationLogDTO> = fetch("vaccinationLogs", dateField: "doneDate")
         async let foodFetch:     PendingFetch<FoodDiaryLogDTO>   = fetch("foodDiaryLogs",   dateField: "date")
         async let tempFetch:     PendingFetch<TemperatureLogDTO> = fetch("temperatureLogs", dateField: "date")
-        async let momSleepFetch: PendingFetch<SleepLogDTO>       = fetch("momSleepLogs",    dateField: "startedAt")
-        async let waterFetch:    PendingFetch<WaterIntakeLogDTO> = fetch("waterIntakeLogs", dateField: "date")
+        async let momSleepFetch: PendingFetch<SleepLogDTO> = fetchOwned(
+            "momSleepLogs", dateField: "startedAt", ownerUID: wellbeingOwnerUID
+        )
+        async let waterFetch: PendingFetch<WaterIntakeLogDTO> = fetchOwned(
+            "waterIntakeLogs", dateField: "date", ownerUID: wellbeingOwnerUID
+        )
         async let leapFetch:     PendingFetch<LeapLogDTO>        = fetch("leapLogs",        dateField: "completedDate")
         async let visitFetch:    PendingFetch<DoctorVisitLogDTO> = fetch("doctorVisitLogs", dateField: "date")
 
@@ -483,17 +488,23 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// collection)` watermark is NOT advanced here — the caller commits it via `merge`/`commit`
     /// only after the local upsert succeeds, so a failed save re-pulls the same window.
     private func fetch<T: Decodable & CloudSyncTimestamped>(_ collection: String,
-                                                            dateField: String) async -> PendingFetch<T> {
+                                                            dateField: String,
+                                                            ownerUID: String? = nil) async -> PendingFetch<T> {
         let scope = service.currentScope()
+        let watermarkCollection = ownerUID.map { "\(collection)|\($0)" } ?? collection
         let previous = watermarks.watermark(family: scope.familyId, baby: scope.babyId,
-                                            collection: collection)
+                                            collection: watermarkCollection)
         var dtos: [T] = []
         var fetchSucceeded = false
         do {
             if let previous {
-                dtos = try await service.fetchChanged(from: collection, since: previous)
+                dtos = try await service.fetchChanged(
+                    from: collection, since: previous, ownerUID: ownerUID
+                )
             } else {
-                dtos = try await service.fetchAll(from: collection, dateField: dateField)
+                dtos = try await service.fetchAll(
+                    from: collection, dateField: dateField, ownerUID: ownerUID
+                )
             }
             fetchSucceeded = true
         } catch {
@@ -502,9 +513,22 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         let maxObserved = dtos.compactMap { $0.updatedAt?.dateValue() }.max()
         let next = Self.advancedWatermark(previous: previous, maxObserved: maxObserved)
         return PendingFetch(dtos: dtos, familyId: scope.familyId, babyId: scope.babyId,
-                            collection: collection,
+                            collection: watermarkCollection,
                             commitTo: Self.watermarkAfterFetch(fetchSucceeded: fetchSucceeded,
                                                                next: next))
+    }
+
+    private func fetchOwned<T: Decodable & CloudSyncTimestamped>(
+        _ collection: String,
+        dateField: String,
+        ownerUID: String?
+    ) async -> PendingFetch<T> {
+        guard let ownerUID, !ownerUID.isEmpty else {
+            let scope = service.currentScope()
+            return PendingFetch(dtos: [], familyId: scope.familyId, babyId: scope.babyId,
+                                collection: collection, commitTo: nil)
+        }
+        return await fetch(collection, dateField: dateField, ownerUID: ownerUID)
     }
 
     /// Merges one collection and, only on success, advances its watermark. A throwing
@@ -633,18 +657,20 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
                                 updatedAt: dto.updatedAt?.dateValue())
     }
 
-    private static func momSleepEntry(_ dto: SleepLogDTO) -> SleepEntry? {
+    static func momSleepEntry(_ dto: SleepLogDTO) -> SleepEntry? {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
         let log = dto.domain
         return SleepEntry(id: uuid, startDate: log.startedAt, endDate: log.endedAt,
-                          note: "", quality: log.quality, updatedAt: log.updatedAt)
+                          note: "", quality: log.quality, updatedAt: log.updatedAt,
+                          startedBy: log.addedBy, startedByName: log.addedByName)
     }
 
-    private static func waterIntakeEntry(_ dto: WaterIntakeLogDTO) -> WaterIntakeEntry? {
+    static func waterIntakeEntry(_ dto: WaterIntakeLogDTO) -> WaterIntakeEntry? {
         guard let idStr = dto.id, let uuid = UUID(uuidString: idStr) else { return nil }
         let log = dto.domain
         return WaterIntakeEntry(id: uuid, date: log.date, amountMl: log.amountMl,
-                                updatedAt: dto.updatedAt?.dateValue())
+                                updatedAt: dto.updatedAt?.dateValue(),
+                                ownerUID: log.addedBy, ownerName: log.addedByName)
     }
 
     // Leaps are keyed by an Int leapId (not a UUID), so no UUID guard here.

@@ -38,6 +38,9 @@ final class BabySyncService {
         "momSleepLogs", "waterIntakeLogs", "leapLogs", "symptomLogs",
         "quickLogs", "deletions",
     ]
+    static let privateWellbeingSubcollections: Set<String> = [
+        "momSleepLogs", "waterIntakeLogs",
+    ]
 
     private static let migrationFlagKey = "babysync_perbaby_migration_v1_done"
 
@@ -70,6 +73,11 @@ final class BabySyncService {
 
     private func collection(_ name: String) -> CollectionReference {
         babyDoc().collection(name)
+    }
+
+    func currentUserUID() -> String? {
+        guard FirebaseBootstrapper.isConfigured else { return nil }
+        return Auth.auth().currentUser?.uid
     }
 
     func addLog<T: Encodable>(_ log: T, to subcollection: String) async throws {
@@ -421,7 +429,12 @@ final class BabySyncService {
                 try await newParent.setData(data, merge: true)
             }
             for sub in Self.allSubcollections {
-                try await copyDocs(from: oldParent.collection(sub), to: newParent.collection(sub))
+                var source: Query = oldParent.collection(sub)
+                if Self.privateWellbeingSubcollections.contains(sub) {
+                    guard let uid = currentUserUID() else { return }
+                    source = source.whereField("addedBy", isEqualTo: uid)
+                }
+                try await copyDocs(from: source, to: newParent.collection(sub))
             }
             defaults.set(true, forKey: Self.migrationFlagKey)
         } catch {
@@ -429,7 +442,7 @@ final class BabySyncService {
         }
     }
 
-    private func copyDocs(from source: CollectionReference, to dest: CollectionReference) async throws {
+    private func copyDocs(from source: Query, to dest: CollectionReference) async throws {
         let docs = try await source.getDocuments().documents
         guard !docs.isEmpty else { return }
         for chunk in stride(from: 0, to: docs.count, by: 400) {
@@ -488,6 +501,7 @@ final class BabySyncService {
     func fetchAll<T: Decodable>(from subcollection: String,
                                 dateField: String,
                                 since: Date? = nil,
+                                ownerUID: String? = nil,
                                 limit: Int = 500) async throws -> [T] {
         guard cloudSyncAllowed() else { return [] }
         guard hasPath else { return [] }
@@ -495,14 +509,15 @@ final class BabySyncService {
         var cursor: DocumentSnapshot?
 
         while true {
-            var query: Query
+            var query: Query = collection(subcollection)
+            if let ownerUID {
+                query = query.whereField("addedBy", isEqualTo: ownerUID)
+            }
             if let since {
-                query = collection(subcollection)
-                    .whereField(dateField, isGreaterThanOrEqualTo: Timestamp(date: since))
+                query = query.whereField(dateField, isGreaterThanOrEqualTo: Timestamp(date: since))
                     .order(by: dateField, descending: true)
             } else {
-                query = collection(subcollection)
-                    .order(by: dateField, descending: true)
+                query = query.order(by: dateField, descending: true)
             }
             query = query.limit(to: limit)
             if let cursor {
@@ -534,10 +549,15 @@ final class BabySyncService {
     /// the merge upsert is idempotent. Ascending order drains a >limit backlog forward without gaps.
     func fetchChanged<T: Decodable>(from subcollection: String,
                                     since: Date,
+                                    ownerUID: String? = nil,
                                     limit: Int = 500) async throws -> [T] {
         guard cloudSyncAllowed() else { return [] }
         guard hasPath else { return [] }
-        let snapshot = try await collection(subcollection)
+        var query: Query = collection(subcollection)
+        if let ownerUID {
+            query = query.whereField("addedBy", isEqualTo: ownerUID)
+        }
+        let snapshot = try await query
             .whereField("updatedAt", isGreaterThanOrEqualTo: Timestamp(date: since))
             .order(by: "updatedAt", descending: false)
             .limit(to: limit)

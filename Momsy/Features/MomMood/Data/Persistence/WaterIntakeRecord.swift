@@ -8,10 +8,14 @@ final class WaterIntakeRecord {
     var date: Date = Date()
     var amountMl: Int = 0
     var updatedAt: Date?
+    var ownerUID: String = ""
+    var ownerName: String = ""
 
-    init(_ entry: WaterIntakeEntry) {
+    init(_ entry: WaterIntakeEntry, ownerUID: String = "") {
         id = entry.id
         babyId = ActiveBaby.scope
+        self.ownerUID = entry.ownerUID.isEmpty ? ownerUID : entry.ownerUID
+        ownerName = entry.ownerName
         apply(entry)
     }
 
@@ -21,7 +25,14 @@ final class WaterIntakeRecord {
         updatedAt = entry.updatedAt
     }
 
+    func merge(_ entry: WaterIntakeEntry) {
+        apply(entry)
+        ownerUID = entry.ownerUID.isEmpty ? ownerUID : entry.ownerUID
+        ownerName = entry.ownerName.isEmpty ? ownerName : entry.ownerName
+    }
+
     func toDomain() -> WaterIntakeEntry {
-        WaterIntakeEntry(id: id, date: date, amountMl: amountMl, updatedAt: updatedAt)
+        WaterIntakeEntry(id: id, date: date, amountMl: amountMl, updatedAt: updatedAt,
+                         ownerUID: ownerUID, ownerName: ownerName)
     }
 }

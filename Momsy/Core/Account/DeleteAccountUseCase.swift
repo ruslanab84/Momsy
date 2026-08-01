@@ -108,12 +108,12 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                 } else {
                     let babyIds = try await discoverBabyIds(in: familyRef)
                     for babyId in babyIds {
-                        try await anonymizeAuthorMetadata(
+                        try await eraseAuthoredData(
                             under: familyRef.collection("babies").document(babyId),
                             uid: uid
                         )
                     }
-                    try await anonymizeAuthorMetadata(
+                    try await eraseAuthoredData(
                         under: db.collection("babies").document(familyId),
                         uid: uid
                     )
@@ -175,7 +175,7 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         try? await oldParent.delete()
     }
 
-    private func anonymizeAuthorMetadata(under parent: DocumentReference, uid: String) async throws {
+    private func eraseAuthoredData(under parent: DocumentReference, uid: String) async throws {
         for subcollection in BabySyncService.allSubcollections where subcollection != "deletions" {
             let documents = try await parent.collection(subcollection)
                 .whereField("addedBy", isEqualTo: uid)
@@ -184,11 +184,22 @@ struct FirestoreAccountEraser: CloudAccountEraser {
             for start in stride(from: 0, to: documents.count, by: 400) {
                 let batch = Firestore.firestore().batch()
                 for document in documents[start..<min(start + 400, documents.count)] {
-                    guard let update = AccountErasureGate.authorAnonymizationUpdate(
+                    switch AccountErasureGate.authoredDataAction(
+                        subcollection: subcollection,
                         documentData: document.data(),
                         deletingUid: uid
-                    ) else { continue }
-                    batch.updateData(update, forDocument: document.reference)
+                    ) {
+                    case .delete:
+                        batch.deleteDocument(document.reference)
+                    case .anonymize:
+                        guard let update = AccountErasureGate.authorAnonymizationUpdate(
+                            documentData: document.data(),
+                            deletingUid: uid
+                        ) else { continue }
+                        batch.updateData(update, forDocument: document.reference)
+                    case nil:
+                        continue
+                    }
                 }
                 try await batch.commit()
             }

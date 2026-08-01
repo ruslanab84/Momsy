@@ -103,6 +103,65 @@ struct MultiChildFoundationTests {
         freshActive()
     }
 
+    @Test func wellbeingRepositoriesAreScopedToCurrentUser() async throws {
+        freshActive()
+        ActiveBaby.currentId = UUID()
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(
+            for: MomSleepRecord.self, WaterIntakeRecord.self,
+            configurations: config
+        )
+        let context = ModelContext(container)
+        let momSleep = SwiftDataMomSleepRepository(context: context, currentUID: { "mom" })
+        let dadSleep = SwiftDataMomSleepRepository(context: context, currentUID: { "dad" })
+        let momWater = SwiftDataWaterIntakeRepository(context: context, currentUID: { "mom" })
+        let dadWater = SwiftDataWaterIntakeRepository(context: context, currentUID: { "dad" })
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        let window = (from: date.addingTimeInterval(-1), to: date.addingTimeInterval(1))
+
+        try await momSleep.upsert([
+            SleepEntry(startDate: date, endDate: date, startedBy: "mom"),
+            SleepEntry(startDate: date, endDate: date, startedBy: "dad"),
+        ])
+        try await momWater.upsert([
+            WaterIntakeEntry(id: UUID(), date: date, amountMl: 200, ownerUID: "mom"),
+            WaterIntakeEntry(id: UUID(), date: date, amountMl: 300, ownerUID: "dad"),
+        ])
+        context.insert(MomSleepRecord(SleepEntry(startDate: date, endDate: date)))
+        context.insert(WaterIntakeRecord(WaterIntakeEntry(id: UUID(), date: date, amountMl: 400)))
+        try context.save()
+
+        #expect(try await momSleep.getEntries(from: window.from, to: window.to).map(\.startedBy) == ["mom"])
+        #expect(try await dadSleep.getEntries(from: window.from, to: window.to).map(\.startedBy) == ["dad"])
+        #expect(try await momWater.getEntries(from: window.from, to: window.to).map(\.ownerUID) == ["mom"])
+        #expect(try await dadWater.getEntries(from: window.from, to: window.to).map(\.ownerUID) == ["dad"])
+        freshActive()
+    }
+
+    @Test func localWellbeingSurvivesFirstCloudSyncOptIn() async throws {
+        freshActive()
+        ActiveBaby.currentId = UUID()
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(
+            for: MomSleepRecord.self, WaterIntakeRecord.self,
+            configurations: config
+        )
+        let context = ModelContext(container)
+        var uid: String?
+        let sleep = SwiftDataMomSleepRepository(context: context, currentUID: { uid })
+        let water = SwiftDataWaterIntakeRepository(context: context, currentUID: { uid })
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        let window = (from: date.addingTimeInterval(-1), to: date.addingTimeInterval(1))
+
+        try await sleep.add(SleepEntry(startDate: date, endDate: date))
+        try await water.add(WaterIntakeEntry(id: UUID(), date: date, amountMl: 250))
+        uid = "mom"
+
+        #expect(try await sleep.getEntries(from: window.from, to: window.to).map(\.startedBy) == ["mom"])
+        #expect(try await water.getEntries(from: window.from, to: window.to).map(\.ownerUID) == ["mom"])
+        freshActive()
+    }
+
     // MARK: Quick-log strip scoping
 
     /// The "Today so far" quick-log strip (diaper/walk/bath/vitamin/stool) must be
