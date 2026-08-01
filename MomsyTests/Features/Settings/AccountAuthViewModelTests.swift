@@ -20,6 +20,24 @@ private final class AuthMock: AccountAuthProviding {
 private struct DummyError: Error {}
 private final class Flag { var value = false }
 
+private struct AuthSwitchCloudEraser: CloudAccountEraser {
+    final class Calls: @unchecked Sendable {
+        var events: [String] = []
+        var stillPresent = false
+    }
+
+    let calls: Calls
+
+    func deleteCloudData(uid: String) async throws {
+        calls.events.append("cloudErase:\(uid)")
+    }
+
+    func isCloudDataPresent(uid: String) async throws -> Bool {
+        calls.events.append("serverVerify:\(uid)")
+        return calls.stillPresent
+    }
+}
+
 @MainActor
 struct AccountAuthViewModelTests {
 
@@ -98,19 +116,74 @@ struct AccountAuthViewModelTests {
         #expect(result === original)
     }
 
-    @Test func anonymousMemberCleanupPrecedesExistingAccountSignIn() async throws {
-        var events: [String] = []
+    @Test func anonymousAccountErasurePrecedesExistingAccountSignIn() async throws {
+        let calls = AuthSwitchCloudEraser.Calls()
 
         let uid = try await AuthManager.switchFromAnonymousAccount(
-            cleanup: { events.append("cleanup") },
+            anonymousUid: "anonymous-uid",
+            cloudEraser: AuthSwitchCloudEraser(calls: calls),
+            deleteAuthUser: { calls.events.append("authDelete") },
+            purgeLocalData: { calls.events.append("localPurge") },
             signIn: {
-                events.append("signIn")
+                calls.events.append("signIn")
                 return "provider-uid"
             }
         )
 
         #expect(uid == "provider-uid")
-        #expect(events == ["cleanup", "signIn"])
+        #expect(calls.events == [
+            "cloudErase:anonymous-uid",
+            "serverVerify:anonymous-uid",
+            "authDelete",
+            "localPurge",
+            "signIn",
+        ])
+    }
+
+    @Test func incompleteAnonymousErasurePreventsExistingAccountSignIn() async {
+        let calls = AuthSwitchCloudEraser.Calls()
+        calls.stillPresent = true
+
+        await #expect {
+            try await AuthManager.switchFromAnonymousAccount(
+                anonymousUid: "anonymous-uid",
+                cloudEraser: AuthSwitchCloudEraser(calls: calls),
+                deleteAuthUser: { calls.events.append("authDelete") },
+                purgeLocalData: { calls.events.append("localPurge") },
+                signIn: { calls.events.append("signIn") }
+            )
+        } throws: { error in
+            guard case AuthError.accountDeletionPending = error else { return false }
+            return true
+        }
+
+        #expect(calls.events == [
+            "cloudErase:anonymous-uid",
+            "serverVerify:anonymous-uid",
+        ])
+    }
+
+    @Test func anonymousAuthDeletionFailurePreventsExistingAccountSignIn() async {
+        let calls = AuthSwitchCloudEraser.Calls()
+
+        await #expect(throws: DummyError.self) {
+            try await AuthManager.switchFromAnonymousAccount(
+                anonymousUid: "anonymous-uid",
+                cloudEraser: AuthSwitchCloudEraser(calls: calls),
+                deleteAuthUser: {
+                    calls.events.append("authDelete")
+                    throw DummyError()
+                },
+                purgeLocalData: { calls.events.append("localPurge") },
+                signIn: { calls.events.append("signIn") }
+            )
+        }
+
+        #expect(calls.events == [
+            "cloudErase:anonymous-uid",
+            "serverVerify:anonymous-uid",
+            "authDelete",
+        ])
     }
 
     @Test func appleCancelIsSilent() async throws {

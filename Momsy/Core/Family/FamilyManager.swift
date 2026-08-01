@@ -454,24 +454,6 @@ final class FamilyManager: ObservableObject {
         )
     }
 
-    /// Removes the anonymous user's own roster entry before Firebase switches to an
-    /// existing provider account.
-    func removeAnonymousMemberBeforeAccountSwitch(
-        anonymousUid: String,
-        familyId: String?
-    ) async throws {
-        guard let familyId else { return }
-        do {
-            try await db.collection("families").document(familyId)
-                .collection("members").document(anonymousUid)
-                .delete()
-            Self.log.info("Removed anonymous member \(anonymousUid, privacy: .private)")
-        } catch {
-            Self.log.error("Anonymous member cleanup failed: \(error.localizedDescription, privacy: .public)")
-            throw error
-        }
-    }
-
     /// True when the caller is the only remaining member (or the roster is empty).
     /// Gates whether account deletion may tear down shared family data.
     func isSoleMember(uid: String) async throws -> Bool {

@@ -72,6 +72,7 @@ final class AuthManager: ObservableObject {
             self?.firebaseUser = user
             if let user {
                 Task { @MainActor in
+                    guard Auth.auth().currentUser?.uid == user.uid else { return }
                     if UserDefaultsPendingAccountDeletionStore().loadPending() == user.uid {
                         AuthManager.log.info("Skipping family setup while account deletion is pending")
                         return
@@ -91,6 +92,7 @@ final class AuthManager: ObservableObject {
                             role: pendingSetup?.role ?? .mom,
                             initialProfile: pendingSetup?.profile
                         )
+                        guard Auth.auth().currentUser?.uid == user.uid else { return }
                         pendingSetupStore.clear()
                     } catch {
                         // Don't fail silently — a denied write here (rules/permissions)
@@ -99,7 +101,10 @@ final class AuthManager: ObservableObject {
                     }
                 }
             } else {
-                Task { @MainActor in FamilyManager.shared.reset() }
+                Task { @MainActor in
+                    guard Auth.auth().currentUser == nil else { return }
+                    FamilyManager.shared.reset()
+                }
             }
         }
     }
@@ -149,10 +154,9 @@ final class AuthManager: ObservableObject {
     }
 
     /// Promotes the current (possibly anonymous) user to a provider credential.
-    /// Linking preserves the existing uid → `familyId` → data; a fresh sign-in would
-    /// orphan anything logged anonymously. Falls back to a plain sign-in when the
-    /// credential already belongs to another account (that account's data is then
-    /// adopted on next launch via CloudSyncDownloader).
+    /// Linking preserves the existing uid → `familyId` → data. When the credential
+    /// already belongs to another account, the anonymous account must be fully erased
+    /// before switching uids or its cloud data and Auth user become unreachable.
     nonisolated static func fallbackCredential(
         original: AuthCredential,
         linkError: NSError
@@ -162,10 +166,18 @@ final class AuthManager: ObservableObject {
 
     @MainActor
     static func switchFromAnonymousAccount<Result>(
-        cleanup: () async throws -> Void,
+        anonymousUid: String,
+        cloudEraser: any CloudAccountEraser,
+        deleteAuthUser: () async throws -> Void,
+        purgeLocalData: () async -> Void,
         signIn: () async throws -> Result
     ) async throws -> Result {
-        try await cleanup()
+        try await cloudEraser.deleteCloudData(uid: anonymousUid)
+        guard try await !cloudEraser.isCloudDataPresent(uid: anonymousUid) else {
+            throw AuthError.accountDeletionPending
+        }
+        try await deleteAuthUser()
+        await purgeLocalData()
         return try await signIn()
     }
 
@@ -178,12 +190,16 @@ final class AuthManager: ObservableObject {
                 return try await current.link(with: credential).user
             } catch let error as NSError where error.code == AuthErrorCode.credentialAlreadyInUse.rawValue {
                 let fallback = Self.fallbackCredential(original: credential, linkError: error)
+                let cloudEraser = FirestoreAccountEraser(babySync: BabySyncService())
                 return try await Self.switchFromAnonymousAccount(
-                    cleanup: {
-                        try await FamilyManager.shared.removeAnonymousMemberBeforeAccountSwitch(
-                            anonymousUid: anonymousUid,
-                            familyId: cachedFamilyId
-                        )
+                    anonymousUid: anonymousUid,
+                    cloudEraser: cloudEraser,
+                    deleteAuthUser: {
+                        try await self.deleteAccount(expectedUID: anonymousUid)
+                    },
+                    purgeLocalData: {
+                        await FamilyManager.shared.onMembershipRevoked?(cachedFamilyId ?? "")
+                        FamilyManager.shared.reset()
                     },
                     signIn: {
                         try await Auth.auth().signIn(with: fallback).user
