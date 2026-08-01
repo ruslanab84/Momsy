@@ -3,6 +3,22 @@ import Testing
 
 @Suite("AccountErasureGate")
 struct AccountErasureGateTests {
+    @Test("anonymizes only the deleting account's author metadata")
+    func authorAnonymization() {
+        let ownUpdate = AccountErasureGate.authorAnonymizationUpdate(
+            documentData: ["addedBy": "me", "addedByName": "Mom", "amount": 120],
+            deletingUid: "me"
+        )
+
+        #expect(ownUpdate?["addedBy"] as? String == "")
+        #expect(ownUpdate?["addedByName"] as? String == "")
+        #expect(ownUpdate?.count == 2)
+        #expect(AccountErasureGate.authorAnonymizationUpdate(
+            documentData: ["addedBy": "partner", "addedByName": "Dad"],
+            deletingUid: "me"
+        ) == nil)
+    }
+
     @Test("sole member may tear down shared data")
     func soleMember() {
         #expect(AccountErasureGate.mayTearDownSharedData(memberIds: ["me"], callerUid: "me"))

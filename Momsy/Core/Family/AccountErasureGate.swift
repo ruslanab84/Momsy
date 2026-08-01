@@ -8,6 +8,14 @@ import Foundation
 ///
 /// Pure and synchronous so the policy is unit-tested without Firestore.
 enum AccountErasureGate {
+    static func authorAnonymizationUpdate(
+        documentData: [String: Any],
+        deletingUid: String
+    ) -> [String: Any]? {
+        guard documentData["addedBy"] as? String == deletingUid else { return nil }
+        return ["addedBy": "", "addedByName": ""]
+    }
+
     static func isLegacyPlaceholder(documentId: String, data: [String: Any]) -> Bool {
         guard
             UUID(uuidString: documentId) != nil,

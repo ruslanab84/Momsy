@@ -133,6 +133,20 @@ service cloud.firestore {
         && hasValidRoutineAuthor();
     }
 
+    function canListOwnAuthoredData(familyId) {
+      return belongsToFamily(familyId)
+        && resource.data.addedBy == request.auth.uid;
+    }
+
+    function anonymizesOwnAuthorMetadata(familyId) {
+      return belongsToFamily(familyId)
+        && resource.data.addedBy == request.auth.uid
+        && request.resource.data.addedBy == ''
+        && request.resource.data.addedByName == ''
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['addedBy', 'addedByName']);
+    }
+
     function hasInviteCode() {
       return 'inviteCode' in request.resource.data
         && request.resource.data.inviteCode is string;
@@ -348,13 +362,16 @@ service cloud.firestore {
         allow delete: if canManageFamilyRoster(familyId);
 
         match /{subcollection}/{document=**} {
-          allow read: if canReadBabyCollection(familyId, subcollection);
+          allow get: if canReadBabyCollection(familyId, subcollection);
+          allow list: if canReadBabyCollection(familyId, subcollection)
+                      || canListOwnAuthoredData(familyId);
           allow create: if canManageFamilyRoster(familyId)
                         || isFamilyCreator(familyId)
                         || canCreateRoutineLog(familyId, subcollection);
           allow update: if canManageFamilyRoster(familyId)
                         || isFamilyCreator(familyId)
-                        || canUpdateRoutineLog(familyId, subcollection);
+                        || canUpdateRoutineLog(familyId, subcollection)
+                        || anonymizesOwnAuthorMetadata(familyId);
           // ponytail: Nanny deletes stay parent-only until tombstones identify
           // both the source collection and author.
           allow delete: if canManageFamilyRoster(familyId);
@@ -368,11 +385,14 @@ service cloud.firestore {
       allow read, write: if canManageFamilyRoster(familyId);
 
       match /{subcollection}/{document=**} {
-        allow read: if canReadBabyCollection(familyId, subcollection);
+        allow get: if canReadBabyCollection(familyId, subcollection);
+        allow list: if canReadBabyCollection(familyId, subcollection)
+                    || canListOwnAuthoredData(familyId);
         allow create: if canManageFamilyRoster(familyId)
                       || canCreateRoutineLog(familyId, subcollection);
         allow update: if canManageFamilyRoster(familyId)
-                      || canUpdateRoutineLog(familyId, subcollection);
+                      || canUpdateRoutineLog(familyId, subcollection)
+                      || anonymizesOwnAuthorMetadata(familyId);
         allow delete: if canManageFamilyRoster(familyId);
       }
     }

@@ -104,6 +104,11 @@ async function seedFirestore() {
             addedByName: "Mom",
             value: 37.2,
         });
+        batch.set(db.doc(`${babyPath}/temperatureLogs/temp-nanny`), {
+            addedBy: users.nanny,
+            addedByName: "Nanny",
+            value: 36.9,
+        });
         batch.set(db.doc(`${babyPath}/diaryLogs/diary-mom`), {
             addedBy: users.mom,
             addedByName: "Mom",
@@ -470,6 +475,47 @@ test("nanny can track routine care only under their own identity", async () => {
         startedAt: new Date("2026-07-11T12:45:00Z"),
     }));
     await assertFails(db.doc(`${babyPath}/feedingLogs/feed-mom`).update({ amount: 30 }));
+});
+
+test("a departing shared-family member can anonymize only their own author metadata", async () => {
+    const db = firestore(users.nanny);
+    const ownLog = db.doc(`${babyPath}/feedingLogs/feed-nanny`);
+    const postDepartureLog = db.doc(`${babyPath}/feedingLogs/feed-nanny-after-departure`);
+
+    await assertSucceeds(ownLog.set({
+        addedBy: users.nanny,
+        addedByName: "Nanny",
+        startedAt: new Date("2026-07-11T12:00:00Z"),
+    }));
+    await assertFails(ownLog.update({
+        addedBy: "",
+        addedByName: "",
+        startedAt: new Date("2026-07-12T12:00:00Z"),
+    }));
+    await assertSucceeds(ownLog.update({ addedBy: "", addedByName: "" }));
+    await assertSucceeds(postDepartureLog.set({
+        addedBy: users.nanny,
+        addedByName: "Nanny",
+        startedAt: new Date("2026-07-11T13:00:00Z"),
+    }));
+    await assertFails(db.doc(`${babyPath}/feedingLogs/feed-mom`).update({
+        addedBy: "",
+        addedByName: "",
+    }));
+
+    const ownPrivateLogs = db.collection(`${babyPath}/temperatureLogs`)
+        .where("addedBy", "==", users.nanny);
+    const snapshot = await assertSucceeds(ownPrivateLogs.get());
+    assert.deepEqual(snapshot.docs.map((doc) => doc.id), ["temp-nanny"]);
+    await assertSucceeds(snapshot.docs[0].ref.update({ addedBy: "", addedByName: "" }));
+
+    const userRef = db.doc(`users/${users.nanny}`);
+    await assertSucceeds(userRef.set({ familyId }));
+    const departure = db.batch();
+    departure.delete(db.doc(`${familyPath}/members/${users.nanny}`));
+    departure.delete(userRef);
+    await assertSucceeds(departure.commit());
+    await assertFails(postDepartureLog.update({ addedBy: "", addedByName: "" }));
 });
 
 test("nanny cannot read medical or private data and cannot delete logs", async () => {

@@ -66,7 +66,16 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         if let familyId = resolvedFamilyId, !familyId.isEmpty {
             do {
                 let familyRef = db.collection("families").document(familyId)
-                let memberDocuments = try await familyRef.collection("members").getDocuments().documents
+                let memberDocuments: [QueryDocumentSnapshot]
+                do {
+                    memberDocuments = try await familyRef.collection("members").getDocuments().documents
+                } catch let error as NSError
+                    where error.domain == FirestoreErrorDomain
+                    && error.code == FirestoreErrorCode.permissionDenied.rawValue {
+                    // A previously interrupted deletion may already have removed membership.
+                    try await userRef.delete()
+                    return
+                }
                 let partition = AccountErasureGate.partitionMemberDocuments(
                     memberDocuments.map {
                         (id: $0.documentID, data: $0.data())
@@ -101,26 +110,30 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                     if callerCreatedFamily {
                         try await familyRef.delete()
                     }
-                    // Firestore never cascades into subcollections: the caller's roster doc
-                    // must be removed explicitly or it outlives the erased account as PII.
-                    // Ordered AFTER the deletes above — those are authorised by
-                    // `belongsToFamily`, which reads this very document.
-                    try await familyRef.collection("members").document(uid).delete()
                 } else {
-                    try await familyRef.collection("members").document(uid).delete()
+                    let babyIds = try await discoverBabyIds(in: familyRef)
+                    for babyId in babyIds {
+                        try await anonymizeAuthorMetadata(
+                            under: familyRef.collection("babies").document(babyId),
+                            uid: uid
+                        )
+                    }
+                    try await anonymizeAuthorMetadata(
+                        under: db.collection("babies").document(familyId),
+                        uid: uid
+                    )
                 }
-            } catch let error as NSError
-                where error.domain == FirestoreErrorDomain
-                && error.code == FirestoreErrorCode.permissionDenied.rawValue {
-                // The caller's members/{uid} doc is already gone (a prior partial run
-                // deleted it), so every family read/write is now denied by
-                // `belongsToFamily`. Nothing in the family branch is reachable or
-                // owned by this account anymore; fall through to deleting users/{uid} —
-                // the only remaining re-resolution signal `isCloudDataPresent` checks.
-            }
-        }
 
-        try await userRef.delete()
+                // Keep author cleanup and membership access ordered, while making the final
+                // membership/user removal atomic so recovery cannot observe a half-finished exit.
+                let batch = db.batch()
+                batch.deleteDocument(familyRef.collection("members").document(uid))
+                batch.deleteDocument(userRef)
+                try await batch.commit()
+            }
+        } else {
+            try await userRef.delete()
+        }
     }
 
     /// Reads from the server so a cache-confirmed-but-not-yet-flushed delete can't pass as
@@ -165,6 +178,26 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         }
         try? await oldParent.collection("profile").document("info").delete()
         try? await oldParent.delete()
+    }
+
+    private func anonymizeAuthorMetadata(under parent: DocumentReference, uid: String) async throws {
+        for subcollection in BabySyncService.allSubcollections where subcollection != "deletions" {
+            let documents = try await parent.collection(subcollection)
+                .whereField("addedBy", isEqualTo: uid)
+                .getDocuments(source: .server)
+                .documents
+            for start in stride(from: 0, to: documents.count, by: 400) {
+                let batch = Firestore.firestore().batch()
+                for document in documents[start..<min(start + 400, documents.count)] {
+                    guard let update = AccountErasureGate.authorAnonymizationUpdate(
+                        documentData: document.data(),
+                        deletingUid: uid
+                    ) else { continue }
+                    batch.updateData(update, forDocument: document.reference)
+                }
+                try await batch.commit()
+            }
+        }
     }
 
     private func deleteAllDocs(in ref: Query) async throws {
