@@ -6,7 +6,7 @@ import {
     assertSucceeds,
     initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { serverTimestamp, Timestamp } from "firebase/firestore";
+import { deleteField, serverTimestamp, Timestamp } from "firebase/firestore";
 
 const projectId = "demo-momsy";
 const familyId = "family-a";
@@ -209,6 +209,30 @@ test("a restricted member cannot promote their own roster role", async () => {
 
     await assertSucceeds(member.update({ name: "Updated nanny" }));
     await assertFails(member.update({ roleRaw: "Мама" }));
+    await assertFails(member.update({ roleRaw: deleteField() }));
+});
+
+test("legacy members can repair a missing role without promoting themselves", async () => {
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const db = adminContext.firestore();
+        await db.doc(`${familyPath}/members/${users.mom}`).update({
+            roleRaw: deleteField(),
+        });
+        await db.doc(`${familyPath}/members/${users.outsider}`).set({
+            uid: users.outsider,
+            name: "Legacy member",
+        });
+    });
+
+    const creator = firestore(users.mom).doc(`${familyPath}/members/${users.mom}`);
+    await assertFails(creator.update({ roleRaw: "Папа" }));
+    await assertSucceeds(creator.update({ roleRaw: "Мама" }));
+
+    const member = firestore(users.outsider).doc(`${familyPath}/members/${users.outsider}`);
+    await assertFails(member.update({ roleRaw: "Мама" }));
+    await assertFails(member.update({ roleRaw: "Няня" }));
+    await assertFails(member.update({ roleRaw: "Бабушка" }));
+    await assertSucceeds(member.update({ roleRaw: "Папа" }));
 });
 
 test("a parent cannot create a placeholder member without an authenticated join", async () => {

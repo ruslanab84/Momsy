@@ -134,6 +134,12 @@ final class FamilyManager: ObservableObject {
         return cachedOwnerUid != currentUid
     }
 
+    nonisolated static func legacyRepairRole(isFamilyCreator: Bool) -> FamilyRole {
+        // Pre-role family membership had full access. Preserve that legacy contract
+        // deterministically; a parent can assign a more specific role afterward.
+        isFamilyCreator ? .mom : .dad
+    }
+
     func beginJoinFlow() { joinInFlight = true }
     func endJoinFlow() { joinInFlight = false }
 
@@ -502,12 +508,25 @@ final class FamilyManager: ObservableObject {
     private func confirmMembership(familyId: String, uid: String) async -> MembershipCheck {
         currentRole = nil
         do {
-            let snap = try await db.collection("families").document(familyId)
-                .collection("members").document(uid)
-                .getDocument(source: .server)
+            let familyRef = db.collection("families").document(familyId)
+            let memberRef = familyRef.collection("members").document(uid)
+            let snap = try await memberRef.getDocument(source: .server)
             guard snap.exists else { return .revoked }
-            currentRole = (snap.data()?["roleRaw"] as? String)
+            var role = (snap.data()?["roleRaw"] as? String)
                 .flatMap(FamilyRole.init(storedRawValue:))
+            if role == nil, snap.data()?["roleRaw"] == nil {
+                do {
+                    let family = try await familyRef.getDocument(source: .server)
+                    let repairedRole = Self.legacyRepairRole(
+                        isFamilyCreator: family.data()?["createdBy"] as? String == uid
+                    )
+                    try await memberRef.updateData(["roleRaw": repairedRole.rawValue])
+                    role = repairedRole
+                } catch {
+                    Self.log.error("Legacy member role repair failed: \(error.localizedDescription, privacy: .public)")
+                }
+            }
+            currentRole = role
             if self.familyId == familyId {
                 observeCurrentRole(familyId: familyId, uid: uid)
             }

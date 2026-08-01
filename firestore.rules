@@ -175,8 +175,29 @@ service cloud.firestore {
     }
 
     function memberRoleUnchanged() {
-      return !('roleRaw' in request.resource.data)
-        || request.resource.data.roleRaw == resource.data.roleRaw;
+      return 'roleRaw' in resource.data
+        && 'roleRaw' in request.resource.data
+        && request.resource.data.roleRaw == resource.data.roleRaw;
+    }
+
+    function isLegacySelfRoleRepair(familyId, memberId) {
+      return isSignedIn()
+        && memberId == request.auth.uid
+        && isFamilyMember(familyId)
+        && !('roleRaw' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['roleRaw'])
+        && (
+          (
+            get(/databases/$(database)/documents/families/$(familyId)).data.createdBy
+              == request.auth.uid
+            && request.resource.data.roleRaw == 'Мама'
+          )
+          || (
+            get(/databases/$(database)/documents/families/$(familyId)).data.createdBy
+              != request.auth.uid
+            && request.resource.data.roleRaw == 'Папа'
+          )
+        );
     }
 
     function requestedUserFamilyIdIsAuthorized() {
@@ -311,6 +332,7 @@ service cloud.firestore {
         allow create: if isSelfCreatorBootstrap(familyId, memberId)
                       || isSelfInviteJoin(familyId, memberId);
         allow update: if canManageFamilyRoster(familyId)
+                      || isLegacySelfRoleRepair(familyId, memberId)
                       || (isSignedIn()
                           && memberId == request.auth.uid
                           && isFamilyMember(familyId)

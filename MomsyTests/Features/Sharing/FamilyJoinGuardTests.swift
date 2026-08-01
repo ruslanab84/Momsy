@@ -31,6 +31,12 @@ struct FamilyJoinGuardTests {
         #expect(!FamilyManager.cacheIsStale(cachedOwnerUid: "provider", currentUid: "provider"))
         #expect(FamilyManager.cacheIsStale(cachedOwnerUid: "anonymous", currentUid: "provider"))
     }
+
+    @Test("legacy roles preserve the pre-role full-access contract")
+    func legacyRoleRepairPolicy() {
+        #expect(FamilyManager.legacyRepairRole(isFamilyCreator: true) == .mom)
+        #expect(FamilyManager.legacyRepairRole(isFamilyCreator: false) == .dad)
+    }
 }
 
 @Suite("StoredFamilyMember Firestore mapping")
