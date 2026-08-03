@@ -66,6 +66,9 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         if let familyId = resolvedFamilyId, !familyId.isEmpty {
             do {
                 let familyRef = db.collection("families").document(familyId)
+                let familyDocument = try await familyRef.getDocument(source: .server)
+                let callerCreatedFamily =
+                    familyDocument.data()?["createdBy"] as? String == uid
                 let memberDocuments = try await familyRef.collection("members")
                     .getDocuments(source: .server)
                     .documents
@@ -78,16 +81,19 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                 let legacyPlaceholders = memberDocuments.filter {
                     placeholderIds.contains($0.documentID)
                 }
-                let callerRoleRaw = memberDocuments
-                    .first { $0.documentID == uid }?
-                    .data()["roleRaw"] as? String ?? ""
-                if FamilyRole(storedRawValue: callerRoleRaw)?.canManageFamilyMembers == true {
+                let realMembers = memberDocuments
+                    .filter { !placeholderIds.contains($0.documentID) }
+                    .map {
+                        (id: $0.documentID, roleRaw: $0.data()["roleRaw"] as? String ?? "")
+                    }
+                let callerRoleRaw = realMembers.first { $0.id == uid }?.roleRaw ?? ""
+                if AccountErasureGate.isParentRole(callerRoleRaw) {
                     for placeholder in legacyPlaceholders {
                         try await placeholder.reference.delete()
                     }
                 }
                 let mayTearDownSharedData = AccountErasureGate.mayTearDownSharedData(
-                    memberIds: partition.realIds,
+                    members: realMembers,
                     callerUid: uid,
                     callerRoleRaw: callerRoleRaw
                 )
@@ -123,6 +129,12 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                 // Keep author cleanup and membership access ordered, while making the final
                 // membership/user removal atomic so recovery cannot observe a half-finished exit.
                 let batch = db.batch()
+                if callerCreatedFamily {
+                    // The family doc survives as a non-reusable tombstone (rules forbid a
+                    // client delete), so it must not keep storing the erased user's UID.
+                    // Rules only accept this write together with the membership delete below.
+                    batch.updateData(["createdBy": ""], forDocument: familyRef)
+                }
                 batch.deleteDocument(familyRef.collection("members").document(uid))
                 batch.deleteDocument(userRef)
                 try await batch.commit()

@@ -136,11 +136,10 @@ private struct MomsyRootView: View {
                 container.runMigrationIfNeeded()
                 await appState.load()
                 phoneSession.activate()
-                guard !deletionStillPending else {
+                if onboardingDone {
                     await setupNotificationsOnLaunch(appState: appState)
-                    return
                 }
-                await setupNotificationsOnLaunch(appState: appState)
+                guard !deletionStillPending else { return }
                 switch CloudSyncConsent.status() {
                 case .granted:
                     await startCloudServices()
@@ -231,6 +230,10 @@ private struct MomsyRootView: View {
                 }
             }) {
                 AccountAuthSheet(container: container, mode: .joinFamily)
+            }
+            .onChange(of: onboardingDone) { _, isDone in
+                guard isDone else { return }
+                Task { await setupNotificationsOnLaunch(appState: appState) }
             }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {

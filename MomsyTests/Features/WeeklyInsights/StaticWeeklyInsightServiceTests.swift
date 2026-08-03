@@ -79,6 +79,51 @@ struct StaticWeeklyInsightServiceTests {
         #expect(ai.overallSummary.contains("leap #4"))
         #expect(ai.overallSummary.contains("new skills"))
     }
+
+    // MARK: - Age guard
+
+    /// The distinctive phrase of each language's "introduce one new food" advice.
+    /// The offline fallback must never emit it for a baby under 6 months — the
+    /// Gemini prompt already forbids it, and this is the only other narrative path.
+    private static let solidsAdvicePhrase: [Language: String] = [
+        .english: "new food",
+        .russian: "новому продукту",
+        .german: "neue Lebensmittel einzeln",
+        .spanish: "un alimento nuevo cada vez",
+        .french: "nouvel aliment",
+        .portuguese: "um novo alimento de cada vez",
+        .chinese: "新食物"
+    ]
+
+    @Test("never recommends solids under six months, in any language")
+    func doesNotRecommendSolidsUnderSixMonths() async throws {
+        let service = StaticWeeklyInsightService()
+        for (lang, phrase) in Self.solidsAdvicePhrase {
+            let ctx = WeeklyInsightContext(stats: stats(avgSleep: 700, ageMonths: 3), language: lang)
+            let ai = try await service.generate(context: ctx)
+            #expect(!ai.feedingRecommendation.contains(phrase), "\(lang) leaked solids advice to a 3-month-old")
+            #expect(!ai.feedingRecommendation.isEmpty)
+        }
+    }
+
+    @Test("recommends one new food at a time from six months, in any language")
+    func recommendsOneNewFoodAtSixMonths() async throws {
+        let service = StaticWeeklyInsightService()
+        for (lang, phrase) in Self.solidsAdvicePhrase {
+            let ctx = WeeklyInsightContext(stats: stats(avgSleep: 700, ageMonths: 6), language: lang)
+            let ai = try await service.generate(context: ctx)
+            #expect(ai.feedingRecommendation.contains(phrase), "\(lang) dropped solids advice for a 6-month-old")
+        }
+    }
+
+    @Test("allergen warning outranks the age guard")
+    func allergenWarningTakesPriorityOverAgeGuard() async throws {
+        let service = StaticWeeklyInsightService()
+        let ctx = WeeklyInsightContext(stats: stats(avgSleep: 700, ageMonths: 4, allergens: ["Egg"]),
+                                       language: .english)
+        let ai = try await service.generate(context: ctx)
+        #expect(ai.feedingRecommendation.contains("Egg"))
+    }
 }
 
 @Suite("WeeklyInsightPrompt")

@@ -175,6 +175,38 @@ test("family lifecycle cannot be reopened or client-deleted", async () => {
     await assertFails(momDb.doc(familyPath).delete());
 });
 
+test("the creator drops their UID only by leaving the roster", async () => {
+    const momDb = firestore(users.mom);
+    const dadDb = firestore(users.dad);
+    const memberPath = `${familyPath}/members/${users.mom}`;
+
+    // Anonymizing on its own leaves the creator in the roster — not an erasure.
+    await assertFails(momDb.doc(familyPath).update({ createdBy: "" }));
+    // Ownership may never be handed to another UID, erasure or not.
+    const handoff = momDb.batch();
+    handoff.update(momDb.doc(familyPath), { createdBy: users.dad });
+    handoff.delete(momDb.doc(memberPath));
+    await assertFails(handoff.commit());
+    // Only the creator may clear the field.
+    const impostor = dadDb.batch();
+    impostor.update(dadDb.doc(familyPath), { createdBy: "" });
+    impostor.delete(dadDb.doc(`${familyPath}/members/${users.dad}`));
+    await assertFails(impostor.commit());
+    // The tombstone itself stays undeletable.
+    await assertFails(momDb.doc(familyPath).delete());
+
+    const erasure = momDb.batch();
+    erasure.update(momDb.doc(familyPath), { createdBy: "" });
+    erasure.delete(momDb.doc(memberPath));
+    await assertSucceeds(erasure.commit());
+
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const family = await adminContext.firestore().doc(familyPath).get();
+        assert.equal(family.data().createdBy, "");
+        assert.equal(family.data().bootstrapComplete, true);
+    });
+});
+
 test("family creator bootstrap requires a parent role", async () => {
     for (const [suffix, roleRaw] of [
         ["mom", "Мама"],

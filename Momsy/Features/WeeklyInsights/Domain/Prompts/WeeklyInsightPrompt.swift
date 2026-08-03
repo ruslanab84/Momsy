@@ -31,7 +31,10 @@ enum WeeklyInsightPrompt {
 
         Reply ONLY with a JSON object with exactly these keys: \(jsonKeys).
         Keep JSON keys exactly in English. Write every JSON string value in \(responseLanguage).
-        Each value is 3-4 warm, specific sentences with concrete numbers and comparisons from the data. No markdown, no extra keys, no text outside the JSON.
+        Each value is 3-4 warm, specific sentences (40-80 words). Cite the concrete numbers from
+        the data in every summary: night vs day sleep split, naps/day, the week-over-week trend,
+        feedings/day and diaper count where relevant. Never restate a number without interpreting it.
+        No markdown, no extra keys, no text outside the JSON.
         """
     }
 

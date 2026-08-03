@@ -1,10 +1,16 @@
 import Foundation
 
 /// Decides whether "delete account" may tear down *shared* health data or must be
-/// scoped to the caller's own membership. Shared data may only be destroyed when
-/// the caller is the last remaining member — otherwise erasing it is data loss for
-/// a co-parent (and, under GDPR, processing another person's data without basis),
-/// not right-to-erasure.
+/// scoped to the caller's own membership. Shared data may only be destroyed by the
+/// last remaining PARENT — otherwise erasing it is data loss for a co-parent (and,
+/// under GDPR, processing another person's data without basis), not right-to-erasure.
+///
+/// The gate is "last parent" rather than "last member" because only a parent role
+/// satisfies `canManageFamilyRoster` in the Firestore rules, and that is what every
+/// delete under `families/{id}/babies/**` requires. A departing last parent that left
+/// a nanny/grandma behind would strand the child's whole log tree: the survivor can
+/// never delete it, and the family doc itself is client-undeletable, so the data would
+/// outlive every person entitled to erase it.
 ///
 /// Pure and synchronous so the policy is unit-tested without Firestore.
 enum AccountErasureGate {
@@ -58,20 +64,18 @@ enum AccountErasureGate {
         return (realIds, placeholderIds)
     }
 
-    static func mayTearDownSharedData(memberIds: [String], callerUid: String) -> Bool {
-        // `allSatisfy` on an empty roster returns true: an empty/orphaned family has
-        // no co-parent to harm, so tearing it down is safe.
-        memberIds.allSatisfy { $0 == callerUid }
+    static func isParentRole(_ roleRaw: String) -> Bool {
+        FamilyRole(storedRawValue: roleRaw)?.canManageFamilyMembers == true
     }
 
     static func mayTearDownSharedData(
-        memberIds: [String],
+        members: [(id: String, roleRaw: String)],
         callerUid: String,
         callerRoleRaw: String
     ) -> Bool {
-        guard FamilyRole(storedRawValue: callerRoleRaw)?.canManageFamilyMembers == true else {
-            return false
-        }
-        return mayTearDownSharedData(memberIds: memberIds, callerUid: callerUid)
+        guard isParentRole(callerRoleRaw) else { return false }
+        // `allSatisfy` on an empty roster returns true: an empty/orphaned family has
+        // no co-parent to harm, so tearing it down is safe.
+        return members.allSatisfy { $0.id == callerUid || !isParentRole($0.roleRaw) }
     }
 }

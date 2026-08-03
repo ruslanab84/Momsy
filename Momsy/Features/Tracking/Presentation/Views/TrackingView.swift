@@ -9,6 +9,7 @@ struct TrackingView: View {
     @EnvironmentObject var appState: AppState
     @ObservedObject private var familyManager = FamilyManager.shared
     @State private var showEditProfile = false
+    @State private var showWHOMethodology = false
 
     private let container: AppContainer
 
@@ -43,6 +44,10 @@ struct TrackingView: View {
         }
         .sheet(isPresented: $vm.showAddTemp) {
             AddTempSheet { entry in vm.addTemp(entry) }
+        }
+        .sheet(isPresented: $showWHOMethodology) {
+            WHOMethodologySheet()
+                .environmentObject(loc)
         }
         .sheet(isPresented: $showEditProfile) {
             if let profile = appState.babyProfile {
@@ -125,7 +130,7 @@ struct TrackingView: View {
             switch vm.selectedTab {
             case 1:
                 return ChartConfig(
-                    title: "Height, in", unit: "in",
+                    title: loc.strings.heightIn, unit: "in",
                     data:  vm.currentReference?.scaledBy(units.heightChartFactor),
                     gridVals: [20, 26, 31, 37],
                     babyPoints: vm.babyHeightPoints.map {
@@ -134,7 +139,7 @@ struct TrackingView: View {
                 )
             case 2:
                 return ChartConfig(
-                    title: "Head circ., in", unit: "in",
+                    title: loc.strings.headCircIn, unit: "in",
                     data:  vm.currentReference?.scaledBy(units.heightChartFactor),
                     gridVals: [13, 15, 17, 19],
                     babyPoints: vm.babyHeadPoints.map {
@@ -143,7 +148,7 @@ struct TrackingView: View {
                 )
             default:
                 return ChartConfig(
-                    title: "Weight, lb", unit: "lb",
+                    title: loc.strings.weightLb, unit: "lb",
                     data:  vm.currentReference?.scaledBy(units.weightChartFactor),
                     gridVals: [9, 15, 22, 29],
                     babyPoints: vm.babyWeightPoints.map {
@@ -197,8 +202,37 @@ struct TrackingView: View {
             if vm.babySex == nil {
                 sexHint
             }
+
+            methodologyFooter
         }
         .bbCard(pad: 14)
+    }
+
+    /// Guideline 1.4.1: the chart carries WHO branding and a health label, so the
+    /// source, the approximations behind the label and the "see a paediatrician"
+    /// advice have to be reachable from the chart itself, not buried in code.
+    private var methodologyFooter: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(loc.strings.whoChartDisclaimer)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Button { showWHOMethodology = true } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "info.circle.fill")
+                        .font(.system(size: 11, weight: .bold))
+                    Text(loc.strings.whoMethodologyMore)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 9, weight: .heavy))
+                }
+                .foregroundColor(.bbInkSoft)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 8)
     }
 
     private var whoRangeLabel: String {

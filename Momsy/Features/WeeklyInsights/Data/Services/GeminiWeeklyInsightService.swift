@@ -4,12 +4,19 @@ import FirebaseAI
 final class GeminiWeeklyInsightService: WeeklyInsightService {
 
     private let modelName = "gemini-3.1-flash-lite"
-    private let maxOutputTokens = 1400
+    /// Gemini 3.x always uses dynamic thinking and counts thinking tokens against
+    /// `maxOutputTokens`. The budget must cover thinking *and* the five narrative
+    /// fields, otherwise the response comes back with `finishReason == .maxTokens`
+    /// and the SDK throws before any text is produced.
+    private let maxOutputTokens = 4000
 
     func generate(context: WeeklyInsightContext) async throws -> WeeklyInsightAI {
         try await GeminiRetry.run(label: "GeminiWeeklyInsightService") {
             // Prompt-enforced JSON (system prompt mandates it) + tolerant decode.
-            let config = GenerationConfig(maxOutputTokens: maxOutputTokens)
+            let config = GenerationConfig(
+                maxOutputTokens: maxOutputTokens,
+                thinkingConfig: ThinkingConfig(thinkingLevel: .low)
+            )
             let model = FirebaseAI.firebaseAI(backend: .googleAI()).generativeModel(
                 modelName: modelName,
                 generationConfig: config,

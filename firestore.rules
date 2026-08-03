@@ -48,6 +48,22 @@ service cloud.firestore {
       return isFamilyMember(familyId);
     }
 
+    // Право на удаление: создатель снимает свой UID с семейного документа, уходя из
+    // ростера. Сам документ остаётся неповторно используемым tombstone'ом (delete
+    // запрещён всем), но перестаёт хранить идентификатор стёртого пользователя.
+    // Backend'а с привилегированным доступом в проекте нет, поэтому иначе UID
+    // остался бы навсегда.
+    function isCreatorSelfErasure(familyId) {
+      return isSignedIn()
+        && resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdBy == ''
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['createdBy'])
+        && !existsAfter(
+          /databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)
+        );
+    }
+
     function callerRoleRaw(familyId) {
       return get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.roleRaw;
     }
@@ -356,11 +372,14 @@ service cloud.firestore {
                     && request.resource.data.bootstrapComplete == false;
       // Bootstrap may only move false -> true; otherwise a creator could reopen
       // bootstrap and recreate their member document.
-      allow update: if (canManageFamilyRoster(familyId) || isFamilyCreator(familyId))
-                    && request.resource.data.createdBy == resource.data.createdBy
-                    && request.resource.data.bootstrapComplete == true
-                    && request.resource.data.diff(resource.data).affectedKeys()
-                      .hasOnly(['bootstrapComplete']);
+      allow update: if (
+                      (canManageFamilyRoster(familyId) || isFamilyCreator(familyId))
+                      && request.resource.data.createdBy == resource.data.createdBy
+                      && request.resource.data.bootstrapComplete == true
+                      && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['bootstrapComplete'])
+                    )
+                    || isCreatorSelfErasure(familyId);
       // Keep the parent as a non-reusable tombstone; trusted backends bypass rules.
       allow delete: if false;
 

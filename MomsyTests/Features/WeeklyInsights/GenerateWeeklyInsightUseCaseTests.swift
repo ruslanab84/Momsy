@@ -205,4 +205,60 @@ struct GenerateWeeklyInsightUseCaseTests {
         #expect(cal.startOfDay(for: bounds.end) == cal.startOfDay(for: date(2026, 6, 7, 0)))
         #expect(cal.startOfDay(for: bounds.start) == cal.startOfDay(for: date(2026, 5, 31, 0)))
     }
+
+    // MARK: - Fallback retry
+
+    private static let placeholderAI = WeeklyInsightAI(
+        sleepSummary: "static", sleepRecommendation: "static",
+        feedingSummary: "static", feedingRecommendation: "static", overallSummary: "static"
+    )
+
+    /// A stored report for an arbitrary past week, generated at epoch 0.
+    private func storedReport(isAIGenerated: Bool, noData: Bool = false) -> WeeklyInsight {
+        let start = Date(timeIntervalSince1970: 0)
+        let stats = noData
+            ? emptyStats(weekStart: start, weekEnd: start.addingTimeInterval(7 * 86_400))
+            : sampleStats(weekStart: start, weekEnd: start.addingTimeInterval(7 * 86_400))
+        return WeeklyInsight(stats: stats, ai: Self.placeholderAI, isAIGenerated: isAIGenerated,
+                             generatedAt: start, language: .english)
+    }
+
+    /// Stats for a week with nothing logged at all → `hasNoData` is true.
+    private func emptyStats(weekStart: Date, weekEnd: Date) -> WeeklyStats {
+        WeeklyStats(
+            weekStart: weekStart, weekEnd: weekEnd,
+            ageMonths: 2, ageWeeks: 9, currentLeapName: nil,
+            currentLeapID: nil, leapSignals: [],
+            avgSleepMinutesPerDay: 0, avgNightSleepMinutes: 0, avgDaySleepMinutes: 0,
+            avgNapsPerDay: 0, sleepTrendVsPrevWeekMinutes: 0,
+            whoMinSleepMinutes: 840, whoAwakeWindowMax: 90,
+            avgFeedingsPerDay: 0, totalFeedings: 0,
+            newFoodsIntroduced: [], allergensFlagged: [], totalDiapers: 0
+        )
+    }
+
+    @Test("retries AI when the stored report is a fallback older than a day")
+    func retriesStaleFallbackReport() {
+        let stored = storedReport(isAIGenerated: false)
+        #expect(GenerateWeeklyInsightUseCase.shouldRetryAI(stored, now: Date(timeIntervalSince1970: 90_000)))
+    }
+
+    @Test("does not retry a fallback report within the same day")
+    func doesNotRetryWithinTheSameDay() {
+        let stored = storedReport(isAIGenerated: false)
+        #expect(!GenerateWeeklyInsightUseCase.shouldRetryAI(stored, now: Date(timeIntervalSince1970: 3_600)))
+    }
+
+    @Test("never retries a successful AI report")
+    func neverRetriesSuccessfulAIReport() {
+        let stored = storedReport(isAIGenerated: true)
+        #expect(!GenerateWeeklyInsightUseCase.shouldRetryAI(stored, now: Date(timeIntervalSince1970: 90_000)))
+    }
+
+    @Test("never retries a week with no logged data")
+    func neverRetriesNoDataWeek() {
+        let stored = storedReport(isAIGenerated: false, noData: true)
+        #expect(stored.stats.hasNoData)
+        #expect(!GenerateWeeklyInsightUseCase.shouldRetryAI(stored, now: Date(timeIntervalSince1970: 90_000)))
+    }
 }

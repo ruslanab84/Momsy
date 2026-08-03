@@ -47,24 +47,82 @@ struct AccountErasureGateTests {
 
     @Test("sole member may tear down shared data")
     func soleMember() {
-        #expect(AccountErasureGate.mayTearDownSharedData(memberIds: ["me"], callerUid: "me"))
+        #expect(AccountErasureGate.mayTearDownSharedData(
+            members: [(id: "me", roleRaw: FamilyRole.mom.rawValue)],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.mom.rawValue
+        ))
     }
     @Test("member with a co-parent may NOT tear down shared data")
     func withCoParent() {
-        #expect(!AccountErasureGate.mayTearDownSharedData(memberIds: ["me", "partner"], callerUid: "me"))
+        #expect(!AccountErasureGate.mayTearDownSharedData(
+            members: [
+                (id: "me", roleRaw: FamilyRole.mom.rawValue),
+                (id: "partner", roleRaw: FamilyRole.dad.rawValue)
+            ],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.mom.rawValue
+        ))
     }
 
     @Test("empty roster treated as sole — nobody else to harm")
     func emptyRoster() {
-        #expect(AccountErasureGate.mayTearDownSharedData(memberIds: [], callerUid: "me"))
+        #expect(AccountErasureGate.mayTearDownSharedData(
+            members: [],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.mom.rawValue
+        ))
     }
-    @Test("roster of only other members may NOT tear down")
+    @Test("roster of only other parents may NOT tear down")
     func othersOnly() {
-        #expect(!AccountErasureGate.mayTearDownSharedData(memberIds: ["a", "b"], callerUid: "me"))
+        #expect(!AccountErasureGate.mayTearDownSharedData(
+            members: [
+                (id: "a", roleRaw: FamilyRole.mom.rawValue),
+                (id: "b", roleRaw: FamilyRole.dad.rawValue)
+            ],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.mom.rawValue
+        ))
     }
-    @Test("caller plus others may NOT tear down")
+    @Test("caller plus other parents may NOT tear down")
     func callerPlusOthers() {
-        #expect(!AccountErasureGate.mayTearDownSharedData(memberIds: ["me", "a", "b"], callerUid: "me"))
+        #expect(!AccountErasureGate.mayTearDownSharedData(
+            members: [
+                (id: "me", roleRaw: FamilyRole.mom.rawValue),
+                (id: "a", roleRaw: FamilyRole.dad.rawValue),
+                (id: "b", roleRaw: FamilyRole.mom.rawValue)
+            ],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.mom.rawValue
+        ))
+    }
+
+    @Test("last parent MAY tear down even with restricted members left behind")
+    func lastParentWithRestrictedSurvivors() {
+        // A nanny/grandma survivor can never delete the baby tree (rules demand a
+        // parent role) and the family doc is client-undeletable, so leaving the data
+        // behind would strand it permanently.
+        #expect(AccountErasureGate.mayTearDownSharedData(
+            members: [
+                (id: "me", roleRaw: FamilyRole.mom.rawValue),
+                (id: "nanny", roleRaw: FamilyRole.nanny.rawValue),
+                (id: "grandma", roleRaw: FamilyRole.grandma.rawValue)
+            ],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.mom.rawValue
+        ))
+    }
+
+    @Test("an unrecognized member role is never treated as a surviving parent")
+    func unknownSurvivorRole() {
+        #expect(AccountErasureGate.mayTearDownSharedData(
+            members: [
+                (id: "me", roleRaw: FamilyRole.dad.rawValue),
+                (id: "legacy", roleRaw: "")
+            ],
+            callerUid: "me",
+            callerRoleRaw: FamilyRole.dad.rawValue
+        ))
     }
 
     @Test("recognizes only the legacy Add to team placeholder shape")
@@ -100,25 +158,19 @@ struct AccountErasureGateTests {
         ])
         #expect(soleMember.realIds == ["me"])
         #expect(soleMember.placeholderIds == [documentId])
-        #expect(AccountErasureGate.mayTearDownSharedData(
-            memberIds: soleMember.realIds,
-            callerUid: "me"
-        ))
 
         let sharedFamily = AccountErasureGate.partitionMemberDocuments([
             (id: "me", data: ["uid": "me"]),
             (id: "partner", data: ["uid": "partner"])
         ])
-        #expect(!AccountErasureGate.mayTearDownSharedData(
-            memberIds: sharedFamily.realIds,
-            callerUid: "me"
-        ))
+        #expect(sharedFamily.realIds == ["me", "partner"])
+        #expect(sharedFamily.placeholderIds.isEmpty)
     }
 
     @Test("sole parent may tear down shared data")
     func soleParent() {
         #expect(AccountErasureGate.mayTearDownSharedData(
-            memberIds: ["me"],
+            members: [(id: "me", roleRaw: FamilyRole.dad.rawValue)],
             callerUid: "me",
             callerRoleRaw: FamilyRole.dad.rawValue
         ))
@@ -127,12 +179,12 @@ struct AccountErasureGateTests {
     @Test("sole restricted member may only remove their membership")
     func soleRestrictedMember() {
         #expect(!AccountErasureGate.mayTearDownSharedData(
-            memberIds: ["me"],
+            members: [(id: "me", roleRaw: FamilyRole.nanny.rawValue)],
             callerUid: "me",
             callerRoleRaw: FamilyRole.nanny.rawValue
         ))
         #expect(!AccountErasureGate.mayTearDownSharedData(
-            memberIds: ["me"],
+            members: [(id: "me", roleRaw: FamilyRole.grandma.rawValue)],
             callerUid: "me",
             callerRoleRaw: FamilyRole.grandma.rawValue
         ))

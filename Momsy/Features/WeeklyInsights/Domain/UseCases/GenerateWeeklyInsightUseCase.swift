@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// Orchestrates: compute last completed week → de-dup → aggregate → AI (with
 /// offline fallback) → persist locally. Generation is automatic (no UI trigger).
@@ -54,7 +55,16 @@ final class GenerateWeeklyInsightUseCase {
         // generated in. Changing the app language never re-generates or re-translates
         // past reports (no Gemini cost on language switch); only future weeks use the
         // new language.
-        if ((try? await repo.report(forWeekStarting: weekStart)) ?? nil) != nil { return nil }
+        //
+        // Exception: a report that fell back to the static narrative is retried once a
+        // day until the AI version succeeds — a single transient Gemini failure would
+        // otherwise leave a template report in place permanently. Such a retry adopts
+        // the current app language, since the narrative it replaces is a template
+        // rather than a generated report. No-data weeks and successful AI reports are
+        // never regenerated.
+        if let existing = (try? await repo.report(forWeekStarting: weekStart)) ?? nil {
+            guard Self.shouldRetryAI(existing, now: now) else { return nil }
+        }
 
         let birthDate = appState.babyProfile?.birthDate
         let insight = await generate(weekStart: weekStart, weekEnd: weekEnd,
@@ -79,8 +89,13 @@ final class GenerateWeeklyInsightUseCase {
 
         let ctx = WeeklyInsightContext(stats: stats, language: language)
 
-        if hasAIConsent(), let ai = try? await service.generate(context: ctx) {
-            return WeeklyInsight(stats: stats, ai: ai, isAIGenerated: true, generatedAt: Date(), language: language)
+        if hasAIConsent() {
+            do {
+                let ai = try await service.generate(context: ctx)
+                return WeeklyInsight(stats: stats, ai: ai, isAIGenerated: true, generatedAt: Date(), language: language)
+            } catch {
+                Self.log.error("Weekly insight AI failed, using static fallback: \(error.localizedDescription, privacy: .private)")
+            }
         }
         let ai = (try? await fallback.generate(context: ctx)) ?? Self.emptyAI
         return WeeklyInsight(stats: stats, ai: ai, isAIGenerated: false, generatedAt: Date(), language: language)
@@ -102,6 +117,15 @@ final class GenerateWeeklyInsightUseCase {
         guard let weekStart = cal.date(byAdding: .day, value: -7, to: weekEnd) else { return nil }
         return (weekStart, weekEnd)
     }
+
+    /// Retry window for a report that fell back to the static narrative.
+    /// Caps regeneration attempts at roughly one per day per week bucket.
+    static func shouldRetryAI(_ existing: WeeklyInsight, now: Date) -> Bool {
+        guard !existing.isAIGenerated, !existing.stats.hasNoData else { return false }
+        return now.timeIntervalSince(existing.generatedAt) >= 86_400
+    }
+
+    private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "WeeklyInsight")
 
     private static let emptyAI = WeeklyInsightAI(
         sleepSummary: "", sleepRecommendation: "",

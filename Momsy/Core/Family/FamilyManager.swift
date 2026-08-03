@@ -454,14 +454,20 @@ final class FamilyManager: ObservableObject {
         )
     }
 
-    /// True when the caller is the only remaining member (or the roster is empty).
+    /// True when the caller is the only remaining parent (or the roster is empty).
     /// Gates whether account deletion may tear down shared family data.
     func isSoleMember(uid: String) async throws -> Bool {
         guard let familyId else { return true }
         let snap = try await db.collection("families").document(familyId)
             .collection("members").getDocuments()
-        let ids = snap.documents.map { $0.documentID }
-        return AccountErasureGate.mayTearDownSharedData(memberIds: ids, callerUid: uid)
+        let members = snap.documents.map {
+            (id: $0.documentID, roleRaw: $0.data()["roleRaw"] as? String ?? "")
+        }
+        return AccountErasureGate.mayTearDownSharedData(
+            members: members,
+            callerUid: uid,
+            callerRoleRaw: members.first { $0.id == uid }?.roleRaw ?? ""
+        )
     }
 
     /// `permissionDenied` on reading one's OWN member doc means the doc no longer

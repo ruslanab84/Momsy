@@ -367,13 +367,14 @@ final class OnboardingViewModel: ObservableObject {
 
     func finish() {
         analytics.track(.onboardingComplete)
-        pushNotifications.scheduleMorningDiary(hour: 9, minute: 0)
-        guard flow == .createProfile else {
-            pendingInviteStore.clear()
-            onDone()
-            return
-        }
         Task {
+            await pushNotifications.requestPermission()
+            pushNotifications.scheduleMorningDiary(hour: 9, minute: 0)
+            guard flow == .createProfile else {
+                pendingInviteStore.clear()
+                onDone()
+                return
+            }
             let profile = try? await saveBabyProfileLocallyIfNeeded()
             guard cloudSyncEnabled else {
                 onDone()

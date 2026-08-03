@@ -64,10 +64,19 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Sleep looks healthy for this age — keep the current rhythm."
             : "Try an earlier bedtime and watch wake windows (~\(s.whoAwakeWindowMax) min) to add rest."
         let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
-        let foods = s.newFoodsIntroduced.isEmpty ? "no new foods" : s.newFoodsIntroduced.joined(separator: ", ")
-        let feedingRec = s.allergensFlagged.isEmpty
-            ? "Introduce one new food at a time and watch for reactions."
-            : "Avoid re-introducing flagged foods (\(s.allergensFlagged.joined(separator: ", "))) and consult your pediatrician."
+        let foods = s.newFoodsIntroduced.isEmpty
+            ? (s.ageMonths < 6 ? "milk only, as expected for this age" : "no new foods")
+            : s.newFoodsIntroduced.joined(separator: ", ")
+        // Age outranks the default advice: solids must never be suggested under 6
+        // months. A flagged allergen outranks both.
+        let feedingRec: String
+        if !s.allergensFlagged.isEmpty {
+            feedingRec = "Avoid re-introducing flagged foods (\(s.allergensFlagged.joined(separator: ", "))) and consult your pediatrician."
+        } else if s.ageMonths < 6 {
+            feedingRec = "At this age milk feeds are all baby needs — keep offering breast milk or formula on demand."
+        } else {
+            feedingRec = "Introduce one new food at a time and watch for reactions."
+        }
         return WeeklyInsightAI(
             sleepSummary: "This week baby slept on average \(hEn(s.avgSleepMinutesPerDay)) per day (\(String(format: "%.1f", s.avgNapsPerDay)) naps). Typical for this age is ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
@@ -85,10 +94,17 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Сон в норме для этого возраста — сохраняйте текущий режим."
             : "Попробуйте укладывать раньше и следите за окнами бодрствования (~\(s.whoAwakeWindowMax) мин)."
         let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
-        let foods = s.newFoodsIntroduced.isEmpty ? "новых продуктов не было" : s.newFoodsIntroduced.joined(separator: ", ")
-        let feedingRec = s.allergensFlagged.isEmpty
-            ? "Вводите по одному новому продукту и следите за реакцией."
-            : "Не вводите повторно продукты с реакцией (\(s.allergensFlagged.joined(separator: ", "))) и проконсультируйтесь с педиатром."
+        let foods = s.newFoodsIntroduced.isEmpty
+            ? (s.ageMonths < 6 ? "только молоко — это норма для возраста" : "новых продуктов не было")
+            : s.newFoodsIntroduced.joined(separator: ", ")
+        let feedingRec: String
+        if !s.allergensFlagged.isEmpty {
+            feedingRec = "Не вводите повторно продукты с реакцией (\(s.allergensFlagged.joined(separator: ", "))) и проконсультируйтесь с педиатром."
+        } else if s.ageMonths < 6 {
+            feedingRec = "В этом возрасте достаточно молока — продолжайте кормить грудью или смесью по требованию."
+        } else {
+            feedingRec = "Вводите по одному новому продукту и следите за реакцией."
+        }
         return WeeklyInsightAI(
             sleepSummary: "На этой неделе малыш спал в среднем \(h(s.avgSleepMinutesPerDay)) в сутки (\(String(format: "%.1f", s.avgNapsPerDay)) дневных снов). Обычно в этом возрасте ≥ \(h(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
@@ -106,10 +122,17 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Der Schlaf ist für dieses Alter gesund — behalte den Rhythmus bei."
             : "Versuche eine frühere Schlafenszeit und beachte die Wachfenster (~\(s.whoAwakeWindowMax) Min.)."
         let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
-        let foods = s.newFoodsIntroduced.isEmpty ? "keine neuen Lebensmittel" : s.newFoodsIntroduced.joined(separator: ", ")
-        let feedingRec = s.allergensFlagged.isEmpty
-            ? "Führe neue Lebensmittel einzeln ein und achte auf Reaktionen."
-            : "Führe markierte Lebensmittel (\(s.allergensFlagged.joined(separator: ", "))) nicht erneut ein und frage den Kinderarzt."
+        let foods = s.newFoodsIntroduced.isEmpty
+            ? (s.ageMonths < 6 ? "nur Milch — in diesem Alter zu erwarten" : "keine neuen Lebensmittel")
+            : s.newFoodsIntroduced.joined(separator: ", ")
+        let feedingRec: String
+        if !s.allergensFlagged.isEmpty {
+            feedingRec = "Führe markierte Lebensmittel (\(s.allergensFlagged.joined(separator: ", "))) nicht erneut ein und frage den Kinderarzt."
+        } else if s.ageMonths < 6 {
+            feedingRec = "In diesem Alter reichen Milchmahlzeiten — biete weiterhin Muttermilch oder Formula nach Bedarf an."
+        } else {
+            feedingRec = "Führe neue Lebensmittel einzeln ein und achte auf Reaktionen."
+        }
         return WeeklyInsightAI(
             sleepSummary: "Diese Woche schlief das Baby Ø \(hEn(s.avgSleepMinutesPerDay)) pro Tag (\(String(format: "%.1f", s.avgNapsPerDay)) Schläfchen). Üblich in diesem Alter sind ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
@@ -127,10 +150,17 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "El sueño está saludable para esta edad: mantén el ritmo actual."
             : "Prueba una hora de dormir más temprana y observa las ventanas de vigilia (~\(s.whoAwakeWindowMax) min) para sumar descanso."
         let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
-        let foods = s.newFoodsIntroduced.isEmpty ? "ningún alimento nuevo" : s.newFoodsIntroduced.joined(separator: ", ")
-        let feedingRec = s.allergensFlagged.isEmpty
-            ? "Introduce un alimento nuevo cada vez y observa posibles reacciones."
-            : "Evita reintroducir los alimentos marcados (\(s.allergensFlagged.joined(separator: ", "))) y consulta con tu pediatra."
+        let foods = s.newFoodsIntroduced.isEmpty
+            ? (s.ageMonths < 6 ? "solo leche, como corresponde a esta edad" : "ningún alimento nuevo")
+            : s.newFoodsIntroduced.joined(separator: ", ")
+        let feedingRec: String
+        if !s.allergensFlagged.isEmpty {
+            feedingRec = "Evita reintroducir los alimentos marcados (\(s.allergensFlagged.joined(separator: ", "))) y consulta con tu pediatra."
+        } else if s.ageMonths < 6 {
+            feedingRec = "A esta edad la leche es suficiente: sigue ofreciendo leche materna o fórmula a demanda."
+        } else {
+            feedingRec = "Introduce un alimento nuevo cada vez y observa posibles reacciones."
+        }
         return WeeklyInsightAI(
             sleepSummary: "Esta semana el bebé durmió una media de \(hEn(s.avgSleepMinutesPerDay)) al día (\(String(format: "%.1f", s.avgNapsPerDay)) siestas). Lo habitual a esta edad es ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
@@ -148,10 +178,17 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "Le sommeil est sain pour cet âge — gardez le rythme actuel."
             : "Essayez un coucher plus tôt et surveillez les fenêtres d’éveil (~\(s.whoAwakeWindowMax) min) pour ajouter du repos."
         let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
-        let foods = s.newFoodsIntroduced.isEmpty ? "aucun nouvel aliment" : s.newFoodsIntroduced.joined(separator: ", ")
-        let feedingRec = s.allergensFlagged.isEmpty
-            ? "Introduisez un seul nouvel aliment à la fois et surveillez les réactions."
-            : "Évitez de réintroduire les aliments signalés (\(s.allergensFlagged.joined(separator: ", "))) et consultez votre pédiatre."
+        let foods = s.newFoodsIntroduced.isEmpty
+            ? (s.ageMonths < 6 ? "uniquement du lait, comme il se doit à cet âge" : "aucun nouvel aliment")
+            : s.newFoodsIntroduced.joined(separator: ", ")
+        let feedingRec: String
+        if !s.allergensFlagged.isEmpty {
+            feedingRec = "Évitez de réintroduire les aliments signalés (\(s.allergensFlagged.joined(separator: ", "))) et consultez votre pédiatre."
+        } else if s.ageMonths < 6 {
+            feedingRec = "À cet âge, le lait suffit — continuez à proposer le lait maternel ou la préparation à la demande."
+        } else {
+            feedingRec = "Introduisez un seul nouvel aliment à la fois et surveillez les réactions."
+        }
         return WeeklyInsightAI(
             sleepSummary: "Cette semaine, bébé a dormi en moyenne \(hEn(s.avgSleepMinutesPerDay)) par jour (\(String(format: "%.1f", s.avgNapsPerDay)) siestes). À cet âge, on compte plutôt ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
@@ -169,10 +206,17 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "O sono está saudável para esta idade — mantenha o ritmo atual."
             : "Experimente uma hora de deitar mais cedo e observe as janelas de sono (~\(s.whoAwakeWindowMax) min) para acrescentar descanso."
         let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
-        let foods = s.newFoodsIntroduced.isEmpty ? "nenhum alimento novo" : s.newFoodsIntroduced.joined(separator: ", ")
-        let feedingRec = s.allergensFlagged.isEmpty
-            ? "Introduza um novo alimento de cada vez e observe possíveis reações."
-            : "Evite reintroduzir os alimentos assinalados (\(s.allergensFlagged.joined(separator: ", "))) e consulte o seu pediatra."
+        let foods = s.newFoodsIntroduced.isEmpty
+            ? (s.ageMonths < 6 ? "apenas leite, como é esperado nesta idade" : "nenhum alimento novo")
+            : s.newFoodsIntroduced.joined(separator: ", ")
+        let feedingRec: String
+        if !s.allergensFlagged.isEmpty {
+            feedingRec = "Evite reintroduzir os alimentos assinalados (\(s.allergensFlagged.joined(separator: ", "))) e consulte o seu pediatra."
+        } else if s.ageMonths < 6 {
+            feedingRec = "Nesta idade o leite é suficiente — continue a oferecer leite materno ou fórmula em livre demanda."
+        } else {
+            feedingRec = "Introduza um novo alimento de cada vez e observe possíveis reações."
+        }
         return WeeklyInsightAI(
             sleepSummary: "Esta semana o bebé dormiu em média \(hEn(s.avgSleepMinutesPerDay)) por dia (\(String(format: "%.1f", s.avgNapsPerDay)) sestas). O habitual nesta idade é ≥ \(hEn(s.whoMinSleepMinutes)).",
             sleepRecommendation: sleepRec,
@@ -197,10 +241,17 @@ final class StaticWeeklyInsightService: WeeklyInsightService {
             ? "这个年龄段的睡眠很健康——保持现在的节奏即可。"
             : "试着早点哄睡，并留意清醒时长（约 \(s.whoAwakeWindowMax) 分钟），以增加休息。"
         let feeds = String(format: "%.1f", s.avgFeedingsPerDay)
-        let foods = s.newFoodsIntroduced.isEmpty ? "没有新食物" : s.newFoodsIntroduced.joined(separator: "、")
-        let feedingRec = s.allergensFlagged.isEmpty
-            ? "每次只引入一种新食物，并留意是否有反应。"
-            : "不要再次引入已标记的食物（\(s.allergensFlagged.joined(separator: "、"))），并咨询儿科医生。"
+        let foods = s.newFoodsIntroduced.isEmpty
+            ? (s.ageMonths < 6 ? "只有奶——这个月龄本该如此" : "没有新食物")
+            : s.newFoodsIntroduced.joined(separator: "、")
+        let feedingRec: String
+        if !s.allergensFlagged.isEmpty {
+            feedingRec = "不要再次引入已标记的食物（\(s.allergensFlagged.joined(separator: "、"))），并咨询儿科医生。"
+        } else if s.ageMonths < 6 {
+            feedingRec = "这个月龄只需奶量——继续按需喂母乳或配方奶。"
+        } else {
+            feedingRec = "每次只引入一种新食物，并留意是否有反应。"
+        }
         return WeeklyInsightAI(
             sleepSummary: "本周宝宝平均每天睡 \(hZh(s.avgSleepMinutesPerDay))（\(String(format: "%.1f", s.avgNapsPerDay)) 次小睡）。这个月龄通常需要 ≥ \(hZh(s.whoMinSleepMinutes))。",
             sleepRecommendation: sleepRec,

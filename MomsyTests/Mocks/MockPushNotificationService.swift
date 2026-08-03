@@ -3,6 +3,7 @@ import Foundation
 
 final class MockPushNotificationService: PushNotificationServiceProtocol, @unchecked Sendable {
     var permissionRequested = false
+    var permissionRequestedBeforeDiaryScheduling = false
     var scheduledDiaryHour: Int?
     var weeklyReportScheduled = false
     var weeklyReportCancelled = false
@@ -15,7 +16,10 @@ final class MockPushNotificationService: PushNotificationServiceProtocol, @unche
     func requestPermission() async { permissionRequested = true }
     func scheduleFeedingReminder(afterMinutes minutes: Int) {}
     func cancelFeedingReminder() {}
-    func scheduleMorningDiary(hour: Int, minute: Int) { scheduledDiaryHour = hour }
+    func scheduleMorningDiary(hour: Int, minute: Int) {
+        permissionRequestedBeforeDiaryScheduling = permissionRequested
+        scheduledDiaryHour = hour
+    }
     func scheduleLeapNotification(leapID: Int, name: String, startDate: Date) { scheduledLeapStartIDs.append(leapID) }
     func scheduleLeapSoonNotification(leapID: Int, name: String, fireDate: Date) { scheduledLeapSoonIDs.append(leapID) }
     func scheduleLeapPeakNotification(leapID: Int, name: String, fireDate: Date) { scheduledLeapPeakIDs.append(leapID) }

@@ -463,12 +463,14 @@ struct OnboardingViewModelTests {
         #expect(analytics.events.count == 1)
     }
 
-    @Test("finish() schedules morning diary push notification")
-    func finishSchedulesPush() async throws {
+    @Test("finish() requests notification permission before scheduling")
+    func finishRequestsPermissionBeforeScheduling() async throws {
         let (vm, _, _, push) = makeVM()
         vm.babyName = "Lena"
         vm.finish()
         try await Task.sleep(nanoseconds: 100_000_000)
+        #expect(push.permissionRequested)
+        #expect(push.permissionRequestedBeforeDiaryScheduling)
         #expect(push.scheduledDiaryHour == 9)
     }
 
@@ -479,6 +481,7 @@ struct OnboardingViewModelTests {
         harness.vm.step = .ready
 
         harness.vm.finish()
+        try await Task.sleep(nanoseconds: 100_000_000)
 
         let saved = try await harness.repo.getProfile()
         #expect(called)

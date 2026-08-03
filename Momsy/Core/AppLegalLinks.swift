@@ -5,6 +5,10 @@ enum AppLegalLinks {
     static let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
     static let feedbackEmail = "momsy.app.support@gmail.com"
 
+    /// Source of the growth tables in `WHOGrowthStandards.swift`, surfaced in the
+    /// tracking chart's methodology sheet so the WHO attribution is verifiable.
+    static let whoGrowthStandardsURL = URL(string: "https://www.who.int/tools/child-growth-standards/standards")
+
     static let appStoreID = "6784641297"
 
     static var appStoreReviewURL: URL? {
