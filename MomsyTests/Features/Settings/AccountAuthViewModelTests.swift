@@ -28,8 +28,9 @@ private struct AuthSwitchCloudEraser: CloudAccountEraser {
 
     let calls: Calls
 
-    func deleteCloudData(uid: String) async throws {
+    func deleteCloudData(uid: String, familyIdHint: String?) async throws -> AccountErasureOutcome {
         calls.events.append("cloudErase:\(uid)")
+        return .erased
     }
 
     func isCloudDataPresent(uid: String) async throws -> Bool {

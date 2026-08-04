@@ -73,7 +73,7 @@ final class AuthManager: ObservableObject {
             if let user {
                 Task { @MainActor in
                     guard Auth.auth().currentUser?.uid == user.uid else { return }
-                    if UserDefaultsPendingAccountDeletionStore().loadPending() == user.uid {
+                    if UserDefaultsPendingAccountDeletionStore().loadPending()?.uid == user.uid {
                         AuthManager.log.info("Skipping family setup while account deletion is pending")
                         return
                     }
@@ -172,7 +172,7 @@ final class AuthManager: ObservableObject {
         purgeLocalData: () async -> Void,
         signIn: () async throws -> Result
     ) async throws -> Result {
-        try await cloudEraser.deleteCloudData(uid: anonymousUid)
+        _ = try await cloudEraser.deleteCloudData(uid: anonymousUid, familyIdHint: nil)
         guard try await !cloudEraser.isCloudDataPresent(uid: anonymousUid) else {
             throw AuthError.accountDeletionPending
         }
@@ -190,7 +190,7 @@ final class AuthManager: ObservableObject {
                 return try await current.link(with: credential).user
             } catch let error as NSError where error.code == AuthErrorCode.credentialAlreadyInUse.rawValue {
                 let fallback = Self.fallbackCredential(original: credential, linkError: error)
-                let cloudEraser = FirestoreAccountEraser(babySync: BabySyncService())
+                let cloudEraser = FirestoreAccountEraser()
                 return try await Self.switchFromAnonymousAccount(
                     anonymousUid: anonymousUid,
                     cloudEraser: cloudEraser,
@@ -254,7 +254,7 @@ final class AuthManager: ObservableObject {
         )
         let user = try await linkOrSignIn(with: credential)
         await adoptAppleFullNameIfNeeded(cred.fullName, for: user)
-        if UserDefaultsPendingAccountDeletionStore().loadPending() == user.uid,
+        if UserDefaultsPendingAccountDeletionStore().loadPending()?.uid == user.uid,
            let authorizationCode = cred.authorizationCode
             .flatMap({ String(data: $0, encoding: .utf8) }) {
             pendingAppleDeletionAuthorizationCode = authorizationCode
@@ -344,7 +344,7 @@ final class AuthManager: ObservableObject {
 #if canImport(GoogleSignIn)
         let credential = try await googleCredentialFromInteractiveSignIn()
         firebaseUser = try await linkOrSignIn(with: credential)
-        if UserDefaultsPendingAccountDeletionStore().loadPending() == firebaseUser?.uid {
+        if UserDefaultsPendingAccountDeletionStore().loadPending()?.uid == firebaseUser?.uid {
             googleDeletionReauthenticatedUID = firebaseUser?.uid
         }
 #else

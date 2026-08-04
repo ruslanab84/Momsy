@@ -446,7 +446,7 @@ final class FamilyManager: ObservableObject {
         // suppressed-restore path would delete the freshly created member doc.
         UserDefaultsSuppressedFamilyRestoreStore().clearSuppression(for: uid)
         let pendingStore = UserDefaultsPendingAccountDeletionStore()
-        if pendingStore.loadPending() == uid { pendingStore.clearPending() }
+        if pendingStore.loadPending()?.uid == uid { pendingStore.clearPending() }
         isReady = true
         NotificationCenter.default.post(
             name: .familyDidJoin, object: nil,

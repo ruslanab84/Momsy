@@ -189,4 +189,18 @@ struct AccountErasureGateTests {
             callerRoleRaw: FamilyRole.grandma.rawValue
         ))
     }
+
+    @Test("last parent may tear down shared data even with a nanny left in the roster")
+    func lastParentWithNannyMayTearDown() {
+        #expect(AccountErasureGate.mayTearDownSharedData(
+            members: [(id: "p1", roleRaw: "Мама"), (id: "n1", roleRaw: "Няня")],
+            callerUid: "p1", callerRoleRaw: "Мама"))
+    }
+
+    @Test("a co-parent in the roster blocks tearing down shared data")
+    func coParentBlocksTearDown() {
+        #expect(AccountErasureGate.mayTearDownSharedData(
+            members: [(id: "p1", roleRaw: "Мама"), (id: "p2", roleRaw: "Папа")],
+            callerUid: "p1", callerRoleRaw: "Мама") == false)
+    }
 }

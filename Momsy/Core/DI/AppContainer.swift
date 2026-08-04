@@ -622,13 +622,15 @@ final class AppContainer {
     /// Durable "deletion in progress" marker, shared by the delete use case (writes it) and
     /// launch recovery (completes/clears it). Survives `eraseLocalData()`.
     let pendingAccountDeletionStore: PendingAccountDeletionStore = UserDefaultsPendingAccountDeletionStore()
+    let pendingAuthAccountDeletionStore: PendingAuthAccountDeletionStore = UserDefaultsPendingAuthAccountDeletionStore()
     let suppressedFamilyRestoreStore: SuppressedFamilyRestoreStore = UserDefaultsSuppressedFamilyRestoreStore()
 
     func makeDeleteAccountUseCase() -> DeleteAccountUseCase {
         DeleteAccountUseCase(
-            cloudEraser: FirestoreAccountEraser(babySync: BabySyncService()),
+            cloudEraser: FirestoreAccountEraser(),
             auth: authManager,
             pendingStore: pendingAccountDeletionStore,
+            pendingAuthStore: pendingAuthAccountDeletionStore,
             suppressedRestoreStore: suppressedFamilyRestoreStore,
             eraseLocal: { [unowned self] in try self.eraseLocalData() }
         )
@@ -637,9 +639,10 @@ final class AppContainer {
     /// Completes an account deletion interrupted before the backend confirmed it. Run at
     /// launch (before any cloud download) so erased data can never resurface on re-login.
     lazy var accountDeletionRecovery = AccountDeletionRecovery(
-        cloudEraser: FirestoreAccountEraser(babySync: BabySyncService()),
+        cloudEraser: FirestoreAccountEraser(),
         auth: authManager,
         pendingStore: pendingAccountDeletionStore,
+        pendingAuthStore: pendingAuthAccountDeletionStore,
         suppressedRestoreStore: suppressedFamilyRestoreStore
     )
 
@@ -649,16 +652,16 @@ final class AppContainer {
     /// in that state so cached remote data cannot refill the freshly wiped device.
     @MainActor
     func recoverPendingAccountDeletion() async -> Bool {
-        guard let pendingUidAtStart = pendingAccountDeletionStore.loadPending() else { return false }
+        guard let pendingAtStart = pendingAccountDeletionStore.loadPending() else { return false }
         let currentUidAtStart = authManager.currentUID
         await accountDeletionRecovery.runIfNeeded()
 
         let currentUidAfterRecovery = authManager.currentUID
         let deletionStillPending =
-            pendingAccountDeletionStore.loadPending() == pendingUidAtStart &&
-            currentUidAfterRecovery == pendingUidAtStart
+            pendingAccountDeletionStore.loadPending()?.uid == pendingAtStart.uid &&
+            currentUidAfterRecovery == pendingAtStart.uid
         guard AccountDeletionRecovery.shouldWipeDevice(
-            pendingUidAtStart: pendingUidAtStart,
+            pendingUidAtStart: pendingAtStart.uid,
             currentUidAtStart: currentUidAtStart,
             currentUidAfterRecovery: currentUidAfterRecovery
         ) else { return false }

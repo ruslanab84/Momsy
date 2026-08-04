@@ -349,7 +349,7 @@ final class OnboardingViewModel: ObservableObject {
         guard Self.shouldRecoverPendingAccountDeletion(
             flow: flow,
             currentUID: authManager.currentUID,
-            pendingUID: UserDefaultsPendingAccountDeletionStore().loadPending()
+            pendingUID: UserDefaultsPendingAccountDeletionStore().loadPending()?.uid
         ) else { return false }
 
         let stillPending = await recoverPendingAccountDeletion()

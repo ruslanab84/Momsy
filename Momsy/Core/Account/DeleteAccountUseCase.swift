@@ -3,11 +3,28 @@ import FirebaseAuth
 import FirebaseCore
 import FirebaseFirestore
 
+/// Terminal state of one cloud-erase attempt. "Nothing left to erase" is a SUCCESS,
+/// not a failure: treating it as an error kept the pending marker set forever and
+/// permanently blocked re-registration with the same Apple/Google account.
+enum AccountErasureOutcome: Equatable {
+    /// Family data was found and erased on this attempt.
+    case erased
+    /// No routing doc and no reachable membership left — the erase is already complete.
+    case nothingToErase
+    /// `users/{uid}.familyId` now points at a DIFFERENT family than the one this
+    /// deletion recorded. The recorded erase finished and the account has since been
+    /// re-routed; re-running would destroy data the user legitimately owns now.
+    case supersededByNewFamily
+}
+
 /// Erases the user's cloud footprint while retaining `families/{familyId}` as a
 /// non-reusable tombstone. Abstracted so the deletion flow can be unit-tested
 /// without Firestore.
 protocol CloudAccountEraser {
-    func deleteCloudData(uid: String) async throws
+    /// - Parameter familyIdHint: the family recorded when the deletion started. It is the
+    ///   ONLY family this attempt is authorised to touch; passing it explicitly removes the
+    ///   hidden `FamilyManager.shared` fallback that let recovery retarget a new family.
+    func deleteCloudData(uid: String, familyIdHint: String?) async throws -> AccountErasureOutcome
     /// Server-truth check that the user's cloud footprint is gone. MUST read from the
     /// backend (not the local cache) so a cache-only delete can't masquerade as complete.
     /// Returns `true` while anything that could re-resolve the family still exists.
@@ -51,96 +68,148 @@ enum RosterErasure {
 }
 
 struct FirestoreAccountEraser: CloudAccountEraser {
-    let babySync: BabySyncService
-
-    func deleteCloudData(uid: String) async throws {
+    func deleteCloudData(uid: String, familyIdHint: String?) async throws -> AccountErasureOutcome {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(uid)
         let userDoc = try await userRef.getDocument(source: .server)
-        let resolvedFamilyId = (userDoc.data()?["familyId"] as? String) ?? FamilyManager.shared.familyId
+        let serverFamilyId = (userDoc.data()?["familyId"] as? String)
+            .flatMap { $0.isEmpty ? nil : $0 }
+        let hint = familyIdHint.flatMap { $0.isEmpty ? nil : $0 }
+
+        // The account has been re-routed to a different family since the deletion was
+        // recorded (e.g. an invite join). The recorded erase is finished; re-running it
+        // here would destroy data the user legitimately owns now.
+        if let hint, let serverFamilyId, serverFamilyId != hint {
+            return .supersededByNewFamily
+        }
 
         try await deleteAllDocs(
             in: db.collection("invites").whereField("createdBy", isEqualTo: uid)
         )
 
-        if let familyId = resolvedFamilyId, !familyId.isEmpty {
-            do {
-                let familyRef = db.collection("families").document(familyId)
-                let familyDocument = try await familyRef.getDocument(source: .server)
-                let callerCreatedFamily =
-                    familyDocument.data()?["createdBy"] as? String == uid
-                let memberDocuments = try await familyRef.collection("members")
-                    .getDocuments(source: .server)
-                    .documents
-                let partition = AccountErasureGate.partitionMemberDocuments(
-                    memberDocuments.map {
-                        (id: $0.documentID, data: $0.data())
-                    }
-                )
-                let placeholderIds = Set(partition.placeholderIds)
-                let legacyPlaceholders = memberDocuments.filter {
-                    placeholderIds.contains($0.documentID)
-                }
-                let realMembers = memberDocuments
-                    .filter { !placeholderIds.contains($0.documentID) }
-                    .map {
-                        (id: $0.documentID, roleRaw: $0.data()["roleRaw"] as? String ?? "")
-                    }
-                let callerRoleRaw = realMembers.first { $0.id == uid }?.roleRaw ?? ""
-                if AccountErasureGate.isParentRole(callerRoleRaw) {
-                    for placeholder in legacyPlaceholders {
-                        try await placeholder.reference.delete()
-                    }
-                }
-                let mayTearDownSharedData = AccountErasureGate.mayTearDownSharedData(
-                    members: realMembers,
-                    callerUid: uid,
-                    callerRoleRaw: callerRoleRaw
-                )
-                let babyIds = try await discoverBabyIds(in: familyRef)
-                let healthDataParentPaths = Self.healthDataParentPaths(
-                    familyId: familyId,
-                    babyIds: babyIds
-                )
+        guard let familyId = serverFamilyId ?? hint else {
+            // Neither a routing doc nor a recorded family: there is nothing left to erase.
+            // Reporting this as `.accountDeletionPending` is what deadlocked re-registration.
+            if userDoc.exists { try await userRef.delete() }
+            return .nothingToErase
+        }
 
-                if mayTearDownSharedData {
-                    for babyId in babyIds {
-                        try await deleteBabyTree(familyRef: familyRef, familyId: familyId, babyId: babyId)
+        // Membership is the capability that authorises every delete under
+        // `families/{id}/babies/**`. If it is already gone, a previous attempt committed
+        // the exit batch and only the local marker is stale.
+        guard try await callerIsStillMember(familyId: familyId, uid: uid) else {
+            if userDoc.exists { try await userRef.delete() }
+            return .nothingToErase
+        }
+
+        do {
+            let familyRef = db.collection("families").document(familyId)
+            let familyDocument = try await familyRef.getDocument(source: .server)
+            let callerCreatedFamily =
+                familyDocument.data()?["createdBy"] as? String == uid
+            let memberDocuments = try await familyRef.collection("members")
+                .getDocuments(source: .server)
+                .documents
+            let partition = AccountErasureGate.partitionMemberDocuments(
+                memberDocuments.map {
+                    (id: $0.documentID, data: $0.data())
+                }
+            )
+            let placeholderIds = Set(partition.placeholderIds)
+            let legacyPlaceholders = memberDocuments.filter {
+                placeholderIds.contains($0.documentID)
+            }
+            let realMembers = memberDocuments
+                .filter { !placeholderIds.contains($0.documentID) }
+                .map {
+                    (id: $0.documentID, roleRaw: $0.data()["roleRaw"] as? String ?? "")
+                }
+            let callerRoleRaw = realMembers.first { $0.id == uid }?.roleRaw ?? ""
+            if AccountErasureGate.isParentRole(callerRoleRaw) {
+                for placeholder in legacyPlaceholders {
+                    try await placeholder.reference.delete()
+                }
+            }
+            let mayTearDownSharedData = AccountErasureGate.mayTearDownSharedData(
+                members: realMembers,
+                callerUid: uid,
+                callerRoleRaw: callerRoleRaw
+            )
+            let babyIds = try await discoverBabyIds(in: familyRef)
+            let healthDataParentPaths = Self.healthDataParentPaths(
+                familyId: familyId,
+                babyIds: babyIds
+            )
+
+            if mayTearDownSharedData {
+                for babyId in babyIds {
+                    try await deleteBabyTree(familyRef: familyRef, familyId: familyId, babyId: babyId)
+                }
+                try await deleteLegacyFamilyTree(familyId: familyId)
+                try await verifyHealthDataAbsent(parentPaths: healthDataParentPaths)
+                // A surviving nanny/grandma would otherwise keep a live membership in a
+                // family whose data no longer exists, and neither role can create a new
+                // family — a permanent dead end. Removing the roster makes their next
+                // `confirmMembership` return `.revoked`, routing them through
+                // `detachFromRevokedFamily` and into a clean personal family.
+                // Rules: `allow delete: if canManageFamilyRoster(familyId)` — the caller
+                // is a parent by definition of `mayTearDownSharedData`.
+                for member in realMembers where member.id != uid {
+                    try await familyRef.collection("members").document(member.id).delete()
+                }
+            } else {
+                let callerIsParent = AccountErasureGate.isParentRole(callerRoleRaw)
+                for babyId in babyIds {
+                    let babyRef = familyRef.collection("babies").document(babyId)
+                    try await eraseAuthoredData(under: babyRef, uid: uid)
+                    if callerIsParent {
+                        try await eraseProfileMembership(under: babyRef, uid: uid)
                     }
-                    try await deleteLegacyFamilyTree(familyId: familyId)
-                    try await verifyHealthDataAbsent(parentPaths: healthDataParentPaths)
-                } else {
-                    for babyId in babyIds {
-                        try await eraseAuthoredData(
-                            under: familyRef.collection("babies").document(babyId),
-                            uid: uid
-                        )
-                    }
-                    try await eraseAuthoredData(
-                        under: db.collection("babies").document(familyId),
+                }
+                let legacyRef = db.collection("babies").document(familyId)
+                try await eraseAuthoredData(under: legacyRef, uid: uid)
+                if callerIsParent {
+                    try await eraseProfileMembership(under: legacyRef, uid: uid)
+                }
+                try await verifyHealthDataAbsent(
+                    parentPaths: healthDataParentPaths,
+                    authoredBy: uid
+                )
+                if callerIsParent {
+                    try await verifyProfileMembershipAbsent(
+                        parentPaths: healthDataParentPaths,
                         uid: uid
                     )
-                    try await verifyHealthDataAbsent(
-                        parentPaths: healthDataParentPaths,
-                        authoredBy: uid
-                    )
                 }
-
-                // Keep author cleanup and membership access ordered, while making the final
-                // membership/user removal atomic so recovery cannot observe a half-finished exit.
-                let batch = db.batch()
-                if callerCreatedFamily {
-                    // The family doc survives as a non-reusable tombstone (rules forbid a
-                    // client delete), so it must not keep storing the erased user's UID.
-                    // Rules only accept this write together with the membership delete below.
-                    batch.updateData(["createdBy": ""], forDocument: familyRef)
-                }
-                batch.deleteDocument(familyRef.collection("members").document(uid))
-                batch.deleteDocument(userRef)
-                try await batch.commit()
             }
-        } else {
-            throw AuthError.accountDeletionPending
+
+            // Keep author cleanup and membership access ordered, while making the final
+            // membership/user removal atomic so recovery cannot observe a half-finished exit.
+            let batch = db.batch()
+            if callerCreatedFamily {
+                // The family doc survives as a non-reusable tombstone (rules forbid a
+                // client delete), so it must not keep storing the erased user's UID.
+                // Rules only accept this write together with the membership delete below.
+                batch.updateData(["createdBy": ""], forDocument: familyRef)
+            }
+            batch.deleteDocument(familyRef.collection("members").document(uid))
+            batch.deleteDocument(userRef)
+            try await batch.commit()
+        }
+        return .erased
+    }
+
+    /// `permissionDenied` on reading one's OWN member doc means the doc no longer exists
+    /// (rules require it to exist for the read). Reuses `FamilyManager`'s classifier so the
+    /// two call sites cannot drift apart.
+    private func callerIsStillMember(familyId: String, uid: String) async throws -> Bool {
+        let ref = Firestore.firestore()
+            .collection("families").document(familyId)
+            .collection("members").document(uid)
+        do {
+            return try await ref.getDocument(source: .server).exists
+        } catch let error where FamilyManager.classifyMembershipError(error) == .revoked {
+            return false
         }
     }
 
@@ -288,6 +357,57 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         }
     }
 
+    /// `profile/info` carries `members: [{uid, role, name}]` written by
+    /// `BabySyncService.setupBabyProfile`. It is NOT in `BabySyncService.allSubcollections`,
+    /// so the scoped erase used to leave the departing parent's uid and display name in the
+    /// child's profile forever — visible to the remaining co-parent.
+    ///
+    /// Rewrites the array filtered rather than using `arrayRemove`: `arrayRemove` needs an
+    /// exact element match and `name` may have drifted since it was written.
+    ///
+    /// Rules: `families/{id}/babies/{babyId}/{subcollection}/{doc=**}` allows update for
+    /// `canManageFamilyRoster` — satisfied while the caller's member doc still exists, i.e.
+    /// before the exit batch commits. Only parents are ever written into `members`, so this
+    /// is gated on the caller's parent role.
+    private func eraseProfileMembership(under parent: DocumentReference, uid: String) async throws {
+        let ref = parent.collection("profile").document("info")
+        let snapshot = try await Self.readIgnoringMissingParent(ref)
+        guard let members = snapshot?.data()?["members"] as? [[String: Any]] else { return }
+        let remaining = members.filter { ($0["uid"] as? String) != uid }
+        guard remaining.count != members.count else { return }
+        try await ref.updateData(["members": remaining])
+    }
+
+    private func verifyProfileMembershipAbsent(parentPaths: [String], uid: String) async throws {
+        let db = Firestore.firestore()
+        for path in parentPaths {
+            let ref = db.document("\(path)/profile/info")
+            guard let snapshot = try await Self.readIgnoringMissingParent(ref) else { continue }
+            guard !snapshot.metadata.hasPendingWrites else {
+                throw AuthError.accountDeletionPending
+            }
+            let members = snapshot.data()?["members"] as? [[String: Any]] ?? []
+            guard members.allSatisfy({ ($0["uid"] as? String) != uid }) else {
+                throw AuthError.accountDeletionPending
+            }
+        }
+    }
+
+    /// The legacy `babies/{familyId}` tree may not exist at all; a missing parent must not
+    /// fail the erase.
+    private static func readIgnoringMissingParent(
+        _ ref: DocumentReference
+    ) async throws -> DocumentSnapshot? {
+        do {
+            let snapshot = try await ref.getDocument(source: .server)
+            return snapshot.exists ? snapshot : nil
+        } catch let error as NSError
+            where error.domain == FirestoreErrorCode.errorDomain
+            && error.code == FirestoreErrorCode.notFound.rawValue {
+            return nil
+        }
+    }
+
     private func deleteAllDocs(in ref: Query) async throws {
         let docs = try await ref.getDocuments(source: .server).documents
         guard !docs.isEmpty else { return }
@@ -323,6 +443,7 @@ final class DeleteAccountUseCase {
     private let cloudEraser: CloudAccountEraser
     private let auth: any AccountAuthProtocol
     private let pendingStore: PendingAccountDeletionStore
+    private let pendingAuthStore: PendingAuthAccountDeletionStore
     private let suppressedRestoreStore: SuppressedFamilyRestoreStore
     private let eraseLocal: @MainActor () throws -> Void
 
@@ -330,12 +451,14 @@ final class DeleteAccountUseCase {
         cloudEraser: CloudAccountEraser,
         auth: any AccountAuthProtocol,
         pendingStore: PendingAccountDeletionStore,
+        pendingAuthStore: PendingAuthAccountDeletionStore,
         suppressedRestoreStore: SuppressedFamilyRestoreStore,
         eraseLocal: @MainActor @escaping () throws -> Void
     ) {
         self.cloudEraser = cloudEraser
         self.auth = auth
         self.pendingStore = pendingStore
+        self.pendingAuthStore = pendingAuthStore
         self.suppressedRestoreStore = suppressedRestoreStore
         self.eraseLocal = eraseLocal
     }
@@ -348,10 +471,12 @@ final class DeleteAccountUseCase {
         if let uid = auth.currentUID {
             // Persist the intent FIRST so a deletion that doesn't reach the backend is
             // completed by launch recovery instead of resurfacing on the next sign-in.
-            pendingStore.markPending(uid: uid)
+            // The family is recorded WITH the uid: recovery must never re-resolve it.
+            let familyId = FamilyManager.shared.familyId
+            pendingStore.markPending(uid: uid, familyId: familyId)
             suppressedRestoreStore.suppressRestore(for: uid)
             do {
-                try await cloudEraser.deleteCloudData(uid: uid)
+                _ = try await cloudEraser.deleteCloudData(uid: uid, familyIdHint: familyId)
 
                 if try await cloudEraser.isCloudDataPresent(uid: uid) {
                     // Cache said done but the SERVER still has the user doc. Keep the marker
@@ -359,10 +484,16 @@ final class DeleteAccountUseCase {
                     // still authenticated — do NOT delete/sign out the account yet.
                     completionError = AuthError.accountDeletionPending
                 } else {
+                    // Cloud is server-confirmed clean: the user owns no data from here on,
+                    // so the blocking marker must go regardless of what Auth does next.
+                    pendingStore.clearPending()
                     do {
                         try await auth.deleteAccount(expectedUID: uid)
-                        pendingStore.clearPending()
+                        pendingAuthStore.clearPending()
                     } catch {
+                        // Hand the Auth record to the non-blocking retry. Surfacing the error
+                        // still lets Settings offer reauthentication in this session.
+                        pendingAuthStore.markPending(uid: uid)
                         authError = error
                     }
                 }
@@ -398,18 +529,26 @@ final class AccountDeletionRecovery {
     private let cloudEraser: CloudAccountEraser
     private let auth: any AccountAuthProtocol
     private let pendingStore: PendingAccountDeletionStore
+    private let pendingAuthStore: PendingAuthAccountDeletionStore
     private let suppressedRestoreStore: SuppressedFamilyRestoreStore
+    /// True while the account has been put back into use (a family is resolved again).
+    /// Injected so the policy is testable without `FamilyManager.shared`.
+    private let accountIsInUse: @MainActor () -> Bool
 
     init(
         cloudEraser: CloudAccountEraser,
         auth: any AccountAuthProtocol,
         pendingStore: PendingAccountDeletionStore,
-        suppressedRestoreStore: SuppressedFamilyRestoreStore
+        pendingAuthStore: PendingAuthAccountDeletionStore,
+        suppressedRestoreStore: SuppressedFamilyRestoreStore,
+        accountIsInUse: @MainActor @escaping () -> Bool = { FamilyManager.shared.familyId != nil }
     ) {
         self.cloudEraser = cloudEraser
         self.auth = auth
         self.pendingStore = pendingStore
+        self.pendingAuthStore = pendingAuthStore
         self.suppressedRestoreStore = suppressedRestoreStore
+        self.accountIsInUse = accountIsInUse
     }
 
     /// Captures ownership before recovery can clear Auth and the marker. A different account
@@ -424,25 +563,60 @@ final class AccountDeletionRecovery {
     }
 
     func runIfNeeded() async {
-        guard let pendingUid = pendingStore.loadPending() else { return }
-        guard let currentUid = auth.currentUID, currentUid == pendingUid else {
-            suppressedRestoreStore.suppressRestore(for: pendingUid)
+        guard let pending = pendingStore.loadPending() else {
+            await retryAuthDeletionIfNeeded()
             return
         }
-        suppressedRestoreStore.suppressRestore(for: pendingUid)
+        guard let currentUid = auth.currentUID, currentUid == pending.uid else {
+            suppressedRestoreStore.suppressRestore(for: pending.uid)
+            return
+        }
+        suppressedRestoreStore.suppressRestore(for: pending.uid)
         do {
-            try await cloudEraser.deleteCloudData(uid: currentUid)
+            let outcome = try await cloudEraser.deleteCloudData(
+                uid: currentUid,
+                familyIdHint: pending.familyId
+            )
+            if outcome == .supersededByNewFamily {
+                // The recorded family was already erased and the account now belongs to a
+                // different family. The marker is stale — clearing the suppression lets the
+                // new family be adopted normally on the next `FamilyManager.setup`.
+                pendingStore.clearPending()
+                suppressedRestoreStore.clearSuppression(for: currentUid)
+                return
+            }
             guard try await cloudEraser.isCloudDataPresent(uid: currentUid) == false else {
                 return // still on the server — keep the marker and retry next launch
             }
+            // Server-confirmed clean. Releasing the blocking marker HERE is the fix for the
+            // re-registration deadlock: with no data left, reusing the Auth uid is safe.
+            pendingStore.clearPending()
             do {
                 try await auth.deleteAccount(expectedUID: currentUid)
-                pendingStore.clearPending()
+                pendingAuthStore.clearPending()
             } catch {
-                return // keep the authenticated session and marker for interactive re-auth
+                pendingAuthStore.markPending(uid: currentUid)
             }
         } catch {
             // Leave the marker in place; the next launch retries.
+        }
+    }
+
+    /// Best-effort removal of an Auth record whose data is already gone. Never blocks the UI.
+    /// Skipped — and dropped — once the account is back in use, so a returning user is not
+    /// signed out of a session they deliberately restarted.
+    private func retryAuthDeletionIfNeeded() async {
+        guard let uid = pendingAuthStore.loadPending() else { return }
+        guard let currentUid = auth.currentUID, currentUid == uid else { return }
+        guard !accountIsInUse() else {
+            pendingAuthStore.clearPending()
+            return
+        }
+        do {
+            try await auth.deleteAccount(expectedUID: uid)
+            pendingAuthStore.clearPending()
+        } catch {
+            // Retry on a later launch.
         }
     }
 }
