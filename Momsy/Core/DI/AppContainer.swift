@@ -652,9 +652,12 @@ final class AppContainer {
     /// in that state so cached remote data cannot refill the freshly wiped device.
     @MainActor
     func recoverPendingAccountDeletion() async -> Bool {
-        guard let pendingAtStart = pendingAccountDeletionStore.loadPending() else { return false }
+        let pendingAtStart = pendingAccountDeletionStore.loadPending()
         let currentUidAtStart = authManager.currentUID
+        // Recovery runs even without a blocking marker: that is the state in which it drives
+        // the non-blocking Auth-record retry, and this is its only production entry point.
         await accountDeletionRecovery.runIfNeeded()
+        guard let pendingAtStart else { return false }
 
         let currentUidAfterRecovery = authManager.currentUID
         let deletionStillPending =

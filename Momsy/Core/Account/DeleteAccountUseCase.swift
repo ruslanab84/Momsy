@@ -31,42 +31,6 @@ protocol CloudAccountEraser {
     func isCloudDataPresent(uid: String) async throws -> Bool
 }
 
-/// The slice of `BabySyncService` the roster-wide erase needs. `deleteAllData()` targets a
-/// single child (the path resolved from `ActiveBaby`), so the loop in `RosterErasure` calls
-/// it once per child. Abstracted so the per-child logic is unit-testable without Firestore.
-protocol BabyRosterDataEraser {
-    func discoverAllBabyIds() async -> [String]
-    func deleteAllData() async throws
-}
-
-extension BabySyncService: BabyRosterDataEraser {}
-
-/// Erases EVERY child's cloud subtree, not just the active one. Firestore keeps the per-baby
-/// trees at sibling paths (`families/{familyId}/babies/{babyId}/…`) and never cascades a parent
-/// delete into them, so erasing only the active child would orphan every sibling's health logs
-/// after "delete account" — a GDPR right-to-erasure gap. Each child is erased under a task-local
-/// override that retargets the cloud path to it (mirroring `CloudSyncDownloader`). The locally
-/// active child is always included even if the roster read missed it (created locally, not yet
-/// uploaded); with no roster discovered at all, falls back to erasing the active path once.
-enum RosterErasure {
-    static func eraseAll(using svc: BabyRosterDataEraser, locallyActiveId: UUID?) async throws {
-        var ids = await svc.discoverAllBabyIds()
-        if let active = locallyActiveId, !ids.contains(active.uuidString) {
-            ids.append(active.uuidString)
-        }
-        guard !ids.isEmpty else {
-            try await svc.deleteAllData()
-            return
-        }
-        for idStr in ids {
-            guard let id = UUID(uuidString: idStr) else { continue }
-            try await ActiveBaby.$syncTargetOverride.withValue(id) {
-                try await svc.deleteAllData()
-            }
-        }
-    }
-}
-
 struct FirestoreAccountEraser: CloudAccountEraser {
     func deleteCloudData(uid: String, familyIdHint: String?) async throws -> AccountErasureOutcome {
         let db = Firestore.firestore()
@@ -503,14 +467,15 @@ final class DeleteAccountUseCase {
             }
         }
 
-        // Keep the current session, retry marker, and local UI available so provider
-        // reauthentication/revocation can finish before the deletion is reported complete.
-        if let authError { throw authError }
-
         // Always leave the device clean, even if the cloud erase didn't fully confirm.
         try eraseLocal()
         FamilyManager.shared.reset()
 
+        // The Auth failure surfaces only AFTER the wipe: it can be set only once the server
+        // confirmed the cloud is clean, and returning early there would strand the local store
+        // — `FamilyManager` would then adopt a brand-new family on the next launch and re-upload
+        // it all. Still thrown so Settings can offer reauthentication; the session survives.
+        if let authError { throw authError }
         if let cloudError { throw cloudError }
         if let completionError { throw completionError }
     }

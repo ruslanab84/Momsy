@@ -167,8 +167,8 @@ struct DeleteAccountTests {
         #expect(wipes() == 1)
     }
 
-    @Test("keeps the session and deletion marker when recent authentication is required")
-    func reauthRequiredDoesNotSignOutOrWipe() async {
+    @Test("wipes the device and releases the blocking marker when only Auth deletion fails")
+    func reauthRequiredStillCompletesTheErasure() async {
         let (uc, _, auth, pending, authPending, _, wipes) = makeUseCase(authError: AuthError.reauthRequired)
 
         await #expect {
@@ -180,29 +180,32 @@ struct DeleteAccountTests {
 
         #expect(auth.deleteCount == 1)
         #expect(auth.signOutCount == 0)
-        #expect(pending.pendingUid == "user-1")
-        #expect(pending.clearCount == 0)
+        // The cloud is server-confirmed clean, so the marker that blocks re-registration
+        // must go; only the non-blocking Auth retry survives.
+        #expect(pending.pendingUid == nil)
+        #expect(pending.clearCount == 1)
         #expect(authPending.pendingUid == "user-1")
-        #expect(wipes() == 0)
+        // …and the device is wiped, so the deletion cannot undo itself on the next launch.
+        #expect(wipes() == 1)
     }
 
-    @Test("keeps deletion pending when provider revoke or Auth deletion fails")
-    func authRetirementFailureKeepsPending() async {
-        let (uc, _, auth, pending, _, _, wipes) = makeUseCase(authError: DummyError())
+    @Test("hands a failed provider revoke to the Auth retry without blocking re-registration")
+    func authRetirementFailureDefersToAuthRetry() async {
+        let (uc, _, auth, pending, authPending, _, wipes) = makeUseCase(authError: DummyError())
 
         await #expect(throws: DummyError.self) {
             try await uc.execute()
         }
 
         #expect(auth.signOutCount == 0)
-        #expect(pending.pendingUid == "user-1")
-        #expect(pending.clearCount == 0)
-        #expect(wipes() == 0)
+        #expect(pending.pendingUid == nil)
+        #expect(authPending.pendingUid == "user-1")
+        #expect(wipes() == 1)
     }
 
     @Test("never deletes a different Auth account if the session changes during cloud erase")
     func authRetirementIsBoundToOriginalUID() async {
-        let (uc, cloud, auth, pending, _, _, wipes) = makeUseCase(uid: "user-1")
+        let (uc, cloud, auth, pending, authPending, _, wipes) = makeUseCase(uid: "user-1")
         cloud.onDelete = { auth.currentUID = "user-2" }
 
         await #expect {
@@ -213,9 +216,11 @@ struct DeleteAccountTests {
         }
 
         #expect(auth.expectedUIDs == ["user-1"])
-        #expect(pending.pendingUid == "user-1")
-        #expect(pending.clearCount == 0)
-        #expect(wipes() == 0)
+        // The retry stays pinned to the original uid; recovery re-checks the signed-in
+        // account before acting, so "user-2" can never be deleted in its place.
+        #expect(pending.pendingUid == nil)
+        #expect(authPending.pendingUid == "user-1")
+        #expect(wipes() == 1)
     }
 
     @Test("with no authenticated user, skips cloud steps but still wipes local")
@@ -434,48 +439,6 @@ private func waitForDeletion(
     }
 }
 
-// MARK: - Roster-wide erasure (multi-child GDPR coverage)
-
-/// Records which child each `deleteAllData()` call targeted by reading the task-local
-/// `ActiveBaby.syncTargetOverride` that scopes the cloud path for that single erase.
-private final class MockRosterEraser: BabyRosterDataEraser, @unchecked Sendable {
-    let rosterIds: [String]
-    private(set) var erasedTargets: [String] = []
-    init(rosterIds: [String]) { self.rosterIds = rosterIds }
-    func discoverAllBabyIds() async -> [String] { rosterIds }
-    func deleteAllData() async throws {
-        erasedTargets.append(ActiveBaby.syncTargetOverride?.uuidString ?? "<active-path>")
-    }
-}
-
-@Suite("RosterErasure")
-struct RosterErasureTests {
-
-    @Test("erases every child in the family roster, not just the active one")
-    func erasesEntireRoster() async throws {
-        let a = UUID(), b = UUID(), c = UUID()
-        let mock = MockRosterEraser(rosterIds: [a, b, c].map(\.uuidString))
-        try await RosterErasure.eraseAll(using: mock, locallyActiveId: a)
-        #expect(Set(mock.erasedTargets) == Set([a, b, c].map(\.uuidString)))
-        #expect(mock.erasedTargets.count == 3)
-    }
-
-    @Test("includes a locally-active child the roster read missed")
-    func includesLocalActiveMissingFromRoster() async throws {
-        let inRoster = UUID(), localOnly = UUID()
-        let mock = MockRosterEraser(rosterIds: [inRoster.uuidString])
-        try await RosterErasure.eraseAll(using: mock, locallyActiveId: localOnly)
-        #expect(Set(mock.erasedTargets) == Set([inRoster, localOnly].map(\.uuidString)))
-    }
-
-    @Test("with an empty roster and no active child, erases the active path once")
-    func emptyRosterFallsBackToActivePath() async throws {
-        let mock = MockRosterEraser(rosterIds: [])
-        try await RosterErasure.eraseAll(using: mock, locallyActiveId: nil)
-        #expect(mock.erasedTargets == ["<active-path>"])
-    }
-}
-
 // MARK: - Launch recovery (completes an interrupted / server-incomplete erase)
 
 @Suite("AccountDeletionRecovery", .serialized)
@@ -557,27 +520,40 @@ struct AccountDeletionRecoveryTests {
         #expect(suppressed.isRestoreSuppressed(for: "abc"))
     }
 
-    @Test("keeps the session and marker when recovery needs recent authentication")
-    func recoveryReauthRequiredKeepsSessionAndMarker() async {
+    @Test("keeps the session and marker when the server still reports data during recovery")
+    func recoveryKeepsMarkerWhileServerStillHasData() async {
         let cloud = MockCloudEraser.Calls()
+        cloud.stillPresent = true
         let auth = MockAuth(uid: "abc")
         auth.deleteError = AuthError.reauthRequired
-        let pending = MockPendingStore(pendingUid: "abc")
+        let pending = MockPendingStore(pendingUid: "abc", familyId: "fam-1")
         let authPending = MockPendingAuthStore()
         let rec = AccountDeletionRecovery(
-            cloudEraser: MockCloudEraser(calls: cloud),
-            auth: auth,
-            pendingStore: pending,
-            pendingAuthStore: authPending,
-            suppressedRestoreStore: MockSuppressedRestoreStore())
+            cloudEraser: MockCloudEraser(calls: cloud), auth: auth,
+            pendingStore: pending, pendingAuthStore: authPending,
+            suppressedRestoreStore: MockSuppressedRestoreStore(), accountIsInUse: { false })
+
+        await rec.runIfNeeded()
+
+        #expect(auth.deleteCount == 0)        // Auth is never touched before the cloud is clean
+        #expect(pending.pendingUid == "abc")  // marker survives for the next launch
+        #expect(authPending.pendingUid == nil)
+    }
+
+    @Test("drives the Auth retry when only the non-blocking marker is left")
+    func runsAuthRetryWithoutBlockingMarker() async {
+        let authPending = MockPendingAuthStore()
+        authPending.markPending(uid: "abc")
+        let auth = MockAuth(uid: "abc")
+        let rec = AccountDeletionRecovery(
+            cloudEraser: MockCloudEraser(calls: .init()), auth: auth,
+            pendingStore: MockPendingStore(pendingUid: nil), pendingAuthStore: authPending,
+            suppressedRestoreStore: MockSuppressedRestoreStore(), accountIsInUse: { false })
 
         await rec.runIfNeeded()
 
         #expect(auth.deleteCount == 1)
-        #expect(auth.signOutCount == 0)
-        #expect(pending.pendingUid == "abc")
-        #expect(authPending.pendingUid == "abc")
-        #expect(pending.clearCount == 0)
+        #expect(authPending.pendingUid == nil)
     }
 
     @Test("clears the marker when the recorded erase finished but Auth deletion still fails")

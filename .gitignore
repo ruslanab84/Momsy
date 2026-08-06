@@ -1,6 +1,7 @@
 # ── Xcode ──────────────────────────────────────────────────────────────────────
 build/
 DerivedData/
+.derivedData/
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -83,3 +84,7 @@ AGENTS.md
 
 # ── Graphify generated cache ───────────────────────────────────────────────────
 graphify-out/cache/ast/
+
+# ── Python ─────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc

@@ -168,11 +168,15 @@ final class AuthManager: ObservableObject {
     static func switchFromAnonymousAccount<Result>(
         anonymousUid: String,
         cloudEraser: any CloudAccountEraser,
+        familyIdHint: String?,
         deleteAuthUser: () async throws -> Void,
         purgeLocalData: () async -> Void,
         signIn: () async throws -> Result
     ) async throws -> Result {
-        _ = try await cloudEraser.deleteCloudData(uid: anonymousUid, familyIdHint: nil)
+        // An anonymous user may never have had a `users/{uid}` routing doc written (cloud sync
+        // is consent-gated), so without the cached family the eraser has nothing to resolve and
+        // leaves `families/{id}/babies/**` orphaned after the switch.
+        _ = try await cloudEraser.deleteCloudData(uid: anonymousUid, familyIdHint: familyIdHint)
         guard try await !cloudEraser.isCloudDataPresent(uid: anonymousUid) else {
             throw AuthError.accountDeletionPending
         }
@@ -194,6 +198,7 @@ final class AuthManager: ObservableObject {
                 return try await Self.switchFromAnonymousAccount(
                     anonymousUid: anonymousUid,
                     cloudEraser: cloudEraser,
+                    familyIdHint: cachedFamilyId,
                     deleteAuthUser: {
                         try await self.deleteAccount(expectedUID: anonymousUid)
                     },

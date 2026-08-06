@@ -23,6 +23,7 @@ private final class Flag { var value = false }
 private struct AuthSwitchCloudEraser: CloudAccountEraser {
     final class Calls: @unchecked Sendable {
         var events: [String] = []
+        var hints: [String?] = []
         var stillPresent = false
     }
 
@@ -30,6 +31,7 @@ private struct AuthSwitchCloudEraser: CloudAccountEraser {
 
     func deleteCloudData(uid: String, familyIdHint: String?) async throws -> AccountErasureOutcome {
         calls.events.append("cloudErase:\(uid)")
+        calls.hints.append(familyIdHint)
         return .erased
     }
 
@@ -123,6 +125,7 @@ struct AccountAuthViewModelTests {
         let uid = try await AuthManager.switchFromAnonymousAccount(
             anonymousUid: "anonymous-uid",
             cloudEraser: AuthSwitchCloudEraser(calls: calls),
+            familyIdHint: "fam-anon",
             deleteAuthUser: { calls.events.append("authDelete") },
             purgeLocalData: { calls.events.append("localPurge") },
             signIn: {
@@ -132,6 +135,9 @@ struct AccountAuthViewModelTests {
         )
 
         #expect(uid == "provider-uid")
+        // The cached family is the only way to reach an anonymous user's tree when no
+        // `users/{uid}` routing doc was ever written.
+        #expect(calls.hints == ["fam-anon"])
         #expect(calls.events == [
             "cloudErase:anonymous-uid",
             "serverVerify:anonymous-uid",
@@ -149,6 +155,7 @@ struct AccountAuthViewModelTests {
             try await AuthManager.switchFromAnonymousAccount(
                 anonymousUid: "anonymous-uid",
                 cloudEraser: AuthSwitchCloudEraser(calls: calls),
+                familyIdHint: "fam-anon",
                 deleteAuthUser: { calls.events.append("authDelete") },
                 purgeLocalData: { calls.events.append("localPurge") },
                 signIn: { calls.events.append("signIn") }
@@ -171,6 +178,7 @@ struct AccountAuthViewModelTests {
             try await AuthManager.switchFromAnonymousAccount(
                 anonymousUid: "anonymous-uid",
                 cloudEraser: AuthSwitchCloudEraser(calls: calls),
+                familyIdHint: "fam-anon",
                 deleteAuthUser: {
                     calls.events.append("authDelete")
                     throw DummyError()
