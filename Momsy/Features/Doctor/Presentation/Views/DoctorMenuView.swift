@@ -58,6 +58,15 @@ struct DoctorMenuView: View {
                         )
                         Divider().padding(.leading, 60)
                         DoctorMenuRow(
+                            destination: CareTipsView(container: container),
+                            icon: "lightbulb.fill",
+                            iconColor: .bbButterDeep,
+                            iconBg: Color.bbButter.opacity(0.3),
+                            title: lm.strings.careTipsTitle,
+                            sub: lm.strings.careTipsSub
+                        )
+                        Divider().padding(.leading, 60)
+                        DoctorMenuRow(
                             destination: LogReportView(container: container),
                             icon: "calendar.badge.clock",
                             iconColor: .bbCoralDeep,

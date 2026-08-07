@@ -1758,4 +1758,47 @@ struct L10n {
     var logReportSub: String   { s("All entries — day, week, month", "Все записи — день, неделя, месяц", "Alle Einträge — Tag, Woche, Monat", "Todos los registros — día, semana, mes", "Toutes les entrées — jour, semaine, mois", "Todos os registos — dia, semana, mês", "全部记录——日、周、月") }
     var logReportDay: String   { s("Day", "День", "Tag", "Día", "Jour", "Dia", "日") }
     var logReportEmpty: String { s("No entries for this period", "Нет записей за этот период", "Keine Einträge für diesen Zeitraum", "No hay registros en este período", "Aucune entrée pour cette période", "Sem registos neste período", "此时段暂无记录") }
+
+    // MARK: — Care Tips (Doctor)
+    var careTipsTitle: String { s("Care Tips", "Советы по уходу", "Pflegetipps", "Consejos de cuidado", "Conseils de soins", "Dicas de cuidados", "护理建议") }
+    var careTipsSub: String   { s("Everyday guidance by age", "Рекомендации по возрасту", "Alltagstipps nach Alter", "Guía diaria por edad", "Conseils du quotidien par âge", "Orientação diária por idade", "按月龄的日常指导") }
+    var careTipsSearchPrompt: String { s("Search tips", "Поиск советов", "Tipps suchen", "Buscar consejos", "Rechercher des conseils", "Pesquisar dicas", "搜索建议") }
+    var careTipsEmpty: String { s("Nothing found. Try another filter or search.", "Ничего не найдено. Измените фильтр или запрос.", "Nichts gefunden. Anderer Filter oder Suchbegriff?", "No se encontró nada. Prueba otro filtro o búsqueda.", "Aucun résultat. Essayez un autre filtre ou une autre recherche.", "Nada encontrado. Tente outro filtro ou pesquisa.", "未找到内容。请更换筛选或搜索词。") }
+    var careTipsFilterAll: String { s("All", "Все", "Alle", "Todos", "Tous", "Todos", "全部") }
+    var careTipsFilterMyBaby: String { s("For my baby", "Для моего малыша", "Für mein Baby", "Para mi bebé", "Pour mon bébé", "Para o meu bebé", "适合我的宝宝") }
+
+    var careTipWhatToDo: String { s("What to do", "Что делать", "Was zu tun ist", "Qué hacer", "Que faire", "O que fazer", "怎么做") }
+    var careTipWhyItMatters: String { s("Why it matters", "Почему это важно", "Warum es wichtig ist", "Por qué importa", "Pourquoi c’est important", "Porque é importante", "为什么重要") }
+    var careTipCommonMistakes: String { s("Common mistakes", "Частые ошибки", "Häufige Fehler", "Errores frecuentes", "Erreurs fréquentes", "Erros comuns", "常见误区") }
+    var careTipWhenToCallDoctor: String { s("When to call your doctor", "Когда звонить врачу", "Wann zum Arzt", "Cuándo llamar al médico", "Quand appeler le médecin", "Quando contactar o médico", "何时联系医生") }
+
+    var careTipsDisclaimer: String {
+        s("General guidance for everyday care, not medical advice or a diagnosis. When in doubt — always see your paediatrician.",
+          "Общие рекомендации по повседневному уходу, а не медицинский совет или диагноз. При любых сомнениях — всегда к педиатру.",
+          "Allgemeine Hinweise zur täglichen Pflege, keine medizinische Beratung und keine Diagnose. Im Zweifel — immer zum Kinderarzt.",
+          "Orientación general para el cuidado diario, no es consejo médico ni un diagnóstico. Ante la duda — acude siempre a tu pediatra.",
+          "Conseils généraux pour les soins du quotidien, pas un avis médical ni un diagnostic. En cas de doute — consultez toujours votre pédiatre.",
+          "Orientação geral para os cuidados diários, não é aconselhamento médico nem um diagnóstico. Em caso de dúvida — consulte sempre o seu pediatra.",
+          "这是日常护理的一般性建议，不构成医疗建议或诊断。如有疑问——请务必就诊儿科医生。")
+    }
+
+    var careTipsAllAges: String { s("All ages", "Любой возраст", "Jedes Alter", "Todas las edades", "Tous les âges", "Todas as idades", "全月龄") }
+
+    func careTipsCategoryTitle(_ category: CareTipCategory) -> String {
+        switch category {
+        case .feeding:     return s("Feeding", "Кормление", "Ernährung", "Alimentación", "Alimentation", "Alimentação", "喂养")
+        case .sleep:       return s("Sleep", "Сон", "Schlaf", "Sueño", "Sommeil", "Sono", "睡眠")
+        case .hygiene:     return s("Daily care", "Ежедневный уход", "Tägliche Pflege", "Cuidado diario", "Soins quotidiens", "Cuidados diários", "日常护理")
+        case .comfort:     return s("Comfort", "Комфорт", "Wohlbefinden", "Bienestar", "Confort", "Conforto", "舒缓")
+        case .development: return s("Development", "Развитие", "Entwicklung", "Desarrollo", "Développement", "Desenvolvimento", "发育")
+        case .safety:      return s("Safety", "Безопасность", "Sicherheit", "Seguridad", "Sécurité", "Segurança", "安全")
+        case .parent:      return s("For parents", "Для родителей", "Für Eltern", "Para los padres", "Pour les parents", "Para os pais", "给父母")
+        }
+    }
+
+    func careTipAgeRange(from: Int, to: Int) -> String {
+        if from == 0 && to >= 24 { return careTipsAllAges }
+        let unit = s("mo", "мес", "Mon.", "meses", "mois", "meses", "个月")
+        return "\(from)–\(to) \(unit)"
+    }
 }

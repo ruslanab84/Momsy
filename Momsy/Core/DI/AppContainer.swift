@@ -714,6 +714,10 @@ final class AppContainer {
     func makeWeeklyInsightViewModel() -> WeeklyInsightViewModel {
         WeeklyInsightViewModel(generate: generateWeeklyInsight, get: getWeeklyInsights)
     }
+
+    func makeCareTipsViewModel() -> CareTipsViewModel {
+        CareTipsViewModel(appState: appState)
+    }
 }
 
 // MARK: — Environment

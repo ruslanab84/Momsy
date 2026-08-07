@@ -93,6 +93,8 @@
 		C56A0D6E69513551AC768365 /* StopSleepUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF16DE1BAD5B55BABDAEB7C /* StopSleepUseCaseTests.swift */; };
 		C5A000000000000000000003 /* CSVReportServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A000000000000000000002 /* CSVReportServiceTests.swift */; };
 		C7F9E2D650E4DB928C049225 /* SleepSessionOwnershipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32F8D3BFD0887B5BFB39D82 /* SleepSessionOwnershipTests.swift */; };
+		CA4E1102CA4E1102CA4E1102 /* CareTipsCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4E1101CA4E1101CA4E1101 /* CareTipsCatalogTests.swift */; };
+		CA4E1202CA4E1202CA4E1202 /* LocalizedTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4E1201CA4E1201CA4E1201 /* LocalizedTextTests.swift */; };
 		CC001122CC33DD44EE55FF70 /* SharedActivityUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF71 /* SharedActivityUI.swift */; };
 		CC001122CC33DD44EE55FF72 /* SleepLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF73 /* SleepLiveActivityView.swift */; };
 		CC001122CC33DD44EE55FF74 /* WalkLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001122CC33DD44EE55FF75 /* WalkLiveActivityView.swift */; };
@@ -269,6 +271,8 @@
 		C37279E74C1D7F7DFA7CED64 /* MockLeapsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockLeapsRepository.swift; sourceTree = "<group>"; };
 		C50479E8852BDAA636377733 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
 		C5A000000000000000000002 /* CSVReportServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CSVReportServiceTests.swift; sourceTree = "<group>"; };
+		CA4E1101CA4E1101CA4E1101 /* CareTipsCatalogTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CareTipsCatalogTests.swift; sourceTree = "<group>"; };
+		CA4E1201CA4E1201CA4E1201 /* LocalizedTextTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizedTextTests.swift; sourceTree = "<group>"; };
 		CAADDB368FFD0B2A73ADFB21 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		CC001122CC33DD44EE55FF71 /* SharedActivityUI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedActivityUI.swift; sourceTree = "<group>"; };
 		CC001122CC33DD44EE55FF73 /* SleepLiveActivityView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepLiveActivityView.swift; sourceTree = "<group>"; };
@@ -322,6 +326,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Core/Auth/SKILL.md,
+				Core/DesignSystem/SKILL.md,
 			);
 			target = B7318B462FB8F473003CCB0B /* Momsy */;
 		};
@@ -446,6 +452,7 @@
 			isa = PBXGroup;
 			children = (
 				321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */,
+				CA4E1201CA4E1201CA4E1201 /* LocalizedTextTests.swift */,
 				ACC001DEA000000000000003 /* Auth */,
 				0BABF12B0000000000000003 /* Family */,
 				0BABF1290000000000000001 /* Localization */,
@@ -774,6 +781,14 @@
 			path = Leaps;
 			sourceTree = "<group>";
 		};
+		CA4E1103CA4E1103CA4E1103 /* CareTips */ = {
+			isa = PBXGroup;
+			children = (
+				CA4E1101CA4E1101CA4E1101 /* CareTipsCatalogTests.swift */,
+			);
+			path = CareTips;
+			sourceTree = "<group>";
+		};
 		CF188E3D6A5F475289D564B6 /* Features */ = {
 			isa = PBXGroup;
 			children = (
@@ -793,6 +808,7 @@
 				0BABF1250000000000000003 /* Report */,
 				FEED0006AAAA1111BBBB0001 /* LogReport */,
 				FE11AA03FE11AA03FE11AA03 /* Vaccination */,
+				CA4E1103CA4E1103CA4E1103 /* CareTips */,
 				AC00BEEF0000000000000003 /* Tracking */,
 				F94EBA0100654CF0862AB203 /* Vitamin */,
 				DEADBEEF0000000000000010 /* WeeklyInsights */,
@@ -1040,6 +1056,8 @@
 				2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */,
 				3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */,
 				FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */,
+				CA4E1102CA4E1102CA4E1102 /* CareTipsCatalogTests.swift in Sources */,
+				CA4E1202CA4E1202CA4E1202 /* LocalizedTextTests.swift in Sources */,
 				2A98F7575F5748A0BF198500 /* VitaminCategoryTests.swift in Sources */,
 				AC00BEEF0000000000000002 /* WHOGrowthStandardsTests.swift in Sources */,
 				AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */,
