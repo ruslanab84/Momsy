@@ -8,12 +8,18 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "The ABC of safe sleep: Alone, on the Back, in a Cot",
                 ru: "Азбука безопасного сна: один, на спине, в кроватке",
-                de: "Die Grundlagen sicheren Schlafs: Allein, auf dem Rücken, im Bett"
+                de: "Die Grundlagen sicheren Schlafs: Allein, auf dem Rücken, im Bett",
+                es: "El ABC del sueño seguro: solo, boca arriba, en la cuna",
+                fr: "L'ABC du sommeil en toute sécurité : seul, sur le dos, dans un lit bébé",
+                pt: "O ABC do sono seguro: sozinho, de costas, em um berço"
             ),
             summary: LocalizedText(
                 en: "The single most protective habit of the first year, for every sleep",
                 ru: "Самая защитная привычка первого года — и она нужна на каждый сон",
-                de: "Die am stärksten schützende Gewohnheit des ersten Jahres für jeden Schlaf"
+                de: "Die am stärksten schützende Gewohnheit des ersten Jahres für jeden Schlaf",
+                es: "El hábito más protector del primer año, en cada sueño",
+                fr: "L'habitude la plus protectrice de la première année, pour chaque sommeil",
+                pt: "O hábito mais protetor do primeiro ano, para cada sono"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -36,12 +42,36 @@ extension CareTipsCatalog {
                     "Im Bett: ein Babybett, Gitterbett oder eine Wiege, die den aktuellen Sicherheitsstandards entspricht.",
                     "Wenden Sie es auf jeden Schlaf an, einschließlich kurzer Tagesschläfchen und Schläfe weg von zu Hause.",
                     "Stellen Sie sicher, dass jeder, der Ihr Baby je zu Bett bringt — Partner, Großeltern, Nanny — die gleichen drei Regeln befolgt."
+                ],
+                es: [
+                    "Solo: el bebé duerme en su propia superficie, sin nadie ni nada más encima.",
+                    "Boca arriba: boca arriba en cada siesta y cada noche, hasta que se gire solo en ambos sentidos.",
+                    "En la cuna: una cuna, cuco o moisés que cumpla las normas de seguridad vigentes.",
+                    "Aplícalo a todos los sueños, incluidas las siestas cortas y los sueños fuera de casa.",
+                    "Asegúrate de que todo el que acueste al bebé —pareja, abuelos, canguro— siga las mismas tres reglas."
+                ],
+                fr: [
+                    "Seul : votre bébé dort sur sa propre surface, sans personne ni rien d'autre dessus.",
+                    "Dos : sur le dos à chaque sieste et chaque nuit, jusqu'à ce qu'il roule tout seul dans les deux sens.",
+                    "Lit bébé : un lit bébé, un berceau ou un couffin répondant aux normes de sécurité en vigueur.",
+                    "Appliquez-le à chaque sommeil, y compris les courtes siestes de jour et les nuits loin de la maison.",
+                    "Assurez-vous que toutes les personnes qui installent votre bébé – partenaire, grands-parents, nounou – suivent les trois mêmes règles.",
+                ],
+                pt: [
+                    "Sozinho: seu bebê dorme na sua própria superfície, sem ninguém e nada mais sobre ele.",
+                    "Costas: nas costas a cada soneca e a cada noite, até rolarem sozinhos para os dois lados.",
+                    "Berço: berço, berço ou cesto moisés que atenda às normas de segurança vigentes.",
+                    "Aplique-o em todas as noites de sono, incluindo cochilos curtos durante o dia e fora de casa.",
+                    "Certifique-se de que todos que cuidam do seu bebê – parceiro, avós, babá – sigam as mesmas três regras.",
                 ]
             ),
             whyItMatters: LocalizedText(
                 en: "Back sleeping is the change most strongly associated with the fall in sudden infant death rates worldwide. On the back, the airway stays open and the swallowing reflex is better positioned to protect it, which is also why healthy babies do not choke when they sleep this way. The value of the rule comes from consistency: occasional exceptions, including at other people's homes, are where the risk concentrates.",
                 ru: "Сон на спине — то изменение, которое сильнее всего связано со снижением частоты синдрома внезапной детской смерти во всём мире. На спине дыхательные пути остаются открытыми, а глотательный рефлекс лучше расположен для их защиты — поэтому здоровые дети в такой позе не поперхиваются. Ценность правила — в постоянстве: именно на редких исключениях, в том числе в гостях, и концентрируется риск.",
-                de: "Rückenschlaf ist die Veränderung, die am stärksten mit dem Rückgang der Fälle von plötzlichem Kindstod weltweit verbunden ist. Auf dem Rücken bleiben die Atemwege offen und der Schluckreflex ist besser positioniert, um sie zu schützen — deshalb würgen gesunde Babys nicht, wenn sie auf diese Weise schlafen. Der Wert der Regel liegt in der Konsistenz: gelegentliche Ausnahmen, auch in anderen Häusern, konzentrieren das Risiko."
+                de: "Rückenschlaf ist die Veränderung, die am stärksten mit dem Rückgang der Fälle von plötzlichem Kindstod weltweit verbunden ist. Auf dem Rücken bleiben die Atemwege offen und der Schluckreflex ist besser positioniert, um sie zu schützen — deshalb würgen gesunde Babys nicht, wenn sie auf diese Weise schlafen. Der Wert der Regel liegt in der Konsistenz: gelegentliche Ausnahmen, auch in anderen Häusern, konzentrieren das Risiko.",
+                es: "Dormir boca arriba es el cambio más asociado a la caída de las tasas de muerte súbita del lactante en todo el mundo. Boca arriba, la vía aérea permanece abierta y el reflejo de deglución queda mejor situado para protegerla, y por eso los bebés sanos no se atragantan al dormir así. El valor de la regla está en la constancia: es en las excepciones ocasionales, incluidas las casas ajenas, donde se concentra el riesgo.",
+                fr: "Le sommeil sur le dos est le changement le plus fortement associé à la baisse des taux de mort subite du nourrisson dans le monde. Sur le dos, les voies respiratoires restent ouvertes et le réflexe de déglutition est mieux positionné pour les protéger, c'est aussi pourquoi les bébés en bonne santé ne s'étouffent pas lorsqu'ils dorment de cette façon. La valeur de la règle vient de la cohérence : les exceptions occasionnelles, y compris au domicile d'autrui, sont là où se concentre le risque.",
+                pt: "Dormir nas costas é a mudança mais fortemente associada à queda nas taxas de mortalidade infantil súbita em todo o mundo. Nas costas, a via aérea permanece aberta e o reflexo da deglutição fica melhor posicionado para protegê-la, razão pela qual bebês saudáveis ​​não engasgam quando dormem assim. O valor da regra vem da consistência: exceções ocasionais, inclusive nas casas de outras pessoas, são onde o risco se concentra."
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -61,6 +91,24 @@ extension CareTipsCatalog {
                     "Bauchschlag für Nickerchen, weil sich das Baby auf diese Weise besser beruhigt.",
                     "Unterschiedliche Regeln für Tagesschläfchen und Nachtschlaf.",
                     "Annahme, dass ein Baby, das sich einmal gedreht hat, bereit ist, auf dem Bauch zu schlafen."
+                ],
+                es: [
+                    "Dormir de lado como solución intermedia: es inestable y el bebé puede girarse boca abajo.",
+                    "Ponerlo boca abajo en las siestas porque así se calma mejor.",
+                    "Reglas distintas para las siestas que para la noche.",
+                    "Suponer que un bebé que se ha girado una vez ya puede dormir boca abajo."
+                ],
+                fr: [
+                    "Dormir sur le côté comme compromis : il est instable et le bébé peut rouler vers l'avant.",
+                    "Dormir devant pour les siestes car le bébé s'installe mieux ainsi.",
+                    "Des règles différentes pour les siestes de jour et celles de nuit.",
+                    "En supposant qu'un bébé qui a roulé une fois est prêt à dormir sur le ventre.",
+                ],
+                pt: [
+                    "Dormir de lado é um compromisso – é instável e o bebê pode rolar para a frente.",
+                    "Dormir de frente para cochilar porque o bebê se acomoda melhor assim.",
+                    "Regras diferentes para cochilos diurnos e noturnos.",
+                    "Supondo que um bebê que rolou uma vez esteja pronto para dormir de bruços.",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -78,6 +126,21 @@ extension CareTipsCatalog {
                     "Ihr Baby ist sehr unruhig auf dem Rücken und wurde mit Reflux diagnostiziert — fragen Sie, bevor Sie etwas ändern.",
                     "Jede Atempause, Farbveränderung oder Schlappe während des Schlafs — suchen Sie sofort Hilfe.",
                     "Ein Gesundheitsfachmann hat eine andere Position aus medizinischen Gründen empfohlen; folgen Sie seinen Anweisungen, nicht dieser Karte."
+                ],
+                es: [
+                    "El bebé está muy inquieto boca arriba y tiene diagnóstico de reflujo: pregunta antes de cambiar nada.",
+                    "Cualquier pausa respiratoria, cambio de color o flacidez durante el sueño: busca ayuda de inmediato.",
+                    "Un profesional sanitario ha indicado otra postura por un motivo médico: sigue su indicación, no esta ficha."
+                ],
+                fr: [
+                    "Votre bébé est très instable sur le dos et a reçu un diagnostic de reflux – renseignez-vous avant de changer quoi que ce soit.",
+                    "En cas de pause respiratoire, de changement de couleur ou de souplesse pendant le sommeil, demandez immédiatement de l'aide.",
+                    "Un professionnel de la santé a conseillé une position différente pour une raison médicale ; suivez leurs instructions, pas cette carte.",
+                ],
+                pt: [
+                    "Seu bebê está muito inquieto e foi diagnosticado com refluxo – pergunte antes de mudar qualquer coisa.",
+                    "Qualquer pausa respiratória, mudança de cor ou flacidez durante o sono – procure ajuda imediatamente.",
+                    "Um profissional de saúde aconselhou uma posição diferente por motivos médicos; siga as instruções deles, não este cartão.",
                 ]
             )
         ),
@@ -87,12 +150,18 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "A firm, flat, empty sleep surface",
                 ru: "Твёрдая, ровная и пустая поверхность для сна",
-                de: "Eine feste, flache, leere Schlaffläche"
+                de: "Eine feste, flache, leere Schlaffläche",
+                es: "Una superficie de sueño firme, plana y vacía",
+                fr: "Une surface de sommeil ferme, plate et vide",
+                pt: "Uma superfície de sono firme, plana e vazia"
             ),
             summary: LocalizedText(
                 en: "Nothing in the cot but a fitted sheet and your baby",
                 ru: "В кроватке только натянутая простыня и сам ребёнок",
-                de: "Nichts im Bett außer einem Spannbettuch und Ihrem Baby"
+                de: "Nichts im Bett außer einem Spannbettuch und Ihrem Baby",
+                es: "En la cuna, nada más que una sábana bajera y tu bebé",
+                fr: "Rien dans le lit bébé sauf un drap housse et votre bébé",
+                pt: "Nada no berço além de um lençol justo e seu bebê"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -115,12 +184,36 @@ extension CareTipsCatalog {
                     "Entfernen Sie Kissen, Bettdecken, lose Decken, Bettstoßfänger, Positionierer, Keile und Kuscheltiere.",
                     "Verwenden Sie einen Schlafsack oder eine leichte eingefasste Decke, die nicht höher als die Brust reicht, mit Füßen am Fuß des Betts.",
                     "Halten Sie das Bett von Kabeln, Rollowerschnüren und allem, das in Reichweite hängt, fern."
+                ],
+                es: [
+                    "Usa un colchón firme y plano que encaje en la estructura de la cuna sin huecos en los bordes.",
+                    "Cúbrelo con una sábana bajera bien ajustada y nada más.",
+                    "Retira almohadas, nórdicos, mantas sueltas, protectores de cuna, posicionadores, cuñas y peluches.",
+                    "Usa un saco de dormir o una manta ligera remetida que no pase del pecho, con los pies al fondo de la cuna.",
+                    "Mantén la cuna lejos de cables, cordones de persiana y de cualquier cosa que cuelgue a su alcance."
+                ],
+                fr: [
+                    "Utilisez un matelas ferme et plat qui s'adapte au cadre du lit, sans espaces sur les bords.",
+                    "Couvrez-le d'un drap bien ajusté et rien d'autre.",
+                    "Retirez les oreillers, les couettes, les couvertures amples, les tours de lit, les positionneurs, les cales et les peluches.",
+                    "Utilisez un sac de couchage ou une couverture légère qui ne dépasse pas la poitrine et les pieds au pied du lit.",
+                    "Gardez le lit à l'écart des cordons, des tirettes de store et de tout ce qui pend à portée de main.",
+                ],
+                pt: [
+                    "Use um colchão firme e plano que caiba na estrutura do berço, sem folgas nas bordas.",
+                    "Cubra-o com um lençol bem ajustado e nada mais.",
+                    "Remova travesseiros, edredons, cobertores soltos, protetores de berço, posicionadores, cunhas e peluches.",
+                    "Use um saco de dormir ou um cobertor leve que não ultrapasse o peito, com os pés na base do berço.",
+                    "Mantenha o berço longe de cordas, puxadores de persianas e qualquer coisa pendurada ao seu alcance.",
                 ]
             ),
             whyItMatters: LocalizedText(
                 en: "A soft or cluttered surface can mould around the face or let a baby rebreathe their own exhaled air, and young babies cannot reliably move their head away from an obstruction. Cot bumpers and sleep positioners were designed to solve problems that a correctly sized cot does not have, and both have caused harm. The safest cot looks almost empty, which feels wrong to most parents and is exactly right.",
                 ru: "Мягкая или заставленная поверхность может облепить лицо или заставить ребёнка вдыхать собственный выдохнутый воздух, а маленькие дети не могут надёжно отвернуть голову от препятствия. Бортики и позиционеры для сна придумали для решения проблем, которых у правильно подобранной кроватки нет, и и то и другое приводило к трагедиям. Самая безопасная кроватка выглядит почти пустой — большинству родителей это кажется неправильным, и это именно то, что нужно.",
-                de: "Eine weiche oder vollgestellte Oberfläche kann sich um das Gesicht formen oder ein Baby dazu bringen, ihre eigene Ausatemluft wieder einzuatmen, und kleine Babys können ihren Kopf nicht zuverlässig von einem Hindernis abwenden. Bettstoßfänger und Schlafpositionierer wurden entwickelt, um Probleme zu lösen, die ein richtig großes Bett nicht hat, und beide haben Schaden verursacht. Das sicherste Bett sieht fast leer aus, was sich für die meisten Eltern falsch anfühlt und genau richtig ist."
+                de: "Eine weiche oder vollgestellte Oberfläche kann sich um das Gesicht formen oder ein Baby dazu bringen, ihre eigene Ausatemluft wieder einzuatmen, und kleine Babys können ihren Kopf nicht zuverlässig von einem Hindernis abwenden. Bettstoßfänger und Schlafpositionierer wurden entwickelt, um Probleme zu lösen, die ein richtig großes Bett nicht hat, und beide haben Schaden verursacht. Das sicherste Bett sieht fast leer aus, was sich für die meisten Eltern falsch anfühlt und genau richtig ist.",
+                es: "Una superficie blanda o llena de cosas puede amoldarse a la cara o hacer que el bebé vuelva a respirar su propio aire exhalado, y los bebés pequeños no pueden apartar la cabeza de un obstáculo de forma fiable. Los protectores y posicionadores se diseñaron para resolver problemas que una cuna del tamaño correcto no tiene, y ambos han causado daño. La cuna más segura parece casi vacía, lo que a la mayoría de los padres les resulta raro y es exactamente lo correcto.",
+                fr: "Une surface molle ou encombrée peut se mouler autour du visage ou permettre au bébé de respirer son propre air expiré, et les jeunes bébés ne peuvent pas éloigner leur tête de manière fiable d'une obstruction. Les tours de lit et les positionneurs de sommeil ont été conçus pour résoudre des problèmes qu'un lit de bébé de taille correcte ne présente pas, et tous deux ont causé des dommages. Le lit de bébé le plus sûr semble presque vide, ce qui ne convient pas à la plupart des parents et qui est tout à fait correct.",
+                pt: "Uma superfície macia ou desordenada pode moldar-se ao redor do rosto ou permitir que o bebê respire novamente o próprio ar exalado, e os bebês pequenos não conseguem mover a cabeça de forma confiável para longe de uma obstrução. Os protetores de berço e os posicionadores de dormir foram projetados para resolver problemas que um berço de tamanho correto não tem, e ambos causaram danos. O berço mais seguro parece quase vazio, o que parece errado para a maioria dos pais e é exatamente certo."
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -140,6 +233,24 @@ extension CareTipsCatalog {
                     "Eine Matratzenauflage oder zusätzliche Polsterung zum Komfort.",
                     "Eine Bettdecke oder ein Kissen im ersten Jahr.",
                     "Lassen Sie das Baby mit einem Erwachsenen auf einem Sofa, Sessel oder Sitzsack schlafen."
+                ],
+                es: [
+                    "Añadir un doudou o una muselina «solo para las siestas».",
+                    "Un cubrecolchón o acolchado extra por comodidad.",
+                    "Un nórdico o una almohada durante el primer año.",
+                    "Dejar que el bebé duerma con un adulto en el sofá, un sillón o un puf."
+                ],
+                fr: [
+                    "Ajout d'un doudou ou d'une mousseline « juste pour les siestes ».",
+                    "Un surmatelas ou un rembourrage supplémentaire pour plus de confort.",
+                    "Une couette ou un oreiller la première année.",
+                    "Laisser bébé dormir sur un canapé, un fauteuil ou un pouf avec un adulte.",
+                ],
+                pt: [
+                    "Adicionando um edredom ou musselina 'só para cochilar'.",
+                    "Um protetor de colchão ou acolchoamento extra para maior conforto.",
+                    "Um edredom ou travesseiro no primeiro ano.",
+                    "Deixar o bebê dormir em sofá, poltrona ou pufe com um adulto.",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -157,6 +268,21 @@ extension CareTipsCatalog {
                     "Ihr Baby kann sich nach den Neugeborenenwochen überhaupt nicht auf einer festen, flachen Oberfläche beruhigen.",
                     "Der Reflux ist so schwerwiegend, dass Sie einen Keil oder eine Neigung in Betracht ziehen — fragen Sie zuerst.",
                     "Sie finden Ihr Baby mit Bettwäsche über dem Gesicht, auch nur einmal."
+                ],
+                es: [
+                    "Pasadas las primeras semanas, el bebé no consigue dormirse en absoluto sobre una superficie firme y plana.",
+                    "El reflujo es tan intenso que estás pensando en una cuña o una inclinación: pregunta antes.",
+                    "Encuentras al bebé con la ropa de cama sobre la cara, aunque sea una sola vez."
+                ],
+                fr: [
+                    "Votre bébé ne peut pas du tout s'installer sur une surface plane et ferme après les semaines du nouveau-né.",
+                    "Le reflux est suffisamment grave pour que vous envisagiez un coin ou une pente – demandez d’abord.",
+                    "Vous trouvez votre bébé avec une literie sur le visage, même une fois.",
+                ],
+                pt: [
+                    "Seu bebê não consegue se acomodar em uma superfície plana e firme após as semanas do recém-nascido.",
+                    "O refluxo é grave o suficiente para que você considere uma cunha ou inclinação – pergunte primeiro.",
+                    "Você encontra seu bebê com roupa de cama cobrindo o rosto, pelo menos uma vez.",
                 ]
             )
         ),
@@ -166,12 +292,18 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Share a room, not a bed, for the first six months",
                 ru: "Первые шесть месяцев — одна комната, но не одна кровать",
-                de: "Teilen Sie ein Zimmer, aber kein Bett, für die ersten sechs Monate"
+                de: "Teilen Sie ein Zimmer, aber kein Bett, für die ersten sechs Monate",
+                es: "Compartid habitación, no cama, los primeros seis meses",
+                fr: "Partagez une chambre, pas un lit, pendant les six premiers mois",
+                pt: "Divida um quarto, não uma cama, durante os primeiros seis meses"
             ),
             summary: LocalizedText(
                 en: "Same room, separate surface — close enough to hear, safe enough to sleep",
                 ru: "Та же комната, отдельная поверхность: достаточно близко, чтобы слышать, и достаточно безопасно, чтобы спать",
-                de: "Gleiches Zimmer, separate Oberfläche — nah genug zum Hören, sicher genug zum Schlafen"
+                de: "Gleiches Zimmer, separate Oberfläche — nah genug zum Hören, sicher genug zum Schlafen",
+                es: "Misma habitación, superficie separada: lo suficientemente cerca para oír, lo suficientemente seguro para dormir",
+                fr: "Même pièce, surface séparée – suffisamment proche pour entendre, suffisamment en sécurité pour dormir",
+                pt: "Mesmo quarto, superfície separada – perto o suficiente para ouvir, seguro o suficiente para dormir"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -194,12 +326,36 @@ extension CareTipsCatalog {
                     "Stillen Sie im Bett, wenn nötig, aber legen Sie Ihr Baby vor dem Schlaf zurück auf seine Oberfläche.",
                     "Wenn Sie während des Stillen einschlafen könnten, leeren Sie das Bett zuerst von Kissen und Bettdecken als Vorsichtsmaßnahme.",
                     "Schlafen Sie niemals mit Ihrem Baby auf einem Sofa oder Sessel — dies ist mit einem Bett viel riskanter."
+                ],
+                es: [
+                    "Coloque la cuna, cuna o cama junto a la cama al alcance de la mano de su cama.",
+                    "Mantenga este arreglo durante al menos los primeros seis meses, incluidas las siestas si está en la habitación.",
+                    "Aliméntelo en la cama si es necesario, pero lleve a su bebé a su propia superficie antes de dormir.",
+                    "Si puede quedarse dormido mientras alimenta, primero limpie la cama de almohadas y edredones como medida de precaución.",
+                    "Nunca duerma con su bebé en un sofá o sillón; esto conlleva un riesgo mucho mayor que una cama.",
+                ],
+                fr: [
+                    "Placez le lit de bébé, le berceau ou le lit de chevet à portée de main de votre lit.",
+                    "Conservez cet arrangement pendant au moins les six premiers mois, y compris les siestes si vous êtes dans la pièce.",
+                    "Nourrissez-le au lit si vous en avez besoin, mais ramenez votre bébé sur sa propre surface avant de dormir.",
+                    "Si vous risquez de vous endormir pendant le repas, débarrassez d'abord le lit des oreillers et des couettes par mesure de précaution.",
+                    "Ne dormez jamais avec votre bébé sur un canapé ou un fauteuil : cela comporte un risque beaucoup plus élevé que dans un lit.",
+                ],
+                pt: [
+                    "Coloque o berço, berço ou cama de cabeceira ao alcance do braço da cama.",
+                    "Mantenha esse arranjo pelo menos nos primeiros seis meses, incluindo cochilos se você estiver no quarto.",
+                    "Alimente-o na cama, se necessário, mas coloque o bebê de volta na superfície antes de dormir.",
+                    "Se você adormecer durante a alimentação, limpe primeiro os travesseiros e edredons da cama, por precaução.",
+                    "Nunca durma com seu bebê em um sofá ou poltrona – isso representa um risco muito maior do que em uma cama.",
                 ]
             ),
             whyItMatters: LocalizedText(
                 en: "Room-sharing is associated with a lower risk of sudden infant death, and it makes night feeds far less exhausting because nobody has to cross the house. Bed-sharing is a different thing: adult bedding, mattress softness and the presence of another body change the picture. Separating the two ideas lets you keep the benefit of closeness without the associated risk.",
                 ru: "Сон в одной комнате связан с более низким риском синдрома внезапной детской смерти, и он делает ночные кормления заметно менее изматывающими, потому что не нужно ходить через всю квартиру. Совместный сон в одной кровати — это другое: взрослое постельное бельё, мягкость матраса и присутствие другого тела меняют картину. Разделение этих двух понятий позволяет сохранить пользу близости без связанного с ней риска.",
-                de: "Das Teilen eines Zimmers ist mit einem niedrigeren Risiko für plötzlichen Kindstod verbunden, und es macht nächtliche Fütterungen viel weniger anstrengend, da niemand das Haus durchqueren muss. Bettteilen ist etwas anderes: Erwachsenenbettwäsche, Matratzenzartheit und die Anwesenheit eines anderen Körpers ändern das Bild. Durch die Trennung dieser beiden Ideen können Sie den Vorteil der Nähe ohne das damit verbundene Risiko beibehalten."
+                de: "Das Teilen eines Zimmers ist mit einem niedrigeren Risiko für plötzlichen Kindstod verbunden, und es macht nächtliche Fütterungen viel weniger anstrengend, da niemand das Haus durchqueren muss. Bettteilen ist etwas anderes: Erwachsenenbettwäsche, Matratzenzartheit und die Anwesenheit eines anderen Körpers ändern das Bild. Durch die Trennung dieser beiden Ideen können Sie den Vorteil der Nähe ohne das damit verbundene Risiko beibehalten.",
+                es: "Compartir habitación se asocia con un menor riesgo de muerte súbita infantil y hace que las tomas nocturnas sean mucho menos agotadoras porque nadie tiene que cruzar la casa. Compartir la cama es otra cosa: la ropa de cama de los adultos, la suavidad del colchón y la presencia de otro cuerpo cambian el panorama. Separar las dos ideas le permite conservar el beneficio de la cercanía sin el riesgo asociado.",
+                fr: "Le partage de la chambre est associé à un risque plus faible de mort subite du nourrisson et rend les tétées nocturnes beaucoup moins épuisantes car personne n'a à traverser la maison. Le partage du lit est une autre chose : la literie adulte, la douceur du matelas et la présence d’un autre corps changent la donne. Séparer les deux idées permet de conserver le bénéfice de la proximité sans le risque associé.",
+                pt: "Compartilhar o quarto está associado a um menor risco de morte súbita do bebê e torna as mamadas noturnas muito menos cansativas porque ninguém precisa atravessar a casa. Compartilhar a cama é outra coisa: a roupa de cama dos adultos, a maciez do colchão e a presença de outro corpo mudam o quadro. Separar as duas ideias permite manter o benefício da proximidade sem o risco associado."
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -219,6 +375,24 @@ extension CareTipsCatalog {
                     "Während der Nachtfütterung auf dem Sofa einschlafen.",
                     "Bettteilen nach Alkohol, beruhigenden Medikamenten oder extremer Erschöpfung.",
                     "Ein nicht sicher befestigter Bettseitenschläfer, der eine Lücke gegen die Erwachsenenmatratze hinterlässt."
+                ],
+                es: [
+                    "Llevar al bebé a su habitación temprano porque parece que duermen ruidosamente.",
+                    "Dormirse en el sofá durante las tomas nocturnas.",
+                    "Compartir la cama después del consumo de alcohol, medicamentos sedantes o agotamiento extremo.",
+                    "Una cama junto a la cama que no está bien fijada, dejando un espacio contra el colchón de adultos.",
+                ],
+                fr: [
+                    "Déplacer le bébé dans sa propre chambre plus tôt car il semble dormir bruyant.",
+                    "S'endormir sur le canapé pendant les tétées nocturnes.",
+                    "Partage du lit après avoir consommé de l'alcool, pris des sédatifs ou été extrêmement épuisé.",
+                    "Un dormeur de chevet qui n'est pas solidement fixé, laissant un espace contre le matelas adulte.",
+                ],
+                pt: [
+                    "Mover o bebê para seu próprio quarto mais cedo porque eles parecem ter sono barulhento.",
+                    "Adormecer no sofá durante as mamadas noturnas.",
+                    "Compartilhar a cama após álcool, medicação sedativa ou exaustão extrema.",
+                    "Uma cama de cabeceira que não está bem fixada, deixando um espaço no colchão do adulto.",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -236,6 +410,21 @@ extension CareTipsCatalog {
                     "Ihr Baby war verfrüht oder hatte niedriges Geburtsgewicht — fragen Sie nach zusätzlichen Vorsichtsmaßnahmen.",
                     "Sie schlafen wiederholt während des Stillens ein — sagen Sie es; es gibt sicherere Anordnungen.",
                     "Schnarchen, Atempausen oder angestrengtes Atmen während des Schlafs."
+                ],
+                es: [
+                    "Su bebé fue prematuro o tuvo bajo peso al nacer; pregunte sobre precauciones adicionales.",
+                    "Te encuentras quedándote dormido repetidamente mientras te alimentas; díselo; hay arreglos más seguros.",
+                    "Ronquidos, pausas en la respiración o respiración ruidosa y dificultosa durante el sueño.",
+                ],
+                fr: [
+                    "Votre bébé était prématuré ou avait un faible poids à la naissance – renseignez-vous sur les précautions supplémentaires.",
+                    "Vous vous endormez à plusieurs reprises pendant que vous vous nourrissez – dites-le ; il existe des arrangements plus sûrs.",
+                    "Ronflement, pauses respiratoires ou respiration bruyante et difficile pendant le sommeil.",
+                ],
+                pt: [
+                    "Seu bebê foi prematuro ou teve baixo peso ao nascer – pergunte sobre precauções adicionais.",
+                    "Você adormece repetidamente enquanto se alimenta - diga isso; existem arranjos mais seguros.",
+                    "Ronco, pausas na respiração ou respiração ruidosa e difícil durante o sono.",
                 ]
             )
         ),
@@ -245,12 +434,18 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Room temperature and how to dress for sleep",
                 ru: "Температура в комнате и как одевать на сон",
-                de: "Raumtemperatur und wie man zum Schlafen anzieht"
+                de: "Raumtemperatur und wie man zum Schlafen anzieht",
+                es: "Temperatura ambiente y cómo vestirse para dormir.",
+                fr: "Température ambiante et comment s'habiller pour dormir",
+                pt: "Temperatura ambiente e como se vestir para dormir"
             ),
             summary: LocalizedText(
                 en: "Aim for 18–21 °C and check the chest, not the hands",
                 ru: "Ориентир — 18–21 °C, проверяйте грудь, а не ручки",
-                de: "Streben Sie 18–21 °C an und überprüfen Sie die Brust, nicht die Hände"
+                de: "Streben Sie 18–21 °C an und überprüfen Sie die Brust, nicht die Hände",
+                es: "Apunte a una temperatura de 18 a 21 °C y revise el pecho, no las manos.",
+                fr: "Visez une température de 18 à 21 °C et vérifiez la poitrine, pas les mains",
+                pt: "Apontar para 18–21 °C e verificar o peito, não as mãos"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -273,12 +468,36 @@ extension CareTipsCatalog {
                     "Überprüfen Sie die Temperatur, indem Sie zwei Finger auf die Brust oder die Rückseite des Halses schieben.",
                     "Verwenden Sie im Sommer einen leichteren Schlafsack und im Winter einen wärmeren, anstatt lose Decken hinzuzufügen.",
                     "Entfernen Sie Hüte und Kapuzen in Innenräumen — Babys geben Wärme über den Kopf ab."
+                ],
+                es: [
+                    "Mantenga la habitación para dormir entre 18 y 21 °C aproximadamente, siempre que pueda.",
+                    "Vista a su bebé con una capa más de la que usted se sienta cómoda, contando el saco de dormir como una capa.",
+                    "Compruebe la temperatura deslizando dos dedos sobre el pecho o la nuca.",
+                    "Utilice un saco de dormir más ligero en verano y uno más cálido en invierno en lugar de añadir mantas sueltas.",
+                    "Quítese los sombreros y capuchas en el interior: los bebés liberan calor a través de la cabeza.",
+                ],
+                fr: [
+                    "Gardez la chambre à coucher entre 18 et 21 °C environ lorsque vous le pouvez.",
+                    "Habillez votre bébé avec une couche de plus que celle dans laquelle vous êtes à l'aise, en comptant la gigoteuse comme une couche.",
+                    "Vérifiez la température en glissant deux doigts sur la poitrine ou sur la nuque.",
+                    "Utilisez un sac de couchage plus léger en été et plus chaud en hiver plutôt que d'ajouter des couvertures amples.",
+                    "Retirez les chapeaux et les cagoules à l’intérieur : les bébés dégagent de la chaleur par la tête.",
+                ],
+                pt: [
+                    "Mantenha o quarto de dormir entre 18 e 21 °C sempre que possível.",
+                    "Vista seu bebê com uma camada a mais do que você se sente confortável, contando o saco de dormir como uma camada.",
+                    "Verifique a temperatura deslizando dois dedos no peito ou na nuca.",
+                    "Use um saco de dormir mais leve no verão e um mais quente no inverno, em vez de adicionar cobertores soltos.",
+                    "Remova chapéus e capuzes dentro de casa – os bebês liberam calor pela cabeça.",
                 ]
             ),
             whyItMatters: LocalizedText(
                 en: "Overheating is a recognised risk factor for sudden infant death, and babies cannot take off a layer or push away a blanket the way an adult can. Cool hands and feet are normal for months and are a poor guide, because circulation to the extremities is still developing. The chest tells you the truth: it should feel warm and dry, never hot or clammy.",
                 ru: "Перегрев — признанный фактор риска синдрома внезапной детской смерти, а ребёнок не может снять слой одежды или отбросить одеяло, как взрослый. Прохладные ручки и ножки нормальны в течение месяцев и плохо подходят как ориентир, потому что кровообращение в конечностях ещё формируется. Правду говорит грудь: она должна быть тёплой и сухой, но не горячей и не влажной.",
-                de: "Überhitzung ist ein anerkannter Risikofaktor für den plötzlichen Kindstod, und Babys können eine Schicht nicht ausziehen oder eine Decke nicht wie ein Erwachsener abschieben. Kühle Hände und Füße sind für Monate normal und ein schlechter Leitfaden, da die Durchblutung der Gliedmaßen noch entwickelt wird. Die Brust sagt dir die Wahrheit: Sie sollte sich warm und trocken anfühlen, nie heiß oder feucht."
+                de: "Überhitzung ist ein anerkannter Risikofaktor für den plötzlichen Kindstod, und Babys können eine Schicht nicht ausziehen oder eine Decke nicht wie ein Erwachsener abschieben. Kühle Hände und Füße sind für Monate normal und ein schlechter Leitfaden, da die Durchblutung der Gliedmaßen noch entwickelt wird. Die Brust sagt dir die Wahrheit: Sie sollte sich warm und trocken anfühlen, nie heiß oder feucht.",
+                es: "El sobrecalentamiento es un factor de riesgo reconocido de muerte súbita infantil, y los bebés no pueden quitarse una capa ni apartar una manta como lo hace un adulto. Las manos y los pies fríos son normales durante meses y no son una buena guía, porque la circulación en las extremidades aún se está desarrollando. El pecho te dice la verdad: debe sentirse cálido y seco, nunca caliente ni húmedo.",
+                fr: "La surchauffe est un facteur de risque reconnu de mort subite du nourrisson, et les bébés ne peuvent pas enlever une couche ou repousser une couverture comme le fait un adulte. Des mains et des pieds frais sont normaux pendant des mois et ne constituent pas un bon indicateur, car la circulation vers les extrémités est encore en développement. La poitrine vous dit la vérité : elle doit être chaude et sèche, jamais chaude ou moite.",
+                pt: "O superaquecimento é um fator de risco reconhecido para morte súbita infantil, e os bebês não conseguem tirar uma camada ou afastar um cobertor como um adulto. Mãos e pés frios são normais durante meses e são um mau guia, porque a circulação nas extremidades ainda está em desenvolvimento. O peito diz a verdade: deve estar quente e seco, nunca quente ou úmido."
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -298,6 +517,24 @@ extension CareTipsCatalog {
                     "Einen Hut für den Schlaf in Innenräumen anlassen.",
                     "Eine Wärmflasche oder eine elektrische Decke im Bett.",
                     "Das Bett neben einem Heizkörper oder in direktem Sonnenlicht platzieren."
+                ],
+                es: [
+                    "Agregar capas porque las manos se sienten frías.",
+                    "Dejar un sombrero puesto para dormir en el interior.",
+                    "Una bolsa de agua caliente o manta eléctrica en la cuna.",
+                    "Colocar la cuna junto a un radiador o bajo la luz solar directa.",
+                ],
+                fr: [
+                    "Ajouter des couches parce que les mains sont froides.",
+                    "Laisser un chapeau pour dormir à l’intérieur.",
+                    "Une bouillotte ou une couverture chauffante dans le lit bébé.",
+                    "Placer le lit à côté d'un radiateur ou en plein soleil.",
+                ],
+                pt: [
+                    "Adicionando camadas porque as mãos ficam frias.",
+                    "Deixar um chapéu para dormir dentro de casa.",
+                    "Bolsa de água quente ou cobertor elétrico no berço.",
+                    "Colocar o berço próximo a um radiador ou sob luz solar direta.",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -315,6 +552,21 @@ extension CareTipsCatalog {
                     "Ihr Baby schwitzt, ist gerötet oder atmet während des Schlafs schnell.",
                     "Die Brust fühlt sich selbst nach dem Entfernen einer Schicht heiß und feucht an.",
                     "Ein Fieber tritt zusammen mit ungewöhnlicher Schläfrigkeit oder Fütterungsverweigerung auf."
+                ],
+                es: [
+                    "Su bebé suda, se sonroja o respira rápidamente mientras duerme.",
+                    "El pecho se siente caliente y húmedo incluso después de quitar una capa.",
+                    "La fiebre aparece junto con una somnolencia inusual o la negativa a alimentarse.",
+                ],
+                fr: [
+                    "Votre bébé transpire, rougit ou respire rapidement pendant son sommeil.",
+                    "La poitrine est chaude et moite même après avoir retiré une couche.",
+                    "Une fièvre apparaît accompagnée d'une somnolence inhabituelle ou d'un refus de s'alimenter.",
+                ],
+                pt: [
+                    "Seu bebê está suando, corado ou respirando rapidamente durante o sono.",
+                    "O peito fica quente e úmido mesmo depois de remover uma camada.",
+                    "A febre aparece juntamente com uma sonolência incomum ou recusa em alimentar-se.",
                 ]
             )
         ),
@@ -324,12 +576,18 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Swaddling — and stopping at the first sign of rolling",
                 ru: "Пеленание — и отказ от него при первых переворотах",
-                de: "Pucken — und beim ersten Anzeichen des Rollens stoppen"
+                de: "Pucken — und beim ersten Anzeichen des Rollens stoppen",
+                es: "Envolverlo y detenerse a la primera señal de que está rodando",
+                fr: "Emmailloter – et s’arrêter au premier signe de roulage",
+                pt: "Enfaixando – e parando ao primeiro sinal de rolar"
             ),
             summary: LocalizedText(
                 en: "Snug at the arms, loose at the hips, and finished before rolling starts",
                 ru: "Плотно у ручек, свободно в бёдрах и закончить до начала переворотов",
-                de: "Fest an den Armen, locker an den Hüften, und beendet bevor das Rollen beginnt"
+                de: "Fest an den Armen, locker an den Hüften, und beendet bevor das Rollen beginnt",
+                es: "Ajustado en los brazos, suelto en las caderas y terminado antes de que comience a rodar.",
+                fr: "Bien ajusté au niveau des bras, ample au niveau des hanches et terminé avant le début du roulage",
+                pt: "Aconchegante nos braços, solto nos quadris e finalizado antes de começar a rolar"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -352,12 +610,36 @@ extension CareTipsCatalog {
                     "Lassen Sie viel Platz an den Hüften, damit die Beine sich nach oben und außen beugen können.",
                     "Legen Sie ein gepucktes Baby immer auf den Rücken, nie auf die Seite oder den Bauch.",
                     "Hören Sie beim ersten Anzeichen des Rollens vollständig auf zu pucken — normalerweise irgendwann zwischen zwei und vier Monaten. Wechseln Sie zu einem Schlafsack mit freien Armen."
+                ],
+                es: [
+                    "Utilice una tela fina y transpirable o un arrullo especialmente diseñado, nunca una manta pesada.",
+                    "Manténgalo firme a lo largo del pecho pero lo suficientemente suelto como para deslizar dos dedos debajo del borde superior.",
+                    "Deje suficiente espacio en las caderas para que las piernas puedan doblarse hacia arriba y hacia afuera.",
+                    "Coloque siempre al bebé envuelto boca arriba, nunca de lado o de frente.",
+                    "Deje de envolverlo por completo a la primera señal de que está rodando, generalmente entre dos y cuatro meses. Pasar a un saco de dormir con los brazos libres.",
+                ],
+                fr: [
+                    "Utilisez un tissu fin et respirant ou un emmaillotage spécialement conçu, jamais une couverture lourde.",
+                    "Gardez-le ferme sur la poitrine mais suffisamment lâche pour glisser deux doigts sous le bord supérieur.",
+                    "Laissez suffisamment d’espace au niveau des hanches pour que les jambes puissent se plier et s’étendre.",
+                    "Placez toujours un bébé emmailloté sur le dos, jamais sur le côté ou sur le devant.",
+                    "Arrêtez complètement d’emmailloter dès les premiers signes de roulage – généralement entre deux et quatre mois. Déplacez-vous vers un sac de couchage avec les bras libres.",
+                ],
+                pt: [
+                    "Use um tecido fino e respirável ou um pano feito sob medida, nunca um cobertor pesado.",
+                    "Mantenha-o firme no peito, mas solto o suficiente para deslizar dois dedos sob a borda superior.",
+                    "Deixe bastante espaço nos quadris para que as pernas possam dobrar para cima e para fora.",
+                    "Sempre coloque o bebê enfaixado de costas, nunca de lado ou de frente.",
+                    "Pare de enfaixar completamente ao primeiro sinal de rolar – geralmente entre dois e quatro meses. Vá para um saco de dormir com os braços livres.",
                 ]
             ),
             whyItMatters: LocalizedText(
                 en: "Swaddling dampens the startle reflex that wakes newborns from light sleep, which is why it often buys everyone a longer stretch. The danger point is rolling: a swaddled baby who turns onto their front cannot use their arms to lift or turn their head. Hip room matters too, because tightly straightened legs can interfere with normal hip development in the early months.",
                 ru: "Пеленание сглаживает рефлекс вздрагивания, который будит новорождённого из поверхностного сна, — поэтому оно часто даёт всем более длинный отрезок сна. Опасный момент — перевороты: запелёнатый ребёнок, оказавшийся на животе, не может опереться руками, чтобы поднять или повернуть голову. Свобода в бёдрах тоже важна: туго выпрямленные ножки могут нарушить нормальное развитие тазобедренных суставов в первые месяцы.",
-                de: "Pucken dämpft den Schreckreflex, der Neugeborene aus dem leichten Schlaf weckt, weshalb es oft allen eine längere Strecke bringt. Der Gefahrenpunkt ist das Rollen: Ein gepucktes Baby, das sich auf den Bauch dreht, kann seine Arme nicht benutzen, um seinen Kopf zu heben oder zu drehen. Der Platz an den Hüften ist auch wichtig, da eng gerade Beine die normale Entwicklung der Hüften in den frühen Monaten beeinträchtigen können."
+                de: "Pucken dämpft den Schreckreflex, der Neugeborene aus dem leichten Schlaf weckt, weshalb es oft allen eine längere Strecke bringt. Der Gefahrenpunkt ist das Rollen: Ein gepucktes Baby, das sich auf den Bauch dreht, kann seine Arme nicht benutzen, um seinen Kopf zu heben oder zu drehen. Der Platz an den Hüften ist auch wichtig, da eng gerade Beine die normale Entwicklung der Hüften in den frühen Monaten beeinträchtigen können.",
+                es: "Envolverlo amortigua el reflejo de sobresalto que despierta a los recién nacidos del sueño ligero, razón por la cual a menudo les da a todos un período más prolongado. El peligro es rodar: un bebé envuelto en pañales que se gira boca abajo no puede utilizar los brazos para levantar o girar la cabeza. El espacio para las caderas también es importante, porque las piernas muy estiradas pueden interferir con el desarrollo normal de la cadera en los primeros meses.",
+                fr: "L'emmaillotage atténue le réflexe de sursaut qui réveille les nouveau-nés d'un sommeil léger, c'est pourquoi cela permet souvent à tout le monde de s'étirer plus longtemps. Le point dangereux est de rouler : un bébé emmailloté qui se retourne sur le ventre ne peut pas utiliser ses bras pour soulever ou tourner la tête. L'espace pour les hanches est également important, car des jambes bien tendues peuvent interférer avec le développement normal des hanches au cours des premiers mois.",
+                pt: "Enfaixar amortece o reflexo de susto que desperta os recém-nascidos do sono leve, e é por isso que muitas vezes proporciona a todos um alongamento mais longo. O ponto perigoso é rolar: um bebê enfaixado que vira de frente não consegue usar os braços para levantar ou virar a cabeça. O espaço para os quadris também é importante, porque as pernas bem esticadas podem interferir no desenvolvimento normal do quadril nos primeiros meses."
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -377,6 +659,24 @@ extension CareTipsCatalog {
                     "Weiterhin pucken nach dem ersten Rollen, weil es immer noch beim Schlafen hilft.",
                     "Über dicker Kleidung pucken, was Überhitzung risikiert.",
                     "Nacken oder Kinn mit der oberen Kante des Stoffs abdecken."
+                ],
+                es: [
+                    "Envolviendo las piernas rectas y apretadas.",
+                    "Continuar envolviéndolo después del primer giro porque todavía ayuda a dormir.",
+                    "Envolverlo encima de ropa gruesa, lo que supone un riesgo de sobrecalentamiento.",
+                    "Cubriendo el cuello o la barbilla con el borde superior de la tela.",
+                ],
+                fr: [
+                    "Enrouler les jambes droites et serrées.",
+                    "Continuer à emmailloter après le premier roulage car cela aide quand même à dormir.",
+                    "Emmailloter sur des vêtements épais, ce qui risque de surchauffer.",
+                    "Couvrir le cou ou le menton avec le bord supérieur du tissu.",
+                ],
+                pt: [
+                    "Envolvendo as pernas retas e firmes.",
+                    "Continuar a enfaixar após o primeiro rolo porque ainda ajuda a dormir.",
+                    "Enrolar em cima de roupas grossas, pois há risco de superaquecimento.",
+                    "Cobrindo o pescoço ou queixo com a borda superior do tecido.",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -394,6 +694,21 @@ extension CareTipsCatalog {
                     "Sie hören einen Klick aus den Hüften, oder die Beine scheinen ungleichmäßig zu bewegen.",
                     "Ihr Baby überhitzt beim Pucken, auch in leichten Schichten.",
                     "Ihr Baby rollt sich beim Pucken — stoppen Sie sofort und erwähnen Sie es beim nächsten Check-up."
+                ],
+                es: [
+                    "Escuchas un clic en las caderas o las piernas parecen moverse de manera desigual.",
+                    "Su bebé se sobrecalienta cuando lo envuelven, incluso con capas ligeras.",
+                    "Su bebé se da vuelta mientras está envuelto; deténgase inmediatamente y menciónelo en el próximo chequeo.",
+                ],
+                fr: [
+                    "Vous entendez un clic provenant des hanches ou les jambes semblent bouger de manière inégale.",
+                    "Votre bébé surchauffe lorsqu'il est emmailloté, même dans des couches légères.",
+                    "Votre bébé roule lorsqu'il est emmailloté : arrêtez-vous immédiatement et mentionnez-le lors du prochain contrôle.",
+                ],
+                pt: [
+                    "Você ouve um clique nos quadris ou as pernas parecem se mover de maneira irregular.",
+                    "Seu bebê superaquece quando enrolado, mesmo em camadas leves.",
+                    "Seu bebê rola enquanto está enrolado – pare imediatamente e mencione isso no próximo check-up.",
                 ]
             )
         ),
@@ -403,12 +718,18 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Wake windows and the overtired trap",
                 ru: "Окна бодрствования и ловушка перевозбуждения",
-                de: "Wachfenster und die Übermüdungsfalle"
+                de: "Wachfenster und die Übermüdungsfalle",
+                es: "Despierta las ventanas y la trampa cansada",
+                fr: "Les fenêtres de réveil et le piège fatigué",
+                pt: "Acorde as janelas e a armadilha cansada"
             ),
             summary: LocalizedText(
                 en: "Watch the clock and the baby — a short awake stretch prevents a long fight",
                 ru: "Следите и за часами, и за ребёнком: короткое бодрствование избавляет от долгой борьбы",
-                de: "Beobachten Sie die Uhr und das Baby — ein kurzes Wachintervall verhindert einen langen Kampf"
+                de: "Beobachten Sie die Uhr und das Baby — ein kurzes Wachintervall verhindert einen langen Kampf",
+                es: "Vigile el reloj y al bebé: un breve período de vigilia evita una pelea larga",
+                fr: "Surveillez l'horloge et le bébé : un court étirement d'éveil évite un long combat",
+                pt: "Observe o relógio e o bebê – um curto período de vigília evita uma longa briga"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -431,12 +752,36 @@ extension CareTipsCatalog {
                     "Behandeln Sie die Spannen als Ausgangspunkt und passen Sie sie nach einer Woche Beobachtung an Ihr Baby an.",
                     "Verfolgen Sie den Schlaf in Momsy für ein paar Tage, um das echte Muster zu sehen, anstatt das erinnerte.",
                     "Verkürzen Sie das Wachfenster, anstatt es zu verlängern, wenn die Beruhigung schwierig war."
+                ],
+                es: [
+                    "Utilice guías aproximadas: alrededor de 45 a 60 minutos despierto para un recién nacido, de 1,5 a 2 horas alrededor de los 3 a 4 meses, de 2 a 3 horas a los 6 meses, de 3 a 4 horas cerca de un año.",
+                    "Empiece a relajarse ante las primeras señales de cansancio: una mirada fija, cejas rojas, tirones de orejas, torpeza repentina en el movimiento.",
+                    "Trate los rangos como punto de partida y ajústelos a los de su propio bebé durante una semana de observación.",
+                    "Realice un seguimiento del sueño en Momsy durante unos días para ver el patrón real en lugar del recordado.",
+                    "Acorte la ventana de estela en lugar de alargarla cuando el asentamiento haya sido difícil.",
+                ],
+                fr: [
+                    "Utilisez des guides approximatifs : environ 45 à 60 minutes d'éveil pour un nouveau-né, 1,5 à 2 heures vers 3 à 4 mois, 2 à 3 heures à 6 mois, 3 à 4 heures près d'un an.",
+                    "Commencez à vous détendre dès les premiers signaux de fatigue : un regard fixe, des sourcils rouges, des tiraillements d'oreilles, une maladresse soudaine dans les mouvements.",
+                    "Considérez les plages comme un point de départ et adaptez-vous à votre propre bébé au cours d'une semaine d'observation.",
+                    "Suivez le sommeil dans Momsy pendant quelques jours pour voir le modèle réel plutôt que celui mémorisé.",
+                    "Raccourcissez la fenêtre de réveil plutôt que de l'allonger lorsque la stabilisation a été difficile.",
+                ],
+                pt: [
+                    "Use guias aproximados: cerca de 45–60 minutos acordado para um recém-nascido, 1,5–2 horas por volta dos 3–4 meses, 2–3 horas por 6 meses, 3–4 horas perto de um ano.",
+                    "Comece a relaxar aos primeiros sinais de cansaço - olhar fixo, sobrancelhas vermelhas, puxar as orelhas, súbita falta de jeito nos movimentos.",
+                    "Trate os intervalos como ponto de partida e ajuste-os ao seu próprio bebê durante uma semana de observação.",
+                    "Acompanhe o sono em Momsy por alguns dias para ver o padrão real, em vez do lembrado.",
+                    "Encurte a janela de ativação em vez de aumentá-la quando a acomodação for difícil.",
                 ]
             ),
             whyItMatters: LocalizedText(
                 en: "When a baby stays awake past their limit, the body releases stress hormones to keep going, and those same hormones then make falling asleep harder and staying asleep shorter. That is the counter-intuitive part of infant sleep: an overtired baby fights sleep more, not less. Catching the window early is usually the difference between a five-minute settle and forty-five minutes of crying.",
                 ru: "Когда ребёнок бодрствует дольше своего предела, организм выбрасывает гормоны стресса, чтобы держаться, и эти же гормоны потом мешают уснуть и сокращают сон. В этом парадокс детского сна: переутомлённый ребёнок сопротивляется сну сильнее, а не слабее. Поймать окно вовремя — обычно разница между пятиминутным укладыванием и сорока пятью минутами плача.",
-                de: "Wenn ein Baby länger als sein Limit wach bleibt, setzt der Körper Stresshormone frei, um weiterzumachen, und dieselben Hormone machen es dann schwieriger, einzuschlafen, und verkürzen den Schlaf. Das ist der kontraintuitive Teil des Babyschlafes: Ein überforderndes Baby kämpft mehr gegen Schlaf, nicht weniger. Das Fenster früh zu erwischen ist normalerweise der Unterschied zwischen einer fünfminütigen Beruhigung und fünfundvierzig Minuten Weinen."
+                de: "Wenn ein Baby länger als sein Limit wach bleibt, setzt der Körper Stresshormone frei, um weiterzumachen, und dieselben Hormone machen es dann schwieriger, einzuschlafen, und verkürzen den Schlaf. Das ist der kontraintuitive Teil des Babyschlafes: Ein überforderndes Baby kämpft mehr gegen Schlaf, nicht weniger. Das Fenster früh zu erwischen ist normalerweise der Unterschied zwischen einer fünfminütigen Beruhigung und fünfundvierzig Minuten Weinen.",
+                es: "Cuando un bebé permanece despierto más allá de su límite, el cuerpo libera hormonas del estrés para seguir adelante, y esas mismas hormonas hacen que conciliar el sueño sea más difícil y que permanezca más corto. Ésa es la parte contraria a la intuición del sueño infantil: un bebé demasiado cansado lucha por dormir más, no menos. Agarrar la ventana temprano suele ser la diferencia entre un descanso de cinco minutos y cuarenta y cinco minutos de llanto.",
+                fr: "Lorsqu'un bébé reste éveillé au-delà de sa limite, le corps libère des hormones de stress pour continuer, et ces mêmes hormones rendent l'endormissement plus difficile et le sommeil plus court. C’est la partie contre-intuitive du sommeil du nourrisson : un bébé fatigué a plus de difficultés à dormir, pas moins. Attraper la fenêtre plus tôt fait généralement la différence entre cinq minutes d'installation et quarante-cinq minutes de pleurs.",
+                pt: "Quando um bebê fica acordado além do limite, o corpo libera hormônios do estresse para continuar, e esses mesmos hormônios tornam o adormecimento mais difícil e o sono mais curto. Essa é a parte contra-intuitiva do sono infantil: um bebê cansado luta mais para dormir, e não menos. Chegar cedo à janela geralmente é a diferença entre uma pausa de cinco minutos e quarenta e cinco minutos de choro."
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -456,6 +801,24 @@ extension CareTipsCatalog {
                     "Einem Chart aus dem Internet folgen, anstatt Ihres eigenen Babysignalen.",
                     "Die frühesten Hinweise verpassen und auf Augenjucken oder Weinen warten.",
                     "Erwarten Sie das gleiche Fenster zu jeder Tageszeit — das erste am Morgen ist normalerweise das kürzeste."
+                ],
+                es: [
+                    "Mantener al bebé despierto por más tiempo con la esperanza de una noche mejor.",
+                    "Seguir un gráfico de Internet en lugar de las señales de su propio bebé.",
+                    "Perder las primeras señales y esperar a que se frote los ojos o llore.",
+                    "Esperar la misma ventana a todas horas del día; la primera de la mañana suele ser la más corta.",
+                ],
+                fr: [
+                    "Garder bébé éveillé plus longtemps dans l’espoir d’une meilleure nuit.",
+                    "Suivre un tableau provenant d'Internet au lieu des signaux de votre propre bébé.",
+                    "Manquer les premiers signaux et attendre de se frotter les yeux ou de pleurer.",
+                    "S'attendre à la même fenêtre à chaque moment de la journée – la première du matin est généralement la plus courte.",
+                ],
+                pt: [
+                    "Manter o bebê acordado por mais tempo na esperança de uma noite melhor.",
+                    "Seguir um gráfico da internet em vez dos sinais do seu próprio bebê.",
+                    "Perdendo os primeiros sinais e esperando esfregar os olhos ou chorar.",
+                    "Esperar a mesma janela a cada hora do dia – a primeira da manhã geralmente é mais curta.",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -473,6 +836,21 @@ extension CareTipsCatalog {
                     "Ihr Baby schläft über Wochen hinweg viel mehr oder viel weniger als die Richtlinien und scheint damit unwohl.",
                     "Der Schlaf wird ständig durch Schmerzen, Husten oder angestrengtes Atmen unterbrochen.",
                     "Sie sind über die Entwicklung zusammen mit ungewöhnlichen Schlafmustern besorgt."
+                ],
+                es: [
+                    "Su bebé duerme mucho más o menos que las guías durante varias semanas y parece no sentirse bien.",
+                    "El sueño se ve constantemente interrumpido por el dolor, la tos o la dificultad para respirar.",
+                    "Le preocupa el desarrollo junto con patrones de sueño inusuales.",
+                ],
+                fr: [
+                    "Votre bébé dort beaucoup plus ou beaucoup moins que les guides pendant plusieurs semaines et ne semble pas bien.",
+                    "Le sommeil est constamment interrompu par la douleur, la toux ou une respiration difficile.",
+                    "Vous vous inquiétez du développement et des habitudes de sommeil inhabituelles.",
+                ],
+                pt: [
+                    "Seu bebê dorme muito mais ou menos do que os guias durante várias semanas e parece indisposto.",
+                    "O sono é constantemente interrompido por dor, tosse ou dificuldade para respirar.",
+                    "Você está preocupado com o desenvolvimento juntamente com padrões de sono incomuns.",
                 ]
             )
         ),
@@ -482,12 +860,18 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Build a twenty-minute bedtime routine",
                 ru: "Создайте двадцатиминутный ритуал перед сном",
-                de: "Bauen Sie eine zwanzigminütige Schlafenszeit-Routine auf"
+                de: "Bauen Sie eine zwanzigminütige Schlafenszeit-Routine auf",
+                es: "Construya una rutina de veinte minutos para acostarse",
+                fr: "Construisez une routine du coucher de vingt minutes",
+                pt: "Crie uma rotina de vinte minutos para dormir"
             ),
             summary: LocalizedText(
                 en: "The same short sequence every night becomes a signal your baby can read",
                 ru: "Одна и та же короткая последовательность каждый вечер становится понятным ребёнку сигналом",
-                de: "Die gleiche kurze Abfolge jeden Abend wird zu einem Signal, das Ihr Baby lesen kann"
+                de: "Die gleiche kurze Abfolge jeden Abend wird zu einem Signal, das Ihr Baby lesen kann",
+                es: "La misma secuencia corta todas las noches se convierte en una señal que tu bebé puede leer.",
+                fr: "La même courte séquence chaque soir devient un signal que votre bébé peut lire",
+                pt: "A mesma sequência curta todas as noites torna-se um sinal que seu bebê pode ler"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -510,12 +894,36 @@ extension CareTipsCatalog {
                     "Dimmen Sie die Lichter ab und senken Sie Ihre Stimme ab dem ersten Schritt.",
                     "Beenden Sie das Zimmer, in dem Ihr Baby schlafen wird.",
                     "Verwenden Sie die gleiche verkürzte Version weg von zu Hause, so dass das Signal immer noch funktioniert, wenn alles andere unbekannt ist."
+                ],
+                es: [
+                    "Elija tres o cuatro pasos y mantenga el orden fijo: por ejemplo, baño, saco de dormir, alimentación, una canción corta.",
+                    "Mantenga todo en unos veinte minutos: largas rutinas pasan por la ventana cansada.",
+                    "Atenúa las luces y baja la voz desde el primer paso en adelante.",
+                    "Termina en la habitación donde dormirá tu bebé.",
+                    "Utilice la misma versión abreviada fuera de casa para que la señal siga funcionando cuando todo lo demás no le resulte familiar.",
+                ],
+                fr: [
+                    "Choisissez trois ou quatre étapes et gardez l'ordre fixe : par exemple bain, sac de couchage, nourriture, une courte chanson.",
+                    "Gardez le tout à environ vingt minutes – de longues routines passent devant la fenêtre fatiguée.",
+                    "Baissez les lumières et baissez le ton dès le premier pas.",
+                    "Terminez dans la pièce où dormira votre bébé.",
+                    "Utilisez la même version abrégée loin de chez vous afin que le signal fonctionne toujours lorsque tout le reste ne vous est pas familier.",
+                ],
+                pt: [
+                    "Escolha três ou quatro etapas e mantenha a ordem fixa: por exemplo, banho, saco de dormir, alimentação, uma música curta.",
+                    "Mantenha tudo em cerca de vinte minutos - longas rotinas passam pela janela cansativa.",
+                    "Apague as luzes e abaixe a voz desde o primeiro passo.",
+                    "Termine no quarto onde seu bebê vai dormir.",
+                    "Use a mesma versão abreviada fora de casa para que o sinal ainda funcione quando todo o resto não for familiar.",
                 ]
             ),
             whyItMatters: LocalizedText(
                 en: "Babies cannot tell time, but they are excellent at recognising sequences. A repeated pattern of dimming light, a familiar smell and a predictable order tells the body what is coming, and melatonin release follows the cue. The routine is doing something real; it is not a superstition. Consistency matters far more than the specific contents, which is why simple routines usually outperform elaborate ones.",
                 ru: "Дети не умеют определять время, но прекрасно распознают последовательности. Повторяющееся сочетание приглушённого света, знакомого запаха и предсказуемого порядка сообщает организму, что будет дальше, и выброс мелатонина следует за этим сигналом. Ритуал действительно работает, это не суеверие. Постоянство важнее конкретного содержания — поэтому простые ритуалы обычно эффективнее сложных.",
-                de: "Babys können keine Zeit erzählen, aber sie sind hervorragend in der Erkennung von Abfolgen. Ein wiederholtes Muster aus Dimmerlicht, einem vertrauten Duft und einer vorhersehbaren Reihenfolge sagt dem Körper, was kommt, und die Melatoninfreisetzung folgt dem Hinweis. Die Routine tut etwas Echtes; es ist kein Aberglaube. Konsistenz ist viel wichtiger als der spezifische Inhalt, daher schneiden einfache Routinen normalerweise besser ab als aufwendige."
+                de: "Babys können keine Zeit erzählen, aber sie sind hervorragend in der Erkennung von Abfolgen. Ein wiederholtes Muster aus Dimmerlicht, einem vertrauten Duft und einer vorhersehbaren Reihenfolge sagt dem Körper, was kommt, und die Melatoninfreisetzung folgt dem Hinweis. Die Routine tut etwas Echtes; es ist kein Aberglaube. Konsistenz ist viel wichtiger als der spezifische Inhalt, daher schneiden einfache Routinen normalerweise besser ab als aufwendige.",
+                es: "Los bebés no pueden decir la hora, pero son excelentes para reconocer secuencias. Un patrón repetido de luz tenue, un olor familiar y un orden predecible le indican al cuerpo lo que se avecina, y la liberación de melatonina sigue la señal. La rutina es hacer algo real; no es una superstición. La coherencia importa mucho más que los contenidos específicos, razón por la cual las rutinas simples suelen superar a las elaboradas.",
+                fr: "Les bébés ne peuvent pas lire l’heure, mais ils sont excellents pour reconnaître les séquences. Un motif répété de lumière tamisée, une odeur familière et un ordre prévisible indiquent au corps ce qui arrive, et la libération de mélatonine suit le signal. La routine consiste à faire quelque chose de réel ; ce n'est pas une superstition. La cohérence compte bien plus que le contenu spécifique, c’est pourquoi les routines simples surpassent généralement les routines élaborées.",
+                pt: "Os bebês não sabem dizer as horas, mas são excelentes em reconhecer sequências. Um padrão repetido de luz fraca, um cheiro familiar e uma ordem previsível informam ao corpo o que está por vir, e a liberação de melatonina segue a deixa. A rotina é fazer algo real; não é uma superstição. A consistência é muito mais importante do que os conteúdos específicos, e é por isso que rotinas simples geralmente superam as elaboradas."
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -535,6 +943,24 @@ extension CareTipsCatalog {
                     "Bildschirme oder helles Kopflicht während des Winddown.",
                     "Die Routine erst starten, wenn das Baby bereits überfordert ist.",
                     "Die Routine im Urlaub oder beim Besuch der Familie aufgeben."
+                ],
+                es: [
+                    "Cambiando el orden dependiendo de quién acueste al bebé.",
+                    "Pantallas o luces brillantes en el techo durante la relajación.",
+                    "Comenzar la rutina solo después de que el bebé ya esté demasiado cansado.",
+                    "Abandonar la rutina durante las vacaciones o cuando se visita a la familia.",
+                ],
+                fr: [
+                    "Changer l'ordre en fonction de qui dépose le bébé.",
+                    "Écrans ou plafonnier lumineux pendant la période de détente.",
+                    "Commencer la routine seulement lorsque le bébé est déjà fatigué.",
+                    "Abandonner la routine en vacances ou lors d'une visite en famille.",
+                ],
+                pt: [
+                    "Mudando a ordem dependendo de quem está colocando o bebê no chão.",
+                    "Telas ou luz brilhante no teto durante o relaxamento.",
+                    "Iniciar a rotina somente depois que o bebê já estiver cansado.",
+                    "Abandonando a rotina nas férias ou quando visita a família.",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -552,6 +978,21 @@ extension CareTipsCatalog {
                     "Die Schlafenszeit ist trotz einer stabilen Routine durchgehend belastend.",
                     "Ihr Baby wacht schreiend auf und kann sich Nacht für Nacht nicht beruhigen.",
                     "Ihnen gehen die Ressourcen aus, um mit den Nächten umzugehen — sagen Sie dies laut zu Ihrem Arzt oder Besucherin."
+                ],
+                es: [
+                    "La hora de acostarse es constantemente angustiosa durante meses a pesar de una rutina estable.",
+                    "Su bebé se despierta gritando y no puede consolarlo, noche tras noche.",
+                    "Se está quedando sin recursos para afrontar las noches; dígaselo en voz alta a su médico o visitador sanitario.",
+                ],
+                fr: [
+                    "L’heure du coucher est constamment pénible pendant des mois malgré une routine stable.",
+                    "Votre bébé se réveille en criant et ne peut être réconforté nuit après nuit.",
+                    "Vous manquez de ressources pour faire face aux nuits – dites-le à voix haute à votre médecin ou à votre visiteur de santé.",
+                ],
+                pt: [
+                    "A hora de dormir é consistentemente angustiante durante meses, apesar de uma rotina estável.",
+                    "Seu bebê acorda gritando e não consegue ser consolado, noite após noite.",
+                    "Você está ficando sem recursos para lidar com as noites – diga isso em voz alta ao seu médico ou enfermeiro.",
                 ]
             )
         )
