@@ -42,6 +42,13 @@ final class BabySyncService {
         "momSleepLogs", "waterIntakeLogs",
     ]
 
+    static func requiresAuthorScopedQuery(
+        for subcollection: String,
+        authoredOnly: Bool = false
+    ) -> Bool {
+        authoredOnly || privateWellbeingSubcollections.contains(subcollection)
+    }
+
     private static let migrationFlagKey = "babysync_perbaby_migration_v1_done"
 
     /// The store backing the family/baby path. Injectable so tests can isolate it in a
@@ -326,16 +333,21 @@ final class BabySyncService {
         }
     }
 
-    /// Deletes every document in a subcollection (batched). Used to purge a
-    /// retired collection such as the legacy `quickLogs`.
-    func deleteAll(in subcollection: String) async throws {
+    /// Deletes every permitted document in a subcollection (batched). Private
+    /// wellbeing collections remain scoped to their author by Firestore Rules.
+    func deleteAll(in subcollection: String, ownerUID: String? = nil) async throws {
         guard hasPath else { return }
-        try await deleteAllDocs(in: collection(subcollection))
+        let query = try deletionQuery(
+            in: collection(subcollection),
+            subcollection: subcollection,
+            ownerUID: ownerUID
+        )
+        try await deleteAllDocs(in: query)
     }
 
     /// Batched delete of every document in an arbitrary collection reference.
-    private func deleteAllDocs(in ref: CollectionReference) async throws {
-        let snapshot = try await ref.getDocuments()
+    private func deleteAllDocs(in query: Query) async throws {
+        let snapshot = try await query.getDocuments()
         let docs = snapshot.documents
         guard !docs.isEmpty else { return }
         // Firestore caps a WriteBatch at 500 ops; chunk well under that.
@@ -348,18 +360,19 @@ final class BabySyncService {
         }
     }
 
-    /// Full GDPR erasure of this baby's cloud tree: every log subcollection, the
-    /// `profile/info` doc, and the `families/{familyId}/babies/{babyId}` parent document.
+    /// GDPR erasure of shared logs and the caller's private wellbeing logs, plus the
+    /// `profile/info` doc and `families/{familyId}/babies/{babyId}` parent document.
     /// Also purges any pre-migration `babies/{familyId}` tree left behind so erasure is
     /// complete even if this device never migrated.
     func deleteAllData() async throws {
         guard hasPath else { return }
+        let ownerUID = try requireCurrentUserUID()
         for sub in Self.allSubcollections {
-            try await deleteAll(in: sub)
+            try await deleteAll(in: sub, ownerUID: ownerUID)
         }
         try await babyDoc().collection("profile").document("info").delete()
         try await babyDoc().delete()
-        try await deleteLegacyFamilyTree()
+        try await deleteLegacyFamilyTree(ownerUID: ownerUID)
         // Drop this scope's incremental watermarks so a re-add of the family re-seeds from a
         // clean full pull, not an incremental query that would skip the restored docs.
         SyncWatermarkStore().reset(family: familyId, baby: babyId)
@@ -369,9 +382,10 @@ final class BabySyncService {
     /// family-wide tree that full account erasure owns.
     func deleteBaby(id: UUID) async throws {
         guard !familyId.isEmpty else { return }
+        let ownerUID = try requireCurrentUserUID()
         try await ActiveBaby.$syncTargetOverride.withValue(id) {
             for sub in Self.allSubcollections {
-                try await deleteAll(in: sub)
+                try await deleteAll(in: sub, ownerUID: ownerUID)
             }
             try await babyDoc().collection("profile").document("info").delete()
             try await babyDoc().delete()
@@ -381,14 +395,38 @@ final class BabySyncService {
 
     /// Best-effort removal of the old family-keyed tree (`babies/{familyId}`) that the
     /// per-baby migration copies from but leaves in place during rollout.
-    private func deleteLegacyFamilyTree() async throws {
+    private func deleteLegacyFamilyTree(ownerUID: String) async throws {
         guard !familyId.isEmpty else { return }
         let oldParent = db.collection("babies").document(familyId)
         for sub in Self.allSubcollections {
-            try? await deleteAllDocs(in: oldParent.collection(sub))
+            let query = try deletionQuery(
+                in: oldParent.collection(sub),
+                subcollection: sub,
+                ownerUID: ownerUID
+            )
+            try? await deleteAllDocs(in: query)
         }
         try? await oldParent.collection("profile").document("info").delete()
         try? await oldParent.delete()
+    }
+
+    private func deletionQuery(
+        in collection: CollectionReference,
+        subcollection: String,
+        ownerUID: String?
+    ) throws -> Query {
+        guard Self.requiresAuthorScopedQuery(for: subcollection) else { return collection }
+        guard let uid = ownerUID ?? currentUserUID(), !uid.isEmpty else {
+            throw AuthError.reauthRequired
+        }
+        return collection.whereField("addedBy", isEqualTo: uid)
+    }
+
+    private func requireCurrentUserUID() throws -> String {
+        guard let uid = currentUserUID(), !uid.isEmpty else {
+            throw AuthError.reauthRequired
+        }
+        return uid
     }
 
     // MARK: - Per-baby migration & discovery

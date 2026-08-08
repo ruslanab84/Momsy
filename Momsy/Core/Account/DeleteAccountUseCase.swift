@@ -107,10 +107,19 @@ struct FirestoreAccountEraser: CloudAccountEraser {
 
             if mayTearDownSharedData {
                 for babyId in babyIds {
-                    try await deleteBabyTree(familyRef: familyRef, familyId: familyId, babyId: babyId)
+                    try await deleteBabyTree(
+                        familyRef: familyRef,
+                        familyId: familyId,
+                        babyId: babyId,
+                        ownerUID: uid
+                    )
                 }
-                try await deleteLegacyFamilyTree(familyId: familyId)
-                try await verifyHealthDataAbsent(parentPaths: healthDataParentPaths)
+                try await deleteLegacyFamilyTree(familyId: familyId, ownerUID: uid)
+                try await verifyHealthDataAbsent(
+                    parentPaths: healthDataParentPaths,
+                    deletingUID: uid,
+                    authoredOnly: false
+                )
                 // A surviving nanny/grandma would otherwise keep a live membership in a
                 // family whose data no longer exists, and neither role can create a new
                 // family — a permanent dead end. Removing the roster makes their next
@@ -137,7 +146,8 @@ struct FirestoreAccountEraser: CloudAccountEraser {
                 }
                 try await verifyHealthDataAbsent(
                     parentPaths: healthDataParentPaths,
-                    authoredBy: uid
+                    deletingUID: uid,
+                    authoredOnly: true
                 )
                 if callerIsParent {
                     try await verifyProfileMembershipAbsent(
@@ -202,21 +212,34 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         return ids
     }
 
-    private func deleteBabyTree(familyRef: DocumentReference, familyId: String, babyId: String) async throws {
+    private func deleteBabyTree(
+        familyRef: DocumentReference,
+        familyId: String,
+        babyId: String,
+        ownerUID: String
+    ) async throws {
         let babyRef = familyRef.collection("babies").document(babyId)
         for subcollection in BabySyncService.allSubcollections {
-            try await deleteAllDocs(in: babyRef.collection(subcollection))
+            try await deleteAllDocs(
+                in: babyRef.collection(subcollection),
+                subcollection: subcollection,
+                ownerUID: ownerUID
+            )
         }
         try await babyRef.collection("profile").document("info").delete()
         try await babyRef.delete()
         SyncWatermarkStore().reset(family: familyId, baby: babyId)
     }
 
-    private func deleteLegacyFamilyTree(familyId: String) async throws {
+    private func deleteLegacyFamilyTree(familyId: String, ownerUID: String) async throws {
         let oldParent = Firestore.firestore().collection("babies").document(familyId)
         for subcollection in BabySyncService.allSubcollections {
             try await Self.performLegacyDeletion {
-                try await deleteAllDocs(in: oldParent.collection(subcollection))
+                try await deleteAllDocs(
+                    in: oldParent.collection(subcollection),
+                    subcollection: subcollection,
+                    ownerUID: ownerUID
+                )
             }
         }
         try await Self.performLegacyDeletion {
@@ -261,17 +284,22 @@ struct FirestoreAccountEraser: CloudAccountEraser {
 
     private func verifyHealthDataAbsent(
         parentPaths: [String],
-        authoredBy uid: String? = nil
+        deletingUID: String,
+        authoredOnly: Bool
     ) async throws {
         let db = Firestore.firestore()
         for path in Self.healthDataCollectionPaths(
             parentPaths: parentPaths,
-            includingDeletionMarkers: uid == nil
+            includingDeletionMarkers: !authoredOnly
         ) {
             let collection = db.collection(path)
+            let subcollection = String(path.split(separator: "/").last ?? "")
             let query: Query
-            if let uid {
-                query = collection.whereField("addedBy", isEqualTo: uid)
+            if BabySyncService.requiresAuthorScopedQuery(
+                for: subcollection,
+                authoredOnly: authoredOnly
+            ) {
+                query = collection.whereField("addedBy", isEqualTo: deletingUID)
             } else {
                 query = collection
             }
@@ -281,7 +309,7 @@ struct FirestoreAccountEraser: CloudAccountEraser {
             }
         }
 
-        guard uid == nil else { return }
+        guard !authoredOnly else { return }
         for path in Self.healthDataDocumentPaths(parentPaths: parentPaths) {
             let snapshot = try await db.document(path).getDocument(source: .server)
             guard !snapshot.exists, !snapshot.metadata.hasPendingWrites else {
@@ -372,8 +400,22 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         }
     }
 
-    private func deleteAllDocs(in ref: Query) async throws {
-        let docs = try await ref.getDocuments(source: .server).documents
+    private func deleteAllDocs(
+        in collection: CollectionReference,
+        subcollection: String,
+        ownerUID: String
+    ) async throws {
+        let query: Query
+        if BabySyncService.requiresAuthorScopedQuery(for: subcollection) {
+            query = collection.whereField("addedBy", isEqualTo: ownerUID)
+        } else {
+            query = collection
+        }
+        try await deleteAllDocs(in: query)
+    }
+
+    private func deleteAllDocs(in query: Query) async throws {
+        let docs = try await query.getDocuments(source: .server).documents
         guard !docs.isEmpty else { return }
         let db = Firestore.firestore()
         for start in stride(from: 0, to: docs.count, by: 400) {

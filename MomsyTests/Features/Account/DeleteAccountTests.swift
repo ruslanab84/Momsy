@@ -276,6 +276,17 @@ struct DeleteAccountTests {
 
 @Suite("FirestoreAccountEraser")
 struct FirestoreAccountEraserTests {
+    @Test("private wellbeing queries remain author scoped during full teardown")
+    func privateWellbeingQueryScope() {
+        #expect(BabySyncService.requiresAuthorScopedQuery(for: "momSleepLogs"))
+        #expect(BabySyncService.requiresAuthorScopedQuery(for: "waterIntakeLogs"))
+        #expect(!BabySyncService.requiresAuthorScopedQuery(for: "feedingLogs"))
+        #expect(BabySyncService.requiresAuthorScopedQuery(
+            for: "feedingLogs",
+            authoredOnly: true
+        ))
+    }
+
     @Test("legacy deletion ignores notFound but propagates every other error")
     func legacyDeletionErrorPolicy() async throws {
         let notFound = NSError(
