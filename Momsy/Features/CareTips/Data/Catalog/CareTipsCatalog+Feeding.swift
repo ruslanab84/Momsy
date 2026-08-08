@@ -11,7 +11,8 @@ extension CareTipsCatalog {
                 de: "Halten Sie Ihr Baby nach dem Füttern aufrecht",
                 es: "Mantén al bebé incorporado después de cada toma",
                 fr: "Gardez votre bébé bien droit après chaque tétée",
-                pt: "Segure seu bebê em pé após cada mamada"
+                pt: "Segure seu bebê em pé após cada mamada",
+                zh: "每次喂奶后将宝宝抱直"
             ),
             summary: LocalizedText(
                 en: "Ten to fifteen minutes vertical lets swallowed air come up before milk does",
@@ -19,7 +20,8 @@ extension CareTipsCatalog {
                 de: "Zehn bis fünfzehn Minuten aufrecht lassen die Luft vor der Milch nach oben kommen",
                 es: "Diez o quince minutos incorporado permiten que el aire salga antes que la leche",
                 fr: "Dix à quinze minutes en position verticale permettent à l’air de sortir avant le lait",
-                pt: "Dez a quinze minutos na vertical permitem que o ar engolido suba antes do leite."
+                pt: "Dez a quinze minutos na vertical permitem que o ar engolido suba antes do leite.",
+                zh: "垂直十到十五分钟，让吞咽的空气先于乳汁上升"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -63,6 +65,13 @@ extension CareTipsCatalog {
                     "Fique em pé por 10 a 15 minutos após uma mamada completa, um pouco mais se o seu bebê tiver tendência a cuspir.",
                     "Dê tapinhas ou acaricie as costas suavemente e ritmicamente – nunca é necessária pressão.",
                     "Troque para sentar no colo se seu braço estiver cansado; o ponto é a coluna vertical, não a posição exata.",
+                ],
+                zh: [
+                    "将宝宝抱到您的肩膀上，让他们的胸部靠在您身上，下巴远离您的肩膀。",
+                    "用一只手支撑头部和颈部；保持脊柱挺直而不是卷曲。",
+                    "吃饱后保持直立 10 至 15 分钟，如果宝宝容易吐奶，则可以延长一点时间。",
+                    "轻轻地、有节奏地拍打或抚摸背部——永远不需要压力。",
+                    "如果你的手臂疲劳了，就换成坐在你的腿上；该点是垂直脊柱，而不是确切位置。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -71,7 +80,8 @@ extension CareTipsCatalog {
                 de: "Neugeborene schlucken bei fast jedem Füttern Luft, und das Ventil zwischen Magen und Speiseröhre ist noch weich und leicht zu öffnen. Wenn Ihr Baby direkt nach dem Füttern flach liegt, drückt die eingeschlossene Luft die Milch mit nach oben. Wenn Sie aufrecht bleiben, kann die Luft über der Milch aufsteigen und von selbst entweichen, was normalerweise weniger Spucken, weniger Zappeln und eine ruhigere Beruhigung danach bedeutet.",
                 es: "Los recién nacidos tragan aire con casi cada alimentación y la válvula entre el estómago y el esófago todavía está blanda y se abre fácilmente. Cuando su bebé se acuesta inmediatamente después de amamantar, el aire atrapado empuja la leche hacia arriba con él. Mantenerse erguido permite que el aire se eleve por encima de la leche y escape por sí solo, lo que generalmente significa menos regurgitaciones, menos episodios de retorcerse y un descanso más tranquilo después.",
                 fr: "Les nouveau-nés avalent de l'air à presque chaque tétée, et la valve entre l'estomac et le tube alimentaire est toujours souple et s'ouvre facilement. Lorsque votre bébé est allongé à plat juste après une tétée, cet air emprisonné repousse le lait avec lui. Rester debout permet à l'air de s'élever au-dessus du lait et de s'échapper tout seul, ce qui signifie généralement moins de crachats, moins d'épisodes de tortillement et une installation plus calme par la suite.",
-                pt: "Os recém-nascidos engolem ar em quase todas as mamadas, e a válvula entre o estômago e o tubo alimentar ainda está macia e pode ser aberta facilmente. Quando seu bebê fica deitado logo após a mamada, o ar preso empurra o leite de volta com ele. Ficar em pé permite que o ar suba acima do leite e escape por conta própria, o que geralmente significa menos regurgitações, menos episódios de contorção e uma postura mais calma depois."
+                pt: "Os recém-nascidos engolem ar em quase todas as mamadas, e a válvula entre o estômago e o tubo alimentar ainda está macia e pode ser aberta facilmente. Quando seu bebê fica deitado logo após a mamada, o ar preso empurra o leite de volta com ele. Ficar em pé permite que o ar suba acima do leite e escape por conta própria, o que geralmente significa menos regurgitações, menos episódios de contorção e uma postura mais calma depois.",
+                zh: "新生儿几乎每次喂食都会吞入空气，胃和食物管之间的阀门仍然柔软且容易打开。当宝宝吃完奶后直接平躺时，滞留的空气会将乳汁一起推回原处。保持直立可以让空气上升到牛奶上方并自行逸出，这通常意味着更少的吐奶、更少的蠕动发作以及随后更平静的安定。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -109,6 +119,12 @@ extension CareTipsCatalog {
                     "Enrolar o corpo para a frente para que a barriga fique comprimida – isso torna o refluxo mais provável, e não menor.",
                     "Tapinhas firmes na crença de que mais difícil significa mais rápido.",
                     "Usar uma cadeirinha de carro ou segurança como posição vertical - o ângulo desleixado dobra a barriga.",
+                ],
+                zh: [
+                    "将婴儿直接放下，因为他们在乳房或奶瓶旁睡着了。",
+                    "将身体向前卷曲，使腹部受压——这会增加而不是减少反流的可能性。",
+                    "坚定地相信越难意味着越快。",
+                    "使用汽车座椅或摇椅作为直立位置——倾斜的角度可以折叠腹部。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -147,6 +163,12 @@ extension CareTipsCatalog {
                     "Seu bebê se arqueia, grita ou recusa a alimentação regularmente depois de comer.",
                     "O ganho de peso diminui ou as fraldas ficam visivelmente mais secas.",
                     "O leite volta com força e repetidamente, não como um gotejamento suave.",
+                ],
+                zh: [
+                    "吐出的痰液呈绿色、黄色或含有血液。",
+                    "您的宝宝在吃完饭后会弓起背、尖叫或拒绝吃奶。",
+                    "体重增加减慢或尿布明显变干。",
+                    "奶水会反复有力地回流，而不是轻轻地流淌。",
                 ]
             )
         ),
@@ -159,7 +181,8 @@ extension CareTipsCatalog {
                 de: "Drei Positionen zum Aufstoßen und wann jede funktioniert",
                 es: "Tres posturas para sacar los gases y cuándo funciona cada una",
                 fr: "Trois positions pour faire roter bébé et savoir quand utiliser chacune",
-                pt: "Três posições para arrotar e quando cada uma funciona"
+                pt: "Três posições para arrotar e quando cada uma funciona",
+                zh: "三种打嗝位置以及每种位置的工作时间"
             ),
             summary: LocalizedText(
                 en: "If one hold does not work in five minutes, change position instead of patting longer",
@@ -167,7 +190,8 @@ extension CareTipsCatalog {
                 de: "Wenn eine Position in fünf Minuten nicht funktioniert, wechseln Sie sie, anstatt länger zu klopfen",
                 es: "Si una postura no funciona en cinco minutos, cámbiala en vez de dar palmaditas más tiempo",
                 fr: "Si une position ne fonctionne pas en cinq minutes, changez-la au lieu de tapoter plus longtemps",
-                pt: "Se uma espera não funcionar em cinco minutos, mude de posição em vez de dar tapinhas por mais tempo"
+                pt: "Se uma espera não funcionar em cinco minutos, mude de posição em vez de dar tapinhas por mais tempo",
+                zh: "如果一个动作在五分钟内不起作用，请改变位置而不是拍更长时间"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -211,6 +235,13 @@ extension CareTipsCatalog {
                     "De bruços no colo: barriga sobre as coxas, cabeça ligeiramente mais alta que o corpo, uma mão firmando as costas.",
                     "Dê a cada posição cerca de cinco minutos e depois mude em vez de continuar com a mesma posição.",
                     "Arrotar no meio da alimentação também – quando você troca de lado ou depois de cerca de 60 ml de uma mamadeira.",
+                ],
+                zh: [
+                    "过肩：胸部靠着你，下巴高于肩膀——经典的第一次尝试。",
+                    "坐在腿上：用手掌（不要是喉咙）支撑下巴和下巴，身体稍微前倾，轻拍肩胛骨之间。",
+                    "脸朝下放在膝盖上：趴在大腿上，头略高于身体，一只手稳定背部。",
+                    "每个姿势大约五分钟，然后更换而不是继续同一个姿势。",
+                    "喂奶时也会打嗝——当你换边时，或者从瓶子里喝了大约 60 毫升后。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -219,7 +250,8 @@ extension CareTipsCatalog {
                 de: "Luft sitzt dort, wo der Magen in diesem Moment geformt ist, also kann eine Position, die heute zu einem Aufstoßen führt, morgen nichts bewirken. Eine Winkeländerung verschiebt die Blase in Richtung Magenöffnung, von wo aus sie entweichen kann. Aufstoßen während der Fütterung hilft mehr als ein einzelner Versuch am Ende, weil ein kleinerer Magen Luft leichter freisetzt als ein voller.",
                 es: "El aire se asienta dondequiera que el estómago tenga forma en ese momento, por lo que una sujeción que libere un eructo hoy puede que no sirva de nada mañana. Cambiar el ángulo mueve la burbuja hacia la parte superior del estómago, donde puede escapar. Eructar a mitad de la comida ayuda más que un solo intento al final, porque un estómago más pequeño libera aire más fácilmente que uno lleno.",
                 fr: "L'air se trouve là où se trouve la forme de l'estomac à ce moment-là, donc une prise qui libère un rot aujourd'hui peut ne rien faire demain. Changer l'angle déplace la bulle vers le haut de l'estomac où elle peut s'échapper. Le rot à mi-tétée aide plus qu'une seule tentative à la fin, car un estomac plus petit libère de l'air plus facilement qu'un estomac plein.",
-                pt: "O ar fica onde quer que o estômago esteja moldado naquele momento, então uma pressão que libera um arroto hoje pode não fazer nada amanhã. Mudar o ângulo move a bolha em direção ao topo do estômago, de onde pode escapar. Arrotar no meio da alimentação ajuda mais do que uma única tentativa no final, porque um estômago menor libera ar com mais facilidade do que um estômago cheio."
+                pt: "O ar fica onde quer que o estômago esteja moldado naquele momento, então uma pressão que libera um arroto hoje pode não fazer nada amanhã. Mudar o ângulo move a bolha em direção ao topo do estômago, de onde pode escapar. Arrotar no meio da alimentação ajuda mais do que uma única tentativa no final, porque um estômago menor libera ar com mais facilidade do que um estômago cheio.",
+                zh: "空气就存在于胃在那一刻恰好成形的地方，所以今天打嗝的姿势明天可能毫无作用。改变角度会使气泡移向胃顶部，从而可以逸出。喂食过程中打嗝比最后一次尝试更有帮助，因为较小的胃比完整的胃更容易释放空气。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -257,6 +289,12 @@ extension CareTipsCatalog {
                     "Apoiando a garganta em vez da mandíbula na posição sentada.",
                     "Supondo que cada mamada termine com um arroto audível – muitos não o fazem, e tudo bem.",
                     "Esperar até que o bebê já esteja chorando de desconforto antes de começar.",
+                ],
+                zh: [
+                    "在一个位置拍了二十分钟，没有效果。",
+                    "在坐姿中支撑喉咙而不是下巴。",
+                    "假设每次喂食都必须以可听见的打嗝声结束——很多人不会，那很好。",
+                    "等到宝宝已经因不适而哭泣后再开始。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -289,6 +327,11 @@ extension CareTipsCatalog {
                     "Seu bebê parece sentir dor durante ou após a maioria das mamadas, apesar de arrotar.",
                     "As mamadas terminam regularmente em choro inconsolável que dura mais de uma hora.",
                     "Você percebe chiado no peito, tosse ou mudança de cor durante as mamadas.",
+                ],
+                zh: [
+                    "尽管打嗝，您的宝宝在大多数喂奶期间或喂奶后似乎都会感到疼痛。",
+                    "喂食通常以持续一个多小时的无法安慰的哭泣结束。",
+                    "您在喂食期间注意到喘息、咳嗽或颜色变化。",
                 ]
             )
         ),
@@ -301,7 +344,8 @@ extension CareTipsCatalog {
                 de: "Erkennen Sie Hungersignale, bevor das Weinen beginnt",
                 es: "Reconoce las señales de hambre antes de que empiece el llanto",
                 fr: "Repérez les signes de faim avant que les pleurs ne commencent",
-                pt: "Capte sinais de fome antes que o choro comece"
+                pt: "Capte sinais de fome antes que o choro comece",
+                zh: "在哭泣开始之前捕捉饥饿信号"
             ),
             summary: LocalizedText(
                 en: "Crying is a late signal — feeding at the early cues is calmer for everyone",
@@ -309,7 +353,8 @@ extension CareTipsCatalog {
                 de: "Weinen ist ein spätes Signal — die Fütterung bei frühen Zeichen ist für alle ruhiger",
                 es: "El llanto es una señal tardía: alimentar al bebé ante las primeras señales es más tranquilo para todos",
                 fr: "Les pleurs sont un signe tardif : nourrir bébé dès les premiers signes est plus calme pour tout le monde",
-                pt: "Chorar é um sinal tardio – alimentar-se nos primeiros sinais é mais calmo para todos"
+                pt: "Chorar é um sinal tardio – alimentar-se nos primeiros sinais é mais calmo para todos",
+                zh: "哭泣是一个晚期信号——根据早期信号进食对每个人来说都会更平静"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -353,6 +398,13 @@ extension CareTipsCatalog {
                     "Sinais tardios: choro intenso, rosto vermelho, movimentos bruscos e agitados.",
                     "Ofereça uma alimentação no estágio inicial ou intermediário – a pega é mais fácil e a alimentação geralmente é mais eficiente.",
                     "Se o choro já começou, acalme-se primeiro: pele a pele, balanço suave, voz baixa e depois ofereça.",
+                ],
+                zh: [
+                    "留意早期的暗示：搅拌、张嘴、左右转动头部、双手移向脸部。",
+                    "中段提示：伸展、增加身体运动、把手放入嘴里、发出轻微的烦躁声音。",
+                    "晚期线索：大哭、脸红、动作急躁。",
+                    "在早期或中期提供喂食——衔乳更容易，喂食通常也更有效。",
+                    "如果已经开始哭泣，请先平静：肌肤接触、轻轻摇晃、轻声说话，然后提供帮助。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -361,7 +413,8 @@ extension CareTipsCatalog {
                 de: "Ein weinendes Baby hat eine gewölbte Zunge und einen angespannten Kiefer, was einen tiefen Halt physisch schwieriger macht. Fütterungen, die aus Weinen beginnen, sind in der Regel kürzer, wilder und beinhalten mehr Luft schlucken. Das Lesen der frühen Zeichen stärkt auch Ihr Vertrauen in Ihre eigenen Beobachtungen, was genauso wertvoll ist wie die sanftere Fütterung selbst.",
                 es: "Un bebé que llora tiene la lengua arqueada y la mandíbula tensa, lo que hace que sea físicamente más difícil lograr un agarre profundo. Las tomas que comienzan con el llanto tienden a ser más cortas, más frenéticas e implican tragar más aire. Leer las primeras señales también aumenta tu confianza en tus propias observaciones, lo que vale tanto como la transmisión más fluida en sí.",
                 fr: "Un bébé qui pleure a une langue arquée et une mâchoire tendue, ce qui rend physiquement plus difficile une prise profonde du sein. Les tétées qui commencent par des pleurs ont tendance à être plus courtes, plus frénétiques et impliquent d’avaler plus d’air. La lecture des premiers signaux renforce également votre confiance dans vos propres observations, ce qui vaut autant que l'alimentation plus fluide elle-même.",
-                pt: "Um bebê que chora tem a língua arqueada e a mandíbula tensa, o que torna fisicamente mais difícil conseguir uma pega profunda. As mamadas que começam com o choro tendem a ser mais curtas, mais frenéticas e envolvem engolir mais ar. Ler as primeiras dicas também aumenta sua confiança em suas próprias observações, o que vale tanto quanto a própria alimentação mais suave."
+                pt: "Um bebê que chora tem a língua arqueada e a mandíbula tensa, o que torna fisicamente mais difícil conseguir uma pega profunda. As mamadas que começam com o choro tendem a ser mais curtas, mais frenéticas e envolvem engolir mais ar. Ler as primeiras dicas também aumenta sua confiança em suas próprias observações, o que vale tanto quanto a própria alimentação mais suave.",
+                zh: "哭泣的婴儿舌头呈拱形，下巴紧张，这使得深含乳变得更困难。从哭声开始的喂食往往更短、更疯狂，并且需要吞咽更多的空气。阅读早期的线索还可以增强您对自己观察结果的信心，这与更顺畅的饲料本身一样有价值。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -393,6 +446,11 @@ extension CareTipsCatalog {
                     "Alimentar estritamente de acordo com o relógio e ignorar o que o bebê está mostrando.",
                     "Interpretando cada movimento da boca como fome – os bebês também fazem a boca com as mãos para se acalmar e explorar.",
                     "Usar um manequim para adiar um sinal claro de alimentação nas primeiras semanas.",
+                ],
+                zh: [
+                    "严格按时钟喂奶，忽略婴儿的表现。",
+                    "将每一个嘴巴的动作都视为饥饿——婴儿也会用嘴张开双手来自我安抚和探索。",
+                    "使用奶嘴来推迟最初几周的明确喂食提示。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -425,6 +483,11 @@ extension CareTipsCatalog {
                     "Seu bebê está sempre com muito sono para mostrar sinais de fome e precisa ser acordado a cada mamada.",
                     "Menos de seis fraldas molhadas por dia após a primeira semana.",
                     "Os sinais de alimentação aparecem constantemente e a alimentação nunca parece satisfatória.",
+                ],
+                zh: [
+                    "您的宝宝始终太困，无法表现出饥饿迹象，每次喂奶时都必须被叫醒。",
+                    "第一周后，每天湿尿布少于六片。",
+                    "喂食提示不断出现，但喂食似乎永远不会令人满意。",
                 ]
             )
         ),
@@ -437,7 +500,8 @@ extension CareTipsCatalog {
                 de: "Tempogerechtiges Flaschenfahren: Halten Sie die Flasche horizontal",
                 es: "Tomas pausadas con biberón: mantén el biberón horizontal",
                 fr: "Donner le biberon au rythme de bébé : gardez le biberon à l’horizontale",
-                pt: "Alimentação com mamadeira com ritmo: mantenha a mamadeira na horizontal"
+                pt: "Alimentação com mamadeira com ritmo: mantenha a mamadeira na horizontal",
+                zh: "定速奶瓶喂养：保持奶瓶水平"
             ),
             summary: LocalizedText(
                 en: "Let your baby set the rhythm instead of letting gravity empty the bottle",
@@ -445,7 +509,8 @@ extension CareTipsCatalog {
                 de: "Lassen Sie Ihr Baby den Rhythmus vorgeben, anstatt die Schwerkraft die Flasche zu leeren",
                 es: "Deja que el bebé marque el ritmo en vez de que la gravedad vacíe el biberón",
                 fr: "Laissez bébé donner le rythme au lieu de laisser la gravité vider le biberon",
-                pt: "Deixe seu bebê definir o ritmo em vez de deixar a gravidade esvaziar a mamadeira"
+                pt: "Deixe seu bebê definir o ritmo em vez de deixar a gravidade esvaziar a mamadeira",
+                zh: "让宝宝设定节奏，而不是让重力清空瓶子"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -489,6 +554,13 @@ extension CareTipsCatalog {
                     "Toque a tetina nos lábios e espere que a boca se abra em vez de empurrá-la para dentro.",
                     "Faça uma pausa a cada 20–30 segundos inclinando ligeiramente a garrafa para baixo; deixe seu bebê respirar e decida continuar.",
                     "Procure que a mamada dure de 10 a 20 minutos e pare quando o bebê se virar - mesmo que ainda tenha leite.",
+                ],
+                zh: [
+                    "将宝宝半直立抱起，头高于肚子，而不是平躺。",
+                    "保持瓶子大致水平，仅将牛奶注入奶嘴尖端。",
+                    "将奶嘴触碰嘴唇，等待嘴巴张开，而不是将其推入。",
+                    "每 20-30 秒稍微向下倾斜瓶子暂停一次；让宝宝呼吸并决定继续。",
+                    "尽量让喂奶持续 10-20 分钟，并在宝宝转身时停止——即使还剩下奶。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -497,7 +569,8 @@ extension CareTipsCatalog {
                 de: "Bei einer vertikalen Flasche fließt die Milch, ob das Baby aktiv saugt oder nicht, also muss es ständig schlucken, um nicht zu ersticken. Dies setzt den natürlichen Pause-Atem-Rhythmus außer Kraft, den es an der Brust nutzt, und umgeht das Sättigungssignal – deshalb enden schnelle Flaschenmahlzeiten oft mit Blähungen, Spucken und einem gestressten Baby. Das Tempo gibt der Appetitfeedback-Schleife Zeit zu wirken.",
                 es: "Con un biberón vertical, la leche fluye independientemente de que el bebé esté succionando activamente o no, por lo que debe seguir tragando para evitar ahogarse. Eso anula el ritmo natural de pausa y respiración que usan en el pecho y evita la señal de saciedad, razón por la cual la alimentación rápida con biberón a menudo termina con gases, regurgitaciones y un bebé angustiado. El ritmo le da tiempo al circuito de retroalimentación del apetito para funcionar.",
                 fr: "Avec un biberon vertical, le lait coule, que le bébé tète activement ou non, il doit donc continuer à avaler pour éviter de s'étouffer. Cela annule le rythme naturel de pause et de respiration qu'ils utilisent au sein et contourne le signal de satiété, c'est pourquoi les tétées rapides au biberon se terminent souvent par du vent, des crachats et un bébé en détresse. La stimulation donne à la boucle de rétroaction de l’appétit le temps de fonctionner.",
-                pt: "Com uma mamadeira vertical, o leite flui independentemente de o bebê estar sugando ativamente ou não, por isso ele deve continuar engolindo para evitar engasgos. Isso substitui o ritmo natural de pausa e respiração que eles usam no peito e ignora o sinal de plenitude, razão pela qual as mamadas rápidas geralmente terminam com gases, cusparadas e um bebê angustiado. O ritmo dá ao ciclo de feedback do apetite tempo para funcionar."
+                pt: "Com uma mamadeira vertical, o leite flui independentemente de o bebê estar sugando ativamente ou não, por isso ele deve continuar engolindo para evitar engasgos. Isso substitui o ritmo natural de pausa e respiração que eles usam no peito e ignora o sinal de plenitude, razão pela qual as mamadas rápidas geralmente terminam com gases, cusparadas e um bebê angustiado. O ritmo dá ao ciclo de feedback do apetite tempo para funcionar.",
+                zh: "对于立式奶瓶，无论婴儿是否主动吸吮，牛奶都会流动，因此他们必须不断吞咽以避免窒息。这超越了他们在乳房时使用的自然暂停和呼吸节奏，并且绕过了饱腹信号，这就是为什么快速奶瓶喂养通常会以风、吐奶和痛苦的婴儿结束。节奏让食欲反馈回路有时间发挥作用。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -535,6 +608,12 @@ extension CareTipsCatalog {
                     "Encorajar os últimos mililitros depois que o bebê tiver parado claramente.",
                     "Aumentar o tamanho da tetina para encurtar a alimentação.",
                     "Alimentar com o bebê deitado de costas.",
+                ],
+                zh: [
+                    "将奶瓶放在垫子上，然后让宝宝坐在上面——有窒息的危险，而且绝不安全。",
+                    "宝宝明显停了之后再鼓励最后几毫升。",
+                    "增大奶头尺寸以缩短喂奶时间。",
+                    "喂养时让婴儿平躺。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -567,6 +646,11 @@ extension CareTipsCatalog {
                     "O leite vaza regularmente pelos cantos da boca ou o bebê engole e balbucia.",
                     "As mamadas demoram mais de 40 minutos e deixam seu bebê exausto.",
                     "Tosse, engasgos ou mudança de cor durante a alimentação com mamadeira.",
+                ],
+                zh: [
+                    "牛奶经常从嘴角漏出，或者宝宝吞咽并吐出奶汁。",
+                    "喂奶需要 40 多分钟，让宝宝精疲力竭。",
+                    "奶瓶喂养期间出现咳嗽、作呕或颜色变化。",
                 ]
             )
         ),
@@ -579,7 +663,8 @@ extension CareTipsCatalog {
                 de: "Formel sicher zubereiten und lagern",
                 es: "Preparar y conservar la leche de fórmula de forma segura",
                 fr: "Préparer et conserver le lait infantile en toute sécurité",
-                pt: "Preparar e armazenar a fórmula com segurança"
+                pt: "Preparar e armazenar a fórmula com segurança",
+                zh: "安全地准备和储存配方奶粉"
             ),
             summary: LocalizedText(
                 en: "Fresh is safest: make each bottle when you need it and discard leftovers",
@@ -587,7 +672,8 @@ extension CareTipsCatalog {
                 de: "Frisch ist am sichersten: Machen Sie jede Flasche, wenn Sie sie brauchen, und entsorgen Sie Reste",
                 es: "Lo fresco es más seguro: prepara cada biberón cuando lo necesites y desecha las sobras",
                 fr: "Le lait frais est le plus sûr : préparez chaque biberon au moment voulu et jetez les restes",
-                pt: "Fresco é mais seguro: faça cada garrafa quando precisar e descarte as sobras"
+                pt: "Fresco é mais seguro: faça cada garrafa quando precisar e descarte as sobras",
+                zh: "新鲜最安全：在需要时制作每一瓶，并丢弃剩余的"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -631,6 +717,13 @@ extension CareTipsCatalog {
                     "Adicione água à garrafa primeiro e depois o número exato de medidas indicadas na lata.",
                     "Deixe esfriar rapidamente sob uma torneira fria, segurando a tampa, e teste na parte interna do pulso - deve estar morno, não quente.",
                     "Jogue fora tudo o que sobrar na mamadeira dentro de duas horas após o início da alimentação.",
+                ],
+                zh: [
+                    "在第一年里，要洗手，然后对奶瓶和奶嘴进行清洁和消毒。",
+                    "将淡水煮沸并冷却不超过 30 分钟，然后再混合，这样水的温度仍然足以杀死粉末中的细菌。",
+                    "首先将水倒入瓶子中，然后按照罐子上标明的量勺的准确数量添加水。",
+                    "在运行的冷水龙头下快速冷却，盖上盖子，然后在手腕内侧进行测试 - 感觉应该是微温的，而不是温暖的。",
+                    "在开始喂食后两小时内扔掉瓶子里剩下的所有东西。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -639,7 +732,8 @@ extension CareTipsCatalog {
                 de: "Formelprder ist kein steriles Produkt, und eine warm zubereitete Flasche ist ein ausgezeichnetes Wachstumsmedium. Zwei Dinge schützen Ihr Baby: Wasser, das heiß genug ist, um Bakterien zum Zeitpunkt des Mischens abzutöten, und ein kurzes Fenster zwischen Herstellung und Konsum. Die Genauigkeit der Dosierung ist genauso wichtig — zu konzentrierte Formel belastet unreife Nieren, und zu verdünnte Formel bremst unauffällig das Gewichtswachstum.",
                 es: "La fórmula en polvo no es un producto estéril y un biberón preparado tibio es un excelente medio de crecimiento. Dos cosas protegen a su bebé: agua lo suficientemente caliente como para matar las bacterias en el momento de mezclarse y un breve período entre preparar y beber. La precisión de la cucharada es igualmente importante: la fórmula demasiado concentrada ejerce presión sobre los riñones inmaduros y la fórmula demasiado diluida frena silenciosamente el aumento de peso.",
                 fr: "La poudre de formule n’est pas un produit stérile et un biberon chaud et maquillé est un excellent milieu de croissance. Deux choses protègent votre bébé : de l’eau suffisamment chaude pour tuer les bactéries au moment du mélange et un court laps de temps entre la préparation et la consommation. La précision de la cuillère est tout aussi importante : une formule trop concentrée met à rude épreuve les reins immatures et une formule trop diluée retient discrètement la prise de poids.",
-                pt: "A fórmula em pó não é um produto estéril e um frasco aquecido é um excelente meio de crescimento. Duas coisas protegem seu bebê: água quente o suficiente para matar as bactérias no momento da mistura e um curto intervalo entre fazer e beber. A precisão da colher é igualmente importante - a fórmula superconcentrada sobrecarrega os rins imaturos, e a fórmula superdiluída retém silenciosamente o ganho de peso."
+                pt: "A fórmula em pó não é um produto estéril e um frasco aquecido é um excelente meio de crescimento. Duas coisas protegem seu bebê: água quente o suficiente para matar as bactérias no momento da mistura e um curto intervalo entre fazer e beber. A precisão da colher é igualmente importante - a fórmula superconcentrada sobrecarrega os rins imaturos, e a fórmula superdiluída retém silenciosamente o ganho de peso.",
+                zh: "配方奶粉不是无菌产品，温热的奶粉瓶是极好的生长培养基。有两件事可以保护您的宝宝：水的温度足够高，可以在混合时杀死细菌，以及制作和饮用之间的时间间隔很短。舀取的准确性同样重要——过度浓缩的配方奶粉会对未成熟的肾脏造成压力，而过度稀释的配方奶粉会悄悄地抑制体重增加。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -677,6 +771,12 @@ extension CareTipsCatalog {
                     "Preparar um lote de garrafas para o dia e deixá-las em temperatura ambiente.",
                     "Reaquecer uma garrafa parcialmente bêbada para mais tarde.",
                     "Usar um micro-ondas, que cria pontos quentes que podem queimar a boca.",
+                ],
+                zh: [
+                    "包装或堆放勺子而不是将其弄平。",
+                    "配制一批当天需要的瓶子，并将它们放置在室温下。",
+                    "重新加热半醉的瓶子以供稍后使用。",
+                    "使用微波炉会产生热点，从而烫伤口腔。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -709,6 +809,11 @@ extension CareTipsCatalog {
                     "Vômito, diarréia ou febre após a alimentação.",
                     "Seu bebê recusa a fórmula que normalmente aceita ou desenvolve erupção na pele após as mamadas.",
                     "O ganho de peso diminui apesar dos volumes normais de alimentação.",
+                ],
+                zh: [
+                    "进食后呕吐、腹泻或发烧。",
+                    "您的宝宝拒绝接受通常接受的配方奶，或者在喂奶后出现皮疹。",
+                    "尽管饲喂量正常，但体重增加却减慢。",
                 ]
             )
         ),
@@ -721,7 +826,8 @@ extension CareTipsCatalog {
                 de: "Spucken oder Erbrechen: wie man sie unterscheidet",
                 es: "Regurgitación o vómito: cómo distinguirlos",
                 fr: "Régurgitations ou vomissements : comment les distinguer",
-                pt: "Cuspir ou vomitar: como diferenciá-los"
+                pt: "Cuspir ou vomitar: como diferenciá-los",
+                zh: "吐奶或呕吐：如何区分它们"
             ),
             summary: LocalizedText(
                 en: "A relaxed dribble is normal; forceful, distressed, or coloured is not",
@@ -729,7 +835,8 @@ extension CareTipsCatalog {
                 de: "Ein entspanntes Rinnsal ist normal; gewaltsam, angespannt oder gefärbt ist es nicht",
                 es: "Un goteo tranquilo es normal; si es a presión, con malestar o tiene color, no lo es",
                 fr: "Un petit écoulement sans effort est normal ; s’il est puissant, douloureux ou coloré, il ne l’est pas",
-                pt: "Um drible relaxado é normal; forte, angustiado ou colorido não é"
+                pt: "Um drible relaxado é normal; forte, angustiado ou colorido não é",
+                zh: "轻松运球是正常的；有力的、仿旧的或有颜色的不是"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -773,6 +880,13 @@ extension CareTipsCatalog {
                     "Observe a cor: espera-se branco leitoso ou levemente coalhado; verde, amarelo, marrom ou com manchas de sangue não é.",
                     "Observe o volume – uma colher de sopa se espalha amplamente sobre uma musselina e muitas vezes parece muito mais do que realmente é.",
                     "Registre episódios no Momsy para que você possa mostrar um padrão em vez de uma memória no próximo compromisso.",
+                ],
+                zh: [
+                    "看用力：唾液从口中滚出，呕吐物用力排出。",
+                    "看看你的宝宝：吐奶后，他们表现得好像什么也没发生过一样；呕吐后，他们通常会感到不安。",
+                    "看颜色：乳白色或稍凝结；绿色、黄色、棕色或血丝则不然。",
+                    "注意体积——一汤匙在平纹细布上铺得很宽，而且通常看起来比实际要多得多。",
+                    "在 Momsy 中记录情节，以便您可以在下次约会时显示模式而不是记忆。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -781,7 +895,8 @@ extension CareTipsCatalog {
                 de: "Etwa die Hälfte aller Babys speien in den ersten Monaten, einfach weil der Muskelring oben am Magen noch ausreift. Das ist ein Wäscheproblem, kein medizinisches, solange Ihr Baby komfortabel ist und an Gewicht zunimmt. Erbrechen ist ein anderes Ereignis mit anderen Ursachen, also spart das Trennen der beiden in Ihrem Kopf viel unnötige Sorge — und macht die wirklich besorgniserregenden Episoden hervorgehoben.",
                 es: "Aproximadamente la mitad de los bebés regurgitan durante los primeros meses, simplemente porque el anillo muscular en la parte superior del estómago todavía está madurando. Ése es un problema de lavandería, no médico, siempre y cuando su bebé esté cómodo y aumente de peso. El vómito es un evento diferente con causas diferentes, por lo que separar los dos en su mente le ahorra muchas preocupaciones innecesarias y hace que los episodios genuinamente preocupantes se destaquen.",
                 fr: "Environ la moitié des bébés régurgitent au cours des premiers mois, simplement parce que l'anneau musculaire situé au sommet de l'estomac est encore en train de mûrir. Il s’agit d’un problème de lessive et non médical, tant que votre bébé se sent à l’aise et prend du poids. Les vomissements sont un événement différent avec des causes différentes, donc séparer les deux dans votre esprit vous évite bien des soucis inutiles et fait ressortir les épisodes véritablement préoccupants.",
-                pt: "Cerca de metade dos bebês cuspe nos primeiros meses, simplesmente porque o anel muscular na parte superior do estômago ainda está amadurecendo. Esse é um problema de lavanderia, não médico, desde que seu bebê esteja confortável e ganhando peso. O vômito é um evento diferente com causas diferentes, portanto, separar os dois em sua mente evita muitas preocupações desnecessárias – e faz com que os episódios genuinamente preocupantes se destaquem."
+                pt: "Cerca de metade dos bebês cuspe nos primeiros meses, simplesmente porque o anel muscular na parte superior do estômago ainda está amadurecendo. Esse é um problema de lavanderia, não médico, desde que seu bebê esteja confortável e ganhando peso. O vômito é um evento diferente com causas diferentes, portanto, separar os dois em sua mente evita muitas preocupações desnecessárias – e faz com que os episódios genuinamente preocupantes se destaquem.",
+                zh: "大约一半的婴儿在头几个月内会吐奶，这仅仅是因为胃顶部的肌肉环仍在成熟。这是一个洗衣问题，而不是医学问题，只要您的宝宝感到舒适并且体重增加即可。呕吐是一种不同的事件，有不同的原因，因此在脑海中将两者分开可以节省很多不必要的担忧，并使真正令人担忧的事件脱颖而出。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -819,6 +934,12 @@ extension CareTipsCatalog {
                     "Trocar de fórmula repetidamente sem orientação médica.",
                     "Julgar a gravidade pelo tamanho da mancha.",
                     "Adicionar espessantes ou cereais às mamadeiras sem orientação médica.",
+                ],
+                zh: [
+                    "由于频繁吐奶而减少饲料量，这会影响体重增加。",
+                    "在没有医疗建议的情况下反复更换配方奶粉。",
+                    "通过污渍看起来有多大来判断严重程度。",
+                    "在没有医生指导的情况下向瓶子中添加增稠剂或麦片。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -857,6 +978,12 @@ extension CareTipsCatalog {
                     "O vômito é forte e repetido após a maioria das mamadas.",
                     "Sinais de desidratação: boca seca, fontanela afundada, muito menos fraldas molhadas, sonolência incomum.",
                     "Vômito acompanhado de febre, barriga inchada ou recusa em alimentar-se.",
+                ],
+                zh: [
+                    "呕吐物呈绿色或黄色，含有血液，或看起来像咖啡渣。",
+                    "大多数喂食后都会出现剧烈且反复的呕吐。",
+                    "脱水迹象：口干、囟门凹陷、湿尿布少得多、异常嗜睡。",
+                    "呕吐并伴有发烧、肚子肿胀或拒绝进食。",
                 ]
             )
         ),
@@ -869,7 +996,8 @@ extension CareTipsCatalog {
                 de: "Feste Nahrung beginnen: Schauen Sie auf Ihr Baby, nicht auf den Kalender",
                 es: "Empezar con sólidos: observa a tu bebé, no el calendario",
                 fr: "Commencer les aliments solides : observez votre bébé, pas le calendrier",
-                pt: "Começando com sólidos: leia seu bebê, não o calendário"
+                pt: "Começando com sólidos: leia seu bebê, não o calendário",
+                zh: "开始辅食：阅读你的宝宝，而不是日历"
             ),
             summary: LocalizedText(
                 en: "Around six months, and only when all three readiness signs are there",
@@ -877,7 +1005,8 @@ extension CareTipsCatalog {
                 de: "Ungefähr sechs Monate alt und nur wenn alle drei Bereitschaftszeichen vorhanden sind",
                 es: "Alrededor de los seis meses y solo cuando estén presentes las tres señales de preparación",
                 fr: "Vers six mois, et seulement lorsque les trois signes de préparation sont présents",
-                pt: "Cerca de seis meses, e somente quando todos os três sinais de prontidão estiverem presentes"
+                pt: "Cerca de seis meses, e somente quando todos os três sinais de prontidão estiverem presentes",
+                zh: "大约六个月，并且只有当所有三个准备就绪迹象都存在时"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -921,6 +1050,13 @@ extension CareTipsCatalog {
                     "Mantenha o leite como a principal fonte de nutrição – os primeiros sólidos são uma prática, não uma reposição de calorias.",
                     "Espere que a maior parte das primeiras refeições acabe no rosto, no babador e no chão. Esse é o processo funcionando.",
                     "Registre novos alimentos e quaisquer reações no Diário Alimentar da Momsy.",
+                ],
+                zh: [
+                    "同时检查这三个迹象：在几乎没有支撑的情况下坐起来，稳定地控制头部和颈部，协调地伸手拿食物并将其送到嘴里。",
+                    "从一次单一食物开始，每天一次，在宝宝不太饿的平静时刻提供。",
+                    "将牛奶作为主要营养来源——早期固体食物是练习，而不是替代卡路里。",
+                    "预计第一顿饭的大部分都会落在脸上、围嘴和地板上。这就是工作过程。",
+                    "在妈妈的食物日记中记录新食物和任何反应。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -929,7 +1065,8 @@ extension CareTipsCatalog {
                 de: "Die Bereitschaftszeichen existieren, weil das sichere Schlucken fester Nahrung von der Rumpfkontrolle und dem Verblassen des Zungenstoß-Reflexes abhängt, nicht von einem Datum. Wenn man vorher beginnt, erhöht sich das Erstickungsrisiko und hilft selten beim Schlaf, trotz folkloristischer Annahmen. Wenn man viel später als sechs Monate beginnt, kann es schwieriger werden, neue Texturen zu akzeptieren, und die Eisenvorräte erhalten keine Unterstützung.",
                 es: "Los signos de preparación existen porque tragar alimentos sólidos de manera segura depende del control del tronco y de la desaparición del reflejo de empujar la lengua, no de una cita. Comenzar antes de que estén colocados aumenta el riesgo de asfixia y rara vez ayuda a dormir, a pesar de lo que se dice. Comenzar mucho después de seis meses puede hacer que las nuevas texturas sean más difíciles de aceptar y dejar las reservas de hierro sin soporte.",
                 fr: "Les signes de préparation existent parce que l'ingestion sûre d'aliments solides dépend du contrôle du tronc et de la disparition du réflexe de poussée de langue, et non d'un rendez-vous. Commencer avant que ceux-ci ne soient en place augmente le risque d’étouffement et aide rarement à dormir, malgré le folklore. Bien commencer après six mois peut rendre les nouvelles textures plus difficiles à accepter et laisser les réserves de fer sans soutien.",
-                pt: "Os sinais de prontidão existem porque a deglutição segura de alimentos sólidos depende do controle do tronco e do desaparecimento do reflexo de impulso da língua, e não de um encontro. Começar antes de eles estarem instalados aumenta o risco de asfixia e raramente ajuda a dormir, apesar do folclore. Começar bem depois de seis meses pode dificultar a aceitação de novas texturas e deixar os estoques de ferro sem suporte."
+                pt: "Os sinais de prontidão existem porque a deglutição segura de alimentos sólidos depende do controle do tronco e do desaparecimento do reflexo de impulso da língua, e não de um encontro. Começar antes de eles estarem instalados aumenta o risco de asfixia e raramente ajuda a dormir, apesar do folclore. Começar bem depois de seis meses pode dificultar a aceitação de novas texturas e deixar os estoques de ferro sem suporte.",
+                zh: "准备迹象的存在是因为安全吞咽固体食物取决于躯干控制和吐舌反射的减弱，而不是日期。尽管有民间传说，但在这些措施就位之前开始会增加窒息的风险，而且很少有助于睡眠。六个月后开始良好可能会使新纹理更难以接受，并使铁店得不到支持。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -967,6 +1104,12 @@ extension CareTipsCatalog {
                     "Julgar a prontidão pelo peso ou pelo grau de interesse do bebê em observar você comer.",
                     "Apresentar vários alimentos novos no mesmo dia, o que esconde a origem de qualquer reação.",
                     "Tratar uma cara confusa como rejeição – novos gostos muitas vezes precisam de muitas exposições.",
+                ],
+                zh: [
+                    "将麦片添加到瓶子里，希望夜晚更长。",
+                    "通过体重或宝宝对看你吃东西的兴趣程度来判断是否准备好了。",
+                    "在同一天引入几种新食物，这隐藏了任何反应的根源。",
+                    "将一张扭曲的脸视为拒绝——新品味往往需要多次接触。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -1005,6 +1148,12 @@ extension CareTipsCatalog {
                     "Engasgos repetidos que se transformam em engasgos silenciosos ou tosse que não cessa.",
                     "Qualquer erupção cutânea, inchaço, vômito ou alteração respiratória após um novo alimento.",
                     "Recusa consistente de todos os sólidos por oito meses.",
+                ],
+                zh: [
+                    "您的宝宝六个月大时无法靠支撑坐着或保持头部稳定。",
+                    "反复作呕，变成无声的窒息，或咳嗽不止。",
+                    "吃新食物后出现任何皮疹、肿胀、呕吐或呼吸变化。",
+                    "八个月内持续拒绝所有固体食物。",
                 ]
             )
         ),
@@ -1017,7 +1166,8 @@ extension CareTipsCatalog {
                 de: "Abendliches Cluster-Füttern ist normal, kein Zeichen niedriger Versorgung",
                 es: "Las tomas frecuentes por la tarde son normales, no una señal de poca leche",
                 fr: "Les tétées groupées du soir sont normales, pas un signe de manque de lait",
-                pt: "A alimentação noturna em grupo é normal, não é um sinal de baixa oferta"
+                pt: "A alimentação noturna em grupo é normal, não é um sinal de baixa oferta",
+                zh: "晚上集群喂食是正常现象，并非供应不足的迹象"
             ),
             summary: LocalizedText(
                 en: "Back-to-back feeds between late afternoon and bedtime are a phase, not a problem",
@@ -1025,7 +1175,8 @@ extension CareTipsCatalog {
                 de: "Aufeinanderfolgende Fütterungen zwischen spätem Nachmittag und Schlafenszeit sind eine Phase, kein Problem",
                 es: "Las tomas seguidas entre la tarde y la hora de dormir son una etapa, no un problema",
                 fr: "Les tétées rapprochées entre la fin de l’après-midi et le coucher sont une phase, pas un problème",
-                pt: "As mamadas consecutivas entre o final da tarde e a hora de dormir são uma fase, não um problema"
+                pt: "As mamadas consecutivas entre o final da tarde e a hora de dormir são uma fase, não um problema",
+                zh: "下午晚些时候和就寝时间之间的连续喂食是一个阶段，而不是问题"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -1069,6 +1220,13 @@ extension CareTipsCatalog {
                     "Ofereça sempre que seu bebê pedir, em vez de tentar esticar os intervalos durante o cluster.",
                     "Entregue o bebê entre as mamadas se um dos pais estiver por perto - o pai que amamenta precisa mais de pausas do que de abraços.",
                     "Verifique os sinais tranquilizadores: fraldas molhadas suficientes, ganho de peso constante e períodos de calma alerta durante o dia.",
+                ],
+                zh: [
+                    "预计集群最常出现在下午晚些时候和晚上，以及生长突增前后。",
+                    "在开始之前先做好准备：水、零食、充好电的手机、舒适的座椅。",
+                    "每当宝宝提出要求时就提供，而不是试图在集群期间延长时间间隔。",
+                    "如果有共同父母在场，请在两次喂奶之间将婴儿交给孩子——喂奶的父母更需要休息，而不是拥抱。",
+                    "检查令人放心的迹象：足够的湿尿布、体重稳定增加以及白天警觉平静的时期。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -1077,7 +1235,8 @@ extension CareTipsCatalog {
                 de: "Der Milchfettgehalt und das Volumen variieren natürlich im Laufe des Tages, und Abendmahlzeiten sind in der Regel kürzer und weniger befriedigend — also nehmen Babys einfach mehr von ihnen. Häufige abendliche Stimulation signalisiert der Brust auch, mehr Milch für den nächsten Tag zu produzieren. Zu wissen, dass dieses Muster zu erwarten ist, nimmt zwei Dinge, die es schwer machen, weg: die Angst, dass etwas nicht stimmt, und das Gefühl, dass es nie enden wird.",
                 es: "El contenido y el volumen de grasa de la leche varían naturalmente a lo largo del día, y las tomas nocturnas tienden a ser más cortas y menos satisfactorias individualmente, por lo que los bebés simplemente toman más cantidad. La estimulación nocturna frecuente también indica al pecho que produzca más leche para el día siguiente. Saber que se espera un patrón elimina las dos cosas que lo hacen difícil: el miedo a que algo ande mal y la sensación de que nunca terminará.",
                 fr: "La teneur en matières grasses et le volume du lait varient naturellement au cours de la journée, et les tétées du soir ont tendance à être plus courtes et moins satisfaisantes individuellement – de sorte que les bébés en prennent simplement plus. Une stimulation fréquente le soir signale également au sein de produire plus de lait pour le lendemain. Connaître le schéma attendu élimine les deux choses qui rendent les choses difficiles : la peur que quelque chose ne va pas et le sentiment que cela ne finira jamais.",
-                pt: "O conteúdo e o volume de gordura do leite variam naturalmente ao longo do dia, e as mamadas noturnas tendem a ser mais curtas e menos satisfatórias individualmente – então os bebês simplesmente ingerem mais. A estimulação noturna frequente também sinaliza ao seio para produzir mais leite no dia seguinte. Saber o padrão esperado elimina as duas coisas que o tornam difícil: o medo de que algo esteja errado e a sensação de que nunca terá fim."
+                pt: "O conteúdo e o volume de gordura do leite variam naturalmente ao longo do dia, e as mamadas noturnas tendem a ser mais curtas e menos satisfatórias individualmente – então os bebês simplesmente ingerem mais. A estimulação noturna frequente também sinaliza ao seio para produzir mais leite no dia seguinte. Saber o padrão esperado elimina as duas coisas que o tornam difícil: o medo de que algo esteja errado e a sensação de que nunca terá fim.",
+                zh: "乳脂含量和体积在一天中会自然变化，晚上的喂食时间往往较短，而且个体的满足感较差，因此婴儿只需摄入更多即可。晚上频繁的刺激也会向乳房发出信号，让其在第二天产生更多的乳汁。知道这种模式是预期的，就能消除让事情变得困难的两件事：对出问题的恐惧，以及事情永远不会结束的感觉。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -1109,6 +1268,11 @@ extension CareTipsCatalog {
                     "Lendo o cluster como prova de que o leite acabou e completando em pânico.",
                     "Cronometrar feeds e impor intervalos durante a janela do cluster.",
                     "Suponha que um bebê que não consegue se acomodar à noite esteja simplesmente com fome, e não cansado.",
+                ],
+                zh: [
+                    "将集群视为牛奶已用完并恐慌地补充的证据。",
+                    "在集群窗口期间定时馈送和执行间隔。",
+                    "假设晚上无法安定下来的婴儿只是饥饿而不是过度疲劳。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -1147,6 +1311,12 @@ extension CareTipsCatalog {
                     "Nenhum ganho de peso durante duas semanas ou perda de peso.",
                     "Seu bebê tem dificuldade para acordar, é incomumente mole ou se alimenta fracamente.",
                     "A alimentação é dolorosa para você ou os mamilos estão rachados e sangrando.",
+                ],
+                zh: [
+                    "第一周后，每天湿尿布少于六片。",
+                    "两周内体重没有增加，也没有体重减轻。",
+                    "您的宝宝很难被唤醒、异常软弱或吃奶无力。",
+                    "喂奶会让您感到疼痛，或者乳头破裂并流血。",
                 ]
             )
         )

@@ -11,7 +11,8 @@ extension CareTipsCatalog {
                 de: "Nabelschnurpflege: sauber, trocken und offen",
                 es: "Cuidado del cordón umbilical: limpio, seco y al aire",
                 fr: "Entretien du cordon ombilical : propre, sec et découvert",
-                pt: "Cuidados com o cordão umbilical: limpo, seco e descoberto"
+                pt: "Cuidados com o cordão umbilical: limpo, seco e descoberto",
+                zh: "脐带护理：清洁、干燥、无遮盖"
             ),
             summary: LocalizedText(
                 en: "Air is the main treatment — the stump falls off on its own in one to three weeks",
@@ -19,7 +20,8 @@ extension CareTipsCatalog {
                 de: "Luft ist die Hauptbehandlung – der Stumpf fällt in ein bis drei Wochen von selbst ab",
                 es: "El aire es el tratamiento principal: el muñón se cae solo en una a tres semanas",
                 fr: "L'air est le traitement principal : le moignon tombe tout seul en une à trois semaines.",
-                pt: "O ar é o principal tratamento – o coto cai sozinho em uma a três semanas"
+                pt: "O ar é o principal tratamento – o coto cai sozinho em uma a três semanas",
+                zh: "空气是主要治疗方法——残肢在一到三周内自行脱落"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -63,6 +65,13 @@ extension CareTipsCatalog {
                     "Mantenha-o seco: banhos de esponja até que caia e a base cicatrize.",
                     "Se ficar sujo, limpe com água pura e deixe secar completamente ao ar.",
                     "Deixe-o se soltar sozinho – nunca puxe, mesmo que esteja pendurado por um fio.",
+                ],
+                zh: [
+                    "让树桩尽可能暴露在空气中。",
+                    "将尿布折叠到残端下方，这样它就不会摩擦或积聚水分。",
+                    "保持干燥：用海绵擦洗，直至其脱落且底座愈合。",
+                    "如果弄脏，请用清水清洗并完全风干。",
+                    "让它自行分离——千万不要拉扯，即使它是用一根线挂着的。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -71,7 +80,8 @@ extension CareTipsCatalog {
                 de: "Der Stumpf ist totes Gewebe, das natürlich austrocknet und sich trennt – je trockener es bleibt, desto schneller geschieht dies. Alte Routinen mit Alkohol oder Antiseptikum wurden weitgehend aufgegeben, da sie die Trennung verlangsamen, ohne Infektionen bei gesunden Babys zu reduzieren. Ein wenig getrocknetes Blut oder ein leicht unangenehmer Geruch in den letzten Tagen ist beim Ablösen normal.",
                 es: "El muñón es tejido muerto que se seca y se separa de forma natural, y cuanto más seco esté, antes ocurre. Las rutinas antiguas con alcohol o antiséptico se han abandonado en gran medida porque retrasan la separación sin reducir las infecciones en bebés sanos. Algo de sangre seca o un olor algo desagradable en los últimos días es esperable mientras se desprende.",
                 fr: "Le moignon est un tissu mort qui sèche et se sépare naturellement, et plus il reste sec, plus cela se produit rapidement. Les anciennes routines impliquant de l'alcool ou des antiseptiques ont été largement abandonnées car elles ralentissent la séparation sans réduire l'infection chez les bébés en bonne santé. Un peu de sang séché ou une odeur légèrement désagréable dans les derniers jours est attendu lors de la séparation.",
-                pt: "O coto é um tecido morto que seca e se separa naturalmente, e quanto mais seco fica, mais rápido isso acontece. As antigas rotinas que envolviam álcool ou anti-sépticos foram largamente abandonadas porque retardam a separação sem reduzir a infecção em bebés saudáveis. Espera-se um pouco de sangue seco ou um cheiro levemente desagradável nos últimos dias à medida que se separa."
+                pt: "O coto é um tecido morto que seca e se separa naturalmente, e quanto mais seco fica, mais rápido isso acontece. As antigas rotinas que envolviam álcool ou anti-sépticos foram largamente abandonadas porque retardam a separação sem reduzir a infecção em bebés saudáveis. Espera-se um pouco de sangue seco ou um cheiro levemente desagradável nos últimos dias à medida que se separa.",
+                zh: "残肢是死去的组织，会自然干燥和分离，而且越干燥，分离的速度就越快。涉及酒精或消毒剂的旧习惯已基本被放弃，因为它们会减缓分离速度，但不会减少健康婴儿的感染。在最后几天分离时，预计会出现一点干血或轻微难闻的气味。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -109,6 +119,12 @@ extension CareTipsCatalog {
                     "Aplicar cremes, pós ou anti-sépticos sem ser solicitado.",
                     "Imersão completa no banho antes da separação.",
                     "Ajudando quando parece pronto para sair.",
+                ],
+                zh: [
+                    "用尿布腰带盖住残肢。",
+                    "在未经告知的情况下使用霜剂、粉剂或防腐剂。",
+                    "分离前完全浸入浴中。",
+                    "当它看起来准备好脱落时，帮助它前进。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -147,6 +163,12 @@ extension CareTipsCatalog {
                     "Pus, secreção fétida ou sangramento contínuo.",
                     "Seu bebê chora quando a área é tocada ou fica com febre.",
                     "O coto ainda não saiu há três semanas.",
+                ],
+                zh: [
+                    "发红蔓延到根部周围的皮肤。",
+                    "脓液、恶臭分泌物或持续出血。",
+                    "当触摸该区域时，宝宝会哭泣，或者发烧。",
+                    "三个星期了，树桩还没有脱落。",
                 ]
             )
         ),
@@ -159,7 +181,8 @@ extension CareTipsCatalog {
                 de: "Baden eines Neugeborenen: kurz, warm und nicht jeden Tag",
                 es: "Bañar a un recién nacido: corto, templado y no a diario",
                 fr: "Baigner un nouveau-né : court, chaud et pas tous les jours",
-                pt: "Dar banho em um recém-nascido: curto, quente e não todos os dias"
+                pt: "Dar banho em um recém-nascido: curto, quente e não todos os dias",
+                zh: "给新生儿洗澡：时间短、温暖，但不是每天"
             ),
             summary: LocalizedText(
                 en: "Two or three baths a week at around 37 °C is plenty for new skin",
@@ -167,7 +190,8 @@ extension CareTipsCatalog {
                 de: "Zwei- oder dreimal pro Woche Baden bei etwa 37 °C ist ausreichend für neue Haut",
                 es: "Dos o tres baños por semana a unos 37 °C bastan para una piel nueva",
                 fr: "Deux ou trois bains par semaine à environ 37 °C suffisent amplement pour une peau neuve",
-                pt: "Dois ou três banhos por semana a cerca de 37 °C são suficientes para uma pele nova"
+                pt: "Dois ou três banhos por semana a cerca de 37 °C são suficientes para uma pele nova",
+                zh: "每周在 37°C 左右洗澡两到三次对于新皮肤来说就足够了"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -211,6 +235,13 @@ extension CareTipsCatalog {
                     "Reúna tudo primeiro: toalha, fralda limpa, roupa, água. Nunca se afaste, nem por um segundo.",
                     "Apoie a cabeça e o pescoço com um antebraço e segure a parte externa do braço ou ombro com essa mão.",
                     "Use água pura nas primeiras semanas ou uma pequena quantidade de sabonete líquido para bebês sem perfume. Top-and-tail nos dias entre os banhos.",
+                ],
+                zh: [
+                    "用肘部或温度计检查水温 — 37°C 左右，温暖而不是烫手。",
+                    "洗澡时间应控制在 5 至 10 分钟，水位约为 10-13 厘米。",
+                    "首先收集所有东西：毛巾、干净的尿布、衣服、水。永远不要离开，一秒钟也不行。",
+                    "用一只前臂支撑头部和颈部，并用那只手握住外臂或肩膀。",
+                    "在最初几周使用清水，或少量无香味的婴儿沐浴露。在沐浴之间的日子里从头到尾。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -219,7 +250,8 @@ extension CareTipsCatalog {
                 de: "Neugeborene Haut ist dünner als Erwachsenenhaut und bildet noch ihre Schutzbarriere, daher entfernt häufiges Waschen und duftende Produkte mehr, als sie reinigen. Zwei- oder dreimal pro Woche Baden hält die Haut komfortabel, während der Windelbereich und das Gesicht – die Teile, die wirklich schmutzig werden – täglich gereinigt werden. Kurze Bäder vermeiden auch den schnellen Wärmeverlust, der Babys abkühlt und danach unruhig macht.",
                 es: "La piel del recién nacido es más fina que la del adulto y todavía está construyendo su barrera protectora, así que lavar a menudo y usar productos perfumados retira más de lo que limpia. Dos o tres baños por semana mantienen la piel cómoda, mientras que la zona del pañal y la cara —lo que de verdad se ensucia— se limpian a diario. Los baños cortos también evitan la pérdida rápida de calor que deja al bebé frío e inquieto después.",
                 fr: "La peau des nouveau-nés est plus fine que celle des adultes et continue de construire sa barrière protectrice. C'est pourquoi des lavages fréquents et des produits parfumés décapent plus qu'ils ne nettoient. Deux ou trois bains par semaine maintiennent la peau confortable tandis que la zone des couches et le visage – les parties qui se salissent – ​​sont nettoyés quotidiennement. Les bains courts évitent également la perte de chaleur rapide qui laisse les bébés glacés et instables par la suite.",
-                pt: "A pele do recém-nascido é mais fina do que a pele do adulto e ainda está a construir a sua barreira protetora, por isso a lavagem frequente e os produtos perfumados retiram mais do que limpam. Dois ou três banhos por semana mantêm a pele confortável enquanto a área da fralda e o rosto – as partes que realmente ficam sujas – são limpos diariamente. Banhos curtos também evitam a rápida perda de calor que depois deixa os bebês gelados e inquietos."
+                pt: "A pele do recém-nascido é mais fina do que a pele do adulto e ainda está a construir a sua barreira protetora, por isso a lavagem frequente e os produtos perfumados retiram mais do que limpam. Dois ou três banhos por semana mantêm a pele confortável enquanto a área da fralda e o rosto – as partes que realmente ficam sujas – são limpos diariamente. Banhos curtos também evitam a rápida perda de calor que depois deixa os bebês gelados e inquietos.",
+                zh: "新生儿的皮肤比成人的皮肤薄，并且仍在构建保护屏障，因此频繁的洗涤和芳香产品会剥落的皮肤多于清洁的皮肤。每周洗澡两到三次可以保持皮肤舒适，同时每天清洁尿布区域和脸部（实际上很脏的部分）。短暂的洗澡还可以避免热量快速散失，以免婴儿洗澡后感到寒冷和不安。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -257,6 +289,12 @@ extension CareTipsCatalog {
                     "Banhos diários com sabonete nas primeiras semanas.",
                     "Assentos de banho ou anéis usados como motivo para desviar o olhar.",
                     "Tomar banho logo após a mamada, que muitas vezes termina em cuspe.",
+                ],
+                zh: [
+                    "用手试水，它的灵敏度远不如肘部。",
+                    "最初几周每天用肥皂洗澡。",
+                    "浴座或浴环用作移开视线的理由。",
+                    "喂奶后立即洗澡，这通常会导致吐奶。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -289,6 +327,11 @@ extension CareTipsCatalog {
                     "Manchas persistentes secas, rachadas ou lacrimejantes que não melhoram.",
                     "Uma erupção cutânea que se espalha após o banho.",
                     "Seu bebê fica com frio e manchas durante ou após o banho.",
+                ],
+                zh: [
+                    "持续干燥、破裂或流水的斑块没有改善。",
+                    "沐浴后扩散的皮疹。",
+                    "洗澡期间或洗澡后，您的宝宝会变得寒冷并出现斑点。",
                 ]
             )
         ),
@@ -301,7 +344,8 @@ extension CareTipsCatalog {
                 de: "Windelausschlag verhindern: Luftzeit und eine Schutzbarriere",
                 es: "Prevenir la dermatitis del pañal: aire y una barrera",
                 fr: "Prévenir l'érythème fessier : du temps d'air et une barrière",
-                pt: "Prevenir assaduras: tempo de ar e uma barreira"
+                pt: "Prevenir assaduras: tempo de ar e uma barreira",
+                zh: "预防尿布疹：空气时间和屏障"
             ),
             summary: LocalizedText(
                 en: "Change often, dry thoroughly, and let the skin breathe once a day",
@@ -309,7 +353,8 @@ extension CareTipsCatalog {
                 de: "Wechseln Sie häufig, trocknen Sie gründlich ab und lassen Sie die Haut einmal täglich atmen",
                 es: "Cambia a menudo, seca a fondo y deja que la piel respire una vez al día",
                 fr: "Changez-le souvent, séchez-le soigneusement et laissez la peau respirer une fois par jour",
-                pt: "Troque frequentemente, seque bem e deixe a pele respirar uma vez por dia"
+                pt: "Troque frequentemente, seque bem e deixe a pele respirar uma vez por dia",
+                zh: "勤换、彻底干燥、每天让皮肤呼吸一次"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -353,6 +398,13 @@ extension CareTipsCatalog {
                     "Seque completamente – a umidade deixada nas dobras é o que causa a maioria das erupções cutâneas.",
                     "Aplique uma fina camada de creme barreira na pele limpa e seca se a área parecer rosada.",
                     "Dê dez minutos de tempo livre de fraldas em uma toalha todos os dias.",
+                ],
+                zh: [
+                    "一旦发现尿布湿或脏，请立即更换，在最初几个月至少每两到三个小时更换一次。",
+                    "用水和脱脂棉或无香料的湿巾从前到后清洁。",
+                    "彻底拍干——折痕中残留的水分是大多数皮疹的根源。",
+                    "如果该区域呈粉红色，请在清洁干燥的皮肤上涂抹一层薄薄的隔离霜。",
+                    "每天有十分钟不穿尿布的时间用毛巾覆盖。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -361,7 +413,8 @@ extension CareTipsCatalog {
                 de: "Windelausschlag ist hauptsächlich ein Feuchtigkeitsproblem: nasse Haut wird weich, Reibung zerstört die Oberfläche, und Ammoniak aus dem Urin reizt den Rest. Luftzeit und gründliches Trocknen adressieren direkt die Ursache – deshalb wirken sie besser als jede Creme. Eine Schutzunguentum hält die nächste nasse Windel dann von bereits entzündeter Haut fern.",
                 es: "La dermatitis del pañal es sobre todo un problema de humedad: la piel mojada se reblandece, la fricción rompe la superficie y el amoniaco de la orina irrita lo que queda. El tiempo al aire y un secado a fondo atacan la causa directamente, por eso funcionan mejor que cualquier crema. La pomada barrera luego mantiene el siguiente pañal mojado lejos de una piel ya dolorida.",
                 fr: "L'érythème fessier est principalement un problème d'humidité : la peau mouillée se ramollit, la friction brise la surface et l'ammoniac de l'urine irrite ce qui reste. Le temps d’aération et un séchage complet s’attaquent directement à la cause, c’est pourquoi ils fonctionnent mieux que n’importe quelle crème. Une pommade barrière éloigne ensuite la prochaine couche mouillée de la peau déjà douloureuse.",
-                pt: "As assaduras são principalmente um problema de umidade: a pele molhada amolece, a fricção rompe a superfície e a amônia da urina irrita o que resta. O tempo de ventilação e a secagem completa abordam a causa diretamente, e é por isso que funcionam melhor do que qualquer creme. Uma pomada de barreira mantém a próxima fralda molhada longe da pele que já está dolorida."
+                pt: "As assaduras são principalmente um problema de umidade: a pele molhada amolece, a fricção rompe a superfície e a amônia da urina irrita o que resta. O tempo de ventilação e a secagem completa abordam a causa diretamente, e é por isso que funcionam melhor do que qualquer creme. Uma pomada de barreira mantém a próxima fralda molhada longe da pele que já está dolorida.",
+                zh: "尿布疹主要是水分问题：潮湿的皮肤会软化，摩擦会破坏表面，尿液中的氨会刺激残留的皮肤。晾晒时间和彻底干燥可以直接解决问题，这就是为什么它们比任何乳霜效果更好。然后，屏障软膏可以防止下一张湿尿布接触已经疼痛的皮肤。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -399,6 +452,12 @@ extension CareTipsCatalog {
                     "Uma espessa camada de creme sobre a pele úmida, que retém a umidade.",
                     "Toalhetes perfumados ou à base de álcool na pele ferida.",
                     "Pó de talco – pode ser inalado e não ajuda.",
+                ],
+                zh: [
+                    "擦洗疼痛的皮肤而不是拍打它。",
+                    "在潮湿的皮肤上涂上一层厚厚的乳霜，锁住水分。",
+                    "用芳香或含酒精的湿巾擦拭破损的皮肤。",
+                    "滑石粉——可以吸入，但没有帮助。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -437,6 +496,12 @@ extension CareTipsCatalog {
                     "Bolhas, feridas abertas ou áreas de pele em carne viva.",
                     "Nenhuma melhora após três dias de bons cuidados.",
                     "Erupção cutânea com febre ou um bebê instável e indisposto.",
+                ],
+                zh: [
+                    "皮疹有鲜红色斑块，小斑点蔓延到边缘之外——这可能是鹅口疮。",
+                    "水泡、开放性疮口或皮肤破损流泪的区域。",
+                    "经过三天的精心护理，没有任何改善。",
+                    "皮疹加发烧或宝宝情绪不稳定、身体不适。",
                 ]
             )
         ),
@@ -449,7 +514,8 @@ extension CareTipsCatalog {
                 de: "Winzige Nägel schneiden ohne Drama",
                 es: "Cortar uñas diminutas sin dramas",
                 fr: "Couper les petits ongles sans drame",
-                pt: "Aparar unhas minúsculas sem drama"
+                pt: "Aparar unhas minúsculas sem drama",
+                zh: "修剪小指甲，无需戏剧化"
             ),
             summary: LocalizedText(
                 en: "Cut during sleep, follow the natural shape, and file the corners",
@@ -457,7 +523,8 @@ extension CareTipsCatalog {
                 de: "Schneiden Sie im Schlaf, folgen Sie der natürlichen Form und feilen Sie die Ecken",
                 es: "Corta mientras duerme, sigue la forma natural y lima las esquinas",
                 fr: "Coupez pendant le sommeil, suivez la forme naturelle et limez les coins",
-                pt: "Corte durante o sono, siga o formato natural e lixe os cantos"
+                pt: "Corte durante o sono, siga o formato natural e lixe os cantos",
+                zh: "睡眠时剪裁，遵循自然形状，锉平边角"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -501,6 +568,13 @@ extension CareTipsCatalog {
                     "Corte as unhas em linha reta seguindo a curva e as unhas dos pés em linha reta, sem arredondamento nos cantos.",
                     "Alise as bordas com uma lixa macia – é isso que evita arranhões.",
                     "Espere aparar as unhas aproximadamente semanalmente e as dos pés a cada poucas semanas.",
+                ],
+                zh: [
+                    "选择宝宝熟睡或洗完澡后放松的时间。",
+                    "剪之前，轻轻地将指尖垫按离指甲。",
+                    "沿着曲线笔直地剪指甲，脚趾甲笔直地剪，拐角处不要倒圆。",
+                    "用柔软的金刚砂板平滑边缘——这样可以防止划伤。",
+                    "预计大约每周修剪一次指甲，每隔几周修剪一次脚趾甲。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -509,7 +583,8 @@ extension CareTipsCatalog {
                 de: "Neugeborene Nägel sind weich und wachsen überraschend schnell, und scharfe Kanten hinterlassen Kratzer im Gesicht innerhalb von Stunden. Der Grund zum Feilen statt kurz schneiden ist, dass das Nagelbett bei Babys sehr nah am freien Rand sitzt, daher ist tiefes Schneiden sowohl schmerzhaft als auch ein Infektionsrisiko. Abgerundete Zehennägelecken sind die Hauptursache für eingewachsene Nägel später.",
                 es: "Las uñas del recién nacido son blandas y crecen sorprendentemente rápido, y los bordes afilados dejan arañazos en la cara en cuestión de horas. Conviene limar en lugar de cortar muy corto porque en los bebés el lecho ungueal queda muy cerca del borde libre, así que cortar profundo duele y es un riesgo de infección. Redondear las esquinas de las uñas de los pies es la causa principal de uñas encarnadas más adelante.",
                 fr: "Les ongles des nouveau-nés sont doux et poussent étonnamment vite, et les bords tranchants laissent des rayures sur le visage en quelques heures. La raison pour laquelle il faut limer plutôt que couper court est que le lit de l'ongle se trouve très près du bord libre chez les bébés, donc couper profondément est à la fois douloureux et présente un risque d'infection. Les coins arrondis des ongles des pieds sont la principale cause des ongles incarnés plus tard.",
-                pt: "As unhas dos recém-nascidos são macias e crescem surpreendentemente rápido, e as pontas afiadas deixam arranhões no rosto em poucas horas. A razão para lixar em vez de cortar é que o leito ungueal fica muito próximo da borda livre dos bebês, portanto, cortar profundamente é doloroso e representa um risco de infecção. Os cantos arredondados das unhas são a principal causa de unhas encravadas posteriormente."
+                pt: "As unhas dos recém-nascidos são macias e crescem surpreendentemente rápido, e as pontas afiadas deixam arranhões no rosto em poucas horas. A razão para lixar em vez de cortar é que o leito ungueal fica muito próximo da borda livre dos bebês, portanto, cortar profundamente é doloroso e representa um risco de infecção. Os cantos arredondados das unhas são a principal causa de unhas encravadas posteriormente.",
+                zh: "新生儿的指甲很软，生长速度快得惊人，锋利的边缘在数小时内就会在脸上留下划痕。锉刀而不是剪短的原因是，婴儿的甲床非常靠近自由边缘，因此切得很深既痛苦又存在感染风险。脚趾甲的圆角是日后指甲向内生长的主要原因。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -547,6 +622,12 @@ extension CareTipsCatalog {
                     "Cortar muito curto na esperança de prolongar o tempo entre os cortes.",
                     "Arredondando os cantos das unhas.",
                     "Luvas anti-riscos usadas permanentemente, o que limita a exploração das mãos que os bebês precisam.",
+                ],
+                zh: [
+                    "咬掉指甲——成人的口腔会将细菌带入任何小撕裂处。",
+                    "剪得太短，希望在修剪之间剪得更长。",
+                    "脚趾甲角呈圆形。",
+                    "永久使用的防刮手套限制了婴儿需要的手部探索。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -579,6 +660,11 @@ extension CareTipsCatalog {
                     "Vermelhidão, inchaço ou pus ao redor da prega ungueal.",
                     "Uma unha encravada que não resolve.",
                     "Um corte que continua sangrando após alguns minutos de pressão suave.",
+                ],
+                zh: [
+                    "甲襞周围发红、肿胀或流脓。",
+                    "向内生长的脚趾甲无法固定。",
+                    "轻轻按压几分钟后仍持续流血的伤口。",
                 ]
             )
         ),
@@ -591,7 +677,8 @@ extension CareTipsCatalog {
                 de: "Nase- und Ohrenpflege: nur die Außenseite reinigen",
                 es: "Cuidado de nariz y oídos: limpia solo por fuera",
                 fr: "Soins du nez et des oreilles : nettoyer l’extérieur uniquement",
-                pt: "Cuidados com nariz e ouvidos: limpe apenas a parte externa"
+                pt: "Cuidados com nariz e ouvidos: limpe apenas a parte externa",
+                zh: "鼻子和耳朵护理：仅清洁外部"
             ),
             summary: LocalizedText(
                 en: "Saline and a soft cloth — nothing goes inside the nostril or ear canal",
@@ -599,7 +686,8 @@ extension CareTipsCatalog {
                 de: "Salzwasser und ein weiches Tuch – nichts geht in Nasenlöcher oder Gehörgang",
                 es: "Suero fisiológico y un paño suave: nada entra en la nariz ni en el conducto auditivo",
                 fr: "Une solution saline et un chiffon doux : rien ne pénètre dans la narine ou le conduit auditif",
-                pt: "Solução salina e um pano macio – nada entra na narina ou no canal auditivo"
+                pt: "Solução salina e um pano macio – nada entra na narina ou no canal auditivo",
+                zh: "盐水和软布——鼻孔或耳道内没有任何东西"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -643,6 +731,13 @@ extension CareTipsCatalog {
                     "Limpe o muco amolecido com uma seringa ou aspirador nasal, ou deixe seu bebê espirrar.",
                     "Experimente solução salina cerca de dez minutos antes da mamada, para que seu bebê possa respirar enquanto chupa.",
                     "Deixe a cera em paz – ela sai sozinha do canal.",
+                ],
+                zh: [
+                    "用湿布擦拭外耳及其后面的褶皱，然后擦干。",
+                    "对于鼻子堵塞，在每个鼻孔滴一两滴生理盐水，等待一分钟。",
+                    "用球形注射器或吸鼻器清除软化的粘液，或者让宝宝打喷嚏将其排出。",
+                    "喂奶前十分钟左右尝试使用生理盐水，这样宝宝可以在吸吮时呼吸。",
+                    "不要管耳垢——它会自行从耳道中排出。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -651,7 +746,8 @@ extension CareTipsCatalog {
                 de: "Babys atmen in den ersten Monaten hauptsächlich durch die Nase, daher stört selbst eine bescheidene Blockierung die Fütterung und den Schlaf mehr als bei einem Erwachsenen. Salzwasser verdünnt Schleim, damit er sich bewegen kann; es ist kein Medikament, daher ist es sicher wiederzuholten. Wattestäbchen schieben Wachs tiefer hinein und können einen sehr kurzen, empfindlichen Gehörgang beschädigen, also lautet die Regel: nichts Kleineres als Ihr Fingertipp geht hinein.",
                 es: "Los bebés respiran sobre todo por la nariz durante los primeros meses, así que incluso una obstrucción moderada altera la alimentación y el sueño más que en un adulto. El suero fluidifica el moco para que pueda salir; no medica nada, y por eso es seguro repetirlo. Los bastoncillos empujan la cera más adentro y pueden dañar un conducto auditivo muy corto y delicado, así que la regla es simple: nada más fino que la punta de tu dedo entra ahí.",
                 fr: "Les bébés respirent principalement par le nez pendant les premiers mois, de sorte que même un léger blocage perturbe l'alimentation et le sommeil plus que chez un adulte. La solution saline fluidifie le mucus pour qu’il puisse bouger ; cela ne médicamente rien, c’est pourquoi il est prudent de le répéter. Les cotons-tiges poussent le cérumen plus profondément et peuvent endommager un conduit auditif très court et délicat, la règle est donc simple : rien de plus petit que le bout de votre doigt n'y entre.",
-                pt: "Os bebés respiram principalmente pelo nariz durante os primeiros meses, por isso mesmo um bloqueio modesto perturba a alimentação e o sono mais do que num adulto. A solução salina afina o muco para que ele possa se mover; não medica nada, por isso é seguro repetir. Os cotonetes empurram a cera mais profundamente e podem danificar um canal auditivo muito curto e delicado, então a regra é simples: nada menor do que a ponta do seu dedo entra."
+                pt: "Os bebés respiram principalmente pelo nariz durante os primeiros meses, por isso mesmo um bloqueio modesto perturba a alimentação e o sono mais do que num adulto. A solução salina afina o muco para que ele possa se mover; não medica nada, por isso é seguro repetir. Os cotonetes empurram a cera mais profundamente e podem danificar um canal auditivo muito curto e delicado, então a regra é simples: nada menor do que a ponta do seu dedo entra.",
+                zh: "婴儿在最初几个月主要通过鼻子呼吸，因此即使是轻微的堵塞也会比成人更严重地扰乱进食和睡眠。盐水可以稀释粘液，使其能够移动；它没有任何药物作用，这就是为什么可以安全地重复。棉签会将耳垢推入更深的地方，可能会损坏非常短而脆弱的耳道，因此规则很简单：不要插入比指尖更小的东西。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -689,6 +785,12 @@ extension CareTipsCatalog {
                     "Velas auriculares, que são ineficazes e apresentam risco de queimadura.",
                     "Sucção agressiva que irrita o revestimento nasal e aumenta o inchaço.",
                     "Gotas descongestionantes para bebês sem orientação médica.",
+                ],
+                zh: [
+                    "鼻孔或耳道内的棉签。",
+                    "耳烛不仅无效，而且有烧伤风险。",
+                    "强力吸力会刺激鼻腔内壁并加剧肿胀。",
+                    "无需医疗建议即可给婴儿使用减充血滴剂。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -727,6 +829,12 @@ extension CareTipsCatalog {
                     "Descarga ou sangue do ouvido.",
                     "Um nariz entupido que impede o bebê de mamar ou uma respiração que parece difícil.",
                     "Qualquer suspeita de que um objeto foi enfiado no nariz ou na orelha.",
+                ],
+                zh: [
+                    "宝宝发烧或异常哭闹时会拉扯一只耳朵。",
+                    "耳朵有分泌物或血液。",
+                    "鼻子堵塞导致宝宝无法进食，或者呼吸看起来很费力。",
+                    "怀疑有物体被推入鼻子或耳朵。",
                 ]
             )
         )

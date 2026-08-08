@@ -11,7 +11,8 @@ extension CareTipsCatalog {
                 de: "Ein kolikartig veranlagtes Abend beruhigen",
                 es: "Calmar una tarde de cólicos",
                 fr: "Apaiser une soirée de coliques",
-                pt: "Acalmando uma noite com cólicas"
+                pt: "Acalmando uma noite com cólicas",
+                zh: "舒缓肠绞痛的夜晚"
             ),
             summary: LocalizedText(
                 en: "Layer several calming inputs at once and give each combination a few minutes",
@@ -19,7 +20,8 @@ extension CareTipsCatalog {
                 de: "Kombinieren Sie mehrere Beruhigungsmethoden gleichzeitig und geben Sie jeder Kombination ein paar Minuten Zeit",
                 es: "Combina varios estímulos calmantes a la vez y dale unos minutos a cada combinación",
                 fr: "Superposez plusieurs entrées apaisantes à la fois et accordez quelques minutes à chaque combinaison.",
-                pt: "Coloque várias entradas calmantes de uma só vez e dê a cada combinação alguns minutos"
+                pt: "Coloque várias entradas calmantes de uma só vez e dê a cada combinação alguns minutos",
+                zh: "同时分层几个镇静输入，并给每个组合几分钟的时间"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -63,6 +65,13 @@ extension CareTipsCatalog {
                     "Reduza a entrada em outros lugares: diminua as luzes, desligue a televisão, vá para uma sala mais silenciosa.",
                     "Troque de suporte a cada vinte minutos se vocês forem dois.",
                     "Se nada funcionar e você sentir que sua paciência está acabando, coloque seu bebê em segurança no berço e afaste-se por alguns minutos.",
+                ],
+                zh: [
+                    "尝试一下镇静套装：紧紧包裹住身体，将其放在侧面或前臂上，发出稳定的嘘声，轻柔的有节奏的动作，以及吸吮的东西。",
+                    "保持节奏不变——婴儿习惯于重复，而不是变化。",
+                    "减少其他地方的输入：调暗灯光、关掉电视、转移到更安静的房间。",
+                    "如果你们两个人，每二十分钟更换一次支架。",
+                    "如果没有任何效果并且您感觉失去了耐心，请将您的宝宝安全地放在婴儿床上，然后离开几分钟。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -71,7 +80,8 @@ extension CareTipsCatalog {
                 de: "Kolik im Sinne von langen unerklärten Abendschreien erreicht ihren Höhepunkt um etwa sechs Wochen und verschwindet bei den meisten Babys um drei bis vier Monate. Diese Techniken ahmen die ständige Bewegung, den Druck und den Klang der Gebärmutter nach – deshalb funktionieren mehrere gleichzeitig besser als eine allein. Zu wissen, dass es ein Ende gibt, ist ebenso wichtig wie die Techniken selbst – diese Phase ist endlich, auch wenn es sich nicht so anfühlt.",
                 es: "Los cólicos, entendidos como llanto vespertino prolongado y sin explicación, alcanzan su pico hacia las seis semanas y remiten en la mayoría de los bebés hacia los tres o cuatro meses. Estas técnicas imitan el movimiento, la presión y el sonido constantes del útero, y por eso varias a la vez suelen funcionar mejor que cualquiera por separado. Saber que hay un final importa tanto como las técnicas: esta etapa es finita, aunque no lo parezca.",
                 fr: "Les coliques, c'est-à-dire de longs pleurs inexpliqués en soirée, culminent vers six semaines et s'installent pour la plupart des bébés au bout de trois ou quatre mois. Ces techniques imitent le mouvement, la pression et le bruit constants de l’utérus, c’est pourquoi plusieurs à la fois ont tendance à mieux fonctionner qu’une seule. Savoir qu'il y a un point final compte autant que les techniques elles-mêmes - cette phase est finie même si elle ne semble pas l'être.",
-                pt: "A cólica, no sentido de um choro noturno longo e inexplicável, atinge o pico por volta das seis semanas e se instala na maioria dos bebês por volta dos três ou quatro meses. Essas técnicas imitam o movimento, a pressão e o som constantes do útero, e é por isso que várias de uma vez tendem a funcionar melhor do que qualquer uma sozinha. Saber que existe um ponto final é tão importante quanto as próprias técnicas – esta fase é finita mesmo quando não parece assim."
+                pt: "A cólica, no sentido de um choro noturno longo e inexplicável, atinge o pico por volta das seis semanas e se instala na maioria dos bebês por volta dos três ou quatro meses. Essas técnicas imitam o movimento, a pressão e o som constantes do útero, e é por isso que várias de uma vez tendem a funcionar melhor do que qualquer uma sozinha. Saber que existe um ponto final é tão importante quanto as próprias técnicas – esta fase é finita mesmo quando não parece assim.",
+                zh: "绞痛是指长时间无法解释的夜间哭闹，在六周左右达到高峰，大多数婴儿会在三到四个月时消失。这些技术模仿子宫的持续运动、压力和声音，这就是为什么同时使用几种技术往往比单独使用任何一种技术效果更好。知道终点的存在与技术本身一样重要——这个阶段是有限的，即使感觉并非如此。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -109,6 +119,12 @@ extension CareTipsCatalog {
                     "Gotas para cólicas, remédios fitoterápicos ou gripe water sem orientação médica.",
                     "Assumir que chorar sempre significa fome e alimentação contínua.",
                     "Culpar a si mesmo – a cólica não é causada por nada que você fez ou deixou de fazer.",
+                ],
+                zh: [
+                    "每三十秒切换一次技术，然后它们才能发挥作用。",
+                    "无需医生建议即可使用绞痛滴剂、草药或止痛水。",
+                    "假设哭泣总是意味着饥饿和不断进食。",
+                    "责怪自己——绞痛不是由你做了或没做的任何事情引起的。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -147,6 +163,12 @@ extension CareTipsCatalog {
                     "Choro com febre, vômito, sangue nas fezes ou recusa em alimentar-se.",
                     "Baixo ganho de peso junto com o choro.",
                     "Você se sente incapaz de lidar com a situação – este é um motivo para pedir ajuda, não um fracasso.",
+                ],
+                zh: [
+                    "平静一段时间后突然开始哭泣，或者哭声听起来尖锐且不寻常。",
+                    "发烧、呕吐、便血或拒绝进食而哭泣。",
+                    "伴随着哭泣，体重增加缓慢。",
+                    "你感到无法应对——这是寻求帮助的原因，而不是失败。",
                 ]
             )
         ),
@@ -159,7 +181,8 @@ extension CareTipsCatalog {
                 de: "Eingeklemmte Luft freigeben",
                 es: "Ayudar a expulsar los gases",
                 fr: "Libérer le vent emprisonné",
-                pt: "Liberando o vento preso"
+                pt: "Liberando o vento preso",
+                zh: "释放被困的风"
             ),
             summary: LocalizedText(
                 en: "Bicycle legs, a warm tummy and a few minutes of patience",
@@ -167,7 +190,8 @@ extension CareTipsCatalog {
                 de: "Fahrradadbewegungen, ein warmer Bauch und ein paar Minuten Geduld",
                 es: "Bicicleta con las piernas, barriga templada y unos minutos de paciencia",
                 fr: "Des jambes de vélo, un ventre chaud et quelques minutes de patience",
-                pt: "Pernas de bicicleta, barriga quentinha e alguns minutos de paciência"
+                pt: "Pernas de bicicleta, barriga quentinha e alguns minutos de paciência",
+                zh: "自行车腿、温暖的肚子和几分钟的耐心"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -211,6 +235,13 @@ extension CareTipsCatalog {
                     "Massageie a barriga em círculos lentos no sentido horário com as mãos quentes, seguindo a direção do intestino.",
                     "Experimente alguns minutos de barriga para baixo em seu colo enquanto seu bebê está acordado e supervisionado.",
                     "Faça tudo isso antes ou bem depois da mamada, não imediatamente depois.",
+                ],
+                zh: [
+                    "让宝宝仰卧，慢慢地转动双腿，一次一只。",
+                    "将双膝轻轻抬向腹部，保持几秒钟，然后松开。重复几次。",
+                    "用温热的手沿着肠道的方向缓慢地顺时针打圈按摩腹部。",
+                    "当您的宝宝醒着并受到监督时，尝试在您的腿上进行几分钟的俯卧时间。",
+                    "所有这些都在喂食前或喂食后不久进行，而不是在喂食后立即进行。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -219,7 +250,8 @@ extension CareTipsCatalog {
                 de: "Ein unreifes Verdauungssystem befördert Gas langsam, und ein Baby, das seine Position noch nicht verändern kann, hat keine Möglichkeit, ihm zu helfen. Beinbewegungen und kreisende Massage folgen dem Weg des Dickdarms und ermutigen die Luft physisch zum Ausgang. Wärme entspannt die Bauchdecke – deshalb funktionieren dieselben Bewegungen mit warmen Händen besser als mit kalten.",
                 es: "Un sistema digestivo inmaduro desplaza los gases despacio, y un bebé que aún no puede cambiar de postura no tiene forma de ayudar. El movimiento de las piernas y el masaje en el sentido de las agujas del reloj siguen el recorrido del intestino grueso y empujan físicamente el gas hacia la salida. El calor relaja la pared abdominal: por eso los mismos movimientos funcionan mejor con las manos calientes que frías.",
                 fr: "Un système digestif immature déplace les gaz lentement et un bébé qui ne peut pas encore changer de position n'a aucun moyen de l'aider. Le mouvement des jambes et le massage dans le sens des aiguilles d’une montre suivent le trajet du gros intestin et encouragent physiquement les gaz vers la sortie. La chaleur détend la paroi abdominale, c'est pourquoi les mêmes mouvements fonctionnent mieux avec des mains chaudes qu'avec des mains froides.",
-                pt: "Um sistema digestivo imaturo movimenta os gases lentamente, e um bebê que ainda não consegue mudar de posição não tem como ajudá-lo. O movimento das pernas e a massagem no sentido horário seguem o trajeto do intestino grosso e estimulam fisicamente os gases em direção à saída. O calor relaxa a parede abdominal, razão pela qual os mesmos movimentos funcionam melhor com as mãos quentes do que com as frias."
+                pt: "Um sistema digestivo imaturo movimenta os gases lentamente, e um bebê que ainda não consegue mudar de posição não tem como ajudá-lo. O movimento das pernas e a massagem no sentido horário seguem o trajeto do intestino grosso e estimulam fisicamente os gases em direção à saída. O calor relaxa a parede abdominal, razão pela qual os mesmos movimentos funcionam melhor com as mãos quentes do que com as frias.",
+                zh: "不成熟的消化系统移动气体的速度很慢，而且还不能改变姿势的婴儿无法帮助其移动。腿部运动和顺时针按摩沿着大肠的路径，以物理方式促进气体流向出口。温暖可以放松腹壁，这就是为什么相同的动作用温暖的手比用冷手效果更好。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -257,6 +289,12 @@ extension CareTipsCatalog {
                     "Pressionando firmemente a barriga cheia.",
                     "Círculos no sentido anti-horário, trabalhando contra a direção natural.",
                     "Gotas de simeticona ou chás de ervas sem consultar primeiro o seu médico.",
+                ],
+                zh: [
+                    "喂奶后立即按摩，通常可以使乳汁回流。",
+                    "用力按压饱满的肚子。",
+                    "逆时针转圈，与自然方向相反。",
+                    "无需先询问医生即可使用西甲硅油滴剂或花草茶。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -295,6 +333,12 @@ extension CareTipsCatalog {
                     "Ausência de fezes por um período anormalmente longo, juntamente com angústia e vômitos.",
                     "Sangue ou muco nas fezes.",
                     "Levantando as pernas com gritos que vêm em ondas agudas.",
+                ],
+                zh: [
+                    "肚子摸起来坚硬、肿胀或触痛。",
+                    "长时间没有大便，伴随着痛苦和呕吐。",
+                    "粪便中有血或粘液。",
+                    "伴随着尖锐的波浪式尖叫，双腿抬起。",
                 ]
             )
         ),
@@ -307,7 +351,8 @@ extension CareTipsCatalog {
                 de: "Fieber messen und die Schwellenwerte kennen",
                 es: "Medir la fiebre y conocer los umbrales",
                 fr: "Mesurer une fièvre et connaître les seuils",
-                pt: "Medindo a febre e conhecendo os limites"
+                pt: "Medindo a febre e conhecendo os limites",
+                zh: "测量发烧并了解阈值"
             ),
             summary: LocalizedText(
                 en: "Under three months, any fever is an immediate call — no exceptions",
@@ -315,7 +360,8 @@ extension CareTipsCatalog {
                 de: "Unter drei Monaten ist jedes Fieber ein sofortiger Anruf – keine Ausnahmen",
                 es: "Por debajo de los tres meses, cualquier fiebre exige llamar de inmediato, sin excepciones",
                 fr: "Moins de trois mois, toute fièvre est un appel immédiat – sans exception",
-                pt: "Menos de três meses, qualquer febre é uma chamada imediata – sem exceções"
+                pt: "Menos de três meses, qualquer febre é uma chamada imediata – sem exceções",
+                zh: "三个月内，任何发烧都要立即致电——无一例外"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -359,6 +405,13 @@ extension CareTipsCatalog {
                     "Observe o comportamento e também o número: alimentação, estado de alerta, fraldas molhadas, respiração, cor da pele.",
                     "Mantenha a ingestão de líquidos – mamadas mais frequentes ou com fórmula, e água também quando os sólidos começarem.",
                     "Não embrulhe demais. Uma camada leve ajuda a escapar do calor.",
+                ],
+                zh: [
+                    "对于年幼的婴儿，可以在腋下使用数字温度计进行测量，或者使用医生推荐的设备。",
+                    "在 Momsy 中记录数字和时间，以便您可以显示曲线，而不是单个点。",
+                    "观察行为和数量：喂食、警觉性、湿尿布、呼吸、肤色。",
+                    "保持液体供应——更频繁地母乳或配方奶喂养，一旦开始吃固体食物，也要喝水。",
+                    "不要过度包裹。一层薄薄的一层有助于热量散发。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -367,7 +420,8 @@ extension CareTipsCatalog {
                 de: "Bei Babys unter drei Monaten kann das Immunsystem Infektionen nicht zuverlässig eindämmen, daher wird eine Temperatur von 38 °C oder höher als dringend behandelt, unabhängig davon, wie gut das Baby aussieht. Ab drei Monaten sagt das Verhalten mehr aus als die Zahl selbst: Ein Baby mit 39 °C, das trinkt und auf Sie reagiert, ist normalerweise weniger besorgniserregend als eines mit 38 °C, das schlaff ist und nicht füttern will.",
                 es: "En bebés menores de tres meses el sistema inmunitario no contiene la infección de forma fiable, así que una temperatura de 38 °C o más se trata como urgente por muy bien que parezca estar el bebé. A partir de los tres meses, el comportamiento aporta más información que la cifra: un bebé con 39 °C que bebe y responde suele preocupar menos que uno con 38 °C que está flácido y no quiere comer.",
                 fr: "Chez les bébés de moins de trois mois, le système immunitaire ne peut pas contenir l'infection de manière fiable, c'est pourquoi une température de 38 °C ou plus est considérée comme urgente, quel que soit l'état de santé du bébé. À partir de trois mois, le comportement contient plus d'informations que le chiffre lui-même : un bébé à 39 °C qui boit et vous répond est généralement moins inquiétant qu'un bébé à 38 °C qui est mou et ne veut pas se nourrir.",
-                pt: "Em bebés com menos de três meses, o sistema imunitário não consegue conter a infecção de forma fiável, pelo que uma temperatura de 38 °C ou superior é tratada como urgente, independentemente do estado de saúde do bebé. A partir dos três meses, o comportamento carrega mais informações do que o próprio número: um bebê com 39 °C que bebe e responde a você geralmente é menos preocupante do que um bebê com 38 °C que está mole e não mama."
+                pt: "Em bebés com menos de três meses, o sistema imunitário não consegue conter a infecção de forma fiável, pelo que uma temperatura de 38 °C ou superior é tratada como urgente, independentemente do estado de saúde do bebé. A partir dos três meses, o comportamento carrega mais informações do que o próprio número: um bebê com 39 °C que bebe e responde a você geralmente é menos preocupante do que um bebê com 38 °C que está mole e não mama.",
+                zh: "对于三个月以下的婴儿，免疫系统无法可靠地遏制感染，因此无论婴儿看起来状况如何，38°C 或以上的体温都会被视为紧急情况。从三个月开始，行为比数字本身包含更多的信息：一个 39°C 的婴儿喝水并对你做出反应通常比一个 38°C 的跛行且不吃奶的婴儿更不令人担忧。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -405,6 +459,12 @@ extension CareTipsCatalog {
                     "Envolvendo um bebê quente em cobertores.",
                     "Qualquer medicamento sem confirmação da dose para a idade e peso do seu bebê com um profissional.",
                     "Banhos frios ou fricções com álcool para baixar a temperatura.",
+                ],
+                zh: [
+                    "仅通过触摸来判断温度。",
+                    "用毯子裹住热乎乎的婴儿。",
+                    "未经专业人士确认适合宝宝年龄和体重的剂量而服用的任何药物。",
+                    "洗冷水澡或用酒精擦拭以降低体温。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -443,6 +503,12 @@ extension CareTipsCatalog {
                     "Febre com erupção na pele que não desaparece sob pressão, rigidez no pescoço ou fontanela protuberante – emergência.",
                     "Respiração difícil ou rápida, sonolência incomum ou choro fraco.",
                     "Febre com duração superior a 48 horas ou bebê que não bebe.",
+                ],
+                zh: [
+                    "三个月以下的婴儿发烧 38°C 或更高 - 请立即就医。",
+                    "发烧并伴有在压力下不消退的皮疹、颈部僵硬或囟门膨出——紧急情况。",
+                    "呼吸困难或急促、异常困倦或哭声微弱。",
+                    "发烧持续超过 48 小时，或宝宝不肯喝水。",
                 ]
             )
         ),
@@ -455,7 +521,8 @@ extension CareTipsCatalog {
                 de: "Zahnen-Linderung, die wirklich sicher ist",
                 es: "Alivio de la dentición que sí es seguro",
                 fr: "Un soulagement de la dentition réellement sûr",
-                pt: "Alívio da dentição que é realmente seguro"
+                pt: "Alívio da dentição que é realmente seguro",
+                zh: "实际上安全的出牙缓解"
             ),
             summary: LocalizedText(
                 en: "Cool pressure works; necklaces and numbing gels do not belong here",
@@ -463,7 +530,8 @@ extension CareTipsCatalog {
                 de: "Kühle und Druck wirken; Halsketten und Zahnungsgel gehören hier nicht hin",
                 es: "El frío y la presión funcionan; los collares y los geles anestésicos no pintan nada aquí",
                 fr: "La pression froide fonctionne ; les colliers et les gels anesthésiants n'ont pas leur place ici",
-                pt: "A pressão fria funciona; colares e géis anestésicos não pertencem aqui"
+                pt: "A pressão fria funciona; colares e géis anestésicos não pertencem aqui",
+                zh: "冷压工作；项链和麻醉凝胶不属于这里"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -507,6 +575,13 @@ extension CareTipsCatalog {
                     "Deixe seu bebê mastigar um pano limpo e frio sob supervisão.",
                     "Limpe a baba do queixo e pescoço com frequência e aplique um creme de barreira para evitar erupções cutâneas com baba.",
                     "Mantenha as rotinas calmas e espere algumas noites agitadas perto de cada dente.",
+                ],
+                zh: [
+                    "提供坚固的橡胶或硅胶牙胶，在冰箱而不是冰箱中冷藏。",
+                    "用干净的手指或凉爽的湿法兰绒均匀用力擦拭口香糖。",
+                    "让宝宝在监督下咀嚼一块干净的冷布。",
+                    "经常擦掉下巴和脖子上的口水，并涂抹隔离霜以防止出现口水疹。",
+                    "保持日常生活平静，预计每颗牙齿周围都会有几个不安定的夜晚。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -515,7 +590,8 @@ extension CareTipsCatalog {
                 de: "Druck auf das Zahnfleisch unterbricht das Schmerzsignal vom durchbrechenden Zahn, und Kälte reduziert lokale Schwellungen – deshalb übertrifft ein gekühlter Beißring fast alles andere. Bernsteinketten sind Strangulations- und Erstickungsrisiken ohne nachgewiesenen Nutzen, und einige Zahnungsgel enthalten Inhaltsstoffe, die für Säuglinge nicht sicher sind. Zahnen verursacht auch nicht hohe Fieber oder Durchfall; wenn diese auftreten, suchen Sie nach einer anderen Erklärung.",
                 es: "La presión sobre la encía interrumpe la señal de dolor del diente que empuja, y el frío reduce la inflamación local: por eso un mordedor enfriado supera a casi todo lo que se vende para esto. Los collares de ámbar son un riesgo de estrangulamiento y atragantamiento sin beneficio demostrado, y algunos geles anestésicos contienen ingredientes que no se consideran seguros en lactantes. La dentición tampoco causa fiebre alta ni diarrea; si aparecen, busca otra explicación.",
                 fr: "La pression sur la gencive interrompt le signal de douleur émis par la dent et le froid réduit le gonflement local. C'est pourquoi un anneau de dentition réfrigéré surpasse presque tout ce qui est vendu à cet effet. Les colliers d'ambre présentent un risque d'étranglement et d'étouffement sans aucun bénéfice prouvé, et certains gels anesthésiants contiennent des ingrédients non considérés comme sûrs pour les nourrissons. La poussée dentaire ne provoque pas non plus de forte fièvre ni de diarrhée ; si ceux-ci apparaissent, cherchez une autre explication.",
-                pt: "A pressão na gengiva interrompe o sinal de dor da passagem do dente, e o frio reduz o inchaço local – razão pela qual um mordedor resfriado supera quase tudo que é vendido para esse fim. Colares de âmbar apresentam risco de estrangulamento e asfixia sem benefício comprovado, e alguns géis anestésicos contêm ingredientes não considerados seguros para bebês. A dentição também não causa febre alta ou diarreia; se aparecerem, procure outra explicação."
+                pt: "A pressão na gengiva interrompe o sinal de dor da passagem do dente, e o frio reduz o inchaço local – razão pela qual um mordedor resfriado supera quase tudo que é vendido para esse fim. Colares de âmbar apresentam risco de estrangulamento e asfixia sem benefício comprovado, e alguns géis anestésicos contêm ingredientes não considerados seguros para bebês. A dentição também não causa febre alta ou diarreia; se aparecerem, procure outra explicação.",
+                zh: "牙龈上的压力会中断牙齿发出的疼痛信号，而寒冷会减少局部肿胀——这就是为什么冷冻牙胶的效果优于几乎所有为此目的出售的产品。琥珀项链存在勒颈和窒息的风险，但尚未证实其益处，而且一些麻醉凝胶含有被认为对婴儿不安全的成分。出牙也不会引起高烧或腹泻；如果出现这些，请寻找其他解释。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -553,6 +629,12 @@ extension CareTipsCatalog {
                     "Mordedores congelados e sólidos, que são muito duros para gengivas delicadas.",
                     "Géis anestésicos contendo benzocaína ou lidocaína.",
                     "Culpar a dentição pela febre alta ou por uma doença persistente.",
+                ],
+                zh: [
+                    "琥珀或木珠项链。",
+                    "牙胶冻成固体，对于娇嫩的牙龈来说太硬了。",
+                    "含有苯佐卡因或利多卡因的麻醉凝胶。",
+                    "将长牙归咎于高烧或持续性疾病。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -591,6 +673,12 @@ extension CareTipsCatalog {
                     "Diarréia, vômito ou erupção cutânea em todo o corpo.",
                     "Recusa de alimentação por mais de um dia.",
                     "Gengivas inchadas, sangrando ou nenhum dente por volta dos 15 meses.",
+                ],
+                zh: [
+                    "发烧超过38°C，这不是出牙引起的。",
+                    "腹泻、呕吐或全身出现皮疹。",
+                    "拒绝进食超过一天。",
+                    "大约 15 个月时牙龈肿胀、出血或根本没有牙齿。",
                 ]
             )
         ),
@@ -603,7 +691,8 @@ extension CareTipsCatalog {
                 de: "Kopfgneis: harmlos und heilt von selbst",
                 es: "Costra láctea: inofensiva y se resuelve sola",
                 fr: "Les croûtes de lait : inoffensives et auto-résolvantes",
-                pt: "Crosta de berço: inofensiva e auto-resolvível"
+                pt: "Crosta de berço: inofensiva e auto-resolvível",
+                zh: "摇篮帽：无害且可自行解决"
             ),
             summary: LocalizedText(
                 en: "Soften, comb gently, wash out — and accept that time does most of the work",
@@ -611,7 +700,8 @@ extension CareTipsCatalog {
                 de: "Aufweichen, sanft kämmen, auswaschen – und akzeptieren, dass die Zeit die meiste Arbeit macht",
                 es: "Ablandar, peinar con suavidad, lavar — y aceptar que el tiempo hace casi todo el trabajo",
                 fr: "Adoucir, peigner délicatement, laver — et accepter que le temps fasse l'essentiel du travail.",
-                pt: "Suavize, penteie suavemente, lave – e aceite que o tempo faz a maior parte do trabalho"
+                pt: "Suavize, penteie suavemente, lave – e aceite que o tempo faz a maior parte do trabalho",
+                zh: "软化、轻轻梳理、清洗——并接受时间会完成大部分工作的事实"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -655,6 +745,13 @@ extension CareTipsCatalog {
                     "Lave com um xampu suave para bebês e depois escove o cabelo.",
                     "Repita a cada poucos dias, em vez de diariamente.",
                     "Se não mudar, deixe-o – ele desaparece sozinho em alguns meses.",
+                ],
+                zh: [
+                    "将少许婴儿油或无香型润肤剂按摩到头皮上，然后放置一个小时或过夜。",
+                    "用软刷或细梳子轻轻地松开软化的鳞屑。",
+                    "用温和的婴儿洗发水清洗，然后梳理头发。",
+                    "每隔几天而不是每天重复一次。",
+                    "如果它没有改变，就留下它——它会在几个月内自行消失。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -663,7 +760,8 @@ extension CareTipsCatalog {
                 de: "Kopfgneis entsteht durch überaktive Talgdrüsen, die durch Schwangerschaftshormone stimuliert werden – es ist weder eine Infektion noch ein Zeichen schlechter Hygiene, und es juckt nicht oder stört Ihr Baby nicht. Das Aufweichen zuerst ist der ganze Trick: trockene Schuppen halten an der Haut fest, geölte nicht. An trockenen Stellen zu kratzen verletzt die darunter liegende Haut und öffnet die Tür zu echten Infektionen.",
                 es: "La costra láctea aparece por glándulas sebáceas hiperactivas estimuladas por hormonas que aún circulan del embarazo, así que no es una infección ni señal de mala higiene, y no pica ni molesta al bebé. Ablandar primero es todo el truco: las escamas secas están pegadas a la piel, las engrasadas no. Rascar las zonas secas rompe la piel de debajo y abre la puerta a una infección real.",
                 fr: "Les croûtes de lait proviennent de glandes sébacées hyperactives stimulées par les hormones qui circulent encore depuis la grossesse. Ce n'est donc ni une infection ni un signe de mauvaise hygiène, et elles ne démangent pas et ne dérangent pas votre bébé. L'essentiel est de ramollir d'abord : les squames sèches sont attachées à la peau, les squames huilées ne le sont pas. Cueillir les zones sèches brise la peau en dessous et ouvre la porte à une véritable infection.",
-                pt: "A crosta láctea provém de glândulas sebáceas hiperativas, estimuladas por hormônios que ainda circulam desde a gravidez, portanto, não é uma infecção nem um sinal de falta de higiene e não causa coceira nem incomoda o bebê. Amolecer primeiro é o truque: as escamas secas ficam presas à pele, as escamas oleosas não. Escolher manchas secas rompe a pele por baixo e abre a porta para infecções genuínas."
+                pt: "A crosta láctea provém de glândulas sebáceas hiperativas, estimuladas por hormônios que ainda circulam desde a gravidez, portanto, não é uma infecção nem um sinal de falta de higiene e não causa coceira nem incomoda o bebê. Amolecer primeiro é o truque: as escamas secas ficam presas à pele, as escamas oleosas não. Escolher manchas secas rompe a pele por baixo e abre a porta para infecções genuínas.",
+                zh: "乳痂是由怀孕期间仍在循环的荷尔蒙刺激而过度活跃的油腺产生的，因此它既不是感染，也不是卫生条件差的迹象，而且不会让宝宝发痒或困扰。首先软化是整个技巧：干燥的鳞片会附着在皮肤上，而油腻的鳞片则不会。抓破干燥的斑块会破坏下面的皮肤，并为真正的感染打开大门。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -701,6 +799,12 @@ extension CareTipsCatalog {
                     "Shampoo anticaspa adulto.",
                     "Lavagem diária, que desnuda o couro cabeludo e pode piorar a situação.",
                     "Supondo que isso signifique que seu bebê está desconfortável – quase nunca está.",
+                ],
+                zh: [
+                    "用指甲剔除或刮掉干燥的薄片。",
+                    "成人去屑洗发水。",
+                    "每天清洗会剥落头皮，使情况变得更糟。",
+                    "假设这意味着您的宝宝不舒服——但事实几乎从来不会。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -739,6 +843,12 @@ extension CareTipsCatalog {
                     "Vermelhidão, choro, inchaço ou cheiro – sinais de infecção.",
                     "Seu bebê coça o couro cabeludo ou parece coçar.",
                     "Não melhorou em cerca de um ano.",
+                ],
+                zh: [
+                    "斑块扩散到面部、颈部或身体。",
+                    "发红、流泪、肿胀或有异味——感染的迹象。",
+                    "您的宝宝抓挠头皮或看起来很痒。",
+                    "一年多了，情况没有任何改善。",
                 ]
             )
         )

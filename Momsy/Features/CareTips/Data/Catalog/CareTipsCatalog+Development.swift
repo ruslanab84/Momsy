@@ -11,7 +11,8 @@ extension CareTipsCatalog {
                 de: "Bauchzeit ab der ersten Woche",
                 es: "Tiempo boca abajo desde la primera semana",
                 fr: "Temps sur le ventre dès la première semaine",
-                pt: "Tempo de barriga desde a primeira semana"
+                pt: "Tempo de barriga desde a primeira semana",
+                zh: "从第一周开始的俯卧时间"
             ),
             summary: LocalizedText(
                 en: "Start with three to five minutes a few times a day and build from there",
@@ -19,7 +20,8 @@ extension CareTipsCatalog {
                 de: "Beginnen Sie mit drei bis fünf Minuten mehrmals am Tag und bauen Sie auf",
                 es: "Empieza con tres a cinco minutos varias veces al día y ve aumentando",
                 fr: "Commencez par trois à cinq minutes plusieurs fois par jour et développez à partir de là",
-                pt: "Comece com três a cinco minutos algumas vezes ao dia e desenvolva a partir daí"
+                pt: "Comece com três a cinco minutos algumas vezes ao dia e desenvolva a partir daí",
+                zh: "从每天几次三到五分钟开始，然后从那里开始构建"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -63,6 +65,13 @@ extension CareTipsCatalog {
                     "Escolha bem o momento – depois de trocar a fralda, antes da mamada, nunca logo após comer.",
                     "Abaixe-se ao nível dos olhos, converse e use um espelho ou um cartão de alto contraste para dar-lhes um motivo para levantar.",
                     "Construa para aproximadamente uma hora, distribuída ao longo do dia por três meses. Sempre acordado e supervisionado.",
+                ],
+                zh: [
+                    "从第一天或第二天开始：斜躺的身体上胸部接触胸部的时间算作俯卧时间。",
+                    "转移到坚硬平坦的表面进行短期训练，每天两次或三次。",
+                    "选择好时机——换尿布后、喂奶前，切勿在刚吃完饭后。",
+                    "俯身与视线齐平，交谈，并使用镜子或高对比度卡片给他们举起的理由。",
+                    "三个月内逐渐争取每天大约一个小时。始终保持清醒并受到监督。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -71,7 +80,8 @@ extension CareTipsCatalog {
                 de: "Alles – von der Kopfkontrolle über das Rollen und Sitzen bis hin zum Krabbeln – hängt von der Nacken-, Schulter- und Rückenstärke ab, die sich nur gegen die Schwerkraft entwickelt. Da Babys nun Nächte und Nickerchen auf dem Rücken verbringen – zu Recht – geschieht diese Entwicklung während der wachen Stunden. Dies entlastet auch die Rückseite des Schädels, was gleichzeitig die Kopfform schützt.",
                 es: "Todo, desde el control de la cabeza hasta girarse, sentarse y finalmente gatear, depende de la fuerza de cuello, hombros y espalda que solo se desarrolla contra la gravedad. Como los bebés pasan las noches y las siestas boca arriba —y así debe ser—, ese trabajo tiene que hacerse en las horas de vigilia. Además quita presión de la parte posterior del cráneo, lo que protege la forma de la cabeza al mismo tiempo.",
                 fr: "Tout, depuis le contrôle de la tête jusqu'à rouler, s'asseoir et éventuellement ramper, dépend de la force du cou, des épaules et du dos qui ne se développe que contre la gravité. Puisque les bébés passent désormais leurs nuits et leurs siestes sur le dos – à juste titre – c’est pendant les heures d’éveil que ce travail doit être effectué. Il soulage également la pression exercée sur l'arrière du crâne, ce qui protège en même temps la forme de la tête.",
-                pt: "Tudo, desde o controle da cabeça até rolar, sentar e eventualmente engatinhar, depende da força do pescoço, ombros e costas que só se desenvolve contra a gravidade. Como os bebês agora passam as noites e cochilam de costas - com razão - é nas horas de vigília que esse trabalho deve acontecer. Ele também tira a pressão da parte de trás do crânio, o que ao mesmo tempo protege o formato da cabeça."
+                pt: "Tudo, desde o controle da cabeça até rolar, sentar e eventualmente engatinhar, depende da força do pescoço, ombros e costas que só se desenvolve contra a gravidade. Como os bebês agora passam as noites e cochilam de costas - com razão - é nas horas de vigília que esse trabalho deve acontecer. Ele também tira a pressão da parte de trás do crânio, o que ao mesmo tempo protege o formato da cabeça.",
+                zh: "从头部控制到翻身、坐立和最终爬行，一切都取决于颈部、肩部和背部的力量，而这些力量只能在对抗重力的情况下发展。由于婴儿现在晚上和小睡都是仰卧的——这是正确的——醒着的时间就是这项工作必须进行的时间。它还可以减轻头骨后部的压力，同时保护头部形状。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -109,6 +119,12 @@ extension CareTipsCatalog {
                     "Hora de ficar de bruços logo após a mamada.",
                     "Somente em colchão ou sofá macio, onde não haja nada firme para empurrar.",
                     "Deixar o bebê sozinho ou deixá-lo dormir de bruços.",
+                ],
+                zh: [
+                    "跳过它是因为婴儿抗议——短而频繁的治疗胜过长时间不愉快的治疗。",
+                    "喂奶后立即趴着的时间。",
+                    "只能在柔软的床垫或沙发上，没有任何坚硬的东西可以推挤。",
+                    "让婴儿无人看管，或者让他们趴着睡。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -147,6 +163,12 @@ extension CareTipsCatalog {
                     "Seu bebê vira consistentemente a cabeça apenas para um lado.",
                     "Um lado do corpo parece mais rígido ou é claramente menos usado.",
                     "O controle da cabeça parece retroceder depois de ter melhorado.",
+                ],
+                zh: [
+                    "三个月了头完全没有抬起来。",
+                    "您的宝宝始终只将头转向一侧。",
+                    "身体的一侧感觉更僵硬或明显使用较少。",
+                    "头部控制能力在改善后似乎出现了倒退。",
                 ]
             )
         ),
@@ -159,7 +181,8 @@ extension CareTipsCatalog {
                 de: "Kopfform rund halten",
                 es: "Mantener redonda la forma de la cabeza",
                 fr: "Garder la forme de la tête ronde",
-                pt: "Mantendo o formato da cabeça redondo"
+                pt: "Mantendo o formato da cabeça redondo",
+                zh: "保持头部形状呈圆形"
             ),
             summary: LocalizedText(
                 en: "Vary the pressure point: alternate head position, cot orientation and carrying arm",
@@ -167,7 +190,8 @@ extension CareTipsCatalog {
                 de: "Variieren Sie den Druckpunkt: wechseln Sie Kopfposition, Bettenausrichtung und Tragearm",
                 es: "Varía el punto de apoyo: alterna la posición de la cabeza, la orientación en la cuna y el brazo con que lo llevas",
                 fr: "Variez le point de pression : alternez la position de la tête, l'orientation du lit et le bras de transport.",
-                pt: "Varie o ponto de pressão: alterne a posição da cabeça, a orientação do berço e o braço de transporte"
+                pt: "Varie o ponto de pressão: alterne a posição da cabeça, a orientação do berço e o braço de transporte",
+                zh: "改变压力点：交替头部位置、床方向和支撑臂"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -211,6 +235,13 @@ extension CareTipsCatalog {
                     "Troque o braço que você carrega e alimenta, mesmo que seja com mamadeira.",
                     "Aumente o tempo de vigília na parte de trás da cabeça - tempo de bruços, brincadeiras deitadas de lado, carregamento na posição vertical.",
                     "Limite o tempo em assentos de carro, seguranças e balanços ao que a viagem realmente exige.",
+                ],
+                zh: [
+                    "每晚交替将头转向婴儿床的哪一端，以便宝宝从两侧转向房间。",
+                    "时不时地移动一下手机或房间有趣的一面。",
+                    "切换您携带的手臂并继续喂食，即使是奶瓶喂养。",
+                    "增加后脑勺的清醒时间——趴着的时间、侧躺玩耍的时间、直立携带的时间。",
+                    "将汽车座椅、摇椅和秋千上的时间限制在旅行实际需要的范围内。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -219,7 +250,8 @@ extension CareTipsCatalog {
                 de: "Der Säuglingssschädel ist weich und verformt sich unter anhältendem Druck, daher entwickelt ein Baby, das immer an der gleichen Stelle ruht, dort eine flache Stelle. Die Lösung ist Vielfalt statt eines Geräts, und je früher es beginnt, desto wirksamer nimmt der Schädel von selbst Form an. Persistentes einseitiges Drehen bedeutet manchmal einen verspannten Nackenmuskel, der gut auf frühe Physiotherapie anspricht und weniger auf Abwarten.",
                 es: "El cráneo del lactante es blando y se remodela bajo una presión mantenida, así que un bebé que siempre apoya el mismo punto desarrolla ahí una zona plana. La solución es la variedad, no ningún dispositivo, y cuanto antes se empiece más eficazmente se redondea el cráneo por sí solo. Girar siempre hacia el mismo lado a veces indica un músculo del cuello acortado, que responde bien a la fisioterapia temprana y mal a la espera.",
                 fr: "Le crâne d'un nourrisson est mou et se remodèle sous une pression soutenue, de sorte qu'un bébé qui repose toujours au même endroit y développe une zone plate. La solution réside dans la variété plutôt que dans n'importe quel appareil, et plus elle démarre tôt, plus le crâne s'arrondit tout seul. Une rotation unilatérale persistante signifie parfois une tension musculaire du cou, qui répond bien à une physiothérapie précoce et moins bien à l'attente.",
-                pt: "O crânio de um bebê é macio e se remodela sob pressão sustentada, de modo que um bebê que sempre descansa no mesmo lugar desenvolve ali uma área plana. A solução é a variedade, e não qualquer dispositivo, e quanto mais cedo ela for iniciada, mais eficazmente o crânio se completará por conta própria. Virar unilateralmente persistentemente às vezes significa um músculo tenso no pescoço, que responde bem à fisioterapia precoce e menos bem à espera."
+                pt: "O crânio de um bebê é macio e se remodela sob pressão sustentada, de modo que um bebê que sempre descansa no mesmo lugar desenvolve ali uma área plana. A solução é a variedade, e não qualquer dispositivo, e quanto mais cedo ela for iniciada, mais eficazmente o crânio se completará por conta própria. Virar unilateralmente persistentemente às vezes significa um músculo tenso no pescoço, que responde bem à fisioterapia precoce e menos bem à espera.",
+                zh: "婴儿的头骨很软，在持续的压力下会重塑，所以总是躺在同一个地方的婴儿会在那里形成一个平坦的区域。修复方法是多种多样的，而不是任何设备，而且开始得越早，头骨就能更有效地自行变圆。持续的一侧转动有时意味着颈部肌肉紧张，这对早期物理治疗反应良好，但对等待反应较差。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -257,6 +289,12 @@ extension CareTipsCatalog {
                     "Longos alongamentos diários em uma cadeirinha ou segurança.",
                     "Sempre alimentando e carregando do mesmo lado.",
                     "Mudar a posição de dormir para a frente para aliviar a pressão.",
+                ],
+                zh: [
+                    "婴儿床上的塑头枕头或定位器——对睡眠不安全且无效。",
+                    "每天在汽车座椅或摇椅上进行长时间的伸展运动。",
+                    "始终在同一侧喂食和携带。",
+                    "将睡姿改为正面以缓解压力。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -295,6 +333,12 @@ extension CareTipsCatalog {
                     "Seu bebê não consegue ou não quer virar a cabeça para um lado.",
                     "O rosto ou as orelhas parecem assimétricos.",
                     "Qualquer preocupação sobre o tamanho ou formato da cabeça em uma verificação de rotina.",
+                ],
+                zh: [
+                    "明显的平坦区域在大约四个月内没有随着位置变化而改善。",
+                    "您的宝宝不能或不会向某一方向转动头部。",
+                    "脸或耳朵看起来不对称。",
+                    "例行检查时对头部尺寸或形状的任何担忧。",
                 ]
             )
         ),
@@ -307,7 +351,8 @@ extension CareTipsCatalog {
                 de: "Serve and Return: Antworten Sie auf jedes Brabbeln",
                 es: "Ida y vuelta: responde a cada balbuceo",
                 fr: "Servir et rendre : répondez à chaque bavardage",
-                pt: "Servir e devolver: responda a cada tagarelice"
+                pt: "Servir e devolver: responda a cada tagarelice",
+                zh: "发球和接球：回答每一个喋喋不休的问题"
             ),
             summary: LocalizedText(
                 en: "Your reply to a sound is what builds language, long before words appear",
@@ -315,7 +360,8 @@ extension CareTipsCatalog {
                 de: "Ihre Antwort auf einen Laut ist es, der Sprache aufbaut, lange bevor Worte erscheinen",
                 es: "Tu respuesta a un sonido es lo que construye el lenguaje, mucho antes de que aparezcan las palabras",
                 fr: "Votre réponse à un son est ce qui construit le langage, bien avant que les mots n'apparaissent",
-                pt: "Sua resposta a um som é o que constrói a linguagem, muito antes de as palavras aparecerem"
+                pt: "Sua resposta a um som é o que constrói a linguagem, muito antes de as palavras aparecerem",
+                zh: "早在单词出现之前，你对声音的回应就构成了语言"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -359,6 +405,13 @@ extension CareTipsCatalog {
                     "Narre rotinas comuns em voz alta – trocar fraldas, cozinhar, vestir-se.",
                     "Use entonação quente e exagerada; a voz cantada é genuinamente mais fácil para um bebê processar.",
                     "Mantenha a situação nos dois sentidos – deixe lacunas em vez de preencher todos os silêncios.",
+                ],
+                zh: [
+                    "当宝宝发出声音时，看着他们，做出回应，然后暂停，就像在等待答复一样。",
+                    "说出他们正在看什么，而不是你想让他们看什么。",
+                    "大声讲述日常事务——换尿布、做饭、穿衣服。",
+                    "使用温暖夸张的语调；唱歌的声音确实更容易让婴儿接受。",
+                    "保持双向——留下空白而不是填补每一个沉默。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -367,7 +420,8 @@ extension CareTipsCatalog {
                 de: "Sprache entwickelt sich durch gegenseitige Austausche, nicht durch die Lautstärke der an ein Kind gerichteten Rede. Jedes Mal, wenn Ihr Baby vokalisiert und Sie antworten, lernt es, dass Laute Reaktionen hervorrufen – die Grundlage von Gesprächen. Forschung zeigt konsistent, dass die Anzahl dieser Rollentausch-Austausche die spätere Sprachfähigkeit besser vorhersagt als die Gesamtzahl der Wörter, die ein Kind hört.",
                 es: "El lenguaje se desarrolla mediante intercambios de ida y vuelta, no por el volumen de habla dirigido al niño. Cada vez que el bebé vocaliza y tú respondes, aprende que los sonidos provocan respuestas: la base de la conversación. La investigación encuentra de forma consistente que el número de estos turnos predice la capacidad lingüística futura mejor que el total de palabras que el niño escucha.",
                 fr: "Le langage se développe grâce à des échanges de va-et-vient, et non à travers le volume de la parole adressée à un enfant. Chaque fois que votre bébé vocalise et que vous répondez, il apprend que les sons provoquent des réponses – le fondement de la conversation. Les recherches révèlent systématiquement que le nombre de ces échanges à tour de rôle prédit mieux les capacités linguistiques ultérieures que le nombre total de mots qu'un enfant entend.",
-                pt: "A linguagem se desenvolve por meio de trocas de vaivém, e não por meio do volume da fala dirigida a uma criança. Cada vez que o seu bebé vocaliza e você responde, ele aprende que os sons causam respostas – a base da conversa. A investigação constata consistentemente que o número destas trocas de turnos prevê melhor a capacidade linguística posterior do que o número total de palavras que uma criança ouve."
+                pt: "A linguagem se desenvolve por meio de trocas de vaivém, e não por meio do volume da fala dirigida a uma criança. Cada vez que o seu bebé vocaliza e você responde, ele aprende que os sons causam respostas – a base da conversa. A investigação constata consistentemente que o número destas trocas de turnos prevê melhor a capacidade linguística posterior do que o número total de palavras que uma criança ouve.",
+                zh: "语言是通过来回交流而不是通过对孩子大声说话来发展的。每次你的宝宝发出声音并且你做出回应时，他们就会知道声音会引起反应——这是对话的基础。研究一致发现，这些轮流交流的次数比孩子听到的单词总数更能预测以后的语言能力。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -405,6 +459,12 @@ extension CareTipsCatalog {
                     "Preenchendo todas as lacunas para que não haja espaço para o bebê dar uma volta.",
                     "Esperando por palavras reais antes de iniciar conversas.",
                     "Corrigindo balbucios em vez de respondê-los.",
+                ],
+                zh: [
+                    "背景电视或广播被视为语言暴露——它没有反应。",
+                    "填满每一个空隙，这样宝宝就没有转动的空间。",
+                    "在开始对话之前等待真实的话语。",
+                    "纠正胡言乱语而不是回答它。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -443,6 +503,12 @@ extension CareTipsCatalog {
                     "Nada de balbuciar consoantes aos nove meses.",
                     "Nenhuma resposta ao seu nome ou a sons altos.",
                     "Perda de sons, gestos ou contato visual que existiam anteriormente – mencione isso imediatamente.",
+                ],
+                zh: [
+                    "大约四个月的时候就不会发出咕咕声或声音了。",
+                    "九个月大时还不会咿呀学语。",
+                    "对他们的名字或响亮的声音没有反应。",
+                    "之前的声音、手势或目光接触消失——立即提及。",
                 ]
             )
         ),
@@ -455,7 +521,8 @@ extension CareTipsCatalog {
                 de: "Haut-zu-Haut – und warum auch Väter das tun sollten",
                 es: "Piel con piel: y por qué los padres también deben hacerlo",
                 fr: "Peau à peau – et pourquoi les pères devraient le faire aussi",
-                pt: "Pele a pele – e por que os pais também deveriam fazer isso"
+                pt: "Pele a pele – e por que os pais também deveriam fazer isso",
+                zh: "皮肤接触——以及为什么父亲也应该这样做"
             ),
             summary: LocalizedText(
                 en: "Bare chest, bare back covered, and twenty unhurried minutes",
@@ -463,7 +530,8 @@ extension CareTipsCatalog {
                 de: "Nackte Brust, bedeckter Rücken und zwanzig ungehörte Minuten",
                 es: "Pecho desnudo, espalda cubierta y veinte minutos sin prisa",
                 fr: "Poitrine nue, dos nu couvert, et vingt minutes sans hâte",
-                pt: "Peito nu, costas nuas cobertas e vinte minutos sem pressa"
+                pt: "Peito nu, costas nuas cobertas e vinte minutos sem pressa",
+                zh: "光着胸，光着背，不紧不慢的二十分钟"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -507,6 +575,13 @@ extension CareTipsCatalog {
                     "Fique em pé e acordado - se sentir sono, leve primeiro o bebê para o berço.",
                     "Mire por pelo menos vinte minutos para que vocês dois possam se acomodar.",
                     "Compartilhe: pais, companheiros e pais adotivos recebem os mesmos benefícios.",
+                ],
+                zh: [
+                    "脱掉宝宝的衣服，穿上尿布，然后将他们胸部朝下放在您裸露的胸前。",
+                    "用薄毯盖住他们的背部，使脸部始终清晰可见。",
+                    "保持直立和清醒——如果您感到困，请先将宝宝移到婴儿床上。",
+                    "目标是至少二十分钟，这样你们俩都能适应。",
+                    "分享：父亲、伴侣和养父母获得同样的福利。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -515,7 +590,8 @@ extension CareTipsCatalog {
                 de: "Direkter Hautkontakt stabilisiert die Herzfrequenz, Atmung und Temperatur eines Babys und senkt Stresshormone sowohl beim Baby als auch beim haltenden Erwachsenen. Bei dem Elternteil löst es die Oxytocin-Ausschüttung aus, die die Bindung unterstützt und beim stillenden Elternteil die Milchproduktion. Es ist eines der wenigen Dinge, das gleichzeitig gut für das Baby, gut für den Erwachsenen und kostenlos ist.",
                 es: "El contacto directo de piel estabiliza la frecuencia cardiaca, la respiración y la temperatura del bebé, y baja las hormonas del estrés tanto en el bebé como en el adulto que lo sostiene. En el progenitor libera oxitocina, lo que favorece el vínculo y, en quien amamanta, la producción de leche. Es una de las pocas cosas que a la vez es buena para el bebé, buena para el adulto y gratis.",
                 fr: "Le contact direct avec la peau stabilise la fréquence cardiaque, la respiration et la température du bébé, et réduit les hormones de stress chez le bébé et l'adulte qui le tient. Pour le parent, cela déclenche la libération d'ocytocine, qui favorise la liaison et, pour le parent qui se nourrit, la production de lait. C’est l’une des rares choses qui soit à la fois bonne pour le bébé, bonne pour l’adulte et gratuite.",
-                pt: "O contato direto com a pele estabiliza a frequência cardíaca, a respiração e a temperatura do bebê, e reduz os hormônios do estresse tanto no bebê quanto no adulto que os segura. Para os pais, desencadeia a liberação de oxitocina, que apoia o vínculo e, para os pais que amamentam, o fornecimento de leite. É uma das poucas coisas que é simultaneamente boa para o bebê, boa para o adulto e gratuita."
+                pt: "O contato direto com a pele estabiliza a frequência cardíaca, a respiração e a temperatura do bebê, e reduz os hormônios do estresse tanto no bebê quanto no adulto que os segura. Para os pais, desencadeia a liberação de oxitocina, que apoia o vínculo e, para os pais que amamentam, o fornecimento de leite. É uma das poucas coisas que é simultaneamente boa para o bebê, boa para o adulto e gratuita.",
+                zh: "直接的皮肤接触可以稳定婴儿的心率、呼吸和体温，并降低婴儿和抱着婴儿的成人的压力荷尔蒙。对于父母来说，它会触发催产素的释放，从而支持亲密关系，对于喂养的父母来说，它可以促进乳汁供应。它是为数不多的同时对婴儿、对成人都有好处且免费的东西之一。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -553,6 +629,12 @@ extension CareTipsCatalog {
                     "Parando após a primeira semana – permanece valioso por meses.",
                     "Adormecer com o bebê no peito, em um sofá ou poltrona.",
                     "Apressando-o em intervalos de cinco minutos entre outras tarefas.",
+                ],
+                zh: [
+                    "将其视为只有亲生母亲才能做的事情。",
+                    "第一周后就停止——它在几个月内仍然有价值。",
+                    "将宝宝放在沙发或扶手椅上，放在胸前入睡。",
+                    "把它赶到其他任务之间的五分钟间隙。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -585,6 +667,11 @@ extension CareTipsCatalog {
                     "Seu bebê fica com frio, manchado ou mole durante o contato pele a pele.",
                     "Respiração ruidosa ou difícil enquanto está deitado de bruços.",
                     "Você não sente nenhuma conexão depois de semanas de tentativas – vale a pena dizer isso a um profissional, e é comum.",
+                ],
+                zh: [
+                    "肌肤接触时，宝宝会变得寒冷、出现斑点或软弱。",
+                    "趴在胸前时呼吸嘈杂或困难。",
+                    "经过几周的尝试后，你根本感觉不到任何联系——这值得对专业人士说，而且很常见。",
                 ]
             )
         ),
@@ -597,7 +684,8 @@ extension CareTipsCatalog {
                 de: "Lesen Sie täglich laut vor, ab sofort",
                 es: "Lee en voz alta a diario, empezando ya",
                 fr: "Lisez à haute voix quotidiennement, à partir de maintenant",
-                pt: "Leia em voz alta diariamente, começando agora"
+                pt: "Leia em voz alta diariamente, começando agora",
+                zh: "每天大声朗读，从现在开始"
             ),
             summary: LocalizedText(
                 en: "The voice matters more than the story, and no age is too early",
@@ -605,7 +693,8 @@ extension CareTipsCatalog {
                 de: "Die Stimme ist wichtiger als die Geschichte, und es gibt kein zu frühes Alter",
                 es: "La voz importa más que la historia, y ninguna edad es demasiado temprana",
                 fr: "La voix compte plus que l'histoire, et aucun âge n'est trop tôt",
-                pt: "A voz é mais importante do que a história, e nenhuma idade é cedo demais"
+                pt: "A voz é mais importante do que a história, e nenhuma idade é cedo demais",
+                zh: "声音比故事更重要，年龄不嫌早"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -649,6 +738,13 @@ extension CareTipsCatalog {
                     "Deixe o seu bebé ditar o ritmo: salte páginas, repita os favoritos, pare quando o interesse acabar.",
                     "Aponte para as imagens e nomeie-as em vez de ler o texto palavra por palavra.",
                     "Encaixe-o em uma rotina que você já possui, como antes da última mamada.",
+                ],
+                zh: [
+                    "从新生儿阶段开始，每天阅读几分钟——任何书，包括你自己的书。",
+                    "最初几个月选择高对比度和简单的图像，然后选择布书和纸板书来抓握和咀嚼。",
+                    "让您的宝宝设定节奏：跳过页面、重复最喜欢的内容、当兴趣消失时停止。",
+                    "指着图片并说出它们的名称，而不是逐字阅读文本。",
+                    "将其融入您已有的日常习惯中，例如在最后一次喂食之前。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -657,7 +753,8 @@ extension CareTipsCatalog {
                 de: "Bücher bringen ungewöhnliche Wörter in eine warme, vertraute Stimme, und die Kombination aus Rhythmus, Wiederholung und Nähe ist das, was sie zum Haften bringt. Lange bevor ein Baby eine Geschichte versteht, lernt es, dass Seiten umgeblättert werden, dass Bilder etwas bedeuten und dass dies eine gemeinsame und angenehme Aktivität ist. Die Gewohnheit im ersten Jahr zu entwickeln ist viel einfacher, als sie einem mobilen Kleinkind später beizubringen.",
                 es: "Los libros traen palabras poco habituales con una voz cálida y conocida, y la combinación de ritmo, repetición y cercanía es lo que hace que se fijen. Mucho antes de entender una historia, el bebé aprende que las páginas se pasan, que los dibujos significan algo y que esta es una actividad compartida y agradable. Crear el hábito en el primer año es mucho más fácil que introducirlo cuando ya camina.",
                 fr: "Les livres mettent des mots inhabituels dans une voix chaleureuse et familière, et la combinaison du rythme, de la répétition et de la proximité est ce qui les rend fidèles. Bien avant qu'un bébé ne comprenne une histoire, il apprend que les pages se tournent, que les images signifient quelque chose et qu'il s'agit d'une activité partagée et agréable. Construire cette habitude dès la première année est bien plus facile que de la présenter à un tout-petit mobile.",
-                pt: "Os livros colocam palavras incomuns em uma voz calorosa e familiar, e a combinação de ritmo, repetição e proximidade é o que os mantém. Muito antes de um bebê entender uma história, ele aprende que as páginas viram, que as imagens significam alguma coisa e que esta é uma atividade compartilhada e agradável. Construir o hábito no primeiro ano é muito mais fácil do que apresentá-lo a uma criança móvel."
+                pt: "Os livros colocam palavras incomuns em uma voz calorosa e familiar, e a combinação de ritmo, repetição e proximidade é o que os mantém. Muito antes de um bebê entender uma história, ele aprende que as páginas viram, que as imagens significam alguma coisa e que esta é uma atividade compartilhada e agradável. Construir o hábito no primeiro ano é muito mais fácil do que apresentá-lo a uma criança móvel.",
+                zh: "书籍将不寻常的词语融入温暖熟悉的声音中，节奏、重复和亲密的结合使得它们被牢牢记住。早在婴儿理解故事之前，他们就知道书页会翻动，图片会有意义，而且这是一项共享且令人愉快的活动。在第一年养成这个习惯比把它介绍给一个会走路的孩子要容易得多。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -695,6 +792,12 @@ extension CareTipsCatalog {
                     "Insistindo em terminar o livro.",
                     "Trocar livros por um aplicativo ou tela nessa idade.",
                     "Escolher apenas histórias longas e com muito texto.",
+                ],
+                zh: [
+                    "等到孩子能安静地坐着听。",
+                    "坚持把书看完。",
+                    "在这个年龄段，将书籍换成应用程序或屏幕。",
+                    "只选择长文本故事。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -727,6 +830,11 @@ extension CareTipsCatalog {
                     "Nenhum rastreamento visual de fotos ou rostos por três meses.",
                     "Não há interesse em olhar livros ou rostos por volta de um ano.",
                     "Qualquer preocupação com audição ou visão – verifique em vez de observar.",
+                ],
+                zh: [
+                    "三个月内无法对照片或面部进行视觉跟踪。",
+                    "大约一年后，就完全没有兴趣看书或看脸了。",
+                    "如果对听力或视力有任何疑问，请检查而不是观看。",
                 ]
             )
         )

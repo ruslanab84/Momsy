@@ -11,7 +11,8 @@ extension CareTipsCatalog {
                 de: "Teilen Sie die Nacht in Schichten auf",
                 es: "Dividid la noche en turnos",
                 fr: "Divisez la nuit en équipes",
-                pt: "Divida a noite em turnos"
+                pt: "Divida a noite em turnos",
+                zh: "把晚上分成轮班"
             ),
             summary: LocalizedText(
                 en: "One protected four-hour block each beats two people half-awake all night",
@@ -19,7 +20,8 @@ extension CareTipsCatalog {
                 de: "Vier Stunden ununterbrochener Schlaf für jeden ist besser als zwei halbwache Menschen die ganze Nacht",
                 es: "Cuatro horas seguidas de sueño para cada uno valen más que dos personas medio despiertas toda la noche",
                 fr: "Un bloc protégé de quatre heures chacun bat deux personnes à moitié éveillées toute la nuit",
-                pt: "Um bloco protegido de quatro horas cada deixa duas pessoas meio acordadas a noite toda"
+                pt: "Um bloco protegido de quatro horas cada deixa duas pessoas meio acordadas a noite toda",
+                zh: "一个受保护的四小时区块，每人将两个人打得半夜半醒"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -63,6 +65,13 @@ extension CareTipsCatalog {
                     "Se estiver amamentando, o pai que não amamenta ainda faz a troca da fralda, o reassentamento e o retorno ao berço.",
                     "Combine a divisão com antecedência, em vez de negociar às 3h.",
                     "Gire qual pai obtém o bloco anterior para que a metade mais difícil seja compartilhada.",
+                ],
+                zh: [
+                    "将夜晚分为两个时段——例如，一位家长要一直呆到凌晨 2 点，另一位家长则要从凌晨 2 点开始。",
+                    "如果可能的话，下班的父母会睡在其他地方，戴上耳塞，不戴显示器。",
+                    "如果是母乳喂养，未哺乳的父母仍需更换尿布、重新安顿并返回婴儿床。",
+                    "提前同意分摊，而不是在凌晨 3 点进行谈判。",
+                    "轮换哪个父级获得较早的块，以便共享较难的一半。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -71,7 +80,8 @@ extension CareTipsCatalog {
                 de: "Der Schlaf findet in etwa 90-minütigen Zyklen statt, und ein durchgehender Block hilft viel besser als dieselbe Gesamtstundenzahl in Fragmenten. Zwei halbwache Erwachsene die ganze Nacht lang führen zu zwei erschöpften Eltern – ein Schichtsystem dagegen bringt jede Nacht einen ausgeruhten Elternteil. Sich vorher auf die Aufteilung zu einigen beseitigt auch die nächtliche Verhandlung, in der sich normalerweise der Unmut sammelt.",
                 es: "El sueño repara en ciclos de unos noventa minutos, y un bloque completo sin interrupciones hace mucho más por el funcionamiento diario que el mismo total de horas partido en fragmentos. Dos adultos medio despiertos toda la noche acaban siendo dos padres agotados; un sistema de turnos consigue un progenitor descansado cada noche. Acordarlo por adelantado también elimina la negociación nocturna, que es donde suele acumularse el resentimiento.",
                 fr: "Le sommeil se rétablit par cycles d'environ quatre-vingt-dix minutes, et un bloc complet et ininterrompu fait bien plus pour le fonctionnement que le même total d'heures divisé en fragments. Deux adultes à moitié éveillés toute la nuit se retrouvent avec deux parents handicapés ; un système de quarts produit un parent reposé chaque nuit. Le fait de l’accepter à l’avance supprime également les négociations nocturnes, où la plupart des ressentiments ont tendance à s’accumuler.",
-                pt: "O sono é restaurado em ciclos de aproximadamente noventa minutos, e um bloqueio completo e ininterrupto contribui muito mais para o funcionamento do que o mesmo total de horas divididas em fragmentos. Dois adultos meio acordados a noite toda acabam com dois pais deficientes; um sistema de turnos produz um pai descansado todas as noites. Concordar com antecedência também elimina a negociação noturna, que é onde a maior parte do ressentimento tende a se acumular."
+                pt: "O sono é restaurado em ciclos de aproximadamente noventa minutos, e um bloqueio completo e ininterrupto contribui muito mais para o funcionamento do que o mesmo total de horas divididas em fragmentos. Dois adultos meio acordados a noite toda acabam com dois pais deficientes; um sistema de turnos produz um pai descansado todas as noites. Concordar com antecedência também elimina a negociação noturna, que é onde a maior parte do ressentimento tende a se acumular.",
+                zh: "睡眠以大约九十分钟的周期恢复，完整不间断的睡眠时间比分成碎片的相同总时间对功能的作用要大得多。两个成年人每人半夜半醒，最后却有两个受伤的父母；轮班制让家长每晚都能得到休息。提前达成一致还可以消除每晚的谈判，而这正是大多数怨恨往往积聚的地方。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -109,6 +119,12 @@ extension CareTipsCatalog {
                     "O pai que não se alimenta presumindo que não há nada útil para fazer.",
                     "Decidir quem se levanta no momento, sempre.",
                     "Preencher o bloco de folga com tarefas domésticas em vez de dormir.",
+                ],
+                zh: [
+                    "出于团结，父母每次喂食都会醒来。",
+                    "不喂养的父母认为没有什么有用的事情可做。",
+                    "每次都决定谁在那一刻起床。",
+                    "把下班时间用做家务而不是睡觉来填满。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -141,6 +157,11 @@ extension CareTipsCatalog {
                     "Você não consegue dormir mesmo quando seu bebê está dormindo e outra pessoa está de plantão.",
                     "A exaustão está afetando sua direção, sua segurança ou sua capacidade de cuidar de seu bebê.",
                     "Baixo humor ou ansiedade persistente junto com o cansaço.",
+                ],
+                zh: [
+                    "即使您的宝宝睡着了并且有人值班，您也无法入睡。",
+                    "疲惫会影响您的驾驶、安全或照顾宝宝的能力。",
+                    "持续情绪低落或焦虑并伴有疲劳。",
                 ]
             )
         ),
@@ -153,7 +174,8 @@ extension CareTipsCatalog {
                 de: "Babyblues oder etwas Ernsteres",
                 es: "Tristeza posparto o algo más",
                 fr: "Baby blues ou quelque chose de plus",
-                pt: "Baby blues ou algo mais"
+                pt: "Baby blues ou algo mais",
+                zh: "婴儿忧郁或其他"
             ),
             summary: LocalizedText(
                 en: "Tearfulness in the first two weeks is common; low mood that persists deserves support",
@@ -161,7 +183,8 @@ extension CareTipsCatalog {
                 de: "Tränenfluss in den ersten zwei Wochen ist normal; anhaltend gedrückte Stimmung verdient Unterstützung",
                 es: "Llorar durante las dos primeras semanas es habitual; un ánimo bajo que persiste merece ayuda",
                 fr: "Les larmes sont courantes au cours des deux premières semaines ; la mauvaise humeur qui persiste mérite du soutien",
-                pt: "O choro nas primeiras duas semanas é comum; mau humor que persiste merece apoio"
+                pt: "O choro nas primeiras duas semanas é comum; mau humor que persiste merece apoio",
+                zh: "最初两周流泪是很常见的；持续的低落情绪值得支持"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -205,6 +228,13 @@ extension CareTipsCatalog {
                     "Diga a uma pessoa como você realmente está, não a versão que você dá na porta.",
                     "Proteja o básico sempre que puder: comida, água, luz do dia, um bloco de sono.",
                     "Se o mau humor, a ansiedade ou a dormência durarem mais de duas semanas, marque uma consulta. Traga seu parceiro se isso ajudar.",
+                ],
+                zh: [
+                    "预计会出现产后忧郁症：哭泣、情绪波动和敏感，在第三至五天左右达到顶峰，并在两周内缓解。",
+                    "跟踪您一段时间内的感受 — Momsy 的健康屏幕包括 EPDS 调查问卷。",
+                    "告诉一个人你实际上在做什么，而不是你在门口提供的版本。",
+                    "尽可能保护基本生活必需品：食物、水、阳光、睡眠时间。",
+                    "如果情绪低落、焦虑或麻木持续超过两周，请预约。如果有帮助的话，带上你的伴侣。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -213,7 +243,8 @@ extension CareTipsCatalog {
                 de: "Babyblues entstehen durch einen abrupten Hormonumbruch nach der Geburt und vergehen von selbst. Postpartale Depression und Angst sind anders: Sie bleiben, sie verschärfen sich, und sie sprechen gut auf Behandlung an – aber nur, wenn jemand davon weiß. Sie sind häufig, betreffen auch Väter und Partner, und sie sagen nichts über Ihre Liebe zu Ihrem Baby aus.",
                 es: "La tristeza posparto se debe a un cambio hormonal brusco tras el parto y se resuelve sola. La depresión y la ansiedad posparto son distintas: persisten, se profundizan y responden bien al tratamiento, pero solo cuando alguien sabe de ellas. Son frecuentes, también afectan a padres y parejas, y no dicen nada sobre cuánto quieres a tu bebé.",
                 fr: "Le baby blues est dû à un changement hormonal brutal après la naissance et se résout tout seul. La dépression et l’anxiété postnatales sont différentes : elles persistent, s’aggravent et réagissent bien au traitement – ​​mais seulement lorsque quelqu’un en a connaissance. Ils sont courants, ils affectent également les pères et les partenaires, et ils ne constituent pas un verdict sur l’amour que vous portez à votre bébé.",
-                pt: "A tristeza infantil é causada por uma mudança hormonal abrupta após o nascimento e se resolve por conta própria. A depressão e a ansiedade pós-parto são diferentes: persistem, aprofundam-se e respondem bem ao tratamento – mas apenas quando alguém sabe sobre elas. São comuns, afetam também os pais e os parceiros e não são um veredicto sobre o quanto você ama seu bebê."
+                pt: "A tristeza infantil é causada por uma mudança hormonal abrupta após o nascimento e se resolve por conta própria. A depressão e a ansiedade pós-parto são diferentes: persistem, aprofundam-se e respondem bem ao tratamento – mas apenas quando alguém sabe sobre elas. São comuns, afetam também os pais e os parceiros e não são um veredicto sobre o quanto você ama seu bebê.",
+                zh: "婴儿忧郁症是由出生后荷尔蒙突然变化引起的，并会自行消退。产后抑郁症和焦虑症是不同的：它们会持续存在、加深，并且对治疗反应良好——但前提是有人了解它们。它们很常见，也会影响父亲和伴侣，而且它们并不能决定你有多爱你的宝宝。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -251,6 +282,12 @@ extension CareTipsCatalog {
                     "Supondo que não pode ser depressão porque você ama seu bebê.",
                     "Escondendo do seu parceiro ou do seu médico.",
                     "Os parceiros crentes e os pais não são afetados.",
+                ],
+                zh: [
+                    "等待它过去，因为每个人都说头几个月很艰难。",
+                    "假设这不可能是抑郁症，因为你爱你的宝宝。",
+                    "对您的伴侣或医生隐瞒它。",
+                    "有信仰的伴侣和父亲不受影响。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -289,6 +326,12 @@ extension CareTipsCatalog {
                     "Dificuldade de vínculo ou culpa persistente e inutilidade.",
                     "Ataques de pânico, pensamentos intrusivos e assustadores ou incapacidade de dormir mesmo quando o bebê dorme.",
                     "Qualquer pensamento de prejudicar você ou seu bebê – entre em contato com os serviços de emergência ou com o seu médico imediatamente. Isto é urgente e tratável, e pedir ajuda é a atitude certa.",
+                ],
+                zh: [
+                    "情绪低落、焦虑或空虚持续两周以上。",
+                    "难以建立联系，或者持续的内疚和无价值感。",
+                    "惊恐发作、侵入性的可怕想法，或者即使宝宝睡着了也无法入睡。",
+                    "如果有伤害自己或宝宝的想法，请立即联系紧急服务部门或您的医生。这是紧急且可以治疗的，寻求帮助是正确的举动。",
                 ]
             )
         ),
@@ -301,7 +344,8 @@ extension CareTipsCatalog {
                 de: "Schütteln Sie ein Baby nie: haben Sie einen Ausstiegsplan",
                 es: "Nunca sacudas a un bebé: ten un plan para apartarte",
                 fr: "Ne secouez jamais un bébé : ayez un plan de sortie",
-                pt: "Nunca sacuda um bebê: tenha um plano de fuga"
+                pt: "Nunca sacuda um bebê: tenha um plano de fuga",
+                zh: "切勿摇晃婴儿：制定一个离开计划"
             ),
             summary: LocalizedText(
                 en: "Decide now what you will do when you have nothing left, so you do not decide in the moment",
@@ -309,7 +353,8 @@ extension CareTipsCatalog {
                 de: "Entscheiden Sie jetzt, was Sie tun werden, wenn Ihnen nichts mehr bleibt, damit Sie es nicht im Moment entscheiden müssen",
                 es: "Decide ahora qué harás cuando no te quede nada, para no tener que decidirlo en el momento",
                 fr: "Décidez maintenant de ce que vous ferez quand vous n'aurez plus rien, pour ne pas décider sur le moment",
-                pt: "Decida agora o que você fará quando não tiver mais nada, para não decidir no momento"
+                pt: "Decida agora o que você fará quando não tiver mais nada, para não decidir no momento",
+                zh: "现在就决定当你一无所有的时候你要做什么，这样你就不会在当下做出决定"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -353,6 +398,13 @@ extension CareTipsCatalog {
                     "Respire devagar, beba água, saia de casa ou ligue para alguém.",
                     "Volte quando estiver mais calmo. Um bebê chorando em um berço seguro fica bem por alguns minutos; um bebê abalado não é.",
                     "Certifique-se de que todos que cuidam do seu bebê – parceiros, parentes, babás – conheçam esse plano e saibam que ele é permitido.",
+                ],
+                zh: [
+                    "提前同意计划：当您达到极限时，将您的宝宝仰卧在婴儿床上。",
+                    "离开房间，关上门，并将计时器设置为五到十分钟。",
+                    "缓慢呼吸、喝水、走出去或打电话给某人。",
+                    "等你心情平静了再回去吧。婴儿在安全床上哭泣几分钟是没问题的；摇晃的婴儿则不然。",
+                    "确保所有照顾你宝宝的人——伴侣、亲戚、保姆——都知道这个计划并且知道这是允许的。",
                 ]
             ),
             whyItMatters: LocalizedText(
@@ -361,7 +413,8 @@ extension CareTipsCatalog {
                 de: "Schütteln verursacht in Sekunden katastrophale und permanente Hirnverletzungen, und es passiert fast immer liebenden Eltern am Ende einer langen Phase untröstlichen Weinens. Der Höhepunkt des Weinens liegt um die sechste bis achte Woche – genau dann, wenn Eltern am meisten erschöpft sind – daher muss der Plan existieren, bevor der Moment kommt. Sich wegzubegeben ist kein Verwahrlosung – es ist das Verantwortungsvolle.",
                 es: "Sacudir a un bebé provoca lesiones cerebrales catastróficas y permanentes en cuestión de segundos, y casi siempre les ocurre a padres cariñosos al final de un largo llanto inconsolable. El llanto alcanza su pico entre la sexta y la octava semana, justo cuando los padres están más agotados; por eso el plan tiene que existir antes de que llegue ese momento. Apartarse no es desatender: es lo responsable.",
                 fr: "Les tremblements provoquent des lésions cérébrales catastrophiques et permanentes en quelques secondes, et cela arrive presque toujours aux parents aimants à la fin d'une longue période de pleurs inconsolables. Les pleurs culminent vers six à huit semaines, exactement au moment où les parents sont le plus épuisés, c'est pourquoi le plan doit exister avant que le moment n'arrive. Choisir de s’en aller n’est pas une négligence – c’est la chose responsable à faire.",
-                pt: "Tremer causa lesões cerebrais catastróficas e permanentes em segundos, e quase sempre acontece com pais amorosos no final de um longo período de choro inconsolável. O choro atinge o pico por volta das seis a oito semanas, exatamente quando os pais estão mais exaustos, por isso o plano tem que existir antes que chegue o momento. Decidir ir embora não é negligência – é a coisa responsável a fazer."
+                pt: "Tremer causa lesões cerebrais catastróficas e permanentes em segundos, e quase sempre acontece com pais amorosos no final de um longo período de choro inconsolável. O choro atinge o pico por volta das seis a oito semanas, exatamente quando os pais estão mais exaustos, por isso o plano tem que existir antes que chegue o momento. Decidir ir embora não é negligência – é a coisa responsável a fazer.",
+                zh: "摇晃会在几秒钟内造成灾难性的永久性脑损伤，这种情况几乎总是发生在慈爱的父母在长时间无法安慰的哭泣结束后。哭泣在六到八周左右达到高峰，正是父母最疲惫的时候，这就是为什么必须在这一刻到来之前制定计划的原因。选择离开并不是疏忽——而是负责任的事情。"
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -399,6 +452,12 @@ extension CareTipsCatalog {
                     "Continuar a segurar um bebê enquanto sente a raiva aumentar.",
                     "Não dizer aos outros cuidadores que ir embora é esperado e permitido.",
                     "Sentir vergonha de atingir um limite – todo pai tem um.",
+                ],
+                zh: [
+                    "相信这种情况只会发生在其他类型的父母身上。",
+                    "继续抱着婴儿，同时感到愤怒上升。",
+                    "不告诉其他护理人员走开是预期和允许的。",
+                    "为达到极限而感到羞耻——每个父母都有一个。",
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -431,6 +490,11 @@ extension CareTipsCatalog {
                     "Se o seu bebê foi sacudido ou caiu, procure atendimento de emergência imediatamente, sejam quais forem as circunstâncias.",
                     "Vômitos, sonolência incomum, irritabilidade, fontanela saliente, convulsões ou alterações respiratórias após qualquer impacto na cabeça.",
                     "Se você frequentemente se sente perto de perder o controle, informe o seu médico ou profissional de saúde. O apoio existe e solicitá-lo protege a todos.",
+                ],
+                zh: [
+                    "如果您的宝宝被摇晃或掉落，无论情况如何，请立即寻求紧急护理。",
+                    "头部撞击后出现呕吐、异常嗜睡、烦躁、囟门膨出、癫痫发作或呼吸变化。",
+                    "如果您经常感觉快要失去控制，请告诉您的医生或健康访问员。支持是存在的，寻求支持可以保护每个人。",
                 ]
             )
         )
