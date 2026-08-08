@@ -7,11 +7,13 @@ extension CareTipsCatalog {
             id: 1501, category: .safety, icon: "car.fill", ageFrom: 0, ageTo: 24,
             title: LocalizedText(
                 en: "Car seat basics: rear-facing, snug harness, no coats",
-                ru: "Автокресло: спиной вперёд, плотные ремни, без верхней одежды"
+                ru: "Автокресло: спиной вперёд, плотные ремни, без верхней одежды",
+                de: "Grundlagen des Autositzes: rückwärts gewandt, fester Gurt, keine Mäntel"
             ),
             summary: LocalizedText(
                 en: "Rear-facing as long as the seat allows, and the harness flat against the body",
-                ru: "Спиной вперёд столько, сколько позволяет кресло, ремни — плотно к телу"
+                ru: "Спиной вперёд столько, сколько позволяет кресло, ремни — плотно к телу",
+                de: "Rückwärts gewandt, solange der Sitz es zulässt, und der Gurt flach am Körper"
             ),
             whatToDo: LocalizedList(
                 en: [
@@ -27,11 +29,19 @@ extension CareTipsCatalog {
                     "Затягивайте так, чтобы у плеча нельзя было защипнуть горизонтальную складку ремня.",
                     "Нагрудный зажим располагайте на уровне подмышек.",
                     "Снимайте объёмные куртки и комбинезоны: сначала пристегните ребёнка, затем накройте его курткой или пледом поверх ремней."
+                ],
+                de: [
+                    "Halten Sie den Sitz so lange rückwärts gewandt, wie die Höhen- und Gewichtsbeschränkungen Ihres Sitzes es zulassen.",
+                    "Stellen Sie die Gurtschlitze auf Schulterhöhe oder knapp darunter in einem rückwärts gewandten Sitz ein.",
+                    "Ziehen Sie an, bis Sie keine horizontale Falte des Gurtes an der Schulter einklemmen können.",
+                    "Positionieren Sie den Brustclip auf Achselhöhe.",
+                    "Entfernen Sie sperrige Mäntel und Schneeanzüge; schnallen Sie Ihr Baby zuerst an, dann legen Sie den Mantel oder eine Decke über den Gurt."
                 ]
             ),
             whyItMatters: LocalizedText(
                 en: "In a frontal collision a rear-facing seat spreads the force across the whole back and supports the head and neck, which is exactly what a baby's proportionally heavy head and soft neck need. A padded coat compresses to almost nothing under crash forces, leaving several centimetres of slack in a harness that felt tight in the driveway — which is how a correctly fastened child ends up loose in a crash.",
-                ru: "При лобовом столкновении кресло, установленное спиной вперёд, распределяет нагрузку по всей спине и поддерживает голову и шею — именно то, что нужно ребёнку с непропорционально тяжёлой головой и слабой шеей. Утеплённая куртка при ударе сжимается почти до нуля, оставляя несколько сантиметров слабины в ремнях, которые казались тугими во дворе, — так правильно пристёгнутый ребёнок оказывается свободным в момент аварии."
+                ru: "При лобовом столкновении кресло, установленное спиной вперёд, распределяет нагрузку по всей спине и поддерживает голову и шею — именно то, что нужно ребёнку с непропорционально тяжёлой головой и слабой шеей. Утеплённая куртка при ударе сжимается почти до нуля, оставляя несколько сантиметров слабины в ремнях, которые казались тугими во дворе, — так правильно пристёгнутый ребёнок оказывается свободным в момент аварии.",
+                de: "Bei einem Frontalaufprall verteilt ein rückwärts gewandter Sitz die Kraft über den ganzen Rücken und stützt Kopf und Nacken – genau das, was ein Baby mit verhältnismäßig schwerem Kopf und weichem Nacken braucht. Ein gepolsterter Mantel wird unter Aufprallkräften zu fast nichts komprimiert und hinterlässt mehrere Zentimeter Spielraum in einem Gurt, der in der Einfahrt eng wirkte – so endet ein richtig angeschnalltes Kind in einem Aufprall lose."
             ),
             commonMistakes: LocalizedList(
                 en: [
@@ -45,6 +55,12 @@ extension CareTipsCatalog {
                     "Слабо затянутые ремни или нагрудный зажим, съехавший на живот.",
                     "Зимние куртки, комбинезоны или сторонние подкладки под ремнями.",
                     "Бывшие в употреблении кресла с неизвестной историей или любое кресло, побывавшее в аварии."
+                ],
+                de: [
+                    "Zum Geburtstag umdrehen statt bis zur Grenze des Sitzes.",
+                    "Ein loser Gurt oder ein Brustclip, der auf dem Bauch sitzt.",
+                    "Wintermäntel, Schneeanzüge oder Nachkauf-Polsterung unter den Gurten.",
+                    "Gebrauchte Sitze mit unbekannter Vorgeschichte oder jeder Sitz, der in einen Unfall verwickelt war."
                 ]
             ),
             whenToCallDoctor: LocalizedList(
@@ -57,6 +73,11 @@ extension CareTipsCatalog {
                     "Голова ребёнка заваливается вперёд или дыхание в кресле кажется затруднённым — срочно проверьте угол наклона.",
                     "Недоношенным детям и детям с низким весом при рождении перед выпиской может потребоваться проверка переносимости автокресла.",
                     "После любого столкновения покажите ребёнка врачу, даже если он выглядит совершенно здоровым."
+                ],
+                de: [
+                    "Der Kopf Ihres Babys sackt nach vorne oder die Atmung im Sitz klingt mühsam – überprüfen Sie den Neigungswinkel dringend.",
+                    "Frühgeborene oder untergewichtige Babys benötigen möglicherweise vor der Entlassung einen Autositz-Toleranztest.",
+                    "Nach einem Aufprall sollte Ihr Baby untersucht werden, auch wenn es völlig in Ordnung zu sein scheint."
                 ]
             )
         ),
