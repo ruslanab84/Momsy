@@ -24,3 +24,4 @@ extension MomSleepRecord: BabyScoped {}
 extension MomMoodRecord: BabyScoped {}
 extension WaterIntakeRecord: BabyScoped {}
 extension LeapProgressRecord: BabyScoped {}
+extension WeeklyInsightRecord: BabyScoped {}

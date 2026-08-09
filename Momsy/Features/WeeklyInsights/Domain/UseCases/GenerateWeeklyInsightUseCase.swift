@@ -49,28 +49,34 @@ final class GenerateWeeklyInsightUseCase {
     @discardableResult
     func generateIfNeeded(now: Date = Date()) async -> WeeklyInsight? {
         guard hasAIConsent() else { return nil }
-        let language = LocalizationManager.shared.current
-        guard let (weekStart, weekEnd) = Self.weekBounds(now: now) else { return nil }
-        // A report for this week already exists — keep it in whatever language it was
-        // generated in. Changing the app language never re-generates or re-translates
-        // past reports (no Gemini cost on language switch); only future weeks use the
-        // new language.
-        //
-        // Exception: a report that fell back to the static narrative is retried once a
-        // day until the AI version succeeds — a single transient Gemini failure would
-        // otherwise leave a template report in place permanently. Such a retry adopts
-        // the current app language, since the narrative it replaces is a template
-        // rather than a generated report. No-data weeks and successful AI reports are
-        // never regenerated.
-        if let existing = (try? await repo.report(forWeekStarting: weekStart)) ?? nil {
-            guard Self.shouldRetryAI(existing, now: now) else { return nil }
-        }
+        guard let babyId = ActiveBaby.currentId,
+              let profile = appState.babyProfile,
+              profile.id == babyId
+        else { return nil }
 
-        let birthDate = appState.babyProfile?.birthDate
-        let insight = await generate(weekStart: weekStart, weekEnd: weekEnd,
-                                     birthDate: birthDate, language: language)
-        try? await repo.save(insight)
-        return insight
+        return await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+            let language = LocalizationManager.shared.current
+            guard let (weekStart, weekEnd) = Self.weekBounds(now: now) else { return nil }
+            // A report for this week already exists — keep it in whatever language it was
+            // generated in. Changing the app language never re-generates or re-translates
+            // past reports (no Gemini cost on language switch); only future weeks use the
+            // new language.
+            //
+            // Exception: a report that fell back to the static narrative is retried once a
+            // day until the AI version succeeds — a single transient Gemini failure would
+            // otherwise leave a template report in place permanently. Such a retry adopts
+            // the current app language, since the narrative it replaces is a template
+            // rather than a generated report. No-data weeks and successful AI reports are
+            // never regenerated.
+            if let existing = (try? await repo.report(forWeekStarting: weekStart)) ?? nil {
+                guard Self.shouldRetryAI(existing, now: now) else { return nil }
+            }
+
+            let insight = await generate(weekStart: weekStart, weekEnd: weekEnd,
+                                         birthDate: profile.birthDate, language: language)
+            try? await repo.save(insight)
+            return insight
+        }
     }
 
     /// Builds stats + narrative (AI, falling back to static) without persistence — testable.

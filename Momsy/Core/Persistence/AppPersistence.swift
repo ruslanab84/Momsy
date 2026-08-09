@@ -8,7 +8,7 @@ enum AppPersistence {
     // Informational only — recorded after a successful open so we can tell, in
     // diagnostics, which schema last wrote the store. It no longer gates a wipe;
     // migration is attempted in place to preserve user data.
-    private static let schemaVersion = "v24"
+    private static let schemaVersion = "v25"
     private static let schemaVersionKey = "AppPersistence.schemaVersion"
 
     private static let log = Logger(subsystem: "RuslanAbd.Momsy", category: "Persistence")

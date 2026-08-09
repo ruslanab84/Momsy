@@ -377,6 +377,7 @@ final class AppContainer {
             "babysync_perbaby_migration_v1_done",
             "firestore_quicklogs_cleanup_v1_done",
             "babyLogBackfill_v1_done",
+            "babyLogBackfill_v2_done",
             "diaper_today_count",
             "diaper_today_date",
             "uid",

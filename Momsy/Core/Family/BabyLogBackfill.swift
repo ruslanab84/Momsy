@@ -5,7 +5,7 @@ import Foundation
 /// first child, plus the cascade-delete used when a child is removed. Both walk the
 /// same set of `BabyScoped` SwiftData models, parameterised by what to do with a match.
 enum BabyLogBackfill {
-    private static let flagKey = "babyLogBackfill_v1_done"
+    private static let flagKey = "babyLogBackfill_v2_done"
 
     /// Stamp every `unassigned` log record with child #1's id. No-op (and not marked
     /// done) until a baby exists, so a fresh install doesn't lock in the flag before
@@ -25,6 +25,7 @@ enum BabyLogBackfill {
             ActiveBaby.currentId = targetId
         }
 
+        deleteLegacyWeeklyInsights(context: context)
         applyAll(match: ActiveBaby.unassigned, reassignTo: targetId, context: context)
         try? context.save()
         UserDefaults.standard.set(true, forKey: flagKey)
@@ -55,6 +56,20 @@ enum BabyLogBackfill {
         apply(MomMoodRecord.self,           match: match, reassignTo: newId, context: context)
         apply(WaterIntakeRecord.self,       match: match, reassignTo: newId, context: context)
         apply(LeapProgressRecord.self,      match: match, reassignTo: newId, context: context)
+        apply(WeeklyInsightRecord.self,     match: match, reassignTo: newId, context: context)
+    }
+
+    /// Pre-scope reports cannot be attributed safely after a family switch. They are
+    /// derived data, so dropping them is safer than exposing them under the current child.
+    @MainActor
+    private static func deleteLegacyWeeklyInsights(context: ModelContext) {
+        let unassigned = ActiveBaby.unassigned
+        let descriptor = FetchDescriptor<WeeklyInsightRecord>(
+            predicate: #Predicate { $0.babyId == unassigned }
+        )
+        for record in (try? context.fetch(descriptor)) ?? [] {
+            context.delete(record)
+        }
     }
 
     /// Fetches all rows of `T` and reassigns or deletes those matching `match`.

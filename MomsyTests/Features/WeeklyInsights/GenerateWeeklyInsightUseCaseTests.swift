@@ -85,6 +85,20 @@ struct GenerateWeeklyInsightUseCaseTests {
         #expect(repo.saveCount == 0)
     }
 
+    @Test("without an active baby, never generates or saves a report")
+    func noActiveBaby() async throws {
+        let appState = makeAppState()
+        let repo = MockWeeklyInsightRepository()
+        let service = MockWeeklyInsightService()
+        let uc = makeUseCase(repo: repo, service: service, appState: appState)
+
+        let insight = await uc.generateIfNeeded()
+
+        #expect(insight == nil)
+        #expect(service.callCount == 0)
+        #expect(repo.saveCount == 0)
+    }
+
     @Test("a week with no logged data skips the AI service and reflects the gap")
     func emptyWeekSkipsAI() async throws {
         let appState = makeAppState(profile: BabyProfile(name: "Mia"))
@@ -115,14 +129,17 @@ struct GenerateWeeklyInsightUseCaseTests {
         ]
         let repo = MockWeeklyInsightRepository()
         let uc = makeUseCase(sleepRepo: sleepRepo, repo: repo, appState: appState)
+        let babyId = try #require(appState.babyProfile?.id)
 
-        let first = await uc.generateIfNeeded(now: now)
-        #expect(first != nil)
-        #expect(repo.saveCount == 1)
+        await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+            let first = await uc.generateIfNeeded(now: now)
+            #expect(first != nil)
+            #expect(repo.saveCount == 1)
 
-        let second = await uc.generateIfNeeded(now: now)
-        #expect(second == nil)
-        #expect(repo.saveCount == 1)
+            let second = await uc.generateIfNeeded(now: now)
+            #expect(second == nil)
+            #expect(repo.saveCount == 1)
+        }
     }
 
     /// Pre-aggregated stats for a baby in the "World of Patterns" leap (week 8, id 2).
@@ -157,8 +174,11 @@ struct GenerateWeeklyInsightUseCaseTests {
                                           generatedAt: Date(), language: .english))
         let service = MockWeeklyInsightService()
         let uc = makeUseCase(repo: repo, service: service, appState: appState)
+        let babyId = try #require(appState.babyProfile?.id)
 
-        let result = await uc.generateIfNeeded(now: now)
+        let result = await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+            await uc.generateIfNeeded(now: now)
+        }
 
         #expect(result == nil)                       // existing report → not regenerated
         #expect(service.callCount == 0)              // zero Gemini calls on language change

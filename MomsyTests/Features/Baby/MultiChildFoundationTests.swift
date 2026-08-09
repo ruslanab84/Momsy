@@ -15,10 +15,32 @@ struct MultiChildFoundationTests {
     private func makeContext() throws -> ModelContext {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(
-            for: SleepRecord.self, FeedingRecord.self, BabyRecord.self,
+            for: SleepRecord.self, FeedingRecord.self, BabyRecord.self, WeeklyInsightRecord.self,
             configurations: config
         )
         return ModelContext(container)
+    }
+
+    private func weeklyInsight(weekStart: Date, summary: String) -> WeeklyInsight {
+        let weekEnd = Calendar.current.date(byAdding: .day, value: 7, to: weekStart) ?? weekStart
+        let stats = WeeklyStats(
+            weekStart: weekStart, weekEnd: weekEnd,
+            ageMonths: 2, ageWeeks: 9, currentLeapName: nil,
+            currentLeapID: nil, leapSignals: [],
+            avgSleepMinutesPerDay: 0, avgNightSleepMinutes: 0, avgDaySleepMinutes: 0,
+            avgNapsPerDay: 0, sleepTrendVsPrevWeekMinutes: 0,
+            whoMinSleepMinutes: 840, whoAwakeWindowMax: 90,
+            avgFeedingsPerDay: 0, totalFeedings: 0,
+            newFoodsIntroduced: [], allergensFlagged: [], totalDiapers: 0
+        )
+        let ai = WeeklyInsightAI(
+            sleepSummary: "", sleepRecommendation: "",
+            feedingSummary: "", feedingRecommendation: "", overallSummary: summary
+        )
+        return WeeklyInsight(
+            stats: stats, ai: ai, isAIGenerated: true,
+            generatedAt: weekEnd, language: .english
+        )
     }
 
     // MARK: Roster + cap
@@ -101,6 +123,37 @@ struct MultiChildFoundationTests {
         let aEntries = try await repo.getEntries(from: window.from, to: window.to)
         #expect(aEntries.count == 2)
         freshActive()
+    }
+
+    @Test func weeklyInsightsAreScopedToActiveChildAndDeletedWithIt() async throws {
+        freshActive()
+        defer { freshActive() }
+        let context = try makeContext()
+        let repository = SwiftDataWeeklyInsightRepository(context: context)
+        let weekStart = Calendar.current.startOfDay(for: Date(timeIntervalSince1970: 1_700_000_000))
+        let babyA = UUID(), babyB = UUID()
+
+        ActiveBaby.currentId = babyA
+        try await repository.save(weeklyInsight(weekStart: weekStart, summary: "A"))
+
+        ActiveBaby.currentId = babyB
+        #expect(try await repository.all().isEmpty)
+        #expect(try await repository.latest() == nil)
+        #expect(try await repository.report(forWeekStarting: weekStart) == nil)
+        try await repository.save(weeklyInsight(weekStart: weekStart, summary: "B"))
+
+        let stored = try context.fetch(FetchDescriptor<WeeklyInsightRecord>())
+        #expect(stored.count == 2)
+        #expect(Set(stored.map(\.babyId)) == [babyA, babyB])
+
+        ActiveBaby.currentId = babyA
+        #expect(try await repository.all().map(\.ai.overallSummary) == ["A"])
+        BabyLogBackfill.deleteLogs(forBaby: babyA, context: context)
+        try context.save()
+        #expect(try await repository.all().isEmpty)
+
+        ActiveBaby.currentId = babyB
+        #expect(try await repository.all().map(\.ai.overallSummary) == ["B"])
     }
 
     @Test func wellbeingRepositoriesAreScopedToCurrentUser() async throws {
@@ -206,7 +259,11 @@ struct MultiChildFoundationTests {
 
     @Test func backfillStampsLegacyLogsToFirstChild() async throws {
         freshActive()
-        UserDefaults.standard.removeObject(forKey: "babyLogBackfill_v1_done")
+        UserDefaults.standard.removeObject(forKey: "babyLogBackfill_v2_done")
+        defer {
+            UserDefaults.standard.removeObject(forKey: "babyLogBackfill_v2_done")
+            freshActive()
+        }
         let ctx = try makeContext()
 
         // A baby exists, but logs were created before multi-child (unassigned).
@@ -215,15 +272,17 @@ struct MultiChildFoundationTests {
         let legacy = SleepRecord(SleepEntry(startDate: Date()))
         legacy.babyId = ActiveBaby.unassigned   // simulate pre-migration row
         ctx.insert(legacy)
+        ctx.insert(WeeklyInsightRecord(
+            weeklyInsight(weekStart: Date(timeIntervalSince1970: 1_700_000_000), summary: "legacy"),
+            babyId: ActiveBaby.unassigned
+        ))
         try ctx.save()
 
         BabyLogBackfill.run(context: ctx)
 
         let all = try ctx.fetch(FetchDescriptor<SleepRecord>())
         #expect(all.allSatisfy { $0.babyId == child.id })
+        #expect(try ctx.fetch(FetchDescriptor<WeeklyInsightRecord>()).isEmpty)
         #expect(ActiveBaby.currentId == child.id)
-
-        UserDefaults.standard.removeObject(forKey: "babyLogBackfill_v1_done")
-        freshActive()
     }
 }

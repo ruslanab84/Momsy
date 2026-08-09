@@ -28,8 +28,8 @@ struct WeeklyInsightViewModelTests {
     @Test("non-premium load does not generate a report")
     func nonPremium() async throws {
         let repo = MockWeeklyInsightRepository()
-        let (vm, _) = makeVM(repo: repo)
-        await vm.load(isPremium: false)
+        let (vm, appState) = makeVM(repo: repo)
+        await vm.load(isPremium: false, babyId: appState.babyProfile?.id)
         #expect(repo.saveCount == 0)
         #expect(vm.reports.isEmpty)
         #expect(vm.state.value != nil)  // .loaded
@@ -38,8 +38,11 @@ struct WeeklyInsightViewModelTests {
     @Test("premium load generates and surfaces the report")
     func premium() async throws {
         let repo = MockWeeklyInsightRepository()
-        let (vm, _) = makeVM(repo: repo)
-        await vm.load(isPremium: true)
+        let (vm, appState) = makeVM(repo: repo)
+        let babyId = try #require(appState.babyProfile?.id)
+        await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+            await vm.load(isPremium: true, babyId: babyId)
+        }
         #expect(repo.saveCount == 1)
         #expect(vm.reports.count == 1)
     }
@@ -55,7 +58,7 @@ struct WeeklyInsightViewModelTests {
             hasAIConsent: { true }
         )
         let vm = WeeklyInsightViewModel(generate: generate, get: GetWeeklyInsightsUseCase(repository: repo))
-        await vm.load(isPremium: false)
+        await vm.load(isPremium: false, babyId: appState.babyProfile?.id)
         #expect(vm.state.errorMessage != nil)
     }
 }

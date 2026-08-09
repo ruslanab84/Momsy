@@ -5,7 +5,8 @@ import Foundation
 /// NOT synced to Firestore — stays on device (privacy + user requirement).
 @Model
 final class WeeklyInsightRecord {
-    @Attribute(.unique) var weekStart: Date = Date()
+    var babyId: UUID = ActiveBaby.unassigned
+    var weekStart: Date = Date()
     var weekEnd: Date = Date()
     var generatedAt: Date = Date()
     var isAIGenerated: Bool = false
@@ -39,8 +40,9 @@ final class WeeklyInsightRecord {
     var feedingRecommendation: String = ""
     var overallSummary: String = ""
 
-    init(_ insight: WeeklyInsight) {
+    init(_ insight: WeeklyInsight, babyId: UUID) {
         let s = insight.stats
+        self.babyId = babyId
         weekStart = s.weekStart
         weekEnd = s.weekEnd
         generatedAt = insight.generatedAt
