@@ -9,7 +9,8 @@ import FirebaseFirestore
 enum AccountErasureOutcome: Equatable {
     /// Family data was found and erased on this attempt.
     case erased
-    /// No routing doc and no reachable membership left — the erase is already complete.
+    /// No client-reachable membership remains; the membership-deletion trigger owns any
+    /// remaining old-family cleanup.
     case nothingToErase
     /// `users/{uid}.familyId` now points at a DIFFERENT family than the one this
     /// deletion recorded. The recorded erase finished and the account has since been
@@ -58,9 +59,9 @@ struct FirestoreAccountEraser: CloudAccountEraser {
             return .nothingToErase
         }
 
-        // Membership is the capability that authorises every delete under
-        // `families/{id}/babies/**`. If it is already gone, a previous attempt committed
-        // the exit batch and only the local marker is stale.
+        // Membership is the capability that authorises every client delete under
+        // `families/{id}/babies/**`. Its deletion also starts the trusted cleanup trigger,
+        // so a retry must not attempt an unauthorised old-family scrub.
         guard try await callerIsStillMember(familyId: familyId, uid: uid) else {
             if userDoc.exists { try await userRef.delete() }
             return .nothingToErase
@@ -198,7 +199,12 @@ struct FirestoreAccountEraser: CloudAccountEraser {
             .whereField("createdBy", isEqualTo: uid)
             .limit(to: 1)
             .getDocuments(source: .server)
-        return invites.metadata.hasPendingWrites || !invites.isEmpty
+        guard invites.isEmpty, !invites.metadata.hasPendingWrites else { return true }
+        let departureCleanups = try await db.collection("familyDepartureCleanups")
+            .whereField("uid", isEqualTo: uid)
+            .limit(to: 1)
+            .getDocuments(source: .server)
+        return departureCleanups.metadata.hasPendingWrites || !departureCleanups.isEmpty
     }
 
     private func discoverBabyIds(in familyRef: DocumentReference) async throws -> [String] {

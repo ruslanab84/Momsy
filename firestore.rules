@@ -51,8 +51,8 @@ service cloud.firestore {
     // Право на удаление: создатель снимает свой UID с семейного документа, уходя из
     // ростера. Сам документ остаётся неповторно используемым tombstone'ом (delete
     // запрещён всем), но перестаёт хранить идентификатор стёртого пользователя.
-    // Backend'а с привилегированным доступом в проекте нет, поэтому иначе UID
-    // остался бы навсегда.
+    // Client cleanup still clears it atomically; the departure trigger is the
+    // retryable fallback for roster removals and interrupted exits.
     function isCreatorSelfErasure(familyId) {
       return isSignedIn()
         && resource.data.createdBy == request.auth.uid
@@ -236,6 +236,22 @@ service cloud.firestore {
         && request.resource.data.roleRaw == resource.data.roleRaw;
     }
 
+    function memberUidUnchangedOrCanonical(memberId) {
+      return (
+          !('uid' in resource.data)
+          && !('uid' in request.resource.data)
+        )
+        || (
+          'uid' in resource.data
+          && 'uid' in request.resource.data
+          && request.resource.data.uid == resource.data.uid
+        )
+        || (
+          !('uid' in resource.data)
+          && request.resource.data.uid == memberId
+        );
+    }
+
     function isLegacySelfRoleRepair(familyId, memberId) {
       return isSignedIn()
         && memberId == request.auth.uid
@@ -267,6 +283,29 @@ service cloud.firestore {
             || isFamilyMemberAfter(request.resource.data.familyId)
           )
         );
+    }
+
+    function isValidDepartureCleanupCreate() {
+      let familyId = request.resource.data.familyId;
+      let uid = request.resource.data.uid;
+      let removedMemberId = request.resource.data.removedMemberId;
+      let memberPath = /databases/$(database)/documents/families/$(familyId)/members/$(removedMemberId);
+      return isSignedIn()
+        && request.resource.data.keys()
+          .hasAll(['familyId', 'uid', 'removedMemberId', 'requestedAt'])
+        && request.resource.data.keys()
+          .hasOnly(['familyId', 'uid', 'removedMemberId', 'requestedAt'])
+        && familyId is string
+        && uid is string
+        && removedMemberId is string
+        && request.resource.data.requestedAt == request.time
+        && exists(memberPath)
+        && (
+          removedMemberId == uid
+          || ('uid' in get(memberPath).data && get(memberPath).data.uid == uid)
+        )
+        && !existsAfter(memberPath)
+        && (request.auth.uid == uid || canManageFamilyRoster(familyId));
     }
 
     function userFamilyIdUnchanged() {
@@ -332,6 +371,12 @@ service cloud.firestore {
       allow delete: if isSignedIn() && request.auth.uid == uid;
     }
 
+    match /familyDepartureCleanups/{jobId} {
+      allow get, list: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isValidDepartureCleanupCreate();
+      allow update, delete: if false;
+    }
+
     // A signed-in user may look up ONE invite by its exact code to discover an
     // existing familyId to join. Owner-constrained queries/deletes support account
     // erasure without allowing callers to enumerate other families' codes.
@@ -390,12 +435,15 @@ service cloud.firestore {
         allow read:   if belongsToFamily(familyId);
         allow create: if isSelfCreatorBootstrap(familyId, memberId)
                       || isSelfInviteJoin(familyId, memberId);
-        allow update: if canManageFamilyRoster(familyId)
-                      || isLegacySelfRoleRepair(familyId, memberId)
-                      || (isSignedIn()
-                          && memberId == request.auth.uid
-                          && isFamilyMember(familyId)
-                          && memberRoleUnchanged());
+        allow update: if memberUidUnchangedOrCanonical(memberId)
+                      && (
+                        canManageFamilyRoster(familyId)
+                        || isLegacySelfRoleRepair(familyId, memberId)
+                        || (isSignedIn()
+                            && memberId == request.auth.uid
+                            && isFamilyMember(familyId)
+                            && memberRoleUnchanged())
+                      );
         allow delete: if canManageFamilyRoster(familyId)
                       || (isSignedIn() && memberId == request.auth.uid);
       }

@@ -4,8 +4,9 @@
   "description": "AI-powered baby care assistant built with SwiftUI and Firebase.",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test:firebase-rules",
-    "test:firebase-rules": "firebase emulators:exec --only firestore,storage --project demo-momsy \"node --test tests/firebase-rules.test.mjs\""
+    "test": "npm run test:firebase-rules && npm run test:firebase-functions",
+    "test:firebase-rules": "firebase emulators:exec --only firestore,storage --project demo-momsy \"node --test tests/firebase-rules.test.mjs\"",
+    "test:firebase-functions": "firebase emulators:exec --only firestore,functions --project demo-momsy \"npm test --prefix functions\""
   },
   "repository": {
     "type": "git",

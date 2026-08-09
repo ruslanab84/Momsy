@@ -249,6 +249,13 @@ test("a restricted member cannot promote their own roster role", async () => {
     await assertFails(member.update({ roleRaw: deleteField() }));
 });
 
+test("a parent cannot rewrite a member's auth identity", async () => {
+    const member = firestore(users.mom).doc(`${familyPath}/members/${users.nanny}`);
+
+    await assertFails(member.update({ uid: users.dad }));
+    await assertSucceeds(member.update({ name: "Updated by parent" }));
+});
+
 test("legacy members can repair a missing role without promoting themselves", async () => {
     await testEnv.withSecurityRulesDisabled(async (adminContext) => {
         const db = adminContext.firestore();
@@ -280,6 +287,33 @@ test("a parent cannot create a placeholder member without an authenticated join"
         roleRaw: "Папа",
         isMe: false,
     }));
+});
+
+test("a departure cleanup job is tied to the matching membership deletion", async () => {
+    const momDb = firestore(users.mom);
+    const nannyDb = firestore(users.nanny);
+    const cleanupRef = momDb.doc("familyDepartureCleanups/nanny-departure");
+    const cleanupData = {
+        familyId,
+        uid: users.nanny,
+        removedMemberId: users.nanny,
+        requestedAt: serverTimestamp(),
+    };
+
+    await assertFails(cleanupRef.set(cleanupData));
+
+    const removal = momDb.batch();
+    removal.set(cleanupRef, cleanupData);
+    removal.delete(momDb.doc(`${familyPath}/members/${users.nanny}`));
+    await assertSucceeds(removal.commit());
+
+    await assertSucceeds(nannyDb.doc(cleanupRef.path).get());
+    await assertSucceeds(
+        nannyDb.collection("familyDepartureCleanups").where("uid", "==", users.nanny).get()
+    );
+    await assertFails(nannyDb.collection("familyDepartureCleanups").get());
+    await assertFails(firestore(users.dad).doc(cleanupRef.path).get());
+    await assertFails(nannyDb.doc(cleanupRef.path).delete());
 });
 
 test("invite roles are immutable and replacement revokes the old code", async () => {

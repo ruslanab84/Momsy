@@ -64,6 +64,9 @@ final class FirestoreFamilyRepository: FamilyRepository {
 
     func remove(_ member: StoredFamilyMember) async throws {
         let collection = try col()
+        guard let familyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey) else {
+            throw FamilyError.noFamilyId
+        }
         let docIds = [
             member.documentId,
             member.uid,
@@ -76,15 +79,51 @@ final class FirestoreFamilyRepository: FamilyRepository {
             let ref = collection.document(docId)
             let snap = try await ref.getDocument()
             if snap.exists {
-                try await ref.delete()
+                try await deleteMember(
+                    ref,
+                    data: snap.data() ?? [:],
+                    familyId: familyId,
+                    fallbackUID: member.uid
+                )
                 return
             }
         }
 
         let snap = try await collection.whereField("id", isEqualTo: member.id.uuidString).getDocuments()
         for doc in snap.documents {
-            try await doc.reference.delete()
+            try await deleteMember(
+                doc.reference,
+                data: doc.data(),
+                familyId: familyId,
+                fallbackUID: member.uid
+            )
         }
+    }
+
+    private func deleteMember(
+        _ memberRef: DocumentReference,
+        data: [String: Any],
+        familyId: String,
+        fallbackUID: String?
+    ) async throws {
+        guard let uid = FamilyDepartureCleanupJob.resolvedUID(
+            storedUID: data["uid"] as? String,
+            fallbackUID: fallbackUID,
+            documentID: memberRef.documentID
+        ) else { throw FamilyError.accessDenied }
+
+        let cleanupRef = db.collection("familyDepartureCleanups").document(
+            FamilyDepartureCleanupJob.documentID(familyID: familyId, uid: uid)
+        )
+        let batch = db.batch()
+        batch.setData([
+            "familyId": familyId,
+            "uid": uid,
+            "removedMemberId": memberRef.documentID,
+            "requestedAt": FieldValue.serverTimestamp()
+        ], forDocument: cleanupRef)
+        batch.deleteDocument(memberRef)
+        try await batch.commit()
     }
 
     private func documentId(for member: StoredFamilyMember) -> String {

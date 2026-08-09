@@ -376,9 +376,11 @@ final class FamilyManager: ObservableObject {
         let currentFamilyId = familyId
         let switchingFamily = (currentFamilyId != nil && currentFamilyId != targetFamilyId)
         let hasData: Bool
+        let leavingActiveFamily: Bool
         if switchingFamily, let currentFamilyId {
             do {
                 hasData = try await currentFamilyHasData()
+                leavingActiveFamily = true
             } catch {
                 guard Self.classifyMembershipError(error) == .revoked else { throw error }
                 let membership = await confirmMembershipHealthGated(
@@ -390,9 +392,11 @@ final class FamilyManager: ObservableObject {
                     confirmedMembership: membership
                 ) else { throw error }
                 hasData = false
+                leavingActiveFamily = false
             }
         } else {
             hasData = false
+            leavingActiveFamily = false
         }
         if FamilyJoinGuard.requiresConfirmation(
             currentFamilyId: familyId, targetFamilyId: targetFamilyId,
@@ -432,6 +436,17 @@ final class FamilyManager: ObservableObject {
         if let previous = familyId, previous != targetFamilyId {
             let previousMemberRef = db.collection("families").document(previous)
                 .collection("members").document(uid)
+            if leavingActiveFamily {
+                let cleanupRef = db.collection("familyDepartureCleanups").document(
+                    FamilyDepartureCleanupJob.documentID(familyID: previous, uid: uid)
+                )
+                batch.setData([
+                    "familyId": previous,
+                    "uid": uid,
+                    "removedMemberId": uid,
+                    "requestedAt": FieldValue.serverTimestamp()
+                ], forDocument: cleanupRef)
+            }
             batch.deleteDocument(previousMemberRef)
         }
 
