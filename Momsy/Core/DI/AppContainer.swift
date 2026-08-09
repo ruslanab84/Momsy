@@ -351,6 +351,7 @@ final class AppContainer {
         try context.delete(model: WaterIntakeRecord.self)
         try context.delete(model: MomSleepRecord.self)
         try context.delete(model: PumpingRecord.self)
+        try context.delete(model: VitaminRecord.self)
         try context.delete(model: WeeklyInsightRecord.self)
         try context.save()
 
