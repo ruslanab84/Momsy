@@ -116,6 +116,7 @@
 		EF17D71D2F26C73FED353CDD /* OnboardingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */; };
 		F1AEB007F1AEB007F1AEB001 /* FirebaseBootstrapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1AEB007F1AEB007F1AEB002 /* FirebaseBootstrapperTests.swift */; };
 		F1AEB007F1AEB007F1AEB011 /* SleepLiveSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1AEB007F1AEB007F1AEB012 /* SleepLiveSyncServiceTests.swift */; };
+		FDC10002FDC10002FDC10002 /* FamilyDepartureCleanupJobTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC10001FDC10001FDC10001 /* FamilyDepartureCleanupJobTests.swift */; };
 		F24AC470479B4459B238AC55 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 7DF85D6711D74713B69A22F4 /* FirebaseAppCheck */; };
 		F2A9C001F2A9C001F2A9C002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F2A9C001F2A9C001F2A9C001 /* PrivacyInfo.xcprivacy */; };
 		FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */; };
@@ -310,6 +311,7 @@
 		F9F1F99234A1F4FCB8840C13 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA16402FBC4C3F01E5573DB2 /* TestHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		FA31CE01FA31CE01FA31CE01 /* FamilyCacheReauthTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyCacheReauthTests.swift; sourceTree = "<group>"; };
+		FDC10001FDC10001FDC10001 /* FamilyDepartureCleanupJobTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyDepartureCleanupJobTests.swift; sourceTree = "<group>"; };
 		FB2828F5A5DB44A9E2563938 /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		FD2A02650FDD6CE849965CC6 /* DailyTipPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyTipPrompt.swift; sourceTree = "<group>"; };
 		FE11AA01FE11AA01FE11AA01 /* VaccinationScheduleTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationScheduleTests.swift; sourceTree = "<group>"; };
@@ -472,6 +474,7 @@
 		0BABF12B0000000000000003 /* Family */ = {
 			isa = PBXGroup;
 			children = (
+				FDC10001FDC10001FDC10001 /* FamilyDepartureCleanupJobTests.swift */,
 				0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */,
 				0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */,
 				0BABF12B0000000000000007 /* FamilyMembershipCheckTests.swift */,
@@ -1126,6 +1129,7 @@
 				0BABF1270000000000000001 /* LanguageTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB001 /* FirebaseBootstrapperTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB011 /* SleepLiveSyncServiceTests.swift in Sources */,
+				FDC10002FDC10002FDC10002 /* FamilyDepartureCleanupJobTests.swift in Sources */,
 				ACC001DEA000000000000001 /* AccountDisplayTests.swift in Sources */,
 				FEED0001AAAA1111BBBB0002 /* MockWalkRepository.swift in Sources */,
 				FEED0002AAAA1111BBBB0002 /* MockBathRepository.swift in Sources */,

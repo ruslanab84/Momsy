@@ -91,16 +91,18 @@ test("membership removal scrubs current and legacy personal identifiers", async 
     removal.delete(legacyMemberRef);
     await removal.commit();
     await waitFor(async () => {
-        const [shared, privateLog, family, user] = await Promise.all([
+        const [shared, privateLog, family, user, cleanup] = await Promise.all([
             babyRef.collection("feedingLogs").doc("own-shared").get(),
             babyRef.collection("momSleepLogs").doc("own-private").get(),
             familyRef.get(),
             db.collection("users").doc(uid).get(),
+            cleanupRef.get(),
         ]);
         return shared.get("addedBy") === ""
             && !privateLog.exists
             && family.get("createdBy") === ""
-            && user.get("familyId") === undefined;
+            && user.get("familyId") === undefined
+            && !cleanup.exists;
     });
 
     const [
