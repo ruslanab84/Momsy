@@ -241,6 +241,112 @@ test("family creator bootstrap requires a parent role", async () => {
     }
 });
 
+test("new family bootstrap commits routing and family state atomically", async () => {
+    const uid = "atomic-creator";
+    const id = "atomic-family";
+    const family = `families/${id}`;
+    const member = `${family}/members/${uid}`;
+    const baby = `${family}/babies/atomic-baby`;
+    const profile = `${baby}/profile/info`;
+    const user = `users/${uid}`;
+    const db = firestore(uid);
+    const batch = db.batch();
+
+    batch.set(db.doc(family), {
+        createdBy: uid,
+        bootstrapComplete: true,
+    });
+    batch.set(db.doc(member), { uid, roleRaw: "Мама" });
+    batch.set(db.doc(baby), { id: "atomic-baby", name: "Baby" });
+    batch.set(db.doc(profile), {
+        members: [{ uid, role: "parent", name: "Mom" }],
+    });
+    batch.set(db.doc(user), { familyId: id });
+
+    await assertSucceeds(batch.commit());
+
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const admin = adminContext.firestore();
+        assert.equal((await admin.doc(family).get()).data().bootstrapComplete, true);
+        assert.equal((await admin.doc(member).get()).data().uid, uid);
+        assert.equal((await admin.doc(baby).get()).exists, true);
+        assert.equal((await admin.doc(profile).get()).exists, true);
+        assert.equal((await admin.doc(user).get()).data().familyId, id);
+    });
+});
+
+test("incomplete or restricted family bootstrap leaves no orphan documents", async () => {
+    const missingRouteUid = "atomic-missing-route";
+    const missingRouteFamily = "families/atomic-missing-route";
+    const missingRouteMember = `${missingRouteFamily}/members/${missingRouteUid}`;
+    const missingRouteDb = firestore(missingRouteUid);
+    const missingRouteBatch = missingRouteDb.batch();
+    missingRouteBatch.set(missingRouteDb.doc(missingRouteFamily), {
+        createdBy: missingRouteUid,
+        bootstrapComplete: true,
+    });
+    missingRouteBatch.set(missingRouteDb.doc(missingRouteMember), {
+        uid: missingRouteUid,
+        roleRaw: "Мама",
+    });
+    await assertFails(missingRouteBatch.commit());
+
+    const missingMemberUid = "atomic-missing-member";
+    const missingMemberFamily = "families/atomic-missing-member";
+    const missingMemberUser = `users/${missingMemberUid}`;
+    const missingMemberDb = firestore(missingMemberUid);
+    const missingMemberBatch = missingMemberDb.batch();
+    missingMemberBatch.set(missingMemberDb.doc(missingMemberFamily), {
+        createdBy: missingMemberUid,
+        bootstrapComplete: true,
+    });
+    missingMemberBatch.set(missingMemberDb.doc(missingMemberUser), {
+        familyId: "atomic-missing-member",
+    });
+    await assertFails(missingMemberBatch.commit());
+
+    const restrictedUid = "atomic-restricted";
+    const restrictedId = "atomic-restricted-family";
+    const restrictedFamily = `families/${restrictedId}`;
+    const restrictedMember = `${restrictedFamily}/members/${restrictedUid}`;
+    const restrictedBaby = `${restrictedFamily}/babies/restricted-baby`;
+    const restrictedProfile = `${restrictedBaby}/profile/info`;
+    const restrictedUser = `users/${restrictedUid}`;
+    const restrictedDb = firestore(restrictedUid);
+    const restrictedBatch = restrictedDb.batch();
+    restrictedBatch.set(restrictedDb.doc(restrictedFamily), {
+        createdBy: restrictedUid,
+        bootstrapComplete: true,
+    });
+    restrictedBatch.set(restrictedDb.doc(restrictedMember), {
+        uid: restrictedUid,
+        roleRaw: "Няня",
+    });
+    restrictedBatch.set(restrictedDb.doc(restrictedBaby), { name: "Baby" });
+    restrictedBatch.set(restrictedDb.doc(restrictedProfile), {
+        members: [{ uid: restrictedUid, role: "parent", name: "Nanny" }],
+    });
+    restrictedBatch.set(restrictedDb.doc(restrictedUser), { familyId: restrictedId });
+    await assertFails(restrictedBatch.commit());
+
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const admin = adminContext.firestore();
+        for (const path of [
+            missingRouteFamily,
+            missingRouteMember,
+            missingMemberFamily,
+            missingMemberUser,
+            restrictedFamily,
+            restrictedMember,
+            restrictedBaby,
+            restrictedProfile,
+            restrictedUser,
+        ]) {
+            assert.equal((await admin.doc(path).get()).exists, false, path);
+        }
+    });
+});
+
 test("a restricted member cannot promote their own roster role", async () => {
     const member = firestore(users.nanny).doc(`${familyPath}/members/${users.nanny}`);
 

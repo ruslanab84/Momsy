@@ -276,29 +276,11 @@ final class FamilyManager: ObservableObject {
             guard role.canCreateFamily else {
                 throw FamilyError.restrictedRoleCannotCreateFamily
             }
-            let newId = try await createFamily(for: uid)
-            try await ensureMemberDocument(
-                familyId: newId,
-                uid: uid,
+            let newId = try await createFamily(
+                for: uid,
                 displayName: displayName,
-                defaultRoleRaw: role.rawValue,
-                bootstrapCreator: true
-            )
-            let bootstrapSync = BabySyncService(
-                familyId: newId,
-                babyId: initialProfile?.id.uuidString
-            )
-            if role.canManageFamilyMembers {
-                try await bootstrapSync.setupBabyProfile(uid: uid, displayName: displayName)
-            }
-            if let initialProfile {
-                try await bootstrapSync.setBabyProfile(initialProfile)
-            }
-            try await db.collection("families").document(newId)
-                .updateData(["bootstrapComplete": true])
-            try await userRef.setData(
-                ["familyId": newId, "displayName": displayName],
-                merge: true
+                role: role,
+                initialProfile: initialProfile
             )
             persist(familyId: newId, ownerUid: uid)
             _ = await confirmMembership(familyId: newId, uid: uid)
@@ -314,15 +296,59 @@ final class FamilyManager: ObservableObject {
     }
 
     @discardableResult
-    private func createFamily(for uid: String) async throws -> String {
+    private func createFamily(
+        for uid: String,
+        displayName: String,
+        role: FamilyRole,
+        initialProfile: BabyProfile?
+    ) async throws -> String {
         guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
-        let ref = db.collection("families").document()
-        try await ref.setData([
+        let familyRef = db.collection("families").document()
+        let memberRef = familyRef.collection("members").document(uid)
+        let userRef = db.collection("users").document(uid)
+        let batch = db.batch()
+
+        // Routing must commit with the family so account erasure can always resolve it.
+        batch.setData([
             "createdAt": Timestamp(date: Date()),
             "createdBy": uid,
-            "bootstrapComplete": false
-        ])
-        return ref.documentID
+            "bootstrapComplete": true
+        ], forDocument: familyRef)
+        batch.setData(
+            memberDocumentData(
+                uid: uid,
+                displayName: displayName,
+                defaultRoleRaw: role.rawValue,
+                includeLifecycleFields: true
+            ),
+            forDocument: memberRef,
+            merge: true
+        )
+
+        if let babyId = initialProfile?.id ?? ActiveBaby.currentId {
+            let babyRef = familyRef.collection("babies").document(babyId.uuidString)
+            if role.canManageFamilyMembers {
+                batch.setData([
+                    "createdAt": Timestamp(date: Date()),
+                    "members": [["uid": uid, "role": "parent", "name": displayName]]
+                ], forDocument: babyRef.collection("profile").document("info"))
+            }
+            if let initialProfile {
+                try batch.setData(
+                    from: BabyProfileDTO(from: initialProfile),
+                    forDocument: babyRef,
+                    merge: true
+                )
+            }
+        }
+
+        batch.setData(
+            ["familyId": familyRef.documentID, "displayName": displayName],
+            forDocument: userRef,
+            merge: true
+        )
+        try await batch.commit()
+        return familyRef.documentID
     }
 
     /// Whether the caller's current family already has a child profile (data that would
@@ -644,9 +670,7 @@ final class FamilyManager: ObservableObject {
         familyId: String,
         uid: String,
         displayName: String,
-        defaultRoleRaw: String,
-        inviteCode: String? = nil,
-        bootstrapCreator: Bool = false
+        defaultRoleRaw: String
     ) async throws {
         let ref = db.collection("families").document(familyId)
             .collection("members").document(uid)
@@ -654,22 +678,19 @@ final class FamilyManager: ObservableObject {
             uid: uid,
             displayName: displayName,
             defaultRoleRaw: defaultRoleRaw,
-            inviteCode: inviteCode,
-            includeLifecycleFields: inviteCode != nil || bootstrapCreator
+            includeLifecycleFields: false
         )
 
-        if inviteCode == nil && !bootstrapCreator {
-            let snap = try await ref.getDocument()
-            let existing = snap.data() ?? [:]
-            if existing["id"] as? String == nil {
-                data["id"] = UUID().uuidString
-            }
-            if existing["roleRaw"] as? String == nil {
-                data["roleRaw"] = defaultRoleRaw
-            }
-            if existing["joinedAt"] as? Timestamp == nil {
-                data["joinedAt"] = Timestamp(date: Date())
-            }
+        let snap = try await ref.getDocument()
+        let existing = snap.data() ?? [:]
+        if existing["id"] as? String == nil {
+            data["id"] = UUID().uuidString
+        }
+        if existing["roleRaw"] as? String == nil {
+            data["roleRaw"] = defaultRoleRaw
+        }
+        if existing["joinedAt"] as? Timestamp == nil {
+            data["joinedAt"] = Timestamp(date: Date())
         }
         try await ref.setData(data, merge: true)
     }

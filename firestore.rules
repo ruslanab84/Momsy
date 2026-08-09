@@ -80,6 +80,22 @@ service cloud.firestore {
       ];
     }
 
+    // One-shot setup for new clients: the family cannot become visible without
+    // its creator membership and user routing committing in the same batch.
+    function isAtomicFamilyCreatorBootstrap(familyId) {
+      let familyPath = /databases/$(database)/documents/families/$(familyId);
+      let memberPath = /databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid);
+      let userPath = /databases/$(database)/documents/users/$(request.auth.uid);
+      return isSignedIn()
+        && !exists(familyPath)
+        && !exists(memberPath)
+        && getAfter(familyPath).data.createdBy == request.auth.uid
+        && getAfter(familyPath).data.bootstrapComplete == true
+        && getAfter(memberPath).data.uid == request.auth.uid
+        && isParentRole(getAfter(memberPath).data.roleRaw)
+        && getAfter(userPath).data.familyId == familyId;
+    }
+
     // Read the roster pre-state: getAfter() would let a removed inviter recreate
     // their own parent member document in the same join batch.
     function isActiveParentMember(familyId, uid) {
@@ -429,7 +445,10 @@ service cloud.firestore {
       allow read:   if belongsToFamily(familyId);
       allow create: if isSignedIn()
                     && request.resource.data.createdBy == request.auth.uid
-                    && request.resource.data.bootstrapComplete == false;
+                    && (
+                      request.resource.data.bootstrapComplete == false
+                      || isAtomicFamilyCreatorBootstrap(familyId)
+                    );
       // Bootstrap may only move false -> true; otherwise a creator could reopen
       // bootstrap and recreate their member document.
       allow update: if (
@@ -449,6 +468,9 @@ service cloud.firestore {
       match /members/{memberId} {
         allow read:   if belongsToFamily(familyId);
         allow create: if isSelfCreatorBootstrap(familyId, memberId)
+                      || (memberId == request.auth.uid
+                          && request.resource.data.uid == request.auth.uid
+                          && isAtomicFamilyCreatorBootstrap(familyId))
                       || isSelfInviteJoin(familyId, memberId);
         allow update: if memberUidUnchangedOrCanonical(memberId)
                       && (
@@ -465,8 +487,11 @@ service cloud.firestore {
 
       match /babies/{babyId} {
         allow read: if canViewBabyStatus(familyId);
-        allow create, update: if canManageFamilyRoster(familyId)
-                              || isFamilyCreator(familyId);
+        allow create: if canManageFamilyRoster(familyId)
+                      || isFamilyCreator(familyId)
+                      || isAtomicFamilyCreatorBootstrap(familyId);
+        allow update: if canManageFamilyRoster(familyId)
+                      || isFamilyCreator(familyId);
         allow delete: if canManageFamilyRoster(familyId);
 
         match /{subcollection}/{document=**} {
@@ -479,6 +504,7 @@ service cloud.firestore {
                           && (
                             canManageFamilyRoster(familyId)
                             || isFamilyCreator(familyId)
+                            || isAtomicFamilyCreatorBootstrap(familyId)
                             || canCreateRoutineLog(familyId, subcollection)
                           )
                         )
