@@ -80,6 +80,16 @@ service cloud.firestore {
       ];
     }
 
+    // Read the roster pre-state: getAfter() would let a removed inviter recreate
+    // their own parent member document in the same join batch.
+    function isActiveParentMember(familyId, uid) {
+      return uid is string
+        && exists(/databases/$(database)/documents/families/$(familyId)/members/$(uid))
+        && isParentRole(
+          get(/databases/$(database)/documents/families/$(familyId)/members/$(uid)).data.roleRaw
+        );
+    }
+
     function isNannyRole(roleRaw) {
       return roleRaw in ['Няня', 'няня', 'nanny', 'Nanny'];
     }
@@ -199,7 +209,11 @@ service cloud.firestore {
         && familyExists(familyId)
         && exists(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode))
         && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.familyId == familyId
-        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt > request.time;
+        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt > request.time
+        && isActiveParentMember(
+          familyId,
+          get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.createdBy
+        );
     }
 
     function memberRoleMatchesInvite() {
@@ -386,7 +400,8 @@ service cloud.firestore {
                     // даже при отказе, и перебор не должен его оплачивать.
                     && isStrongInviteCode(code)
                     && familyExists(resource.data.familyId)
-                    && resource.data.expiresAt > request.time;
+                    && resource.data.expiresAt > request.time
+                    && isActiveParentMember(resource.data.familyId, resource.data.createdBy);
       allow list:   if isSignedIn()
                     && resource.data.createdBy == request.auth.uid;
       allow create: if isSignedIn()

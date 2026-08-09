@@ -422,6 +422,52 @@ test("an invite cannot expose or recreate a deleted family", async () => {
     await assertFails(batch.commit());
 });
 
+test("a downgraded parent cannot keep authorizing joins with an old invite", async () => {
+    const inviteCode = "MOMSY-D2W3-N4G5-R6D7";
+    const invitePath = `invites/${inviteCode}`;
+    const momDb = firestore(users.mom);
+
+    await assertSucceeds(momDb.doc(invitePath).set({
+        familyId,
+        createdBy: users.mom,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        roleRaw: "Папа",
+    }));
+    await assertSucceeds(firestore(users.dad)
+        .doc(`${familyPath}/members/${users.mom}`)
+        .update({ roleRaw: "Няня" }));
+
+    const joinerDb = firestore(users.outsider);
+    await assertFails(joinerDb.doc(invitePath).get());
+    const batch = joinerDb.batch();
+    batch.set(joinerDb.doc(`${familyPath}/members/${users.outsider}`), {
+        uid: users.outsider,
+        roleRaw: "Папа",
+        inviteCode,
+    });
+    batch.set(joinerDb.doc(`users/${users.outsider}`), { familyId });
+    batch.delete(joinerDb.doc(invitePath));
+    await assertFails(batch.commit());
+});
+
+test("a removed parent cannot restore access with their own old invite", async () => {
+    await assertSucceeds(firestore(users.dad)
+        .doc(`${familyBPath}/members/${users.parentB}`)
+        .delete());
+
+    const removedParentDb = firestore(users.parentB);
+    await assertFails(removedParentDb.doc(familyBInvitePath).get());
+    const batch = removedParentDb.batch();
+    batch.set(removedParentDb.doc(`${familyBPath}/members/${users.parentB}`), {
+        uid: users.parentB,
+        roleRaw: "Папа",
+        inviteCode: "MOMSY-B2B3-B4B5-B6B7",
+    });
+    batch.set(removedParentDb.doc(`users/${users.parentB}`), { familyId: familyBId });
+    batch.delete(removedParentDb.doc(familyBInvitePath));
+    await assertFails(batch.commit());
+});
+
 test("self-invite join consumes the code before another UID can use it", async () => {
     const momDb = firestore(users.mom);
     const invite = momDb.doc("invites/MOMSY-J2N3-K4L5-M6N7");
