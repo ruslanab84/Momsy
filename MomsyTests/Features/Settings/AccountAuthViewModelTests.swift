@@ -214,6 +214,53 @@ struct AccountAuthViewModelTests {
     }
 }
 
+@Suite("Provider sign-in cloud sync consent", .serialized)
+@MainActor
+struct ProviderSignInConsentTests {
+
+    @Test func deniedConsentBlocksAppleSignIn() async {
+        await withDeniedCloudSyncConsent {
+            let auth = AuthManager()
+
+            await #expect {
+                try await auth.handleAppleCompletion(.failure(DummyError()))
+            } throws: { error in
+                guard case AuthError.cloudSyncConsentRequired = error else { return false }
+                return true
+            }
+        }
+    }
+
+    @Test func deniedConsentBlocksGoogleSignIn() async {
+        await withDeniedCloudSyncConsent {
+            let auth = AuthManager()
+
+            await #expect {
+                try await auth.signInWithGoogle()
+            } throws: { error in
+                guard case AuthError.cloudSyncConsentRequired = error else { return false }
+                return true
+            }
+        }
+    }
+}
+
+@MainActor
+private func withDeniedCloudSyncConsent(_ operation: () async -> Void) async {
+    let defaults = UserDefaults.standard
+    let previousValue = defaults.object(forKey: CloudSyncConsent.storageKey)
+    defer {
+        if let previousValue {
+            defaults.set(previousValue, forKey: CloudSyncConsent.storageKey)
+        } else {
+            defaults.removeObject(forKey: CloudSyncConsent.storageKey)
+        }
+    }
+
+    CloudSyncConsent.set(.denied, defaults: defaults)
+    await operation()
+}
+
 @MainActor
 private func waitUntil(timeoutNs: UInt64 = 2_000_000_000, _ cond: @escaping () -> Bool) async throws {
     let start = DispatchTime.now().uptimeNanoseconds

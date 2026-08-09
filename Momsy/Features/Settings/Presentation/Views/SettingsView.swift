@@ -29,7 +29,9 @@ struct SettingsView: View {
                 languageSection
                 vaccinationScheduleSection
                 childrenSection
-                accountSection
+                if vm.cloudSyncEnabled || authManager.isSignedIn {
+                    accountSection
+                }
                 cloudSyncSection
                 aboutSection
                 dangerSection

@@ -236,11 +236,12 @@ final class AuthManager: ObservableObject {
 
     @MainActor
     func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) async throws {
-        installStateListenerIfPossible()
         defer {
             currentNonce = nil
             appleRequestPreparationError = nil
         }
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
+        installStateListenerIfPossible()
         let auth = try result.get()
         if let appleRequestPreparationError {
             throw appleRequestPreparationError
@@ -345,6 +346,7 @@ final class AuthManager: ObservableObject {
 
     @MainActor
     func signInWithGoogle() async throws {
+        guard CloudSyncConsent.isGranted() else { throw AuthError.cloudSyncConsentRequired }
         installStateListenerIfPossible()
 #if canImport(GoogleSignIn)
         let credential = try await googleCredentialFromInteractiveSignIn()
