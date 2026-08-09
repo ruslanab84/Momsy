@@ -657,21 +657,25 @@ final class AppContainer {
         let currentUidAtStart = authManager.currentUID
         // Recovery runs even without a blocking marker: that is the state in which it drives
         // the non-blocking Auth-record retry, and this is its only production entry point.
-        await accountDeletionRecovery.runIfNeeded()
+        let disposition = await accountDeletionRecovery.runIfNeeded()
         guard let pendingAtStart else { return false }
 
         let currentUidAfterRecovery = authManager.currentUID
         let deletionStillPending =
             pendingAccountDeletionStore.loadPending()?.uid == pendingAtStart.uid &&
             currentUidAfterRecovery == pendingAtStart.uid
-        guard AccountDeletionRecovery.shouldWipeDevice(
-            pendingUidAtStart: pendingAtStart.uid,
+        if AccountDeletionRecovery.shouldWipeDevice(
+            pendingAtStart: pendingAtStart,
             currentUidAtStart: currentUidAtStart,
-            currentUidAfterRecovery: currentUidAfterRecovery
-        ) else { return false }
-
-        try? eraseLocalData()
-        FamilyManager.shared.reset()
+            currentUidAfterRecovery: currentUidAfterRecovery,
+            disposition: disposition
+        ) {
+            do {
+                try eraseLocalData()
+                pendingAccountDeletionStore.markLocalWipeCompleted(for: pendingAtStart.uid)
+            } catch {}
+            FamilyManager.shared.reset()
+        }
         return deletionStillPending
     }
 

@@ -6,6 +6,13 @@ import Foundation
 struct PendingAccountDeletion: Equatable {
     let uid: String
     let familyId: String?
+    let localWipeCompleted: Bool
+
+    init(uid: String, familyId: String?, localWipeCompleted: Bool = false) {
+        self.uid = uid
+        self.familyId = familyId
+        self.localWipeCompleted = localWipeCompleted
+    }
 }
 
 /// Durable record that an account deletion was started but not yet *server-confirmed*.
@@ -23,6 +30,8 @@ protocol PendingAccountDeletionStore {
     func markPending(uid: String, familyId: String?)
     /// The in-flight deletion, or `nil` when none is pending.
     func loadPending() -> PendingAccountDeletion?
+    /// Records that the device was already cleaned for this deletion generation.
+    func markLocalWipeCompleted(for uid: String)
     /// Clears the marker once the erase is server-confirmed.
     func clearPending()
 }
@@ -32,12 +41,14 @@ struct UserDefaultsPendingAccountDeletionStore: PendingAccountDeletionStore {
     /// marker outlives the device wipe and is still present on the next launch.
     private static let key = "pendingAccountDeletion_uid_v1"
     private static let familyKey = "pendingAccountDeletion_familyId_v1"
+    private static let localWipeCompletedKey = "pendingAccountDeletion_localWipeCompleted_v1"
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) { self.defaults = defaults }
 
     func markPending(uid: String, familyId: String?) {
         defaults.set(uid, forKey: Self.key)
+        defaults.set(false, forKey: Self.localWipeCompletedKey)
         if let familyId, !familyId.isEmpty {
             defaults.set(familyId, forKey: Self.familyKey)
         } else {
@@ -47,12 +58,22 @@ struct UserDefaultsPendingAccountDeletionStore: PendingAccountDeletionStore {
 
     func loadPending() -> PendingAccountDeletion? {
         guard let uid = defaults.string(forKey: Self.key) else { return nil }
-        return PendingAccountDeletion(uid: uid, familyId: defaults.string(forKey: Self.familyKey))
+        return PendingAccountDeletion(
+            uid: uid,
+            familyId: defaults.string(forKey: Self.familyKey),
+            localWipeCompleted: defaults.bool(forKey: Self.localWipeCompletedKey)
+        )
+    }
+
+    func markLocalWipeCompleted(for uid: String) {
+        guard defaults.string(forKey: Self.key) == uid else { return }
+        defaults.set(true, forKey: Self.localWipeCompletedKey)
     }
 
     func clearPending() {
         defaults.removeObject(forKey: Self.key)
         defaults.removeObject(forKey: Self.familyKey)
+        defaults.removeObject(forKey: Self.localWipeCompletedKey)
     }
 }
 

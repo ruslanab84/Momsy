@@ -479,8 +479,9 @@ final class DeleteAccountUseCase {
         var cloudError: Error?
         var authError: Error?
         var completionError: Error?
+        let deletingUid = auth.currentUID
 
-        if let uid = auth.currentUID {
+        if let uid = deletingUid {
             // Persist the intent FIRST so a deletion that doesn't reach the backend is
             // completed by launch recovery instead of resurfacing on the next sign-in.
             // The family is recorded WITH the uid: recovery must never re-resolve it.
@@ -517,6 +518,9 @@ final class DeleteAccountUseCase {
 
         // Always leave the device clean, even if the cloud erase didn't fully confirm.
         try eraseLocal()
+        if let deletingUid {
+            pendingStore.markLocalWipeCompleted(for: deletingUid)
+        }
         FamilyManager.shared.reset()
 
         // The Auth failure surfaces only AFTER the wipe: it can be set only once the server
@@ -527,6 +531,11 @@ final class DeleteAccountUseCase {
         if let cloudError { throw cloudError }
         if let completionError { throw completionError }
     }
+}
+
+nonisolated enum AccountDeletionRecoveryDisposition: Equatable {
+    case continueDeletion
+    case supersededByNewFamily
 }
 
 /// Finishes an account deletion that the original `DeleteAccountUseCase.execute()` started
@@ -567,22 +576,27 @@ final class AccountDeletionRecovery {
     /// Captures ownership before recovery can clear Auth and the marker. A different account
     /// becoming active while recovery awaits must not have its local data wiped.
     nonisolated static func shouldWipeDevice(
-        pendingUidAtStart: String?,
+        pendingAtStart: PendingAccountDeletion?,
         currentUidAtStart: String?,
-        currentUidAfterRecovery: String?
+        currentUidAfterRecovery: String?,
+        disposition: AccountDeletionRecoveryDisposition
     ) -> Bool {
-        guard let pendingUidAtStart, currentUidAtStart == pendingUidAtStart else { return false }
-        return currentUidAfterRecovery == nil || currentUidAfterRecovery == pendingUidAtStart
+        guard let pendingAtStart,
+              !pendingAtStart.localWipeCompleted,
+              disposition != .supersededByNewFamily,
+              currentUidAtStart == pendingAtStart.uid else { return false }
+        return currentUidAfterRecovery == nil || currentUidAfterRecovery == pendingAtStart.uid
     }
 
-    func runIfNeeded() async {
+    @discardableResult
+    func runIfNeeded() async -> AccountDeletionRecoveryDisposition {
         guard let pending = pendingStore.loadPending() else {
             await retryAuthDeletionIfNeeded()
-            return
+            return .continueDeletion
         }
         guard let currentUid = auth.currentUID, currentUid == pending.uid else {
             suppressedRestoreStore.suppressRestore(for: pending.uid)
-            return
+            return .continueDeletion
         }
         suppressedRestoreStore.suppressRestore(for: pending.uid)
         do {
@@ -596,10 +610,10 @@ final class AccountDeletionRecovery {
                 // new family be adopted normally on the next `FamilyManager.setup`.
                 pendingStore.clearPending()
                 suppressedRestoreStore.clearSuppression(for: currentUid)
-                return
+                return .supersededByNewFamily
             }
             guard try await cloudEraser.isCloudDataPresent(uid: currentUid) == false else {
-                return // still on the server — keep the marker and retry next launch
+                return .continueDeletion // still on the server — keep the marker and retry next launch
             }
             // Server-confirmed clean. Releasing the blocking marker HERE is the fix for the
             // re-registration deadlock: with no data left, reusing the Auth uid is safe.
@@ -613,6 +627,7 @@ final class AccountDeletionRecovery {
         } catch {
             // Leave the marker in place; the next launch retries.
         }
+        return .continueDeletion
     }
 
     /// Best-effort removal of an Auth record whose data is already gone. Never blocks the UI.

@@ -35,14 +35,33 @@ private final class MockPendingStore: PendingAccountDeletionStore, @unchecked Se
     private(set) var pending: PendingAccountDeletion?
     var markCount = 0
     var clearCount = 0
-    init(pendingUid: String? = nil, familyId: String? = nil) {
-        pending = pendingUid.map { PendingAccountDeletion(uid: $0, familyId: familyId) }
+    init(
+        pendingUid: String? = nil,
+        familyId: String? = nil,
+        localWipeCompleted: Bool = false
+    ) {
+        pending = pendingUid.map {
+            PendingAccountDeletion(
+                uid: $0,
+                familyId: familyId,
+                localWipeCompleted: localWipeCompleted
+            )
+        }
     }
     var pendingUid: String? { pending?.uid }
+    var localWipeCompleted: Bool { pending?.localWipeCompleted == true }
     func markPending(uid: String, familyId: String?) {
         pending = PendingAccountDeletion(uid: uid, familyId: familyId); markCount += 1
     }
     func loadPending() -> PendingAccountDeletion? { pending }
+    func markLocalWipeCompleted(for uid: String) {
+        guard let pending, pending.uid == uid else { return }
+        self.pending = PendingAccountDeletion(
+            uid: pending.uid,
+            familyId: pending.familyId,
+            localWipeCompleted: true
+        )
+    }
     func clearPending() { pending = nil; clearCount += 1 }
 }
 
@@ -126,7 +145,8 @@ struct DeleteAccountTests {
         uid: String? = "user-1",
         cloudError: Error? = nil,
         authError: Error? = nil,
-        stillPresent: Bool = false
+        stillPresent: Bool = false,
+        localError: Error? = nil
     ) -> (
         DeleteAccountUseCase,
         MockCloudEraser.Calls,
@@ -151,7 +171,10 @@ struct DeleteAccountTests {
             pendingStore: pending,
             pendingAuthStore: authPending,
             suppressedRestoreStore: suppressed,
-            eraseLocal: { localWipes += 1 }
+            eraseLocal: {
+                localWipes += 1
+                if let localError { throw localError }
+            }
         )
         return (uc, cloudCalls, auth, pending, authPending, suppressed, { localWipes })
     }
@@ -244,6 +267,7 @@ struct DeleteAccountTests {
         #expect(pending.clearCount == 0)
         #expect(suppressed.isRestoreSuppressed(for: "user-1"))
         #expect(wipes() == 1)
+        #expect(pending.localWipeCompleted)
     }
 
     @Test("marks deletion pending, verifies against the server, then clears the marker")
@@ -271,6 +295,43 @@ struct DeleteAccountTests {
         #expect(auth.signOutCount == 0)
         #expect(suppressed.isRestoreSuppressed(for: "abc"))
         #expect(wipes() == 1)                  // device still left clean for the user
+        #expect(pending.localWipeCompleted)
+    }
+
+    @Test("does not mark the local wipe complete when device erasure fails")
+    func failedLocalWipeRemainsPending() async {
+        let (uc, _, _, pending, _, _, wipes) = makeUseCase(
+            stillPresent: true,
+            localError: DummyError()
+        )
+
+        await #expect(throws: DummyError.self) {
+            try await uc.execute()
+        }
+
+        #expect(wipes() == 1)
+        #expect(pending.pendingUid == "user-1")
+        #expect(!pending.localWipeCompleted)
+    }
+}
+
+@Suite("Pending account deletion store")
+struct PendingAccountDeletionStoreTests {
+    @Test("tracks a completed local wipe only for the deletion owner")
+    func tracksCompletedLocalWipe() throws {
+        let suiteName = UUID().uuidString
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = UserDefaultsPendingAccountDeletionStore(defaults: defaults)
+
+        store.markPending(uid: "user-1", familyId: "family-1")
+        #expect(store.loadPending()?.localWipeCompleted == false)
+
+        store.markLocalWipeCompleted(for: "user-2")
+        #expect(store.loadPending()?.localWipeCompleted == false)
+
+        store.markLocalWipeCompleted(for: "user-1")
+        #expect(store.loadPending()?.localWipeCompleted == true)
     }
 }
 
@@ -608,11 +669,12 @@ struct AccountDeletionRecoveryTests {
             pendingStore: pending, pendingAuthStore: MockPendingAuthStore(),
             suppressedRestoreStore: suppressed, accountIsInUse: { true })
 
-        await rec.runIfNeeded()
+        let disposition = await rec.runIfNeeded()
 
         #expect(pending.pendingUid == nil)
         #expect(cloud.presentChecks.isEmpty)                      // no erase was attempted
         #expect(suppressed.isRestoreSuppressed(for: "abc") == false)
+        #expect(disposition == .supersededByNewFamily)
     }
 
     @Test("nothing-to-erase completes the deletion instead of blocking forever")
@@ -649,18 +711,20 @@ struct AccountDeletionRecoveryTests {
     @Test("wipes after recovery clears Auth and the marker for the owning session")
     func recoveryCompletionStillRequiresWipe() {
         #expect(AccountDeletionRecovery.shouldWipeDevice(
-            pendingUidAtStart: "u1",
+            pendingAtStart: PendingAccountDeletion(uid: "u1", familyId: nil),
             currentUidAtStart: "u1",
-            currentUidAfterRecovery: nil
+            currentUidAfterRecovery: nil,
+            disposition: .continueDeletion
         ))
     }
 
     @Test("wipes the device while the pending deletion owns the session")
     func wipesForOwningSession() {
         #expect(AccountDeletionRecovery.shouldWipeDevice(
-            pendingUidAtStart: "u1",
+            pendingAtStart: PendingAccountDeletion(uid: "u1", familyId: nil),
             currentUidAtStart: "u1",
-            currentUidAfterRecovery: "u1"
+            currentUidAfterRecovery: "u1",
+            disposition: .continueDeletion
         ))
     }
 
@@ -669,27 +733,54 @@ struct AccountDeletionRecoveryTests {
         // Otherwise a marker whose uid never signs in again re-wipes — and so resets
         // onboarding — on every cold launch, forever.
         #expect(AccountDeletionRecovery.shouldWipeDevice(
-            pendingUidAtStart: "u1",
+            pendingAtStart: PendingAccountDeletion(uid: "u1", familyId: nil),
             currentUidAtStart: nil,
-            currentUidAfterRecovery: nil
+            currentUidAfterRecovery: nil,
+            disposition: .continueDeletion
         ) == false)
     }
 
     @Test("no device wipe when a different account is signed in")
     func skipsWipeForOtherUser() {
         #expect(AccountDeletionRecovery.shouldWipeDevice(
-            pendingUidAtStart: "u1",
+            pendingAtStart: PendingAccountDeletion(uid: "u1", familyId: nil),
             currentUidAtStart: "u2",
-            currentUidAfterRecovery: "u2"
+            currentUidAfterRecovery: "u2",
+            disposition: .continueDeletion
         ) == false)
     }
 
     @Test("no device wipe if the session switches accounts during recovery")
     func skipsWipeAfterAccountSwitch() {
         #expect(AccountDeletionRecovery.shouldWipeDevice(
-            pendingUidAtStart: "u1",
+            pendingAtStart: PendingAccountDeletion(uid: "u1", familyId: nil),
             currentUidAtStart: "u1",
-            currentUidAfterRecovery: "u2"
+            currentUidAfterRecovery: "u2",
+            disposition: .continueDeletion
+        ) == false)
+    }
+
+    @Test("no device wipe when recovery found a legitimate replacement family")
+    func skipsWipeWhenDeletionWasSuperseded() {
+        #expect(AccountDeletionRecovery.shouldWipeDevice(
+            pendingAtStart: PendingAccountDeletion(uid: "u1", familyId: "old-family"),
+            currentUidAtStart: "u1",
+            currentUidAfterRecovery: "u1",
+            disposition: .supersededByNewFamily
+        ) == false)
+    }
+
+    @Test("no repeated wipe after the deletion already cleaned the device")
+    func skipsCompletedLocalWipe() {
+        #expect(AccountDeletionRecovery.shouldWipeDevice(
+            pendingAtStart: PendingAccountDeletion(
+                uid: "u1",
+                familyId: "old-family",
+                localWipeCompleted: true
+            ),
+            currentUidAtStart: "u1",
+            currentUidAfterRecovery: "u1",
+            disposition: .continueDeletion
         ) == false)
     }
 }
