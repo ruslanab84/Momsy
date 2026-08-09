@@ -38,6 +38,25 @@ struct PendingWritesStoreTests {
         #expect(defaults.data(forKey: SecurePreferences.encryptedKey(for: "pending_writes_v1")) != nil)
     }
 
+    @Test func productionKeychainPathPersistsAcrossStoreRecreation() throws {
+        let suite = "PendingWritesStoreTests.productionKeychain"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let store = PendingWritesStore(defaults: defaults)
+        store.add(collection: "feedingLogs", docId: "durable",
+                  payload: ["amountMl": 90], familyId: "family", babyId: "baby")
+
+        #expect(defaults.object(forKey: "pending_writes_v1") == nil)
+        #expect(defaults.data(forKey: SecurePreferences.encryptedKey(for: "pending_writes_v1")) != nil)
+
+        let relaunchedStore = PendingWritesStore(defaults: defaults)
+        let entry = try #require(relaunchedStore.all().first)
+        #expect(entry.docId == "durable")
+        #expect((entry.payload["amountMl"] as? Int) == 90)
+    }
+
     @Test func addReplacesSameDocId() {
         let (store, _) = freshStore()
         store.add(collection: "sleepLogs", docId: "x", payload: ["v": 1], familyId: "f", babyId: "b")
