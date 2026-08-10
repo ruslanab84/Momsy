@@ -6,7 +6,9 @@
   "scripts": {
     "test": "npm run test:firebase-rules && npm run test:firebase-functions",
     "test:firebase-rules": "firebase emulators:exec --only firestore,storage --project demo-momsy \"node --test tests/firebase-rules.test.mjs\"",
-    "test:firebase-functions": "firebase emulators:exec --only firestore,functions --project demo-momsy \"npm test --prefix functions\""
+    "test:firebase-functions": "firebase emulators:exec --only firestore,functions --project demo-momsy \"npm test --prefix functions\"",
+    "firebase:release-gate": "node -e \"const project = JSON.parse(require('node:fs').readFileSync('.firebaserc', 'utf8')).projects.default; if (project !== 'momsy-cf74a') throw new Error('Expected Firebase project momsy-cf74a, got ' + project)\" && npm test",
+    "deploy:firebase-rules": "npm run firebase:release-gate && firebase deploy --only firestore:rules,storage --project momsy-cf74a --non-interactive"
   },
   "repository": {
     "type": "git",
@@ -22,6 +24,7 @@
   "homepage": "https://github.com/ruslanab84/Momsy#readme",
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",
-    "firebase": "^12.16.0"
+    "firebase": "^12.16.0",
+    "firebase-tools": "15.26.0"
   }
 }
