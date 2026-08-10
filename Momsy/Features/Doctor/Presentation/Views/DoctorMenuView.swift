@@ -48,6 +48,7 @@ struct DoctorMenuView: View {
                     .buttonStyle(.plain)
 
                     VStack(spacing: 1) {
+                        /* Weekly Report is temporarily hidden for the App Store release.
                         DoctorMenuRow(
                             destination: WeeklyInsightView(container: container),
                             icon: "sparkles",
@@ -57,6 +58,7 @@ struct DoctorMenuView: View {
                             sub: lm.strings.weeklyInsightSub
                         )
                         Divider().padding(.leading, 60)
+                        */
                         DoctorMenuRow(
                             destination: CareTipsView(container: container),
                             icon: "lightbulb.fill",

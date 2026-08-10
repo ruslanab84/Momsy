@@ -11,6 +11,7 @@ final class GeminiWeeklyInsightService: WeeklyInsightService {
     private let maxOutputTokens = 4000
 
     func generate(context: WeeklyInsightContext) async throws -> WeeklyInsightAI {
+        /* Gemini generation is temporarily disabled for the App Store release.
         try await GeminiRetry.run(label: "GeminiWeeklyInsightService") {
             // Prompt-enforced JSON (system prompt mandates it) + tolerant decode.
             let config = GenerationConfig(
@@ -32,6 +33,8 @@ final class GeminiWeeklyInsightService: WeeklyInsightService {
             }
             return ai
         }
+        */
+        throw WeeklyInsightError.temporarilyDisabled
     }
 
     /// Tolerant decode: strips markdown fences and extracts the first JSON object.
@@ -51,6 +54,7 @@ final class GeminiWeeklyInsightService: WeeklyInsightService {
 }
 
 enum WeeklyInsightError: Error {
+    case temporarilyDisabled
     case emptyResponse
     case malformedResponse
 }

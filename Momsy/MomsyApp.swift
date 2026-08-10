@@ -272,6 +272,8 @@ private struct MomsyRootView: View {
 
     @MainActor
     private func maybeGenerateWeeklyReport() async {
+        /* Weekly Report and its Gemini consent/generation flow are temporarily disabled
+        for the App Store release.
         guard onboardingDone, container.subscriptionManager.isPremium else { return }
         switch WeeklyInsightAIConsent.status() {
         case .notDetermined:
@@ -281,6 +283,7 @@ private struct MomsyRootView: View {
         case .denied:
             break
         }
+        */
     }
 
     @MainActor
@@ -322,7 +325,8 @@ private struct MomsyRootView: View {
 
 private func setupNotificationsOnLaunch(appState: AppState) async {
     let push = LocalPushNotificationService.shared
-    push.scheduleWeeklyReport(hour: 7, minute: 0)
+    // push.scheduleWeeklyReport(hour: 7, minute: 0) // Weekly Report is temporarily disabled.
+    push.cancelWeeklyReport()
 
     guard let birth = appState.babyProfile?.birthDate else { return }
     for leap in DevelopmentLeap.catalog {
