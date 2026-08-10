@@ -67,6 +67,7 @@ struct OnboardingViewModelTests {
         pendingCode: String? = nil,
         cloudSyncEnabled: Bool = false,
         familySetupError: Error? = nil,
+        initialProfiles: [BabyProfile] = [],
         setCloudSyncConsent: @escaping (CloudSyncConsent.Status) -> Void = { _ in },
         onDone: @escaping () -> Void = {}
     ) -> Harness {
@@ -77,7 +78,7 @@ struct OnboardingViewModelTests {
             pendingStore.save(pendingCode)
         }
 
-        let repo      = MockBabyRepository()
+        let repo      = MockBabyRepository(initialProfiles: initialProfiles)
         let analytics = MockAnalyticsService()
         let push      = MockPushNotificationService()
         let state     = makeAppState()
@@ -422,6 +423,40 @@ struct OnboardingViewModelTests {
     }
 
     // MARK: - finish
+
+    @Test("finish() does not complete onboarding when local profile save fails")
+    func finishDoesNotCompleteWhenLocalProfileSaveFails() async throws {
+        var completed = false
+        let profiles = (0..<ActiveBaby.maxChildren).map { BabyProfile(name: "Existing \($0)") }
+        let harness = makeHarness(initialProfiles: profiles, onDone: { completed = true })
+        harness.vm.babyName = "Mia"
+
+        harness.vm.finish()
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(!completed)
+        #expect(harness.vm.finishError != nil)
+        #expect(harness.analytics.events.isEmpty)
+    }
+
+    @Test("finish() does not complete onboarding when Firebase family setup fails")
+    func finishDoesNotCompleteWhenFamilySetupFails() async throws {
+        var completed = false
+        let harness = makeHarness(
+            cloudSyncEnabled: true,
+            familySetupError: FamilyError.noFamilyId,
+            onDone: { completed = true }
+        )
+        harness.vm.babyName = "Mia"
+
+        harness.vm.finish()
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(!completed)
+        #expect(harness.vm.finishError != nil)
+        #expect(harness.pendingSetupStore.load()?.profile.name == "Mia")
+        #expect(harness.analytics.events.isEmpty)
+    }
 
     @Test("finish() calls onDone callback")
     func finishCallsOnDone() async throws {

@@ -32,6 +32,7 @@ final class OnboardingViewModel: ObservableObject {
     @Published private(set) var inviteExpiry = Date()
     @Published private(set) var isPreparingInvite = false
     @Published var inviteError: Error?
+    @Published var finishError: String?
     @Published var pendingInviteCode = ""
     @Published var showJoinConfirm = false
     @Published private(set) var cloudSyncEnabled: Bool
@@ -366,28 +367,27 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     func finish() {
-        analytics.track(.onboardingComplete)
+        finishError = nil
         Task {
-            await pushNotifications.requestPermission()
-            pushNotifications.scheduleMorningDiary(hour: 9, minute: 0)
-            guard flow == .createProfile else {
-                pendingInviteStore.clear()
+            do {
+                if flow == .joinFamily {
+                    pendingInviteStore.clear()
+                } else {
+                    let profile = try await saveBabyProfileLocallyIfNeeded()
+                    if cloudSyncEnabled {
+                        pendingSetupStore.save(role: parentRole, profile: profile)
+                        try await ensureFamilyReady(familyDisplayName, parentRole, profile)
+                        pendingSetupStore.clear()
+                    }
+                }
+
+                analytics.track(.onboardingComplete)
+                await pushNotifications.requestPermission()
+                pushNotifications.scheduleMorningDiary(hour: 9, minute: 0)
                 onDone()
-                return
+            } catch {
+                finishError = error.localizedDescription
             }
-            let profile = try? await saveBabyProfileLocallyIfNeeded()
-            guard cloudSyncEnabled else {
-                onDone()
-                return
-            }
-            if let profile {
-                pendingSetupStore.save(role: parentRole, profile: profile)
-                do {
-                    try await ensureFamilyReady(familyDisplayName, parentRole, profile)
-                    pendingSetupStore.clear()
-                } catch {}
-            }
-            onDone()
         }
     }
 

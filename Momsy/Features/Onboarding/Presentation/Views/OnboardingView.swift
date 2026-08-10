@@ -44,6 +44,7 @@ struct OnboardingView: View {
         } message: {
             Text(loc.strings.joinReplaceMessage)
         }
+        .errorToast($vm.finishError)
     }
 
     // MARK: - Background
