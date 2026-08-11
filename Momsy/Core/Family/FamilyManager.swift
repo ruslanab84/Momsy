@@ -102,7 +102,7 @@ final class FamilyManager: ObservableObject {
     private var hasVerifiedMembershipThisLaunch = false
     private var memberRoleListener: ListenerRegistration?
 
-    enum MembershipCheck { case member, revoked, unknown }
+    nonisolated enum MembershipCheck { case member, revoked, unknown }
 
     private var db: Firestore { Firestore.firestore() }
     private var isSettingUp = false

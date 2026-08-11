@@ -28,7 +28,7 @@ final class PhoneSessionManager: NSObject {
         NotificationCenter.default.addObserver(
             forName: .widgetDataDidChange, object: nil, queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in self?.pushState() }
+            Task { @MainActor [weak self] in self?.pushState() }
         }
     }
 

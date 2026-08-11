@@ -8,7 +8,7 @@ import Foundation
 // stable, non-localized tokens (`FeedingSide.token`, `SleepQuality.rawValue`).
 
 /// Commands sent Watch → iPhone over `WCSession`.
-enum WatchCommand: Codable, Equatable {
+nonisolated enum WatchCommand: Codable, Equatable, Sendable {
     case startFeeding(side: String)   // "left" | "right" | "bottle"
     case pauseFeeding
     case resumeFeeding
@@ -20,7 +20,7 @@ enum WatchCommand: Codable, Equatable {
 
 /// Envelope carrying a command plus an idempotency id so re-delivered transfers
 /// are processed at most once on the iPhone.
-struct WatchCommandEnvelope: Codable, Equatable {
+nonisolated struct WatchCommandEnvelope: Codable, Equatable, Sendable {
     let id: UUID
     let command: WatchCommand
     let sentAt: Date
