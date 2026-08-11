@@ -645,7 +645,11 @@ final class AppContainer {
         auth: authManager,
         pendingStore: pendingAccountDeletionStore,
         pendingAuthStore: pendingAuthAccountDeletionStore,
-        suppressedRestoreStore: suppressedFamilyRestoreStore
+        suppressedRestoreStore: suppressedFamilyRestoreStore,
+        eraseLocal: { [unowned self] in
+            defer { FamilyManager.shared.reset() }
+            try self.eraseLocalData()
+        }
     )
 
     /// Runs before launch-time migrations/local profile loading, and after a provider sign-in
@@ -655,29 +659,14 @@ final class AppContainer {
     @MainActor
     func recoverPendingAccountDeletion() async -> Bool {
         let pendingAtStart = pendingAccountDeletionStore.loadPending()
-        let currentUidAtStart = authManager.currentUID
         // Recovery runs even without a blocking marker: that is the state in which it drives
         // the non-blocking Auth-record retry, and this is its only production entry point.
-        let disposition = await accountDeletionRecovery.runIfNeeded()
+        await accountDeletionRecovery.runIfNeeded()
         guard let pendingAtStart else { return false }
 
         let currentUidAfterRecovery = authManager.currentUID
-        let deletionStillPending =
-            pendingAccountDeletionStore.loadPending()?.uid == pendingAtStart.uid &&
+        return pendingAccountDeletionStore.loadPending()?.uid == pendingAtStart.uid &&
             currentUidAfterRecovery == pendingAtStart.uid
-        if AccountDeletionRecovery.shouldWipeDevice(
-            pendingAtStart: pendingAtStart,
-            currentUidAtStart: currentUidAtStart,
-            currentUidAfterRecovery: currentUidAfterRecovery,
-            disposition: disposition
-        ) {
-            do {
-                try eraseLocalData()
-                pendingAccountDeletionStore.markLocalWipeCompleted(for: pendingAtStart.uid)
-            } catch {}
-            FamilyManager.shared.reset()
-        }
-        return deletionStillPending
     }
 
     func makeSettingsViewModel() -> SettingsViewModel {

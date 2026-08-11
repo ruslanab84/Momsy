@@ -479,6 +479,7 @@ final class DeleteAccountUseCase {
         var cloudError: Error?
         var authError: Error?
         var completionError: Error?
+        var cloudIsConfirmedClean = false
         let deletingUid = auth.currentUID
 
         if let uid = deletingUid {
@@ -497,18 +498,7 @@ final class DeleteAccountUseCase {
                     // still authenticated — do NOT delete/sign out the account yet.
                     completionError = AuthError.accountDeletionPending
                 } else {
-                    // Cloud is server-confirmed clean: the user owns no data from here on,
-                    // so the blocking marker must go regardless of what Auth does next.
-                    pendingStore.clearPending()
-                    do {
-                        try await auth.deleteAccount(expectedUID: uid)
-                        pendingAuthStore.clearPending()
-                    } catch {
-                        // Hand the Auth record to the non-blocking retry. Surfacing the error
-                        // still lets Settings offer reauthentication in this session.
-                        pendingAuthStore.markPending(uid: uid)
-                        authError = error
-                    }
+                    cloudIsConfirmedClean = true
                 }
             } catch {
                 // Network/permission failure mid-erase: leave the marker for recovery.
@@ -522,6 +512,21 @@ final class DeleteAccountUseCase {
             pendingStore.markLocalWipeCompleted(for: deletingUid)
         }
         FamilyManager.shared.reset()
+
+        if cloudIsConfirmedClean, let uid = deletingUid {
+            // Keep the marker and authenticated session until the local wipe is durable.
+            // Otherwise a SwiftData failure would strand health data with no safe retry.
+            pendingStore.clearPending()
+            do {
+                try await auth.deleteAccount(expectedUID: uid)
+                pendingAuthStore.clearPending()
+            } catch {
+                // Hand the Auth record to the non-blocking retry. Surfacing the error
+                // still lets Settings offer reauthentication in this session.
+                pendingAuthStore.markPending(uid: uid)
+                authError = error
+            }
+        }
 
         // The Auth failure surfaces only AFTER the wipe: it can be set only once the server
         // confirmed the cloud is clean, and returning early there would strand the local store
@@ -553,6 +558,7 @@ final class AccountDeletionRecovery {
     private let pendingStore: PendingAccountDeletionStore
     private let pendingAuthStore: PendingAuthAccountDeletionStore
     private let suppressedRestoreStore: SuppressedFamilyRestoreStore
+    private let eraseLocal: @MainActor () throws -> Void
     /// True while the account has been put back into use (a family is resolved again).
     /// Injected so the policy is testable without `FamilyManager.shared`.
     private let accountIsInUse: @MainActor () -> Bool
@@ -563,6 +569,7 @@ final class AccountDeletionRecovery {
         pendingStore: PendingAccountDeletionStore,
         pendingAuthStore: PendingAuthAccountDeletionStore,
         suppressedRestoreStore: SuppressedFamilyRestoreStore,
+        eraseLocal: @MainActor @escaping () throws -> Void,
         accountIsInUse: @MainActor @escaping () -> Bool = { FamilyManager.shared.familyId != nil }
     ) {
         self.cloudEraser = cloudEraser
@@ -570,6 +577,7 @@ final class AccountDeletionRecovery {
         self.pendingStore = pendingStore
         self.pendingAuthStore = pendingAuthStore
         self.suppressedRestoreStore = suppressedRestoreStore
+        self.eraseLocal = eraseLocal
         self.accountIsInUse = accountIsInUse
     }
 
@@ -599,6 +607,7 @@ final class AccountDeletionRecovery {
             return .continueDeletion
         }
         suppressedRestoreStore.suppressRestore(for: pending.uid)
+        var cloudIsConfirmedClean = false
         do {
             let outcome = try await cloudEraser.deleteCloudData(
                 uid: currentUid,
@@ -612,20 +621,40 @@ final class AccountDeletionRecovery {
                 suppressedRestoreStore.clearSuppression(for: currentUid)
                 return .supersededByNewFamily
             }
-            guard try await cloudEraser.isCloudDataPresent(uid: currentUid) == false else {
-                return .continueDeletion // still on the server — keep the marker and retry next launch
-            }
-            // Server-confirmed clean. Releasing the blocking marker HERE is the fix for the
-            // re-registration deadlock: with no data left, reusing the Auth uid is safe.
-            pendingStore.clearPending()
-            do {
-                try await auth.deleteAccount(expectedUID: currentUid)
-                pendingAuthStore.clearPending()
-            } catch {
-                pendingAuthStore.markPending(uid: currentUid)
-            }
+            cloudIsConfirmedClean = try await cloudEraser.isCloudDataPresent(uid: currentUid) == false
         } catch {
-            // Leave the marker in place; the next launch retries.
+            // Leave the marker in place; the next launch retries the cloud erase.
+        }
+
+        if !pending.localWipeCompleted {
+            guard Self.shouldWipeDevice(
+                pendingAtStart: pending,
+                currentUidAtStart: currentUid,
+                currentUidAfterRecovery: auth.currentUID,
+                disposition: .continueDeletion
+            ) else {
+                return .continueDeletion
+            }
+            do {
+                try eraseLocal()
+                pendingStore.markLocalWipeCompleted(for: currentUid)
+            } catch {
+                // Fail closed: keep the marker and session so the next recovery can retry.
+                return .continueDeletion
+            }
+        }
+
+        guard cloudIsConfirmedClean,
+              pendingStore.loadPending()?.localWipeCompleted == true else {
+            return .continueDeletion
+        }
+        // The cloud and device are both clean, so reusing this uid cannot restore old data.
+        pendingStore.clearPending()
+        do {
+            try await auth.deleteAccount(expectedUID: currentUid)
+            pendingAuthStore.clearPending()
+        } catch {
+            pendingAuthStore.markPending(uid: currentUid)
         }
         return .continueDeletion
     }

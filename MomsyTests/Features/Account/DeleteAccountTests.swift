@@ -313,6 +313,24 @@ struct DeleteAccountTests {
         #expect(pending.pendingUid == "user-1")
         #expect(!pending.localWipeCompleted)
     }
+
+    @Test("keeps the marker and Auth session when server-clean local erasure fails")
+    func serverCleanLocalWipeFailureRemainsRetryable() async {
+        let (uc, _, auth, pending, authPending, _, wipes) = makeUseCase(
+            localError: DummyError()
+        )
+
+        await #expect(throws: DummyError.self) {
+            try await uc.execute()
+        }
+
+        #expect(wipes() == 1)
+        #expect(pending.pendingUid == "user-1")
+        #expect(!pending.localWipeCompleted)
+        #expect(pending.clearCount == 0)
+        #expect(auth.deleteCount == 0)
+        #expect(authPending.pendingUid == nil)
+    }
 }
 
 @Suite("Pending account deletion store")
@@ -529,13 +547,48 @@ struct AccountDeletionRecoveryTests {
             auth: auth,
             pendingStore: pending,
             pendingAuthStore: authPending,
-            suppressedRestoreStore: suppressed)
+            suppressedRestoreStore: suppressed,
+            eraseLocal: {})
 
         await rec.runIfNeeded()
 
         #expect(cloud.uids == ["abc"])         // re-ran the cloud erase
         #expect(pending.pendingUid == nil)     // and cleared the marker once verified gone
         #expect(suppressed.isRestoreSuppressed(for: "abc"))
+    }
+
+    @Test("retries a failed local wipe before releasing a server-clean marker")
+    func retriesFailedLocalWipeBeforeFinalizingDeletion() async {
+        let cloud = MockCloudEraser.Calls()
+        let auth = MockAuth(uid: "abc")
+        let pending = MockPendingStore(pendingUid: "abc")
+        var localError: Error? = DummyError()
+        var localWipes = 0
+        let rec = AccountDeletionRecovery(
+            cloudEraser: MockCloudEraser(calls: cloud),
+            auth: auth,
+            pendingStore: pending,
+            pendingAuthStore: MockPendingAuthStore(),
+            suppressedRestoreStore: MockSuppressedRestoreStore(),
+            eraseLocal: {
+                localWipes += 1
+                if let localError { throw localError }
+            }
+        )
+
+        await rec.runIfNeeded()
+
+        #expect(localWipes == 1)
+        #expect(pending.pendingUid == "abc")
+        #expect(!pending.localWipeCompleted)
+        #expect(auth.deleteCount == 0)
+
+        localError = nil
+        await rec.runIfNeeded()
+
+        #expect(localWipes == 2)
+        #expect(pending.pendingUid == nil)
+        #expect(auth.deleteCount == 1)
     }
 
     @Test("does nothing when no deletion is pending")
@@ -546,7 +599,8 @@ struct AccountDeletionRecoveryTests {
             auth: MockAuth(uid: "abc"),
             pendingStore: MockPendingStore(pendingUid: nil),
             pendingAuthStore: MockPendingAuthStore(),
-            suppressedRestoreStore: MockSuppressedRestoreStore())
+            suppressedRestoreStore: MockSuppressedRestoreStore(),
+            eraseLocal: {})
 
         await rec.runIfNeeded()
 
@@ -563,7 +617,8 @@ struct AccountDeletionRecoveryTests {
             auth: MockAuth(uid: "someone-else"),
             pendingStore: pending,
             pendingAuthStore: MockPendingAuthStore(),
-            suppressedRestoreStore: suppressed)
+            suppressedRestoreStore: suppressed,
+            eraseLocal: {})
 
         await rec.runIfNeeded()
 
@@ -583,7 +638,8 @@ struct AccountDeletionRecoveryTests {
             auth: MockAuth(uid: "abc"),
             pendingStore: pending,
             pendingAuthStore: MockPendingAuthStore(),
-            suppressedRestoreStore: suppressed)
+            suppressedRestoreStore: suppressed,
+            eraseLocal: {})
 
         await rec.runIfNeeded()
 
@@ -603,7 +659,7 @@ struct AccountDeletionRecoveryTests {
         let rec = AccountDeletionRecovery(
             cloudEraser: MockCloudEraser(calls: cloud), auth: auth,
             pendingStore: pending, pendingAuthStore: authPending,
-            suppressedRestoreStore: MockSuppressedRestoreStore(), accountIsInUse: { false })
+            suppressedRestoreStore: MockSuppressedRestoreStore(), eraseLocal: {}, accountIsInUse: { false })
 
         await rec.runIfNeeded()
 
@@ -620,7 +676,7 @@ struct AccountDeletionRecoveryTests {
         let rec = AccountDeletionRecovery(
             cloudEraser: MockCloudEraser(calls: .init()), auth: auth,
             pendingStore: MockPendingStore(pendingUid: nil), pendingAuthStore: authPending,
-            suppressedRestoreStore: MockSuppressedRestoreStore(), accountIsInUse: { false })
+            suppressedRestoreStore: MockSuppressedRestoreStore(), eraseLocal: {}, accountIsInUse: { false })
 
         await rec.runIfNeeded()
 
@@ -637,7 +693,7 @@ struct AccountDeletionRecoveryTests {
         let rec = AccountDeletionRecovery(
             cloudEraser: MockCloudEraser(calls: cloud), auth: auth,
             pendingStore: pending, pendingAuthStore: authPending,
-            suppressedRestoreStore: MockSuppressedRestoreStore(), accountIsInUse: { false })
+            suppressedRestoreStore: MockSuppressedRestoreStore(), eraseLocal: {}, accountIsInUse: { false })
 
         await rec.runIfNeeded()
 
@@ -652,7 +708,7 @@ struct AccountDeletionRecoveryTests {
         let rec = AccountDeletionRecovery(
             cloudEraser: MockCloudEraser(calls: cloud), auth: MockAuth(uid: "abc"),
             pendingStore: pending, pendingAuthStore: MockPendingAuthStore(),
-            suppressedRestoreStore: MockSuppressedRestoreStore(), accountIsInUse: { false })
+            suppressedRestoreStore: MockSuppressedRestoreStore(), eraseLocal: {}, accountIsInUse: { false })
 
         await rec.runIfNeeded()
 
@@ -667,7 +723,7 @@ struct AccountDeletionRecoveryTests {
         let rec = AccountDeletionRecovery(
             cloudEraser: MockCloudEraser(calls: cloud), auth: MockAuth(uid: "abc"),
             pendingStore: pending, pendingAuthStore: MockPendingAuthStore(),
-            suppressedRestoreStore: suppressed, accountIsInUse: { true })
+            suppressedRestoreStore: suppressed, eraseLocal: {}, accountIsInUse: { true })
 
         let disposition = await rec.runIfNeeded()
 
@@ -684,7 +740,7 @@ struct AccountDeletionRecoveryTests {
         let rec = AccountDeletionRecovery(
             cloudEraser: MockCloudEraser(calls: cloud), auth: MockAuth(uid: "abc"),
             pendingStore: pending, pendingAuthStore: MockPendingAuthStore(),
-            suppressedRestoreStore: MockSuppressedRestoreStore(), accountIsInUse: { false })
+            suppressedRestoreStore: MockSuppressedRestoreStore(), eraseLocal: {}, accountIsInUse: { false })
 
         await rec.runIfNeeded()
 
@@ -698,7 +754,7 @@ struct AccountDeletionRecoveryTests {
         let rec = AccountDeletionRecovery(
             cloudEraser: MockCloudEraser(calls: .init()), auth: auth,
             pendingStore: MockPendingStore(pendingUid: nil), pendingAuthStore: authPending,
-            suppressedRestoreStore: MockSuppressedRestoreStore(), accountIsInUse: { true })
+            suppressedRestoreStore: MockSuppressedRestoreStore(), eraseLocal: {}, accountIsInUse: { true })
 
         await rec.runIfNeeded()
 
