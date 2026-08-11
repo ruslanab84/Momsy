@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const { after, before, beforeEach, test } = require("node:test");
 const { deleteApp, initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
+const { cleanupDeletedBaby } = require("../baby-deletion-cleanup");
 const { cleanupDepartedFamilyMember, cleanupJobID } = require("../family-departure-cleanup");
 
 const projectId = "demo-momsy";
@@ -284,6 +285,61 @@ test("a corrupted stored uid cannot redirect cleanup away from the path uid", as
     assert.equal((await db.collection("users").doc(actualUid).get()).get("familyId"), undefined);
     assert.equal((await activeLogRef.get()).get("addedBy"), wrongUid);
     assert.equal((await db.collection("users").doc(wrongUid).get()).get("familyId"), familyId);
+});
+
+test("deleting a baby removes the co-parent's private wellbeing subtree", async () => {
+    const familyId = "deleted-baby-family";
+    const babyId = "deleted-baby";
+    const familyRef = db.collection("families").doc(familyId);
+    const babyRef = familyRef.collection("babies").doc(babyId);
+    const coParentPrivateRef = babyRef.collection("momSleepLogs").doc("co-parent-private");
+    const ownPrivateRef = babyRef.collection("waterIntakeLogs").doc("own-private");
+    const sharedRef = babyRef.collection("feedingLogs").doc("shared");
+    const profileRef = babyRef.collection("profile").doc("info");
+    const tombstoneRef = familyRef.collection("deletedBabies").doc(babyId);
+    const batch = db.batch();
+
+    batch.set(familyRef, { bootstrapComplete: true });
+    batch.set(babyRef, { id: babyId, name: "Baby" });
+    batch.set(coParentPrivateRef, { addedBy: "dad", addedByName: "Dad" });
+    batch.set(ownPrivateRef, { addedBy: "mom", addedByName: "Mom" });
+    batch.set(sharedRef, { addedBy: "mom", addedByName: "Mom" });
+    batch.set(profileRef, { members: [{ uid: "mom" }, { uid: "dad" }] });
+    await batch.commit();
+
+    await babyRef.delete();
+
+    await waitFor(async () => {
+        const [tombstone, coParentPrivate, ownPrivate, shared, profile] = await Promise.all([
+            tombstoneRef.get(),
+            coParentPrivateRef.get(),
+            ownPrivateRef.get(),
+            sharedRef.get(),
+            profileRef.get(),
+        ]);
+        return tombstone.exists
+            && !coParentPrivate.exists
+            && !ownPrivate.exists
+            && !shared.exists
+            && !profile.exists;
+    });
+});
+
+test("backfill recursively removes an already parentless baby subtree", async () => {
+    const familyId = "existing-orphan-family";
+    const babyId = "existing-orphan";
+    const familyRef = db.collection("families").doc(familyId);
+    const babyRef = familyRef.collection("babies").doc(babyId);
+    const privateRef = babyRef.collection("waterIntakeLogs").doc("co-parent-private");
+    const tombstoneRef = familyRef.collection("deletedBabies").doc(babyId);
+
+    await familyRef.set({ bootstrapComplete: true });
+    await privateRef.set({ addedBy: "dad", addedByName: "Dad" });
+
+    await cleanupDeletedBaby(db, familyId, babyId);
+
+    assert.equal((await tombstoneRef.get()).exists, true);
+    assert.equal((await privateRef.get()).exists, false);
 });
 
 async function waitFor(predicate, timeoutMilliseconds = 20_000) {

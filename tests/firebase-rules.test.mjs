@@ -706,6 +706,26 @@ test("parents can read and delete only their own private wellbeing logs", async 
     }
 });
 
+test("a deleted baby tombstone blocks stale access and recreation", async () => {
+    const tombstonePath = `${familyPath}/deletedBabies/${babyId}`;
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const db = adminContext.firestore();
+        await db.doc(tombstonePath).set({ deletedAt: new Date() });
+        await db.doc(babyPath).delete();
+    });
+
+    const momDb = firestore(users.mom);
+    await assertFails(momDb.doc(babyPath).set({ id: babyId, name: "Resurrected" }));
+    await assertFails(momDb.doc(`${babyPath}/momSleepLogs/mom-private`).get());
+    await assertFails(momDb.collection(`${babyPath}/momSleepLogs`)
+        .where("addedBy", "==", users.mom).get());
+    await assertFails(momDb.doc(`${babyPath}/feedingLogs/recreated`).set({
+        addedBy: users.mom,
+        addedByName: "Mom",
+    }));
+    await assertFails(momDb.doc(tombstonePath).get());
+});
+
 test("nanny can track routine care only under their own identity", async () => {
     const db = firestore(users.nanny);
     const ownLog = db.doc(`${babyPath}/feedingLogs/feed-nanny`);

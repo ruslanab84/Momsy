@@ -1,6 +1,7 @@
 const { initializeApp } = require("firebase-admin/app");
 const { FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
 const { onDocumentDeleted } = require("firebase-functions/v2/firestore");
+const { cleanupDeletedBaby } = require("./baby-deletion-cleanup");
 const { cleanupDepartedFamilyMember, cleanupJobID } = require("./family-departure-cleanup");
 
 initializeApp();
@@ -59,4 +60,13 @@ exports.cleanupDepartedFamilyMember = onDocumentDeleted({
             }
         });
     }
+});
+
+exports.cleanupDeletedBaby = onDocumentDeleted({
+    document: "families/{familyId}/babies/{babyId}",
+    region: "us-central1",
+    retry: true,
+    timeoutSeconds: 540,
+}, async (event) => {
+    await cleanupDeletedBaby(getFirestore(), event.params.familyId, event.params.babyId);
 });

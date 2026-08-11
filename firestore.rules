@@ -162,6 +162,16 @@ service cloud.firestore {
       );
     }
 
+    function babyExists(familyId, babyId) {
+      return exists(/databases/$(database)/documents/families/$(familyId)/babies/$(babyId))
+        && !exists(/databases/$(database)/documents/families/$(familyId)/deletedBabies/$(babyId));
+    }
+
+    function babyExistsAfter(familyId, babyId) {
+      return existsAfter(/databases/$(database)/documents/families/$(familyId)/babies/$(babyId))
+        && !existsAfter(/databases/$(database)/documents/families/$(familyId)/deletedBabies/$(babyId));
+    }
+
     function hasValidRoutineAuthor() {
       return request.resource.data.keys().hasAll(['addedBy', 'addedByName'])
         && request.resource.data.addedBy is string
@@ -485,21 +495,33 @@ service cloud.firestore {
                       || (isSignedIn() && memberId == request.auth.uid);
       }
 
+      // Trusted cleanup retains this tombstone after deleting the parent document,
+      // so stale devices cannot recreate the child or write a new orphan subtree.
+      match /deletedBabies/{babyId} {
+        allow read, write: if false;
+      }
+
       match /babies/{babyId} {
-        allow read: if canViewBabyStatus(familyId);
-        allow create: if canManageFamilyRoster(familyId)
+        allow read: if babyExists(familyId, babyId)
+                    && canViewBabyStatus(familyId);
+        allow create: if !exists(/databases/$(database)/documents/families/$(familyId)/deletedBabies/$(babyId))
+                      && (canManageFamilyRoster(familyId)
                       || isFamilyCreator(familyId)
-                      || isAtomicFamilyCreatorBootstrap(familyId);
-        allow update: if canManageFamilyRoster(familyId)
-                      || isFamilyCreator(familyId);
+                      || isAtomicFamilyCreatorBootstrap(familyId));
+        allow update: if !exists(/databases/$(database)/documents/families/$(familyId)/deletedBabies/$(babyId))
+                      && (canManageFamilyRoster(familyId)
+                      || isFamilyCreator(familyId));
         allow delete: if canManageFamilyRoster(familyId);
 
         match /{subcollection}/{document=**} {
-          allow get: if canReadBabyCollection(familyId, subcollection)
-                     || canListOwnAuthoredData(familyId);
-          allow list: if canReadBabyCollection(familyId, subcollection)
-                      || canListOwnAuthoredData(familyId);
-          allow create: if (
+          allow get: if babyExists(familyId, babyId)
+                     && (canReadBabyCollection(familyId, subcollection)
+                         || canListOwnAuthoredData(familyId));
+          allow list: if babyExists(familyId, babyId)
+                      && (canReadBabyCollection(familyId, subcollection)
+                          || canListOwnAuthoredData(familyId));
+          allow create: if babyExistsAfter(familyId, babyId)
+                         && (
                           !isPrivateWellbeingCollection(subcollection)
                           && (
                             canManageFamilyRoster(familyId)
@@ -507,9 +529,9 @@ service cloud.firestore {
                             || isAtomicFamilyCreatorBootstrap(familyId)
                             || canCreateRoutineLog(familyId, subcollection)
                           )
-                        )
-                        || canCreatePrivateWellbeing(familyId, subcollection);
-          allow update: if (
+                          || canCreatePrivateWellbeing(familyId, subcollection));
+          allow update: if babyExistsAfter(familyId, babyId)
+                           && (
                           !isPrivateWellbeingCollection(subcollection)
                           && (
                             canManageFamilyRoster(familyId)
@@ -517,15 +539,14 @@ service cloud.firestore {
                             || canUpdateRoutineLog(familyId, subcollection)
                             || anonymizesOwnAuthorMetadata(familyId)
                           )
-                        )
-                        || canUpdatePrivateWellbeing(familyId, subcollection);
+                          || canUpdatePrivateWellbeing(familyId, subcollection));
           // ponytail: Nanny deletes stay parent-only until tombstones identify
           // both the source collection and author.
-          allow delete: if (
+          allow delete: if babyExists(familyId, babyId)
+                           && (
                           !isPrivateWellbeingCollection(subcollection)
                           && canManageFamilyRoster(familyId)
-                        )
-                        || canDeletePrivateWellbeing(familyId, subcollection);
+                          || canDeletePrivateWellbeing(familyId, subcollection));
         }
       }
     }
