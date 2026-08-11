@@ -165,6 +165,7 @@ struct OnboardingView: View {
                 lang: loc.lang,
                 isJoinFlow: vm.isJoinFlow,
                 cloudSyncEnabled: vm.cloudSyncEnabled,
+                isFinishing: vm.isFinishing,
                 onStart: vm.finish
             )
         }

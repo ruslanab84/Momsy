@@ -52,6 +52,32 @@ struct OnboardingViewModelTests {
         var syncAfterJoinCount = 0
     }
 
+    @MainActor
+    final class FamilySetupGate {
+        private(set) var callCount = 0
+        private var firstCallWaiter: CheckedContinuation<Void, Never>?
+        private var releaseFirstCallWaiter: CheckedContinuation<Void, Never>?
+
+        func failFirstCallAfterRelease() async throws {
+            callCount += 1
+            guard callCount == 1 else { return }
+            firstCallWaiter?.resume()
+            firstCallWaiter = nil
+            await withCheckedContinuation { releaseFirstCallWaiter = $0 }
+            throw FamilyError.noFamilyId
+        }
+
+        func waitForFirstCall() async {
+            guard callCount == 0 else { return }
+            await withCheckedContinuation { firstCallWaiter = $0 }
+        }
+
+        func releaseFirstCall() {
+            releaseFirstCallWaiter?.resume()
+            releaseFirstCallWaiter = nil
+        }
+    }
+
     struct Harness {
         let vm: OnboardingViewModel
         let repo: MockBabyRepository
@@ -67,6 +93,7 @@ struct OnboardingViewModelTests {
         pendingCode: String? = nil,
         cloudSyncEnabled: Bool = false,
         familySetupError: Error? = nil,
+        familySetup: (@MainActor (String, FamilyRole, BabyProfile) async throws -> Void)? = nil,
         initialProfiles: [BabyProfile] = [],
         setCloudSyncConsent: @escaping (CloudSyncConsent.Status) -> Void = { _ in },
         onDone: @escaping () -> Void = {}
@@ -95,7 +122,11 @@ struct OnboardingViewModelTests {
                 recorder.ensuredDisplayNames.append(displayName)
                 recorder.ensuredRoles.append(role)
                 recorder.ensuredProfiles.append(profile)
-                if let familySetupError { throw familySetupError }
+                if let familySetup {
+                    try await familySetup(displayName, role, profile)
+                } else if let familySetupError {
+                    throw familySetupError
+                }
             },
             joinFamily: { code, force in
                 recorder.joinRequests.append((code, force))
@@ -423,6 +454,43 @@ struct OnboardingViewModelTests {
     }
 
     // MARK: - finish
+
+    @Test("finish() ignores a second tap while family setup is in flight")
+    func finishIgnoresSecondTapWhileFamilySetupIsInFlight() async {
+        let gate = FamilySetupGate()
+        var completed = false
+        let harness = makeHarness(
+            cloudSyncEnabled: true,
+            familySetup: { _, _, _ in
+                try await gate.failFirstCallAfterRelease()
+            },
+            onDone: { completed = true }
+        )
+        harness.vm.babyName = "Mia"
+
+        harness.vm.finish()
+        await gate.waitForFirstCall()
+        harness.vm.finish()
+        for _ in 0..<100 where gate.callCount == 1 {
+            await Task.yield()
+        }
+
+        #expect(harness.vm.isFinishing)
+        #expect(gate.callCount == 1)
+        #expect(!completed)
+        #expect(harness.analytics.events.isEmpty)
+
+        gate.releaseFirstCall()
+        for _ in 0..<100 where harness.vm.finishError == nil {
+            await Task.yield()
+        }
+
+        #expect(!completed)
+        #expect(!harness.vm.isFinishing)
+        #expect(harness.vm.finishError != nil)
+        #expect(harness.pendingSetupStore.load()?.profile.name == "Mia")
+        #expect(harness.analytics.events.isEmpty)
+    }
 
     @Test("finish() does not complete onboarding when local profile save fails")
     func finishDoesNotCompleteWhenLocalProfileSaveFails() async throws {

@@ -25,6 +25,7 @@ final class OnboardingViewModel: ObservableObject {
     @Published var parentName = ""
     @Published var parentRole: FamilyRole = .mom
     @Published var isSigningIn = false
+    @Published private(set) var isFinishing = false
     @Published var authError: Error?
     @Published var selectedInviteRole: FamilyRole = .dad
     @Published private(set) var inviteCode = ""
@@ -367,8 +368,11 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     func finish() {
+        guard !isFinishing else { return }
+        isFinishing = true
         finishError = nil
         Task {
+            defer { isFinishing = false }
             do {
                 if flow == .joinFamily {
                     pendingInviteStore.clear()

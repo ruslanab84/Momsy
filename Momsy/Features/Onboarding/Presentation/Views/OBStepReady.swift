@@ -11,6 +11,7 @@ struct ReadyStep: View {
     let lang: String
     let isJoinFlow: Bool
     let cloudSyncEnabled: Bool
+    let isFinishing: Bool
     let onStart: () -> Void
     @EnvironmentObject var loc: LocalizationManager
 
@@ -110,7 +111,12 @@ struct ReadyStep: View {
                 Button(action: onStart) {
                     HStack {
                         Text(loc.strings.start)
-                        Image(systemName: "arrow.right")
+                        if isFinishing {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Image(systemName: "arrow.right")
+                        }
                     }
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundColor(.white)
@@ -120,6 +126,7 @@ struct ReadyStep: View {
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                     .shadow(color: Color.bbCoralDeep.opacity(0.35), radius: 12, y: 6)
                 }
+                .disabled(isFinishing)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 50)
             }
