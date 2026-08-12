@@ -171,6 +171,7 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Never step away from the changing table",
                 ru: "Никогда не отходите от пеленального столика",
+                de: "Gehen Sie nie vom Wickeltisch weg",
                 es: "Nunca te apartes del cambiador",
                 fr: "Ne vous éloignez jamais de la table à langer",
                 pt: "Nunca se afaste do trocador",
@@ -179,6 +180,7 @@ extension CareTipsCatalog {
             summary: LocalizedText(
                 en: "One hand stays on your baby, always — rolling arrives without warning",
                 ru: "Одна рука всегда на ребёнке — первый переворот случается без предупреждения",
+                de: "Eine Hand bleibt immer am Baby — das erste Drehen kommt ohne Vorwarnung",
                 es: "Una mano siempre sobre el bebé: el primer volteo llega sin avisar",
                 fr: "Une main reste toujours sur votre bébé – le roulement arrive sans avertissement",
                 pt: "Uma mão permanece em seu bebê, sempre – o rolar chega sem avisar",
@@ -198,6 +200,13 @@ extension CareTipsCatalog {
                     "Если нужно отойти по любой причине, возьмите ребёнка с собой или положите его на пол.",
                     "Рассмотрите вариант переодевать ребёнка на коврике на полу уже с периода новорождённости.",
                     "Используйте ремень, если он есть на столике, но никогда не как замену своей руке."
+                ],
+                de: [
+                    "Legen Sie sich alles Nötige in Reichweite zurecht, bevor Sie anfangen.",
+                    "Halten Sie durchgehend eine Hand auf Bauch oder Brust Ihres Babys — auch wenn Sie nach den Feuchttüchern greifen.",
+                    "Wenn Sie aus irgendeinem Grund weg müssen, nehmen Sie Ihr Baby mit oder legen Sie es auf den Boden.",
+                    "Erwägen Sie, schon ab den ersten Wochen auf einer Unterlage auf dem Boden zu wickeln.",
+                    "Nutzen Sie den Gurt, falls Ihr Wickeltisch einen hat — aber niemals als Ersatz für Ihre Hand."
                 ],
                 es: [
                     "Ten todo lo que necesitas al alcance de la mano antes de empezar.",
@@ -231,6 +240,7 @@ extension CareTipsCatalog {
             whyItMatters: LocalizedText(
                 en: "The first roll is unpredictable and often happens weeks before parents expect it — many falls involve a baby who had never rolled before. Falls from changing height are among the most common injuries in the first year, and the head takes most of the impact. The single-hand rule works because it does not depend on you correctly predicting when your baby will develop a new skill.",
                 ru: "Первый переворот непредсказуем и часто случается на несколько недель раньше, чем ожидают родители: во многих падениях участвует ребёнок, который до этого ни разу не переворачивался. Падения с высоты пеленального столика — одна из самых частых травм на первом году, и основной удар приходится на голову. Правило «одна рука на ребёнке» работает потому, что не зависит от вашей способности угадать, когда появится новый навык.",
+                de: "Das erste Drehen ist nicht vorhersehbar und passiert oft Wochen früher, als Eltern es erwarten: An vielen Stürzen ist ein Baby beteiligt, das sich vorher noch nie gedreht hatte. Stürze aus Wickelhöhe gehören zu den häufigsten Verletzungen im ersten Lebensjahr, und der Kopf trägt den größten Teil des Aufpralls. Die Ein-Hand-Regel funktioniert, weil sie nicht davon abhängt, dass Sie richtig einschätzen, wann Ihr Baby eine neue Fähigkeit entwickelt.",
                 es: "El primer volteo es impredecible y suele ocurrir semanas antes de lo que los padres esperan: en muchas caídas el bebé nunca se había dado la vuelta. Las caídas desde la altura del cambiador están entre las lesiones más frecuentes del primer año, y la cabeza recibe la mayor parte del impacto. La regla de la mano encima funciona porque no depende de que aciertes cuándo tu bebé desarrollará una nueva habilidad.",
                 fr: "Le premier roulement est imprévisible et se produit souvent des semaines avant que les parents ne s'y attendent : de nombreuses chutes impliquent un bébé qui n'avait jamais roulé auparavant. Les chutes de hauteur variable font partie des blessures les plus courantes au cours de la première année, et la tête subit la majeure partie de l'impact. La règle d’une seule main fonctionne car elle ne dépend pas de votre capacité à prédire correctement le moment où votre bébé développera une nouvelle compétence.",
                 pt: "A primeira rolagem é imprevisível e muitas vezes acontece semanas antes do esperado pelos pais – muitas quedas envolvem um bebê que nunca havia rolado antes. As quedas devido à mudança de altura estão entre as lesões mais comuns no primeiro ano, e a cabeça sofre a maior parte do impacto. A regra da mão única funciona porque não depende de você prever corretamente quando seu bebê desenvolverá uma nova habilidade.",
@@ -248,6 +258,12 @@ extension CareTipsCatalog {
                     "Полагаться на ремень или бортики, что они удержат настойчивого ребёнка.",
                     "Открывать дверь или отвечать на звонок посреди переодевания.",
                     "Считать, что ребёнок, который ещё не переворачивался, не перевернётся сегодня."
+                ],
+                de: [
+                    "Sich umdrehen, um eine Windel aus einem Regal knapp außer Reichweite zu holen.",
+                    "Sich auf einen Gurt oder erhöhte Ränder verlassen, um ein entschlossenes Baby zu halten.",
+                    "Mitten beim Wickeln an die Tür oder ans Telefon gehen.",
+                    "Annehmen, dass ein Baby, das sich noch nie gedreht hat, sich heute nicht drehen kann."
                 ],
                 es: [
                     "Girarte a coger un pañal de una estantería que queda justo fuera de tu alcance.",
@@ -285,6 +301,11 @@ extension CareTipsCatalog {
                     "Потеря сознания, рвота, необычная сонливость или выбухающий родничок после падения — экстренная ситуация.",
                     "Припухлость на голове или любые изменения в поведении, кормлении и реакциях."
                 ],
+                de: [
+                    "Jeder Sturz aus der Höhe bei einem Baby unter einem Jahr — holen Sie ärztlichen Rat ein, auch ohne sichtbare Verletzung.",
+                    "Bewusstlosigkeit, Erbrechen, ungewöhnliche Schläfrigkeit oder eine vorgewölbte Fontanelle nach einem Sturz — Notfall.",
+                    "Eine Schwellung am Kopf oder jede Veränderung in Verhalten, Trinkverhalten oder Reaktionsfähigkeit."
+                ],
                 es: [
                     "Cualquier caída desde altura en un bebé menor de un año: consulta aunque no haya lesión visible.",
                     "Pérdida de conciencia, vómitos, somnolencia inusual o fontanela abombada tras la caída: urgencia.",
@@ -313,6 +334,7 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Baby-proof before your baby moves",
                 ru: "Обезопасьте дом до того, как ребёнок поедет",
+                de: "Sichern Sie die Wohnung, bevor Ihr Baby mobil wird",
                 es: "Adapta la casa antes de que el bebé se mueva",
                 fr: "À l'épreuve des bébés avant que votre bébé ne bouge",
                 pt: "À prova de bebês antes que ele se mexa",
@@ -321,6 +343,7 @@ extension CareTipsCatalog {
             summary: LocalizedText(
                 en: "Do it at five months, not on the day they first crawl",
                 ru: "Делайте это в пять месяцев, а не в день первого ползания",
+                de: "Mit fünf Monaten, nicht am Tag des ersten Krabbelns",
                 es: "Hazlo a los cinco meses, no el día en que gatee por primera vez",
                 fr: "Faites-le à cinq mois, pas le jour où ils rampent pour la première fois",
                 pt: "Faça isso aos cinco meses, não no dia em que rastejarem pela primeira vez",
@@ -340,6 +363,13 @@ extension CareTipsCatalog {
                     "Поставьте ворота безопасности вверху и внизу лестницы, уберите под замок бытовую химию, лекарства и мелкие батарейки.",
                     "Уберите провода и шнуры жалюзи из зоны досягаемости и подвяжите их повыше.",
                     "Проверьте, что нет предметов, проходящих во втулку от туалетной бумаги, — это примерный предел размера, опасного удушьем."
+                ],
+                de: [
+                    "Gehen Sie auf den Boden und betrachten Sie den Raum aus der Augenhöhe Ihres Babys.",
+                    "Verankern Sie Bücherregale, Kommoden und Fernseher an der Wand.",
+                    "Bringen Sie Treppenschutzgitter oben und unten an und schließen Sie Reinigungsmittel, Medikamente und kleine Batterien weg.",
+                    "Legen Sie Kabel und Jalousieschnüre außer Reichweite und binden Sie sie hoch.",
+                    "Prüfen Sie alles, was durch eine Klopapierrolle passt — das ist ungefähr die Grenze für Verschluckbares."
                 ],
                 es: [
                     "Ponte en el suelo y mira la habitación a la altura de los ojos del bebé.",
@@ -373,6 +403,7 @@ extension CareTipsCatalog {
             whyItMatters: LocalizedText(
                 en: "Mobility arrives suddenly: a baby who has never moved forward can cross a room within a day of working out how. Preparing early means you are not improvising while also watching a newly mobile child. Furniture tip-overs and button batteries deserve particular attention because both cause severe harm quickly and both are easy to overlook.",
                 ru: "Подвижность появляется внезапно: ребёнок, который никогда не двигался вперёд, может пересечь комнату уже на следующий день после того, как понял, как это делается. Подготовка заранее избавляет от необходимости импровизировать, одновременно присматривая за только что «поехавшим» ребёнком. Опрокидывание мебели и дисковые батарейки заслуживают особого внимания: и то и другое быстро приводит к тяжёлым последствиям и легко упускается из виду.",
+                de: "Mobilität kommt plötzlich: Ein Baby, das sich noch nie vorwärtsbewegt hat, kann einen Tag später ein ganzes Zimmer durchqueren. Früh vorzusorgen bedeutet, nicht improvisieren zu müssen, während Sie gleichzeitig ein frisch mobiles Kind im Blick behalten. Umkippende Möbel und Knopfzellen verdienen besondere Aufmerksamkeit: Beides führt schnell zu schweren Schäden und beides wird leicht übersehen.",
                 es: "La movilidad llega de golpe: un bebé que nunca ha avanzado puede cruzar una habitación al día siguiente de descubrir cómo hacerlo. Prepararlo pronto significa no tener que improvisar mientras vigilas a un niño recién móvil. Los vuelcos de muebles y las pilas de botón merecen atención especial porque ambos causan daños graves rápidamente y ambos se pasan por alto con facilidad.",
                 fr: "La mobilité arrive soudainement : un bébé qui n’a jamais avancé peut traverser une pièce en une journée après avoir compris comment. Se préparer tôt signifie ne pas improviser tout en surveillant un enfant nouvellement mobile. Les renversements de meubles et les piles boutons méritent une attention particulière, car tous deux provoquent rapidement de graves dommages et sont faciles à négliger.",
                 pt: "A mobilidade chega de repente: um bebê que nunca avançou pode atravessar uma sala um dia depois de descobrir como. Preparar-se cedo significa que você não está improvisando enquanto observa uma criança recém-móvel. Os tombos de móveis e as baterias tipo botão merecem atenção especial porque ambos causam danos graves rapidamente e são fáceis de ignorar.",
@@ -390,6 +421,12 @@ extension CareTipsCatalog {
                     "Забывать про комнаты, где ребёнок «никогда» не бывает, — ванную, кухню, квартиру бабушки и дедушки.",
                     "Ставить распорные ворота наверху лестницы, где нужны прикрученные к стене.",
                     "Оставлять на полу сумки с лекарствами или монетами внутри."
+                ],
+                de: [
+                    "Bis zum ersten Krabbeln warten.",
+                    "Räume vergessen, in denen Ihr Baby „nie“ ist — Bad, Küche, Wohnung der Großeltern.",
+                    "Klemmgitter oben an der Treppe, wo verschraubte Gitter nötig sind.",
+                    "Handtaschen mit Medikamenten oder Münzen auf dem Boden liegen lassen."
                 ],
                 es: [
                     "Esperar al primer gateo para empezar.",
@@ -427,6 +464,11 @@ extension CareTipsCatalog {
                     "Подозрение на отравление — вызывайте экстренные службы и держите упаковку при себе.",
                     "Эпизод удушья, который прошёл, но после него сохраняется кашель или шумное дыхание."
                 ],
+                de: [
+                    "Jeder Verdacht, dass Ihr Baby eine Knopfzelle oder einen Magneten verschluckt hat — sofort in die Notaufnahme, warten Sie nicht auf Symptome.",
+                    "Verdacht auf Vergiftung — rufen Sie den Notruf und nehmen Sie die Verpackung mit.",
+                    "Ein Verschlucken, das sich löst, danach aber anhaltenden Husten oder geräuschvolles Atmen hinterlässt."
+                ],
                 es: [
                     "Cualquier sospecha de que el bebé se ha tragado una pila de botón o un imán: acude a urgencias de inmediato, no esperes a que haya síntomas.",
                     "Sospecha de intoxicación: llama a los servicios de emergencia y lleva contigo el envase.",
@@ -455,6 +497,7 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Water safety: never out of arm's reach",
                 ru: "Безопасность на воде: всегда на расстоянии вытянутой руки",
+                de: "Sicherheit am Wasser: nie außer Armreichweite",
                 es: "Seguridad en el agua: nunca fuera del alcance del brazo",
                 fr: "La sécurité aquatique : jamais hors de portée",
                 pt: "Segurança na água: nunca fora do alcance do braço",
@@ -463,6 +506,7 @@ extension CareTipsCatalog {
             summary: LocalizedText(
                 en: "A few centimetres of water is enough, and drowning is silent",
                 ru: "Достаточно нескольких сантиметров воды, и утопление происходит беззвучно",
+                de: "Wenige Zentimeter Wasser genügen, und Ertrinken verläuft lautlos",
                 es: "Bastan unos centímetros de agua, y el ahogamiento es silencioso",
                 fr: "Quelques centimètres d’eau suffisent et la noyade est silencieuse",
                 pt: "Bastam alguns centímetros de água e o afogamento é silencioso",
@@ -482,6 +526,13 @@ extension CareTipsCatalog {
                     "Держите крышку унитаза опущенной, дверь в ванную закрытой, а вёдра и тазы — пустыми после использования.",
                     "Выставьте на водонагревателе безопасный предел температуры и всегда наливайте в ванночку сначала холодную воду.",
                     "Относитесь к стульчикам и кругам для купания как к игрушкам, а не средствам безопасности."
+                ],
+                de: [
+                    "Halten Sie während des gesamten Bades jedes Mal eine Hand an Ihrem Baby.",
+                    "Lassen Sie das Wasser sofort danach ab.",
+                    "Halten Sie Toilettendeckel geschlossen und Badezimmertüren zu; leeren Sie Eimer und Schüsseln nach Gebrauch.",
+                    "Stellen Sie den Warmwasserthermostat auf eine sichere Höchsttemperatur und lassen Sie immer zuerst kaltes Wasser einlaufen.",
+                    "Behandeln Sie Badesitze und Badringe als Spielzeug, nicht als Sicherheitsausrüstung."
                 ],
                 es: [
                     "Mantén una mano sobre el bebé durante todo el baño, siempre.",
@@ -515,6 +566,7 @@ extension CareTipsCatalog {
             whyItMatters: LocalizedText(
                 en: "Infant drowning happens in seconds, in very little water, and almost silently — there is no splashing or shouting to alert you. A baby who slips under cannot right themselves, and the reflex response makes it worse rather than better. Scalds are the other bathroom risk: a baby's skin burns at lower temperatures and in less time than an adult's.",
                 ru: "Утопление младенца происходит за секунды, в совсем небольшом количестве воды и почти беззвучно — не будет ни плеска, ни крика, которые вас предупредят. Ребёнок, соскользнувший под воду, не может подняться сам, а рефлекторная реакция только ухудшает положение. Второй риск в ванной — ожоги: кожа ребёнка обжигается при более низкой температуре и за меньшее время, чем кожа взрослого.",
+                de: "Ertrinken bei Säuglingen geschieht in Sekunden, in sehr wenig Wasser und fast lautlos — es gibt kein Platschen und kein Rufen, das Sie warnt. Ein Baby, das unter Wasser rutscht, kann sich nicht selbst aufrichten, und die Reflexreaktion macht es eher schlimmer als besser. Verbrühungen sind das zweite Risiko im Bad: Babyhaut verbrennt bei niedrigeren Temperaturen und in kürzerer Zeit als Erwachsenenhaut.",
                 es: "El ahogamiento infantil ocurre en segundos, con muy poca agua y casi en silencio: no hay chapoteos ni gritos que te avisen. Un bebé que se desliza bajo el agua no puede incorporarse solo, y la respuesta refleja empeora las cosas en lugar de mejorarlas. Las quemaduras son el otro riesgo del baño: la piel de un bebé se quema a menos temperatura y en menos tiempo que la de un adulto.",
                 fr: "La noyade d'un nourrisson se produit en quelques secondes, dans très peu d'eau et presque silencieusement : il n'y a pas d'éclaboussures ni de cris pour vous alerter. Un bébé qui glisse ne peut pas se redresser, et la réponse réflexe aggrave la situation plutôt que de l'améliorer. Les brûlures sont l'autre risque dans la salle de bain : la peau d'un bébé brûle à des températures plus basses et en moins de temps que celle d'un adulte.",
                 pt: "O afogamento infantil acontece em segundos, em muito pouca água e quase silenciosamente – não há respingos ou gritos para alertá-lo. Um bebê que escorrega não consegue se endireitar e a resposta reflexa piora a situação em vez de melhorar. As queimaduras são outro risco no banheiro: a pele de um bebê queima em temperaturas mais baixas e em menos tempo do que a de um adulto.",
@@ -532,6 +584,12 @@ extension CareTipsCatalog {
                     "Просить старшего ребёнка присмотреть.",
                     "Доливать горячую воду, когда ребёнок уже в ванночке.",
                     "Оставлять вёдра или надувные бассейны с водой."
+                ],
+                de: [
+                    "Den Raum für ein Handtuch oder das Telefon verlassen.",
+                    "Ein älteres Geschwisterkind mit der Aufsicht beauftragen.",
+                    "Heißes Wasser nachlaufen lassen, während das Baby schon in der Wanne ist.",
+                    "Eimer oder Planschbecken mit Wasser darin stehen lassen."
                 ],
                 es: [
                     "Salir de la habitación a por una toalla o el móvil.",
@@ -569,6 +627,11 @@ extension CareTipsCatalog {
                     "Ожог с пузырями, обширный ожог или ожог лица, кистей рук либо области подгузника.",
                     "Рвота или необычная сонливость в течение нескольких часов после любого происшествия с водой."
                 ],
+                de: [
+                    "Jedes Untertauchen, auch kurz, mit anschließendem Husten, veränderter Atmung oder Schläfrigkeit — sofort ärztliche Hilfe.",
+                    "Eine Verbrühung, die Blasen bildet, eine große Fläche bedeckt oder Gesicht, Hände oder den Windelbereich betrifft.",
+                    "Erbrechen oder ungewöhnliche Müdigkeit in den Stunden nach einem Wasserunfall."
+                ],
                 es: [
                     "Cualquier inmersión, aunque sea breve, seguida de tos, cambios en la respiración o somnolencia: busca atención de inmediato.",
                     "Una quemadura que forma ampollas, cubre una zona amplia o afecta a la cara, las manos o la zona del pañal.",
@@ -597,6 +660,7 @@ extension CareTipsCatalog {
             title: LocalizedText(
                 en: "Be ready for an emergency before you need to be",
                 ru: "Подготовьтесь к экстренной ситуации заранее",
+                de: "Bereiten Sie sich auf einen Notfall vor, bevor er eintritt",
                 es: "Prepárate para una emergencia antes de necesitarlo",
                 fr: "Soyez prêt à faire face à une urgence avant de devoir l'être",
                 pt: "Esteja pronto para uma emergência antes de precisar",
@@ -605,6 +669,7 @@ extension CareTipsCatalog {
             summary: LocalizedText(
                 en: "Save the numbers, take an infant first-aid course, and know your own address",
                 ru: "Сохраните номера, пройдите курс первой помощи младенцам и знайте свой адрес наизусть",
+                de: "Nummern speichern, einen Erste-Hilfe-Kurs für Säuglinge machen und die eigene Adresse kennen",
                 es: "Guarda los números, haz un curso de primeros auxilios para lactantes y sábete tu dirección",
                 fr: "Enregistrez les numéros, suivez un cours de premiers secours pour nourrissons et connaissez votre propre adresse",
                 pt: "Salve os números, faça um curso de primeiros socorros infantis e saiba seu próprio endereço",
@@ -624,6 +689,13 @@ extension CareTipsCatalog {
                     "Пройдите курс первой помощи и сердечно-лёгочной реанимации для младенцев: техника для детей отличается от взрослой, и по одному видео её не освоить.",
                     "Обновляйте навыки раз в пару лет и убедитесь, что курс прошли все, кто остаётся с ребёнком.",
                     "Держите небольшую аптечку и медицинскую карту ребёнка там, где их сможет найти любой."
+                ],
+                de: [
+                    "Speichern Sie jetzt die örtliche Notrufnummer und die Nummer Ihrer Kinderärztin oder Ihres Kinderarztes im Telefon.",
+                    "Schreiben Sie Ihre vollständige Adresse samt Türcode und Stockwerk sichtbar auf — unter Stress vergisst man sie.",
+                    "Machen Sie einen Erste-Hilfe- und Reanimationskurs für Säuglinge; die Technik beim Säugling unterscheidet sich von der beim Erwachsenen und lässt sich nicht allein aus einem Video lernen.",
+                    "Frischen Sie die Ausbildung alle paar Jahre auf und sorgen Sie dafür, dass auch alle anderen Betreuungspersonen sie gemacht haben.",
+                    "Bewahren Sie eine kleine Erste-Hilfe-Tasche und das Untersuchungsheft Ihres Babys dort auf, wo jeder sie findet."
                 ],
                 es: [
                     "Guarda ya en el móvil el número de emergencias de tu zona y el de tu pediatra.",
@@ -657,6 +729,7 @@ extension CareTipsCatalog {
             whyItMatters: LocalizedText(
                 en: "In an emergency you will not read instructions or research technique — you will do whatever you have already practised. Infant CPR uses two fingers rather than two hands and a different rate and depth, so adult training does not transfer. Preparing in advance is not pessimism; it is the same reason you check where the exits are on a plane you fully expect to land normally.",
                 ru: "В экстренной ситуации вы не будете читать инструкции и искать технику — вы сделаете то, что уже отрабатывали. При реанимации младенца используют два пальца, а не две руки, а также другую частоту и глубину нажатий, поэтому взрослые навыки сюда не переносятся. Готовиться заранее — это не пессимизм: по той же причине вы смотрите, где выходы в самолёте, который наверняка сядет нормально.",
+                de: "Im Notfall werden Sie keine Anleitung lesen und keine Technik nachschlagen — Sie tun das, was Sie bereits geübt haben. Bei der Säuglingsreanimation werden zwei Finger statt zweier Hände verwendet, mit anderer Frequenz und Drucktiefe, deshalb lässt sich die Erwachsenenausbildung nicht übertragen. Sich vorher vorzubereiten ist kein Pessimismus: Aus demselben Grund schauen Sie im Flugzeug nach den Ausgängen, obwohl Sie fest mit einer normalen Landung rechnen.",
                 es: "En una emergencia no vas a leer instrucciones ni a buscar la técnica: harás lo que ya hayas practicado. La RCP en lactantes usa dos dedos en lugar de dos manos, con otro ritmo y otra profundidad, así que la formación de adultos no sirve. Prepararse por adelantado no es pesimismo: es la misma razón por la que miras dónde están las salidas de un avión que esperas que aterrice con normalidad.",
                 fr: "En cas d’urgence, vous ne lirez pas d’instructions ou de techniques de recherche – vous ferez ce que vous avez déjà pratiqué. La RCR pour nourrissons utilise deux doigts plutôt que deux mains et une fréquence et une profondeur différentes, de sorte que la formation des adultes n'est pas transférée. Se préparer à l’avance n’est pas du pessimisme ; c'est la même raison pour laquelle vous vérifiez où se trouvent les sorties dans un avion dont vous pensez vraiment qu'il atterrira normalement.",
                 pt: "Numa emergência você não lerá instruções ou técnicas de pesquisa – você fará tudo o que já praticou. A RCP infantil usa dois dedos em vez de duas mãos e uma frequência e profundidade diferentes, portanto o treinamento de adultos não é transferido. Preparar-se com antecedência não é pessimismo; é o mesmo motivo pelo qual você verifica onde estão as saídas de um avião que você espera pousar normalmente.",
@@ -674,6 +747,12 @@ extension CareTipsCatalog {
                     "Полагаться на один просмотренный ролик.",
                     "Оставлять тех, кто сидит с ребёнком, без экстренных контактов и медицинских сведений.",
                     "Пропускать повторные курсы после первого года."
+                ],
+                de: [
+                    "Annehmen, Erste Hilfe für Erwachsene sei nah genug dran.",
+                    "Sich auf ein einmal gesehenes Video verlassen.",
+                    "Betreuungspersonen ohne Notfallkontakte und medizinische Angaben lassen.",
+                    "Auffrischungskurse nach dem ersten Jahr auslassen."
                 ],
                 es: [
                     "Dar por hecho que los primeros auxilios de adultos son suficientemente parecidos.",
@@ -710,6 +789,11 @@ extension CareTipsCatalog {
                     "Затруднённое дыхание, синие или серые губы либо кожа, отсутствие реакции — немедленно вызывайте экстренные службы.",
                     "Судороги или сыпь, которая не бледнеет при надавливании.",
                     "Любой эпизод удушья, потребовавший вмешательства, нужно показать врачу после."
+                ],
+                de: [
+                    "Atemnot, blaue oder graue Lippen oder Haut oder Nichtansprechbarkeit — rufen Sie sofort den Notruf.",
+                    "Ein Krampfanfall oder ein Ausschlag, der sich unter Druck nicht wegdrücken lässt.",
+                    "Jede Erstickungsepisode, bei der eingegriffen werden musste, sollte danach ärztlich beurteilt werden."
                 ],
                 es: [
                     "Dificultad para respirar, labios o piel azulados o grisáceos, o falta de respuesta: llama de inmediato a emergencias.",

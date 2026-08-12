@@ -40,16 +40,16 @@ extension CareTipsCatalog {
                 ],
                 de: [
                     "Allein: Ihr Baby schläft auf seiner eigenen Oberfläche, ohne jemanden oder etwas anderem darauf.",
-                    "Auf dem Rücken: auf dem Rücken für jeden Schlaf Tag und jede Nacht, bis er sich selbst in beide Richtungen dreht.",
+                    "Auf dem Rücken: bei jedem Tagschlaf und jede Nacht auf dem Rücken, bis Ihr Baby sich selbstständig in beide Richtungen dreht.",
                     "Im Bett: ein Babybett, Gitterbett oder eine Wiege, die den aktuellen Sicherheitsstandards entspricht.",
-                    "Wenden Sie es auf jeden Schlaf an, einschließlich kurzer Tagesschläfchen und Schläfe weg von zu Hause.",
+                    "Wenden Sie es bei jedem Schlaf an, auch bei kurzen Tagschläfchen und beim Schlafen außer Haus.",
                     "Stellen Sie sicher, dass jeder, der Ihr Baby je zu Bett bringt — Partner, Großeltern, Nanny — die gleichen drei Regeln befolgt."
                 ],
                 es: [
                     "Solo: el bebé duerme en su propia superficie, sin nadie ni nada más encima.",
                     "Boca arriba: boca arriba en cada siesta y cada noche, hasta que se gire solo en ambos sentidos.",
                     "En la cuna: una cuna, cuco o moisés que cumpla las normas de seguridad vigentes.",
-                    "Aplícalo a todos los sueños, incluidas las siestas cortas y los sueños fuera de casa.",
+                    "Aplícalo a cada periodo de sueño, incluidas las siestas cortas y el sueño fuera de casa.",
                     "Asegúrate de que todo el que acueste al bebé —pareja, abuelos, canguro— siga las mismas tres reglas."
                 ],
                 fr: [
@@ -61,15 +61,15 @@ extension CareTipsCatalog {
                 ],
                 pt: [
                     "Sozinho: seu bebê dorme na sua própria superfície, sem ninguém e nada mais sobre ele.",
-                    "Costas: nas costas a cada soneca e a cada noite, até rolarem sozinhos para os dois lados.",
-                    "Berço: berço, berço ou cesto moisés que atenda às normas de segurança vigentes.",
-                    "Aplique-o em todas as noites de sono, incluindo cochilos curtos durante o dia e fora de casa.",
+                    "De barriga para cima: de barriga para cima em cada soneca e todas as noites, até o bebê rolar sozinho para os dois lados.",
+                    "Berço: um berço, alcofa ou moisés que atenda às normas de segurança vigentes.",
+                    "Aplique isso a cada período de sono, incluindo cochilos curtos durante o dia e o sono fora de casa.",
                     "Certifique-se de que todos que cuidam do seu bebê – parceiro, avós, babá – sigam as mesmas três regras.",
                 ],
                 zh: [
                     "独自一人：您的宝宝睡在自己的表面上，上面没有任何人，也没有任何其他东西。",
-                    "背部：每次小睡和每晚都仰卧，直到它们自己滚动。",
-                    "婴儿床：符合现行安全标准的婴儿床、婴儿床或摩西篮。",
+                    "仰卧：每次小睡和每晚都让宝宝仰卧，直到宝宝能自己向两侧翻身。",
+                    "婴儿床：符合现行安全标准的婴儿床、摇篮或摩西篮。",
                     "将其应用于每次睡眠，包括白天短暂小睡和外出睡觉。",
                     "确保所有照顾你孩子的人——伴侣、祖父母、保姆——都遵守同样的三项规则。",
                 ]

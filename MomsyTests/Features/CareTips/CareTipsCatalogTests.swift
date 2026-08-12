@@ -45,6 +45,44 @@ struct CareTipsCatalogTests {
         }
     }
 
+    @Test("every tip is translated into all seven languages")
+    func allLanguagesPresent() {
+        for tip in CareTipsCatalog.all {
+            for lang in Language.allCases {
+                #expect(tip.title.isTranslated(into: lang),
+                        "tip \(tip.id): title missing \(lang.rawValue)")
+                #expect(tip.summary.isTranslated(into: lang),
+                        "tip \(tip.id): summary missing \(lang.rawValue)")
+                #expect(tip.whyItMatters.isTranslated(into: lang),
+                        "tip \(tip.id): whyItMatters missing \(lang.rawValue)")
+                #expect(tip.whatToDo.isTranslated(into: lang),
+                        "tip \(tip.id): whatToDo missing \(lang.rawValue)")
+                #expect(tip.commonMistakes.isTranslated(into: lang),
+                        "tip \(tip.id): commonMistakes missing \(lang.rawValue)")
+                #expect(tip.whenToCallDoctor.isTranslated(into: lang),
+                        "tip \(tip.id): whenToCallDoctor missing \(lang.rawValue)")
+            }
+        }
+    }
+
+    @Test("list fields have the same item count in every language")
+    func listCountsMatchAcrossLanguages() {
+        for tip in CareTipsCatalog.all {
+            let fields: [(String, LocalizedList)] = [
+                ("whatToDo", tip.whatToDo),
+                ("commonMistakes", tip.commonMistakes),
+                ("whenToCallDoctor", tip.whenToCallDoctor)
+            ]
+            for (name, list) in fields {
+                let expected = list(.english).count
+                for lang in Language.allCases {
+                    #expect(list(lang).count == expected,
+                            "tip \(tip.id): \(name) has \(list(lang).count) items in \(lang.rawValue), expected \(expected)")
+                }
+            }
+        }
+    }
+
     @Test("age windows are valid")
     func ageWindowsValid() {
         for tip in CareTipsCatalog.all {

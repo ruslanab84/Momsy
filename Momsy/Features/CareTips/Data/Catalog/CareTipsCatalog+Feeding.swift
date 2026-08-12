@@ -41,37 +41,37 @@ extension CareTipsCatalog {
                 de: [
                     "Heben Sie Ihr Baby auf Ihre Schulter, sodass die Brust gegen Sie anliegt und das Kinn über Ihrer Schulter ist.",
                     "Stützen Sie Kopf und Nacken mit einer Hand; halten Sie die Wirbelsäule gerade und nicht gekrümmt.",
-                    "Bleiben Sie 10–15 Minuten nach einer vollständigen Mahlzeit aufrecht, etwas länger, wenn Ihr Baby zum Spucken neigt.",
+                    "Halten Sie Ihr Baby nach einer vollständigen Mahlzeit 10–15 Minuten aufrecht, etwas länger, wenn es zum Spucken neigt.",
                     "Klopfen oder streicheln Sie den Rücken sanft und rhythmisch — Druck ist niemals erforderlich.",
                     "Wechseln Sie zu einem Halt auf Ihrem Schoß, wenn Ihr Arm müde wird; wichtig ist die aufrechte Wirbelsäule, nicht die exakte Position."
                 ],
                 es: [
                     "Levante a su bebé sobre su hombro para que su pecho descanse contra usted y su barbilla despeje su hombro.",
-                    "Sostenga la cabeza y el cuello con una mano; Mantenga la columna recta en lugar de curvada.",
-                    "Manténgase erguido durante 10 a 15 minutos después de una toma completa, un poco más si su bebé es propenso a regurgitar.",
+                    "Sostenga la cabeza y el cuello con una mano; mantenga la columna recta en lugar de curvada.",
+                    "Mantenga al bebé erguido durante 10 a 15 minutos después de una toma completa, un poco más si es propenso a regurgitar.",
                     "Dé palmaditas o acaricie la espalda suave y rítmicamente; nunca es necesaria presión.",
-                    "Cambie a una posición sentada en su regazo si se le cansa el brazo; el punto es la columna vertical, no la posición exacta.",
+                    "Cambie a sentarlo en su regazo si se le cansa el brazo; lo importante es que la espalda esté vertical, no la postura exacta.",
                 ],
                 fr: [
                     "Soulevez votre bébé sur votre épaule pour que sa poitrine repose contre vous et que son menton dépasse votre épaule.",
                     "Soutenez la tête et le cou d’une seule main ; gardez la colonne vertébrale droite plutôt que courbée.",
-                    "Restez debout pendant 10 à 15 minutes après une tétée complète, un peu plus longtemps si votre bébé a tendance à cracher.",
+                    "Gardez votre bébé à la verticale pendant 10 à 15 minutes après une tétée complète, un peu plus longtemps s’il a tendance à régurgiter.",
                     "Tapotez ou caressez le dos doucement et en rythme – la pression n’est jamais nécessaire.",
-                    "Passez à une position assise sur vos genoux si votre bras se fatigue ; le point est la colonne verticale, pas la position exacte.",
+                    "Asseyez-le sur vos genoux si votre bras se fatigue ; l’essentiel est que le dos reste vertical, pas la position exacte.",
                 ],
                 pt: [
                     "Levante o bebê sobre o ombro de forma que o peito dele repouse contra você e o queixo dele fique afastado do ombro.",
                     "Apoie a cabeça e o pescoço com uma mão; mantenha a coluna reta em vez de enrolada.",
-                    "Fique em pé por 10 a 15 minutos após uma mamada completa, um pouco mais se o seu bebê tiver tendência a cuspir.",
+                    "Mantenha o bebê na vertical por 10 a 15 minutos após uma mamada completa, um pouco mais se ele costuma golfar.",
                     "Dê tapinhas ou acaricie as costas suavemente e ritmicamente – nunca é necessária pressão.",
-                    "Troque para sentar no colo se seu braço estiver cansado; o ponto é a coluna vertical, não a posição exata.",
+                    "Sente o bebê no seu colo se o braço cansar; o que importa é a coluna na vertical, não a posição exata.",
                 ],
                 zh: [
                     "将宝宝抱到您的肩膀上，让他们的胸部靠在您身上，下巴远离您的肩膀。",
                     "用一只手支撑头部和颈部；保持脊柱挺直而不是卷曲。",
-                    "吃饱后保持直立 10 至 15 分钟，如果宝宝容易吐奶，则可以延长一点时间。",
+                    "喂完奶后让宝宝保持直立 10 至 15 分钟，如果宝宝容易吐奶，可以再久一点。",
                     "轻轻地、有节奏地拍打或抚摸背部——永远不需要压力。",
-                    "如果你的手臂疲劳了，就换成坐在你的腿上；该点是垂直脊柱，而不是确切位置。",
+                    "如果您的手臂累了，就让宝宝坐在您的腿上；关键是脊柱保持垂直，而不是具体姿势。",
                 ]
             ),
             whyItMatters: LocalizedText(
