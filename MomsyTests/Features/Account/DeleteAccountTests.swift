@@ -396,7 +396,7 @@ struct FirestoreAccountEraserTests {
     }
 
     @Test("server verification covers every current and legacy health path")
-    func serverVerificationPathPlan() {
+    func serverVerificationPathPlan() async {
         let parents = FirestoreAccountEraser.healthDataParentPaths(
             familyId: "family-1",
             babyIds: ["baby-1", "baby-2"]
@@ -407,7 +407,7 @@ struct FirestoreAccountEraserTests {
             "babies/family-1",
         ])
 
-        let collectionPaths = FirestoreAccountEraser.healthDataCollectionPaths(
+        let collectionPaths = await FirestoreAccountEraser.healthDataCollectionPaths(
             parentPaths: parents,
             includingDeletionMarkers: true
         )
@@ -423,6 +423,94 @@ struct FirestoreAccountEraserTests {
                 #expect(collectionPaths.contains("\(parent)/\(subcollection)"))
             }
         }
+    }
+}
+
+// MARK: - Bounded concurrency
+
+private actor ConcurrencyProbe {
+    private(set) var inFlight = 0
+    private(set) var peak = 0
+    private(set) var completed: [Int] = []
+
+    func enter() {
+        inFlight += 1
+        peak = max(peak, inFlight)
+    }
+
+    func leave(_ item: Int) {
+        inFlight -= 1
+        completed.append(item)
+    }
+}
+
+private struct ProbeFailure: Error {}
+
+@Suite("BoundedConcurrency")
+struct BoundedConcurrencyTests {
+    @Test("runs every item exactly once")
+    func runsEveryItem() async throws {
+        let probe = ConcurrencyProbe()
+
+        try await BoundedConcurrency.forEach(Array(0..<50), limit: 8) { item in
+            await probe.enter()
+            try await Task.sleep(nanoseconds: 1_000_000)
+            await probe.leave(item)
+        }
+
+        let completed = await probe.completed
+        #expect(completed.count == 50)
+        #expect(Set(completed) == Set(0..<50))
+    }
+
+    @Test("respects the limit while overlapping work")
+    func respectsLimit() async throws {
+        let probe = ConcurrencyProbe()
+
+        try await BoundedConcurrency.forEach(Array(0..<40), limit: 5) { item in
+            await probe.enter()
+            try await Task.sleep(nanoseconds: 3_000_000)
+            await probe.leave(item)
+        }
+
+        let peak = await probe.peak
+        #expect(peak <= 5, "peak in-flight \(peak) exceeded the limit")
+        #expect(peak > 1, "work never overlapped")
+    }
+
+    @Test("rethrows an error without scheduling every remaining item")
+    func failsFast() async {
+        let probe = ConcurrencyProbe()
+
+        await #expect(throws: ProbeFailure.self) {
+            try await BoundedConcurrency.forEach(Array(0..<100), limit: 4) { item in
+                if item == 0 { throw ProbeFailure() }
+                await probe.enter()
+                try await Task.sleep(nanoseconds: 20_000_000)
+                await probe.leave(item)
+            }
+        }
+
+        let completed = await probe.completed
+        #expect(completed.count < 100)
+    }
+
+    @Test("uses the sequential path for degenerate inputs")
+    func degenerateInputs() async throws {
+        let emptyProbe = ConcurrencyProbe()
+        try await BoundedConcurrency.forEach([Int](), limit: 8) { item in
+            await emptyProbe.enter()
+            await emptyProbe.leave(item)
+        }
+        #expect(await emptyProbe.peak == 0)
+
+        let serialProbe = ConcurrencyProbe()
+        try await BoundedConcurrency.forEach([1, 2, 3], limit: 1) { item in
+            await serialProbe.enter()
+            await serialProbe.leave(item)
+        }
+        #expect(await serialProbe.peak == 1)
+        #expect(await serialProbe.completed == [1, 2, 3])
     }
 }
 

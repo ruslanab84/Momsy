@@ -32,7 +32,57 @@ protocol CloudAccountEraser {
     func isCloudDataPresent(uid: String) async throws -> Bool
 }
 
-struct FirestoreAccountEraser: CloudAccountEraser {
+/// Runs independent async work while keeping a bounded number of tasks in flight.
+///
+/// Account erasure fans out over every Firestore subcollection. The bound avoids turning a
+/// large family into an unbounded burst of reads and writes while retaining fail-fast behavior.
+enum BoundedConcurrency {
+    nonisolated static let defaultLimit = 8
+
+    nonisolated static func forEach<T: Sendable>(
+        _ items: [T],
+        limit: Int = defaultLimit,
+        _ operation: @Sendable @escaping (T) async throws -> Void
+    ) async throws {
+        guard limit > 1, items.count > 1 else {
+            for item in items {
+                try Task.checkCancellation()
+                try await operation(item)
+            }
+            return
+        }
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            var next = 0
+            let window = min(limit, items.count)
+            while next < window {
+                let item = items[next]
+                group.addTask {
+                    try Task.checkCancellation()
+                    try await operation(item)
+                }
+                next += 1
+            }
+
+            do {
+                while try await group.next() != nil {
+                    guard next < items.count else { continue }
+                    let item = items[next]
+                    group.addTask {
+                        try Task.checkCancellation()
+                        try await operation(item)
+                    }
+                    next += 1
+                }
+            } catch {
+                group.cancelAll()
+                throw error
+            }
+        }
+    }
+}
+
+struct FirestoreAccountEraser: CloudAccountEraser, Sendable {
     func deleteCloudData(uid: String, familyIdHint: String?) async throws -> AccountErasureOutcome {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(uid)
@@ -218,14 +268,15 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         return ids
     }
 
-    private func deleteBabyTree(
+    private nonisolated func deleteBabyTree(
         familyRef: DocumentReference,
         familyId: String,
         babyId: String,
         ownerUID: String
     ) async throws {
         let babyRef = familyRef.collection("babies").document(babyId)
-        for subcollection in BabySyncService.allSubcollections {
+        let subcollections = await MainActor.run { BabySyncService.allSubcollections }
+        try await BoundedConcurrency.forEach(subcollections) { subcollection in
             try await deleteAllDocs(
                 in: babyRef.collection(subcollection),
                 subcollection: subcollection,
@@ -234,12 +285,15 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         }
         try await babyRef.collection("profile").document("info").delete()
         try await babyRef.delete()
-        SyncWatermarkStore().reset(family: familyId, baby: babyId)
+        await MainActor.run {
+            SyncWatermarkStore().reset(family: familyId, baby: babyId)
+        }
     }
 
-    private func deleteLegacyFamilyTree(familyId: String, ownerUID: String) async throws {
+    private nonisolated func deleteLegacyFamilyTree(familyId: String, ownerUID: String) async throws {
         let oldParent = Firestore.firestore().collection("babies").document(familyId)
-        for subcollection in BabySyncService.allSubcollections {
+        let subcollections = await MainActor.run { BabySyncService.allSubcollections }
+        try await BoundedConcurrency.forEach(subcollections) { subcollection in
             try await Self.performLegacyDeletion {
                 try await deleteAllDocs(
                     in: oldParent.collection(subcollection),
@@ -256,7 +310,9 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         }
     }
 
-    static func performLegacyDeletion(_ operation: () async throws -> Void) async throws {
+    nonisolated static func performLegacyDeletion(
+        _ operation: @Sendable () async throws -> Void
+    ) async throws {
         do {
             try await operation()
         } catch {
@@ -268,43 +324,47 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         }
     }
 
-    static func healthDataParentPaths(familyId: String, babyIds: [String]) -> [String] {
+    nonisolated static func healthDataParentPaths(familyId: String, babyIds: [String]) -> [String] {
         babyIds.map { "families/\(familyId)/babies/\($0)" } + ["babies/\(familyId)"]
     }
 
-    static func healthDataCollectionPaths(
+    nonisolated static func healthDataCollectionPaths(
         parentPaths: [String],
         includingDeletionMarkers: Bool
-    ) -> [String] {
+    ) async -> [String] {
+        let allSubcollections = await MainActor.run { BabySyncService.allSubcollections }
         let subcollections = includingDeletionMarkers
-            ? BabySyncService.allSubcollections
-            : BabySyncService.allSubcollections.filter { $0 != "deletions" }
+            ? allSubcollections
+            : allSubcollections.filter { $0 != "deletions" }
         return parentPaths.flatMap { parent in
             subcollections.map { "\(parent)/\($0)" }
         }
     }
 
-    static func healthDataDocumentPaths(parentPaths: [String]) -> [String] {
+    nonisolated static func healthDataDocumentPaths(parentPaths: [String]) -> [String] {
         parentPaths.flatMap { [$0, "\($0)/profile/info"] }
     }
 
-    private func verifyHealthDataAbsent(
+    private nonisolated func verifyHealthDataAbsent(
         parentPaths: [String],
         deletingUID: String,
         authoredOnly: Bool
     ) async throws {
-        let db = Firestore.firestore()
-        for path in Self.healthDataCollectionPaths(
+        let collectionPaths = await Self.healthDataCollectionPaths(
             parentPaths: parentPaths,
             includingDeletionMarkers: !authoredOnly
-        ) {
-            let collection = db.collection(path)
+        )
+        try await BoundedConcurrency.forEach(collectionPaths) { path in
+            let collection = Firestore.firestore().collection(path)
             let subcollection = String(path.split(separator: "/").last ?? "")
+            let requiresAuthorScope = await MainActor.run {
+                BabySyncService.requiresAuthorScopedQuery(
+                    for: subcollection,
+                    authoredOnly: authoredOnly
+                )
+            }
             let query: Query
-            if BabySyncService.requiresAuthorScopedQuery(
-                for: subcollection,
-                authoredOnly: authoredOnly
-            ) {
+            if requiresAuthorScope {
                 query = collection.whereField("addedBy", isEqualTo: deletingUID)
             } else {
                 query = collection
@@ -316,16 +376,23 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         }
 
         guard !authoredOnly else { return }
-        for path in Self.healthDataDocumentPaths(parentPaths: parentPaths) {
-            let snapshot = try await db.document(path).getDocument(source: .server)
+        let documentPaths = Self.healthDataDocumentPaths(parentPaths: parentPaths)
+        try await BoundedConcurrency.forEach(documentPaths) { path in
+            let snapshot = try await Firestore.firestore().document(path).getDocument(source: .server)
             guard !snapshot.exists, !snapshot.metadata.hasPendingWrites else {
                 throw AuthError.accountDeletionPending
             }
         }
     }
 
-    private func eraseAuthoredData(under parent: DocumentReference, uid: String) async throws {
-        for subcollection in BabySyncService.allSubcollections where subcollection != "deletions" {
+    private nonisolated func eraseAuthoredData(
+        under parent: DocumentReference,
+        uid: String
+    ) async throws {
+        let subcollections = await MainActor.run {
+            BabySyncService.allSubcollections.filter { $0 != "deletions" }
+        }
+        try await BoundedConcurrency.forEach(subcollections) { subcollection in
             let documents = try await parent.collection(subcollection)
                 .whereField("addedBy", isEqualTo: uid)
                 .getDocuments(source: .server)
@@ -333,18 +400,23 @@ struct FirestoreAccountEraser: CloudAccountEraser {
             for start in stride(from: 0, to: documents.count, by: 400) {
                 let batch = Firestore.firestore().batch()
                 for document in documents[start..<min(start + 400, documents.count)] {
-                    switch AccountErasureGate.authoredDataAction(
-                        subcollection: subcollection,
-                        documentData: document.data(),
-                        deletingUid: uid
-                    ) {
+                    let action = await MainActor.run {
+                        AccountErasureGate.authoredDataAction(
+                            subcollection: subcollection,
+                            documentData: document.data(),
+                            deletingUid: uid
+                        )
+                    }
+                    switch action {
                     case .delete:
                         batch.deleteDocument(document.reference)
                     case .anonymize:
-                        guard let update = AccountErasureGate.authorAnonymizationUpdate(
-                            documentData: document.data(),
-                            deletingUid: uid
-                        ) else { continue }
+                        guard let update = await MainActor.run(body: {
+                            AccountErasureGate.authorAnonymizationUpdate(
+                                documentData: document.data(),
+                                deletingUid: uid
+                            )
+                        }) else { continue }
                         batch.updateData(update, forDocument: document.reference)
                     case nil:
                         continue
@@ -406,13 +478,16 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         }
     }
 
-    private func deleteAllDocs(
+    private nonisolated func deleteAllDocs(
         in collection: CollectionReference,
         subcollection: String,
         ownerUID: String
     ) async throws {
+        let requiresAuthorScope = await MainActor.run {
+            BabySyncService.requiresAuthorScopedQuery(for: subcollection)
+        }
         let query: Query
-        if BabySyncService.requiresAuthorScopedQuery(for: subcollection) {
+        if requiresAuthorScope {
             query = collection.whereField("addedBy", isEqualTo: ownerUID)
         } else {
             query = collection
@@ -420,16 +495,27 @@ struct FirestoreAccountEraser: CloudAccountEraser {
         try await deleteAllDocs(in: query)
     }
 
-    private func deleteAllDocs(in query: Query) async throws {
-        let docs = try await query.getDocuments(source: .server).documents
-        guard !docs.isEmpty else { return }
+    private nonisolated func deleteAllDocs(in query: Query) async throws {
         let db = Firestore.firestore()
-        for start in stride(from: 0, to: docs.count, by: 400) {
+        let pageSize = 400
+        var pages = 0
+
+        while true {
+            try Task.checkCancellation()
+            let docs = try await query.limit(to: pageSize)
+                .getDocuments(source: .server)
+                .documents
+            guard !docs.isEmpty else { return }
+
             let batch = db.batch()
-            for doc in docs[start..<min(start + 400, docs.count)] {
+            for doc in docs {
                 batch.deleteDocument(doc.reference)
             }
             try await batch.commit()
+
+            guard docs.count == pageSize else { return }
+            pages += 1
+            guard pages < 250 else { throw AuthError.accountDeletionPending }
         }
     }
 }
