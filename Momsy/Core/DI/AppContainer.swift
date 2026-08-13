@@ -333,6 +333,13 @@ final class AppContainer {
     /// is handled by `DeleteAccountUseCase` before this runs.
     @MainActor
     func eraseLocalData() throws {
+        sleepLiveSync.stop()
+        SleepLiveActivityManager().endActivity()
+        FeedingLiveActivityManager().endActivity()
+        WalkLiveActivityManager().endActivity()
+        BathLiveActivityManager().endActivity()
+        PumpingLiveActivityManager().endActivity()
+
         try context.delete(model: SleepRecord.self)
         try context.delete(model: FeedingRecord.self)
         try context.delete(model: WalkRecord.self)
