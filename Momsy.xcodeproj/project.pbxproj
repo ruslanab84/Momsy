@@ -28,6 +28,7 @@
 		1D0A7E115EA9B00100000001 /* DevelopmentLeapSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0A7E115EA9B00100000002 /* DevelopmentLeapSchedule.swift */; };
 		1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128234E8E44F5112A8759AFC /* DailyTipAlgorithmTests.swift */; };
 		1F2E3D4C5B6A79808172635F /* SubscriptionManagerLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADD5DE86DF74081D750B39F /* SubscriptionManagerLogicTests.swift */; };
+		F4A9C1B2D3E4F50617283940 /* FamilyPremiumAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A9C1B2D3E4F50617283941 /* FamilyPremiumAccessTests.swift */; };
 		27CA040C2FD26F9ED0A45DAD /* SleepViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6393BEE3B4890FBA0182E9D /* SleepViewModelTests.swift */; };
 		2815A39316E61565F9A00DA6 /* DailyContextBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E2AA146C13729A15817C5 /* DailyContextBuilderTests.swift */; };
 		2A98F7575F5748A0BF198500 /* VitaminCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12001E51A26A48C69072B882 /* VitaminCategoryTests.swift */; };
@@ -205,6 +206,7 @@
 		4820A4E27274110E9256D2F7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		482ADA73C55024953C8197D9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
 		4ADD5DE86DF74081D750B39F /* SubscriptionManagerLogicTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SubscriptionManagerLogicTests.swift; sourceTree = "<group>"; };
+		F4A9C1B2D3E4F50617283941 /* FamilyPremiumAccessTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyPremiumAccessTests.swift; sourceTree = "<group>"; };
 		4F159218252E2FF5857958F7 /* MomsyWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MomsyWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FD0AF0156B76667AAC29CB9 /* MockDailyTipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDailyTipService.swift; sourceTree = "<group>"; };
 		53A0E7913296744B89DD122D /* DiaryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryViewModelTests.swift; sourceTree = "<group>"; };
@@ -620,6 +622,7 @@
 			isa = PBXGroup;
 			children = (
 				4ADD5DE86DF74081D750B39F /* SubscriptionManagerLogicTests.swift */,
+				F4A9C1B2D3E4F50617283941 /* FamilyPremiumAccessTests.swift */,
 			);
 			path = Subscription;
 			sourceTree = "<group>";
@@ -1125,6 +1128,7 @@
 				0BABF12B0000000000000008 /* FamilySuppressedRestoreTests.swift in Sources */,
 				5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */,
 				1F2E3D4C5B6A79808172635F /* SubscriptionManagerLogicTests.swift in Sources */,
+				F4A9C1B2D3E4F50617283940 /* FamilyPremiumAccessTests.swift in Sources */,
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
 				0BABF1270000000000000001 /* LanguageTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB001 /* FirebaseBootstrapperTests.swift in Sources */,

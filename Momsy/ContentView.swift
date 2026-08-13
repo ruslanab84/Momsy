@@ -4,8 +4,10 @@ struct ContentView: View {
     @AppStorage("onboardingDone") private var onboardingDone = false
     @AppStorage("paywallShown") private var paywallShown = false
     @Environment(\.appContainer) private var container
+    @Environment(\.scenePhase) private var scenePhase
     @Binding private var widgetFeatureRoute: WidgetFeatureRoute?
     @State private var showSplash = true
+    @State private var premiumAccessState: PremiumAccessState = .resolving
 
     init(widgetFeatureRoute: Binding<WidgetFeatureRoute?> = .constant(nil)) {
         _widgetFeatureRoute = widgetFeatureRoute
@@ -20,7 +22,10 @@ struct ContentView: View {
             } else if !onboardingDone {
                 OnboardingView(container: container, onDone: { onboardingDone = true })
                     .transition(.opacity)
-            } else if !paywallShown {
+            } else if premiumAccessState == .resolving {
+                SplashView()
+                    .transition(.opacity)
+            } else if premiumAccessState == .requiresPurchase && !paywallShown {
                 PaywallView(
                     subscriptionManager: container.subscriptionManager,
                     onComplete: {
@@ -35,8 +40,15 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: onboardingDone)
+        .onReceive(container.subscriptionManager.$accessState) { premiumAccessState = $0 }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task { await container.subscriptionManager.refreshAccess() }
+        }
         .task {
             migrateLegacyPaywallStateIfNeeded()
+            premiumAccessState = container.subscriptionManager.accessState
+            await container.subscriptionManager.refreshAccess()
             try? await Task.sleep(for: .seconds(2.2))
             showSplash = false
         }

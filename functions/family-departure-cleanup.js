@@ -1,5 +1,6 @@
 const { createHash } = require("node:crypto");
 const { FieldPath, FieldValue } = require("firebase-admin/firestore");
+const { detachFamilyEntitlements } = require("./subscription-entitlement");
 
 const privateWellbeingSubcollections = new Set(["momSleepLogs", "waterIntakeLogs"]);
 const batchLimit = 400;
@@ -25,6 +26,7 @@ async function cleanupDepartedFamilyMember(db, familyId, uid) {
     await scrubInvites(db, memberRef, familyId, uid);
     await clearFamilyCreator(familyRef, memberRef, uid);
     await clearStaleUserRoute(db.collection("users").doc(uid), memberRef, familyId, uid);
+    await detachFamilyEntitlements(db, familyId, uid);
     await verifyCleanup(
         parentRefs,
         familyRef,

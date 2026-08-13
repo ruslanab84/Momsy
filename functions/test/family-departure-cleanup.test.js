@@ -4,6 +4,10 @@ const { deleteApp, initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { cleanupDeletedBaby } = require("../baby-deletion-cleanup");
 const { cleanupDepartedFamilyMember, cleanupJobID } = require("../family-departure-cleanup");
+const {
+    bindEntitlementToCurrentFamily,
+    detachFamilyEntitlements,
+} = require("../subscription-entitlement");
 
 const projectId = "demo-momsy";
 let app;
@@ -177,6 +181,34 @@ test("family switch cleanup preserves the new family route", async () => {
     });
     assert.equal((await userRef.get()).get("familyId"), newFamilyId);
     assert.equal((await cleanupRef.get()).exists, false);
+});
+
+test("a verified subscription is shared with the family and removed on departure", async () => {
+    const familyId = "premium-family";
+    const uid = "subscribing-parent";
+    const transactionID = "1000000123456789";
+    await db.collection("families").doc(familyId).set({ bootstrapComplete: true });
+    await db.collection("families").doc(familyId).collection("members").doc(uid).set({ uid });
+    await db.collection("users").doc(uid).set({ familyId });
+
+    await bindEntitlementToCurrentFamily(db, uid, {
+        originalTransactionId: transactionID,
+        productId: "com.ruslanabdulov.momsy.premium.monthly",
+        expiresDate: Date.now() + 60_000,
+        revocationDate: null,
+    });
+
+    const familyWithPremium = await db.collection("families").doc(familyId).get();
+    assert.equal(familyWithPremium.get("premiumEntitlement.originalTransactionId"), transactionID);
+
+    await detachFamilyEntitlements(db, familyId, uid);
+
+    const [familyWithoutPremium, detachedEntitlement] = await Promise.all([
+        db.collection("families").doc(familyId).get(),
+        db.collection("subscriptionEntitlements").doc(transactionID).get(),
+    ]);
+    assert.equal(familyWithoutPremium.get("premiumEntitlement"), undefined);
+    assert.equal(detachedEntitlement.get("familyId"), "");
 });
 
 test("cleanup does nothing when canonical membership is active", async () => {

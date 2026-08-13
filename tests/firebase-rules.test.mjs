@@ -161,6 +161,9 @@ test("family lifecycle cannot be reopened or client-deleted", async () => {
 
     await assertFails(nannyDb.doc(familyPath).update({ bootstrapComplete: false }));
     await assertFails(nannyDb.doc(familyPath).update({ name: "hacked" }));
+    await assertFails(nannyDb.doc(familyPath).update({
+        premiumEntitlement: { productId: "com.ruslanabdulov.momsy.premium.monthly" },
+    }));
     await assertFails(momDb.doc(familyPath).update({ bootstrapComplete: false }));
     await assertFails(momDb.doc(familyPath).update({ name: "unexpected" }));
     await assertFails(nannyDb.doc(familyPath).set({

@@ -5,6 +5,7 @@ import StoreKit
 @MainActor
 final class SubscriptionManager: ObservableObject {
     @Published private(set) var isPremium = false
+    @Published private(set) var accessState: PremiumAccessState = .resolving
     @Published private(set) var isLoading = false
     @Published private(set) var products: [Product] = []
     @Published private(set) var trialEligible = false
@@ -23,24 +24,46 @@ final class SubscriptionManager: ObservableObject {
     }
 
     private let service: any SubscriptionServicing
+    private let familyPremiumService: FamilyPremiumService
     private var listenerTask: Task<Void, Never>?
     private var productLoadTask: Task<[Product], Error>?
+    private var familyJoinObserver: NSObjectProtocol?
+    private var familyRevocationObserver: NSObjectProtocol?
+    private var personalPremium = false
+    private var familyPremium = false
+    private var isResolvingPersonal = true
+    private var isResolvingFamily = true
+    private var observedFamilyID: String?
+    private var hasObservedFamily = false
 
-    init(service: any SubscriptionServicing) {
+    init(service: any SubscriptionServicing, familyPremiumService: FamilyPremiumService) {
         self.service = service
+        self.familyPremiumService = familyPremiumService
+        observeFamilyChanges()
         listenerTask = Task {
             _ = try? await loadProductsIfNeeded()
-            await updateStatus()
+            await refreshAccess()
             for await result in Transaction.updates {
                 guard case .verified(let tx) = result else { continue }
-                await updateStatus()
-                await tx.finish()
+                await updatePersonalStatus(synchronizeFamilyEntitlement: false)
+                guard Self.grantsPremium(productID: tx.productID) else {
+                    await tx.finish()
+                    continue
+                }
+                do {
+                    try await familyPremiumService.synchronize(transactionJWS: result.jwsRepresentation)
+                    await tx.finish()
+                } catch {
+                    continue
+                }
             }
         }
     }
 
     deinit {
         listenerTask?.cancel()
+        if let familyJoinObserver { NotificationCenter.default.removeObserver(familyJoinObserver) }
+        if let familyRevocationObserver { NotificationCenter.default.removeObserver(familyRevocationObserver) }
     }
 
     func purchase() async throws -> Bool {
@@ -59,10 +82,12 @@ final class SubscriptionManager: ObservableObject {
             let grantsPremium = Self.grantsPremium(productID: tx.productID)
                 && tx.revocationDate == nil
             if grantsPremium {
-                isPremium = true
+                personalPremium = true
+                updateAccessState()
+                try await familyPremiumService.synchronize(transactionJWS: verification.jwsRepresentation)
             }
             await tx.finish()
-            await updateStatus()
+            await refreshAccess()
             return grantsPremium
         case .pending, .userCancelled:
             return false
@@ -76,7 +101,14 @@ final class SubscriptionManager: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         try? await service.restorePurchases()
-        await updateStatus()
+        await refreshAccess()
+    }
+
+    func refreshAccess() async {
+        await updatePersonalStatus(synchronizeFamilyEntitlement: true)
+        // ponytail: expiry is rechecked on foreground; add App Store Server Notifications
+        // when entitlement changes must reach an already-open co-parent app immediately.
+        observeCurrentFamily(forceRefresh: true)
     }
 
     /// Any product in the app's catalog grants premium.
@@ -127,16 +159,58 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
-    private func updateStatus() async {
+    private func updatePersonalStatus(synchronizeFamilyEntitlement: Bool) async {
         var hasSub = false
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result,
                Self.grantsPremium(productID: tx.productID),
                tx.revocationDate == nil {
                 hasSub = true
+                if synchronizeFamilyEntitlement {
+                    try? await familyPremiumService.synchronize(transactionJWS: result.jwsRepresentation)
+                }
             }
         }
-        isPremium = hasSub
+        personalPremium = hasSub
+        isResolvingPersonal = false
+        updateAccessState()
+    }
+
+    private func observeFamilyChanges() {
+        familyJoinObserver = NotificationCenter.default.addObserver(
+            forName: .familyDidJoin, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.observeCurrentFamily() }
+        }
+        familyRevocationObserver = NotificationCenter.default.addObserver(
+            forName: .familyMembershipRevoked, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.observeCurrentFamily() }
+        }
+    }
+
+    private func observeCurrentFamily(forceRefresh: Bool = false) {
+        let familyID = FamilyManager.shared.familyId
+        guard forceRefresh || !hasObservedFamily || observedFamilyID != familyID else { return }
+        hasObservedFamily = true
+        observedFamilyID = familyID
+        isResolvingFamily = true
+        updateAccessState()
+        familyPremiumService.observe(familyId: familyID) { [weak self] isPremium in
+            guard let self else { return }
+            self.familyPremium = isPremium
+            self.isResolvingFamily = false
+            self.updateAccessState()
+        }
+    }
+
+    private func updateAccessState() {
+        accessState = PremiumAccessPolicy.state(
+            personalPremium: personalPremium,
+            familyPremium: familyPremium,
+            isResolving: isResolvingPersonal || isResolvingFamily
+        )
+        isPremium = accessState == .premium
     }
 
     private func verified<T>(_ result: VerificationResult<T>) throws -> T {
