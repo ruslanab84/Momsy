@@ -201,6 +201,7 @@ private struct MomsyRootView: View {
                         },
                         secondaryButton: .cancel(Text(localization.strings.cloudSyncKeepLocal)) {
                             CloudSyncConsent.set(.denied)
+                            container.subscriptionManager.cloudSyncConsentDidChange(enabled: false)
                             Task { await maybeGenerateWeeklyReport() }
                         }
                     )
@@ -260,6 +261,7 @@ private struct MomsyRootView: View {
     private func startCloudServices() async {
         do {
             try await container.authManager.signInAnonymouslyIfNeeded()
+            container.subscriptionManager.cloudSyncConsentDidChange(enabled: true)
             await container.cloudSyncDownloader.downloadAndMergeWhenReady()
             container.sleepLiveSync.start()
         } catch {

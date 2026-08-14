@@ -48,7 +48,6 @@ struct ContentView: View {
         .task {
             migrateLegacyPaywallStateIfNeeded()
             premiumAccessState = container.subscriptionManager.accessState
-            await container.subscriptionManager.refreshAccess()
             try? await Task.sleep(for: .seconds(2.2))
             showSplash = false
         }

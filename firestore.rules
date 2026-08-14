@@ -455,6 +455,7 @@ service cloud.firestore {
       allow read:   if belongsToFamily(familyId);
       allow create: if isSignedIn()
                     && request.resource.data.createdBy == request.auth.uid
+                    && !('premiumEntitlement' in request.resource.data)
                     && (
                       request.resource.data.bootstrapComplete == false
                       || isAtomicFamilyCreatorBootstrap(familyId)

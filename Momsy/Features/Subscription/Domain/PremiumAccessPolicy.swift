@@ -10,7 +10,7 @@ enum PremiumAccessPolicy {
         familyPremium: Bool,
         isResolving: Bool
     ) -> PremiumAccessState {
-        if isResolving { return .resolving }
-        return personalPremium || familyPremium ? .premium : .requiresPurchase
+        if personalPremium || familyPremium { return .premium }
+        return isResolving ? .resolving : .requiresPurchase
     }
 }

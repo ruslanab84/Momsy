@@ -337,6 +337,7 @@ final class AppContainer {
     @MainActor
     func eraseLocalData() throws {
         sleepLiveSync.stop()
+        subscriptionManager.eraseLocalSubscriptionState()
         SleepLiveActivityManager().endActivity()
         FeedingLiveActivityManager().endActivity()
         WalkLiveActivityManager().endActivity()
@@ -404,6 +405,8 @@ final class AppContainer {
             FirestoreInviteService.syncedCodeKey,
             PendingFamilyInviteStore.codeKey,
             PendingOnboardingSetupStore.storageKey,
+            PendingSubscriptionSyncStore.storageKey,
+            PendingSubscriptionSyncStore.successStorageKey,
             CloudSyncConsent.storageKey,
         ]
         exactKeys.forEach { defaults.removeObject(forKey: $0) }
@@ -481,7 +484,12 @@ final class AppContainer {
                 await self.recoverPendingAccountDeletion()
             },
             initialCloudSyncEnabled: CloudSyncConsent.isGranted(),
-            setCloudSyncConsent: { CloudSyncConsent.set($0) },
+            setCloudSyncConsent: { [unowned self] status in
+                CloudSyncConsent.set(status)
+                self.subscriptionManager.cloudSyncConsentDidChange(
+                    enabled: status == .granted
+                )
+            },
             onDone: onDone
         )
     }
@@ -692,11 +700,14 @@ final class AppContainer {
                         try await self.authManager.signInAnonymouslyIfNeeded()
                     } catch {
                         CloudSyncConsent.set(.denied)
+                        self.subscriptionManager.cloudSyncConsentDidChange(enabled: false)
                         throw error
                     }
+                    self.subscriptionManager.cloudSyncConsentDidChange(enabled: true)
                     await self.cloudSyncDownloader.downloadAndMergeWhenReady()
                     self.sleepLiveSync.start()
                 } else {
+                    self.subscriptionManager.cloudSyncConsentDidChange(enabled: false)
                     self.sleepLiveSync.stop()
                 }
             }

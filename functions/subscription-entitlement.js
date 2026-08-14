@@ -1,30 +1,47 @@
+const { createHash, X509Certificate } = require("node:crypto");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
 const { FieldValue, Timestamp } = require("firebase-admin/firestore");
 const { getAppCheck } = require("firebase-admin/app-check");
 const { getAuth } = require("firebase-admin/auth");
-const { Environment, SignedDataVerifier } = require("@apple/app-store-server-library");
+const { defineInt } = require("firebase-functions/params");
+const {
+    Environment,
+    SignedDataVerifier,
+    VerificationException,
+    VerificationStatus,
+} = require("@apple/app-store-server-library");
 
 const productIDs = new Set([
     "com.ruslanabdulov.momsy.premium.monthly",
     "com.ruslanabdulov.momsy.premium.annual",
 ]);
 const bundleID = "RuslanAbd.Momsy";
-const appleRootCAs = [
-    Buffer.from(`-----BEGIN CERTIFICATE-----
-MIICQzCCAcmgAwIBAgIILcX8iNLFS5UwCgYIKoZIzj0EAwMwZzEbMBkGA1UEAwwS
-QXBwbGUgUm9vdCBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9u
-IEF1dGhvcml0eTETMBEGA1UECgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcN
-MTQwNDMwMTgxOTA2WhcNMzkwNDMwMTgxOTA2WjBnMRswGQYDVQQDDBJBcHBsZSBS
-b290IENBIC0gRzMxJjAkBgNVBAsMHUFwcGxlIENlcnRpZmljY2F0aW9uIEF1
-aG9yaXR5MRMwEQYDVQQKDApBcHBsZSBJbmMuMQswCQYDVQQGEwJVUzB2MBAGByqG
-SM49AgEGBSuBBAAiA2IABJjpLz1AcqTtkyJygRMc3RCV8cWjTnHcFBbZDuWmBSp3
-ZHtfTjjTuxxEtX/1H7YyYl3J6YRbTzBPEVoA/VhYDKX1DyxNB0cTddqXl5dvMVzt
-K517IDvYuVTZXpmkOlEKMaNCMEAwHQYDVR0OBBYEFLuw3qFYM4iapIqZ3r6966/a
-yySrMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMAoGCCqGSM49BAMD
-A2gAMGUCMQCD6cHEFl4aXTQY2e3v9GwOAEZLuN+yRhHFD/3meoyhpmvOwgPUnPWT
-xnS4at+qIxUCMG1mihDK1A3UT82NQz60imOlM27jbdoXt2QfyFMm+YhidDkLF1vL
-UagM6BgD56KyKA==
------END CERTIFICATE-----`),
-];
+const appleAppID = defineInt("APPLE_APP_ID", { default: 6784641297 });
+const appleRootCAHash = "63343abfb89a6a03ebb57e9b3f5fa7be7c4f5c756f3017b3a8c488c3653e9179";
+
+class EntitlementError extends Error {
+    constructor(code, httpStatus, publicMessage, retryable = false, cause) {
+        super(publicMessage, cause ? { cause } : undefined);
+        this.name = "EntitlementError";
+        this.code = code;
+        this.httpStatus = httpStatus;
+        this.publicMessage = publicMessage;
+        this.retryable = retryable;
+    }
+}
+
+function loadAppleRootCAs() {
+    const certificate = readFileSync(path.join(__dirname, "certs", "AppleRootCA-G3.cer"));
+    const hash = createHash("sha256").update(certificate).digest("hex");
+    const root = new X509Certificate(certificate);
+    if (hash !== appleRootCAHash || root.subject !== root.issuer || !root.verify(root.publicKey)) {
+        throw new Error("Apple Root CA G3 failed integrity validation");
+    }
+    return [certificate];
+}
+
+const appleRootCAs = loadAppleRootCAs();
 
 function premiumEntitlementFor(transaction, now = new Date()) {
     const expiresDate = Number(transaction.expiresDate ?? 0);
@@ -46,39 +63,100 @@ function premiumEntitlementFor(transaction, now = new Date()) {
     };
 }
 
-async function verifyTransaction(signedTransaction) {
-    const appAppleId = process.env.APPLE_APP_ID ? Number(process.env.APPLE_APP_ID) : undefined;
-    const environments = [Environment.SANDBOX, Environment.PRODUCTION];
-    let lastError;
-    for (const environment of environments) {
-        try {
-            if (environment === Environment.PRODUCTION && !appAppleId) continue;
-            const verifier = new SignedDataVerifier(
-                appleRootCAs,
-                true,
-                environment,
-                bundleID,
-                environment === Environment.PRODUCTION ? appAppleId : undefined
-            );
-            return await verifier.verifyAndDecodeTransaction(signedTransaction);
-        } catch (error) {
-            lastError = error;
+function verificationError(error) {
+    if (error instanceof EntitlementError) return error;
+    if (error instanceof VerificationException
+        && error.status === VerificationStatus.RETRYABLE_VERIFICATION_FAILURE) {
+        return new EntitlementError(
+            "verification_unavailable",
+            503,
+            "App Store verification is temporarily unavailable.",
+            true,
+            error
+        );
+    }
+    if (error instanceof VerificationException) {
+        return new EntitlementError(
+            "invalid_transaction",
+            400,
+            "The App Store transaction could not be verified.",
+            false,
+            error
+        );
+    }
+    return new EntitlementError(
+        "verification_unavailable",
+        503,
+        "App Store verification is temporarily unavailable.",
+        true,
+        error
+    );
+}
+
+async function verifyTransaction(signedTransaction, options = {}) {
+    const configuredAppID = Number(options.appAppleId ?? appleAppID.value());
+    if (!Number.isSafeInteger(configuredAppID) || configuredAppID <= 0) {
+        throw new EntitlementError(
+            "verification_unavailable",
+            503,
+            "App Store verification is temporarily unavailable.",
+            true
+        );
+    }
+    const makeVerifier = options.makeVerifier ?? ((environment, appID) => new SignedDataVerifier(
+        appleRootCAs,
+        true,
+        environment,
+        bundleID,
+        appID
+    ));
+
+    try {
+        return await makeVerifier(Environment.PRODUCTION, configuredAppID)
+            .verifyAndDecodeTransaction(signedTransaction);
+    } catch (error) {
+        if (!(error instanceof VerificationException)
+            || error.status !== VerificationStatus.INVALID_ENVIRONMENT) {
+            throw verificationError(error);
         }
     }
-    throw lastError ?? new Error("Could not verify App Store transaction");
+
+    try {
+        return await makeVerifier(Environment.SANDBOX, undefined)
+            .verifyAndDecodeTransaction(signedTransaction);
+    } catch (error) {
+        throw verificationError(error);
+    }
 }
 
 async function authorizeRequest(request) {
     const authorization = request.get("Authorization") ?? "";
     const idToken = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
     const appCheckToken = request.get("X-Firebase-AppCheck");
-    if (!idToken || !appCheckToken) throw new Error("Missing Firebase credentials");
-    const [auth, appCheck] = await Promise.all([
-        getAuth().verifyIdToken(idToken),
-        getAppCheck().verifyToken(appCheckToken),
-    ]);
-    if (!auth.uid || !appCheck.appId) throw new Error("Invalid Firebase credentials");
-    return auth.uid;
+    if (!idToken || !appCheckToken) {
+        throw new EntitlementError(
+            "authentication_required",
+            401,
+            "Firebase authentication and App Check are required.",
+            true
+        );
+    }
+    try {
+        const [auth, appCheck] = await Promise.all([
+            getAuth().verifyIdToken(idToken),
+            getAppCheck().verifyToken(appCheckToken),
+        ]);
+        if (!auth.uid || !appCheck.appId) throw new Error("Invalid Firebase credentials");
+        return auth.uid;
+    } catch (error) {
+        throw new EntitlementError(
+            "invalid_credentials",
+            401,
+            "Firebase credentials could not be verified.",
+            true,
+            error
+        );
+    }
 }
 
 function recordData(entitlement, uid, familyId) {
@@ -96,7 +174,8 @@ function recordData(entitlement, uid, familyId) {
 
 function isActiveRecord(data, now) {
     const expiresAt = data.expiresAt instanceof Timestamp ? data.expiresAt.toMillis() : 0;
-    return expiresAt > now.getTime() && !(data.revokedAt instanceof Timestamp);
+    const isRevoked = data.revokedAt !== undefined && data.revokedAt !== null;
+    return expiresAt > now.getTime() && !isRevoked;
 }
 
 function updateFamilyPremium(transaction, db, familyId, entitlements, replacement) {
@@ -115,15 +194,16 @@ function updateFamilyPremium(transaction, db, familyId, entitlements, replacemen
     }
     transaction.set(familyRef, {
         premiumEntitlement: {
+            active: true,
             originalTransactionId: active.id,
             productId: active.productId,
             expiresAt: active.expiresAt,
-            revokedAt: active.revokedAt ?? null,
+            revokedAt: active.revokedAt ?? FieldValue.delete(),
         },
     }, { merge: true });
 }
 
-async function bindEntitlementToCurrentFamily(db, uid, entitlement) {
+async function bindEntitlementToCurrentFamily(db, uid, entitlement, expectedFamilyId) {
     const entitlementRef = db.collection("subscriptionEntitlements")
         .doc(entitlement.originalTransactionId);
     await db.runTransaction(async (transaction) => {
@@ -134,14 +214,37 @@ async function bindEntitlementToCurrentFamily(db, uid, entitlement) {
         ]);
         const familyId = user.get("familyId");
         if (typeof familyId !== "string" || familyId.length === 0) {
-            throw new Error("No active Momsy family");
+            throw new EntitlementError(
+                "no_family",
+                409,
+                "Set up a Momsy family before syncing the subscription.",
+                true
+            );
+        }
+        if (typeof expectedFamilyId === "string" && expectedFamilyId !== familyId) {
+            throw new EntitlementError(
+                "family_changed",
+                409,
+                "The Momsy family changed before synchronization completed."
+            );
         }
         const member = await transaction.get(
             db.collection("families").doc(familyId).collection("members").doc(uid)
         );
-        if (!member.exists) throw new Error("User is not a current family member");
+        if (!member.exists) {
+            throw new EntitlementError(
+                "not_a_member",
+                409,
+                "The current Momsy family membership is still resolving.",
+                true
+            );
+        }
         if (existing.exists && existing.get("ownerUid") !== uid) {
-            throw new Error("Subscription belongs to another Momsy account");
+            throw new EntitlementError(
+                "owned_by_another_account",
+                409,
+                "This subscription belongs to another Momsy account."
+            );
         }
 
         const previousFamilyId = existing.get("familyId");
@@ -200,9 +303,14 @@ async function detachFamilyEntitlements(db, familyId, uid) {
 }
 
 module.exports = {
+    EntitlementError,
+    appleRootCAHash,
     authorizeRequest,
     bindEntitlementToCurrentFamily,
     detachFamilyEntitlements,
+    loadAppleRootCAs,
     premiumEntitlementFor,
+    updateFamilyPremium,
+    verificationError,
     verifyTransaction,
 };

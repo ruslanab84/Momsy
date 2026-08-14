@@ -278,6 +278,44 @@ test("new family bootstrap commits routing and family state atomically", async (
     });
 });
 
+test("clients cannot forge Premium during either family creation path", async () => {
+    const directUid = "premium-direct-creator";
+    const directDb = firestore(directUid);
+    await assertFails(directDb.doc("families/premium-direct-family").set({
+        createdBy: directUid,
+        bootstrapComplete: false,
+        premiumEntitlement: {
+            active: true,
+            expiresAt: new Date(Date.now() + 86_400_000),
+        },
+    }));
+
+    const atomicUid = "premium-atomic-creator";
+    const atomicID = "premium-atomic-family";
+    const atomicDb = firestore(atomicUid);
+    const batch = atomicDb.batch();
+    batch.set(atomicDb.doc(`families/${atomicID}`), {
+        createdBy: atomicUid,
+        bootstrapComplete: true,
+        premiumEntitlement: {
+            active: true,
+            expiresAt: new Date(Date.now() + 86_400_000),
+        },
+    });
+    batch.set(atomicDb.doc(`families/${atomicID}/members/${atomicUid}`), {
+        uid: atomicUid,
+        roleRaw: "Мама",
+    });
+    batch.set(atomicDb.doc(`users/${atomicUid}`), { familyId: atomicID });
+    await assertFails(batch.commit());
+
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const admin = adminContext.firestore();
+        assert.equal((await admin.doc("families/premium-direct-family").get()).exists, false);
+        assert.equal((await admin.doc(`families/${atomicID}`).get()).exists, false);
+    });
+});
+
 test("incomplete or restricted family bootstrap leaves no orphan documents", async () => {
     const missingRouteUid = "atomic-missing-route";
     const missingRouteFamily = "families/atomic-missing-route";
