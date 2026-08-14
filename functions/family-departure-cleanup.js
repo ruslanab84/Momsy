@@ -22,6 +22,7 @@ async function cleanupDepartedFamilyMember(db, familyId, uid) {
         await scrubAuthoredData(db, parentRef, memberRef, uid);
         await scrubProfile(parentRef, memberRef, uid);
     }
+    await scrubOwnedPushTokens(familyRef, memberRef, uid);
 
     await scrubInvites(db, memberRef, familyId, uid);
     await clearFamilyCreator(familyRef, memberRef, uid);
@@ -89,6 +90,29 @@ async function scrubProfile(parentRef, memberRef, uid) {
             transaction.update(profileRef, { members: remaining });
         }
     });
+}
+
+async function scrubOwnedPushTokens(familyRef, memberRef, uid) {
+    for (const collectionName of ["liveActivityTokens", "devicePushTokens"]) {
+        const collection = familyRef.collection(collectionName);
+        while (true) {
+            const result = await familyRef.firestore.runTransaction(async (transaction) => {
+                if (await activeMembershipExistsInTransaction(transaction, memberRef, uid)) {
+                    return "active";
+                }
+                const snapshot = await transaction.get(
+                    collection.where("ownerUid", "==", uid).limit(batchLimit)
+                );
+                if (snapshot.empty) return "empty";
+                for (const document of snapshot.docs) {
+                    transaction.delete(document.ref);
+                }
+                return "deleted";
+            });
+            if (result === "active") return;
+            if (result === "empty") break;
+        }
+    }
 }
 
 async function scrubInvites(db, memberRef, familyId, uid) {
@@ -197,6 +221,13 @@ async function verifyCleanup(parentRefs, familyRef, userRef, memberRef, familyId
     }
     if (user.exists && user.get("familyId") === familyId) {
         throw new Error("Family departure cleanup verification failed: stale route remains");
+    }
+    const pushTokens = await Promise.all([
+        familyRef.collection("liveActivityTokens").where("ownerUid", "==", uid).limit(1).get(),
+        familyRef.collection("devicePushTokens").where("ownerUid", "==", uid).limit(1).get(),
+    ]);
+    if (pushTokens.some((snapshot) => !snapshot.empty)) {
+        throw new Error("Family departure cleanup verification failed: push token remains");
     }
 }
 

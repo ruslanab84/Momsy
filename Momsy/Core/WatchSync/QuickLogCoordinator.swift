@@ -101,11 +101,17 @@ final class QuickLogCoordinator {
             guard let entry = try? await withBabyScope(babyId, operation: {
                 try await startSleepUC.execute()
             }) else { return }
-            WidgetDataStore.shared.setSleepActive(startDate: entry.startDate, babyId: babyId)
+            WidgetDataStore.shared.setSleepActive(
+                startDate: entry.startDate,
+                babyId: babyId,
+                sleepLogId: entry.id
+            )
             sleepLA.startActivity(
                 startDate: entry.startDate,
                 babyName: appState.babyProfile?.name ?? WidgetDataStore.shared.babyName,
-                babyGender: appState.babyProfile?.gender
+                babyGender: appState.babyProfile?.gender,
+                babyId: babyId,
+                sleepLogId: entry.id
             )
             pushSleepToFirestore(entry, babyId: babyId)
         }

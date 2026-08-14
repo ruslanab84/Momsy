@@ -1,9 +1,10 @@
 const assert = require("node:assert/strict");
 const { after, before, beforeEach, test } = require("node:test");
 const { deleteApp, initializeApp } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { cleanupDeletedBaby } = require("../baby-deletion-cleanup");
 const { cleanupDepartedFamilyMember, cleanupJobID } = require("../family-departure-cleanup");
+const { dispatchSleepEnd, reconcileLiveActivityToken } = require("../live-activity");
 const {
     bindEntitlementToCurrentFamily,
     detachFamilyEntitlements,
@@ -88,6 +89,13 @@ test("membership removal scrubs current and legacy personal identifiers", async 
     batch.set(legacyRef.collection("profile").doc("info"), {
         members: [{ uid, name: "Dad" }],
     });
+    batch.set(familyRef.collection("liveActivityTokens").doc("departed-activity"), {
+        ownerUid: uid,
+        babyId: "baby-a",
+    });
+    batch.set(familyRef.collection("devicePushTokens").doc("departed-device"), {
+        ownerUid: uid,
+    });
     await batch.commit();
 
     const cleanupRef = db.collection("familyDepartureCleanups").doc(cleanupJobID(familyId, uid));
@@ -112,7 +120,7 @@ test("membership removal scrubs current and legacy personal identifiers", async 
 
     const [
         shared, other, future, legacyShared, legacyPrivate, profile, legacyProfile,
-        family, user, oldInvite, otherInvite,
+        family, user, oldInvite, otherInvite, liveToken, deviceToken,
     ] =
         await Promise.all([
             babyRef.collection("feedingLogs").doc("own-shared").get(),
@@ -126,6 +134,8 @@ test("membership removal scrubs current and legacy personal identifiers", async 
             db.collection("users").doc(uid).get(),
             db.collection("invites").doc("old-family-invite").get(),
             db.collection("invites").doc("other-family-invite").get(),
+            familyRef.collection("liveActivityTokens").doc("departed-activity").get(),
+            familyRef.collection("devicePushTokens").doc("departed-device").get(),
         ]);
 
     assert.deepEqual(
@@ -143,6 +153,8 @@ test("membership removal scrubs current and legacy personal identifiers", async 
     assert.equal(user.get("displayName"), "Dad");
     assert.equal(oldInvite.exists, false);
     assert.equal(otherInvite.exists, true);
+    assert.equal(liveToken.exists, false);
+    assert.equal(deviceToken.exists, false);
     assert.equal((await cleanupRef.get()).exists, false);
 
     await cleanupDepartedFamilyMember(db, familyId, uid);
@@ -237,6 +249,8 @@ test("cleanup does nothing when canonical membership is active", async () => {
     await userRef.set({ familyId });
     await logRef.set({ addedBy: uid, addedByName: "Mom" });
     await profileRef.set({ members: [{ uid, name: "Mom" }] });
+    await familyRef.collection("liveActivityTokens").doc("active-activity").set({ ownerUid: uid });
+    await familyRef.collection("devicePushTokens").doc("active-device").set({ ownerUid: uid });
 
     await cleanupDepartedFamilyMember(db, familyId, uid);
 
@@ -244,6 +258,8 @@ test("cleanup does nothing when canonical membership is active", async () => {
     assert.deepEqual((await profileRef.get()).get("members"), [{ uid, name: "Mom" }]);
     assert.equal((await familyRef.get()).get("createdBy"), uid);
     assert.equal((await userRef.get()).get("familyId"), familyId);
+    assert.equal((await familyRef.collection("liveActivityTokens").doc("active-activity").get()).exists, true);
+    assert.equal((await familyRef.collection("devicePushTokens").doc("active-device").get()).exists, true);
 });
 
 test("cleanup does nothing while another legacy membership remains", async () => {
@@ -339,6 +355,8 @@ test("deleting a baby removes the co-parent's private wellbeing subtree", async 
     const sharedRef = babyRef.collection("feedingLogs").doc("shared");
     const profileRef = babyRef.collection("profile").doc("info");
     const tombstoneRef = familyRef.collection("deletedBabies").doc(babyId);
+    const deletedBabyToken = familyRef.collection("liveActivityTokens").doc("deleted-baby-token");
+    const otherBabyToken = familyRef.collection("liveActivityTokens").doc("other-baby-token");
     const batch = db.batch();
 
     batch.set(familyRef, { bootstrapComplete: true });
@@ -347,24 +365,29 @@ test("deleting a baby removes the co-parent's private wellbeing subtree", async 
     batch.set(ownPrivateRef, { addedBy: "mom", addedByName: "Mom" });
     batch.set(sharedRef, { addedBy: "mom", addedByName: "Mom" });
     batch.set(profileRef, { members: [{ uid: "mom" }, { uid: "dad" }] });
+    batch.set(deletedBabyToken, { babyId, ownerUid: "mom" });
+    batch.set(otherBabyToken, { babyId: "other-baby", ownerUid: "mom" });
     await batch.commit();
 
     await babyRef.delete();
 
     await waitFor(async () => {
-        const [tombstone, coParentPrivate, ownPrivate, shared, profile] = await Promise.all([
+        const [tombstone, coParentPrivate, ownPrivate, shared, profile, token] = await Promise.all([
             tombstoneRef.get(),
             coParentPrivateRef.get(),
             ownPrivateRef.get(),
             sharedRef.get(),
             profileRef.get(),
+            deletedBabyToken.get(),
         ]);
         return tombstone.exists
             && !coParentPrivate.exists
             && !ownPrivate.exists
             && !shared.exists
-            && !profile.exists;
+            && !profile.exists
+            && !token.exists;
     });
+    assert.equal((await otherBabyToken.get()).exists, true);
 });
 
 test("backfill recursively removes an already parentless baby subtree", async () => {
@@ -382,6 +405,134 @@ test("backfill recursively removes an already parentless baby subtree", async ()
 
     assert.equal((await tombstoneRef.get()).exists, true);
     assert.equal((await privateRef.get()).exists, false);
+});
+
+test("sleep end dispatch targets every exact-session activity and keeps reusable device tokens", async () => {
+    const familyId = "push-family";
+    const babyId = "baby-a";
+    const sleepLogId = "sleep-a";
+    const familyRef = db.collection("families").doc(familyId);
+    const liveTokens = familyRef.collection("liveActivityTokens");
+    const devices = familyRef.collection("devicePushTokens");
+    const startedAt = Timestamp.fromDate(new Date("2026-08-14T10:00:00Z"));
+    const seed = db.batch();
+    for (const [id, ownerUid] of [["mom-phone", "mom"], ["mom-tablet", "mom"], ["dad-phone", "dad"]]) {
+        seed.set(liveTokens.doc(id), {
+            activityId: id,
+            ownerUid,
+            babyId,
+            sleepLogId,
+            kind: "sleep",
+            environment: "sandbox",
+            token: id === "dad-phone" ? "d".repeat(64) : id === "mom-phone" ? "a".repeat(64) : "b".repeat(64),
+            effectiveStartDate: startedAt,
+        });
+    }
+    seed.set(liveTokens.doc("other-session"), {
+        activityId: "other-session",
+        ownerUid: "mom",
+        babyId,
+        sleepLogId: "sleep-b",
+        kind: "sleep",
+        environment: "sandbox",
+        token: "c".repeat(64),
+        effectiveStartDate: startedAt,
+    });
+    seed.set(devices.doc("mom-device"), {
+        ownerUid: "mom", environment: "sandbox", token: "e".repeat(64),
+    });
+    await seed.commit();
+
+    const sends = [];
+    const result = await dispatchSleepEnd(db, {
+        familyId,
+        babyId,
+        sleepLogId,
+        endedAt: new Date("2026-08-14T11:00:00Z"),
+        credentials: {},
+        now: new Date("2026-08-14T11:00:01Z"),
+    }, {
+        sendAPNs: async (request) => {
+            sends.push(request);
+            return { status: 200 };
+        },
+    });
+
+    assert.equal(result.delivered, 3);
+    assert.equal(sends.filter((request) => request.kind === "liveactivity").length, 3);
+    assert.equal(sends.filter((request) => request.kind === "background").length, 1);
+    assert.equal((await liveTokens.doc("mom-phone").get()).exists, false);
+    assert.equal((await liveTokens.doc("mom-tablet").get()).exists, false);
+    assert.equal((await liveTokens.doc("dad-phone").get()).exists, false);
+    assert.equal((await liveTokens.doc("other-session").get()).exists, true);
+    assert.equal((await devices.doc("mom-device").get()).exists, true);
+});
+
+test("transient APNs failure keeps the exact token for function retry", async () => {
+    const familyId = "retry-family";
+    const tokenRef = db.collection("families").doc(familyId)
+        .collection("liveActivityTokens").doc("retry-activity");
+    await tokenRef.set({
+        activityId: "retry-activity",
+        ownerUid: "mom",
+        babyId: "baby-a",
+        sleepLogId: "sleep-a",
+        kind: "sleep",
+        environment: "sandbox",
+        token: "a".repeat(64),
+        effectiveStartDate: Timestamp.fromDate(new Date("2026-08-14T10:00:00Z")),
+    });
+
+    await assert.rejects(() => dispatchSleepEnd(db, {
+        familyId,
+        babyId: "baby-a",
+        sleepLogId: "sleep-a",
+        endedAt: new Date("2026-08-14T11:00:00Z"),
+        credentials: {},
+    }, {
+        sendAPNs: async () => ({ status: 503, reason: "ServiceUnavailable" }),
+    }), AggregateError);
+
+    assert.equal((await tokenRef.get()).exists, true);
+});
+
+test("a token registered after closure is reconciled from the terminal log or tombstone", async () => {
+    const familyId = "late-token-family";
+    const familyRef = db.collection("families").doc(familyId);
+    const babyRef = familyRef.collection("babies").doc("baby-a");
+    const endedToken = familyRef.collection("liveActivityTokens").doc("ended-token");
+    const deletedToken = familyRef.collection("liveActivityTokens").doc("deleted-token");
+    const start = Timestamp.fromDate(new Date("2026-08-14T10:00:00Z"));
+    await babyRef.collection("sleepLogs").doc("ended-sleep").set({
+        startedAt: start,
+        endedAt: Timestamp.fromDate(new Date("2026-08-14T11:00:00Z")),
+    });
+    await babyRef.collection("deletions").doc("deleted-sleep").set({
+        deletedAt: Timestamp.fromDate(new Date("2026-08-14T10:01:00Z")),
+    });
+    for (const [reference, sleepLogId, token] of [
+        [endedToken, "ended-sleep", "a".repeat(64)],
+        [deletedToken, "deleted-sleep", "b".repeat(64)],
+    ]) {
+        await reference.set({
+            activityId: reference.id,
+            ownerUid: "mom",
+            babyId: "baby-a",
+            sleepLogId,
+            kind: "sleep",
+            environment: "sandbox",
+            token,
+            effectiveStartDate: start,
+        });
+        assert.equal(await reconcileLiveActivityToken(db, {
+            familyId,
+            activityId: reference.id,
+            credentials: {},
+        }, {
+            sendAPNs: async () => ({ status: 200 }),
+        }), true);
+        assert.equal((await reference.get()).exists, false);
+    }
 });
 
 async function waitFor(predicate, timeoutMilliseconds = 20_000) {

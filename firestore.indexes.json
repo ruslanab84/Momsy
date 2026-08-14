@@ -31,6 +31,14 @@
         { "fieldPath": "addedBy", "order": "ASCENDING" },
         { "fieldPath": "updatedAt", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "liveActivityTokens",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "babyId", "order": "ASCENDING" },
+        { "fieldPath": "sleepLogId", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

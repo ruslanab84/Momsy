@@ -172,6 +172,59 @@ service cloud.firestore {
         && !existsAfter(/databases/$(database)/documents/families/$(familyId)/deletedBabies/$(babyId));
     }
 
+    function isValidPushToken(value) {
+      return value is string
+        && value.size() >= 32
+        && value.size() <= 512;
+    }
+
+    function isValidPushEnvironment(value) {
+      return value in ['sandbox', 'production'];
+    }
+
+    function isValidLiveActivityToken(familyId, activityId) {
+      let data = request.resource.data;
+      return belongsToFamily(familyId)
+        && data.keys().hasAll([
+          'activityId', 'ownerUid', 'babyId', 'sleepLogId', 'kind',
+          'environment', 'token', 'effectiveStartDate', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'activityId', 'ownerUid', 'babyId', 'sleepLogId', 'kind',
+          'environment', 'token', 'effectiveStartDate', 'updatedAt'
+        ])
+        && data.activityId == activityId
+        && data.ownerUid == request.auth.uid
+        && data.babyId is string
+        && data.babyId.size() > 0
+        && data.babyId.size() <= 1500
+        && data.sleepLogId is string
+        && data.sleepLogId.size() > 0
+        && data.sleepLogId.size() <= 1500
+        && data.kind == 'sleep'
+        && isValidPushEnvironment(data.environment)
+        && isValidPushToken(data.token)
+        && data.effectiveStartDate is timestamp
+        && data.updatedAt == request.time
+        && babyExistsAfter(familyId, data.babyId);
+    }
+
+    function isValidDevicePushToken(familyId, installationId) {
+      let data = request.resource.data;
+      return belongsToFamily(familyId)
+        && data.keys().hasAll([
+          'installationId', 'ownerUid', 'environment', 'token', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'installationId', 'ownerUid', 'environment', 'token', 'updatedAt'
+        ])
+        && data.installationId == installationId
+        && data.ownerUid == request.auth.uid
+        && isValidPushEnvironment(data.environment)
+        && isValidPushToken(data.token)
+        && data.updatedAt == request.time;
+    }
+
     function hasValidRoutineAuthor() {
       return request.resource.data.keys().hasAll(['addedBy', 'addedByName'])
         && request.resource.data.addedBy is string
@@ -500,6 +553,26 @@ service cloud.firestore {
       // so stale devices cannot recreate the child or write a new orphan subtree.
       match /deletedBabies/{babyId} {
         allow read, write: if false;
+      }
+
+      match /liveActivityTokens/{activityId} {
+        allow read: if false;
+        allow create: if isValidLiveActivityToken(familyId, activityId);
+        allow update: if isValidLiveActivityToken(familyId, activityId)
+                      && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['token', 'updatedAt']);
+        allow delete: if belongsToFamily(familyId)
+                      && resource.data.ownerUid == request.auth.uid;
+      }
+
+      match /devicePushTokens/{installationId} {
+        allow read: if false;
+        allow create: if isValidDevicePushToken(familyId, installationId);
+        allow update: if isValidDevicePushToken(familyId, installationId)
+                      && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['token', 'environment', 'updatedAt']);
+        allow delete: if belongsToFamily(familyId)
+                      && resource.data.ownerUid == request.auth.uid;
       }
 
       match /babies/{babyId} {

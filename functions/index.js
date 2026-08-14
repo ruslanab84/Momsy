@@ -1,9 +1,15 @@
 const { initializeApp } = require("firebase-admin/app");
 const { FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
-const { onDocumentDeleted } = require("firebase-functions/v2/firestore");
+const { onDocumentDeleted, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
+const { defineSecret, defineString } = require("firebase-functions/params");
 const { cleanupDeletedBaby } = require("./baby-deletion-cleanup");
 const { cleanupDepartedFamilyMember, cleanupJobID } = require("./family-departure-cleanup");
+const {
+    dispatchSleepEnd,
+    reconcileLiveActivityToken,
+    terminalSleepChange,
+} = require("./live-activity");
 const {
     EntitlementError,
     authorizeRequest,
@@ -13,6 +19,17 @@ const {
 } = require("./subscription-entitlement");
 
 initializeApp();
+
+const apnsAuthKey = defineSecret("APNS_AUTH_KEY");
+const apnsKeyId = defineString("APNS_KEY_ID", { default: "" });
+const apnsTeamId = defineString("APNS_TEAM_ID", { default: "" });
+
+function apnsCredentials() {
+    const credentials = {
+        authKey: apnsAuthKey.value(), keyId: apnsKeyId.value(), teamId: apnsTeamId.value(),
+    };
+    return credentials.authKey && credentials.keyId && credentials.teamId ? credentials : null;
+}
 
 exports.cleanupDepartedFamilyMember = onDocumentDeleted({
     document: "families/{familyId}/members/{uid}",
@@ -77,6 +94,82 @@ exports.cleanupDeletedBaby = onDocumentDeleted({
     timeoutSeconds: 540,
 }, async (event) => {
     await cleanupDeletedBaby(getFirestore(), event.params.familyId, event.params.babyId);
+});
+
+exports.endSleepLiveActivities = onDocumentWritten({
+    document: "families/{familyId}/babies/{babyId}/sleepLogs/{sleepLogId}",
+    region: "us-central1",
+    retry: true,
+    timeoutSeconds: 120,
+    secrets: [apnsAuthKey],
+}, async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    const endedAt = terminalSleepChange(before, after, new Date(event.time));
+    if (!endedAt) return;
+    const credentials = apnsCredentials();
+    if (!credentials) {
+        console.error("APNs credentials are not configured; terminal sleep push skipped");
+        return;
+    }
+    const result = await dispatchSleepEnd(getFirestore(), {
+        familyId: event.params.familyId,
+        babyId: event.params.babyId,
+        sleepLogId: event.params.sleepLogId,
+        endedAt,
+        credentials,
+    });
+    console.log("Dispatched terminal sleep push", {
+        familyId: event.params.familyId,
+        babyId: event.params.babyId,
+        sleepLogId: event.params.sleepLogId,
+        ...result,
+    });
+});
+
+exports.endDeletedSleepLiveActivities = onDocumentWritten({
+    document: "families/{familyId}/babies/{babyId}/deletions/{sleepLogId}",
+    region: "us-central1",
+    retry: true,
+    timeoutSeconds: 120,
+    secrets: [apnsAuthKey],
+}, async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (before || !after) return;
+    const endedAt = after.deletedAt?.toDate?.() ?? new Date(event.time);
+    const credentials = apnsCredentials();
+    if (!credentials) {
+        console.error("APNs credentials are not configured; deleted sleep push skipped");
+        return;
+    }
+    await dispatchSleepEnd(getFirestore(), {
+        familyId: event.params.familyId,
+        babyId: event.params.babyId,
+        sleepLogId: event.params.sleepLogId,
+        endedAt,
+        credentials,
+    });
+});
+
+exports.reconcileLateSleepLiveActivityToken = onDocumentWritten({
+    document: "families/{familyId}/liveActivityTokens/{activityId}",
+    region: "us-central1",
+    retry: true,
+    timeoutSeconds: 120,
+    secrets: [apnsAuthKey],
+}, async (event) => {
+    if (!event.data?.after.exists) return;
+    const credentials = apnsCredentials();
+    if (!credentials) {
+        console.error("APNs credentials are not configured; late token reconciliation skipped");
+        return;
+    }
+    await reconcileLiveActivityToken(getFirestore(), {
+        familyId: event.params.familyId,
+        activityId: event.params.activityId,
+        credentials,
+    });
 });
 
 exports.syncSubscriptionEntitlement = onRequest({
