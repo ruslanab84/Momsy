@@ -235,12 +235,14 @@ final class AppContainer {
         BabyLogBackfill.deleteLogs(forBaby: id, context: context)
         try context.save()
         try await babyRepository.deleteProfile(id: id)
-        if ActiveBaby.currentId == id {
+        let replacedActiveBaby = ActiveBaby.currentId == id
+        if replacedActiveBaby {
             let remaining = (try? await babyRepository.getAllProfiles()) ?? []
             ActiveBaby.currentId = remaining.first?.id
         }
         await appState.load()
         if ActiveBaby.currentId != nil { await cloudSyncDownloader.resyncActiveBaby() }
+        if replacedActiveBaby { sleepLiveSync.restart() }
         NotificationCenter.default.post(name: .cloudSyncDidMerge, object: nil)
     }
 

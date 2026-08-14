@@ -36,6 +36,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// поднятым до конца процесса, навсегда отсекая все последующие синхронизации.
     private var syncStartedAt: Date?
     private var lastSyncAt: Date?
+    private var sleepLiveResyncPending = false
 
     init(service: BabySyncService,
          feedingRepo: any FeedingRepository,
@@ -170,7 +171,6 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard FamilyManager.shared.familyId != nil else { return }
         hasRun = true
         syncStartedAt = Date()
-        defer { syncStartedAt = nil; lastSyncAt = Date() }
         // Migrate the old family-keyed tree first (derives the canonical babyId for a
         // pre-per-baby family), flush any writes queued before the path was ready, then
         // sync every child in the roster.
@@ -180,6 +180,7 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         resetTombstoneWatermarkOnce()
         await downloadAllBabies()
         await purgeLegacyQuickLogsOnce()
+        await finishFullSync()
     }
 
     /// Pulls profile + logs for every child in the family roster. Each child is synced
@@ -252,7 +253,10 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard hasRun else { return }
         guard FamilyManager.shared.familyId != nil else { return }
         guard !Self.isSyncInFlight(syncStartedAt: syncStartedAt, now: Date(),
-                                   lease: Self.syncLease) else { return }
+                                   lease: Self.syncLease) else {
+            sleepLiveResyncPending = true
+            return
+        }
 
         let pendingDeletes = PendingDeletionsStore.shared.ids()
         let fetched: PendingFetch<SleepLogDTO> = await fetch("sleepLogs", dateField: "startedAt")
@@ -277,9 +281,9 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
                                  now: Date(), minInterval: 300) { return }
         guard FamilyManager.shared.familyId != nil else { return }
         syncStartedAt = Date()
-        defer { syncStartedAt = nil; lastSyncAt = Date() }
         await service.replayPendingWrites()
         await downloadAllBabies()
+        await finishFullSync()
     }
 
     /// Post-join refresh. Unlike `resyncAll`, this bypasses the time-debounce — a join
@@ -297,9 +301,18 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
         }
         syncStartedAt = Date()
-        defer { syncStartedAt = nil; lastSyncAt = Date() }
         await service.replayPendingWrites()
         await downloadAllBabies()
+        await finishFullSync()
+    }
+
+    @MainActor
+    private func finishFullSync() async {
+        syncStartedAt = nil
+        lastSyncAt = Date()
+        guard sleepLiveResyncPending else { return }
+        sleepLiveResyncPending = false
+        await resyncSleepLive()
     }
 
     /// Two-way reconcile of the baby profile against the `babies/{familyId}` parent doc.

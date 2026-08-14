@@ -669,3 +669,57 @@ struct PendingDeletionsStoreTests {
         #expect(store.all().isEmpty)
     }
 }
+
+@Suite("Sleep widget remote termination")
+@MainActor
+struct SleepWidgetRemoteTerminationTests {
+    @Test("only the matching baby and sleep session can clear the widget")
+    func clearsOnlyMatchingSession() {
+        let store = WidgetDataStore.shared
+        let babyId = UUID()
+        let activeLogId = UUID()
+        let otherLogId = UUID()
+        let start = Date(timeIntervalSinceReferenceDate: 10_000)
+        let end = start.addingTimeInterval(900)
+        store.clearAll()
+        defer { store.clearAll() }
+
+        store.setSleepActive(startDate: start, babyId: babyId, sleepLogId: activeLogId)
+
+        #expect(store.endSleepIfMatches(
+            sleepLogId: otherLogId,
+            babyId: babyId,
+            endedAt: end
+        ) == false)
+        guard case .active = store.sleepState(for: babyId) else {
+            Issue.record("A mismatched remote end cleared the active widget")
+            return
+        }
+
+        #expect(store.endSleepIfMatches(
+            sleepLogId: activeLogId,
+            babyId: babyId,
+            endedAt: end
+        ) == true)
+        #expect(store.sleepLogId(for: babyId) == nil)
+        #expect(store.lastSleepEndDate(for: babyId) == end)
+        guard case .idle(let duration) = store.sleepState(for: babyId) else {
+            Issue.record("The matching remote end did not clear the widget")
+            return
+        }
+        #expect(duration == 900)
+    }
+
+    @Test("Sleep ContentState keeps Foundation default Date encoding")
+    func contentStateUsesFoundationDateEpoch() throws {
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        let end = start.addingTimeInterval(600)
+        let data = try JSONEncoder().encode(
+            SleepActivityAttributes.ContentState(effectiveStartDate: start, endDate: end)
+        )
+        let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Double])
+
+        #expect(object["effectiveStartDate"] == start.timeIntervalSinceReferenceDate)
+        #expect(object["endDate"] == end.timeIntervalSinceReferenceDate)
+    }
+}

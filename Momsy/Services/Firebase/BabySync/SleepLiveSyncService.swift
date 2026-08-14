@@ -8,12 +8,24 @@ import Foundation
 @MainActor
 final class SleepLiveSyncService {
     private let downloader: any CloudSyncDownloaderProtocol
+    private let stream: @MainActor (Date) -> AsyncStream<Void>
     private var streamTask: Task<Void, Never>?
 
-    init(downloader: any CloudSyncDownloaderProtocol) { self.downloader = downloader }
+    init(
+        downloader: any CloudSyncDownloaderProtocol,
+        stream: @MainActor @escaping (Date) -> AsyncStream<Void> = {
+            BabySyncService().streamLogUpdates(from: "sleepLogs", since: $0)
+        }
+    ) {
+        self.downloader = downloader
+        self.stream = stream
+    }
 
     func start() {
         stop()
+        // Attach synchronously before either catch-up or the app's full foreground
+        // resync can suspend. The one-element buffer closes the attach/catch-up gap.
+        let updates = stream(Date())
         streamTask = Task { [weak self] in
             // Catch-up first: a co-parent write made while this device was detached
             // (backgrounded) predates the listener's attach time, and the foreground
@@ -21,8 +33,7 @@ final class SleepLiveSyncService {
             // session stays invisible until the next full sync.
             await self?.downloader.resyncSleepLive()
             guard !Task.isCancelled else { return }
-            let stream = BabySyncService().streamLogUpdates(from: "sleepLogs", since: Date())
-            for await _ in stream {
+            for await _ in updates {
                 guard !Task.isCancelled, let self else { return }
                 try? await Task.sleep(for: .milliseconds(300))
                 await self.downloader.resyncSleepLive()

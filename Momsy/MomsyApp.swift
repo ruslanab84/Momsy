@@ -38,6 +38,7 @@ private struct AppRuntime {
 
 @main
 struct MomsyApp: App {
+    @UIApplicationDelegateAdaptor(MomsyAppDelegate.self) private var appDelegate
     @AppStorage("appTheme") private var appTheme = "system"
     @State private var startup: AppStartupState
 
@@ -239,8 +240,8 @@ private struct MomsyRootView: View {
                 if phase == .active {
                     WidgetCenter.shared.reloadAllTimelines()
                     if CloudSyncConsent.isGranted() {
-                        Task { await container.cloudSyncDownloader.resyncAll() }
                         container.sleepLiveSync.start()
+                        Task { await container.cloudSyncDownloader.resyncAll() }
                     } else {
                         container.sleepLiveSync.stop()
                     }
@@ -261,6 +262,8 @@ private struct MomsyRootView: View {
         do {
             try await container.authManager.signInAnonymouslyIfNeeded()
             await container.cloudSyncDownloader.downloadAndMergeWhenReady()
+            UIApplication.shared.registerForRemoteNotifications()
+            RemotePushTokenService.shared.republishApplicationTokenIfAvailable()
             container.sleepLiveSync.start()
         } catch {
             await maybeGenerateWeeklyReport()
@@ -297,6 +300,7 @@ private struct MomsyRootView: View {
                 return
             }
             try await FamilyManager.shared.joinFamily(code: code, uid: uid, force: force)
+            RemotePushTokenService.shared.republishApplicationTokenIfAvailable()
             pendingAuthenticatedJoinCode = nil
             pendingAuthenticatedJoinForce = false
             joinAlert = .success
@@ -327,6 +331,9 @@ private func setupNotificationsOnLaunch(appState: AppState) async {
     let push = LocalPushNotificationService.shared
     // push.scheduleWeeklyReport(hour: 7, minute: 0) // Weekly Report is temporarily disabled.
     push.cancelWeeklyReport()
+    await MainActor.run {
+        UIApplication.shared.registerForRemoteNotifications()
+    }
 
     guard let birth = appState.babyProfile?.birthDate else { return }
     for leap in DevelopmentLeap.catalog {

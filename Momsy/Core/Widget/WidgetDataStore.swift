@@ -318,14 +318,16 @@ final class WidgetDataStore {
 
     // MARK: - Sleep writes (called from SleepViewModel)
 
-    func setSleepActive(startDate: Date, babyId: UUID? = nil) {
+    func setSleepActive(startDate: Date, babyId: UUID? = nil, sleepLogId: UUID) {
         defaults.set(true, forKey: sleepActiveKey(for: babyId))
         defaults.set(startDate.timeIntervalSinceReferenceDate, forKey: sleepStartKey(for: babyId))
+        defaults.set(sleepLogId.uuidString, forKey: sleepLogIdKey(for: babyId))
         if let babyId {
             defaults.set(babyId.uuidString, forKey: "w_sleep_active_baby_id")
         }
         defaults.set(true, forKey: "w_sleep_active")
         defaults.set(startDate.timeIntervalSinceReferenceDate, forKey: "w_sleep_start")
+        defaults.set(sleepLogId.uuidString, forKey: "w_sleep_log_id")
         reload()
     }
 
@@ -335,6 +337,7 @@ final class WidgetDataStore {
 
         defaults.set(false, forKey: sleepActiveKey(for: babyId))
         defaults.set(lastDurationSeconds, forKey: sleepDurationKey(for: babyId))
+        defaults.removeObject(forKey: sleepLogIdKey(for: babyId))
         if startTime > 0 {
             defaults.set(startTime, forKey: sleepLastStartKey(for: babyId))
         }
@@ -346,8 +349,28 @@ final class WidgetDataStore {
                 defaults.set(startTime, forKey: "w_last_sleep_start")
             }
             defaults.removeObject(forKey: "w_sleep_active_baby_id")
+            defaults.removeObject(forKey: "w_sleep_log_id")
         }
         reload()
+    }
+
+    func sleepLogId(for babyId: UUID?) -> UUID? {
+        let scoped = defaults.string(forKey: sleepLogIdKey(for: babyId)).flatMap(UUID.init)
+        if scoped != nil || babyId == nil { return scoped }
+        guard sleepActiveBabyId == nil || sleepActiveBabyId == babyId else { return nil }
+        return defaults.string(forKey: "w_sleep_log_id").flatMap(UUID.init)
+    }
+
+    @discardableResult
+    func endSleepIfMatches(sleepLogId: UUID, babyId: UUID, endedAt: Date) -> Bool {
+        guard self.sleepLogId(for: babyId) == sleepLogId else { return false }
+        let startedAt = defaults.double(forKey: sleepStartKey(for: babyId))
+        let duration = startedAt > 0
+            ? max(0, Int(endedAt.timeIntervalSince(Date(timeIntervalSinceReferenceDate: startedAt))))
+            : 0
+        setLastSleepEnd(endedAt, babyId: babyId)
+        clearSleep(lastDurationSeconds: duration, babyId: babyId)
+        return true
     }
 
     func setLastSleepEnd(_ date: Date, babyId: UUID? = nil) {
@@ -565,6 +588,10 @@ final class WidgetDataStore {
 
     private func sleepDurationKey(for babyId: UUID?) -> String {
         scopedSleepKey("w_last_sleep_dur", for: babyId)
+    }
+
+    private func sleepLogIdKey(for babyId: UUID?) -> String {
+        scopedSleepKey("w_sleep_log_id", for: babyId)
     }
 
     private func sleepLastStartKey(for babyId: UUID?) -> String {

@@ -16,7 +16,23 @@ async function cleanupDeletedBaby(db, familyId, babyId) {
     await familyRef.collection("deletedBabies").doc(babyId).set({
         deletedAt: FieldValue.serverTimestamp(),
     }, { merge: true });
+    await deleteLiveActivityTokens(familyRef, babyId);
     await db.recursiveDelete(familyRef.collection("babies").doc(babyId));
+}
+
+async function deleteLiveActivityTokens(familyRef, babyId) {
+    while (true) {
+        const snapshot = await familyRef.collection("liveActivityTokens")
+            .where("babyId", "==", babyId)
+            .limit(400)
+            .get();
+        if (snapshot.empty) return;
+        const batch = familyRef.firestore.batch();
+        for (const document of snapshot.docs) {
+            batch.delete(document.ref);
+        }
+        await batch.commit();
+    }
 }
 
 module.exports = { cleanupDeletedBaby };

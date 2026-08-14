@@ -912,3 +912,83 @@ test("a tombstone may be written with a server timestamp sentinel", async () => 
         deletedAt: serverTimestamp(),
     }));
 });
+
+test("push tokens are owner-write-only, multi-device safe, and route immutable", async () => {
+    const momDb = firestore(users.mom);
+    const dadDb = firestore(users.dad);
+    const activityPath = `${familyPath}/liveActivityTokens/activity-a`;
+    const secondActivityPath = `${familyPath}/liveActivityTokens/activity-b`;
+    const devicePath = `${familyPath}/devicePushTokens/install-a`;
+    const liveToken = {
+        activityId: "activity-a",
+        ownerUid: users.mom,
+        babyId,
+        sleepLogId: "sleep-a",
+        kind: "sleep",
+        environment: "sandbox",
+        token: "a".repeat(64),
+        effectiveStartDate: Timestamp.fromMillis(Date.now() - 60_000),
+        updatedAt: serverTimestamp(),
+    };
+
+    await assertSucceeds(momDb.doc(activityPath).set(liveToken));
+    await assertSucceeds(momDb.doc(secondActivityPath).set({
+        ...liveToken,
+        activityId: "activity-b",
+        token: "b".repeat(64),
+    }));
+    await assertFails(momDb.doc(activityPath).get());
+    await assertFails(dadDb.doc(activityPath).get());
+    await assertFails(dadDb.doc(activityPath).update({ token: "c".repeat(64) }));
+    await assertFails(momDb.doc(activityPath).update({ babyId: "baby-b" }));
+    await assertFails(momDb.doc(activityPath).update({ sleepLogId: "sleep-b" }));
+    await assertSucceeds(momDb.doc(activityPath).update({
+        token: "d".repeat(64),
+        updatedAt: serverTimestamp(),
+    }));
+    await assertSucceeds(momDb.doc(activityPath).delete());
+
+    await assertSucceeds(momDb.doc(devicePath).set({
+        installationId: "install-a",
+        ownerUid: users.mom,
+        environment: "sandbox",
+        token: "e".repeat(64),
+        updatedAt: serverTimestamp(),
+    }));
+    await assertFails(momDb.doc(devicePath).get());
+    await assertFails(dadDb.doc(devicePath).delete());
+    await assertSucceeds(momDb.doc(devicePath).delete());
+});
+
+test("push token schema rejects cross-family, missing baby, and malformed routes", async () => {
+    const momDb = firestore(users.mom);
+    const base = {
+        activityId: "activity-invalid",
+        ownerUid: users.mom,
+        babyId,
+        sleepLogId: "sleep-a",
+        kind: "sleep",
+        environment: "sandbox",
+        token: "a".repeat(64),
+        effectiveStartDate: Timestamp.fromMillis(Date.now() - 60_000),
+        updatedAt: serverTimestamp(),
+    };
+
+    await assertFails(momDb.doc(`${familyBPath}/liveActivityTokens/activity-invalid`).set(base));
+    await assertFails(momDb.doc(`${familyPath}/liveActivityTokens/activity-invalid`).set({
+        ...base,
+        babyId: "missing-baby",
+    }));
+    await assertFails(momDb.doc(`${familyPath}/liveActivityTokens/activity-invalid`).set({
+        ...base,
+        ownerUid: users.dad,
+    }));
+    await assertFails(momDb.doc(`${familyPath}/liveActivityTokens/activity-invalid`).set({
+        ...base,
+        environment: "invalid",
+    }));
+    await assertFails(momDb.doc(`${familyPath}/liveActivityTokens/activity-invalid`).set({
+        ...base,
+        unexpected: true,
+    }));
+});

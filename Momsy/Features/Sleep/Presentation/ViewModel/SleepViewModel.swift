@@ -217,11 +217,17 @@ final class SleepViewModel: ObservableObject {
         activeSleepBabyId = babyId
         isSleepActive = true
         sleepSeconds = Int(Date().timeIntervalSince(entry.startDate))
-        WidgetDataStore.shared.setSleepActive(startDate: entry.startDate, babyId: babyId)
+        WidgetDataStore.shared.setSleepActive(
+            startDate: entry.startDate,
+            babyId: babyId,
+            sleepLogId: entry.id
+        )
         liveActivity.startActivity(
             startDate: entry.startDate,
             babyName: appState.babyProfile?.name ?? "",
-            babyGender: appState.babyProfile?.gender
+            babyGender: appState.babyProfile?.gender,
+            babyId: babyId,
+            sleepLogId: entry.id
         )
         timerTask?.cancel()
         timerTask = Task { [weak self] in
@@ -310,7 +316,11 @@ final class SleepViewModel: ObservableObject {
             activeSleepEntry = saved
             activeSleepBabyId = babyId
             sleepSeconds = Int(Date().timeIntervalSince(saved.startDate))
-            WidgetDataStore.shared.setSleepActive(startDate: saved.startDate, babyId: babyId)
+            WidgetDataStore.shared.setSleepActive(
+                startDate: saved.startDate,
+                babyId: babyId,
+                sleepLogId: saved.id
+            )
         } else if shouldRestoreVisibleTimer {
             activateTimer(entry: saved, babyId: babyId)
         }
