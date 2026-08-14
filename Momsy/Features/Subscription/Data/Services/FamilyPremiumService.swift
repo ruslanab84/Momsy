@@ -4,13 +4,30 @@ import FirebaseFirestore
 import Foundation
 
 @MainActor
-final class FamilyPremiumService {
+protocol FamilyPremiumServicing: AnyObject {
+    var currentContext: SubscriptionSyncContext? { get }
+    func observe(familyId: String?, onChange: @escaping @MainActor (Bool) -> Void)
+    func stopObserving()
+    func synchronize(_ pending: PendingSubscriptionSync) async throws
+}
+
+@MainActor
+final class FamilyPremiumService: FamilyPremiumServicing {
     private static let endpoint = URL(string: "https://us-central1-momsy-cf74a.cloudfunctions.net/syncSubscriptionEntitlement")!
 
     private var listener: ListenerRegistration?
 
     deinit {
         listener?.remove()
+    }
+
+    var currentContext: SubscriptionSyncContext? {
+        guard FirebaseBootstrapper.isConfigured,
+              CloudSyncConsent.isGranted(),
+              let uid = Auth.auth().currentUser?.uid,
+              let familyID = FamilyManager.shared.familyId
+        else { return nil }
+        return SubscriptionSyncContext(uid: uid, familyID: familyID)
     }
 
     func observe(
@@ -30,16 +47,27 @@ final class FamilyPremiumService {
 
         listener = Firestore.firestore().collection("families").document(familyId)
             .addSnapshotListener { snapshot, error in
-                let isPremium = error == nil && Self.isActive(snapshot?.data())
+                guard error == nil, let snapshot else { return }
+                let isPremium = Self.isActive(snapshot.data())
                 Task { @MainActor in onChange(isPremium) }
             }
     }
 
-    func synchronize(transactionJWS: String) async throws {
+    func stopObserving() {
+        listener?.remove()
+        listener = nil
+    }
+
+    func synchronize(_ pending: PendingSubscriptionSync) async throws {
         guard FirebaseBootstrapper.isConfigured,
               CloudSyncConsent.isGranted(),
               let user = Auth.auth().currentUser
-        else { return }
+        else {
+            throw FamilyPremiumSyncError(
+                code: "context_unavailable",
+                isRetryable: true
+            )
+        }
 
         let idToken = try await user.getIDToken()
         let appCheckToken = try await AppCheck.appCheck().token(forcingRefresh: false).token
@@ -48,26 +76,64 @@ final class FamilyPremiumService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
         request.setValue(appCheckToken, forHTTPHeaderField: "X-Firebase-AppCheck")
-        request.httpBody = try JSONEncoder().encode(["signedTransaction": transactionJWS])
+        request.httpBody = try JSONEncoder().encode([
+            "signedTransaction": pending.signedTransaction,
+            "expectedUid": pending.uid,
+            "expectedFamilyId": pending.familyID,
+        ])
 
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode)
-        else { throw FamilyPremiumError.synchronizationFailed }
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw FamilyPremiumSyncError(code: "invalid_response", isRetryable: true)
+        }
+        guard !(200...299).contains(httpResponse.statusCode) else { return }
+
+        let payload = try? JSONDecoder().decode(FamilyPremiumErrorPayload.self, from: data)
+        let code = payload?.code ?? "http_\(httpResponse.statusCode)"
+        let retryable = Self.isRetryable(
+            statusCode: httpResponse.statusCode,
+            code: code,
+            serverValue: payload?.retryable
+        )
+        throw FamilyPremiumSyncError(code: code, isRetryable: retryable)
     }
 
-    private static func isActive(_ data: [String: Any]?, now: Date = Date()) -> Bool {
+    nonisolated static func isRetryable(
+        statusCode: Int,
+        code: String,
+        serverValue: Bool?
+    ) -> Bool {
+        if let serverValue { return serverValue }
+        return statusCode == 401
+            || statusCode == 408
+            || statusCode == 429
+            || statusCode >= 500
+            || (statusCode == 409 && ["no_family", "not_a_member"].contains(code))
+    }
+
+    nonisolated static func isActive(_ data: [String: Any]?, now: Date = Date()) -> Bool {
         guard let entitlement = data?["premiumEntitlement"] as? [String: Any],
+              entitlement["active"] as? Bool == true,
+              let originalTransactionID = entitlement["originalTransactionId"] as? String,
+              !originalTransactionID.isEmpty,
+              let productID = entitlement["productId"] as? String,
+              ProductID.all.contains(productID),
               let expiresAt = (entitlement["expiresAt"] as? Timestamp)?.dateValue()
         else { return false }
-        return expiresAt > now && entitlement["revokedAt"] == nil
+        guard expiresAt > now else { return false }
+        switch entitlement["revokedAt"] {
+        case nil, is NSNull: return true
+        default: return false
+        }
     }
 }
 
-private enum FamilyPremiumError: LocalizedError {
-    case synchronizationFailed
+private struct FamilyPremiumErrorPayload: Decodable {
+    let code: String?
+    let retryable: Bool?
+}
 
-    var errorDescription: String? {
-        "Could not confirm your subscription with Momsy. Please try again."
-    }
+struct FamilyPremiumSyncError: Error {
+    let code: String
+    let isRetryable: Bool
 }

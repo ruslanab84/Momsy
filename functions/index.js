@@ -11,6 +11,7 @@ const {
     terminalSleepChange,
 } = require("./live-activity");
 const {
+    EntitlementError,
     authorizeRequest,
     bindEntitlementToCurrentFamily,
     premiumEntitlementFor,
@@ -182,21 +183,67 @@ exports.syncSubscriptionEntitlement = onRequest({
         const uid = await authorizeRequest(request);
         const signedTransaction = request.body?.signedTransaction;
         if (typeof signedTransaction !== "string" || signedTransaction.length === 0) {
-            response.status(400).json({ error: "Missing signed transaction" });
-            return;
+            throw new EntitlementError(
+                "invalid_request",
+                400,
+                "A signed App Store transaction is required."
+            );
+        }
+        const expectedUid = request.body?.expectedUid;
+        const expectedFamilyId = request.body?.expectedFamilyId;
+        if ((expectedUid !== undefined
+                && (typeof expectedUid !== "string" || expectedUid.length === 0))
+            || (expectedFamilyId !== undefined
+                && (typeof expectedFamilyId !== "string"
+                    || expectedFamilyId.length === 0
+                    || expectedFamilyId.length > 128
+                    || expectedFamilyId.includes("/")))) {
+            throw new EntitlementError(
+                "invalid_request",
+                400,
+                "The subscription synchronization context is invalid."
+            );
+        }
+        if (typeof expectedUid === "string" && expectedUid !== uid) {
+            throw new EntitlementError(
+                "account_changed",
+                409,
+                "The Momsy account changed before synchronization completed."
+            );
         }
         const transaction = await verifyTransaction(signedTransaction);
         const entitlement = premiumEntitlementFor(transaction);
         if (!entitlement.isKnownProduct
             || typeof entitlement.originalTransactionId !== "string"
             || !Number.isFinite(entitlement.expiresDate)) {
-            response.status(400).json({ error: "Unsupported subscription" });
-            return;
+            throw new EntitlementError(
+                "unsupported_subscription",
+                400,
+                "The App Store transaction is not a supported Momsy subscription."
+            );
         }
-        await bindEntitlementToCurrentFamily(getFirestore(), uid, entitlement);
+        await bindEntitlementToCurrentFamily(
+            getFirestore(),
+            uid,
+            entitlement,
+            expectedFamilyId
+        );
         response.status(200).json({ active: entitlement.isActive });
     } catch (error) {
         console.error("Subscription entitlement sync failed", error);
-        response.status(403).json({ error: "Could not verify subscription" });
+        const failure = error instanceof EntitlementError
+            ? error
+            : new EntitlementError(
+                "service_unavailable",
+                503,
+                "Subscription synchronization is temporarily unavailable.",
+                true,
+                error
+            );
+        response.status(failure.httpStatus).json({
+            error: failure.publicMessage,
+            code: failure.code,
+            retryable: failure.retryable,
+        });
     }
 });

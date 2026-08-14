@@ -1,6 +1,8 @@
+import Foundation
 import Testing
 @testable import Momsy
 
+@MainActor
 struct SubscriptionManagerLogicTests {
     @Test func monthlyGrantsPremium() {
         #expect(SubscriptionManager.grantsPremium(productID: ProductID.monthly))
@@ -29,4 +31,148 @@ struct SubscriptionManagerLogicTests {
         #expect(SubscriptionManager.savingsPercent(monthlyPrice: 0, annualPrice: 39.99) == nil)
         #expect(SubscriptionManager.savingsPercent(monthlyPrice: 4.99, annualPrice: 0) == nil)
     }
+
+    @Test func pendingSyncIsScopedAndDeduplicated() {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let first = pending(signedTransaction: "first")
+        let latest = pending(signedTransaction: "latest")
+
+        store.save(first)
+        store.save(latest)
+
+        #expect(store.load() == latest)
+        #expect(latest.matches(SubscriptionSyncContext(uid: "uid-a", familyID: "family-a")))
+        #expect(!latest.matches(SubscriptionSyncContext(uid: "uid-b", familyID: "family-a")))
+        #expect(!latest.matches(SubscriptionSyncContext(uid: "uid-a", familyID: "family-b")))
+    }
+
+    @Test func transactionFinishesBeforeAFailingNetworkFlush() async {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let context = SubscriptionSyncContext(uid: "uid-a", familyID: "family-a")
+        var events: [String] = []
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: { context },
+            synchronize: { _ in
+                events.append("sync")
+                throw TestSyncError()
+            },
+            retryDelays: []
+        )
+
+        await queue.persistAndFinish(pending(signedTransaction: "signed")) {
+            events.append("finish")
+        }
+        await queue.flush()
+
+        #expect(events == ["finish", "sync"])
+        #expect(store.load()?.signedTransaction == "signed")
+    }
+
+    @Test func terminalSyncFailureDropsThePendingJob() async {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let context = SubscriptionSyncContext(uid: "uid-a", familyID: "family-a")
+        store.save(pending(signedTransaction: "signed"))
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: { context },
+            synchronize: { _ in
+                throw FamilyPremiumSyncError(
+                    code: "owned_by_another_account",
+                    isRetryable: false
+                )
+            },
+            retryDelays: []
+        )
+
+        await queue.flush()
+
+        #expect(store.load() == nil)
+    }
+
+    @Test func accountOrFamilySwitchDropsTheOldScopedJob() async {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        store.save(pending(signedTransaction: "signed"))
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: {
+                SubscriptionSyncContext(uid: "uid-b", familyID: "family-b")
+            },
+            synchronize: { _ in Issue.record("A stale job must not reach the network") },
+            retryDelays: []
+        )
+
+        await queue.flush()
+
+        #expect(store.load() == nil)
+    }
+
+    @Test func successfulSyncIsRecordedOnlyAfterTheNetworkSucceeds() async {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let context = SubscriptionSyncContext(uid: "uid-a", familyID: "family-a")
+        let job = pending(signedTransaction: "signed")
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: { context },
+            synchronize: { _ in },
+            retryDelays: []
+        )
+        queue.enqueue(job)
+
+        #expect(!store.wasSuccessfullySynchronized(job))
+        await queue.flush()
+        #expect(store.wasSuccessfullySynchronized(job))
+        #expect(store.load() == nil)
+
+        queue.enqueue(job)
+        #expect(store.load() == nil)
+    }
+
+    @Test func backendFailureClassificationPreservesTransientFamilyStates() {
+        #expect(FamilyPremiumService.isRetryable(
+            statusCode: 409,
+            code: "no_family",
+            serverValue: nil
+        ))
+        #expect(!FamilyPremiumService.isRetryable(
+            statusCode: 409,
+            code: "owned_by_another_account",
+            serverValue: nil
+        ))
+        #expect(FamilyPremiumService.isRetryable(
+            statusCode: 503,
+            code: "verification_unavailable",
+            serverValue: nil
+        ))
+        #expect(!FamilyPremiumService.isRetryable(
+            statusCode: 503,
+            code: "verification_unavailable",
+            serverValue: false
+        ))
+    }
+
+    private func pending(signedTransaction: String) -> PendingSubscriptionSync {
+        PendingSubscriptionSync(
+            uid: "uid-a",
+            familyID: "family-a",
+            originalTransactionID: "1000000123456789",
+            signedTransaction: signedTransaction
+        )
+    }
+
+    private func makeDefaults() -> UserDefaults {
+        let suiteName = "SubscriptionManagerLogicTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            preconditionFailure("Could not create isolated UserDefaults")
+        }
+        defaults.removePersistentDomain(forName: suiteName)
+        return defaults
+    }
+
+    private struct TestSyncError: Error {}
 }

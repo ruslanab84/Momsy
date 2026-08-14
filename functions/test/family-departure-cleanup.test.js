@@ -203,12 +203,22 @@ test("a verified subscription is shared with the family and removed on departure
     await db.collection("families").doc(familyId).collection("members").doc(uid).set({ uid });
     await db.collection("users").doc(uid).set({ familyId });
 
+    await assert.rejects(
+        bindEntitlementToCurrentFamily(db, uid, {
+            originalTransactionId: transactionID,
+            productId: "com.ruslanabdulov.momsy.premium.monthly",
+            expiresDate: Date.now() + 60_000,
+            revocationDate: null,
+        }, "stale-family"),
+        (error) => error.code === "family_changed" && error.httpStatus === 409
+    );
+
     await bindEntitlementToCurrentFamily(db, uid, {
         originalTransactionId: transactionID,
         productId: "com.ruslanabdulov.momsy.premium.monthly",
         expiresDate: Date.now() + 60_000,
         revocationDate: null,
-    });
+    }, familyId);
 
     const familyWithPremium = await db.collection("families").doc(familyId).get();
     assert.equal(familyWithPremium.get("premiumEntitlement.originalTransactionId"), transactionID);

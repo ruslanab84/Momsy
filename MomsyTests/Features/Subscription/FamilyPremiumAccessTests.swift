@@ -1,3 +1,5 @@
+import FirebaseFirestore
+import Foundation
 import Testing
 @testable import Momsy
 
@@ -25,6 +27,17 @@ struct FamilyPremiumAccessTests {
         )
     }
 
+    @Test("verified access wins while the other entitlement source resolves")
+    func verifiedAccessWinsDuringResolution() {
+        #expect(
+            PremiumAccessPolicy.state(
+                personalPremium: true,
+                familyPremium: false,
+                isResolving: true
+            ) == .premium
+        )
+    }
+
     @Test("a parent without either entitlement remains eligible for the paywall")
     func noEntitlementRequiresPaywall() {
         #expect(
@@ -34,5 +47,38 @@ struct FamilyPremiumAccessTests {
                 isResolving: false
             ) == .requiresPurchase
         )
+    }
+
+    @Test("family entitlement accepts missing or Firestore-null revocation")
+    func familyEntitlementAcceptsOnlyValidNonRevokedShapes() {
+        let now = Date()
+        var entitlement = validEntitlement(expiresAt: now.addingTimeInterval(60))
+        #expect(FamilyPremiumService.isActive(["premiumEntitlement": entitlement], now: now))
+
+        entitlement["revokedAt"] = NSNull()
+        #expect(FamilyPremiumService.isActive(["premiumEntitlement": entitlement], now: now))
+
+        entitlement["revokedAt"] = "malformed"
+        #expect(!FamilyPremiumService.isActive(["premiumEntitlement": entitlement], now: now))
+    }
+
+    @Test("family entitlement fails closed for missing active flag and expiry")
+    func familyEntitlementRequiresActiveUnexpiredSchema() {
+        let now = Date()
+        var entitlement = validEntitlement(expiresAt: now.addingTimeInterval(60))
+        entitlement.removeValue(forKey: "active")
+        #expect(!FamilyPremiumService.isActive(["premiumEntitlement": entitlement], now: now))
+
+        entitlement = validEntitlement(expiresAt: now.addingTimeInterval(-1))
+        #expect(!FamilyPremiumService.isActive(["premiumEntitlement": entitlement], now: now))
+    }
+
+    private func validEntitlement(expiresAt: Date) -> [String: Any] {
+        [
+            "active": true,
+            "originalTransactionId": "1000000123456789",
+            "productId": ProductID.monthly,
+            "expiresAt": Timestamp(date: expiresAt),
+        ]
     }
 }

@@ -24,11 +24,13 @@ final class SubscriptionManager: ObservableObject {
     }
 
     private let service: any SubscriptionServicing
-    private let familyPremiumService: FamilyPremiumService
+    private let familyPremiumService: any FamilyPremiumServicing
+    private let syncQueue: SubscriptionSyncQueue
     private var listenerTask: Task<Void, Never>?
+    private var bootstrapTask: Task<Void, Never>?
     private var productLoadTask: Task<[Product], Error>?
-    private var familyJoinObserver: NSObjectProtocol?
-    private var familyRevocationObserver: NSObjectProtocol?
+    private var familyIDObserver: AnyCancellable?
+    private var familyResolutionTask: Task<Void, Never>?
     private var personalPremium = false
     private var familyPremium = false
     private var isResolvingPersonal = true
@@ -36,34 +38,38 @@ final class SubscriptionManager: ObservableObject {
     private var observedFamilyID: String?
     private var hasObservedFamily = false
 
-    init(service: any SubscriptionServicing, familyPremiumService: FamilyPremiumService) {
+    init(
+        service: any SubscriptionServicing,
+        familyPremiumService: any FamilyPremiumServicing,
+        syncStore: PendingSubscriptionSyncStore = PendingSubscriptionSyncStore()
+    ) {
         self.service = service
         self.familyPremiumService = familyPremiumService
+        syncQueue = SubscriptionSyncQueue(
+            store: syncStore,
+            currentContext: { familyPremiumService.currentContext },
+            synchronize: { try await familyPremiumService.synchronize($0) }
+        )
         observeFamilyChanges()
-        listenerTask = Task {
+        listenerTask = Task { [weak self] in
+            for await result in Transaction.updates {
+                guard let self, !Task.isCancelled else { return }
+                await self.processUpdatedTransaction(result)
+            }
+        }
+        bootstrapTask = Task { [weak self] in
+            guard let self else { return }
             _ = try? await loadProductsIfNeeded()
             await refreshAccess()
-            for await result in Transaction.updates {
-                guard case .verified(let tx) = result else { continue }
-                await updatePersonalStatus(synchronizeFamilyEntitlement: false)
-                guard Self.grantsPremium(productID: tx.productID) else {
-                    await tx.finish()
-                    continue
-                }
-                do {
-                    try await familyPremiumService.synchronize(transactionJWS: result.jwsRepresentation)
-                    await tx.finish()
-                } catch {
-                    continue
-                }
-            }
+            syncQueue.scheduleFlush()
         }
     }
 
     deinit {
         listenerTask?.cancel()
-        if let familyJoinObserver { NotificationCenter.default.removeObserver(familyJoinObserver) }
-        if let familyRevocationObserver { NotificationCenter.default.removeObserver(familyRevocationObserver) }
+        bootstrapTask?.cancel()
+        familyResolutionTask?.cancel()
+        familyIDObserver?.cancel()
     }
 
     func purchase() async throws -> Bool {
@@ -84,9 +90,11 @@ final class SubscriptionManager: ObservableObject {
             if grantsPremium {
                 personalPremium = true
                 updateAccessState()
-                try await familyPremiumService.synchronize(transactionJWS: verification.jwsRepresentation)
             }
-            await tx.finish()
+            await persistAndFinishIfNeeded(
+                transaction: tx,
+                signedTransaction: verification.jwsRepresentation
+            )
             await refreshAccess()
             return grantsPremium
         case .pending, .userCancelled:
@@ -106,9 +114,32 @@ final class SubscriptionManager: ObservableObject {
 
     func refreshAccess() async {
         await updatePersonalStatus(synchronizeFamilyEntitlement: true)
-        // ponytail: expiry is rechecked on foreground; add App Store Server Notifications
-        // when entitlement changes must reach an already-open co-parent app immediately.
-        observeCurrentFamily(forceRefresh: true)
+        syncQueue.scheduleFlush()
+    }
+
+    func cloudSyncConsentDidChange(enabled: Bool) {
+        if enabled {
+            observeCurrentFamily(FamilyManager.shared.familyId, force: true)
+            Task { [weak self] in
+                await self?.updatePersonalStatus(synchronizeFamilyEntitlement: true)
+            }
+        } else {
+            familyResolutionTask?.cancel()
+            familyPremiumService.stopObserving()
+            syncQueue.clear()
+            familyPremium = false
+            isResolvingFamily = false
+            updateAccessState()
+        }
+    }
+
+    func eraseLocalSubscriptionState() {
+        familyResolutionTask?.cancel()
+        familyPremiumService.stopObserving()
+        syncQueue.clear()
+        familyPremium = false
+        isResolvingFamily = false
+        updateAccessState()
     }
 
     /// Any product in the app's catalog grants premium.
@@ -161,46 +192,84 @@ final class SubscriptionManager: ObservableObject {
 
     private func updatePersonalStatus(synchronizeFamilyEntitlement: Bool) async {
         var hasSub = false
+        var pending: PendingSubscriptionSync?
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result,
                Self.grantsPremium(productID: tx.productID),
                tx.revocationDate == nil {
                 hasSub = true
-                if synchronizeFamilyEntitlement {
-                    try? await familyPremiumService.synchronize(transactionJWS: result.jwsRepresentation)
+                if synchronizeFamilyEntitlement,
+                   let candidate = pendingSync(
+                    transaction: tx,
+                    signedTransaction: result.jwsRepresentation
+                   ) {
+                    pending = candidate
                 }
             }
         }
         personalPremium = hasSub
         isResolvingPersonal = false
         updateAccessState()
+        if let pending {
+            syncQueue.enqueue(pending)
+            syncQueue.scheduleFlush()
+        }
     }
 
     private func observeFamilyChanges() {
-        familyJoinObserver = NotificationCenter.default.addObserver(
-            forName: .familyDidJoin, object: nil, queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in self?.observeCurrentFamily() }
-        }
-        familyRevocationObserver = NotificationCenter.default.addObserver(
-            forName: .familyMembershipRevoked, object: nil, queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in self?.observeCurrentFamily() }
-        }
+        familyIDObserver = FamilyManager.shared.$familyId
+            .removeDuplicates()
+            .sink { [weak self] familyID in
+                Task { @MainActor in self?.observeCurrentFamily(familyID) }
+            }
     }
 
-    private func observeCurrentFamily(forceRefresh: Bool = false) {
-        let familyID = FamilyManager.shared.familyId
-        guard forceRefresh || !hasObservedFamily || observedFamilyID != familyID else { return }
+    private func observeCurrentFamily(_ familyID: String?, force: Bool = false) {
+        guard force || !hasObservedFamily || observedFamilyID != familyID else { return }
+        let previousFamilyID = observedFamilyID
         hasObservedFamily = true
         observedFamilyID = familyID
+        familyResolutionTask?.cancel()
+        familyPremiumService.stopObserving()
+        familyPremium = false
+
+        if previousFamilyID != nil && familyID == nil {
+            syncQueue.clear()
+        } else {
+            syncQueue.discardPendingIfScopeChanged(to: familyPremiumService.currentContext)
+        }
+
+        guard FirebaseBootstrapper.isConfigured,
+              CloudSyncConsent.isGranted(),
+              let familyID
+        else {
+            isResolvingFamily = false
+            updateAccessState()
+            return
+        }
+
         isResolvingFamily = true
         updateAccessState()
         familyPremiumService.observe(familyId: familyID) { [weak self] isPremium in
-            guard let self else { return }
+            guard let self, self.observedFamilyID == familyID else { return }
+            self.familyResolutionTask?.cancel()
             self.familyPremium = isPremium
             self.isResolvingFamily = false
             self.updateAccessState()
+        }
+        familyResolutionTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard let self,
+                  !Task.isCancelled,
+                  self.observedFamilyID == familyID,
+                  self.isResolvingFamily
+            else { return }
+            self.familyPremium = false
+            self.isResolvingFamily = false
+            self.updateAccessState()
+        }
+        Task { [weak self] in
+            await self?.updatePersonalStatus(synchronizeFamilyEntitlement: true)
         }
     }
 
@@ -218,6 +287,49 @@ final class SubscriptionManager: ObservableObject {
         case .unverified: throw SubscriptionError.failedVerification
         case .verified(let v): return v
         }
+    }
+
+    private func processUpdatedTransaction(
+        _ result: VerificationResult<Transaction>
+    ) async {
+        guard case .verified(let transaction) = result else { return }
+        await updatePersonalStatus(synchronizeFamilyEntitlement: false)
+        await persistAndFinishIfNeeded(
+            transaction: transaction,
+            signedTransaction: result.jwsRepresentation
+        )
+    }
+
+    private func persistAndFinishIfNeeded(
+        transaction: Transaction,
+        signedTransaction: String
+    ) async {
+        guard Self.grantsPremium(productID: transaction.productID),
+              let pending = pendingSync(
+                transaction: transaction,
+                signedTransaction: signedTransaction
+              )
+        else {
+            await transaction.finish()
+            return
+        }
+        await syncQueue.persistAndFinish(pending) {
+            await transaction.finish()
+        }
+        syncQueue.scheduleFlush()
+    }
+
+    private func pendingSync(
+        transaction: Transaction,
+        signedTransaction: String
+    ) -> PendingSubscriptionSync? {
+        guard let context = familyPremiumService.currentContext else { return nil }
+        return PendingSubscriptionSync(
+            uid: context.uid,
+            familyID: context.familyID,
+            originalTransactionID: String(transaction.originalID),
+            signedTransaction: signedTransaction
+        )
     }
 }
 
