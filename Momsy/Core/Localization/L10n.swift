@@ -1674,6 +1674,22 @@ struct L10n {
                                        "Erreur d’achat",
                                        "Erro na compra",
                                        "购买错误") }
+    var purchasePendingTitle: String { s("Purchase Pending",
+                                         "Ожидание подтверждения",
+                                         "Kauf ausstehend",
+                                         "Compra pendiente",
+                                         "Achat en attente",
+                                         "Compra pendente",
+                                         "购买待批准") }
+    var purchasePendingMessage: String {
+        s("Your purchase is awaiting approval. Premium will unlock automatically after it’s approved.",
+          "Покупка ожидает подтверждения. Премиум-доступ включится автоматически после одобрения.",
+          "Dein Kauf wartet auf Genehmigung. Premium wird nach der Genehmigung automatisch freigeschaltet.",
+          "Tu compra está pendiente de aprobación. Premium se desbloqueará automáticamente cuando se apruebe.",
+          "Votre achat est en attente d’approbation. Premium se débloquera automatiquement après son approbation.",
+          "A sua compra aguarda aprovação. O Premium será desbloqueado automaticamente após a aprovação.",
+          "您的购买正在等待批准。获批后，高级版将自动解锁。")
+    }
     var purchaseVerificationFailed: String {
         s("Couldn’t verify the purchase. Please try again.",
           "Не удалось подтвердить покупку. Попробуйте ещё раз.",

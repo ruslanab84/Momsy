@@ -6,7 +6,7 @@ struct PaywallView: View {
     let onComplete: () -> Void
 
     @EnvironmentObject private var loc: LocalizationManager
-    @State private var errorMessage: String?
+    @State private var purchaseAlert: PurchaseAlert?
 
     private var lm: L10n { loc.strings }
 
@@ -37,13 +37,10 @@ struct PaywallView: View {
                 }
             }
         }
-        .alert(isPresented: Binding(
-            get: { errorMessage != nil },
-            set: { if !$0 { errorMessage = nil } }
-        )) {
+        .alert(item: $purchaseAlert) { purchaseAlert in
             Alert(
-                title: Text(lm.purchaseErrorTitle),
-                message: Text(errorMessage ?? ""),
+                title: Text(purchaseAlert.title),
+                message: Text(purchaseAlert.message),
                 dismissButton: .default(Text(lm.done))
             )
         }
@@ -133,7 +130,7 @@ struct PaywallView: View {
                         let purchaseSucceeded = try await subscriptionManager.purchase()
                         if purchaseSucceeded { onComplete() }
                     } catch {
-                        errorMessage = localizedPurchaseError(error)
+                        purchaseAlert = localizedPurchaseAlert(error)
                     }
                 }
             } label: {
@@ -151,7 +148,7 @@ struct PaywallView: View {
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .disabled(subscriptionManager.isLoading || !subscriptionManager.canPurchase)
+            .disabled(subscriptionManager.isLoading)
             .padding(.horizontal, 24)
 
             Text(renewalDisclosureText)
@@ -270,11 +267,14 @@ struct PaywallView: View {
         .buttonStyle(.plain)
     }
 
-    private func localizedPurchaseError(_ error: Error) -> String {
+    private func localizedPurchaseAlert(_ error: Error) -> PurchaseAlert {
         switch error {
-        case SubscriptionError.failedVerification: return lm.purchaseVerificationFailed
-        case SubscriptionError.productUnavailable:  return lm.purchaseProductUnavailable
-        default:                                    return lm.purchaseProductUnavailable
+        case SubscriptionError.pendingApproval:
+            return PurchaseAlert(title: lm.purchasePendingTitle, message: lm.purchasePendingMessage)
+        case SubscriptionError.failedVerification:
+            return PurchaseAlert(title: lm.purchaseErrorTitle, message: lm.purchaseVerificationFailed)
+        default:
+            return PurchaseAlert(title: lm.purchaseErrorTitle, message: lm.purchaseProductUnavailable)
         }
     }
 
@@ -288,4 +288,10 @@ struct PaywallView: View {
                 .foregroundColor(.white)
         }
     }
+}
+
+private struct PurchaseAlert: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
 }

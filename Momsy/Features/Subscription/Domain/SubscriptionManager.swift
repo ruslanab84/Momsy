@@ -11,8 +11,6 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var trialEligible = false
     @Published var selectedProductID = ProductID.annual
 
-    var canPurchase: Bool { selectedProduct != nil }
-
     var selectedProduct: Product? { products.first { $0.id == selectedProductID } }
     var monthlyProduct: Product? { products.first { $0.id == ProductID.monthly } }
     var annualProduct: Product? { products.first { $0.id == ProductID.annual } }
@@ -82,6 +80,7 @@ final class SubscriptionManager: ObservableObject {
             throw SubscriptionError.productUnavailable
         }
         let result = try await service.purchase(product)
+        try Self.throwIfPending(result)
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
@@ -145,6 +144,10 @@ final class SubscriptionManager: ObservableObject {
     /// Any product in the app's catalog grants premium.
     nonisolated static func grantsPremium(productID: String) -> Bool {
         ProductID.all.contains(productID)
+    }
+
+    nonisolated static func throwIfPending(_ result: Product.PurchaseResult) throws {
+        if case .pending = result { throw SubscriptionError.pendingApproval }
     }
 
     /// Percentage saved on annual vs paying monthly for a year. Nil when annual
@@ -333,7 +336,8 @@ final class SubscriptionManager: ObservableObject {
     }
 }
 
-enum SubscriptionError: Error {
+enum SubscriptionError: Error, Equatable {
     case failedVerification
+    case pendingApproval
     case productUnavailable
 }

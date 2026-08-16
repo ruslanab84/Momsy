@@ -1,9 +1,18 @@
 import Foundation
+import StoreKit
 import Testing
 @testable import Momsy
 
 @MainActor
 struct SubscriptionManagerLogicTests {
+    @Test func pendingPurchaseReportsApprovalState() {
+        #expect {
+            try SubscriptionManager.throwIfPending(.pending)
+        } throws: { error in
+            error as? SubscriptionError == .pendingApproval
+        }
+    }
+
     @Test func monthlyGrantsPremium() {
         #expect(SubscriptionManager.grantsPremium(productID: ProductID.monthly))
     }
