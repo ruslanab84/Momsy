@@ -73,6 +73,18 @@ struct FamilyPremiumAccessTests {
         #expect(!FamilyPremiumService.isActive(["premiumEntitlement": entitlement], now: now))
     }
 
+    @Test("a cache miss does not prove that the family lacks Premium")
+    func familyAccessWaitsForServerTruth() {
+        let now = Date()
+        let active = [
+            "premiumEntitlement": validEntitlement(expiresAt: now.addingTimeInterval(60))
+        ]
+
+        #expect(FamilyPremiumService.resolvedAccess(nil, isFromCache: true, now: now) == nil)
+        #expect(FamilyPremiumService.resolvedAccess(nil, isFromCache: false, now: now) == false)
+        #expect(FamilyPremiumService.resolvedAccess(active, isFromCache: true, now: now) == true)
+    }
+
     private func validEntitlement(expiresAt: Date) -> [String: Any] {
         [
             "active": true,

@@ -5,6 +5,29 @@ import Testing
 
 @MainActor
 struct SubscriptionManagerLogicTests {
+    @Test func stalledProductLoadingLeavesPaywallRetryable() async {
+        let service = StalledSubscriptionService()
+        let manager = SubscriptionManager(
+            service: service,
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults()),
+            productLoadTimeout: .milliseconds(20)
+        )
+        let clock = ContinuousClock()
+
+        for _ in 0..<2 {
+            let start = clock.now
+            await #expect(throws: SubscriptionError.productUnavailable) {
+                try await manager.purchase()
+            }
+            #expect(start.duration(to: clock.now) < .milliseconds(500))
+            #expect(!manager.isLoading)
+            await Task.yield()
+        }
+
+        #expect(service.fetchCount >= 2)
+    }
+
     @Test func pendingPurchaseReportsApprovalState() {
         #expect {
             try SubscriptionManager.throwIfPending(.pending)
@@ -184,4 +207,33 @@ struct SubscriptionManagerLogicTests {
     }
 
     private struct TestSyncError: Error {}
+
+    private final class StalledSubscriptionService: SubscriptionServicing {
+        private(set) var fetchCount = 0
+
+        func fetchProducts(ids: [String]) async throws -> [Product] {
+            fetchCount += 1
+            try await Task.sleep(for: .seconds(1))
+            return []
+        }
+
+        func purchase(_ product: Product) async throws -> Product.PurchaseResult {
+            Issue.record("Purchase must not start without a loaded product")
+            throw SubscriptionError.productUnavailable
+        }
+
+        func restorePurchases() async throws {}
+    }
+
+    private final class NoFamilyPremiumService: FamilyPremiumServicing {
+        var currentContext: SubscriptionSyncContext? { nil }
+
+        func observe(familyId: String?, onChange: @escaping @MainActor (Bool) -> Void) {
+            onChange(false)
+        }
+
+        func stopObserving() {}
+
+        func synchronize(_ pending: PendingSubscriptionSync) async throws {}
+    }
 }

@@ -23,12 +23,12 @@ final class SubscriptionManager: ObservableObject {
 
     private let service: any SubscriptionServicing
     private let familyPremiumService: any FamilyPremiumServicing
+    private let productLoadTimeout: Duration
     private let syncQueue: SubscriptionSyncQueue
     private var listenerTask: Task<Void, Never>?
     private var bootstrapTask: Task<Void, Never>?
     private var productLoadTask: Task<[Product], Error>?
     private var familyIDObserver: AnyCancellable?
-    private var familyResolutionTask: Task<Void, Never>?
     private var personalPremium = false
     private var familyPremium = false
     private var isResolvingPersonal = true
@@ -39,10 +39,12 @@ final class SubscriptionManager: ObservableObject {
     init(
         service: any SubscriptionServicing,
         familyPremiumService: any FamilyPremiumServicing,
-        syncStore: PendingSubscriptionSyncStore = PendingSubscriptionSyncStore()
+        syncStore: PendingSubscriptionSyncStore = PendingSubscriptionSyncStore(),
+        productLoadTimeout: Duration = .seconds(15)
     ) {
         self.service = service
         self.familyPremiumService = familyPremiumService
+        self.productLoadTimeout = productLoadTimeout
         syncQueue = SubscriptionSyncQueue(
             store: syncStore,
             currentContext: { familyPremiumService.currentContext },
@@ -66,7 +68,6 @@ final class SubscriptionManager: ObservableObject {
     deinit {
         listenerTask?.cancel()
         bootstrapTask?.cancel()
-        familyResolutionTask?.cancel()
         familyIDObserver?.cancel()
     }
 
@@ -123,7 +124,6 @@ final class SubscriptionManager: ObservableObject {
                 await self?.updatePersonalStatus(synchronizeFamilyEntitlement: true)
             }
         } else {
-            familyResolutionTask?.cancel()
             familyPremiumService.stopObserving()
             syncQueue.clear()
             familyPremium = false
@@ -133,7 +133,6 @@ final class SubscriptionManager: ObservableObject {
     }
 
     func eraseLocalSubscriptionState() {
-        familyResolutionTask?.cancel()
         familyPremiumService.stopObserving()
         syncQueue.clear()
         familyPremium = false
@@ -168,28 +167,41 @@ final class SubscriptionManager: ObservableObject {
         if !products.isEmpty { return products }
         if let productLoadTask {
             let loaded = try await productLoadTask.value
-            await adopt(loaded)
+            adopt(loaded)
             return loaded
         }
 
         let service = service
+        let timeout = productLoadTimeout
         let task = Task<[Product], Error> {
-            let fetched = try await service.fetchProducts(ids: ProductID.all)
-            guard !fetched.isEmpty else { throw SubscriptionError.productUnavailable }
-            return fetched
+            try await withThrowingTaskGroup(of: [Product].self) { group in
+                group.addTask { @MainActor in
+                    try await service.fetchProducts(ids: ProductID.all)
+                }
+                group.addTask {
+                    try await Task.sleep(for: timeout)
+                    throw SubscriptionError.productUnavailable
+                }
+                defer { group.cancelAll() }
+                guard let fetched = try await group.next(), !fetched.isEmpty else {
+                    throw SubscriptionError.productUnavailable
+                }
+                return fetched
+            }
         }
         productLoadTask = task
         defer { productLoadTask = nil }
 
         let loaded = try await task.value
-        await adopt(loaded)
+        adopt(loaded)
         return loaded
     }
 
-    private func adopt(_ loaded: [Product]) async {
+    private func adopt(_ loaded: [Product]) {
         products = loaded
-        if let subscription = loaded.first?.subscription {
-            trialEligible = await subscription.isEligibleForIntroOffer
+        guard let subscription = loaded.first?.subscription else { return }
+        Task { [weak self] in
+            self?.trialEligible = await subscription.isEligibleForIntroOffer
         }
     }
 
@@ -232,7 +244,6 @@ final class SubscriptionManager: ObservableObject {
         let previousFamilyID = observedFamilyID
         hasObservedFamily = true
         observedFamilyID = familyID
-        familyResolutionTask?.cancel()
         familyPremiumService.stopObserving()
         familyPremium = false
 
@@ -255,19 +266,7 @@ final class SubscriptionManager: ObservableObject {
         updateAccessState()
         familyPremiumService.observe(familyId: familyID) { [weak self] isPremium in
             guard let self, self.observedFamilyID == familyID else { return }
-            self.familyResolutionTask?.cancel()
             self.familyPremium = isPremium
-            self.isResolvingFamily = false
-            self.updateAccessState()
-        }
-        familyResolutionTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(2))
-            guard let self,
-                  !Task.isCancelled,
-                  self.observedFamilyID == familyID,
-                  self.isResolvingFamily
-            else { return }
-            self.familyPremium = false
             self.isResolvingFamily = false
             self.updateAccessState()
         }

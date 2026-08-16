@@ -46,9 +46,14 @@ final class FamilyPremiumService: FamilyPremiumServicing {
         }
 
         listener = Firestore.firestore().collection("families").document(familyId)
-            .addSnapshotListener { snapshot, error in
-                guard error == nil, let snapshot else { return }
-                let isPremium = Self.isActive(snapshot.data())
+            .addSnapshotListener(includeMetadataChanges: true) { snapshot, error in
+                guard error == nil,
+                      let snapshot,
+                      let isPremium = Self.resolvedAccess(
+                        snapshot.data(),
+                        isFromCache: snapshot.metadata.isFromCache
+                      )
+                else { return }
                 Task { @MainActor in onChange(isPremium) }
             }
     }
@@ -125,6 +130,16 @@ final class FamilyPremiumService: FamilyPremiumServicing {
         case nil, is NSNull: return true
         default: return false
         }
+    }
+
+    nonisolated static func resolvedAccess(
+        _ data: [String: Any]?,
+        isFromCache: Bool,
+        now: Date = Date()
+    ) -> Bool? {
+        let isPremium = isActive(data, now: now)
+        if isPremium { return true }
+        return isFromCache ? nil : false
     }
 }
 
