@@ -48,6 +48,12 @@ struct SubscriptionManagerLogicTests {
         #expect(!SubscriptionManager.grantsPremium(productID: "com.other.product"))
     }
 
+    @Test func xcodeTransactionsStayLocal() {
+        #expect(!SubscriptionManager.shouldSynchronizeFamilyEntitlement(environment: .xcode))
+        #expect(SubscriptionManager.shouldSynchronizeFamilyEntitlement(environment: .sandbox))
+        #expect(SubscriptionManager.shouldSynchronizeFamilyEntitlement(environment: .production))
+    }
+
     @Test func savingsPercentTypicalCase() {
         // 4.99 * 12 = 59.88; annual 39.99 → ~33%
         let percent = SubscriptionManager.savingsPercent(monthlyPrice: 4.99, annualPrice: 39.99)

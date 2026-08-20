@@ -145,6 +145,12 @@ final class SubscriptionManager: ObservableObject {
         ProductID.all.contains(productID)
     }
 
+    nonisolated static func shouldSynchronizeFamilyEntitlement(
+        environment: AppStore.Environment
+    ) -> Bool {
+        environment != .xcode
+    }
+
     nonisolated static func throwIfPending(_ result: Product.PurchaseResult) throws {
         if case .pending = result { throw SubscriptionError.pendingApproval }
     }
@@ -325,7 +331,9 @@ final class SubscriptionManager: ObservableObject {
         transaction: Transaction,
         signedTransaction: String
     ) -> PendingSubscriptionSync? {
-        guard let context = familyPremiumService.currentContext else { return nil }
+        guard Self.shouldSynchronizeFamilyEntitlement(environment: transaction.environment),
+              let context = familyPremiumService.currentContext
+        else { return nil }
         return PendingSubscriptionSync(
             uid: context.uid,
             familyID: context.familyID,
