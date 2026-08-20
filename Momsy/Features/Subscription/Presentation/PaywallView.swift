@@ -37,13 +37,6 @@ struct PaywallView: View {
                 }
             }
         }
-        .alert(item: $purchaseAlert) { purchaseAlert in
-            Alert(
-                title: Text(purchaseAlert.title),
-                message: Text(purchaseAlert.message),
-                dismissButton: .default(Text(lm.done))
-            )
-        }
     }
 
     // MARK: — Sections
@@ -125,6 +118,7 @@ struct PaywallView: View {
     private var ctaSection: some View {
         VStack(spacing: 12) {
             Button {
+                purchaseAlert = nil
                 Task {
                     do {
                         let purchaseSucceeded = try await subscriptionManager.purchase()
@@ -150,6 +144,14 @@ struct PaywallView: View {
             }
             .disabled(subscriptionManager.isLoading)
             .padding(.horizontal, 24)
+
+            if let purchaseAlert {
+                Text("\(purchaseAlert.title): \(purchaseAlert.message)")
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 28)
+            }
 
             Text(renewalDisclosureText)
                 .font(.caption)

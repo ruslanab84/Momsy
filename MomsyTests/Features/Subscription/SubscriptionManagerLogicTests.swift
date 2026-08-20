@@ -219,7 +219,9 @@ struct SubscriptionManagerLogicTests {
 
         func fetchProducts(ids: [String]) async throws -> [Product] {
             fetchCount += 1
-            try await Task.sleep(for: .seconds(1))
+            let clock = ContinuousClock()
+            let deadline = clock.now.advanced(by: .seconds(1))
+            while clock.now < deadline { await Task.yield() }
             return []
         }
 

@@ -180,20 +180,36 @@ final class SubscriptionManager: ObservableObject {
         let service = service
         let timeout = productLoadTimeout
         let task = Task<[Product], Error> {
-            try await withThrowingTaskGroup(of: [Product].self) { group in
-                group.addTask { @MainActor in
-                    try await service.fetchProducts(ids: ProductID.all)
+            let results = AsyncThrowingStream<[Product], Error> { continuation in
+                let fetchTask = Task { @MainActor in
+                    do {
+                        let fetched = try await service.fetchProducts(ids: ProductID.all)
+                        guard !fetched.isEmpty else {
+                            continuation.finish(throwing: SubscriptionError.productUnavailable)
+                            return
+                        }
+                        continuation.yield(fetched)
+                        continuation.finish()
+                    } catch {
+                        continuation.finish(throwing: error)
+                    }
                 }
-                group.addTask {
-                    try await Task.sleep(for: timeout)
-                    throw SubscriptionError.productUnavailable
+                let timeoutTask = Task {
+                    do {
+                        try await Task.sleep(for: timeout)
+                        continuation.finish(throwing: SubscriptionError.productUnavailable)
+                    } catch {}
                 }
-                defer { group.cancelAll() }
-                guard let fetched = try await group.next(), !fetched.isEmpty else {
-                    throw SubscriptionError.productUnavailable
+                continuation.onTermination = { @Sendable _ in
+                    fetchTask.cancel()
+                    timeoutTask.cancel()
                 }
-                return fetched
             }
+            var iterator = results.makeAsyncIterator()
+            guard let fetched = try await iterator.next() else {
+                throw SubscriptionError.productUnavailable
+            }
+            return fetched
         }
         productLoadTask = task
         defer { productLoadTask = nil }
