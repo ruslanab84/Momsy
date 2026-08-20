@@ -32,56 +32,6 @@ protocol CloudAccountEraser {
     func isCloudDataPresent(uid: String) async throws -> Bool
 }
 
-/// Runs independent async work while keeping a bounded number of tasks in flight.
-///
-/// Account erasure fans out over every Firestore subcollection. The bound avoids turning a
-/// large family into an unbounded burst of reads and writes while retaining fail-fast behavior.
-enum BoundedConcurrency {
-    nonisolated static let defaultLimit = 8
-
-    nonisolated static func forEach<T: Sendable>(
-        _ items: [T],
-        limit: Int = defaultLimit,
-        _ operation: @Sendable @escaping (T) async throws -> Void
-    ) async throws {
-        guard limit > 1, items.count > 1 else {
-            for item in items {
-                try Task.checkCancellation()
-                try await operation(item)
-            }
-            return
-        }
-
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            var next = 0
-            let window = min(limit, items.count)
-            while next < window {
-                let item = items[next]
-                group.addTask {
-                    try Task.checkCancellation()
-                    try await operation(item)
-                }
-                next += 1
-            }
-
-            do {
-                while try await group.next() != nil {
-                    guard next < items.count else { continue }
-                    let item = items[next]
-                    group.addTask {
-                        try Task.checkCancellation()
-                        try await operation(item)
-                    }
-                    next += 1
-                }
-            } catch {
-                group.cancelAll()
-                throw error
-            }
-        }
-    }
-}
-
 struct FirestoreAccountEraser: CloudAccountEraser, Sendable {
     func deleteCloudData(uid: String, familyIdHint: String?) async throws -> AccountErasureOutcome {
         let db = Firestore.firestore()
@@ -91,155 +41,108 @@ struct FirestoreAccountEraser: CloudAccountEraser, Sendable {
             .flatMap { $0.isEmpty ? nil : $0 }
         let hint = familyIdHint.flatMap { $0.isEmpty ? nil : $0 }
 
-        // The account has been re-routed to a different family since the deletion was
-        // recorded (e.g. an invite join). The recorded erase is finished; re-running it
-        // here would destroy data the user legitimately owns now.
         if let hint, let serverFamilyId, serverFamilyId != hint {
             return .supersededByNewFamily
         }
 
-        try await deleteAllDocs(
-            in: db.collection("invites").whereField("createdBy", isEqualTo: uid)
-        )
-
         guard let familyId = serverFamilyId ?? hint else {
-            // Neither a routing doc nor a recorded family: there is nothing left to erase.
-            // Reporting this as `.accountDeletionPending` is what deadlocked re-registration.
-            if userDoc.exists { try await userRef.delete() }
+            try await deleteRoutingFootprint(uid: uid, userRef: userRef, userExists: userDoc.exists)
             return .nothingToErase
         }
 
-        // Membership is the capability that authorises every client delete under
-        // `families/{id}/babies/**`. Its deletion also starts the trusted cleanup trigger,
-        // so a retry must not attempt an unauthorised old-family scrub.
-        guard try await callerIsStillMember(familyId: familyId, uid: uid) else {
-            if userDoc.exists { try await userRef.delete() }
+        guard let memberRef = try await memberReference(familyId: familyId, uid: uid) else {
+            try await waitForDepartureCleanup(uid: uid)
+            let currentUser = try await userRef.getDocument(source: .server)
+            let currentFamilyId = currentUser.data()?["familyId"] as? String
+            if let currentFamilyId, currentFamilyId != familyId {
+                return .supersededByNewFamily
+            }
+            try await deleteRoutingFootprint(
+                uid: uid,
+                userRef: userRef,
+                userExists: currentUser.exists
+            )
             return .nothingToErase
         }
 
-        do {
-            let familyRef = db.collection("families").document(familyId)
-            let familyDocument = try await familyRef.getDocument(source: .server)
-            let callerCreatedFamily =
-                familyDocument.data()?["createdBy"] as? String == uid
-            let memberDocuments = try await familyRef.collection("members")
-                .getDocuments(source: .server)
-                .documents
-            let partition = AccountErasureGate.partitionMemberDocuments(
-                memberDocuments.map {
-                    (id: $0.documentID, data: $0.data())
-                }
-            )
-            let placeholderIds = Set(partition.placeholderIds)
-            let legacyPlaceholders = memberDocuments.filter {
-                placeholderIds.contains($0.documentID)
-            }
-            let realMembers = memberDocuments
-                .filter { !placeholderIds.contains($0.documentID) }
-                .map {
-                    (id: $0.documentID, roleRaw: $0.data()["roleRaw"] as? String ?? "")
-                }
-            let callerRoleRaw = realMembers.first { $0.id == uid }?.roleRaw ?? ""
-            if AccountErasureGate.isParentRole(callerRoleRaw) {
-                for placeholder in legacyPlaceholders {
-                    try await placeholder.reference.delete()
-                }
-            }
-            let mayTearDownSharedData = AccountErasureGate.mayTearDownSharedData(
-                members: realMembers,
-                callerUid: uid,
-                callerRoleRaw: callerRoleRaw
-            )
-            let babyIds = try await discoverBabyIds(in: familyRef)
-            let healthDataParentPaths = Self.healthDataParentPaths(
-                familyId: familyId,
-                babyIds: babyIds
-            )
-
-            if mayTearDownSharedData {
-                for babyId in babyIds {
-                    try await deleteBabyTree(
-                        familyRef: familyRef,
-                        familyId: familyId,
-                        babyId: babyId,
-                        ownerUID: uid
-                    )
-                }
-                try await deleteLegacyFamilyTree(familyId: familyId, ownerUID: uid)
-                try await verifyHealthDataAbsent(
-                    parentPaths: healthDataParentPaths,
-                    deletingUID: uid,
-                    authoredOnly: false
-                )
-                // A surviving nanny/grandma would otherwise keep a live membership in a
-                // family whose data no longer exists, and neither role can create a new
-                // family — a permanent dead end. Removing the roster makes their next
-                // `confirmMembership` return `.revoked`, routing them through
-                // `detachFromRevokedFamily` and into a clean personal family.
-                // Rules: `allow delete: if canManageFamilyRoster(familyId)` — the caller
-                // is a parent by definition of `mayTearDownSharedData`.
-                for member in realMembers where member.id != uid {
-                    try await familyRef.collection("members").document(member.id).delete()
-                }
-            } else {
-                let callerIsParent = AccountErasureGate.isParentRole(callerRoleRaw)
-                for babyId in babyIds {
-                    let babyRef = familyRef.collection("babies").document(babyId)
-                    try await eraseAuthoredData(under: babyRef, uid: uid)
-                    if callerIsParent {
-                        try await eraseProfileMembership(under: babyRef, uid: uid)
-                    }
-                }
-                let legacyRef = db.collection("babies").document(familyId)
-                try await eraseAuthoredData(under: legacyRef, uid: uid)
-                if callerIsParent {
-                    try await eraseProfileMembership(under: legacyRef, uid: uid)
-                }
-                try await verifyHealthDataAbsent(
-                    parentPaths: healthDataParentPaths,
-                    deletingUID: uid,
-                    authoredOnly: true
-                )
-                if callerIsParent {
-                    try await verifyProfileMembershipAbsent(
-                        parentPaths: healthDataParentPaths,
-                        uid: uid
-                    )
-                }
-            }
-
-            // Keep author cleanup and membership access ordered, while making the final
-            // membership/user removal atomic so recovery cannot observe a half-finished exit.
-            let batch = db.batch()
-            if callerCreatedFamily {
-                // The family doc survives as a non-reusable tombstone (rules forbid a
-                // client delete), so it must not keep storing the erased user's UID.
-                // Rules only accept this write together with the membership delete below.
-                batch.updateData(["createdBy": ""], forDocument: familyRef)
-            }
-            batch.deleteDocument(familyRef.collection("members").document(uid))
-            batch.deleteDocument(userRef)
-            try await batch.commit()
-        }
+        let cleanupRef = db.collection("familyDepartureCleanups").document(
+            FamilyDepartureCleanupJob.documentID(familyID: familyId, uid: uid)
+        )
+        let batch = db.batch()
+        batch.setData([
+            "familyId": familyId,
+            "uid": uid,
+            "removedMemberId": memberRef.documentID,
+            "requestedAt": FieldValue.serverTimestamp(),
+            "kind": FamilyDepartureCleanupJob.accountDeletionKind,
+        ], forDocument: cleanupRef)
+        batch.deleteDocument(memberRef)
+        try await batch.commit()
+        try await waitForDepartureCleanup(uid: uid)
         return .erased
     }
 
-    /// `permissionDenied` on reading one's OWN member doc means the doc no longer exists
-    /// (rules require it to exist for the read). Reuses `FamilyManager`'s classifier so the
-    /// two call sites cannot drift apart.
-    private func callerIsStillMember(familyId: String, uid: String) async throws -> Bool {
-        let ref = Firestore.firestore()
+    private func waitForDepartureCleanup(uid: String) async throws {
+        let query = Firestore.firestore().collection("familyDepartureCleanups")
+            .whereField("uid", isEqualTo: uid)
+            .limit(to: 1)
+        var delay: UInt64 = 250_000_000
+        for _ in 0..<35 {
+            try Task.checkCancellation()
+            let snapshot = try await query.getDocuments(source: .server)
+            if snapshot.isEmpty, !snapshot.metadata.hasPendingWrites { return }
+            try await Task.sleep(nanoseconds: delay)
+            delay = min(delay * 2, 2_000_000_000)
+        }
+        throw AuthError.accountDeletionPending
+    }
+
+    private func deleteRoutingFootprint(
+        uid: String,
+        userRef: DocumentReference,
+        userExists: Bool
+    ) async throws {
+        let db = Firestore.firestore()
+        let query = db.collection("invites").whereField("createdBy", isEqualTo: uid)
+        while true {
+            let documents = try await query.limit(to: 400)
+                .getDocuments(source: .server)
+                .documents
+            guard !documents.isEmpty else { break }
+            let batch = db.batch()
+            for document in documents { batch.deleteDocument(document.reference) }
+            try await batch.commit()
+        }
+        if userExists { try await userRef.delete() }
+    }
+
+    /// Prefer the canonical UID document, with the same legacy UID lookup used by roster
+    /// cleanup. A revoked member cannot enumerate the old roster.
+    private func memberReference(familyId: String, uid: String) async throws -> DocumentReference? {
+        let members = Firestore.firestore()
             .collection("families").document(familyId)
-            .collection("members").document(uid)
+            .collection("members")
+        let canonical = members.document(uid)
         do {
-            return try await ref.getDocument(source: .server).exists
+            if try await canonical.getDocument(source: .server).exists { return canonical }
         } catch let error where FamilyManager.classifyMembershipError(error) == .revoked {
-            return false
+            // A missing canonical document is denied by rules; legacy records can still
+            // be found by their authenticated uid field.
+        }
+        do {
+            return try await members.whereField("uid", isEqualTo: uid)
+                .limit(to: 1)
+                .getDocuments(source: .server)
+                .documents
+                .first?
+                .reference
+        } catch let error where FamilyManager.classifyMembershipError(error) == .revoked {
+            return nil
         }
     }
 
-    /// Final server check for routing data after health paths were verified while membership
-    /// still existed. Pending local writes are not accepted as backend confirmation.
+    /// Final server check after the trusted cleanup job completes. Pending local writes are
+    /// not accepted as backend confirmation.
     func isCloudDataPresent(uid: String) async throws -> Bool {
         let db = Firestore.firestore()
         let userDoc = try await db.collection("users").document(uid)
@@ -255,268 +158,6 @@ struct FirestoreAccountEraser: CloudAccountEraser, Sendable {
             .limit(to: 1)
             .getDocuments(source: .server)
         return departureCleanups.metadata.hasPendingWrites || !departureCleanups.isEmpty
-    }
-
-    private func discoverBabyIds(in familyRef: DocumentReference) async throws -> [String] {
-        var ids = try await familyRef.collection("babies").getDocuments(source: .server)
-            .documents
-            .map(\.documentID)
-            .filter { !$0.isEmpty }
-        if let active = ActiveBaby.currentId, !ids.contains(active.uuidString) {
-            ids.append(active.uuidString)
-        }
-        return ids
-    }
-
-    private nonisolated func deleteBabyTree(
-        familyRef: DocumentReference,
-        familyId: String,
-        babyId: String,
-        ownerUID: String
-    ) async throws {
-        let babyRef = familyRef.collection("babies").document(babyId)
-        let subcollections = await MainActor.run { BabySyncService.allSubcollections }
-        try await BoundedConcurrency.forEach(subcollections) { subcollection in
-            try await deleteAllDocs(
-                in: babyRef.collection(subcollection),
-                subcollection: subcollection,
-                ownerUID: ownerUID
-            )
-        }
-        try await babyRef.collection("profile").document("info").delete()
-        try await babyRef.delete()
-        await MainActor.run {
-            SyncWatermarkStore().reset(family: familyId, baby: babyId)
-        }
-    }
-
-    private nonisolated func deleteLegacyFamilyTree(familyId: String, ownerUID: String) async throws {
-        let oldParent = Firestore.firestore().collection("babies").document(familyId)
-        let subcollections = await MainActor.run { BabySyncService.allSubcollections }
-        try await BoundedConcurrency.forEach(subcollections) { subcollection in
-            try await Self.performLegacyDeletion {
-                try await deleteAllDocs(
-                    in: oldParent.collection(subcollection),
-                    subcollection: subcollection,
-                    ownerUID: ownerUID
-                )
-            }
-        }
-        try await Self.performLegacyDeletion {
-            try await oldParent.collection("profile").document("info").delete()
-        }
-        try await Self.performLegacyDeletion {
-            try await oldParent.delete()
-        }
-    }
-
-    nonisolated static func performLegacyDeletion(
-        _ operation: @Sendable () async throws -> Void
-    ) async throws {
-        do {
-            try await operation()
-        } catch {
-            let nsError = error as NSError
-            guard nsError.domain == FirestoreErrorCode.errorDomain,
-                  nsError.code == FirestoreErrorCode.notFound.rawValue else {
-                throw error
-            }
-        }
-    }
-
-    nonisolated static func healthDataParentPaths(familyId: String, babyIds: [String]) -> [String] {
-        babyIds.map { "families/\(familyId)/babies/\($0)" } + ["babies/\(familyId)"]
-    }
-
-    nonisolated static func healthDataCollectionPaths(
-        parentPaths: [String],
-        includingDeletionMarkers: Bool
-    ) async -> [String] {
-        let allSubcollections = await MainActor.run { BabySyncService.allSubcollections }
-        let subcollections = includingDeletionMarkers
-            ? allSubcollections
-            : allSubcollections.filter { $0 != "deletions" }
-        return parentPaths.flatMap { parent in
-            subcollections.map { "\(parent)/\($0)" }
-        }
-    }
-
-    nonisolated static func healthDataDocumentPaths(parentPaths: [String]) -> [String] {
-        parentPaths.flatMap { [$0, "\($0)/profile/info"] }
-    }
-
-    private nonisolated func verifyHealthDataAbsent(
-        parentPaths: [String],
-        deletingUID: String,
-        authoredOnly: Bool
-    ) async throws {
-        let collectionPaths = await Self.healthDataCollectionPaths(
-            parentPaths: parentPaths,
-            includingDeletionMarkers: !authoredOnly
-        )
-        try await BoundedConcurrency.forEach(collectionPaths) { path in
-            let collection = Firestore.firestore().collection(path)
-            let subcollection = String(path.split(separator: "/").last ?? "")
-            let requiresAuthorScope = await MainActor.run {
-                BabySyncService.requiresAuthorScopedQuery(
-                    for: subcollection,
-                    authoredOnly: authoredOnly
-                )
-            }
-            let query: Query
-            if requiresAuthorScope {
-                query = collection.whereField("addedBy", isEqualTo: deletingUID)
-            } else {
-                query = collection
-            }
-            let snapshot = try await query.limit(to: 1).getDocuments(source: .server)
-            guard snapshot.isEmpty, !snapshot.metadata.hasPendingWrites else {
-                throw AuthError.accountDeletionPending
-            }
-        }
-
-        guard !authoredOnly else { return }
-        let documentPaths = Self.healthDataDocumentPaths(parentPaths: parentPaths)
-        try await BoundedConcurrency.forEach(documentPaths) { path in
-            let snapshot = try await Firestore.firestore().document(path).getDocument(source: .server)
-            guard !snapshot.exists, !snapshot.metadata.hasPendingWrites else {
-                throw AuthError.accountDeletionPending
-            }
-        }
-    }
-
-    private nonisolated func eraseAuthoredData(
-        under parent: DocumentReference,
-        uid: String
-    ) async throws {
-        let subcollections = await MainActor.run {
-            BabySyncService.allSubcollections.filter { $0 != "deletions" }
-        }
-        try await BoundedConcurrency.forEach(subcollections) { subcollection in
-            let documents = try await parent.collection(subcollection)
-                .whereField("addedBy", isEqualTo: uid)
-                .getDocuments(source: .server)
-                .documents
-            for start in stride(from: 0, to: documents.count, by: 400) {
-                let batch = Firestore.firestore().batch()
-                for document in documents[start..<min(start + 400, documents.count)] {
-                    let action = await MainActor.run {
-                        AccountErasureGate.authoredDataAction(
-                            subcollection: subcollection,
-                            documentData: document.data(),
-                            deletingUid: uid
-                        )
-                    }
-                    switch action {
-                    case .delete:
-                        batch.deleteDocument(document.reference)
-                    case .anonymize:
-                        guard let update = await MainActor.run(body: {
-                            AccountErasureGate.authorAnonymizationUpdate(
-                                documentData: document.data(),
-                                deletingUid: uid
-                            )
-                        }) else { continue }
-                        batch.updateData(update, forDocument: document.reference)
-                    case nil:
-                        continue
-                    }
-                }
-                try await batch.commit()
-            }
-        }
-    }
-
-    /// `profile/info` carries `members: [{uid, role, name}]` written by
-    /// `BabySyncService.setupBabyProfile`. It is NOT in `BabySyncService.allSubcollections`,
-    /// so the scoped erase used to leave the departing parent's uid and display name in the
-    /// child's profile forever — visible to the remaining co-parent.
-    ///
-    /// Rewrites the array filtered rather than using `arrayRemove`: `arrayRemove` needs an
-    /// exact element match and `name` may have drifted since it was written.
-    ///
-    /// Rules: `families/{id}/babies/{babyId}/{subcollection}/{doc=**}` allows update for
-    /// `canManageFamilyRoster` — satisfied while the caller's member doc still exists, i.e.
-    /// before the exit batch commits. Only parents are ever written into `members`, so this
-    /// is gated on the caller's parent role.
-    private func eraseProfileMembership(under parent: DocumentReference, uid: String) async throws {
-        let ref = parent.collection("profile").document("info")
-        let snapshot = try await Self.readIgnoringMissingParent(ref)
-        guard let members = snapshot?.data()?["members"] as? [[String: Any]] else { return }
-        let remaining = members.filter { ($0["uid"] as? String) != uid }
-        guard remaining.count != members.count else { return }
-        try await ref.updateData(["members": remaining])
-    }
-
-    private func verifyProfileMembershipAbsent(parentPaths: [String], uid: String) async throws {
-        let db = Firestore.firestore()
-        for path in parentPaths {
-            let ref = db.document("\(path)/profile/info")
-            guard let snapshot = try await Self.readIgnoringMissingParent(ref) else { continue }
-            guard !snapshot.metadata.hasPendingWrites else {
-                throw AuthError.accountDeletionPending
-            }
-            let members = snapshot.data()?["members"] as? [[String: Any]] ?? []
-            guard members.allSatisfy({ ($0["uid"] as? String) != uid }) else {
-                throw AuthError.accountDeletionPending
-            }
-        }
-    }
-
-    /// The legacy `babies/{familyId}` tree may not exist at all; a missing parent must not
-    /// fail the erase.
-    private static func readIgnoringMissingParent(
-        _ ref: DocumentReference
-    ) async throws -> DocumentSnapshot? {
-        do {
-            let snapshot = try await ref.getDocument(source: .server)
-            return snapshot.exists ? snapshot : nil
-        } catch let error as NSError
-            where error.domain == FirestoreErrorCode.errorDomain
-            && error.code == FirestoreErrorCode.notFound.rawValue {
-            return nil
-        }
-    }
-
-    private nonisolated func deleteAllDocs(
-        in collection: CollectionReference,
-        subcollection: String,
-        ownerUID: String
-    ) async throws {
-        let requiresAuthorScope = await MainActor.run {
-            BabySyncService.requiresAuthorScopedQuery(for: subcollection)
-        }
-        let query: Query
-        if requiresAuthorScope {
-            query = collection.whereField("addedBy", isEqualTo: ownerUID)
-        } else {
-            query = collection
-        }
-        try await deleteAllDocs(in: query)
-    }
-
-    private nonisolated func deleteAllDocs(in query: Query) async throws {
-        let db = Firestore.firestore()
-        let pageSize = 400
-        var pages = 0
-
-        while true {
-            try Task.checkCancellation()
-            let docs = try await query.limit(to: pageSize)
-                .getDocuments(source: .server)
-                .documents
-            guard !docs.isEmpty else { return }
-
-            let batch = db.batch()
-            for doc in docs {
-                batch.deleteDocument(doc.reference)
-            }
-            try await batch.commit()
-
-            guard docs.count == pageSize else { return }
-            pages += 1
-            guard pages < 250 else { throw AuthError.accountDeletionPending }
-        }
     }
 }
 

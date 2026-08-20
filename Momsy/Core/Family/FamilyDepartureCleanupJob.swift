@@ -2,6 +2,8 @@ import CryptoKit
 import Foundation
 
 enum FamilyDepartureCleanupJob {
+    static let accountDeletionKind = "accountDeletion"
+
     static func documentID(familyID: String, uid: String) -> String {
         let digest = SHA256.hash(data: Data("\(familyID)\0\(uid)".utf8))
         return digest.map { String(format: "%02x", $0) }.joined()

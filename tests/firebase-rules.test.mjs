@@ -463,6 +463,73 @@ test("a departure cleanup job is tied to the matching membership deletion", asyn
     await assertFails(nannyDb.doc(cleanupRef.path).delete());
 });
 
+test("account deletion cleanup can only accompany the caller's own membership deletion", async () => {
+    const legacyUid = "legacy-account-parent";
+    const legacyMemberId = "legacy-account-member";
+    await testEnv.withSecurityRulesDisabled(async (adminContext) => {
+        const admin = adminContext.firestore();
+        const seed = admin.batch();
+        seed.set(admin.doc(`users/${users.mom}`), { familyId });
+        seed.set(admin.doc(`users/${legacyUid}`), { familyId });
+        seed.set(admin.doc(`${familyPath}/members/${legacyMemberId}`), {
+            uid: legacyUid,
+            roleRaw: "Папа",
+        });
+        await seed.commit();
+    });
+
+    const dadDb = firestore(users.dad);
+    const forged = dadDb.batch();
+    forged.set(dadDb.doc("familyDepartureCleanups/forged-account-deletion"), {
+        familyId,
+        uid: users.nanny,
+        removedMemberId: users.nanny,
+        requestedAt: serverTimestamp(),
+        kind: "accountDeletion",
+    });
+    forged.delete(dadDb.doc(`${familyPath}/members/${users.nanny}`));
+    await assertFails(forged.commit());
+
+    const momDb = firestore(users.mom);
+    const unsupported = momDb.batch();
+    unsupported.set(momDb.doc("familyDepartureCleanups/unsupported-account-deletion"), {
+        familyId,
+        uid: users.mom,
+        removedMemberId: users.mom,
+        requestedAt: serverTimestamp(),
+        kind: "unexpected",
+    });
+    unsupported.delete(momDb.doc(`${familyPath}/members/${users.mom}`));
+    await assertFails(unsupported.commit());
+
+    const removal = momDb.batch();
+    removal.set(momDb.doc("familyDepartureCleanups/own-account-deletion"), {
+        familyId,
+        uid: users.mom,
+        removedMemberId: users.mom,
+        requestedAt: serverTimestamp(),
+        kind: "accountDeletion",
+    });
+    removal.delete(momDb.doc(`${familyPath}/members/${users.mom}`));
+    await assertSucceeds(removal.commit());
+
+    const legacyDb = firestore(legacyUid);
+    const legacyMembership = await assertSucceeds(
+        legacyDb.collection(`${familyPath}/members`).where("uid", "==", legacyUid).get()
+    );
+    assert.deepEqual(legacyMembership.docs.map((doc) => doc.id), [legacyMemberId]);
+    const legacyRemoval = legacyDb.batch();
+    legacyRemoval.set(legacyDb.doc("familyDepartureCleanups/legacy-account-deletion"), {
+        familyId,
+        uid: legacyUid,
+        removedMemberId: legacyMemberId,
+        requestedAt: serverTimestamp(),
+        kind: "accountDeletion",
+    });
+    legacyRemoval.delete(legacyDb.doc(`${familyPath}/members/${legacyMemberId}`));
+    await assertSucceeds(legacyRemoval.commit());
+});
+
 test("invite roles are immutable and replacement revokes the old code", async () => {
     const validExpiry = new Date(Date.now() + 23 * 60 * 60 * 1000);
     const invite = firestore(users.mom).doc(familyBInvitePath);

@@ -4,7 +4,11 @@ const { onDocumentDeleted, onDocumentWritten } = require("firebase-functions/v2/
 const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const { cleanupDeletedBaby } = require("./baby-deletion-cleanup");
-const { cleanupDepartedFamilyMember, cleanupJobID } = require("./family-departure-cleanup");
+const {
+    accountDeletionKind,
+    cleanupDepartedFamilyMember,
+    cleanupJobID,
+} = require("./family-departure-cleanup");
 const {
     dispatchSleepEnd,
     reconcileLiveActivityToken,
@@ -53,8 +57,13 @@ exports.cleanupDepartedFamilyMember = onDocumentDeleted({
         const jobRef = db.collection("familyDepartureCleanups").doc(
             cleanupJobID(event.params.familyId, departedUid)
         );
-        await db.runTransaction(async (transaction) => {
+        const kind = await db.runTransaction(async (transaction) => {
             const existing = await transaction.get(jobRef);
+            const requestedKind = existing.get("kind") === accountDeletionKind
+                && existing.get("uid") === departedUid
+                && existing.get("removedMemberId") === event.params.uid
+                ? accountDeletionKind
+                : undefined;
             const existingTime = existing.get("eventTime");
             const existingId = existing.get("eventId");
             const newerEventOwnsJob = existingTime instanceof Timestamp
@@ -76,8 +85,12 @@ exports.cleanupDepartedFamilyMember = onDocumentDeleted({
                     eventTime,
                 }, { merge: true });
             }
+            return requestedKind;
         });
-        await cleanupDepartedFamilyMember(db, event.params.familyId, departedUid);
+        await cleanupDepartedFamilyMember(db, event.params.familyId, departedUid, {
+            kind,
+            roleRaw: event.data?.get("roleRaw"),
+        });
         await db.runTransaction(async (transaction) => {
             const job = await transaction.get(jobRef);
             if (job.exists && job.get("eventId") === eventId) {

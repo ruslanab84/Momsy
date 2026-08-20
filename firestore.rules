@@ -382,12 +382,14 @@ service cloud.firestore {
       let familyId = request.resource.data.familyId;
       let uid = request.resource.data.uid;
       let removedMemberId = request.resource.data.removedMemberId;
+      let requestsAccountDeletion = 'kind' in request.resource.data;
       let memberPath = /databases/$(database)/documents/families/$(familyId)/members/$(removedMemberId);
+      let userPath = /databases/$(database)/documents/users/$(uid);
       return isSignedIn()
         && request.resource.data.keys()
           .hasAll(['familyId', 'uid', 'removedMemberId', 'requestedAt'])
         && request.resource.data.keys()
-          .hasOnly(['familyId', 'uid', 'removedMemberId', 'requestedAt'])
+          .hasOnly(['familyId', 'uid', 'removedMemberId', 'requestedAt', 'kind'])
         && familyId is string
         && uid is string
         && removedMemberId is string
@@ -398,7 +400,19 @@ service cloud.firestore {
           || ('uid' in get(memberPath).data && get(memberPath).data.uid == uid)
         )
         && !existsAfter(memberPath)
-        && (request.auth.uid == uid || canManageFamilyRoster(familyId));
+        && (
+          (
+            !requestsAccountDeletion
+            && (request.auth.uid == uid || canManageFamilyRoster(familyId))
+          )
+          || (
+            requestsAccountDeletion
+            && request.resource.data.kind == 'accountDeletion'
+            && request.auth.uid == uid
+            && exists(userPath)
+            && get(userPath).data.familyId == familyId
+          )
+        );
     }
 
     function userFamilyIdUnchanged() {
@@ -530,7 +544,10 @@ service cloud.firestore {
       // with a valid, unexpired invite code for this family; the family creator may
       // write their own doc during setup; Mom/Dad members may manage the roster.
       match /members/{memberId} {
-        allow read:   if belongsToFamily(familyId);
+        allow read:   if belongsToFamily(familyId)
+                      || (isSignedIn()
+                          && 'uid' in resource.data
+                          && resource.data.uid == request.auth.uid);
         allow create: if isSelfCreatorBootstrap(familyId, memberId)
                       || (memberId == request.auth.uid
                           && request.resource.data.uid == request.auth.uid
@@ -546,7 +563,10 @@ service cloud.firestore {
                             && memberRoleUnchanged())
                       );
         allow delete: if canManageFamilyRoster(familyId)
-                      || (isSignedIn() && memberId == request.auth.uid);
+                      || (isSignedIn()
+                          && (memberId == request.auth.uid
+                              || ('uid' in resource.data
+                                  && resource.data.uid == request.auth.uid)));
       }
 
       // Trusted cleanup retains this tombstone after deleting the parent document,

@@ -3,7 +3,11 @@ const { after, before, beforeEach, test } = require("node:test");
 const { deleteApp, initializeApp } = require("firebase-admin/app");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { cleanupDeletedBaby } = require("../baby-deletion-cleanup");
-const { cleanupDepartedFamilyMember, cleanupJobID } = require("../family-departure-cleanup");
+const {
+    accountDeletionKind,
+    cleanupDepartedFamilyMember,
+    cleanupJobID,
+} = require("../family-departure-cleanup");
 const { dispatchSleepEnd, reconcileLiveActivityToken } = require("../live-activity");
 const {
     bindEntitlementToCurrentFamily,
@@ -193,6 +197,113 @@ test("family switch cleanup preserves the new family route", async () => {
     });
     assert.equal((await userRef.get()).get("familyId"), newFamilyId);
     assert.equal((await cleanupRef.get()).exists, false);
+});
+
+test("account deletion removes the user but preserves a co-parent's family data", async () => {
+    const familyId = "shared-account-deletion";
+    const uid = "departing-account";
+    const familyRef = db.collection("families").doc(familyId);
+    const memberRef = familyRef.collection("members").doc("legacy-account-member");
+    const sharedLog = familyRef.collection("babies").doc("baby-a")
+        .collection("feedingLogs").doc("shared-log");
+    const privateLog = familyRef.collection("babies").doc("baby-a")
+        .collection("momSleepLogs").doc("private-log");
+    const cleanupRef = db.collection("familyDepartureCleanups").doc(cleanupJobID(familyId, uid));
+    const seed = db.batch();
+
+    seed.set(familyRef, { createdBy: uid, bootstrapComplete: true });
+    seed.set(memberRef, { uid, roleRaw: "Папа" });
+    seed.set(familyRef.collection("members").doc("remaining-parent"), {
+        uid: "remaining-parent", roleRaw: "Мама",
+    });
+    seed.set(db.collection("users").doc(uid), { familyId, displayName: "Dad" });
+    seed.set(sharedLog, { addedBy: uid, addedByName: "Dad" });
+    seed.set(privateLog, { addedBy: uid, addedByName: "Dad" });
+    seed.set(db.collection("invites").doc("owned-other-family"), {
+        familyId: "other-family", createdBy: uid,
+    });
+    await seed.commit();
+
+    const removal = db.batch();
+    removal.set(cleanupRef, {
+        familyId,
+        uid,
+        removedMemberId: memberRef.id,
+        kind: accountDeletionKind,
+    });
+    removal.delete(memberRef);
+    await removal.commit();
+
+    await waitFor(async () => !(await cleanupRef.get()).exists);
+    assert.equal((await db.collection("users").doc(uid).get()).exists, false);
+    assert.equal((await sharedLog.get()).get("addedBy"), "");
+    assert.equal((await privateLog.get()).exists, false);
+    assert.equal((await familyRef.collection("members").doc("remaining-parent").get()).exists, true);
+    assert.equal((await db.collection("invites").doc("owned-other-family").get()).exists, false);
+});
+
+test("last-parent account deletion recursively clears current, legacy, and future data", async () => {
+    const familyId = "last-parent-account-deletion";
+    const uid = "last-parent";
+    const familyRef = db.collection("families").doc(familyId);
+    const memberRef = familyRef.collection("members").doc(uid);
+    const babyRef = familyRef.collection("babies").doc("baby-a");
+    const legacyRef = db.collection("babies").doc(familyId);
+    const cleanupRef = db.collection("familyDepartureCleanups").doc(cleanupJobID(familyId, uid));
+    const seed = db.batch();
+
+    seed.set(familyRef, { createdBy: uid, bootstrapComplete: true, name: "Private family" });
+    seed.set(memberRef, { uid, roleRaw: "Папа" });
+    seed.set(familyRef.collection("members").doc("nanny"), { uid: "nanny", roleRaw: "Няня" });
+    seed.set(familyRef.collection("members").doc("9517DE8C-7EE9-4D88-962B-8D609F48CB48"), {
+        id: "9517DE8C-7EE9-4D88-962B-8D609F48CB48", roleRaw: "Мама", isMe: false,
+    });
+    seed.set(db.collection("users").doc(uid), { familyId, displayName: "Dad" });
+    seed.set(babyRef, { id: "baby-a", name: "Baby" });
+    for (let index = 0; index < 401; index += 1) {
+        seed.set(babyRef.collection("feedingLogs").doc(`log-${index}`), { addedBy: uid });
+    }
+    seed.set(babyRef.collection("futureLogs").doc("future"), { private: true });
+    seed.set(legacyRef, { id: familyId });
+    seed.set(legacyRef.collection("futureLogs").doc("legacy-future"), { private: true });
+    seed.set(familyRef.collection("devicePushTokens").doc("device"), { ownerUid: uid });
+    seed.set(db.collection("invites").doc("old-family-by-other"), {
+        familyId, createdBy: "nanny",
+    });
+    seed.set(db.collection("invites").doc("owned-other-family"), {
+        familyId: "other-family", createdBy: uid,
+    });
+    await seed.commit();
+
+    const removal = db.batch();
+    removal.set(cleanupRef, {
+        familyId,
+        uid,
+        removedMemberId: uid,
+        kind: accountDeletionKind,
+    });
+    removal.delete(memberRef);
+    await removal.commit();
+
+    await waitFor(async () => !(await cleanupRef.get()).exists, 30_000);
+    const [family, user, baby, future, legacy, legacyFuture, nanny, token, familyInvite, ownedInvite] =
+        await Promise.all([
+            familyRef.get(),
+            db.collection("users").doc(uid).get(),
+            babyRef.get(),
+            babyRef.collection("futureLogs").doc("future").get(),
+            legacyRef.get(),
+            legacyRef.collection("futureLogs").doc("legacy-future").get(),
+            familyRef.collection("members").doc("nanny").get(),
+            familyRef.collection("devicePushTokens").doc("device").get(),
+            db.collection("invites").doc("old-family-by-other").get(),
+            db.collection("invites").doc("owned-other-family").get(),
+        ]);
+
+    assert.deepEqual(family.data(), { createdBy: "", bootstrapComplete: true });
+    for (const document of [user, baby, future, legacy, legacyFuture, nanny, token, familyInvite, ownedInvite]) {
+        assert.equal(document.exists, false);
+    }
 });
 
 test("a verified subscription is shared with the family and removed on departure", async () => {

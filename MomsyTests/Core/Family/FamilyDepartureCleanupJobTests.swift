@@ -2,6 +2,11 @@ import Testing
 @testable import Momsy
 
 struct FamilyDepartureCleanupJobTests {
+    @Test("account deletion uses the trusted cleanup kind")
+    func accountDeletionKind() {
+        #expect(FamilyDepartureCleanupJob.accountDeletionKind == "accountDeletion")
+    }
+
     @Test("cleanup job IDs are stable and unambiguous")
     func stableDocumentID() {
         let first = FamilyDepartureCleanupJob.documentID(familyID: "family_a", uid: "member")

@@ -4,8 +4,9 @@ const { detachFamilyEntitlements } = require("./subscription-entitlement");
 
 const privateWellbeingSubcollections = new Set(["momSleepLogs", "waterIntakeLogs"]);
 const batchLimit = 400;
+const accountDeletionKind = "accountDeletion";
 
-async function cleanupDepartedFamilyMember(db, familyId, uid) {
+async function cleanupDepartedFamilyMember(db, familyId, uid, options = {}) {
     if (!familyId || !uid || uid.length > 128 || familyId.includes("/") || uid.includes("/")) {
         throw new Error("Invalid family departure cleanup scope");
     }
@@ -13,6 +14,13 @@ async function cleanupDepartedFamilyMember(db, familyId, uid) {
     const familyRef = db.collection("families").doc(familyId);
     const memberRef = familyRef.collection("members").doc(uid);
     if (await activeMembershipExists(memberRef, uid)) {
+        return;
+    }
+    const accountDeletion = options.kind === accountDeletionKind;
+    if (accountDeletion
+        && isParentRole(options.roleRaw)
+        && !await remainingParentExists(familyRef)) {
+        await cleanupAbandonedFamily(db, familyRef, memberRef, familyId, uid);
         return;
     }
     const babyRefs = await familyRef.collection("babies").listDocuments();
@@ -24,9 +32,11 @@ async function cleanupDepartedFamilyMember(db, familyId, uid) {
     }
     await scrubOwnedPushTokens(familyRef, memberRef, uid);
 
-    await scrubInvites(db, memberRef, familyId, uid);
     await clearFamilyCreator(familyRef, memberRef, uid);
-    await clearStaleUserRoute(db.collection("users").doc(uid), memberRef, familyId, uid);
+    const userCleanup = await clearStaleUserRoute(
+        db.collection("users").doc(uid), memberRef, familyId, uid, accountDeletion
+    );
+    await scrubInvites(db, memberRef, familyId, uid, userCleanup === "deleted");
     await detachFamilyEntitlements(db, familyId, uid);
     await verifyCleanup(
         parentRefs,
@@ -34,7 +44,8 @@ async function cleanupDepartedFamilyMember(db, familyId, uid) {
         db.collection("users").doc(uid),
         memberRef,
         familyId,
-        uid
+        uid,
+        userCleanup === "deleted"
     );
 }
 
@@ -115,7 +126,7 @@ async function scrubOwnedPushTokens(familyRef, memberRef, uid) {
     }
 }
 
-async function scrubInvites(db, memberRef, familyId, uid) {
+async function scrubInvites(db, memberRef, familyId, uid, allFamilies = false) {
     let cursor;
     while (true) {
         let query = db.collection("invites")
@@ -129,21 +140,21 @@ async function scrubInvites(db, memberRef, familyId, uid) {
         if (invites.empty) {
             return;
         }
-        const oldFamilyInvites = invites.docs.filter(
-            (invite) => invite.get("familyId") === familyId
+        const deletableInvites = invites.docs.filter(
+            (invite) => allFamilies || invite.get("familyId") === familyId
         );
-        if (oldFamilyInvites.length > 0) {
+        if (deletableInvites.length > 0) {
             const stillDeparted = await db.runTransaction(async (transaction) => {
                 if (await activeMembershipExistsInTransaction(transaction, memberRef, uid)) {
                     return false;
                 }
                 const currentInvites = await transaction.getAll(
-                    ...oldFamilyInvites.map((invite) => invite.ref)
+                    ...deletableInvites.map((invite) => invite.ref)
                 );
                 for (const invite of currentInvites) {
                     if (invite.exists
-                        && invite.get("familyId") === familyId
-                        && invite.get("createdBy") === uid) {
+                        && invite.get("createdBy") === uid
+                        && (allFamilies || invite.get("familyId") === familyId)) {
                         transaction.delete(invite.ref);
                     }
                 }
@@ -169,19 +180,31 @@ async function clearFamilyCreator(familyRef, memberRef, uid) {
     });
 }
 
-async function clearStaleUserRoute(userRef, memberRef, familyId, uid) {
-    await userRef.firestore.runTransaction(async (transaction) => {
+async function clearStaleUserRoute(userRef, memberRef, familyId, uid, deleteAccount = false) {
+    return userRef.firestore.runTransaction(async (transaction) => {
         if (await activeMembershipExistsInTransaction(transaction, memberRef, uid)) {
-            return;
+            return "active";
         }
         const user = await transaction.get(userRef);
-        if (user.exists && user.get("familyId") === familyId) {
-            transaction.update(userRef, { familyId: FieldValue.delete() });
+        if (!user.exists) {
+            return deleteAccount ? "deleted" : "absent";
         }
+        if (deleteAccount
+            && (user.get("familyId") === familyId || user.get("familyId") === undefined)) {
+            transaction.delete(userRef);
+            return "deleted";
+        }
+        if (user.get("familyId") === familyId) {
+            transaction.update(userRef, { familyId: FieldValue.delete() });
+            return "cleared";
+        }
+        return "unchanged";
     });
 }
 
-async function verifyCleanup(parentRefs, familyRef, userRef, memberRef, familyId, uid) {
+async function verifyCleanup(
+    parentRefs, familyRef, userRef, memberRef, familyId, uid, accountDeleted = false
+) {
     if (await activeMembershipExists(memberRef, uid)) {
         return;
     }
@@ -208,12 +231,14 @@ async function verifyCleanup(parentRefs, familyRef, userRef, memberRef, familyId
         }
     }
 
-    const [family, user, oldFamilyInviteExists] = await Promise.all([
+    const [family, user, inviteExists] = await Promise.all([
         familyRef.get(),
         userRef.get(),
-        hasOldFamilyInvite(familyRef.firestore, familyId, uid),
+        accountDeleted
+            ? hasOwnedInvite(familyRef.firestore, uid)
+            : hasOldFamilyInvite(familyRef.firestore, familyId, uid),
     ]);
-    if (oldFamilyInviteExists) {
+    if (inviteExists) {
         throw new Error("Family departure cleanup verification failed: invite remains");
     }
     if (family.exists && family.get("createdBy") === uid) {
@@ -222,6 +247,9 @@ async function verifyCleanup(parentRefs, familyRef, userRef, memberRef, familyId
     if (user.exists && user.get("familyId") === familyId) {
         throw new Error("Family departure cleanup verification failed: stale route remains");
     }
+    if (accountDeleted && user.exists) {
+        throw new Error("Family departure cleanup verification failed: user remains");
+    }
     const pushTokens = await Promise.all([
         familyRef.collection("liveActivityTokens").where("ownerUid", "==", uid).limit(1).get(),
         familyRef.collection("devicePushTokens").where("ownerUid", "==", uid).limit(1).get(),
@@ -229,6 +257,74 @@ async function verifyCleanup(parentRefs, familyRef, userRef, memberRef, familyId
     if (pushTokens.some((snapshot) => !snapshot.empty)) {
         throw new Error("Family departure cleanup verification failed: push token remains");
     }
+}
+
+async function cleanupAbandonedFamily(db, familyRef, memberRef, familyId, uid) {
+    const userRef = db.collection("users").doc(uid);
+    const userCleanup = await clearStaleUserRoute(
+        userRef, memberRef, familyId, uid, true
+    );
+    await detachFamilyEntitlements(db, familyId, uid);
+
+    await Promise.all(
+        (await familyRef.listCollections()).map((collection) => db.recursiveDelete(collection))
+    );
+    await db.recursiveDelete(db.collection("babies").doc(familyId));
+    await deleteMatchingDocuments(db.collection("invites").where("familyId", "==", familyId));
+    await scrubInvites(db, memberRef, familyId, uid, userCleanup === "deleted");
+    await familyRef.set({ createdBy: "", bootstrapComplete: true });
+
+    const liveCollections = (await familyRef.listCollections()).filter(
+        (collection) => collection.id !== "deletedBabies"
+    );
+    const [legacy, user, ownedInvite] = await Promise.all([
+        db.collection("babies").doc(familyId).get(),
+        userRef.get(),
+        hasOwnedInvite(db, uid),
+    ]);
+    const remainingDocuments = await Promise.all(
+        liveCollections.map((collection) => collection.limit(1).get())
+    );
+    if (legacy.exists
+        || remainingDocuments.some((snapshot) => !snapshot.empty)
+        || (userCleanup === "deleted" && user.exists)
+        || (userCleanup === "deleted" && ownedInvite)) {
+        throw new Error("Account deletion cleanup verification failed");
+    }
+}
+
+async function deleteMatchingDocuments(query) {
+    while (true) {
+        const snapshot = await query.limit(batchLimit).get();
+        if (snapshot.empty) return;
+        const batch = snapshot.docs[0].ref.firestore.batch();
+        for (const document of snapshot.docs) batch.delete(document.ref);
+        await batch.commit();
+    }
+}
+
+async function remainingParentExists(familyRef) {
+    const members = await familyRef.collection("members").get();
+    return members.docs.some((member) =>
+        !isLegacyPlaceholder(member) && isParentRole(member.get("roleRaw"))
+    );
+}
+
+function isLegacyPlaceholder(member) {
+    const data = member.data();
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        .test(member.id)
+        && data.id === member.id
+        && (data.uid === undefined || data.uid === member.id)
+        && data.joinedAt === undefined
+        && data.inviteCode === undefined
+        && data.isMe !== true;
+}
+
+function isParentRole(roleRaw) {
+    if (typeof roleRaw !== "string") return false;
+    return new Set(["мама", "mom", "mama", "mother", "parent", "папа", "dad", "papa", "father"])
+        .has(roleRaw.trim().toLowerCase());
 }
 
 async function activeMembershipExists(memberRef, uid) {
@@ -271,8 +367,12 @@ async function hasOldFamilyInvite(db, familyId, uid) {
     }
 }
 
+async function hasOwnedInvite(db, uid) {
+    return !(await db.collection("invites").where("createdBy", "==", uid).limit(1).get()).empty;
+}
+
 function cleanupJobID(familyId, uid) {
     return createHash("sha256").update(familyId).update("\0").update(uid).digest("hex");
 }
 
-module.exports = { cleanupDepartedFamilyMember, cleanupJobID };
+module.exports = { accountDeletionKind, cleanupDepartedFamilyMember, cleanupJobID };
