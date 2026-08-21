@@ -191,11 +191,20 @@ final class SubscriptionManager: ObservableObject {
         ))
     }
 
+    /// Ownership is decided by what the PURCHASE is bound to, never by who happens to be
+    /// signed in. Deciding by the session granted a deleted account's still-active Apple
+    /// subscription to the signed-out device that follows the erasure, and denied legacy
+    /// unbound purchases to their rightful owner. Mirrors `matchesAppAccountToken` in
+    /// `functions/subscription-entitlement.js`.
     nonisolated static func shouldGrantPersonalEntitlement(
         transactionAccountToken: UUID?,
         currentUID: String?
     ) -> Bool {
-        guard let currentUID else { return true }
+        // Bought without a Momsy account (local-only build, or cloud sync declined), so it
+        // belongs to the device rather than to any one account.
+        guard let transactionAccountToken else { return true }
+        // Bound to an account no longer present on this device — its owner must sign in.
+        guard let currentUID else { return false }
         return transactionAccountToken == appAccountToken(for: currentUID)
     }
 

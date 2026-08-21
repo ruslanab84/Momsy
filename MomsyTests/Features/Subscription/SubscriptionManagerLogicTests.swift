@@ -85,7 +85,21 @@ struct SubscriptionManagerLogicTests {
             transactionAccountToken: token,
             currentUID: "uid-b"
         ))
+    }
+
+    /// The deleted account's Apple subscription stays active, and the device is signed out
+    /// once the erasure completes. Granting it there let a re-onboarded user skip the paywall.
+    @Test func aDeletedAccountsBoundEntitlementDoesNotSurviveSignOut() {
         #expect(!SubscriptionManager.shouldGrantPersonalEntitlement(
+            transactionAccountToken: SubscriptionManager.appAccountToken(for: "deleted-uid"),
+            currentUID: nil
+        ))
+    }
+
+    /// A purchase made without a Momsy account belongs to the device, matching the backend's
+    /// `matchesAppAccountToken`. Denying it locked out local-only and cloud-sync-declined buyers.
+    @Test func unboundPurchasesGrantPremiumRegardlessOfSession() {
+        #expect(SubscriptionManager.shouldGrantPersonalEntitlement(
             transactionAccountToken: nil,
             currentUID: "uid-a"
         ))
