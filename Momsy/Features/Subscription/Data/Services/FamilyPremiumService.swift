@@ -5,6 +5,7 @@ import Foundation
 
 @MainActor
 protocol FamilyPremiumServicing: AnyObject {
+    var currentUID: String? { get }
     var currentContext: SubscriptionSyncContext? { get }
     func observe(familyId: String?, onChange: @escaping @MainActor (Bool) -> Void)
     func stopObserving()
@@ -19,6 +20,11 @@ final class FamilyPremiumService: FamilyPremiumServicing {
 
     deinit {
         listener?.remove()
+    }
+
+    var currentUID: String? {
+        guard FirebaseBootstrapper.isConfigured else { return nil }
+        return Auth.auth().currentUser?.uid
     }
 
     var currentContext: SubscriptionSyncContext? {

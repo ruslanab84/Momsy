@@ -1,4 +1,5 @@
 import Combine
+import CryptoKit
 import Foundation
 import StoreKit
 
@@ -80,14 +81,20 @@ final class SubscriptionManager: ObservableObject {
         guard let product = loaded.first(where: { $0.id == selectedProductID }) else {
             throw SubscriptionError.productUnavailable
         }
-        let result = try await service.purchase(product)
+        let accountToken = familyPremiumService.currentUID.map {
+            Self.appAccountToken(for: $0)
+        }
+        let result = try await service.purchase(product, appAccountToken: accountToken)
         try Self.throwIfPending(result)
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
             let grantsPremium = Self.grantsPremium(productID: tx.productID)
                 && tx.revocationDate == nil
-            if grantsPremium {
+            if grantsPremium && Self.shouldGrantPersonalEntitlement(
+                transactionAccountToken: tx.appAccountToken,
+                currentUID: familyPremiumService.currentUID
+            ) {
                 personalPremium = true
                 updateAccessState()
             }
@@ -96,7 +103,7 @@ final class SubscriptionManager: ObservableObject {
                 signedTransaction: verification.jwsRepresentation
             )
             await refreshAccess()
-            return grantsPremium
+            return isPremium
         case .pending, .userCancelled:
             return false
         @unknown default:
@@ -168,6 +175,28 @@ final class SubscriptionManager: ObservableObject {
         environment: AppStore.Environment
     ) -> Bool {
         environment != .xcode
+    }
+
+    nonisolated static func appAccountToken(for uid: String) -> UUID {
+        var bytes = Array(
+            SHA256.hash(data: Data("RuslanAbd.Momsy:\(uid)".utf8)).prefix(16)
+        )
+        bytes[6] = (bytes[6] & 0x0f) | 0x50
+        bytes[8] = (bytes[8] & 0x3f) | 0x80
+        return UUID(uuid: (
+            bytes[0], bytes[1], bytes[2], bytes[3],
+            bytes[4], bytes[5], bytes[6], bytes[7],
+            bytes[8], bytes[9], bytes[10], bytes[11],
+            bytes[12], bytes[13], bytes[14], bytes[15]
+        ))
+    }
+
+    nonisolated static func shouldGrantPersonalEntitlement(
+        transactionAccountToken: UUID?,
+        currentUID: String?
+    ) -> Bool {
+        guard let currentUID else { return true }
+        return transactionAccountToken == appAccountToken(for: currentUID)
     }
 
     nonisolated static func throwIfPending(_ result: Product.PurchaseResult) throws {
@@ -249,11 +278,17 @@ final class SubscriptionManager: ObservableObject {
     private func updatePersonalStatus(synchronizeFamilyEntitlement: Bool) async {
         var hasSub = false
         var pending: PendingSubscriptionSync?
+        let currentUID = familyPremiumService.currentUID
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result,
                Self.grantsPremium(productID: tx.productID),
                tx.revocationDate == nil {
-                hasSub = true
+                if Self.shouldGrantPersonalEntitlement(
+                    transactionAccountToken: tx.appAccountToken,
+                    currentUID: currentUID
+                ) {
+                    hasSub = true
+                }
                 if synchronizeFamilyEntitlement,
                    let candidate = pendingSync(
                     transaction: tx,

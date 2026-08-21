@@ -20,6 +20,29 @@ const bundleID = "RuslanAbd.Momsy";
 const appleAppID = defineInt("APPLE_APP_ID", { default: 6784641297 });
 const appleRootCAHash = "63343abfb89a6a03ebb57e9b3f5fa7be7c4f5c756f3017b3a8c488c3653e9179";
 
+function appAccountTokenFor(uid) {
+    const bytes = Buffer.from(createHash("sha256")
+        .update(`${bundleID}:${uid}`)
+        .digest()
+        .subarray(0, 16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x50;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = bytes.toString("hex");
+    return [
+        hex.slice(0, 8),
+        hex.slice(8, 12),
+        hex.slice(12, 16),
+        hex.slice(16, 20),
+        hex.slice(20),
+    ].join("-");
+}
+
+function matchesAppAccountToken(entitlement, uid) {
+    if (entitlement.appAccountToken == null) return true;
+    return typeof entitlement.appAccountToken === "string"
+        && entitlement.appAccountToken.toLowerCase() === appAccountTokenFor(uid);
+}
+
 class EntitlementError extends Error {
     constructor(code, httpStatus, publicMessage, retryable = false, cause) {
         super(publicMessage, cause ? { cause } : undefined);
@@ -58,6 +81,7 @@ function premiumEntitlementFor(transaction, now = new Date()) {
         isKnownProduct,
         originalTransactionId,
         productId: transaction.productId,
+        appAccountToken: transaction.appAccountToken ?? null,
         expiresDate,
         revocationDate: transaction.revocationDate == null ? null : Number(transaction.revocationDate),
     };
@@ -204,6 +228,13 @@ function updateFamilyPremium(transaction, db, familyId, entitlements, replacemen
 }
 
 async function bindEntitlementToCurrentFamily(db, uid, entitlement, expectedFamilyId) {
+    if (!matchesAppAccountToken(entitlement, uid)) {
+        throw new EntitlementError(
+            "owned_by_another_account",
+            409,
+            "This subscription belongs to another Momsy account."
+        );
+    }
     const entitlementRef = db.collection("subscriptionEntitlements")
         .doc(entitlement.originalTransactionId);
     await db.runTransaction(async (transaction) => {
@@ -304,11 +335,13 @@ async function detachFamilyEntitlements(db, familyId, uid) {
 
 module.exports = {
     EntitlementError,
+    appAccountTokenFor,
     appleRootCAHash,
     authorizeRequest,
     bindEntitlementToCurrentFamily,
     detachFamilyEntitlements,
     loadAppleRootCAs,
+    matchesAppAccountToken,
     premiumEntitlementFor,
     updateFamilyPremium,
     verificationError,

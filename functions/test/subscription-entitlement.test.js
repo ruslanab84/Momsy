@@ -8,12 +8,35 @@ const {
     VerificationStatus,
 } = require("@apple/app-store-server-library");
 const {
+    appAccountTokenFor,
     appleRootCAHash,
+    bindEntitlementToCurrentFamily,
     loadAppleRootCAs,
+    matchesAppAccountToken,
     premiumEntitlementFor,
     updateFamilyPremium,
     verifyTransaction,
 } = require("../subscription-entitlement");
+
+test("app account tokens are stable and reject another Momsy account", () => {
+    const token = appAccountTokenFor("uid-a");
+
+    assert.equal(token, "65cf791d-d515-559f-9e18-4d4491df6c9d");
+    assert.equal(matchesAppAccountToken({ appAccountToken: token }, "uid-a"), true);
+    assert.equal(matchesAppAccountToken({ appAccountToken: token }, "uid-b"), false);
+    assert.equal(matchesAppAccountToken({ appAccountToken: null }, "uid-b"), true);
+});
+
+test("a signed account token cannot bind to another Firebase user", async () => {
+    await assert.rejects(
+        bindEntitlementToCurrentFamily({}, "uid-b", {
+            appAccountToken: appAccountTokenFor("uid-a"),
+        }),
+        (error) => error.code === "owned_by_another_account"
+            && error.httpStatus === 409
+            && error.retryable === false
+    );
+});
 
 test("the bundled Apple root has the pinned identity and self-signature", () => {
     const [certificate] = loadAppleRootCAs();

@@ -67,6 +67,34 @@ struct SubscriptionManagerLogicTests {
         #expect(SubscriptionManager.shouldSynchronizeFamilyEntitlement(environment: .production))
     }
 
+    @Test func appAccountTokenIsStableAndAccountScoped() {
+        let token = SubscriptionManager.appAccountToken(for: "uid-a")
+
+        #expect(token.uuidString.lowercased() == "65cf791d-d515-559f-9e18-4d4491df6c9d")
+        #expect(token != SubscriptionManager.appAccountToken(for: "uid-b"))
+    }
+
+    @Test func authenticatedPersonalEntitlementRequiresMatchingAccountToken() {
+        let token = SubscriptionManager.appAccountToken(for: "uid-a")
+
+        #expect(SubscriptionManager.shouldGrantPersonalEntitlement(
+            transactionAccountToken: token,
+            currentUID: "uid-a"
+        ))
+        #expect(!SubscriptionManager.shouldGrantPersonalEntitlement(
+            transactionAccountToken: token,
+            currentUID: "uid-b"
+        ))
+        #expect(!SubscriptionManager.shouldGrantPersonalEntitlement(
+            transactionAccountToken: nil,
+            currentUID: "uid-a"
+        ))
+        #expect(SubscriptionManager.shouldGrantPersonalEntitlement(
+            transactionAccountToken: nil,
+            currentUID: nil
+        ))
+    }
+
     @Test func savingsPercentTypicalCase() {
         // 4.99 * 12 = 59.88; annual 39.99 → ~33%
         let percent = SubscriptionManager.savingsPercent(monthlyPrice: 4.99, annualPrice: 39.99)
@@ -238,7 +266,10 @@ struct SubscriptionManagerLogicTests {
             return []
         }
 
-        func purchase(_ product: Product) async throws -> Product.PurchaseResult {
+        func purchase(
+            _ product: Product,
+            appAccountToken: UUID?
+        ) async throws -> Product.PurchaseResult {
             Issue.record("Purchase must not start without a loaded product")
             throw SubscriptionError.productUnavailable
         }
@@ -247,6 +278,7 @@ struct SubscriptionManagerLogicTests {
     }
 
     private final class NoFamilyPremiumService: FamilyPremiumServicing {
+        var currentUID: String? { nil }
         var currentContext: SubscriptionSyncContext? { nil }
 
         func observe(familyId: String?, onChange: @escaping @MainActor (Bool) -> Void) {
