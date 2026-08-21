@@ -1,14 +1,30 @@
 import SwiftUI
 import StoreKit
+import Combine
 
 struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
     let onComplete: () -> Void
 
     @EnvironmentObject private var loc: LocalizationManager
-    @State private var purchaseAlert: PurchaseAlert?
+    @StateObject private var actionHandler: PaywallActionHandler
 
     private var lm: L10n { loc.strings }
+
+    init(
+        subscriptionManager: SubscriptionManager,
+        pendingInviteStore: PendingFamilyInviteStore,
+        joinFamily: @escaping @MainActor (String) async throws -> Void,
+        onComplete: @escaping () -> Void
+    ) {
+        self.subscriptionManager = subscriptionManager
+        self.onComplete = onComplete
+        _actionHandler = StateObject(wrappedValue: PaywallActionHandler(
+            pendingInviteStore: pendingInviteStore,
+            subscribe: { try await subscriptionManager.purchase() },
+            joinFamily: joinFamily
+        ))
+    }
 
     var body: some View {
         ZStack {
@@ -36,6 +52,9 @@ struct PaywallView: View {
                     .frame(minHeight: proxy.size.height)
                 }
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .pendingFamilyInviteDidChange)) { _ in
+            actionHandler.refreshInviteContext()
         }
     }
 
@@ -118,21 +137,15 @@ struct PaywallView: View {
     private var ctaSection: some View {
         VStack(spacing: 12) {
             Button {
-                purchaseAlert = nil
                 Task {
-                    do {
-                        let purchaseSucceeded = try await subscriptionManager.purchase()
-                        if purchaseSucceeded { onComplete() }
-                    } catch {
-                        purchaseAlert = localizedPurchaseAlert(error)
-                    }
+                    if await actionHandler.perform() { onComplete() }
                 }
             } label: {
                 ZStack {
-                    if subscriptionManager.isLoading {
+                    if actionHandler.isLoading || subscriptionManager.isLoading {
                         ProgressView().tint(.bbLilacDeep)
                     } else {
-                        Text(subscriptionManager.trialEligible ? lm.startTrial : lm.subscribeCTA)
+                        Text(primaryButtonTitle)
                             .font(.headline)
                             .foregroundColor(.bbLilacDeep)
                     }
@@ -142,10 +155,11 @@ struct PaywallView: View {
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .disabled(subscriptionManager.isLoading)
+            .disabled(actionHandler.isLoading || subscriptionManager.isLoading)
             .padding(.horizontal, 24)
 
-            if let purchaseAlert {
+            if let error = actionHandler.error {
+                let purchaseAlert = localizedPurchaseAlert(error)
                 Text("\(purchaseAlert.title): \(purchaseAlert.message)")
                     .font(.caption)
                     .foregroundColor(.white)
@@ -174,6 +188,11 @@ struct PaywallView: View {
             }
         }
         .padding(.bottom, 44)
+    }
+
+    private var primaryButtonTitle: String {
+        if actionHandler.hasPendingInvite { return lm.joinFamilyTitle }
+        return subscriptionManager.trialEligible ? lm.startTrial : lm.subscribeCTA
     }
 
     private var renewalDisclosureText: String {
@@ -275,6 +294,11 @@ struct PaywallView: View {
             return PurchaseAlert(title: lm.purchasePendingTitle, message: lm.purchasePendingMessage)
         case SubscriptionError.failedVerification:
             return PurchaseAlert(title: lm.purchaseErrorTitle, message: lm.purchaseVerificationFailed)
+        case let localized as LocalizedError:
+            return PurchaseAlert(
+                title: lm.purchaseErrorTitle,
+                message: localized.errorDescription ?? error.localizedDescription
+            )
         default:
             return PurchaseAlert(title: lm.purchaseErrorTitle, message: lm.purchaseProductUnavailable)
         }
@@ -296,4 +320,52 @@ private struct PurchaseAlert: Identifiable {
     let id = UUID()
     let title: String
     let message: String
+}
+
+@MainActor
+final class PaywallActionHandler: ObservableObject {
+    @Published private(set) var pendingInviteCode: String?
+    @Published private(set) var isLoading = false
+    @Published private(set) var error: Error?
+
+    var hasPendingInvite: Bool { pendingInviteCode != nil }
+
+    private let pendingInviteStore: PendingFamilyInviteStore
+    private let subscribe: @MainActor () async throws -> Bool
+    private let joinFamily: @MainActor (String) async throws -> Void
+
+    init(
+        pendingInviteStore: PendingFamilyInviteStore,
+        subscribe: @escaping @MainActor () async throws -> Bool,
+        joinFamily: @escaping @MainActor (String) async throws -> Void
+    ) {
+        self.pendingInviteStore = pendingInviteStore
+        self.subscribe = subscribe
+        self.joinFamily = joinFamily
+        pendingInviteCode = pendingInviteStore.load()
+    }
+
+    func refreshInviteContext() {
+        pendingInviteCode = pendingInviteStore.load()
+    }
+
+    func perform() async -> Bool {
+        guard !isLoading else { return false }
+        isLoading = true
+        error = nil
+        defer { isLoading = false }
+
+        do {
+            if let pendingInviteCode {
+                try await joinFamily(pendingInviteCode)
+                self.pendingInviteCode = nil
+                pendingInviteStore.clear()
+                return true
+            }
+            return try await subscribe()
+        } catch {
+            self.error = error
+            return false
+        }
+    }
 }

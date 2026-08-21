@@ -85,6 +85,76 @@ struct FamilyPremiumAccessTests {
         #expect(FamilyPremiumService.resolvedAccess(active, isFromCache: true, now: now) == true)
     }
 
+    @Test("an authentication change clears the persisted paywall decision")
+    func authenticationChangeClearsPaywallCache() throws {
+        let suiteName = "FamilyPremiumAccessTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(true, forKey: "paywallShown")
+
+        PaywallPresentationState.resetForAuthenticationChange(defaults: defaults)
+
+        #expect(defaults.object(forKey: "paywallShown") == nil)
+    }
+
+    @Test("a resolved missing entitlement invalidates the previous paywall decision")
+    func missingEntitlementForcesPaywallRouting() {
+        #expect(PaywallPresentationState.shouldResetDecision(for: .requiresPurchase))
+        #expect(!PaywallPresentationState.shouldResetDecision(for: .resolving))
+        #expect(!PaywallPresentationState.shouldResetDecision(for: .premium))
+    }
+
+    @Test("a pending invite makes the paywall CTA join instead of purchasing")
+    @MainActor
+    func pendingInviteUsesFamilyJoin() async throws {
+        let suiteName = "FamilyPremiumAccessTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = PendingFamilyInviteStore(defaults: defaults)
+        store.save("momsy://join?code=MOMSY-ABCD12")
+        var joinedCodes: [String] = []
+        var purchaseCount = 0
+        let handler = PaywallActionHandler(
+            pendingInviteStore: store,
+            subscribe: {
+                purchaseCount += 1
+                return true
+            },
+            joinFamily: { joinedCodes.append($0) }
+        )
+
+        let completed = await handler.perform()
+
+        #expect(completed)
+        #expect(joinedCodes == ["MOMSY-ABCD12"])
+        #expect(purchaseCount == 0)
+        #expect(store.load() == nil)
+        #expect(!handler.isLoading)
+        #expect(handler.error == nil)
+    }
+
+    @Test("a failed family join remains retryable")
+    @MainActor
+    func failedFamilyJoinResetsLoadingAndKeepsInvite() async throws {
+        let suiteName = "FamilyPremiumAccessTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = PendingFamilyInviteStore(defaults: defaults)
+        store.save("MOMSY-ABCD12")
+        let handler = PaywallActionHandler(
+            pendingInviteStore: store,
+            subscribe: { true },
+            joinFamily: { _ in throw TestJoinError() }
+        )
+
+        let completed = await handler.perform()
+
+        #expect(!completed)
+        #expect(!handler.isLoading)
+        #expect(handler.error is TestJoinError)
+        #expect(store.load() == "MOMSY-ABCD12")
+    }
+
     private func validEntitlement(expiresAt: Date) -> [String: Any] {
         [
             "active": true,
@@ -93,4 +163,6 @@ struct FamilyPremiumAccessTests {
             "expiresAt": Timestamp(date: expiresAt),
         ]
     }
+
+    private struct TestJoinError: Error {}
 }

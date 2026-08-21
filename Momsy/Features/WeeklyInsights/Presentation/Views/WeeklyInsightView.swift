@@ -6,8 +6,10 @@ struct WeeklyInsightView: View {
     @EnvironmentObject private var lm: LocalizationManager
     @EnvironmentObject private var appState: AppState
     @State private var showPaywall = false
+    private let container: AppContainer
 
     init(container: AppContainer) {
+        self.container = container
         _vm = StateObject(wrappedValue: container.makeWeeklyInsightViewModel())
         _subscriptionManager = ObservedObject(wrappedValue: container.subscriptionManager)
     }
@@ -41,15 +43,22 @@ struct WeeklyInsightView: View {
             await vm.load(isPremium: subscriptionManager.isPremium, babyId: appState.activeBabyId)
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView(subscriptionManager: subscriptionManager, onComplete: {
-                showPaywall = false
-                Task {
-                    await vm.load(
-                        isPremium: subscriptionManager.isPremium,
-                        babyId: appState.activeBabyId
-                    )
+            PaywallView(
+                subscriptionManager: subscriptionManager,
+                pendingInviteStore: PendingFamilyInviteStore(),
+                joinFamily: { code in
+                    try await container.joinFamilyFromOnboarding(code: code)
+                },
+                onComplete: {
+                    showPaywall = false
+                    Task {
+                        await vm.load(
+                            isPremium: subscriptionManager.isPremium,
+                            babyId: appState.activeBabyId
+                        )
+                    }
                 }
-            })
+            )
         }
     }
 

@@ -28,6 +28,10 @@ struct ContentView: View {
             } else if premiumAccessState == .requiresPurchase && !paywallShown {
                 PaywallView(
                     subscriptionManager: container.subscriptionManager,
+                    pendingInviteStore: PendingFamilyInviteStore(),
+                    joinFamily: { code in
+                        try await container.joinFamilyFromOnboarding(code: code)
+                    },
                     onComplete: {
                         withAnimation(.easeInOut(duration: 0.35)) { paywallShown = true }
                     }
@@ -40,7 +44,12 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: onboardingDone)
-        .onReceive(container.subscriptionManager.$accessState) { premiumAccessState = $0 }
+        .onReceive(container.subscriptionManager.$accessState) { accessState in
+            if PaywallPresentationState.shouldResetDecision(for: accessState) {
+                paywallShown = false
+            }
+            premiumAccessState = accessState
+        }
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
             Task { await container.subscriptionManager.refreshAccess() }
@@ -71,7 +80,7 @@ struct ContentView: View {
         .withLocalization(LocalizationManager.shared)
 }
 
-private enum PaywallPresentationState {
+enum PaywallPresentationState {
     private static let onboardingDoneKey = "onboardingDone"
     private static let paywallShownKey = "paywallShown"
     private static let legacyMigrationKey = "paywallShownExistingUserMigrationDone"
@@ -83,5 +92,13 @@ private enum PaywallPresentationState {
         let completedOnboarding = defaults.bool(forKey: onboardingDoneKey)
         let hasPaywallDecision = defaults.object(forKey: paywallShownKey) != nil
         return completedOnboarding && !hasPaywallDecision
+    }
+
+    static func resetForAuthenticationChange(defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: paywallShownKey)
+    }
+
+    static func shouldResetDecision(for accessState: PremiumAccessState) -> Bool {
+        accessState == .requiresPurchase
     }
 }

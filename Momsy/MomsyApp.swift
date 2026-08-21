@@ -141,6 +141,9 @@ private struct MomsyRootView: View {
                     await setupNotificationsOnLaunch(appState: appState)
                 }
                 guard !deletionStillPending else { return }
+                if onboardingDone, let code = PendingFamilyInviteStore().load() {
+                    await joinFamilyFromLink(code: code)
+                }
                 switch CloudSyncConsent.status() {
                 case .granted:
                     await startCloudServices()
@@ -159,8 +162,8 @@ private struct MomsyRootView: View {
                     return
                 }
                 guard let code = JoinDeeplink.code(from: url) else { return }
+                PendingFamilyInviteStore().save(code)
                 guard onboardingDone else {
-                    PendingFamilyInviteStore().save(code)
                     return
                 }
                 Task { @MainActor in
@@ -303,6 +306,7 @@ private struct MomsyRootView: View {
             }
             try await FamilyManager.shared.joinFamily(code: code, uid: uid, force: force)
             RemotePushTokenService.shared.republishApplicationTokenIfAvailable()
+            PendingFamilyInviteStore().clear()
             pendingAuthenticatedJoinCode = nil
             pendingAuthenticatedJoinForce = false
             joinAlert = .success
@@ -313,6 +317,9 @@ private struct MomsyRootView: View {
             showJoinAuthSheet = true
         } catch FamilyError.wouldAbandonExistingFamily where !force {
             joinAlert = .confirm(code)
+        } catch FamilyError.invalidOrExpiredCode {
+            PendingFamilyInviteStore().clear()
+            joinAlert = .failure
         } catch {
             joinAlert = .failure
         }

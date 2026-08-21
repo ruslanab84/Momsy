@@ -135,9 +135,28 @@ final class SubscriptionManager: ObservableObject {
     func eraseLocalSubscriptionState() {
         familyPremiumService.stopObserving()
         syncQueue.clear()
+        personalPremium = false
         familyPremium = false
+        isResolvingPersonal = false
         isResolvingFamily = false
         updateAccessState()
+    }
+
+    func authSessionDidChange(isAuthenticated: Bool) async {
+        familyPremiumService.stopObserving()
+        personalPremium = false
+        familyPremium = false
+        observedFamilyID = nil
+        hasObservedFamily = false
+        isResolvingPersonal = isAuthenticated
+        isResolvingFamily = isAuthenticated
+            && FirebaseBootstrapper.isConfigured
+            && CloudSyncConsent.isGranted()
+        updateAccessState()
+
+        guard isAuthenticated else { return }
+        await updatePersonalStatus(synchronizeFamilyEntitlement: true)
+        syncQueue.scheduleFlush()
     }
 
     /// Any product in the app's catalog grants premium.

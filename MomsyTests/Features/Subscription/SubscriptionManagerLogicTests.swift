@@ -5,6 +5,19 @@ import Testing
 
 @MainActor
 struct SubscriptionManagerLogicTests {
+    @Test func signOutClearsInMemoryPremiumAccess() async {
+        let manager = SubscriptionManager(
+            service: StalledSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+
+        await manager.authSessionDidChange(isAuthenticated: false)
+
+        #expect(!manager.isPremium)
+        #expect(manager.accessState == .requiresPurchase)
+    }
+
     @Test func stalledProductLoadingLeavesPaywallRetryable() async {
         let service = StalledSubscriptionService()
         let manager = SubscriptionManager(

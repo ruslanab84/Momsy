@@ -1,4 +1,6 @@
 import Foundation
+import Combine
+import FirebaseAuth
 import SwiftUI
 import SwiftData
 
@@ -100,6 +102,7 @@ final class AppContainer {
     // MARK: — Cross-device sync wiring
 
     private var familyJoinObserver: NSObjectProtocol?
+    private var authSessionObserver: AnyCancellable?
 
     convenience init() {
         do {
@@ -116,7 +119,24 @@ final class AppContainer {
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
         observeFamilyJoin()
+        observeAuthSession()
         wireMembershipRevocation()
+    }
+
+    private func observeAuthSession() {
+        authSessionObserver = authManager.$firebaseUser
+            .map { $0?.uid }
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] uid in
+                Task { @MainActor in
+                    guard let self else { return }
+                    PaywallPresentationState.resetForAuthenticationChange()
+                    await self.subscriptionManager.authSessionDidChange(
+                        isAuthenticated: uid != nil
+                    )
+                }
+            }
     }
 
     /// Revocation purge hook. Runs synchronously-before the revoked family is
