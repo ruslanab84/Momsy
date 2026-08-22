@@ -109,6 +109,24 @@ struct SubscriptionManagerLogicTests {
         ))
     }
 
+    @Test func anExpiredSubscriptionIsNoLongerEntitled() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        #expect(!SubscriptionManager.isUnexpired(
+            expirationDate: now.addingTimeInterval(-1),
+            now: now
+        ))
+        #expect(SubscriptionManager.isUnexpired(
+            expirationDate: now.addingTimeInterval(1),
+            now: now
+        ))
+    }
+
+    /// A lapsed subscription reports no `revocationDate`, so a grant guard reading only that
+    /// field would resurrect premium from a replayed stale transaction.
+    @Test func lifetimePurchasesNeverExpire() {
+        #expect(SubscriptionManager.isUnexpired(expirationDate: nil))
+    }
+
     @Test func savingsPercentTypicalCase() {
         // 4.99 * 12 = 59.88; annual 39.99 → ~33%
         let percent = SubscriptionManager.savingsPercent(monthlyPrice: 4.99, annualPrice: 39.99)

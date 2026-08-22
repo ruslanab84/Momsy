@@ -97,8 +97,10 @@ final class SubscriptionManager: ObservableObject {
             grantIfEntitled(tx)
             // The App Store accepted the purchase but it stays bound to a different Momsy
             // account, so it grants nothing here. Never fail silently: a dead Subscribe
-            // button is the worst outcome of the binding rule above.
-            guard isPremium else { throw SubscriptionError.ownedByAnotherAccount }
+            // button is the worst outcome of the binding rule above. Checks the personal
+            // entitlement, not `isPremium` — an existing family grant would otherwise mask
+            // a purchase that bought this account nothing.
+            guard personalPremium else { throw SubscriptionError.ownedByAnotherAccount }
             return true
         case .pending, .userCancelled:
             return false
@@ -204,6 +206,12 @@ final class SubscriptionManager: ObservableObject {
         return transactionAccountToken == appAccountToken(for: currentUID)
     }
 
+    /// A nil `expirationDate` means a non-consumable / lifetime purchase, which never lapses.
+    nonisolated static func isUnexpired(expirationDate: Date?, now: Date = Date()) -> Bool {
+        guard let expirationDate else { return true }
+        return expirationDate > now
+    }
+
     nonisolated static func throwIfPending(_ result: Product.PurchaseResult) throws {
         if case .pending = result { throw SubscriptionError.pendingApproval }
     }
@@ -280,14 +288,17 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
-    /// A verified, unrevoked transaction seen on this device grants access. Only ever adds:
-    /// `updatePersonalStatus` stays the sole downgrade path, so expiry and revocation still
-    /// work, while a `Transaction.currentEntitlements` scan that has not caught up with a
-    /// just-completed purchase can no longer erase it.
+    /// A verified, live transaction seen on this device grants access. Only ever adds, so a
+    /// `Transaction.currentEntitlements` scan that has not caught up with a just-completed
+    /// purchase can no longer erase it. Both call sites run this AFTER `updatePersonalStatus`,
+    /// so it must re-check every not-entitled state itself — StoreKit signals revocation via
+    /// `revocationDate` but lapse/expiry only via `expirationDate`, and reading just the
+    /// former would let a replayed stale transaction resurrect an expired subscription.
     private func grantIfEntitled(_ transaction: Transaction) {
         guard !personalPremium,
               Self.grantsPremium(productID: transaction.productID),
               transaction.revocationDate == nil,
+              Self.isUnexpired(expirationDate: transaction.expirationDate),
               Self.shouldGrantPersonalEntitlement(
                 transactionAccountToken: transaction.appAccountToken,
                 currentUID: familyPremiumService.currentUID
