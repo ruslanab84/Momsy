@@ -89,21 +89,17 @@ final class SubscriptionManager: ObservableObject {
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
-            let grantsPremium = Self.grantsPremium(productID: tx.productID)
-                && tx.revocationDate == nil
-            if grantsPremium && Self.shouldGrantPersonalEntitlement(
-                transactionAccountToken: tx.appAccountToken,
-                currentUID: familyPremiumService.currentUID
-            ) {
-                personalPremium = true
-                updateAccessState()
-            }
             await persistAndFinishIfNeeded(
                 transaction: tx,
                 signedTransaction: verification.jwsRepresentation
             )
             await refreshAccess()
-            return isPremium
+            grantIfEntitled(tx)
+            // The App Store accepted the purchase but it stays bound to a different Momsy
+            // account, so it grants nothing here. Never fail silently: a dead Subscribe
+            // button is the worst outcome of the binding rule above.
+            guard isPremium else { throw SubscriptionError.ownedByAnotherAccount }
+            return true
         case .pending, .userCancelled:
             return false
         @unknown default:
@@ -284,6 +280,23 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// A verified, unrevoked transaction seen on this device grants access. Only ever adds:
+    /// `updatePersonalStatus` stays the sole downgrade path, so expiry and revocation still
+    /// work, while a `Transaction.currentEntitlements` scan that has not caught up with a
+    /// just-completed purchase can no longer erase it.
+    private func grantIfEntitled(_ transaction: Transaction) {
+        guard !personalPremium,
+              Self.grantsPremium(productID: transaction.productID),
+              transaction.revocationDate == nil,
+              Self.shouldGrantPersonalEntitlement(
+                transactionAccountToken: transaction.appAccountToken,
+                currentUID: familyPremiumService.currentUID
+              )
+        else { return }
+        personalPremium = true
+        updateAccessState()
+    }
+
     private func updatePersonalStatus(synchronizeFamilyEntitlement: Bool) async {
         var hasSub = false
         var pending: PendingSubscriptionSync?
@@ -381,6 +394,7 @@ final class SubscriptionManager: ObservableObject {
     ) async {
         guard case .verified(let transaction) = result else { return }
         await updatePersonalStatus(synchronizeFamilyEntitlement: false)
+        grantIfEntitled(transaction)
         await persistAndFinishIfNeeded(
             transaction: transaction,
             signedTransaction: result.jwsRepresentation
@@ -426,4 +440,5 @@ enum SubscriptionError: Error, Equatable {
     case failedVerification
     case pendingApproval
     case productUnavailable
+    case ownedByAnotherAccount
 }

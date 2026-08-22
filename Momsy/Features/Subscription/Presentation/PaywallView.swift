@@ -294,6 +294,11 @@ struct PaywallView: View {
             return PurchaseAlert(title: lm.purchasePendingTitle, message: lm.purchasePendingMessage)
         case SubscriptionError.failedVerification:
             return PurchaseAlert(title: lm.purchaseErrorTitle, message: lm.purchaseVerificationFailed)
+        case SubscriptionError.ownedByAnotherAccount:
+            return PurchaseAlert(
+                title: lm.purchaseErrorTitle,
+                message: lm.purchaseOwnedByAnotherAccount
+            )
         case let localized as LocalizedError:
             return PurchaseAlert(
                 title: lm.purchaseErrorTitle,

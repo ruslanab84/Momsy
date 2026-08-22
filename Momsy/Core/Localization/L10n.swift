@@ -1708,6 +1708,15 @@ struct L10n {
           "A subscrição não está disponível de momento. Verifique a ligação e tente novamente.",
           "订阅当前不可用，请检查网络后重试。")
     }
+    var purchaseOwnedByAnotherAccount: String {
+        s("This subscription belongs to a different Momsy account. Sign in with that account, or tap Restore Purchases.",
+          "Эта подписка привязана к другому аккаунту Momsy. Войдите в него или нажмите «Восстановить покупки».",
+          "Dieses Abo gehört zu einem anderen Momsy-Konto. Melde dich damit an oder tippe auf „Käufe wiederherstellen“.",
+          "Esta suscripción pertenece a otra cuenta de Momsy. Inicia sesión con ella o toca «Restaurar compras».",
+          "Cet abonnement appartient à un autre compte Momsy. Connectez-vous avec ce compte ou touchez « Restaurer les achats ».",
+          "Esta subscrição pertence a outra conta Momsy. Inicie sessão com essa conta ou toque em «Restaurar compras».",
+          "此订阅属于另一个 Momsy 账户。请使用该账户登录，或点按“恢复购买”。")
+    }
     var restorePurchases: String   { s("Restore Purchases",
                                        "Восстановить покупки",
                                        "Käufe wiederherstellen",
