@@ -106,12 +106,12 @@ final class SubscriptionManager: ObservableObject {
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
+            await refreshAccess()
+            grantIfEntitled(tx)
             await persistAndFinishIfNeeded(
                 transaction: tx,
                 signedTransaction: verification.jwsRepresentation
             )
-            await refreshAccess()
-            grantIfEntitled(tx)
             // The App Store accepted the purchase but it stays bound to a different Momsy
             // account, so it grants nothing here. Never fail silently: a dead Subscribe
             // button is the worst outcome of the binding rule above. Checks the personal
@@ -126,11 +126,11 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
-    func restore() async {
+    func restore() async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        try? await service.restorePurchases()
+        try await service.restorePurchases()
         await refreshAccess()
     }
 
@@ -233,6 +233,14 @@ final class SubscriptionManager: ObservableObject {
         if case .pending = result { throw SubscriptionError.pendingApproval }
     }
 
+    nonisolated static func resolvedProductID(
+        selectedProductID: String,
+        availableProductIDs: [String]
+    ) -> String? {
+        if availableProductIDs.contains(selectedProductID) { return selectedProductID }
+        return ProductID.all.first(where: availableProductIDs.contains)
+    }
+
     /// Percentage saved on annual vs paying monthly for a year. Nil when annual
     /// isn't cheaper or inputs are invalid.
     nonisolated static func savingsPercent(monthlyPrice: Decimal, annualPrice: Decimal) -> Int? {
@@ -299,6 +307,12 @@ final class SubscriptionManager: ObservableObject {
 
     private func adopt(_ loaded: [Product]) {
         products = loaded
+        if let productID = Self.resolvedProductID(
+            selectedProductID: selectedProductID,
+            availableProductIDs: loaded.map(\.id)
+        ) {
+            selectedProductID = productID
+        }
         guard let subscription = loaded.first?.subscription else { return }
         Task { [weak self] in
             self?.trialEligible = await subscription.isEligibleForIntroOffer

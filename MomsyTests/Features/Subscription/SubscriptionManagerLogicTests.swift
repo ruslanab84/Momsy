@@ -66,6 +66,30 @@ struct SubscriptionManagerLogicTests {
         }
     }
 
+    @Test func unavailableSelectedProductFallsBackToLoadedCatalog() {
+        #expect(SubscriptionManager.resolvedProductID(
+            selectedProductID: ProductID.annual,
+            availableProductIDs: [ProductID.monthly]
+        ) == ProductID.monthly)
+        #expect(SubscriptionManager.resolvedProductID(
+            selectedProductID: ProductID.annual,
+            availableProductIDs: ProductID.all
+        ) == ProductID.annual)
+    }
+
+    @Test func restorePropagatesStoreKitFailure() async {
+        let manager = SubscriptionManager(
+            service: RestoreFailingSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+
+        await #expect(throws: TestRestoreError.self) {
+            try await manager.restore()
+        }
+        #expect(!manager.isLoading)
+    }
+
     @Test func monthlyGrantsPremium() {
         #expect(SubscriptionManager.grantsPremium(productID: ProductID.monthly))
     }
@@ -303,6 +327,7 @@ struct SubscriptionManagerLogicTests {
     }
 
     private struct TestSyncError: Error {}
+    private struct TestRestoreError: Error {}
 
     private final class StalledSubscriptionService: SubscriptionServicing {
         private(set) var fetchCount = 0
@@ -343,6 +368,22 @@ struct SubscriptionManagerLogicTests {
         }
 
         func restorePurchases() async throws {}
+    }
+
+    private struct RestoreFailingSubscriptionService: SubscriptionServicing {
+        func fetchProducts(ids: [String]) async throws -> [Product] { [] }
+
+        func purchase(
+            _ product: Product,
+            appAccountToken: UUID?
+        ) async throws -> Product.PurchaseResult {
+            Issue.record("Purchase must not start while testing restore")
+            throw SubscriptionError.productUnavailable
+        }
+
+        func restorePurchases() async throws {
+            throw TestRestoreError()
+        }
     }
 
     private final class NoFamilyPremiumService: FamilyPremiumServicing {

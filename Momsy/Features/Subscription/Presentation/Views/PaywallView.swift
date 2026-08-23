@@ -8,6 +8,7 @@ struct PaywallView: View {
 
     @EnvironmentObject private var loc: LocalizationManager
     @StateObject private var actionHandler: PaywallActionHandler
+    @State private var restoreError: Error?
 
     private var lm: L10n { loc.strings }
 
@@ -167,6 +168,7 @@ struct PaywallView: View {
         VStack(spacing: 12) {
             Button {
                 Task {
+                    restoreError = nil
                     if await actionHandler.perform() { onComplete() }
                 }
             } label: {
@@ -191,7 +193,7 @@ struct PaywallView: View {
             )
             .padding(.horizontal, 24)
 
-            if let error = actionHandler.error {
+            if let error = restoreError ?? actionHandler.error {
                 let purchaseAlert = localizedPurchaseAlert(error)
                 Text("\(purchaseAlert.title): \(purchaseAlert.message)")
                     .font(.caption)
@@ -210,8 +212,13 @@ struct PaywallView: View {
 
             Button {
                 Task {
-                    await subscriptionManager.restore()
-                    if subscriptionManager.isPremium { onComplete() }
+                    restoreError = nil
+                    do {
+                        try await subscriptionManager.restore()
+                        if subscriptionManager.isPremium { onComplete() }
+                    } catch {
+                        restoreError = error
+                    }
                 }
             } label: {
                 Text(lm.restorePurchases)
