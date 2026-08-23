@@ -4,6 +4,7 @@ enum AppLegalLinks {
     static let privacyPolicyURL = URL(string: "https://ruslanab84.github.io/-momsy-site/")
     static let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
     static let feedbackEmail = "momsy.app.support@gmail.com"
+    static let manageSubscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")
 
     /// Source of the growth tables in `WHOGrowthStandards.swift`, surfaced in the
     /// tracking chart's methodology sheet so the WHO attribution is verifiable.

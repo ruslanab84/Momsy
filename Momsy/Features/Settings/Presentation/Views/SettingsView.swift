@@ -1,6 +1,5 @@
 import SwiftUI
 import FirebaseAuth
-import StoreKit
 
 struct SettingsView: View {
     @StateObject private var vm: SettingsViewModel
@@ -19,7 +18,6 @@ struct SettingsView: View {
 
     @State private var showDeleteConfirm = false
     @State private var showAuthSheet = false
-    @State private var showManageSubscriptions = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -73,7 +71,6 @@ struct SettingsView: View {
                 }
             }
         }
-        .manageSubscriptionsSheet(isPresented: $showManageSubscriptions)
         .confirmationDialog(
             deletionConfirmationText,
             isPresented: $showDeleteConfirm,
@@ -83,7 +80,7 @@ struct SettingsView: View {
                 Task { await vm.requestAccountDeletion() }
             }
             Button(lm.strings.manageSubscriptions) {
-                showManageSubscriptions = true
+                openManageSubscriptions()
             }
             Button(lm.strings.cancel, role: .cancel) {}
         }
@@ -421,6 +418,11 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 infoRow(icon: "info.circle.fill",  bg: .bbSky,    title: lm.strings.version,       value: "\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"))")
                 Divider().opacity(0.2).padding(.leading, 60)
+                Button(action: openManageSubscriptions) {
+                    chevronRow(icon: "creditcard.fill", bg: .bbRose, title: lm.strings.manageSubscriptions)
+                }
+                .buttonStyle(.plain)
+                Divider().opacity(0.2).padding(.leading, 60)
                 Button(action: openPrivacyPolicy) {
                     chevronRow(icon: "lock.shield.fill", bg: .bbMint,  title: lm.strings.privacy)
                 }
@@ -482,6 +484,11 @@ struct SettingsView: View {
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)
         }
+    }
+
+    private func openManageSubscriptions() {
+        guard let manageSubscriptionsURL = AppLegalLinks.manageSubscriptionsURL else { return }
+        openURL(manageSubscriptionsURL)
     }
 
     private func openPrivacyPolicy() {

@@ -12,4 +12,10 @@ struct AppLegalLinksTests {
         let isNumericID = AppLegalLinks.appStoreID.allSatisfy { $0.isNumber }
         #expect(isNumericID)
     }
+
+    @Test func manageSubscriptionsURLPointsAtAppStoreSubscriptions() {
+        let url = AppLegalLinks.manageSubscriptionsURL
+        #expect(url != nil)
+        #expect(url?.absoluteString == "https://apps.apple.com/account/subscriptions")
+    }
 }
