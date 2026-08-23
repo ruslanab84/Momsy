@@ -244,13 +244,15 @@ final class DeleteAccountUseCase {
             // Keep the marker and authenticated session until the local wipe is durable.
             // Otherwise a SwiftData failure would strand health data with no safe retry.
             pendingStore.clearPending()
+            // Marked BEFORE the attempt: the app dying mid-delete must still leave the
+            // Auth record to the retry, or it survives forever with nothing tracking it.
+            pendingAuthStore.markPending(uid: uid)
             do {
                 try await auth.deleteAccount(expectedUID: uid)
                 pendingAuthStore.clearPending()
             } catch {
-                // Hand the Auth record to the non-blocking retry. Surfacing the error
+                // The marker stays for the non-blocking retry. Surfacing the error
                 // still lets Settings offer reauthentication in this session.
-                pendingAuthStore.markPending(uid: uid)
                 authError = error
             }
         }
@@ -377,11 +379,12 @@ final class AccountDeletionRecovery {
         }
         // The cloud and device are both clean, so reusing this uid cannot restore old data.
         pendingStore.clearPending()
+        pendingAuthStore.markPending(uid: currentUid)
         do {
             try await auth.deleteAccount(expectedUID: currentUid)
             pendingAuthStore.clearPending()
         } catch {
-            pendingAuthStore.markPending(uid: currentUid)
+            // The marker stays; a later launch retries.
         }
         return .continueDeletion
     }

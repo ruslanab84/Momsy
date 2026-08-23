@@ -85,11 +85,14 @@ private final class MockAuth: AccountAuthProtocol {
     var deleteCount = 0
     var signOutCount = 0
     var expectedUIDs: [String] = []
+    /// Observes state at the exact moment the Auth record is being deleted.
+    var onDelete: (@MainActor () -> Void)?
 
     init(uid: String?) { currentUID = uid }
 
     func deleteAccount(expectedUID: String) async throws {
         deleteCount += 1
+        onDelete?()
         expectedUIDs.append(expectedUID)
         guard currentUID == expectedUID else { throw AuthError.accountDeletionPending }
         if let deleteError { throw deleteError }
@@ -223,6 +226,18 @@ struct DeleteAccountTests {
         #expect(pending.pendingUid == nil)
         #expect(authPending.pendingUid == "user-1")
         #expect(wipes() == 1)
+    }
+
+    @Test("marks the Auth retry BEFORE deleting, so a crash mid-delete still leaves a marker")
+    func marksAuthRetryBeforeDeletingTheAccount() async throws {
+        let (uc, _, auth, _, authPending, _, _) = makeUseCase()
+        var markedWhileDeleting: String?
+        auth.onDelete = { markedWhileDeleting = authPending.pendingUid }
+
+        try await uc.execute()
+
+        #expect(markedWhileDeleting == "user-1")
+        #expect(authPending.pendingUid == nil)
     }
 
     @Test("never deletes a different Auth account if the session changes during cloud erase")
@@ -625,6 +640,24 @@ struct AccountDeletionRecoveryTests {
 
         #expect(pending.pendingUid == nil)
         #expect(authPending.pendingUid == "abc")
+    }
+
+    @Test("recovery also marks the Auth retry BEFORE deleting the account")
+    func recoveryMarksAuthRetryBeforeDeletingTheAccount() async {
+        let authPending = MockPendingAuthStore()
+        let auth = MockAuth(uid: "abc")
+        var markedWhileDeleting: String?
+        auth.onDelete = { markedWhileDeleting = authPending.pendingUid }
+        let rec = AccountDeletionRecovery(
+            cloudEraser: MockCloudEraser(calls: .init()), auth: auth,
+            pendingStore: MockPendingStore(pendingUid: "abc", familyId: "fam-1"),
+            pendingAuthStore: authPending,
+            suppressedRestoreStore: MockSuppressedRestoreStore(), eraseLocal: {}, accountIsInUse: { false })
+
+        await rec.runIfNeeded()
+
+        #expect(markedWhileDeleting == "abc")
+        #expect(authPending.pendingUid == nil)
     }
 
     @Test("re-runs the erase against the RECORDED family, never a re-resolved one")
