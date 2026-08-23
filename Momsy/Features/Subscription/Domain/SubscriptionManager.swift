@@ -9,6 +9,8 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var accessState: PremiumAccessState = .resolving
     @Published private(set) var isLoading = false
     @Published private(set) var products: [Product] = []
+    @Published private(set) var isLoadingProducts = false
+    @Published private(set) var productLoadFailed = false
     @Published private(set) var trialEligible = false
     @Published var selectedProductID = ProductID.annual
 
@@ -60,7 +62,7 @@ final class SubscriptionManager: ObservableObject {
         }
         bootstrapTask = Task { [weak self] in
             guard let self else { return }
-            _ = try? await loadProductsIfNeeded()
+            await loadProducts()
             await refreshAccess()
             syncQueue.scheduleFlush()
         }
@@ -70,6 +72,21 @@ final class SubscriptionManager: ObservableObject {
         listenerTask?.cancel()
         bootstrapTask?.cancel()
         familyIDObserver?.cancel()
+    }
+
+    /// Retryable entry point for the paywall. The catalog fetch runs exactly once per
+    /// process otherwise — a launch-time failure would leave every later paywall with no
+    /// prices at all. Tracks its own flag rather than `isLoading`, which gates `purchase()`.
+    func loadProducts() async {
+        guard products.isEmpty, !isLoadingProducts else { return }
+        isLoadingProducts = true
+        defer { isLoadingProducts = false }
+        do {
+            _ = try await loadProductsIfNeeded()
+            productLoadFailed = false
+        } catch {
+            productLoadFailed = true
+        }
     }
 
     func purchase() async throws -> Bool {

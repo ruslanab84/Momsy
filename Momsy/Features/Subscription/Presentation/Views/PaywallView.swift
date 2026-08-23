@@ -53,6 +53,7 @@ struct PaywallView: View {
                 }
             }
         }
+        .task { await subscriptionManager.loadProducts() }
         .onReceive(NotificationCenter.default.publisher(for: .pendingFamilyInviteDidChange)) { _ in
             actionHandler.refreshInviteContext()
         }
@@ -114,6 +115,13 @@ struct PaywallView: View {
 
     private var planSelector: some View {
         VStack(spacing: 10) {
+            if subscriptionManager.isLoadingProducts {
+                ProgressView()
+                    .tint(.white)
+                    .frame(height: 120)
+            } else if subscriptionManager.productLoadFailed {
+                priceUnavailableNotice
+            }
             if let annual = subscriptionManager.annualProduct {
                 planCard(
                     product: annual,
@@ -132,6 +140,27 @@ struct PaywallView: View {
             }
         }
         .padding(.horizontal, 24)
+    }
+
+    private var priceUnavailableNotice: some View {
+        VStack(spacing: 10) {
+            Text(lm.purchaseProductUnavailable)
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+
+            Button {
+                Task { await subscriptionManager.loadProducts() }
+            } label: {
+                Text(lm.retry)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 22)
+                    .padding(.vertical, 9)
+                    .overlay(Capsule().stroke(Color.white.opacity(0.6), lineWidth: 1))
+            }
+        }
+        .padding(.vertical, 8)
     }
 
     private var ctaSection: some View {
@@ -155,7 +184,11 @@ struct PaywallView: View {
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .disabled(actionHandler.isLoading || subscriptionManager.isLoading)
+            .disabled(
+                actionHandler.isLoading
+                    || subscriptionManager.isLoading
+                    || (subscriptionManager.products.isEmpty && !actionHandler.hasPendingInvite)
+            )
             .padding(.horizontal, 24)
 
             if let error = actionHandler.error {

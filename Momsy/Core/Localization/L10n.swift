@@ -1536,6 +1536,13 @@ struct L10n {
     var joinAuthUnavailable: String    { s("Couldn't connect. Check your internet connection and try again.", "Не удалось подключиться. Проверьте интернет и попробуйте снова.", "Verbindung fehlgeschlagen. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.", "No se pudo conectar. Comprueba tu conexión e inténtalo de nuevo.", "Connexion impossible. Vérifiez votre connexion Internet et réessayez.", "Não foi possível conectar. Verifique a sua ligação e tente novamente.", "无法连接。请检查网络后重试。") }
 
     // MARK: — Paywall
+    var retry: String { s("Try again",
+                          "Повторить",
+                          "Erneut versuchen",
+                          "Reintentar",
+                          "Réessayer",
+                          "Tentar novamente",
+                          "重试") }
     var paywallPlanFallbackName: String { s("Momsy Premium",
                                             "Momsy Premium",
                                             "Momsy Premium",

@@ -41,6 +41,23 @@ struct SubscriptionManagerLogicTests {
         #expect(service.fetchCount >= 2)
     }
 
+    @Test func failedProductLoadStaysRetryableFromThePaywall() async {
+        let service = EmptyCatalogSubscriptionService()
+        let manager = SubscriptionManager(
+            service: service,
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+
+        // Every attempt fails, so the paywall must be able to ask again rather than stay
+        // price-less for the whole process because the launch-time load happened to fail.
+        for _ in 0..<3 { await manager.loadProducts() }
+
+        #expect(manager.products.isEmpty)
+        #expect(manager.productLoadFailed)
+        #expect(service.fetchCount >= 2)
+    }
+
     @Test func pendingPurchaseReportsApprovalState() {
         #expect {
             try SubscriptionManager.throwIfPending(.pending)
@@ -295,6 +312,25 @@ struct SubscriptionManagerLogicTests {
             let clock = ContinuousClock()
             let deadline = clock.now.advanced(by: .seconds(1))
             while clock.now < deadline { await Task.yield() }
+            return []
+        }
+
+        func purchase(
+            _ product: Product,
+            appAccountToken: UUID?
+        ) async throws -> Product.PurchaseResult {
+            Issue.record("Purchase must not start without a loaded product")
+            throw SubscriptionError.productUnavailable
+        }
+
+        func restorePurchases() async throws {}
+    }
+
+    private final class EmptyCatalogSubscriptionService: SubscriptionServicing {
+        private(set) var fetchCount = 0
+
+        func fetchProducts(ids: [String]) async throws -> [Product] {
+            fetchCount += 1
             return []
         }
 
