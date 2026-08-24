@@ -147,8 +147,11 @@ final class SubscriptionManager: ObservableObject {
         await refreshAccess()
     }
 
+    /// `ContentView` calls this on every `scenePhase == .active`, which is exactly the moment
+    /// a previously dead network may be back — so the backoff budget is restored here.
     func refreshAccess() async {
         await updatePersonalStatus(synchronizeFamilyEntitlement: true)
+        syncQueue.resetRetryBudget()
         syncQueue.scheduleFlush()
     }
 

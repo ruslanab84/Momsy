@@ -93,7 +93,8 @@ final class SubscriptionSyncQueue {
     private let sleep: (Duration) async -> Void
     private var flushTask: Task<Void, Never>?
     private var retryTask: Task<Void, Never>?
-    private var retryAttempt = 0
+    /// Readable by tests; only this type mutates it.
+    private(set) var retryAttempt = 0
     private var isFlushing = false
     private var needsFlush = false
 
@@ -194,6 +195,14 @@ final class SubscriptionSyncQueue {
         retryAttempt = 0
         needsFlush = false
         store.clearAll()
+    }
+
+    /// Restores the backoff budget when the app returns to the foreground. Without this the
+    /// third consecutive failure retires the job for the rest of the process: `scheduleRetry`
+    /// refuses to arm once `retryAttempt` reaches `retryDelays.count`, and nothing lowers it
+    /// again except a success that can no longer be attempted.
+    func resetRetryBudget() {
+        retryAttempt = 0
     }
 
     private func scheduleRetry() {

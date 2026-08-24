@@ -414,6 +414,33 @@ struct SubscriptionManagerLogicTests {
         #expect(store.load() == nil)
     }
 
+    @Test func resetRetryBudgetRearmsTheBackoff() async {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let context = SubscriptionSyncContext(uid: "uid-a", familyID: "family-a")
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: { context },
+            synchronize: { _ in
+                throw FamilyPremiumSyncError(
+                    code: "verification_unavailable",
+                    isRetryable: true
+                )
+            },
+            retryDelays: [.zero, .zero, .zero],
+            sleep: { _ in }
+        )
+        store.save(pending(signedTransaction: "signed"))
+
+        await queue.flush()
+        #expect(queue.retryAttempt > 0)
+
+        queue.resetRetryBudget()
+
+        #expect(queue.retryAttempt == 0)
+        queue.clear()
+    }
+
     private func pending(signedTransaction: String) -> PendingSubscriptionSync {
         PendingSubscriptionSync(
             uid: "uid-a",
