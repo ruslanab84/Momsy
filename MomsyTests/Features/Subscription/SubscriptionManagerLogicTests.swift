@@ -55,7 +55,32 @@ struct SubscriptionManagerLogicTests {
 
         #expect(manager.products.isEmpty)
         #expect(manager.productLoadFailed)
+        #expect(manager.lastProductLoadError != nil)
         #expect(service.fetchCount >= 2)
+    }
+
+    /// An empty store answer means App Store Connect is missing the products; a stalled fetch
+    /// means the network is. The paywall copy blames connectivity either way, so the two must
+    /// stay distinguishable for on-device diagnosis.
+    @Test func anEmptyStoreCatalogIsReportedApartFromATimeout() async {
+        let empty = SubscriptionManager(
+            service: EmptyCatalogSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+        await #expect(throws: SubscriptionError.catalogEmpty) {
+            try await empty.purchase()
+        }
+
+        let stalled = SubscriptionManager(
+            service: StalledSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults()),
+            productLoadTimeout: .milliseconds(20)
+        )
+        await #expect(throws: SubscriptionError.productUnavailable) {
+            try await stalled.purchase()
+        }
     }
 
     @Test func pendingPurchaseReportsApprovalState() {

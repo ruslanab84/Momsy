@@ -146,9 +146,20 @@ struct PaywallView: View {
     private var priceUnavailableNotice: some View {
         VStack(spacing: 10) {
             Text(lm.purchaseProductUnavailable)
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.85))
+                .font(.footnote)
+                .foregroundColor(.white.opacity(0.95))
                 .multilineTextAlignment(.center)
+
+            #if DEBUG
+            // A detached device build has no Xcode console, and the copy above blames the network
+            // for what is usually a missing App Store Connect product. Debug builds only.
+            if let reason = subscriptionManager.lastProductLoadError {
+                Text(reason)
+                    .font(.caption2.monospaced())
+                    .foregroundColor(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+            }
+            #endif
 
             Button {
                 Task { await subscriptionManager.loadProducts() }

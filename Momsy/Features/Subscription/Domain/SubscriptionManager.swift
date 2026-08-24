@@ -1,6 +1,7 @@
 import Combine
 import CryptoKit
 import Foundation
+import os
 import StoreKit
 
 @MainActor
@@ -11,6 +12,10 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var products: [Product] = []
     @Published private(set) var isLoadingProducts = false
     @Published private(set) var productLoadFailed = false
+    /// Why the last catalog fetch failed, kept for on-device diagnosis: a detached device build
+    /// has no Xcode console, and `catalogEmpty` (App Store doesn't know these product IDs) reads
+    /// nothing like the connectivity problem the user-facing copy suggests.
+    @Published private(set) var lastProductLoadError: String?
     @Published private(set) var trialEligible = false
     @Published var selectedProductID = ProductID.annual
 
@@ -23,6 +28,11 @@ final class SubscriptionManager: ObservableObject {
               let annual = annualProduct?.price else { return nil }
         return Self.savingsPercent(monthlyPrice: monthly, annualPrice: annual)
     }
+
+    private static let log = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "RuslanAbd.Momsy",
+        category: "subscription"
+    )
 
     private let service: any SubscriptionServicing
     private let familyPremiumService: any FamilyPremiumServicing
@@ -84,8 +94,11 @@ final class SubscriptionManager: ObservableObject {
         do {
             _ = try await loadProductsIfNeeded()
             productLoadFailed = false
+            lastProductLoadError = nil
         } catch {
             productLoadFailed = true
+            lastProductLoadError = String(describing: error)
+            Self.log.error("Product catalog load failed: \(String(describing: error), privacy: .public)")
         }
     }
 
@@ -271,7 +284,7 @@ final class SubscriptionManager: ObservableObject {
                     do {
                         let fetched = try await service.fetchProducts(ids: ProductID.all)
                         guard !fetched.isEmpty else {
-                            continuation.finish(throwing: SubscriptionError.productUnavailable)
+                            continuation.finish(throwing: SubscriptionError.catalogEmpty)
                             return
                         }
                         continuation.yield(fetched)
@@ -482,5 +495,8 @@ enum SubscriptionError: Error, Equatable {
     case failedVerification
     case pendingApproval
     case productUnavailable
+    /// The store answered, but knows none of `ProductID.all` — the products are missing from
+    /// App Store Connect, not a connectivity failure.
+    case catalogEmpty
     case ownedByAnotherAccount
 }
