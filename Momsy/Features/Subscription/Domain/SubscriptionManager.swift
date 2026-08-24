@@ -428,13 +428,18 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// Publishes only on a real transition. `@Published` fires in `willSet` regardless of
+    /// equality, and every `refreshAccess()` re-runs this with an unchanged value — which
+    /// made the root view re-evaluate its routing branch on every foreground return.
     private func updateAccessState() {
-        accessState = PremiumAccessPolicy.state(
+        let resolved = PremiumAccessPolicy.state(
             personalPremium: personalPremium,
             familyPremium: familyPremium,
             isResolving: isResolvingPersonal || isResolvingFamily
         )
-        isPremium = accessState == .premium
+        guard resolved != accessState else { return }
+        accessState = resolved
+        isPremium = resolved == .premium
     }
 
     private func verified<T>(_ result: VerificationResult<T>) throws -> T {

@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 struct ContentView: View {
@@ -44,10 +45,7 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: onboardingDone)
-        .onReceive(container.subscriptionManager.$accessState) { accessState in
-            if PaywallPresentationState.shouldResetDecision(for: accessState) {
-                paywallShown = false
-            }
+        .onReceive(container.subscriptionManager.$accessState.removeDuplicates()) { accessState in
             premiumAccessState = accessState
         }
         .onChange(of: scenePhase) { _, newPhase in
@@ -96,9 +94,5 @@ enum PaywallPresentationState {
 
     static func resetForAuthenticationChange(defaults: UserDefaults = .standard) {
         defaults.removeObject(forKey: paywallShownKey)
-    }
-
-    static func shouldResetDecision(for accessState: PremiumAccessState) -> Bool {
-        accessState == .requiresPurchase
     }
 }

@@ -1638,6 +1638,15 @@ struct L10n {
           "A carregar o preço da subscrição...",
           "正在加载订阅价格...")
     }
+    var paywallPriceUnavailableDisclosure: String {
+        s("Renewal terms will appear once prices load.",
+          "Условия продления появятся после загрузки цен.",
+          "Die Verlängerungsbedingungen erscheinen, sobald die Preise geladen sind.",
+          "Las condiciones de renovación aparecerán cuando se carguen los precios.",
+          "Les conditions de renouvellement s’afficheront une fois les prix chargés.",
+          "As condições de renovação aparecerão assim que os preços forem carregados.",
+          "价格加载完成后将显示续订条款。")
+    }
     func paywallRenewalDisclosure(price: String) -> String {
         s("7 days free, then \(price)/month. Subscription renews automatically every month unless canceled at least 24 hours before the period ends.",
           "7 дней бесплатно, затем \(price)/мес. Подписка автоматически продлевается каждый месяц, если не отменить её минимум за 24 часа до конца периода.",

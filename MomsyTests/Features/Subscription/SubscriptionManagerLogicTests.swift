@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import StoreKit
 import Testing
@@ -16,6 +17,43 @@ struct SubscriptionManagerLogicTests {
 
         #expect(!manager.isPremium)
         #expect(manager.accessState == .requiresPurchase)
+    }
+
+    @Test func repeatedRefreshDoesNotRepublishUnchangedAccessState() async {
+        let manager = SubscriptionManager(
+            service: EmptyCatalogSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+        await manager.refreshAccess()
+
+        let recorder = AccessStateRecorder()
+        let token = manager.$accessState.sink { recorder.values.append($0) }
+        defer { token.cancel() }
+
+        // Every scene activation calls this. A republish here reset `paywallShown` and
+        // swapped the root view out from under any in-flight modal auth session.
+        for _ in 0..<5 { await manager.refreshAccess() }
+
+        #expect(recorder.values == [.requiresPurchase])
+    }
+
+    @Test func accessStatePublishesOnRealTransitions() async {
+        let manager = SubscriptionManager(
+            service: EmptyCatalogSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+        await manager.refreshAccess()
+
+        let recorder = AccessStateRecorder()
+        let token = manager.$accessState.sink { recorder.values.append($0) }
+        defer { token.cancel() }
+
+        await manager.authSessionDidChange(isAuthenticated: true)
+
+        #expect(recorder.values.contains(.resolving))
+        #expect(recorder.values.last == .requiresPurchase)
     }
 
     @Test func stalledProductLoadingLeavesPaywallRetryable() async {
@@ -409,6 +447,10 @@ struct SubscriptionManagerLogicTests {
         func restorePurchases() async throws {
             throw TestRestoreError()
         }
+    }
+
+    private final class AccessStateRecorder: @unchecked Sendable {
+        var values: [PremiumAccessState] = []
     }
 
     private final class NoFamilyPremiumService: FamilyPremiumServicing {

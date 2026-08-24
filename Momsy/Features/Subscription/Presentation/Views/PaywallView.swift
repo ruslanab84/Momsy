@@ -197,11 +197,8 @@ struct PaywallView: View {
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            .disabled(
-                actionHandler.isLoading
-                    || subscriptionManager.isLoading
-                    || (subscriptionManager.products.isEmpty && !actionHandler.hasPendingInvite)
-            )
+            .disabled(isPrimaryActionDisabled)
+            .opacity(isPrimaryActionDisabled ? 0.45 : 1)
             .padding(.horizontal, 24)
 
             if let error = restoreError ?? actionHandler.error {
@@ -246,9 +243,17 @@ struct PaywallView: View {
         return subscriptionManager.trialEligible ? lm.startTrial : lm.subscribeCTA
     }
 
+    private var isPrimaryActionDisabled: Bool {
+        actionHandler.isLoading
+            || subscriptionManager.isLoading
+            || (subscriptionManager.products.isEmpty && !actionHandler.hasPendingInvite)
+    }
+
     private var renewalDisclosureText: String {
         guard let product = subscriptionManager.selectedProduct else {
-            return lm.paywallPriceLoadingDisclosure
+            return subscriptionManager.productLoadFailed
+                ? lm.paywallPriceUnavailableDisclosure
+                : lm.paywallPriceLoadingDisclosure
         }
         let price = product.displayPrice
         let isAnnual = product.id == ProductID.annual

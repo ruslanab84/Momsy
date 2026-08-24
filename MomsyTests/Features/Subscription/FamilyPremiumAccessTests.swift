@@ -97,11 +97,20 @@ struct FamilyPremiumAccessTests {
         #expect(defaults.object(forKey: "paywallShown") == nil)
     }
 
-    @Test("a resolved missing entitlement invalidates the previous paywall decision")
-    func missingEntitlementForcesPaywallRouting() {
-        #expect(PaywallPresentationState.shouldResetDecision(for: .requiresPurchase))
-        #expect(!PaywallPresentationState.shouldResetDecision(for: .resolving))
-        #expect(!PaywallPresentationState.shouldResetDecision(for: .premium))
+    @Test("only an authentication change invalidates the paywall decision")
+    func paywallDecisionSurvivesAccessStateRepublish() throws {
+        let suiteName = "FamilyPremiumAccessTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(true, forKey: "paywallShown")
+
+        // A `.requiresPurchase` state on its own must never clear the user's dismissal:
+        // that reset ran on every scene activation and swapped the root view mid-flow.
+        #expect(defaults.bool(forKey: "paywallShown"))
+
+        PaywallPresentationState.resetForAuthenticationChange(defaults: defaults)
+
+        #expect(defaults.object(forKey: "paywallShown") == nil)
     }
 
     @Test("a pending invite makes the paywall CTA join instead of purchasing")

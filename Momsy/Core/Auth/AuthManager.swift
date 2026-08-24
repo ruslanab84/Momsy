@@ -450,13 +450,11 @@ final class AuthManager: ObservableObject {
         }
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
 
-        guard
-            let windowScene = UIApplication.shared.connectedScenes
-                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-            let rootVC = windowScene.windows.first?.rootViewController
-        else { throw AuthError.tokenMissing }
+        guard let presenter = Self.topmostPresentedViewController() else {
+            throw AuthError.tokenMissing
+        }
 
-        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter)
         guard let idToken = result.user.idToken?.tokenString else {
             throw AuthError.tokenMissing
         }
@@ -464,6 +462,23 @@ final class AuthManager: ObservableObject {
             withIDToken: idToken,
             accessToken: result.user.accessToken.tokenString
         )
+    }
+
+    /// The reauthentication sheet is itself presented modally, so presenting the Google
+    /// session on the window's root controller stacks it on a view SwiftUI can tear down
+    /// independently. Anchoring to the topmost live presentation keeps the session tied to
+    /// the sheet that started it. `windows.first` is also not necessarily the key window.
+    @MainActor
+    private static func topmostPresentedViewController() -> UIViewController? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let scene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+        guard let window = scene?.windows.first(where: \.isKeyWindow) ?? scene?.windows.first,
+              var top = window.rootViewController
+        else { return nil }
+        while let presented = top.presentedViewController, !presented.isBeingDismissed {
+            top = presented
+        }
+        return top
     }
 #endif
 }
