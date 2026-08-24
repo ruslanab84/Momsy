@@ -2,6 +2,7 @@ import FirebaseAppCheck
 import FirebaseAuth
 import FirebaseFirestore
 import Foundation
+import os
 
 @MainActor
 protocol FamilyPremiumServicing: AnyObject {
@@ -15,6 +16,15 @@ protocol FamilyPremiumServicing: AnyObject {
 @MainActor
 final class FamilyPremiumService: FamilyPremiumServicing {
     private static let endpoint = URL(string: "https://us-central1-momsy-cf74a.cloudfunctions.net/syncSubscriptionEntitlement")!
+
+    /// `nonisolated` because the Firestore snapshot callback is not MainActor-isolated. The
+    /// class is, and `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` would otherwise isolate this
+    /// static too — fine under today's minimal checking, a hard error once strict concurrency
+    /// is turned on. `Logger` is `Sendable`. Matches how `resolvedAccess` is already declared.
+    private nonisolated static let log = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "RuslanAbd.Momsy",
+        category: "subscription"
+    )
 
     private var listener: ListenerRegistration?
 
@@ -53,8 +63,18 @@ final class FamilyPremiumService: FamilyPremiumServicing {
 
         listener = Firestore.firestore().collection("families").document(familyId)
             .addSnapshotListener(includeMetadataChanges: true) { snapshot, error in
-                guard error == nil,
-                      let snapshot,
+                // A permanently failing listener — denied rules, revoked membership — used to
+                // return silently and leave the caller resolving forever, which blanks the whole
+                // app behind the splash. Report "no family premium" instead: the personal
+                // entitlement resolves independently and still grants access on its own.
+                if let error {
+                    Self.log.error(
+                        "Family entitlement listener failed: \(error.localizedDescription, privacy: .public)"
+                    )
+                    Task { @MainActor in onChange(false) }
+                    return
+                }
+                guard let snapshot,
                       let isPremium = Self.resolvedAccess(
                         snapshot.data(),
                         isFromCache: snapshot.metadata.isFromCache
