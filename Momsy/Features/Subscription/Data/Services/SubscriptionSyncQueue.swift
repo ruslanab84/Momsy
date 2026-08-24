@@ -174,14 +174,16 @@ final class SubscriptionSyncQueue {
         }
     }
 
+    /// Drops a job that no longer belongs to the current account/family. Only the pending job
+    /// goes: `clearAll()` here also erased the success marker, and because this runs from
+    /// `observeCurrentFamily` on every cold start, the next `updatePersonalStatus` re-enqueued
+    /// and re-POSTed an already-synchronized transaction — one Cloud Function invocation per
+    /// launch per paying user. The marker is a 4-field exact match, so keeping a stale one is
+    /// inert; family departure still wipes everything through `clear()`.
     func discardPendingIfScopeChanged(to context: SubscriptionSyncContext?) {
-        guard let pending = store.load(),
-              let context,
-              pending.matches(context)
-        else {
-            if context != nil { store.clearAll() }
-            return
-        }
+        guard let context, let pending = store.load() else { return }
+        guard !pending.matches(context) else { return }
+        store.clearPending()
     }
 
     func clear() {

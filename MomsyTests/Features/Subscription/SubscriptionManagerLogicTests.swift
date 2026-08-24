@@ -371,6 +371,49 @@ struct SubscriptionManagerLogicTests {
         ))
     }
 
+    @Test func scopeCheckKeepsTheSuccessMarkerWhenNothingIsPending() async {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let context = SubscriptionSyncContext(uid: "uid-a", familyID: "family-a")
+        let job = pending(signedTransaction: "signed")
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: { context },
+            synchronize: { _ in },
+            retryDelays: []
+        )
+        queue.enqueue(job)
+        await queue.flush()
+        #expect(store.wasSuccessfullySynchronized(job))
+
+        // Runs on every launch from `observeCurrentFamily`.
+        queue.discardPendingIfScopeChanged(to: context)
+
+        #expect(store.wasSuccessfullySynchronized(job))
+        store.save(job)
+        #expect(store.load() == nil)
+    }
+
+    @Test func scopeChangeStillDropsTheStalePendingJob() {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: {
+                SubscriptionSyncContext(uid: "uid-b", familyID: "family-b")
+            },
+            synchronize: { _ in Issue.record("A stale job must not reach the network") },
+            retryDelays: []
+        )
+        store.save(pending(signedTransaction: "signed"))
+
+        queue.discardPendingIfScopeChanged(
+            to: SubscriptionSyncContext(uid: "uid-b", familyID: "family-b")
+        )
+
+        #expect(store.load() == nil)
+    }
+
     private func pending(signedTransaction: String) -> PendingSubscriptionSync {
         PendingSubscriptionSync(
             uid: "uid-a",
