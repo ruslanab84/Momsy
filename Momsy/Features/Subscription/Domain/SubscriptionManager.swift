@@ -198,6 +198,11 @@ final class SubscriptionManager: ObservableObject {
         updateAccessState()
 
         guard isAuthenticated else { return }
+        // The listener torn down above is otherwise only rebuilt by `FamilyManager.$familyId`,
+        // which is `removeDuplicates()`-filtered. A uid change that leaves the family id
+        // untouched publishes nothing, so nobody rebuilds it and `isResolvingFamily` stays
+        // true forever. `force: true` bypasses the `observedFamilyID` equality guard.
+        observeCurrentFamily(FamilyManager.shared.familyId, force: true)
         await updatePersonalStatus(synchronizeFamilyEntitlement: true)
         syncQueue.scheduleFlush()
     }
