@@ -441,6 +441,34 @@ struct SubscriptionManagerLogicTests {
         queue.clear()
     }
 
+    @Test func aStalledResolutionFallsBackToThePaywall() {
+        let manager = SubscriptionManager(
+            service: StalledSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+        #expect(manager.accessState == .resolving)
+
+        manager.resolveStalledAccessIfNeeded()
+
+        #expect(manager.accessState == .requiresPurchase)
+        #expect(!manager.isPremium)
+    }
+
+    @Test func theWatchdogNeverOverridesAResolvedState() async {
+        let manager = SubscriptionManager(
+            service: StalledSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+        await manager.authSessionDidChange(isAuthenticated: false)
+        #expect(manager.accessState == .requiresPurchase)
+
+        manager.resolveStalledAccessIfNeeded()
+
+        #expect(manager.accessState == .requiresPurchase)
+    }
+
     private func pending(signedTransaction: String) -> PendingSubscriptionSync {
         PendingSubscriptionSync(
             uid: "uid-a",
