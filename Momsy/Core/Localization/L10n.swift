@@ -1740,6 +1740,15 @@ struct L10n {
                                        "Restaurer les achats",
                                        "Restaurar compras",
                                        "恢复购买") }
+    var restoreNoPurchasesFound: String {
+        s("No previous purchases found for this Apple Account.",
+          "Для этого Apple Account покупок не найдено.",
+          "Für dieses Apple-Konto wurden keine früheren Käufe gefunden.",
+          "No se encontraron compras anteriores para esta cuenta de Apple.",
+          "Aucun achat antérieur trouvé pour ce compte Apple.",
+          "Não foram encontradas compras anteriores para esta conta Apple.",
+          "未找到此 Apple 账户的历史购买记录。")
+    }
     var featureAll: String         { s("All features, no limits",
                                        "Все функции без ограничений",
                                        "Alle Funktionen ohne Limits",
