@@ -1,6 +1,6 @@
 # Momsy Privacy Policy
 
-**Effective date:** 25 July 2026
+**Effective date:** 26 August 2026
 
 Momsy ("the app", "we", "us") helps parents and caregivers track a baby's care
 and their own well-being. This policy explains what Momsy processes, when data
@@ -22,8 +22,8 @@ apps or websites.
 | Subscription | StoreKit entitlement status | Yes | Processed by Apple; Momsy does not send it to Firebase |
 
 Momsy has no diary-photo feature and does not include or use Firebase Storage.
-The daily tip shown in Today uses built-in local content; it is not generated
-by Gemini.
+The daily tip shown in Today uses built-in local content. Momsy does not send
+data to Gemini or another generative-AI service.
 
 ## 2. Optional Firebase cloud sync
 
@@ -48,31 +48,19 @@ app or request deletion from us. Turning cloud sync off does not delete data.
 Joining or using a shared family requires cloud sync because the shared family
 workspace exists in Firestore.
 
-## 3. Weekly AI insights
+## 3. No generative-AI processing
 
-For Premium users, Momsy can automatically create one insight for the last
-completed week. Before the first Gemini request, Momsy asks for separate
-permission to share the weekly-report data with Google Gemini.
-
-If you allow it, Momsy sends **pre-aggregated statistics**, not raw log rows:
-the baby's age, sleep totals and trends, feeding counts, diaper count, names of
-new foods and flagged allergens/reactions, and developmental-leap signals.
-Momsy does not send account identifiers, EPDS scores, diary text, or photos to
-Gemini. The generated insight is stored on your device.
-
-If you choose **Don't Share**, Momsy uses its non-AI fallback and does not send
-weekly-report data to Gemini. Firebase AI Logic processes the prompt and model
-output through the configured Gemini Developer API; Firebase AI Logic itself
-does not store that content, but the Gemini provider's terms and retention
-rules apply.
+The current version of Momsy does not generate weekly reports with AI and does
+not send baby-care, diary, well-being, account, or family data to Gemini or any
+other generative-AI provider.
 
 ## 4. Service providers and SDKs
 
 Momsy includes only the following third-party services that process app data:
 
 - **Google Firebase:** Firebase Core, Authentication, Cloud Firestore, App
-  Check, and Firebase AI Logic. These provide authentication, optional cloud
-  sync, backend abuse protection, and consented weekly AI insights.
+  Check. These provide authentication, optional cloud sync, and backend abuse
+  protection.
 - **Google Sign-In:** used only when you choose Google as an account provider.
 - **Apple:** Sign in with Apple and StoreKit, used when you choose Apple
   sign-in or manage a subscription.
@@ -82,8 +70,8 @@ Firebase Storage, advertising SDKs, or third-party tracking SDKs.
 
 Google's processing is governed by
 [Google's Privacy Policy](https://policies.google.com/privacy) and applicable
-Firebase/Gemini service terms. Apple's processing is governed by
-[Apple's Privacy Policy](https://www.apple.com/legal/privacy/).
+Firebase service terms. Apple's processing is governed by [Apple's Privacy
+Policy](https://www.apple.com/legal/privacy/).
 
 ## 5. How data is used
 
@@ -92,7 +80,6 @@ We use data only to:
 - provide local tracking, charts, reminders, and daily tips;
 - provide cloud backup, restore, and invited-family sync when you allow it;
 - authenticate and protect private Firebase access;
-- generate weekly AI insights when you separately allow Gemini processing;
 - verify subscription access through StoreKit.
 
 We do not use data for advertising, data-broker sales, or cross-app tracking.
@@ -131,7 +118,6 @@ enter and share that child's information.
 
 - Keep Momsy local-only by declining cloud sync.
 - Enable or withdraw cloud-sync consent in Settings.
-- Separately allow or decline Google Gemini weekly-insight processing.
 - Use an anonymous Firebase account after enabling sync, or link Apple/Google.
 - Delete individual entries, all local/cloud data, and the account as described
   above.

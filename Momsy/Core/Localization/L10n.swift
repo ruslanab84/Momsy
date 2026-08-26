@@ -143,13 +143,13 @@ struct L10n {
           "宝宝资料、健康与护理数据、日记文本及部分照护者记录会通过 Google Firestore 同步。")
     }
     var cloudSyncOptionalDisclosure: String {
-        s("You can turn cloud sync off later in Settings. Weekly AI insights ask for separate permission.",
-          "Синхронизацию можно отключить позже в Настройках. Для еженедельных AI-отчётов запрашивается отдельное разрешение.",
-          "Cloud-Sync kann später in den Einstellungen deaktiviert werden. Wöchentliche KI-Berichte benötigen eine separate Zustimmung.",
-          "Puedes desactivar la sincronización en Ajustes. Los informes semanales con IA piden un permiso aparte.",
-          "Vous pourrez désactiver la synchronisation dans Réglages. Les bilans IA demandent une autorisation distincte.",
-          "Pode desativar a sincronização nas Definições. Os relatórios semanais com IA pedem autorização separada.",
-          "之后可在“设置”中关闭云同步。每周 AI 洞察会另行请求许可。")
+        s("You can turn cloud sync off later in Settings.",
+          "Синхронизацию можно отключить позже в Настройках.",
+          "Cloud-Sync kann später in den Einstellungen deaktiviert werden.",
+          "Puedes desactivar la sincronización en Ajustes.",
+          "Vous pourrez désactiver la synchronisation dans Réglages.",
+          "Pode desativar a sincronização nas Definições.",
+          "之后可在“设置”中关闭云同步。")
     }
     var cloudSyncAllow: String { s("Allow cloud sync", "Разрешить синхронизацию", "Cloud-Sync erlauben", "Permitir sincronización", "Autoriser la synchronisation", "Permitir sincronização", "允许云同步") }
     var cloudSyncKeepLocal: String { s("Keep data on this device", "Хранить только на устройстве", "Daten auf diesem Gerät behalten", "Guardar en este dispositivo", "Garder sur cet appareil", "Guardar neste dispositivo", "仅保存在此设备") }

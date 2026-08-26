@@ -16,8 +16,7 @@ Declare each item for **App Functionality**, **Used for tracking = No**:
       "collected" under Apple's definition. If App Store Connect currently has
       Sensitive Info checked from an earlier submission, uncheck it. Re-verify
       before each submission: `momMood` absent from
-      `BabySyncService.allSubcollections`, absent from `CloudSyncDownloader`,
-      and absent from `WeeklyStats` (the Gemini payload).
+      `BabySyncService.allSubcollections` and absent from `CloudSyncDownloader`.
 - [ ] **Contact Info → Name** — baby's name and provider display name.
       **Linked = Yes** when cloud sync is enabled.
 - [ ] **Contact Info → Email Address** — only when Apple/Google provides it to
@@ -38,22 +37,20 @@ Optional collection still counts as collection for App Store privacy answers.
 - [ ] Existing installs without a stored choice receive the migration prompt.
 - [ ] Settings → Data & Privacy → Cloud sync can withdraw consent; after
       withdrawal, new data remains local and live sync stops.
-- [ ] Weekly Gemini processing has separate explicit consent and sends only the
-      pre-aggregated fields named in `PRIVACY.md`.
+- [ ] The release archive contains no Firebase AI Logic or Gemini integration,
+      and no app data is sent to a generative-AI provider.
 - [ ] Delete all data reports success only after server verification and
       Firebase Auth deletion; pending/reauth states remain visible and retryable.
 
 ## Third-party SDK cross-check
 
 - [ ] Archive contains Firebase Core, Authentication, Firestore, App Check, and
-      Firebase AI Logic plus Google Sign-In.
+      Google Sign-In.
 - [ ] Archive does **not** contain Firebase Analytics, Firebase Realtime
-      Database, Firebase Storage, advertising, or tracking SDKs.
+      Database, Firebase Storage, Firebase AI Logic, advertising, or tracking
+      SDKs.
 - [ ] Review the current Firebase Apple data-disclosure page for every Firebase
       build target present in the archive, including transitive targets.
-- [ ] Confirm whether Firebase AI monitoring is enabled in Firebase Console. If
-      enabled, update policy/App Store answers for sampled prompts, outputs, and
-      performance metrics or disable monitoring.
 
 ## Tracking and manifests
 
@@ -69,5 +66,5 @@ Optional collection still counts as collection for App Store privacy answers.
       `https://ruslanab84.github.io/-momsy-site/`.
 - [ ] Confirm the page is reachable from Settings and the paywall.
 - [ ] Confirm the effective date, support email, deletion behavior, consent
-      behavior, Firebase SDK list, and Gemini weekly-insight description match
-      the submitted binary.
+      behavior, Firebase SDK list, and no-generative-AI statement match the
+      submitted binary.
