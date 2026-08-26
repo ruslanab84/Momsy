@@ -95,9 +95,12 @@ final class AppContainer {
     let preferencesRepository: any UserPreferencesRepository = LocalUserPreferencesRepository()
     let dailyTipRepository                             = DailyTipRepository()
     lazy var weeklyInsightRepository: any WeeklyInsightRepository = SwiftDataWeeklyInsightRepository(context: context)
-    lazy var weeklyInsightService: any WeeklyInsightService = FirebaseBootstrapper.isConfigured
-        ? GeminiWeeklyInsightService()
-        : StaticWeeklyInsightService()
+    /// Gemini generation is disabled for the App Store release (see the disabled
+    /// consent flow in `MomsyApp.maybeGenerateWeeklyReport`), so the offline service
+    /// stands in here. Restoring AI means putting the `FirebaseBootstrapper.isConfigured
+    /// ? GeminiWeeklyInsightService() : StaticWeeklyInsightService()` choice back on
+    /// this one line — nothing downstream assumes which service it got.
+    lazy var weeklyInsightService: any WeeklyInsightService = StaticWeeklyInsightService()
 
     // MARK: — Cross-device sync wiring
 

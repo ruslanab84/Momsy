@@ -80,6 +80,10 @@ struct EPDSSheet: View {
 
             navButtons
                 .padding(.horizontal, 20)
+
+            sourceFooter
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
                 .padding(.bottom, 24)
         }
         .background(Color.bbCream.ignoresSafeArea())
@@ -247,6 +251,9 @@ struct EPDSSheet: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
 
+                sourceFooter
+                    .padding(.horizontal, 8)
+
                 Button {
                     Task {
                         await vm.saveEPDS(scores: answers, mood: mood, energy: energy)
@@ -267,6 +274,24 @@ struct EPDSSheet: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(lm.strings.epdsTitle)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// The EPDS may be reproduced free of charge only while the authors, the title
+    /// and the source are quoted on every copy, so this rides along with both the
+    /// questionnaire and the score.
+    private var sourceFooter: some View {
+        VStack(spacing: 4) {
+            Text(lm.strings.sourceLabel.uppercased())
+                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .kerning(0.5)
+            Text(AppLegalLinks.epdsCitation)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var safetySupportCard: some View {

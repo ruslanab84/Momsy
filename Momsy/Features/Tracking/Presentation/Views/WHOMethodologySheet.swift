@@ -27,6 +27,9 @@ struct WHOMethodologySheet: View {
                         }
                     }
                 }
+                Section(loc.strings.whoAdaptationTitle) {
+                    paragraph(loc.strings.whoGrowthAdaptationNote)
+                }
                 Section(loc.strings.whoMethodologyBandsTitle) {
                     paragraph(loc.strings.whoMethodologyBands)
                 }

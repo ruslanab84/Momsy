@@ -8,6 +8,34 @@ struct VaccinationView: View {
         _vm = StateObject(wrappedValue: container.makeVaccinationViewModel())
     }
 
+    /// The default schedule is an adaptation of WHO material, which may only be
+    /// reused with the source named and WHO's endorsement explicitly disclaimed.
+    private var sourceFooter: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(lm.strings.sourceLabel.uppercased())
+                .font(.system(size: 10, weight: .heavy, design: .rounded))
+                .foregroundColor(.bbInkMute)
+                .kerning(0.5)
+            Text(lm.strings.vaccinationSourceNote)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundColor(.bbInkSoft)
+                .fixedSize(horizontal: false, vertical: true)
+            if let url = AppLegalLinks.whoImmunizationScheduleURL {
+                Link(destination: url) {
+                    HStack(spacing: 6) {
+                        Text(lm.strings.vaccinationOpenSource)
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    .foregroundColor(.bbCoralDeep)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 12)
+    }
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 12, pinnedViews: .sectionHeaders) {
@@ -40,6 +68,8 @@ struct VaccinationView: View {
                             .background(Color.bbCream)
                     }
                 }
+
+                sourceFooter
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)

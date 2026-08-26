@@ -79,7 +79,7 @@ struct L10n {
           "Resumo de IA do sono e da alimentação",
           "AI 睡眠与喂养摘要")
     }
-    var weeklyInsightAIConsentTitle: String {
+    /*var weeklyInsightAIConsentTitle: String {
         s("Share data with Google Gemini?",
           "Передавать данные в Google Gemini?",
           "Daten mit Google Gemini teilen?",
@@ -102,7 +102,7 @@ struct L10n {
     }
     var weeklyInsightAIConsentDeny: String {
         s("Don’t Share", "Не передавать", "Nicht teilen", "No compartir", "Ne pas partager", "Não partilhar", "不共享")
-    }
+    }*/
     var cloudSyncConsentTitle: String {
         s("Choose where your data lives", "Выберите, где хранить данные", "Speicherort der Daten wählen", "Elige dónde guardar tus datos", "Choisissez où stocker vos données", "Escolha onde guardar os dados", "选择数据存储位置")
     }
@@ -822,6 +822,17 @@ struct L10n {
           "该图表仅供参考，不能替代医学检查。单次落在色带之外本身并不意味着异常，落在色带之内也不能排除问题。只有儿科医生才能评估孩子的生长情况——有任何疑虑请与医生沟通。")
     }
     var whoMethodologyOpenSource: String { s("Open the WHO standards", "Открыть нормы ВОЗ", "WHO-Standards öffnen", "Abrir los patrones de la OMS", "Ouvrir les normes de l’OMS", "Abrir os padrões da OMS", "打开 WHO 标准") }
+    var sourceLabel: String { s("Source", "Источник", "Quelle", "Fuente", "Source", "Fonte", "来源") }
+    var whoAdaptationTitle: String { s("Adapted from WHO material", "Адаптация материалов ВОЗ", "Adaption von WHO-Material", "Adaptación de material de la OMS", "Adaptation de documents de l’OMS", "Adaptação de material da OMS", "改编自世卫组织资料") }
+    var whoGrowthAdaptationNote: String {
+        s("The tables in this app are an adaptation of the WHO Child Growth Standards. This adaptation was not created by WHO. WHO is not responsible for its content or accuracy, and does not endorse Momsy.",
+          "Таблицы в приложении — адаптация Норм роста детей ВОЗ. Эта адаптация создана не ВОЗ. ВОЗ не несёт ответственности за её содержание и точность и не поддерживает Momsy.",
+          "Die Tabellen in dieser App sind eine Adaption der WHO-Kindeswachstumsstandards. Diese Adaption wurde nicht von der WHO erstellt. Die WHO ist nicht für ihren Inhalt oder ihre Richtigkeit verantwortlich und unterstützt Momsy nicht.",
+          "Las tablas de esta app son una adaptación de los patrones de crecimiento infantil de la OMS. Esta adaptación no fue creada por la OMS. La OMS no se hace responsable de su contenido ni de su exactitud, y no respalda a Momsy.",
+          "Les tables de cette application sont une adaptation des normes OMS de croissance de l’enfant. Cette adaptation n’a pas été créée par l’OMS. L’OMS n’est pas responsable de son contenu ni de son exactitude et n’approuve pas Momsy.",
+          "As tabelas desta aplicação são uma adaptação dos padrões de crescimento infantil da OMS. Esta adaptação não foi criada pela OMS. A OMS não é responsável pelo seu conteúdo nem pela sua exatidão e não subscreve a Momsy.",
+          "本应用中的参照表改编自世界卫生组织儿童生长标准。该改编版本并非由世卫组织制作，世卫组织不对其内容或准确性负责，也不对 Momsy 作任何背书。")
+    }
     var temperatureHistory: String { s("Temperature history", "История температуры", "Temperaturverlauf", "Historial de temperatura", "Historique de température", "Histórico de temperatura", "体温历史") }
     var recentMeasurements: String { s("Recent measurements", "Последние замеры", "Letzte Messungen", "Medidas recientes", "Mesures récentes", "Medições recentes", "近期测量") }
     var weightKg: String        { s("Weight, kg",    "Вес, кг",       "Gewicht, kg",   "Peso, kg", "Poids, kg", "Peso, kg", "体重，kg") }
@@ -1292,6 +1303,16 @@ struct L10n {
     var vaccinationCalendar: String     { s("Vaccination calendar",   "Календарь прививок",           "Impfkalender", "Calendario de vacunas", "Calendrier des vaccins", "Calendário de vacinas", "疫苗接种日历") }
     var vaccinationCalendarSub: String  { s("Schedule & reminders",   "Расписание и напоминания",     "Zeitplan & Erinnerungen", "Calendario y recordatorios", "Calendrier et rappels", "Calendário e lembretes", "计划与提醒") }
     var vaccinationSchedule: String     { s("Vaccination schedule",   "Календарь прививок",           "Impfkalender", "Calendario de vacunación", "Calendrier de vaccination", "Plano de vacinação", "疫苗接种计划") }
+    var vaccinationOpenSource: String   { s("Open the WHO recommendations", "Открыть рекомендации ВОЗ", "WHO-Empfehlungen öffnen", "Abrir las recomendaciones de la OMS", "Ouvrir les recommandations de l’OMS", "Abrir as recomendações da OMS", "打开世卫组织建议") }
+    var vaccinationSourceNote: String {
+        s("The default schedule is adapted from the WHO recommendations for routine immunization. This adaptation was not created by WHO, and WHO is not responsible for its content or accuracy. National schedules differ — follow the one used in your country and your paediatrician's advice.",
+          "Календарь по умолчанию — адаптация рекомендаций ВОЗ по плановой иммунизации. Эта адаптация создана не ВОЗ, и ВОЗ не несёт ответственности за её содержание и точность. Национальные календари различаются — следуйте календарю своей страны и рекомендациям педиатра.",
+          "Der Standardplan ist eine Adaption der WHO-Empfehlungen zur Routineimpfung. Diese Adaption wurde nicht von der WHO erstellt, und die WHO ist nicht für ihren Inhalt oder ihre Richtigkeit verantwortlich. Nationale Impfpläne unterscheiden sich — folgen Sie dem Plan Ihres Landes und dem Rat Ihrer Kinderärztin oder Ihres Kinderarztes.",
+          "El calendario por defecto es una adaptación de las recomendaciones de la OMS para la inmunización sistemática. Esta adaptación no fue creada por la OMS y la OMS no se hace responsable de su contenido ni de su exactitud. Los calendarios nacionales difieren: sigue el de tu país y las indicaciones de tu pediatra.",
+          "Le calendrier par défaut est une adaptation des recommandations de l’OMS pour la vaccination systématique. Cette adaptation n’a pas été créée par l’OMS et l’OMS n’est pas responsable de son contenu ni de son exactitude. Les calendriers nationaux diffèrent — suivez celui de votre pays et les conseils de votre pédiatre.",
+          "O plano predefinido é uma adaptação das recomendações da OMS para a imunização de rotina. Esta adaptação não foi criada pela OMS e a OMS não é responsável pelo seu conteúdo nem pela sua exatidão. Os planos nacionais diferem — siga o do seu país e as indicações do seu pediatra.",
+          "默认接种计划改编自世界卫生组织常规免疫接种建议。该改编版本并非由世卫组织制作，世卫组织不对其内容或准确性负责。各国接种计划不同——请遵循所在国家的计划及儿科医生的建议。")
+    }
     var vaccinationScheduleHint: String { s("Based on your region. The WHO international schedule is used by default.", "На основе вашего региона. По умолчанию используется международный календарь ВОЗ.", "Basierend auf Ihrer Region. Standardmäßig wird der internationale WHO-Impfkalender verwendet.", "Según tu región. Se usa el calendario internacional de la OMS por defecto.", "Selon votre région. Le calendrier international de l’OMS est utilisé par défaut.", "Com base na sua região. Por predefinição, é usado o plano internacional da OMS.", "根据您所在地区。默认使用 WHO 国际接种计划。") }
     var vaccinationMarkDone: String     { s("Mark as done",           "Отметить выполненной",         "Als erledigt markieren", "Marcar como hecha", "Marquer comme fait", "Marcar como feita", "标记为已完成") }
     var vaccinationUndo: String         { s("Undo",                   "Отменить",                     "Rückgängig", "Deshacer", "Annuler", "Anular", "撤销") }

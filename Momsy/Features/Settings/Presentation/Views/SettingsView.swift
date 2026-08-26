@@ -79,9 +79,9 @@ struct SettingsView: View {
             Button(lm.strings.deleteAllData, role: .destructive) {
                 Task { await vm.requestAccountDeletion() }
             }
-            Button(lm.strings.manageSubscriptions) {
+            /*Button(lm.strings.manageSubscriptions) {
                 openManageSubscriptions()
-            }
+            }*/
             Button(lm.strings.cancel, role: .cancel) {}
         }
         .alert(lm.strings.deleteFailed, isPresented: Binding(

@@ -13,6 +13,27 @@ struct AppLegalLinksTests {
         #expect(isNumericID)
     }
 
+    /// The EPDS copyright holder permits free reproduction only while the authors,
+    /// the title and the source stay attached to the questionnaire, so the citation
+    /// losing any of the three is a licence breach, not a copy tweak.
+    @Test func epdsCitationCarriesAuthorsTitleAndSource() {
+        let citation = AppLegalLinks.epdsCitation
+        for author in ["Cox", "Holden", "Sagovsky"] {
+            #expect(citation.contains(author))
+        }
+        #expect(citation.contains("Edinburgh Postnatal Depression Scale"))
+        #expect(citation.contains("British Journal of Psychiatry"))
+        #expect(citation.contains("1987"))
+        #expect(citation.contains("Royal College of Psychiatrists"))
+    }
+
+    @Test func whoSourceURLsPointAtWHO() {
+        for url in [AppLegalLinks.whoGrowthStandardsURL, AppLegalLinks.whoImmunizationScheduleURL] {
+            #expect(url != nil)
+            #expect(url?.host() == "www.who.int")
+        }
+    }
+
     @Test func manageSubscriptionsURLPointsAtAppStoreSubscriptions() {
         let url = AppLegalLinks.manageSubscriptionsURL
         #expect(url != nil)

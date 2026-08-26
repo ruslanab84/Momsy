@@ -11,7 +11,7 @@ private enum JoinAlert: Identifiable {
     case removedFromFamily
     case cloudSyncConsent
     case cloudSyncFailure(String)
-    case weeklyInsightAIConsent
+    //case weeklyInsightAIConsent
 
     var id: String {
         switch self {
@@ -21,7 +21,7 @@ private enum JoinAlert: Identifiable {
         case .removedFromFamily: return "removedFromFamily"
         case .cloudSyncConsent: return "cloudSyncConsent"
         case .cloudSyncFailure(let message): return "cloudSyncFailure-\(message)"
-        case .weeklyInsightAIConsent: return "weeklyInsightAIConsent"
+        //case .weeklyInsightAIConsent: return "weeklyInsightAIConsent"
         }
     }
 }
@@ -109,7 +109,7 @@ struct MomsyApp: App {
 
 private struct MomsyRootView: View {
     @AppStorage("onboardingDone") private var onboardingDone = false
-    @AppStorage(WeeklyInsightAIConsent.storageKey) private var weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.notDetermined.rawValue
+    //@AppStorage(WeeklyInsightAIConsent.storageKey) private var weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.notDetermined.rawValue
     @Environment(\.scenePhase) private var scenePhase
     @State private var joinAlert: JoinAlert?
     @State private var showJoinAuthSheet = false
@@ -215,18 +215,18 @@ private struct MomsyRootView: View {
                         message: Text(message),
                         dismissButton: .default(Text(localization.strings.done))
                     )
-                case .weeklyInsightAIConsent:
-                    return Alert(
-                        title: Text(localization.strings.weeklyInsightAIConsentTitle),
-                        message: Text(localization.strings.weeklyInsightAIConsentMessage),
-                        primaryButton: .default(Text(localization.strings.weeklyInsightAIConsentAllow)) {
-                            weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.granted.rawValue
-                            Task { await maybeGenerateWeeklyReport() }
-                        },
-                        secondaryButton: .cancel(Text(localization.strings.weeklyInsightAIConsentDeny)) {
-                            weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.denied.rawValue
-                        }
-                    )
+                //case .weeklyInsightAIConsent:
+                  //  return Alert(
+                    //    title: Text(localization.strings.weeklyInsightAIConsentTitle),
+                      //  message: Text(localization.strings.weeklyInsightAIConsentMessage),
+                        //primaryButton: .default(Text(localization.strings.weeklyInsightAIConsentAllow)) {
+                          //  weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.granted.rawValue
+                            //Task { await maybeGenerateWeeklyReport() }
+                        //},
+                        //secondaryButton: .cancel(Text(localization.strings.weeklyInsightAIConsentDeny)) {
+                          //  weeklyInsightAIConsent = WeeklyInsightAIConsent.Status.denied.rawValue
+                        //}
+                    //)
                 }
             }
             .sheet(isPresented: $showJoinAuthSheet, onDismiss: {
