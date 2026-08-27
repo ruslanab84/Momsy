@@ -55,9 +55,11 @@ Momsy is an AI-powered baby care assistant for iOS, built with SwiftUI, SwiftDat
 - **Language**: Swift, SwiftUI
 - **Local persistence**: SwiftData (per-entity repositories)
 - **Cloud sync**: Firebase (Firestore, Auth, Storage, App Check, Analytics), Google Sign-In
-- **AI**: Gemini (on-device fallback aware, iOS 17+)
+- **AI**: Gemini (on-device fallback aware, iOS 17+) — the Weekly Insight AI-report flow (`generateWeeklyInsight`, `WeeklyInsightAIConsent`) is currently commented out in `MomsyApp.swift` ("temporarily disabled for the App Store release"); don't take the dead-looking code as a sign it should be deleted
+- **Subscriptions**: StoreKit 2 via `Features/Subscription/` (`SubscriptionManager`, `PremiumAccessPolicy`, family-wide entitlement sync through `FamilyPremiumService`/`SubscriptionSyncQueue`); local product testing uses `Momsy.storekit`, wired into the `Momsy` scheme's run configuration (not the app bundle)
 - **Companion surfaces**: WidgetKit widgets, Live Activities (`Core/Widget/*ActivityAttributes.swift`), Apple Watch connectivity (`Core/WatchSync`) — note the `MomsyWatch`/`MomsyWatchWidget` source directories exist on disk but are **not currently wired into `Momsy.xcodeproj`** as build targets; adding the target can't be scripted via `project.pbxproj` edits and requires the one-time manual Xcode setup in `docs/AppleWatch-Setup.md`
 - **Localization**: 7 languages (en, ru, de, es, fr, pt, zh) via a custom `L10n`/`LocalizationManager` system (see below), not `.lproj`/`String Catalog` bundles
+- **Deployment target**: iOS 17.0
 
 ## Common Commands
 
@@ -67,7 +69,7 @@ Build and test via `xcodebuild` (no CocoaPods/fastlane; dependencies are Swift P
 # Build the app for a simulator
 xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 17' build
 
-# Run the full unit test suite (~391 tests, ~7-8 min)
+# Run the full unit test suite (~580 @Test cases, several minutes)
 xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 17' test
 
 # Run a single test suite or method (use the Swift type name, not the @Suite("Display Name") string)
@@ -81,15 +83,19 @@ Pick whatever simulator is actually installed (`xcrun simctl list devices availa
 
 Targets: `Momsy` (app), `MomsyTests` (unit tests, Swift Testing framework), `MomsyWidget` (widget extension).
 
-A `GoogleService-Info.plist` is required at `Momsy/Momsy/GoogleService-Info.plist` (never committed — see `.template` file); without it, `FirebaseBootstrapper.isConfigured` is `false` and `AppContainer` falls back to local-only (`No-Op`/`Local*`) repository implementations, so the app still builds and runs without cloud sync.
+A `GoogleService-Info.plist` is required at `Momsy/GoogleService-Info.plist` (never committed — see the sibling `.template` file); without it, `FirebaseBootstrapper.isConfigured` is `false` and `AppContainer` falls back to local-only (`No-Op`/`Local*`) repository implementations, so the app still builds and runs without cloud sync.
 
-### Firestore/Storage security rules tests
+### Firebase (rules + Cloud Functions) tests
 
 ```bash
-npm run test:firebase-rules   # firebase emulators:exec --only firestore,storage + node --test tests/firebase-rules.test.mjs
+npm run test:firebase-rules      # firebase emulators:exec --only firestore,storage + node --test tests/firebase-rules.test.mjs
+npm run test:firebase-functions  # firebase emulators:exec --only firestore,functions + npm test --prefix functions
+npm test                         # both of the above
 ```
 
-Requires JDK 21+ on `JAVA_HOME` (the emulator fails fast on an older default JVM). `firestore.rules` / `storage.rules` changes should be verified here before deploy.
+Requires JDK 21+ on `JAVA_HOME` (the emulator fails fast on an older default JVM). `firestore.rules` / `storage.rules` changes should be verified here before deploy. `functions/` (Node 22, `firebase-functions` + `firebase-admin`) holds the App Store Server Notifications webhook, APNs push, and family/baby deletion-cleanup Cloud Functions — its own tests live in `functions/test/*.test.js`.
+
+`npm run firebase:release-gate` (asserts the `.firebaserc` default project is `momsy-cf74a`, then runs `npm test`) is what CI runs on every PR and push to `main` via `.github/workflows/firebase-release-gate.yml` — it does not touch the iOS app, only Firestore/Storage rules and Cloud Functions.
 
 ## Architecture
 
@@ -99,7 +105,7 @@ Requires JDK 21+ on `JAVA_HOME` (the emulator fails fast on an older default JVM
 
 ### Feature modules (`Momsy/Features/<Name>/`)
 
-Each feature (Sleep, Feeding, Diary, Bath, Walk, Pumping, Vaccination, WeeklyInsights, Sharing, Onboarding, ...) follows the same internal layering:
+Each feature (Sleep, Feeding, Diary, Bath, Walk, Pumping, Vaccination, WeeklyInsights, Sharing, Subscription, Onboarding, ...) follows the same internal layering:
 
 ```
 Data/Persistence/      SwiftData model (e.g. SleepRecord)
@@ -115,12 +121,13 @@ Use `Features/Sleep` as the reference implementation when adding a new feature o
 
 ### Offline-first cloud sync
 
-`Services/Firebase/BabySync/` implements sync between a child's local SwiftData store and Firestore for co-parent sharing:
+`Services/Firebase/BabySync/` implements sync between a child's local SwiftData store and Firestore for co-parent sharing; the corresponding plain domain log types (`SleepLog`, `FeedingLog`, `DiaperLog`, ...) live in `Core/BabySync/Domain/Models/`, each paired with a Firestore `+DTO.swift` mapper under `Services/Firebase/BabySync/Models/`:
 - `BabySyncService` / `BabySyncRepository` push local writes; `CloudSyncDownloader` pulls and merges remote changes per-entity.
 - `SyncWatermarkStore` tracks last-synced timestamps per collection so re-sync/family-switch only pulls deltas.
 - `PendingWritesStore` and `PendingDeletionsStore` queue writes/deletes made while offline for later replay (tombstone-based deletion, not hard deletes).
 - `SleepLiveSyncService` streams open sleep sessions in near-real-time across devices; `SleepSessionOwnership`/`DuplicateOpenSessionPolicy` (in `Features/Sleep/Domain/Services/`) resolve races when both co-parents start/stop a session concurrently.
 - `Core/Family/FamilyManager` + `ActiveBaby` + `FamilySwitchPolicy` govern which family/child scope is active and purge/reset sync state on switch.
+- `Core/Privacy/CloudSyncConsent` gates all of the above: on launch, `MomsyApp`/`ContentView` only calls into cloud services (anonymous sign-in, `cloudSyncDownloader`, `sleepLiveSync`) once the user has explicitly granted sync consent; declining keeps the app on the local/no-op repositories from `AppContainer` even when Firebase is configured.
 
 When touching sync code, check both the Firestore write path (`*SyncRepository`) and the download/merge path (`CloudSyncDownloader`) — the two must stay symmetric (e.g. deletion filtering, watermark advancement) or entries reappear/duplicate across devices.
 
@@ -133,10 +140,13 @@ When touching sync code, check both the Firestore write path (`*SyncRepository`)
 - `Core/Auth` — `AuthManager` (Firebase Auth + Google Sign-In + Apple)
 - `Core/Account` — account deletion / GDPR erasure flow
 - `Core/AI` — Gemini request retry/safety wrappers
+- `Core/Domain` — cross-feature domain types shared by multiple features' Domain layers (`LoadingState`, `RepositoryError`, `BabyAgeContext`/`BabyAgeStage`, `DevelopmentLeapSchedule`, `SyncMerge`, `StaleSessionReconciler`) — put a type here only once two or more features need it, otherwise it belongs in the owning feature's own `Domain/`
 - `Core/Units` — metric/imperial unit system
 - `Core/Widget` — Live Activity attributes/managers per activity type (feeding, sleep, walk, bath, pumping)
 - `Core/WatchSync` — `PhoneSessionManager`/`QuickLogCoordinator` for `WatchConnectivity` messaging to the (currently unbuilt) watch target
 - `Core/Persistence` — `AppPersistence` (SwiftData container bootstrap with recovery-on-corruption; bump its private `schemaVersion` string whenever a new `@Model` class is added to the schema array), `UserDefaultsMigration`
+- `Core/Privacy` — `CloudSyncConsent` (see Offline-first cloud sync above)
+- `Core/Navigation` — `MainTabView`, the app's root tab bar
 
 ## Testing
 
