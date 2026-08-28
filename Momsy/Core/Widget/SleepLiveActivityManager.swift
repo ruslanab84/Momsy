@@ -3,7 +3,7 @@ import Foundation
 import os
 
 @MainActor
-final class SleepLiveActivityManager {
+final class SleepLiveActivityManager: LiveActivityEnding {
     private var activity: Activity<SleepActivityAttributes>?
     private var pushTokenTask: Task<Void, Never>?
     private var activityStateTask: Task<Void, Never>?
@@ -56,20 +56,16 @@ final class SleepLiveActivityManager {
         }
     }
 
-    func endActivity() {
+    func prepareEnd() -> LiveActivityTeardown {
         pushTokenTask?.cancel()
         activityStateTask?.cancel()
         pushTokenTask = nil
         activityStateTask = nil
-        var activities = Activity<SleepActivityAttributes>.activities
-        if let activity, !activities.contains(where: { $0.id == activity.id }) {
-            activities.append(activity)
-        }
-        let activitiesToEnd = activities
+        let activitiesToEnd = Activity<SleepActivityAttributes>.endableActivities(including: activity)
         let endDate = Date()
         let familyId = FamilyManager.shared.familyId
         activity = nil
-        Task {
+        return {
             for existing in activitiesToEnd {
                 var state = existing.content.state
                 state.endDate = endDate

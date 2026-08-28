@@ -3,7 +3,7 @@ import Foundation
 import os
 
 @MainActor
-final class FeedingLiveActivityManager {
+final class FeedingLiveActivityManager: LiveActivityEnding {
     private var activity: Activity<FeedingActivityAttributes>?
     private let logger = Logger(subsystem: "RuslanAbd.Momsy", category: "LiveActivity")
 
@@ -48,10 +48,11 @@ final class FeedingLiveActivityManager {
         Task { await activity.update(ActivityContent(state: state, staleDate: nil)) }
     }
 
-    func endActivity() {
+    func prepareEnd() -> LiveActivityTeardown {
+        let activitiesToEnd = Activity<FeedingActivityAttributes>.endableActivities(including: activity)
         activity = nil
-        Task {
-            for existing in Activity<FeedingActivityAttributes>.activities {
+        return {
+            for existing in activitiesToEnd {
                 await existing.end(nil, dismissalPolicy: .immediate)
             }
         }

@@ -3,7 +3,7 @@ import Foundation
 import os
 
 @MainActor
-final class BathLiveActivityManager {
+final class BathLiveActivityManager: LiveActivityEnding {
     private var activity: Activity<BathActivityAttributes>?
     private let logger = Logger(subsystem: "RuslanAbd.Momsy", category: "LiveActivity")
 
@@ -30,10 +30,11 @@ final class BathLiveActivityManager {
         }
     }
 
-    func endActivity() {
+    func prepareEnd() -> LiveActivityTeardown {
+        let activitiesToEnd = Activity<BathActivityAttributes>.endableActivities(including: activity)
         activity = nil
-        Task {
-            for existing in Activity<BathActivityAttributes>.activities {
+        return {
+            for existing in activitiesToEnd {
                 await existing.end(nil, dismissalPolicy: .immediate)
             }
         }

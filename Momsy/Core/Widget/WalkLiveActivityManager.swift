@@ -3,7 +3,7 @@ import Foundation
 import os
 
 @MainActor
-final class WalkLiveActivityManager {
+final class WalkLiveActivityManager: LiveActivityEnding {
     private var activity: Activity<WalkActivityAttributes>?
     private let logger = Logger(subsystem: "RuslanAbd.Momsy", category: "LiveActivity")
 
@@ -30,10 +30,11 @@ final class WalkLiveActivityManager {
         }
     }
 
-    func endActivity() {
+    func prepareEnd() -> LiveActivityTeardown {
+        let activitiesToEnd = Activity<WalkActivityAttributes>.endableActivities(including: activity)
         activity = nil
-        Task {
-            for existing in Activity<WalkActivityAttributes>.activities {
+        return {
+            for existing in activitiesToEnd {
                 await existing.end(nil, dismissalPolicy: .immediate)
             }
         }
