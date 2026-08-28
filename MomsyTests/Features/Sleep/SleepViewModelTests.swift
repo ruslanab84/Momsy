@@ -1,3 +1,4 @@
+import ActivityKit
 import Testing
 @testable import Momsy
 import Foundation
@@ -721,5 +722,54 @@ struct SleepWidgetRemoteTerminationTests {
 
         #expect(object["effectiveStartDate"] == start.timeIntervalSinceReferenceDate)
         #expect(object["endDate"] == end.timeIntervalSinceReferenceDate)
+    }
+}
+
+@Suite("SleepLiveActivityManager", .serialized)
+@MainActor
+struct SleepLiveActivityManagerTests {
+    @Test("a delayed end does not terminate a newly started activity")
+    func delayedEndDoesNotTerminateNewActivity() async throws {
+        let manager = SleepLiveActivityManager()
+        await manager.endActivityAwaitingCompletion()
+        defer { manager.endActivity() }
+
+        let existingIDs = Set(Activity<SleepActivityAttributes>.activities.map(\.id))
+        manager.startActivity(
+            startDate: Date(),
+            babyName: "Test",
+            babyGender: nil,
+            babyId: nil,
+            sleepLogId: UUID()
+        )
+        let first = try #require(Activity<SleepActivityAttributes>.activities.first {
+            !existingIDs.contains($0.id)
+        })
+
+        manager.endActivity()
+        let idsBeforeRestart = Set(Activity<SleepActivityAttributes>.activities.map(\.id))
+        manager.startActivity(
+            startDate: Date(),
+            babyName: "Test",
+            babyGender: nil,
+            babyId: nil,
+            sleepLogId: UUID()
+        )
+        let restarted = try #require(Activity<SleepActivityAttributes>.activities.first {
+            !idsBeforeRestart.contains($0.id)
+        })
+
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: .seconds(1))
+        while first.activityState != .ended,
+              first.activityState != .dismissed,
+              clock.now < deadline {
+            await Task.yield()
+        }
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(first.activityState == .ended || first.activityState == .dismissed)
+        #expect(restarted.activityState == .active)
+        await manager.endActivityAwaitingCompletion()
     }
 }

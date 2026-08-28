@@ -36,7 +36,7 @@ private struct RemoteSleepEndPayload: Sendable {
 
 enum RemoteSleepNotificationHandler {
     @MainActor
-    fileprivate static func handle(_ payload: RemoteSleepEndPayload) -> UIBackgroundFetchResult {
+    fileprivate static func handle(_ payload: RemoteSleepEndPayload) async -> UIBackgroundFetchResult {
         guard payload.action == "end-sleep",
               let familyId = payload.familyId,
               familyId == UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey),
@@ -54,7 +54,7 @@ enum RemoteSleepNotificationHandler {
             endedAt: Date(timeIntervalSince1970: endedAt)
         )
         if changed {
-            SleepLiveActivityManager().endActivity()
+            await SleepLiveActivityManager().endActivityAwaitingCompletion()
         }
         return changed ? .newData : .noData
     }

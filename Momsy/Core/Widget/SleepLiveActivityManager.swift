@@ -57,6 +57,25 @@ final class SleepLiveActivityManager {
     }
 
     func endActivity() {
+        // Snapshot before the Task can yield so a later sleep activity cannot be ended by this stop.
+        let context = snapshotEndContext()
+        Task {
+            await endActivities(in: context)
+        }
+    }
+
+    /// Awaits the actual `ActivityKit` `end()` calls before returning. Required by callers
+    /// (e.g. the remote push background handler) that must not return control to the system
+    /// before the Live Activity has actually ended, or iOS may suspend the process first.
+    func endActivityAwaitingCompletion() async {
+        await endActivities(in: snapshotEndContext())
+    }
+
+    private func snapshotEndContext() -> (
+        activities: [Activity<SleepActivityAttributes>],
+        endDate: Date,
+        familyId: String?
+    ) {
         pushTokenTask?.cancel()
         activityStateTask?.cancel()
         pushTokenTask = nil
@@ -65,23 +84,28 @@ final class SleepLiveActivityManager {
         if let activity, !activities.contains(where: { $0.id == activity.id }) {
             activities.append(activity)
         }
-        let activitiesToEnd = activities
-        let endDate = Date()
-        let familyId = FamilyManager.shared.familyId
         activity = nil
-        Task {
-            for existing in activitiesToEnd {
-                var state = existing.content.state
-                state.endDate = endDate
-                await existing.end(
-                    ActivityContent(state: state, staleDate: nil, relevanceScore: 0),
-                    dismissalPolicy: .immediate
-                )
-                RemotePushTokenService.shared.revokeLiveActivity(
-                    activityId: existing.id,
-                    familyId: familyId
-                )
-            }
+        return (activities, Date(), FamilyManager.shared.familyId)
+    }
+
+    private func endActivities(
+        in context: (
+            activities: [Activity<SleepActivityAttributes>],
+            endDate: Date,
+            familyId: String?
+        )
+    ) async {
+        for existing in context.activities {
+            var state = existing.content.state
+            state.endDate = context.endDate
+            await existing.end(
+                ActivityContent(state: state, staleDate: nil, relevanceScore: 0),
+                dismissalPolicy: .immediate
+            )
+            RemotePushTokenService.shared.revokeLiveActivity(
+                activityId: existing.id,
+                familyId: context.familyId
+            )
         }
     }
 
