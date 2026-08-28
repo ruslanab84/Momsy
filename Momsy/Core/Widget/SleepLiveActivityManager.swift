@@ -56,7 +56,15 @@ final class SleepLiveActivityManager {
         }
     }
 
-    func endActivity() {
+    /// Снимает Live Activity и возвращает задачу, которая завершится, когда ActivityKit
+    /// реально закроет все активности.
+    ///
+    /// Синхронная часть (отмена наблюдателей, снимок списка активностей, обнуление
+    /// `activity`) выполняется до возврата, поэтому немедленный `startActivity` не
+    /// подхватит уже снятую активность. Само `end(...)` асинхронно, и вызывающий из
+    /// фонового контекста ОБЯЗАН его дождаться — см. `endActivityAndWait()`.
+    @discardableResult
+    func endActivity() -> Task<Void, Never> {
         pushTokenTask?.cancel()
         activityStateTask?.cancel()
         pushTokenTask = nil
@@ -69,7 +77,7 @@ final class SleepLiveActivityManager {
         let endDate = Date()
         let familyId = FamilyManager.shared.familyId
         activity = nil
-        Task {
+        return Task {
             for existing in activitiesToEnd {
                 var state = existing.content.state
                 state.endDate = endDate
@@ -77,12 +85,25 @@ final class SleepLiveActivityManager {
                     ActivityContent(state: state, staleDate: nil, relevanceScore: 0),
                     dismissalPolicy: .immediate
                 )
+                // Отзыв токена намеренно НЕ ожидается: completion Firestore приходит только
+                // после ack бэкенда, поэтому офлайн ожидание не вернулось бы никогда и
+                // повесило бы фоновый хендлер до убийства системой. Firestore сохранит
+                // удаление в персистентном кэше и повторит его сам.
                 RemotePushTokenService.shared.revokeLiveActivity(
                     activityId: existing.id,
                     familyId: familyId
                 )
             }
         }
+    }
+
+    /// Снимает Live Activity и ждёт, пока ActivityKit закроет её.
+    ///
+    /// Нужен фоновым вызывающим (обработчику silent push от второго родителя): вернув
+    /// управление раньше, чем `end(...)` отработал, хендлер отчитается системе о
+    /// завершении, приложение уснёт, и Live Activity останется висеть на локскрине.
+    func endActivityAndWait() async {
+        await endActivity().value
     }
 
     func reattachIfNeeded() {

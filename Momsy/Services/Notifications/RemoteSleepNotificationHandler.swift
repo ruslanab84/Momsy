@@ -35,8 +35,14 @@ private struct RemoteSleepEndPayload: Sendable {
 }
 
 enum RemoteSleepNotificationHandler {
+    /// Обрабатывает silent push «сон закончил второй родитель».
+    ///
+    /// Асинхронный намеренно: система считает фоновое выполнение законченным ровно в
+    /// момент возврата результата, поэтому снятие Live Activity нужно ДОЖДАТЬСЯ здесь.
+    /// Раньше хендлер был синхронным, `endActivity()` только ставил detached-таску, и
+    /// приложение успевало уснуть до `end(...)` — активность оставалась на локскрине.
     @MainActor
-    fileprivate static func handle(_ payload: RemoteSleepEndPayload) -> UIBackgroundFetchResult {
+    fileprivate static func handle(_ payload: RemoteSleepEndPayload) async -> UIBackgroundFetchResult {
         guard payload.action == "end-sleep",
               let familyId = payload.familyId,
               familyId == UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey),
@@ -53,9 +59,8 @@ enum RemoteSleepNotificationHandler {
             babyId: babyId,
             endedAt: Date(timeIntervalSince1970: endedAt)
         )
-        if changed {
-            SleepLiveActivityManager().endActivity()
-        }
-        return changed ? .newData : .noData
+        guard changed else { return .noData }
+        await SleepLiveActivityManager().endActivityAndWait()
+        return .newData
     }
 }
