@@ -23,6 +23,10 @@ Declare each item for **App Functionality**, **Used for tracking = No**:
       Firebase Authentication. **Linked = Yes**.
 - [ ] **Identifiers → User ID** — anonymous or provider-backed Firebase Auth ID.
       **Linked = Yes**.
+- [ ] **Purchases → Purchase History** — signed StoreKit subscription
+      transaction (JWS) sent to a Momsy Firebase Cloud Function and verified
+      entitlement fields stored in Firestore. **Purpose = App Functionality**,
+      **Linked = Yes**, **Used for tracking = No**.
 - [ ] **User Content → Other User Content** — synced diary text and free-form
       care records. **Linked = Yes**.
 
@@ -59,6 +63,9 @@ Optional collection still counts as collection for App Store privacy answers.
 - [ ] Third-party SDK privacy manifests are present and valid in the archive.
 - [ ] Generate Xcode's privacy report from the release archive and reconcile it
       against App Store Connect before submission.
+- [ ] In App Store Connect → App Privacy, add **Purchases → Purchase History**,
+      answer **App Functionality = Yes**, **Linked to identity = Yes**, and
+      **Used for tracking = No**, then click **Publish**.
 
 ## Public policy
 

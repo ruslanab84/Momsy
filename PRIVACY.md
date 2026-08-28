@@ -1,6 +1,6 @@
 # Momsy Privacy Policy
 
-**Effective date:** 26 August 2026
+**Effective date:** 28 August 2026
 
 Momsy ("the app", "we", "us") helps parents and caregivers track a baby's care
 and their own well-being. This policy explains what Momsy processes, when data
@@ -19,7 +19,7 @@ apps or websites.
 | Parent well-being | Mood, energy, and EPDS postpartum-depression screening score | Yes | No; these records remain local |
 | Family sharing | Invite codes, family membership, member name and role | Limited local state | Google Cloud Firestore |
 | Account | Anonymous Firebase user ID, or Apple/Google account ID, name, and email when provided by that sign-in service | Limited local state | Firebase Authentication |
-| Subscription | StoreKit entitlement status | Yes | Processed by Apple; Momsy does not send it to Firebase |
+| Subscription | Signed StoreKit transaction and entitlement status | Yes | Firebase Cloud Function for verification; verified entitlement fields in Google Cloud Firestore |
 
 Momsy has no diary-photo feature and does not include or use Firebase Storage.
 The daily tip shown in Today uses built-in local content. Momsy does not send
@@ -37,8 +37,14 @@ you allow it:
   family members you invite.
 - Firebase App Check sends app/device attestation material and short-lived
   tokens to verify that requests come from the genuine app.
+- When a subscription is purchased, restored, or renewed for a cloud-enabled
+  family, Momsy sends Apple's signed StoreKit transaction (JWS) to a Momsy
+  Firebase Cloud Function. The function verifies the signature and account
+  binding, then stores the subscription product, original transaction ID,
+  expiry/revocation status, and linked Firebase user/family. The signed JWS is
+  used for verification and is not stored in Firestore.
 - Firebase SDK requests may include service data such as device and OS type,
-  app bundle/version, SDK version, model name for AI calls, and IP address.
+  app bundle/version, SDK version, and IP address.
 
 You can turn cloud sync off in **Settings → Data & Privacy → Cloud sync**.
 After you turn it off, Momsy stops new Firestore sync and live cloud updates.
@@ -80,7 +86,8 @@ We use data only to:
 - provide local tracking, charts, reminders, and daily tips;
 - provide cloud backup, restore, and invited-family sync when you allow it;
 - authenticate and protect private Firebase access;
-- verify subscription access through StoreKit.
+- verify subscription access and share it with an invited family through
+  StoreKit and Firebase.
 
 We do not use data for advertising, data-broker sales, or cross-app tracking.
 
