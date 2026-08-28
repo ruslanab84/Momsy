@@ -82,6 +82,12 @@ not Apple Family Sharing.
 Localization: `Core/Localization/LocalizedText.swift` (`LocalizedText`/`LocalizedList`, English
 fallback, per-language params: en/ru/de/es/fr/pt/zh) plus `L10n.swift`. 7 languages are supported;
 translations for new content should cover all of them or explicitly fall back to English.
+Because the translations live in Swift rather than in `.lproj` resources, the bundle has to declare
+them separately: `CFBundleLocalizations` in `Momsy/Info.plist` and `MomsyWidget/Info.plist`, plus
+`knownRegions` in `project.pbxproj`. That declaration is what makes iOS render the sheets it draws
+for us (Sign in with Apple, permission alerts, StoreKit) in the user's language and lets App Store
+Connect accept localized listings — adding a `Language` case means updating all three
+(`MomsyTests/Core/Localization/BundleLocalizationTests.swift` guards this).
 
 Firebase config: `firebase.json` (rules/emulators), `firestore.rules`, `firestore.indexes.json`,
 `storage.rules`. Cloud Functions live in `functions/` (apns, baby-deletion-cleanup,

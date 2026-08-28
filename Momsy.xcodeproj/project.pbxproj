@@ -18,6 +18,7 @@
 		0BABF1250000000000000001 /* SyncWatermarkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */; };
 		0BABF1260000000000000001 /* WatermarkAdvanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */; };
 		0BABF1270000000000000001 /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF1270000000000000002 /* LanguageTests.swift */; };
+		0BABF12C0000000000000011 /* BundleLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12C0000000000000012 /* BundleLocalizationTests.swift */; };
 		0BABF12A0000000000000001 /* CloudSyncWatermarkCommitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */; };
 		0BABF12B0000000000000001 /* FamilyErrorLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */; };
 		0BABF12B0000000000000004 /* FamilyJoinFlowFlagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */; };
@@ -171,6 +172,7 @@
 		0BABF1250000000000000002 /* SyncWatermarkStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncWatermarkStoreTests.swift; sourceTree = "<group>"; };
 		0BABF1260000000000000002 /* WatermarkAdvanceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatermarkAdvanceTests.swift; sourceTree = "<group>"; };
 		0BABF1270000000000000002 /* LanguageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LanguageTests.swift; sourceTree = "<group>"; };
+		0BABF12C0000000000000012 /* BundleLocalizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BundleLocalizationTests.swift; sourceTree = "<group>"; };
 		0BABF12A0000000000000002 /* CloudSyncWatermarkCommitTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncWatermarkCommitTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000002 /* FamilyErrorLocalizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyErrorLocalizationTests.swift; sourceTree = "<group>"; };
 		0BABF12B0000000000000005 /* FamilyJoinFlowFlagTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilyJoinFlowFlagTests.swift; sourceTree = "<group>"; };
@@ -448,6 +450,7 @@
 			isa = PBXGroup;
 			children = (
 				0BABF1270000000000000002 /* LanguageTests.swift */,
+				0BABF12C0000000000000012 /* BundleLocalizationTests.swift */,
 			);
 			path = Localization;
 			sourceTree = "<group>";
@@ -971,6 +974,13 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
+				es,
+				fr,
+				pt,
+				ru,
+				zh,
+				"zh-Hans",
 			);
 			mainGroup = B7318B3E2FB8F473003CCB0B;
 			minimizedProjectReferenceProxies = 1;
@@ -1093,6 +1103,7 @@
 				F4A9C1B2D3E4F50617283940 /* FamilyPremiumAccessTests.swift in Sources */,
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
 				0BABF1270000000000000001 /* LanguageTests.swift in Sources */,
+				0BABF12C0000000000000011 /* BundleLocalizationTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB001 /* FirebaseBootstrapperTests.swift in Sources */,
 				F1AEB007F1AEB007F1AEB011 /* SleepLiveSyncServiceTests.swift in Sources */,
 				FDC10002FDC10002FDC10002 /* FamilyDepartureCleanupJobTests.swift in Sources */,

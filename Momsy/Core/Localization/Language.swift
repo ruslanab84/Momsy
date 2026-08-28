@@ -51,6 +51,30 @@ enum Language: String, CaseIterable, Identifiable, Codable {
         Language(rawValue: code) ?? .english
     }
 
+    /// Resolves a BCP-47 identifier (`pt-BR`, `zh-Hans-CN`, `de_DE`) onto a
+    /// supported language, or `nil` when the app does not ship that language.
+    static func matching(_ identifier: String) -> Language? {
+        let normalized = identifier.replacingOccurrences(of: "_", with: "-")
+        let firstSubtag = normalized.split(separator: "-").first.map { String($0) } ?? normalized
+        let code = Locale(identifier: normalized).language.languageCode?.identifier ?? firstSubtag
+        return Language(rawValue: code.lowercased())
+    }
+
+    /// The language iOS resolved this bundle to for the current launch.
+    ///
+    /// `Momsy/Info.plist` declares every supported language in
+    /// `CFBundleLocalizations`, so `preferredLocalizations` reflects the per-app
+    /// language chosen in Settings ▸ Momsy ▸ Language, falling back to the
+    /// device's preferred language order. Seeding the in-app language from it
+    /// keeps our own UI in the same language as the sheets iOS draws for us
+    /// (Sign in with Apple, permission alerts, StoreKit purchase confirmation).
+    static var systemPreferred: Language {
+        for identifier in Bundle.main.preferredLocalizations + Locale.preferredLanguages {
+            if let match = matching(identifier) { return match }
+        }
+        return .english
+    }
+
     static func localeIdentifier(for code: String) -> String {
         from(code).localeIdentifier
     }

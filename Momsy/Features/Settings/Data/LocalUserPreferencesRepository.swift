@@ -10,7 +10,11 @@ final class LocalUserPreferencesRepository: UserPreferencesRepository {
     func load() -> UserPreferences {
         UserPreferences(
             appTheme:    UserDefaults.standard.string(forKey: Keys.theme)      ?? "system",
-            appLanguage: UserDefaults.standard.string(forKey: Keys.language)   ?? "en",
+            // Falls back to the live in-app language (device-resolved on a
+            // first launch), never to a hardcoded "en" that would leave the
+            // Settings picker out of step with the UI around it.
+            appLanguage: UserDefaults.standard.string(forKey: Keys.language)
+                ?? LocalizationManager.shared.lang,
             unitSystem:  UserDefaults.standard.string(forKey: Keys.unitSystem) ?? "metric"
         )
     }
