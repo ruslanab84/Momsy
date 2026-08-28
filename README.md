@@ -51,6 +51,12 @@ Momsy — iOS-приложение для родителей и близких: 
    проекта.
 3. Добавьте созданный plist в target `Momsy` в Xcode; файл с реальными
    значениями не должен попадать в Git.
+   Сборочная фаза `Validate Firebase Configuration`
+   ([scripts/validate-firebase-config.sh](scripts/validate-firebase-config.sh))
+   проверяет, что plist попал в бандл и заполнен реальными значениями: для
+   Debug это предупреждение, для Release и archive — ошибка сборки. Так релиз
+   без конфигурации не уедет в TestFlight молча. На CI подкладывайте plist из
+   секретов перед сборкой.
 4. Перед развёртыванием Firestore проверьте `firestore.rules` и
    `firestore.indexes.json`. Конфигурация Firebase CLI находится в
    `firebase.json`.

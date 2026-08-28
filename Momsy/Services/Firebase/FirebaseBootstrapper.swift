@@ -18,7 +18,11 @@ enum FirebaseBootstrapper {
         guard FirebaseApp.app() == nil else { return true }
 
         guard let path = googleServiceInfoPath(in: bundle) else {
-            log.warning("Skipping Firebase configuration: GoogleService-Info.plist is missing from the app bundle.")
+            // Soft-failing here is deliberate: running without a Firebase config is a
+            // supported local-only setup. It must never reach a shipping build though —
+            // the "Validate Firebase Configuration" build phase (scripts/validate-firebase-config.sh)
+            // fails Release and archive builds when the plist is missing.
+            log.fault("Skipping Firebase configuration: GoogleService-Info.plist is missing from the app bundle. Cloud sync, family sharing and push are disabled.")
             return false
         }
 

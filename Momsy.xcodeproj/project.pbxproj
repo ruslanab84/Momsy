@@ -923,6 +923,7 @@
 				B7318B432FB8F473003CCB0B /* Sources */,
 				B7318B442FB8F473003CCB0B /* Frameworks */,
 				B7318B452FB8F473003CCB0B /* Resources */,
+				B7318B602FB8F473003CCB0B /* Validate Firebase Configuration */,
 				E7A3B6225227A343AA22DCE5 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -1014,6 +1015,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B7318B602FB8F473003CCB0B /* Validate Firebase Configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Validate Firebase Configuration";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/scripts/validate-firebase-config.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3593CA8CD019F88E0D87F6F8 /* Sources */ = {
