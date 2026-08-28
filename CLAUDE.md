@@ -88,6 +88,15 @@ Firebase config: `firebase.json` (rules/emulators), `firestore.rules`, `firestor
 family-departure-cleanup, subscription-entitlement, live-activity). No `gh` CLI auth in this repo —
 review changes via local `git diff`/`git log`, not `gh pr`.
 
+Versioning: `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` are defined **once**, on the
+project-level Debug/Release configurations in `Momsy.xcodeproj/project.pbxproj`; the Momsy,
+MomsyWidget and MomsyTests targets inherit them. Bump both places there and nowhere else — do not
+re-add per-target overrides (Xcode writes them when you edit versions in a target's General tab),
+and never hardcode `CFBundleShortVersionString`/`CFBundleVersion` in `MomsyWidget/Info.plist`
+(`GENERATE_INFOPLIST_FILE = NO` for that target, so the plist is used verbatim; it must keep
+referencing `$(MARKETING_VERSION)`/`$(CURRENT_PROJECT_VERSION)`). App and widget versions that
+drift apart are rejected on upload with ITMS-90473.
+
 ## Git workflow
 
 This repo pushes directly to `origin/main` — no PR workflow. Before committing: scope with
