@@ -12,11 +12,29 @@ final class LocalizationManager: ObservableObject {
 
     @Published private(set) var current: Language
 
-    private init() {
+    /// Device language narrowed to a supported `Language`. Region and script
+    /// subtags are dropped: `de-AT` → `de`, `zh-Hans-CN` → `zh`, `pt-BR` → `pt`.
+    nonisolated static var systemLanguage: Language {
+        for identifier in Locale.preferredLanguages {
+            let code = identifier.split(separator: "-").first.map(String.init) ?? identifier
+            if let language = Language(rawValue: code) { return language }
+        }
+        return .english
+    }
+
+    /// The user's explicit choice, or the device language on first launch.
+    /// `nonisolated` so that non-isolated call sites — `LocalizedError`
+    /// conformances in particular — can read it without hopping to the main actor.
+    nonisolated static var currentLanguage: Language {
         let stored = UserDefaults.standard.string(forKey: Defaults.appLanguageKey)
             ?? UserDefaults(suiteName: Defaults.appGroupSuiteName)?.string(forKey: Defaults.appLanguageKey)
-            ?? Language.english.rawValue
-        current = Language(rawValue: stored) ?? .english
+        return stored.flatMap(Language.init(rawValue:)) ?? systemLanguage
+    }
+
+    nonisolated static var strings: L10n { L10n(currentLanguage) }
+
+    private init() {
+        current = Self.currentLanguage
         persist(current, reloadWidgets: false)
     }
 

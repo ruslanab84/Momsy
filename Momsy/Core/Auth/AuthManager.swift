@@ -23,17 +23,18 @@ enum AuthError: LocalizedError {
     case providerAccountConflict
 
     var errorDescription: String? {
+        let strings = LocalizationManager.strings
         switch self {
-        case .tokenMissing:          return "Apple Sign-In failed. Please try again."
-        case .notImplemented:        return "Google Sign-In is coming soon."
-        case .appleSignInUnavailable: return "To use Sign in with Apple, open Settings → [Your Name] and sign in with your Apple ID."
-        case .reauthRequired:        return "Please sign in again to delete your account."
-        case .accountDeletionPending: return "Previous account deletion is still finishing. Please try again."
-        case .accountDeletionFinished: return "Previous account deletion finished. Please sign in again."
-        case .cloudSyncConsentRequired: return "Allow cloud sync before using family sharing."
-        case .nonceGenerationFailed: return "Could not start Sign in with Apple. Please try again."
-        case .anonymousSignInRestricted: return "Sign in with Apple or Google before creating or joining a family."
-        case .providerAccountConflict: return "This email is already linked to a different sign-in method. Use the provider you originally signed in with."
+        case .tokenMissing:          return strings.authAppleTokenMissing
+        case .notImplemented:        return strings.authGoogleNotImplemented
+        case .appleSignInUnavailable: return strings.authAppleSignInUnavailable
+        case .reauthRequired:        return strings.authReauthRequired
+        case .accountDeletionPending: return strings.authAccountDeletionPending
+        case .accountDeletionFinished: return strings.authAccountDeletionFinished
+        case .cloudSyncConsentRequired: return strings.authCloudSyncConsentRequired
+        case .nonceGenerationFailed: return strings.authNonceGenerationFailed
+        case .anonymousSignInRestricted: return strings.authAnonymousSignInRestricted
+        case .providerAccountConflict: return strings.authProviderAccountConflict
         }
     }
 }

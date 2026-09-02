@@ -23,8 +23,8 @@ struct MomsyFeedingWidget: Widget {
         StaticConfiguration(kind: kind, provider: MomsyWidgetProvider()) { entry in
             MomsyFeedingWidgetView(entry: entry)
         }
-        .configurationDisplayName("Кормление")
-        .description("Таймер кормления")
+        .configurationDisplayName(WidgetL10n.current.feeding)
+        .description(WidgetL10n.current.widgetFeedingDescription)
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryCircular])
     }
 }
@@ -36,8 +36,8 @@ struct MomsySleepWidget: Widget {
         StaticConfiguration(kind: kind, provider: MomsyWidgetProvider()) { entry in
             MomsySleepWidgetView(entry: entry)
         }
-        .configurationDisplayName("Сон")
-        .description("Трекер сна")
+        .configurationDisplayName(WidgetL10n.current.sleep)
+        .description(WidgetL10n.current.widgetSleepDescription)
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
@@ -49,8 +49,8 @@ struct MomsySummaryWidget: Widget {
         StaticConfiguration(kind: kind, provider: MomsyWidgetProvider()) { entry in
             MomsySummaryWidgetView(entry: entry)
         }
-        .configurationDisplayName("Сводка дня")
-        .description("Кормление, сон и подгузники")
+        .configurationDisplayName(WidgetL10n.current.widgetSummaryName)
+        .description(WidgetL10n.current.widgetSummaryDescription)
         .supportedFamilies([.systemMedium])
     }
 }
@@ -62,8 +62,8 @@ struct MomsyStandByWidget: Widget {
         StaticConfiguration(kind: kind, provider: MomsyWidgetProvider()) { entry in
             MomsyStandByWidgetView(entry: entry)
         }
-        .configurationDisplayName("Ночной режим")
-        .description("Последнее кормление и сон для StandBy")
+        .configurationDisplayName(WidgetL10n.current.widgetStandByName)
+        .description(WidgetL10n.current.widgetStandByDescription)
         .supportedFamilies([.systemSmall])
     }
 }

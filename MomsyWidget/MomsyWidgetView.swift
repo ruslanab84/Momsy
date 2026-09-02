@@ -144,6 +144,13 @@ struct WidgetL10n {
     var pumpingActive: String { t("Pumping…", "Сцеживание…", "Pumpen…", "Extrayendo…", "Tire-lait…", "Extração…", "吸奶中…") }
     var updating: String { t("Updating…", "Обновление…", "Aktualisiert…", "Actualizando…", "Mise à jour…", "A atualizar…", "更新中…") }
 
+    var widgetFeedingDescription: String { t("Feeding timer", "Таймер кормления", "Fütterungs-Timer", "Temporizador de tomas", "Minuteur de tétée", "Temporizador de mamadas", "喂养计时器") }
+    var widgetSleepDescription: String { t("Sleep tracker", "Трекер сна", "Schlaf-Tracker", "Registro de sueño", "Suivi du sommeil", "Registo de sono", "睡眠记录") }
+    var widgetSummaryName: String { t("Daily summary", "Сводка дня", "Tagesübersicht", "Resumen del día", "Résumé du jour", "Resumo do dia", "每日概览") }
+    var widgetSummaryDescription: String { t("Feeding, sleep and diapers", "Кормление, сон и подгузники", "Füttern, Schlaf und Windeln", "Tomas, sueño y pañales", "Tétées, sommeil et couches", "Mamadas, sono e fraldas", "喂养、睡眠和尿布") }
+    var widgetStandByName: String { t("Night mode", "Ночной режим", "Nachtmodus", "Modo noche", "Mode nuit", "Modo noturno", "夜间模式") }
+    var widgetStandByDescription: String { t("Last feeding and sleep for StandBy", "Последнее кормление и сон для StandBy", "Letzte Fütterung und Schlaf für StandBy", "Última toma y sueño para StandBy", "Dernière tétée et sommeil pour StandBy", "Última mamada e sono para StandBy", "StandBy 上的最近喂养与睡眠") }
+
     func openMomsyFor(_ name: String) -> String {
         t("Open Momsy\nfor \(name)", "Открой Momsy\nдля \(name)", "Öffne Momsy\nfür \(name)", "Abre Momsy\npara \(name)", "Ouvrez Momsy\npour \(name)", "Abra o Momsy\npara \(name)", "打开 Momsy\n查看 \(name)")
     }

@@ -18,12 +18,14 @@ enum FirebaseBootstrapper {
         guard FirebaseApp.app() == nil else { return true }
 
         guard let path = googleServiceInfoPath(in: bundle) else {
-            log.warning("Skipping Firebase configuration: GoogleService-Info.plist is missing from the app bundle.")
+            log.fault("Firebase configuration aborted: GoogleService-Info.plist is missing from the app bundle. Cloud sync, invites and subscription entitlement are disabled for this install.")
+            assertionFailure("GoogleService-Info.plist is missing from the app bundle.")
             return false
         }
 
         guard let options = FirebaseOptions(contentsOfFile: path) else {
-            log.error("Skipping Firebase configuration: GoogleService-Info.plist could not be loaded.")
+            log.fault("Firebase configuration aborted: GoogleService-Info.plist could not be parsed. Cloud sync, invites and subscription entitlement are disabled for this install.")
+            assertionFailure("GoogleService-Info.plist could not be parsed.")
             return false
         }
 
