@@ -202,7 +202,10 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
         guard !ids.isEmpty else {
             // No roster yet: preserve prior single-baby behaviour.
             await syncBabyProfile()
-            await downloadAndMerge()
+            guard let babyId = ActiveBaby.currentId else { return }
+            await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+                await downloadAndMerge()
+            }
             return
         }
 
@@ -226,15 +229,18 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     }
 
     /// Re-pull the now-active child's logs after a profile switch. Skips the one-time
-    /// path migration/discovery — those already ran on first launch. The repositories
-    /// read the active babyId at query time, so the merge targets the new child.
+    /// path migration/discovery — those already ran on first launch. Keep the target
+    /// fixed while another switch can change the user's selection during a fetch.
     @MainActor
     func resyncActiveBaby() async {
         guard CloudSyncConsent.isGranted() else { return }
         guard FirebaseApp.app() != nil else { return }
         guard FamilyManager.shared.familyId != nil else { return }
-        await syncBabyProfile()
-        await downloadAndMerge()
+        guard let babyId = ActiveBaby.currentId else { return }
+        await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+            await syncBabyProfile()
+            await downloadAndMerge()
+        }
     }
 
     /// Live sleep trigger path. Unlike `resyncAll`, this must not be time-debounced
@@ -547,12 +553,15 @@ final class CloudSyncDownloader: CloudSyncDownloaderProtocol {
     /// Merges one collection and, only on success, advances its watermark. A throwing
     /// upsert leaves the watermark untouched so the same delta is re-pulled next sync.
     @MainActor
-    private func merge<DTO, Entry>(_ fetched: PendingFetch<DTO>,
-                                   map: (DTO) -> Entry?,
-                                   upsert: ([Entry]) async throws -> Void) async {
+    func merge<DTO, Entry>(_ fetched: PendingFetch<DTO>,
+                           map: (DTO) -> Entry?,
+                           upsert: ([Entry]) async throws -> Void) async {
+        guard let babyId = UUID(uuidString: fetched.babyId) else { return }
         let entries = fetched.dtos.compactMap(map)
         do {
-            try await upsert(entries)
+            try await ActiveBaby.$syncTargetOverride.withValue(babyId) {
+                try await upsert(entries)
+            }
             commit(fetched)
         } catch {
             // Watermark not advanced; this window is retried on the next sync.

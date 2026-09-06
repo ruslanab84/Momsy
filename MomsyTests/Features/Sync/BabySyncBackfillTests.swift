@@ -7,6 +7,39 @@ struct BabySyncBackfillTests {
 
     private struct DummyLog: Encodable { let id: String; let amountMl: Int }
 
+    private struct SwitchingLog: Encodable {
+        let defaults: UserDefaults
+        let nextBabyId: String
+
+        func encode(to encoder: Encoder) throws {
+            // Deterministically switch after setLog starts preparing its payload.
+            defaults.set(nextBabyId, forKey: kBabyIdDefaultsKey)
+            try DummyLog(id: "switching-log", amountMl: 120).encode(to: encoder)
+        }
+    }
+
+    @Test func setLogKeepsOriginalBabyWhilePreparingPayload() async throws {
+        let suite = "BabySyncBackfillTests.switch.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        let babyA = UUID().uuidString, babyB = UUID().uuidString
+        defaults.set(babyA, forKey: kBabyIdDefaultsKey)
+        PendingWritesStore.shared.clear()
+        defer {
+            PendingWritesStore.shared.clear()
+            defaults.removePersistentDomain(forName: suite)
+        }
+
+        try await BabySyncService(defaults: defaults, cloudSyncAllowed: { true })
+            .setLog(SwitchingLog(defaults: defaults, nextBabyId: babyB),
+                    id: "switching-log", to: "feedingLogs")
+
+        let queued = PendingWritesStore.shared.all()
+        #expect(queued.count == 1)
+        #expect(queued.first?.babyId == babyA)
+        #expect(queued.first?.familyId == "")
+        #expect(defaults.string(forKey: kBabyIdDefaultsKey) == babyB)
+    }
+
     @Test func authorStampingFillsEmptyAuthorFields() {
         let payload: [String: Any] = ["amountMl": 120, "addedBy": "", "addedByName": ""]
         let stamped = SyncAuthorMetadata.stamp(

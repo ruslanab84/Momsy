@@ -107,18 +107,21 @@ final class BabySyncService {
     func setLog<T: Encodable>(_ log: T, id: String, to subcollection: String) async throws {
         guard cloudSyncAllowed() else { return }
         guard !id.isEmpty else { return }
+        // Author lookup can suspend while the user selects another child.
+        let scope = currentScope()
+        let ref = hasPath ? collection(subcollection).document(id) : nil
         var payload = try await encodedPayloadWithAuthor(log)
-        guard hasPath else {
+        guard let ref else {
             // `@ServerTimestamp updatedAt` encodes to a `FieldValue` sentinel that `UserDefaults`
             // can't persist; drop it here and let `replayPendingWrites` re-stamp a fresh
             // serverTimestamp. The path is still stamped so replay routes the write to the baby
             // (and family) it belongs to, never to whoever is active at replay time.
             payload.removeValue(forKey: "updatedAt")
             PendingWritesStore.shared.add(collection: subcollection, docId: id,
-                                          payload: payload, familyId: familyId, babyId: babyId)
+                                          payload: payload, familyId: scope.familyId, babyId: scope.babyId)
             return
         }
-        collection(subcollection).document(id).setData(payload, merge: true) { error in
+        ref.setData(payload, merge: true) { error in
             guard let error else { return }
             Self.log.error("setLog(\(subcollection, privacy: .public)) failed: \(error.localizedDescription, privacy: .public)")
         }
@@ -133,6 +136,7 @@ final class BabySyncService {
     private func currentAuthorIdentity() async -> SyncAuthorIdentity? {
         guard FirebaseBootstrapper.isConfigured else { return nil }
         guard let user = Auth.auth().currentUser else { return nil }
+        let familyId = self.familyId
 
         let fallbackName = AccountDisplay.memberName(displayName: user.displayName, email: user.email)
         guard !familyId.isEmpty else {
@@ -545,9 +549,10 @@ final class BabySyncService {
         guard hasPath else { return [] }
         var all: [T] = []
         var cursor: DocumentSnapshot?
+        let source = collection(subcollection)
 
         while true {
-            var query: Query = collection(subcollection)
+            var query: Query = source
             if let ownerUID {
                 query = query.whereField("addedBy", isEqualTo: ownerUID)
             }
@@ -612,7 +617,10 @@ final class BabySyncService {
     func setBabyProfile(_ profile: BabyProfile) async throws {
         guard cloudSyncAllowed() else { return }
         guard !familyId.isEmpty else { return }
-        defaults.set(profile.id.uuidString, forKey: kBabyIdDefaultsKey)
+        // A background backfill must not undo a selection made while it was fetching.
+        if ActiveBaby.syncTargetOverride == nil {
+            defaults.set(profile.id.uuidString, forKey: kBabyIdDefaultsKey)
+        }
         try babyDoc().setData(from: BabyProfileDTO(from: profile), merge: true)
     }
 
