@@ -4,6 +4,7 @@ enum BlobKind: String, Codable {
     case baby, sleep, bottle, moon, sun, drop, star, heart, cloud, bear
     case walk, bath, vitamin, stool, pump
     case mom, dad, nanny, grandma, other
+    case babyAsian, babyDark, babyBlonde
 }
 
 extension BlobKind {
@@ -29,6 +30,9 @@ extension BlobKind {
         case .nanny:   return "nanny"
         case .grandma: return "grandma"
         case .other:   return "other"
+        case .babyAsian:  return "babyAsian"
+        case .babyDark:   return "babyDark"
+        case .babyBlonde: return "babyBlonde"
         }
     }
 
@@ -54,6 +58,9 @@ extension BlobKind {
         case .nanny:   return .bbMint
         case .grandma: return .bbLilac
         case .other:   return .bbButter
+        case .babyAsian:  return .bbMint
+        case .babyDark:   return .bbLilac
+        case .babyBlonde: return .bbSky
         }
     }
 }

@@ -38,9 +38,9 @@ enum BabyAgeStage: String, CaseIterable, Identifiable {
         switch self {
         case .newborn: return .sleep
         case .baby:    return .baby
-        case .eat:     return .bottle
-        case .toddler: return .bear
-        case .kid:     return .star
+        case .eat:     return .babyAsian
+        case .toddler: return .babyDark
+        case .kid:     return .babyBlonde
         }
     }
     var tone: Color {

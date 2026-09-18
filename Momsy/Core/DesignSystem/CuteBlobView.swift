@@ -38,6 +38,9 @@ struct CuteBlobView: View {
         case .nanny:   NannyBlob(s: size)
         case .grandma: GrandmaBlob(s: size)
         case .other:   OtherBlob(s: size)
+        case .babyAsian:  BabyAsianBlob(s: size)
+        case .babyDark:   BabyDarkBlob(s: size)
+        case .babyBlonde: BabyBlondeBlob(s: size)
         }
     }
 }
@@ -207,30 +210,84 @@ private struct OtherBlob: View {
     }
 }
 
-// MARK: - Baby
+// MARK: - Baby (shared face, tinted per variant)
 
-private struct BabyBlob: View {
+private struct BabyFaceBlob: View {
     let s: CGFloat
+    var skin: Color = Color(bbHex: "FFD9B8")
+    var hair: Color = Color(bbHex: "5A3D2B")
+    var eye: Color = Color(bbHex: "5A3D2B")
+    /// true = narrower, gently angled eyes; false = round eyes
+    var almondEyes: Bool = false
+
     var body: some View {
         let f = s * 0.55
         ZStack {
             Ellipse()
-                .fill(Color(bbHex: "FFD9B8"))
+                .fill(skin)
                 .frame(width: f, height: f * 1.05)
             // hair
             Ellipse()
-                .fill(Color(bbHex: "5A3D2B"))
+                .fill(hair)
                 .frame(width: f * 0.9, height: f * 0.4)
                 .offset(y: -f * 0.33)
-            // left eye
-            Circle().fill(Color(bbHex: "5A3D2B")).frame(width: f*0.11, height: f*0.11).offset(x: -f*0.16, y: -f*0.04)
-            // right eye
-            Circle().fill(Color(bbHex: "5A3D2B")).frame(width: f*0.11, height: f*0.11).offset(x:  f*0.16, y: -f*0.04)
+            if almondEyes {
+                Capsule().fill(eye).frame(width: f*0.16, height: f*0.06).offset(x: -f*0.16, y: -f*0.03)
+                Capsule().fill(eye).frame(width: f*0.16, height: f*0.06).offset(x:  f*0.16, y: -f*0.03)
+            } else {
+                Circle().fill(eye).frame(width: f*0.11, height: f*0.11).offset(x: -f*0.16, y: -f*0.04)
+                Circle().fill(eye).frame(width: f*0.11, height: f*0.11).offset(x:  f*0.16, y: -f*0.04)
+            }
             // left cheek
             Circle().fill(Color.bbCoral).opacity(0.7).frame(width: f*0.22, height: f*0.22).offset(x: -f*0.24, y: f*0.13)
             // right cheek
             Circle().fill(Color.bbCoral).opacity(0.7).frame(width: f*0.22, height: f*0.22).offset(x:  f*0.24, y: f*0.13)
         }
+    }
+}
+
+private struct BabyBlob: View {
+    let s: CGFloat
+    var body: some View { BabyFaceBlob(s: s) }
+}
+
+/// Baby with East Asian features: warm skin tone, straight black hair, almond eyes.
+private struct BabyAsianBlob: View {
+    let s: CGFloat
+    var body: some View {
+        BabyFaceBlob(
+            s: s,
+            skin: Color(bbHex: "FFDFC0"),
+            hair: Color(bbHex: "241C16"),
+            eye: Color(bbHex: "241C16"),
+            almondEyes: true
+        )
+    }
+}
+
+/// Baby with dark skin tone and dark hair.
+private struct BabyDarkBlob: View {
+    let s: CGFloat
+    var body: some View {
+        BabyFaceBlob(
+            s: s,
+            skin: Color(bbHex: "8A5A3C"),
+            hair: Color(bbHex: "1E140F"),
+            eye: Color(bbHex: "1E140F")
+        )
+    }
+}
+
+/// Baby with light skin tone and blonde hair.
+private struct BabyBlondeBlob: View {
+    let s: CGFloat
+    var body: some View {
+        BabyFaceBlob(
+            s: s,
+            skin: Color(bbHex: "FFE3C6"),
+            hair: Color(bbHex: "E8C27A"),
+            eye: Color(bbHex: "5A3D2B")
+        )
     }
 }
 
