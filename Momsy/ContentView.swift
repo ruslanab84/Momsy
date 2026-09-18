@@ -3,7 +3,6 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("onboardingDone") private var onboardingDone = false
-    @AppStorage("paywallShown") private var paywallShown = false
     @Environment(\.appContainer) private var container
     @Environment(\.scenePhase) private var scenePhase
     @Binding private var widgetFeatureRoute: WidgetFeatureRoute?
@@ -26,16 +25,15 @@ struct ContentView: View {
             } else if premiumAccessState == .resolving {
                 SplashView()
                     .transition(.opacity)
-            } else if premiumAccessState == .requiresPurchase && !paywallShown {
+            } else if premiumAccessState == .requiresPurchase {
                 PaywallView(
                     subscriptionManager: container.subscriptionManager,
                     pendingInviteStore: PendingFamilyInviteStore(),
                     joinFamily: { code in
                         try await container.joinFamilyFromOnboarding(code: code)
                     },
-                    onComplete: {
-                        withAnimation(.easeInOut(duration: 0.35)) { paywallShown = true }
-                    }
+                    allowsSkip: false,
+                    onComplete: {}
                 )
                 .transition(.opacity)
             } else {
@@ -53,16 +51,9 @@ struct ContentView: View {
             Task { await container.subscriptionManager.refreshAccess() }
         }
         .task {
-            migrateLegacyPaywallStateIfNeeded()
             premiumAccessState = container.subscriptionManager.accessState
             try? await Task.sleep(for: .seconds(2.2))
             showSplash = false
-        }
-    }
-
-    private func migrateLegacyPaywallStateIfNeeded() {
-        if PaywallPresentationState.shouldSuppressInitialPaywallForExistingUser() {
-            paywallShown = true
         }
     }
 }
@@ -79,18 +70,7 @@ struct ContentView: View {
 }
 
 enum PaywallPresentationState {
-    private static let onboardingDoneKey = "onboardingDone"
     private static let paywallShownKey = "paywallShown"
-    private static let legacyMigrationKey = "paywallShownExistingUserMigrationDone"
-
-    static func shouldSuppressInitialPaywallForExistingUser(defaults: UserDefaults = .standard) -> Bool {
-        guard !defaults.bool(forKey: legacyMigrationKey) else { return false }
-        defer { defaults.set(true, forKey: legacyMigrationKey) }
-
-        let completedOnboarding = defaults.bool(forKey: onboardingDoneKey)
-        let hasPaywallDecision = defaults.object(forKey: paywallShownKey) != nil
-        return completedOnboarding && !hasPaywallDecision
-    }
 
     static func resetForAuthenticationChange(defaults: UserDefaults = .standard) {
         defaults.removeObject(forKey: paywallShownKey)

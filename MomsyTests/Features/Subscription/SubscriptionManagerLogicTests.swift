@@ -231,6 +231,15 @@ struct SubscriptionManagerLogicTests {
         #expect(SubscriptionManager.isUnexpired(expirationDate: nil))
     }
 
+    @Test func purchaseGraceIsCappedByExpiry() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        #expect(SubscriptionManager.purchaseGraceDeadline(expirationDate: nil, now: now)
+            == now.addingTimeInterval(SubscriptionManager.purchaseGrace))
+        #expect(SubscriptionManager.purchaseGraceDeadline(
+            expirationDate: now.addingTimeInterval(10), now: now
+        ) == now.addingTimeInterval(10))
+    }
+
     @Test func savingsPercentTypicalCase() {
         // 4.99 * 12 = 59.88; annual 39.99 → ~33%
         let percent = SubscriptionManager.savingsPercent(monthlyPrice: 4.99, annualPrice: 39.99)

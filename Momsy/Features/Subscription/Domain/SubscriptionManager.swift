@@ -43,6 +43,11 @@ final class SubscriptionManager: ObservableObject {
     private var productLoadTask: Task<[Product], Error>?
     private var familyIDObserver: AnyCancellable?
     private var personalPremium = false
+    /// A just-purchased, verified transaction keeps access until this instant even if a
+    /// `currentEntitlements` scan hasn't caught up yet. The StoreKit sheet dismissing fires a
+    /// foreground `refreshAccess()` that can run before the new entitlement is listed, which
+    /// used to overwrite the fresh grant and bounce the buyer straight back to the paywall.
+    private var purchaseGraceUntil: Date?
     private var familyPremium = false
     private var isResolvingPersonal = true
     private var isResolvingFamily = true
@@ -114,13 +119,36 @@ final class SubscriptionManager: ObservableObject {
         let accountToken = familyPremiumService.currentUID.map {
             Self.appAccountToken(for: $0)
         }
-        let result = try await service.purchase(product, appAccountToken: accountToken)
+        Self.log.info("Purchase start: \(product.id, privacy: .public), boundToAccount=\(accountToken != nil)")
+        let result: Product.PurchaseResult
+        do {
+            result = try await service.purchase(product, appAccountToken: accountToken)
+        } catch {
+            Self.log.error("Purchase threw: \(String(describing: error), privacy: .public)")
+            // Store refuses with ASDServerErrorDomain 3532 when the Apple ID already holds this
+            // subscription, which StoreKit surfaces as an unmapped error. Re-derive access
+            // instead of leaving a subscriber stuck on the paywall with a generic failure.
+            await refreshAccess()
+            Self.log.info("Purchase error refresh: personalPremium=\(self.personalPremium)")
+            if personalPremium { return true }
+            if (error as NSError).domain == "ASDServerErrorDomain" {
+                throw SubscriptionError.ownedByAnotherAccount
+            }
+            throw error
+        }
         try Self.throwIfPending(result)
         switch result {
         case .success(let verification):
             let tx = try verified(verification)
             await refreshAccess()
             grantIfEntitled(tx)
+            Self.log.info("""
+                Purchase success: \(tx.productID, privacy: .public), \
+                tokenMatches=\(tx.appAccountToken == accountToken), \
+                expired=\(!Self.isUnexpired(expirationDate: tx.expirationDate)), \
+                personalPremium=\(self.personalPremium), \
+                state=\(String(describing: self.accessState), privacy: .public)
+                """)
             await persistAndFinishIfNeeded(
                 transaction: tx,
                 signedTransaction: verification.jwsRepresentation
@@ -133,6 +161,7 @@ final class SubscriptionManager: ObservableObject {
             guard personalPremium else { throw SubscriptionError.ownedByAnotherAccount }
             return true
         case .pending, .userCancelled:
+            Self.log.info("Purchase not completed: \(String(describing: result), privacy: .public)")
             return false
         @unknown default:
             return false
@@ -171,6 +200,7 @@ final class SubscriptionManager: ObservableObject {
         familyPremiumService.stopObserving()
         syncQueue.clear()
         personalPremium = false
+        purchaseGraceUntil = nil
         familyPremium = false
         isResolvingPersonal = false
         isResolvingFamily = false
@@ -180,6 +210,7 @@ final class SubscriptionManager: ObservableObject {
     func authSessionDidChange(isAuthenticated: Bool) async {
         familyPremiumService.stopObserving()
         personalPremium = false
+        purchaseGraceUntil = nil
         familyPremium = false
         observedFamilyID = nil
         hasObservedFamily = false
@@ -339,8 +370,7 @@ final class SubscriptionManager: ObservableObject {
     /// `revocationDate` but lapse/expiry only via `expirationDate`, and reading just the
     /// former would let a replayed stale transaction resurrect an expired subscription.
     private func grantIfEntitled(_ transaction: Transaction) {
-        guard !personalPremium,
-              Self.grantsPremium(productID: transaction.productID),
+        guard Self.grantsPremium(productID: transaction.productID),
               transaction.revocationDate == nil,
               Self.isUnexpired(expirationDate: transaction.expirationDate),
               Self.shouldGrantPersonalEntitlement(
@@ -348,8 +378,20 @@ final class SubscriptionManager: ObservableObject {
                 currentUID: familyPremiumService.currentUID
               )
         else { return }
+        purchaseGraceUntil = Self.purchaseGraceDeadline(expirationDate: transaction.expirationDate)
+        guard !personalPremium else { return }
         personalPremium = true
         updateAccessState()
+    }
+
+    nonisolated static let purchaseGrace: TimeInterval = 300
+
+    nonisolated static func purchaseGraceDeadline(
+        expirationDate: Date?,
+        now: Date = Date()
+    ) -> Date {
+        let deadline = now.addingTimeInterval(purchaseGrace)
+        return expirationDate.map { min($0, deadline) } ?? deadline
     }
 
     private func updatePersonalStatus(synchronizeFamilyEntitlement: Bool) async {
@@ -375,7 +417,7 @@ final class SubscriptionManager: ObservableObject {
                 }
             }
         }
-        personalPremium = hasSub
+        personalPremium = hasSub || (purchaseGraceUntil.map { $0 > Date() } ?? false)
         isResolvingPersonal = false
         updateAccessState()
         if let pending {
@@ -438,6 +480,7 @@ final class SubscriptionManager: ObservableObject {
             isResolving: isResolvingPersonal || isResolvingFamily
         )
         guard resolved != accessState else { return }
+        Self.log.info("Access state: \(String(describing: self.accessState), privacy: .public) -> \(String(describing: resolved), privacy: .public)")
         accessState = resolved
         isPremium = resolved == .premium
     }

@@ -4,6 +4,7 @@ import Combine
 
 struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
+    let allowsSkip: Bool
     let onComplete: () -> Void
 
     @EnvironmentObject private var loc: LocalizationManager
@@ -16,9 +17,11 @@ struct PaywallView: View {
         subscriptionManager: SubscriptionManager,
         pendingInviteStore: PendingFamilyInviteStore,
         joinFamily: @escaping @MainActor (String) async throws -> Void,
+        allowsSkip: Bool = true,
         onComplete: @escaping () -> Void
     ) {
         self.subscriptionManager = subscriptionManager
+        self.allowsSkip = allowsSkip
         self.onComplete = onComplete
         _actionHandler = StateObject(wrappedValue: PaywallActionHandler(
             pendingInviteStore: pendingInviteStore,
@@ -39,7 +42,7 @@ struct PaywallView: View {
             GeometryReader { proxy in
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
-                        skipButton
+                        if allowsSkip { skipButton }
                         Spacer(minLength: 12)
                         heroSection
                         Spacer().frame(height: 24)
