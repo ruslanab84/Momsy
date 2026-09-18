@@ -1650,6 +1650,38 @@ struct L10n {
                                        "Commencer l’essai gratuit",
                                        "Iniciar avaliação gratuita",
                                        "开始免费试用") }
+    func paywallBilledPrice(price: String, isAnnual: Bool) -> String {
+        let period = isAnnual ? "year" : "month"
+        let russianPeriod = isAnnual ? "год" : "мес."
+        let germanPeriod = isAnnual ? "Jahr" : "Monat"
+        let spanishPeriod = isAnnual ? "año" : "mes"
+        let frenchPeriod = isAnnual ? "an" : "mois"
+        let portuguesePeriod = isAnnual ? "ano" : "mês"
+        let chinesePeriod = isAnnual ? "年" : "月"
+        return s("\(price)/\(period)",
+                 "\(price)/\(russianPeriod)",
+                 "\(price)/\(germanPeriod)",
+                 "\(price)/\(spanishPeriod)",
+                 "\(price)/\(frenchPeriod)",
+                 "\(price)/\(portuguesePeriod)",
+                 "\(price)/\(chinesePeriod)")
+    }
+    func paywallCTASubscribePrice(price: String, isAnnual: Bool) -> String {
+        let period = isAnnual ? "year" : "month"
+        let russianPeriod = isAnnual ? "год" : "мес."
+        let germanPeriod = isAnnual ? "Jahr" : "Monat"
+        let spanishPeriod = isAnnual ? "año" : "mes"
+        let frenchPeriod = isAnnual ? "an" : "mois"
+        let portuguesePeriod = isAnnual ? "ano" : "mês"
+        let chinesePeriod = isAnnual ? "年" : "月"
+        return s("Subscribe — \(price)/\(period)",
+                 "Оформить подписку — \(price)/\(russianPeriod)",
+                 "Abonnieren — \(price)/\(germanPeriod)",
+                 "Suscribirse — \(price)/\(spanishPeriod)",
+                 "S’abonner — \(price)/\(frenchPeriod)",
+                 "Subscrever — \(price)/\(portuguesePeriod)",
+                 "订阅 — \(price)/\(chinesePeriod)")
+    }
     var paywallPriceLoadingDisclosure: String {
         s("Loading subscription price...",
           "Загружаем цену подписки...",

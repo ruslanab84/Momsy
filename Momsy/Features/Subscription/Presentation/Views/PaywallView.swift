@@ -88,17 +88,25 @@ struct PaywallView: View {
             }
 
             Text(subscriptionNameText)
-                .font(.system(size: 30, weight: .bold))
-                .foregroundColor(.white)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundColor(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
 
+            if let heroPriceText {
+                Text(heroPriceText)
+                    .font(.system(size: 32, weight: .heavy))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+            }
+
             if subscriptionManager.trialEligible {
                 Text(lm.trialBadge)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.caption2.weight(.bold))
                     .foregroundColor(.bbLilacDeep)
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 7)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
                     .background(Color.white.opacity(0.95))
                     .clipShape(Capsule())
             }
@@ -240,7 +248,11 @@ struct PaywallView: View {
 
     private var primaryButtonTitle: String {
         if actionHandler.hasPendingInvite { return lm.joinFamilyTitle }
-        return subscriptionManager.trialEligible ? lm.startTrial : lm.subscribeCTA
+        guard let product = subscriptionManager.selectedProduct else {
+            return subscriptionManager.trialEligible ? lm.startTrial : lm.subscribeCTA
+        }
+        let isAnnual = product.id == ProductID.annual
+        return lm.paywallCTASubscribePrice(price: product.displayPrice, isAnnual: isAnnual)
     }
 
     private var isPrimaryActionDisabled: Bool {
@@ -265,6 +277,12 @@ struct PaywallView: View {
         return isAnnual
             ? lm.paywallRenewalDisclosureAnnualNoTrial(price: price)
             : lm.paywallRenewalDisclosureMonthlyNoTrial(price: price)
+    }
+
+    private var heroPriceText: String? {
+        guard let product = subscriptionManager.selectedProduct else { return nil }
+        let isAnnual = product.id == ProductID.annual
+        return lm.paywallBilledPrice(price: product.displayPrice, isAnnual: isAnnual)
     }
 
     private var subscriptionNameText: String {
