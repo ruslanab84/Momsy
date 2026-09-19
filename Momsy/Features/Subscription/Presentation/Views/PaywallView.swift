@@ -10,6 +10,7 @@ struct PaywallView: View {
     @EnvironmentObject private var loc: LocalizationManager
     @StateObject private var actionHandler: PaywallActionHandler
     @State private var restoreError: Error?
+    @State private var restoreNotice: String?
 
     private var lm: L10n { loc.strings }
 
@@ -191,6 +192,7 @@ struct PaywallView: View {
             Button {
                 Task {
                     restoreError = nil
+                    restoreNotice = nil
                     if await actionHandler.perform() { onComplete() }
                 }
             } label: {
@@ -219,6 +221,12 @@ struct PaywallView: View {
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 28)
+            } else if let restoreNotice {
+                Text(restoreNotice)
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 28)
             }
 
             Text(renewalDisclosureText)
@@ -232,9 +240,16 @@ struct PaywallView: View {
             Button {
                 Task {
                     restoreError = nil
+                    restoreNotice = nil
                     do {
                         try await subscriptionManager.restore()
-                        if subscriptionManager.isPremium { onComplete() }
+                        // A restore with nothing to restore succeeds and grants nothing. Saying
+                        // so beats a button that visibly does nothing at all.
+                        if subscriptionManager.isPremium {
+                            onComplete()
+                        } else {
+                            restoreNotice = lm.restoreNoPurchasesFound
+                        }
                     } catch {
                         restoreError = error
                     }
@@ -245,6 +260,7 @@ struct PaywallView: View {
                     .foregroundColor(.white.opacity(0.65))
                     .underline()
             }
+            .disabled(subscriptionManager.isLoading || actionHandler.isLoading)
         }
         .padding(.bottom, 44)
     }

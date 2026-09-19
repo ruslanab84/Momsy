@@ -14,7 +14,9 @@ const {
     loadAppleRootCAs,
     matchesAppAccountToken,
     premiumEntitlementFor,
+    refreshBoundEntitlement,
     updateFamilyPremium,
+    verifyNotification,
     verifyTransaction,
 } = require("../subscription-entitlement");
 
@@ -170,4 +172,119 @@ test("unknown products cannot create a family Premium entitlement", () => {
         originalTransactionId: "1000000123456789",
         expiresDate: Date.now() + 60_000,
     }, new Date()).isActive, false);
+});
+
+test("notifications verify with the notification decoder and the same environment fallback", async () => {
+    const calls = [];
+    const decoded = { notificationType: "DID_RENEW" };
+    const result = await verifyNotification("payload", {
+        appAppleId: 6784641297,
+        makeVerifier(environment) {
+            calls.push(environment);
+            return {
+                verifyAndDecodeNotification: async () => {
+                    if (environment === Environment.PRODUCTION) {
+                        throw new VerificationException(VerificationStatus.INVALID_ENVIRONMENT);
+                    }
+                    return decoded;
+                },
+            };
+        },
+    });
+
+    assert.equal(result, decoded);
+    assert.deepEqual(calls, [Environment.PRODUCTION, Environment.SANDBOX]);
+});
+
+// Minimal in-memory Firestore: one bound entitlement doc plus the family doc writes.
+function notificationDb(existing) {
+    const writes = [];
+    const ref = (path) => ({ path, id: path.split("/").pop() });
+    const db = {
+        collection(name) {
+            return {
+                doc: (id) => ref(`${name}/${id}`),
+                where: () => ({ query: name }),
+            };
+        },
+        async runTransaction(body) {
+            return body({
+                async get(target) {
+                    if (target.query) {
+                        return { docs: existing ? [{ id: "otid", data: () => existing }] : [] };
+                    }
+                    if (target.path === "subscriptionEntitlements/otid") {
+                        return {
+                            exists: existing !== undefined,
+                            get: (field) => existing?.[field],
+                        };
+                    }
+                    return { exists: false, get: () => undefined };
+                },
+                set(target, data) { writes.push({ path: target.path, data }); },
+            });
+        },
+    };
+    return { db, writes };
+}
+
+const monthly = "com.ruslanabdulov.momsy.premium.monthly";
+const entitlement = (expiresDate, revocationDate = null) => ({
+    originalTransactionId: "otid",
+    productId: monthly,
+    expiresDate,
+    revocationDate,
+});
+
+test("a renewal notification extends the bound family's Premium", async () => {
+    const now = Date.now();
+    const { db, writes } = notificationDb({
+        ownerUid: "uid-a",
+        familyId: "family-a",
+        productId: monthly,
+        expiresAt: Timestamp.fromMillis(now - 1_000),
+        revokedAt: null,
+    });
+
+    assert.equal(await refreshBoundEntitlement(db, entitlement(now + 86_400_000)), true);
+
+    const family = writes.find((write) => write.path === "families/family-a");
+    assert.equal(family.data.premiumEntitlement.active, true);
+    assert.equal(family.data.premiumEntitlement.expiresAt.toMillis(), now + 86_400_000);
+    assert.equal(writes[0].data.ownerUid, "uid-a");
+});
+
+test("a refund notification removes family Premium", async () => {
+    const expires = Date.now() + 86_400_000;
+    const { db, writes } = notificationDb({
+        ownerUid: "uid-a",
+        familyId: "family-a",
+        productId: monthly,
+        expiresAt: Timestamp.fromMillis(expires),
+        revokedAt: null,
+    });
+
+    await refreshBoundEntitlement(db, entitlement(expires, Date.now()));
+
+    const family = writes.find((write) => write.path === "families/family-a");
+    assert.equal(family.data.premiumEntitlement.isEqual(FieldValue.delete()), true);
+});
+
+test("an out-of-order older notification never shortens access", async () => {
+    const now = Date.now();
+    const { db, writes } = notificationDb({
+        ownerUid: "uid-a",
+        familyId: "family-a",
+        expiresAt: Timestamp.fromMillis(now + 86_400_000),
+    });
+
+    assert.equal(await refreshBoundEntitlement(db, entitlement(now + 1_000)), false);
+    assert.deepEqual(writes, []);
+});
+
+test("an unbound subscription is ignored until its owner syncs it", async () => {
+    const { db, writes } = notificationDb(undefined);
+
+    assert.equal(await refreshBoundEntitlement(db, entitlement(Date.now() + 1_000)), false);
+    assert.deepEqual(writes, []);
 });

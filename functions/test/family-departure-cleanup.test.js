@@ -12,6 +12,7 @@ const { dispatchSleepEnd, reconcileLiveActivityToken } = require("../live-activi
 const {
     bindEntitlementToCurrentFamily,
     detachFamilyEntitlements,
+    eraseOwnerEntitlements,
 } = require("../subscription-entitlement");
 
 const projectId = "demo-momsy";
@@ -342,6 +343,111 @@ test("a verified subscription is shared with the family and removed on departure
     ]);
     assert.equal(familyWithoutPremium.get("premiumEntitlement"), undefined);
     assert.equal(detachedEntitlement.get("familyId"), "");
+});
+
+test("a stale signed transaction never rolls a bound expiry back", async () => {
+    const familyId = "stale-jws-family";
+    const movedFamilyId = "stale-jws-new-family";
+    const uid = "stale-jws-owner";
+    const transactionID = "4000000000000001";
+    const fresh = Date.now() + 86_400_000;
+    const sign = (expiresDate) => ({
+        originalTransactionId: transactionID,
+        productId: "com.ruslanabdulov.momsy.premium.monthly",
+        expiresDate,
+        revocationDate: null,
+    });
+    for (const id of [familyId, movedFamilyId]) {
+        await db.collection("families").doc(id).set({ bootstrapComplete: true });
+        await db.collection("families").doc(id).collection("members").doc(uid).set({ uid });
+    }
+    await db.collection("users").doc(uid).set({ familyId });
+    await bindEntitlementToCurrentFamily(db, uid, sign(fresh), familyId);
+
+    await bindEntitlementToCurrentFamily(db, uid, sign(Date.now() - 1_000), familyId);
+
+    const record = db.collection("subscriptionEntitlements").doc(transactionID);
+    assert.equal((await record.get()).get("expiresAt").toMillis(), fresh);
+    assert.equal(
+        (await db.collection("families").doc(familyId).get()).get("premiumEntitlement.active"),
+        true
+    );
+
+    await db.collection("users").doc(uid).set({ familyId: movedFamilyId });
+    await bindEntitlementToCurrentFamily(db, uid, sign(Date.now() - 1_000), movedFamilyId);
+
+    const moved = await record.get();
+    assert.equal(moved.get("familyId"), movedFamilyId);
+    assert.equal(moved.get("expiresAt").toMillis(), fresh);
+    assert.equal(
+        (await db.collection("families").doc(movedFamilyId).get()).get("premiumEntitlement.active"),
+        true
+    );
+    assert.equal(
+        (await db.collection("families").doc(familyId).get()).get("premiumEntitlement"),
+        undefined
+    );
+});
+
+test("account deletion erases every subscription record the owner held", async () => {
+    const familyId = "erased-premium-family";
+    const uid = "erased-subscriber";
+    const entitlements = db.collection("subscriptionEntitlements");
+    await db.collection("families").doc(familyId).set({ bootstrapComplete: true });
+    await db.collection("families").doc(familyId).collection("members").doc(uid).set({ uid });
+    await db.collection("users").doc(uid).set({ familyId });
+    await bindEntitlementToCurrentFamily(db, uid, {
+        originalTransactionId: "2000000000000001",
+        productId: "com.ruslanabdulov.momsy.premium.monthly",
+        expiresDate: Date.now() + 60_000,
+        revocationDate: null,
+    }, familyId);
+    await entitlements.doc("2000000000000002").set({ ownerUid: uid, familyId: "" });
+    await entitlements.doc("2000000000000003").set({ ownerUid: "someone-else", familyId: "" });
+
+    await detachFamilyEntitlements(db, familyId, uid, { deleteRecords: true });
+
+    const [family, bound, detached, foreign] = await Promise.all([
+        db.collection("families").doc(familyId).get(),
+        entitlements.doc("2000000000000001").get(),
+        entitlements.doc("2000000000000002").get(),
+        entitlements.doc("2000000000000003").get(),
+    ]);
+    assert.equal(family.get("premiumEntitlement"), undefined);
+    assert.equal(bound.exists, false);
+    assert.equal(detached.exists, false);
+    assert.equal(foreign.exists, true);
+});
+
+test("auth deletion erases a familyless owner's records and a bound family's Premium", async () => {
+    const entitlements = db.collection("subscriptionEntitlements");
+    await entitlements.doc("3000000000000001").set({ ownerUid: "familyless-owner", familyId: "" });
+    await entitlements.doc("3000000000000002").set({ ownerUid: "other-owner", familyId: "" });
+
+    await eraseOwnerEntitlements(db, "familyless-owner");
+
+    assert.equal((await entitlements.doc("3000000000000001").get()).exists, false);
+    assert.equal((await entitlements.doc("3000000000000002").get()).exists, true);
+
+    const familyId = "auth-deleted-premium-family";
+    const uid = "auth-deleted-owner";
+    await db.collection("families").doc(familyId).set({ bootstrapComplete: true });
+    await db.collection("families").doc(familyId).collection("members").doc(uid).set({ uid });
+    await db.collection("users").doc(uid).set({ familyId });
+    await bindEntitlementToCurrentFamily(db, uid, {
+        originalTransactionId: "3000000000000003",
+        productId: "com.ruslanabdulov.momsy.premium.monthly",
+        expiresDate: Date.now() + 60_000,
+        revocationDate: null,
+    }, familyId);
+
+    await eraseOwnerEntitlements(db, uid);
+
+    assert.equal((await entitlements.doc("3000000000000003").get()).exists, false);
+    assert.equal(
+        (await db.collection("families").doc(familyId).get()).get("premiumEntitlement"),
+        undefined
+    );
 });
 
 test("cleanup does nothing when canonical membership is active", async () => {

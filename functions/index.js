@@ -2,6 +2,7 @@ const { initializeApp } = require("firebase-admin/app");
 const { FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
 const { onDocumentDeleted, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
+const { auth } = require("firebase-functions/v1");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const { cleanupDeletedBaby } = require("./baby-deletion-cleanup");
 const {
@@ -18,7 +19,10 @@ const {
     EntitlementError,
     authorizeRequest,
     bindEntitlementToCurrentFamily,
+    eraseOwnerEntitlements,
     premiumEntitlementFor,
+    refreshBoundEntitlement,
+    verifyNotification,
     verifyTransaction,
 } = require("./subscription-entitlement");
 
@@ -98,6 +102,11 @@ exports.cleanupDepartedFamilyMember = onDocumentDeleted({
             }
         });
     }
+});
+
+// v2 has no Auth onDelete trigger; v1 is the supported way to react to account deletion.
+exports.eraseDeletedAccountEntitlements = auth.user().onDelete(async (user) => {
+    await eraseOwnerEntitlements(getFirestore(), user.uid);
 });
 
 exports.cleanupDeletedBaby = onDocumentDeleted({
@@ -258,5 +267,48 @@ exports.syncSubscriptionEntitlement = onRequest({
             code: failure.code,
             retryable: failure.retryable,
         });
+    }
+});
+
+// App Store Server Notifications V2 (URL set in App Store Connect → App Information).
+// Apple retries any non-2xx, so only a transient verification failure answers 5xx.
+exports.appStoreServerNotifications = onRequest({
+    region: "us-central1",
+}, async (request, response) => {
+    if (request.method !== "POST") {
+        response.status(405).end();
+        return;
+    }
+    try {
+        const signedPayload = request.body?.signedPayload;
+        if (typeof signedPayload !== "string" || signedPayload.length === 0) {
+            throw new EntitlementError("invalid_request", 400, "signedPayload is required.");
+        }
+        const notification = await verifyNotification(signedPayload);
+        const signedTransaction = notification.data?.signedTransactionInfo;
+        if (typeof signedTransaction !== "string") {
+            response.status(200).end();
+            return;
+        }
+        const entitlement = premiumEntitlementFor(await verifyTransaction(signedTransaction));
+        if (entitlement.isKnownProduct
+            && typeof entitlement.originalTransactionId === "string"
+            && entitlement.originalTransactionId.length > 0
+            && Number.isFinite(entitlement.expiresDate)) {
+            const updated = await refreshBoundEntitlement(getFirestore(), entitlement);
+            console.log("App Store notification applied", {
+                type: notification.notificationType,
+                subtype: notification.subtype,
+                updated,
+                active: entitlement.isActive,
+            });
+        }
+        response.status(200).end();
+    } catch (error) {
+        console.error("App Store notification failed", error);
+        const failure = error instanceof EntitlementError
+            ? error
+            : new EntitlementError("service_unavailable", 503, "Unavailable.", true, error);
+        response.status(failure.httpStatus).end();
     }
 });

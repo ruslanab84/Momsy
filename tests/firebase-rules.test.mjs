@@ -278,6 +278,25 @@ test("new family bootstrap commits routing and family state atomically", async (
     });
 });
 
+test("new family bootstrap rejects a baby subcollection without its baby doc", async () => {
+    // Guards FamilyManager.createFamily: one orphan profile/info write must not ride
+    // along, or the whole bootstrap batch (family, member, routing) is denied.
+    const uid = "orphan-creator";
+    const id = "orphan-family";
+    const family = `families/${id}`;
+    const db = firestore(uid);
+    const batch = db.batch();
+
+    batch.set(db.doc(family), { createdBy: uid, bootstrapComplete: true });
+    batch.set(db.doc(`${family}/members/${uid}`), { uid, roleRaw: "Мама" });
+    batch.set(db.doc(`${family}/babies/orphan-baby/profile/info`), {
+        members: [{ uid, role: "parent", name: "Mom" }],
+    });
+    batch.set(db.doc(`users/${uid}`), { familyId: id });
+
+    await assertFails(batch.commit());
+});
+
 test("clients cannot forge Premium during either family creation path", async () => {
     const directUid = "premium-direct-creator";
     const directDb = firestore(directUid);
@@ -403,27 +422,21 @@ test("a parent cannot rewrite a member's auth identity", async () => {
     await assertSucceeds(member.update({ name: "Updated by parent" }));
 });
 
-test("legacy members can repair a missing role without promoting themselves", async () => {
+test("a member without a role cannot assign one and a parent cannot strip one", async () => {
     await testEnv.withSecurityRulesDisabled(async (adminContext) => {
-        const db = adminContext.firestore();
-        await db.doc(`${familyPath}/members/${users.mom}`).update({
-            roleRaw: deleteField(),
-        });
-        await db.doc(`${familyPath}/members/${users.outsider}`).set({
+        await adminContext.firestore().doc(`${familyPath}/members/${users.outsider}`).set({
             uid: users.outsider,
             name: "Legacy member",
         });
     });
 
-    const creator = firestore(users.mom).doc(`${familyPath}/members/${users.mom}`);
-    await assertFails(creator.update({ roleRaw: "Папа" }));
-    await assertSucceeds(creator.update({ roleRaw: "Мама" }));
+    const legacy = firestore(users.outsider).doc(`${familyPath}/members/${users.outsider}`);
+    await assertFails(legacy.update({ roleRaw: "Папа" }));
+    await assertFails(legacy.update({ roleRaw: "Мама" }));
 
-    const member = firestore(users.outsider).doc(`${familyPath}/members/${users.outsider}`);
-    await assertFails(member.update({ roleRaw: "Мама" }));
-    await assertFails(member.update({ roleRaw: "Няня" }));
-    await assertFails(member.update({ roleRaw: "Бабушка" }));
-    await assertSucceeds(member.update({ roleRaw: "Папа" }));
+    const nanny = firestore(users.mom).doc(`${familyPath}/members/${users.nanny}`);
+    await assertFails(nanny.update({ roleRaw: deleteField() }));
+    await assertSucceeds(nanny.update({ name: "Still a nanny" }));
 });
 
 test("a parent cannot create a placeholder member without an authenticated join", async () => {
@@ -765,6 +778,19 @@ test("self-invite join is rejected when the member role does not match the invit
     batch.set(joinerDb.doc(`users/${users.outsider}`), { familyId });
     batch.delete(joinerDb.doc("invites/MOMSY-J2N3-K4L5-M6P8"));
     await assertFails(batch.commit());
+});
+
+test("legacy family-keyed tree is read/delete-only, even for parents", async () => {
+    const db = firestore(users.mom);
+
+    await assertSucceeds(db.doc(`${legacyBabyPath}/feedingLogs/legacy-feed`).get());
+    await assertFails(db.doc(`${legacyBabyPath}/feedingLogs/new-feed`).set({
+        addedBy: users.mom,
+        startedAt: new Date(),
+    }));
+    await assertFails(db.doc(`${legacyBabyPath}/feedingLogs/legacy-feed`).update({ note: "x" }));
+    await assertFails(db.doc(legacyBabyPath).set({ id: babyId }));
+    await assertSucceeds(db.doc(`${legacyBabyPath}/feedingLogs/legacy-feed`).delete());
 });
 
 test("parents retain full baby and medical access", async () => {

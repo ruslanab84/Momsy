@@ -37,7 +37,7 @@ async function cleanupDepartedFamilyMember(db, familyId, uid, options = {}) {
         db.collection("users").doc(uid), memberRef, familyId, uid, accountDeletion
     );
     await scrubInvites(db, memberRef, familyId, uid, userCleanup === "deleted");
-    await detachFamilyEntitlements(db, familyId, uid);
+    await detachFamilyEntitlements(db, familyId, uid, { deleteRecords: accountDeletion });
     await verifyCleanup(
         parentRefs,
         familyRef,
@@ -264,7 +264,7 @@ async function cleanupAbandonedFamily(db, familyRef, memberRef, familyId, uid) {
     const userCleanup = await clearStaleUserRoute(
         userRef, memberRef, familyId, uid, true
     );
-    await detachFamilyEntitlements(db, familyId, uid);
+    await detachFamilyEntitlements(db, familyId, uid, { deleteRecords: true });
 
     await Promise.all(
         (await familyRef.listCollections()).map((collection) => db.recursiveDelete(collection))

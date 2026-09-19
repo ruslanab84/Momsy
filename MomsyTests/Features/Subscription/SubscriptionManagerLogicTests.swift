@@ -380,6 +380,104 @@ struct SubscriptionManagerLogicTests {
         ))
     }
 
+    @Test func scopeCheckKeepsTheSuccessMarkerWhenNothingIsPending() async {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let context = SubscriptionSyncContext(uid: "uid-a", familyID: "family-a")
+        let job = pending(signedTransaction: "signed")
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: { context },
+            synchronize: { _ in },
+            retryDelays: []
+        )
+        queue.enqueue(job)
+        await queue.flush()
+        #expect(store.wasSuccessfullySynchronized(job))
+
+        // Runs on every launch from `observeCurrentFamily`.
+        queue.discardPendingIfScopeChanged(to: context)
+
+        #expect(store.wasSuccessfullySynchronized(job))
+        store.save(job)
+        #expect(store.load() == nil)
+    }
+
+    @Test func scopeChangeStillDropsTheStalePendingJob() {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: {
+                SubscriptionSyncContext(uid: "uid-b", familyID: "family-b")
+            },
+            synchronize: { _ in Issue.record("A stale job must not reach the network") },
+            retryDelays: []
+        )
+        store.save(pending(signedTransaction: "signed"))
+
+        queue.discardPendingIfScopeChanged(
+            to: SubscriptionSyncContext(uid: "uid-b", familyID: "family-b")
+        )
+
+        #expect(store.load() == nil)
+    }
+
+    @Test func resetRetryBudgetRearmsTheBackoff() async {
+        let defaults = makeDefaults()
+        let store = PendingSubscriptionSyncStore(defaults: defaults)
+        let context = SubscriptionSyncContext(uid: "uid-a", familyID: "family-a")
+        let queue = SubscriptionSyncQueue(
+            store: store,
+            currentContext: { context },
+            synchronize: { _ in
+                throw FamilyPremiumSyncError(
+                    code: "verification_unavailable",
+                    isRetryable: true
+                )
+            },
+            retryDelays: [.zero, .zero, .zero],
+            sleep: { _ in }
+        )
+        store.save(pending(signedTransaction: "signed"))
+
+        await queue.flush()
+        #expect(queue.retryAttempt > 0)
+
+        queue.resetRetryBudget()
+
+        #expect(queue.retryAttempt == 0)
+        queue.clear()
+    }
+
+    @Test func aStalledResolutionFallsBackToThePaywall() {
+        let manager = SubscriptionManager(
+            service: StalledSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+        #expect(manager.accessState == .resolving)
+
+        manager.resolveStalledAccessIfNeeded()
+
+        #expect(manager.accessState == .requiresPurchase)
+        #expect(!manager.isPremium)
+    }
+
+    @Test func theWatchdogNeverOverridesAResolvedState() async {
+        let manager = SubscriptionManager(
+            service: StalledSubscriptionService(),
+            familyPremiumService: NoFamilyPremiumService(),
+            syncStore: PendingSubscriptionSyncStore(defaults: makeDefaults())
+        )
+        await manager.authSessionDidChange(isAuthenticated: false)
+        #expect(manager.accessState == .requiresPurchase)
+
+        manager.resolveStalledAccessIfNeeded()
+
+        #expect(manager.accessState == .requiresPurchase)
+    }
+
     private func pending(signedTransaction: String) -> PendingSubscriptionSync {
         PendingSubscriptionSync(
             uid: "uid-a",

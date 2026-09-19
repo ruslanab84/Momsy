@@ -37,10 +37,12 @@ final class SubscriptionManager: ObservableObject {
     private let service: any SubscriptionServicing
     private let familyPremiumService: any FamilyPremiumServicing
     private let productLoadTimeout: Duration
+    private let accessResolutionTimeout: Duration
     private let syncQueue: SubscriptionSyncQueue
     private var listenerTask: Task<Void, Never>?
     private var bootstrapTask: Task<Void, Never>?
     private var productLoadTask: Task<[Product], Error>?
+    private var accessResolutionTimeoutTask: Task<Void, Never>?
     private var familyIDObserver: AnyCancellable?
     private var personalPremium = false
     /// A just-purchased, verified transaction keeps access until this instant even if a
@@ -58,11 +60,13 @@ final class SubscriptionManager: ObservableObject {
         service: any SubscriptionServicing,
         familyPremiumService: any FamilyPremiumServicing,
         syncStore: PendingSubscriptionSyncStore = PendingSubscriptionSyncStore(),
-        productLoadTimeout: Duration = .seconds(15)
+        productLoadTimeout: Duration = .seconds(15),
+        accessResolutionTimeout: Duration = .seconds(6)
     ) {
         self.service = service
         self.familyPremiumService = familyPremiumService
         self.productLoadTimeout = productLoadTimeout
+        self.accessResolutionTimeout = accessResolutionTimeout
         syncQueue = SubscriptionSyncQueue(
             store: syncStore,
             currentContext: { familyPremiumService.currentContext },
@@ -86,6 +90,7 @@ final class SubscriptionManager: ObservableObject {
     deinit {
         listenerTask?.cancel()
         bootstrapTask?.cancel()
+        accessResolutionTimeoutTask?.cancel()
         familyIDObserver?.cancel()
     }
 
@@ -176,8 +181,11 @@ final class SubscriptionManager: ObservableObject {
         await refreshAccess()
     }
 
+    /// `ContentView` calls this on every `scenePhase == .active`, which is exactly the moment
+    /// a previously dead network may be back — so the backoff budget is restored here.
     func refreshAccess() async {
         await updatePersonalStatus(synchronizeFamilyEntitlement: true)
+        syncQueue.resetRetryBudget()
         syncQueue.scheduleFlush()
     }
 
@@ -221,6 +229,11 @@ final class SubscriptionManager: ObservableObject {
         updateAccessState()
 
         guard isAuthenticated else { return }
+        // The listener torn down above is otherwise only rebuilt by `FamilyManager.$familyId`,
+        // which is `removeDuplicates()`-filtered. A uid change that leaves the family id
+        // untouched publishes nothing, so nobody rebuilds it and `isResolvingFamily` stays
+        // true forever. `force: true` bypasses the `observedFamilyID` equality guard.
+        observeCurrentFamily(FamilyManager.shared.familyId, force: true)
         await updatePersonalStatus(synchronizeFamilyEntitlement: true)
         syncQueue.scheduleFlush()
     }
@@ -479,10 +492,45 @@ final class SubscriptionManager: ObservableObject {
             familyPremium: familyPremium,
             isResolving: isResolvingPersonal || isResolvingFamily
         )
-        guard resolved != accessState else { return }
-        Self.log.info("Access state: \(String(describing: self.accessState), privacy: .public) -> \(String(describing: resolved), privacy: .public)")
-        accessState = resolved
-        isPremium = resolved == .premium
+        if resolved != accessState {
+            Self.log.info("Access state: \(String(describing: self.accessState), privacy: .public) -> \(String(describing: resolved), privacy: .public)")
+            accessState = resolved
+            isPremium = resolved == .premium
+        }
+        armAccessResolutionTimeout()
+    }
+
+    /// Bounds how long the UI may sit on `.resolving`. `ContentView` replaces the entire app
+    /// with `SplashView()` in that state, and the family listener can legitimately never
+    /// answer: an offline cold start yields a cache-only snapshot, which `resolvedAccess` maps
+    /// to nil on purpose so a stale doc cannot flash premium. Arms once on entry and cancels on
+    /// exit — re-arming on every call would let a chatty resolving loop push the deadline back
+    /// indefinitely.
+    private func armAccessResolutionTimeout() {
+        guard accessState == .resolving else {
+            accessResolutionTimeoutTask?.cancel()
+            accessResolutionTimeoutTask = nil
+            return
+        }
+        guard accessResolutionTimeoutTask == nil else { return }
+        let timeout = accessResolutionTimeout
+        accessResolutionTimeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: timeout)
+            guard !Task.isCancelled else { return }
+            self?.resolveStalledAccessIfNeeded()
+        }
+    }
+
+    /// Forces a stalled `.resolving` open. Only ever downgrades to `.requiresPurchase`: both
+    /// entitlement sources keep resolving in the background, and either one flipping to true
+    /// re-grants premium through `updateAccessState`. Showing the paywall to someone who turns
+    /// out to be premium is recoverable; a permanent splash is not.
+    func resolveStalledAccessIfNeeded() {
+        guard accessState == .resolving else { return }
+        Self.log.error("Premium access resolution timed out; opening the paywall")
+        isResolvingPersonal = false
+        isResolvingFamily = false
+        updateAccessState()
     }
 
     private func verified<T>(_ result: VerificationResult<T>) throws -> T {

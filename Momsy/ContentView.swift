@@ -7,11 +7,19 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Binding private var widgetFeatureRoute: WidgetFeatureRoute?
     @State private var showSplash = true
-    @State private var premiumAccessState: PremiumAccessState = .resolving
+    // Routed straight off the manager: a @State mirror fed by .onReceive stayed on the
+    // paywall after the manager had already published requiresPurchase -> premium.
+    @ObservedObject private var subscriptionManager: SubscriptionManager
 
-    init(widgetFeatureRoute: Binding<WidgetFeatureRoute?> = .constant(nil)) {
+    init(
+        subscriptionManager: SubscriptionManager,
+        widgetFeatureRoute: Binding<WidgetFeatureRoute?> = .constant(nil)
+    ) {
+        self.subscriptionManager = subscriptionManager
         _widgetFeatureRoute = widgetFeatureRoute
     }
+
+    private var premiumAccessState: PremiumAccessState { subscriptionManager.accessState }
 
     var body: some View {
         ZStack {
@@ -27,7 +35,7 @@ struct ContentView: View {
                     .transition(.opacity)
             } else if premiumAccessState == .requiresPurchase {
                 PaywallView(
-                    subscriptionManager: container.subscriptionManager,
+                    subscriptionManager: subscriptionManager,
                     pendingInviteStore: PendingFamilyInviteStore(),
                     joinFamily: { code in
                         try await container.joinFamilyFromOnboarding(code: code)
@@ -43,15 +51,11 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: onboardingDone)
-        .onReceive(container.subscriptionManager.$accessState.removeDuplicates()) { accessState in
-            premiumAccessState = accessState
-        }
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
-            Task { await container.subscriptionManager.refreshAccess() }
+            Task { await subscriptionManager.refreshAccess() }
         }
         .task {
-            premiumAccessState = container.subscriptionManager.accessState
             try? await Task.sleep(for: .seconds(2.2))
             showSplash = false
         }
@@ -61,7 +65,7 @@ struct ContentView: View {
 #Preview {
     let container = AppContainer()
 
-    ContentView()
+    ContentView(subscriptionManager: container.subscriptionManager)
         .withContainer(container)
         .environmentObject(LocalizationManager.shared)
         .environmentObject(UnitSystemManager.shared)

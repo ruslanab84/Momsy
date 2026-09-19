@@ -93,7 +93,8 @@ final class SubscriptionSyncQueue {
     private let sleep: (Duration) async -> Void
     private var flushTask: Task<Void, Never>?
     private var retryTask: Task<Void, Never>?
-    private var retryAttempt = 0
+    /// Readable by tests; only this type mutates it.
+    private(set) var retryAttempt = 0
     private var isFlushing = false
     private var needsFlush = false
 
@@ -174,14 +175,16 @@ final class SubscriptionSyncQueue {
         }
     }
 
+    /// Drops a job that no longer belongs to the current account/family. Only the pending job
+    /// goes: `clearAll()` here also erased the success marker, and because this runs from
+    /// `observeCurrentFamily` on every cold start, the next `updatePersonalStatus` re-enqueued
+    /// and re-POSTed an already-synchronized transaction — one Cloud Function invocation per
+    /// launch per paying user. The marker is a 4-field exact match, so keeping a stale one is
+    /// inert; family departure still wipes everything through `clear()`.
     func discardPendingIfScopeChanged(to context: SubscriptionSyncContext?) {
-        guard let pending = store.load(),
-              let context,
-              pending.matches(context)
-        else {
-            if context != nil { store.clearAll() }
-            return
-        }
+        guard let context, let pending = store.load() else { return }
+        guard !pending.matches(context) else { return }
+        store.clearPending()
     }
 
     func clear() {
@@ -192,6 +195,14 @@ final class SubscriptionSyncQueue {
         retryAttempt = 0
         needsFlush = false
         store.clearAll()
+    }
+
+    /// Restores the backoff budget when the app returns to the foreground. Without this the
+    /// third consecutive failure retires the job for the rest of the process: `scheduleRetry`
+    /// refuses to arm once `retryAttempt` reaches `retryDelays.count`, and nothing lowers it
+    /// again except a success that can no longer be attempted.
+    func resetRetryBudget() {
+        retryAttempt = 0
     }
 
     private func scheduleRetry() {

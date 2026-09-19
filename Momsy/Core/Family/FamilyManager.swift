@@ -134,12 +134,6 @@ final class FamilyManager: ObservableObject {
         return cachedOwnerUid != currentUid
     }
 
-    nonisolated static func legacyRepairRole(isFamilyCreator: Bool) -> FamilyRole {
-        // Pre-role family membership had full access. Preserve that legacy contract
-        // deterministically; a parent can assign a more specific role afterward.
-        isFamilyCreator ? .mom : .dad
-    }
-
     func beginJoinFlow() { joinInFlight = true }
     func endJoinFlow() { joinInFlight = false }
 
@@ -325,21 +319,22 @@ final class FamilyManager: ObservableObject {
             merge: true
         )
 
-        if let babyId = initialProfile?.id ?? ActiveBaby.currentId {
-            let babyRef = familyRef.collection("babies").document(babyId.uuidString)
+        // Only with the profile doc itself: rules deny any baby subcollection write whose
+        // parent `babies/{id}` doesn't exist after the batch, and one denied write rejects
+        // the whole family bootstrap (e.g. enabling Cloud Sync later from Settings).
+        if let initialProfile {
+            let babyRef = familyRef.collection("babies").document(initialProfile.id.uuidString)
             if role.canManageFamilyMembers {
                 batch.setData([
                     "createdAt": Timestamp(date: Date()),
                     "members": [["uid": uid, "role": "parent", "name": displayName]]
                 ], forDocument: babyRef.collection("profile").document("info"))
             }
-            if let initialProfile {
-                try batch.setData(
-                    from: BabyProfileDTO(from: initialProfile),
-                    forDocument: babyRef,
-                    merge: true
-                )
-            }
+            try batch.setData(
+                from: BabyProfileDTO(from: initialProfile),
+                forDocument: babyRef,
+                merge: true
+            )
         }
 
         batch.setData(
@@ -402,11 +397,9 @@ final class FamilyManager: ObservableObject {
         let currentFamilyId = familyId
         let switchingFamily = (currentFamilyId != nil && currentFamilyId != targetFamilyId)
         let hasData: Bool
-        let leavingActiveFamily: Bool
         if switchingFamily, let currentFamilyId {
             do {
                 hasData = try await currentFamilyHasData()
-                leavingActiveFamily = true
             } catch {
                 guard Self.classifyMembershipError(error) == .revoked else { throw error }
                 let membership = await confirmMembershipHealthGated(
@@ -418,11 +411,9 @@ final class FamilyManager: ObservableObject {
                     confirmedMembership: membership
                 ) else { throw error }
                 hasData = false
-                leavingActiveFamily = false
             }
         } else {
             hasData = false
-            leavingActiveFamily = false
         }
         if FamilyJoinGuard.requiresConfirmation(
             currentFamilyId: familyId, targetFamilyId: targetFamilyId,
@@ -462,17 +453,6 @@ final class FamilyManager: ObservableObject {
         if let previous = familyId, previous != targetFamilyId {
             let previousMemberRef = db.collection("families").document(previous)
                 .collection("members").document(uid)
-            if leavingActiveFamily {
-                let cleanupRef = db.collection("familyDepartureCleanups").document(
-                    FamilyDepartureCleanupJob.documentID(familyID: previous, uid: uid)
-                )
-                batch.setData([
-                    "familyId": previous,
-                    "uid": uid,
-                    "removedMemberId": uid,
-                    "requestedAt": FieldValue.serverTimestamp()
-                ], forDocument: cleanupRef)
-            }
             batch.deleteDocument(previousMemberRef)
         }
 
@@ -541,20 +521,9 @@ final class FamilyManager: ObservableObject {
             let memberRef = familyRef.collection("members").document(uid)
             let snap = try await memberRef.getDocument(source: .server)
             guard snap.exists else { return .revoked }
-            var role = (snap.data()?["roleRaw"] as? String)
+            // A missing roleRaw stays nil (no access); roles are backfilled server-side.
+            let role = (snap.data()?["roleRaw"] as? String)
                 .flatMap(FamilyRole.init(storedRawValue:))
-            if role == nil, snap.data()?["roleRaw"] == nil {
-                do {
-                    let family = try await familyRef.getDocument(source: .server)
-                    let repairedRole = Self.legacyRepairRole(
-                        isFamilyCreator: family.data()?["createdBy"] as? String == uid
-                    )
-                    try await memberRef.updateData(["roleRaw": repairedRole.rawValue])
-                    role = repairedRole
-                } catch {
-                    Self.log.error("Legacy member role repair failed: \(error.localizedDescription, privacy: .public)")
-                }
-            }
             currentRole = role
             if self.familyId == familyId {
                 observeCurrentRole(familyId: familyId, uid: uid)

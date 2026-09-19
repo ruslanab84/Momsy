@@ -117,7 +117,15 @@ function verificationError(error) {
     );
 }
 
-async function verifyTransaction(signedTransaction, options = {}) {
+function verifyTransaction(signedTransaction, options = {}) {
+    return verifySigned("verifyAndDecodeTransaction", signedTransaction, options);
+}
+
+function verifyNotification(signedPayload, options = {}) {
+    return verifySigned("verifyAndDecodeNotification", signedPayload, options);
+}
+
+async function verifySigned(method, signedData, options) {
     const configuredAppID = Number(options.appAppleId ?? appleAppID.value());
     if (!Number.isSafeInteger(configuredAppID) || configuredAppID <= 0) {
         throw new EntitlementError(
@@ -136,8 +144,7 @@ async function verifyTransaction(signedTransaction, options = {}) {
     ));
 
     try {
-        return await makeVerifier(Environment.PRODUCTION, configuredAppID)
-            .verifyAndDecodeTransaction(signedTransaction);
+        return await makeVerifier(Environment.PRODUCTION, configuredAppID)[method](signedData);
     } catch (error) {
         if (!(error instanceof VerificationException)
             || error.status !== VerificationStatus.INVALID_ENVIRONMENT) {
@@ -146,8 +153,7 @@ async function verifyTransaction(signedTransaction, options = {}) {
     }
 
     try {
-        return await makeVerifier(Environment.SANDBOX, undefined)
-            .verifyAndDecodeTransaction(signedTransaction);
+        return await makeVerifier(Environment.SANDBOX, undefined)[method](signedData);
     } catch (error) {
         throw verificationError(error);
     }
@@ -279,10 +285,23 @@ async function bindEntitlementToCurrentFamily(db, uid, entitlement, expectedFami
         }
 
         const previousFamilyId = existing.get("familyId");
-        const replacement = {
-            id: entitlement.originalTransactionId,
-            ...recordData(entitlement, uid, familyId),
-        };
+        // A stale JWS (offline queue, second device) must not roll expiry back; it may
+        // still move the record to the owner's current family with the newer data intact.
+        const currentExpiry = existing.get("expiresAt");
+        const isStale = currentExpiry instanceof Timestamp
+            && entitlement.expiresDate < currentExpiry.toMillis();
+        if (isStale && previousFamilyId === familyId) return;
+        const replacement = isStale
+            ? {
+                ...existing.data(),
+                id: entitlement.originalTransactionId,
+                familyId,
+                updatedAt: FieldValue.serverTimestamp(),
+            }
+            : {
+                id: entitlement.originalTransactionId,
+                ...recordData(entitlement, uid, familyId),
+            };
         const familyIDsToUpdate = new Set([familyId]);
         if (typeof previousFamilyId === "string" && previousFamilyId !== familyId) {
             familyIDsToUpdate.add(previousFamilyId);
@@ -314,23 +333,76 @@ async function bindEntitlementToCurrentFamily(db, uid, entitlement, expectedFami
     });
 }
 
-async function detachFamilyEntitlements(db, familyId, uid) {
-    const entitlements = await db.collection("subscriptionEntitlements")
-        .where("familyId", "==", familyId)
-        .get();
-    const ownedEntitlements = entitlements.docs.filter((document) => document.get("ownerUid") === uid);
-    if (ownedEntitlements.length === 0) return;
-    const batch = db.batch();
-    for (const document of ownedEntitlements) {
-        batch.update(document.ref, { familyId: "", updatedAt: FieldValue.serverTimestamp() });
-    }
-    await batch.commit();
-    await db.runTransaction(async (transaction) => {
-        const currentEntitlements = await transaction.get(
-            db.collection("subscriptionEntitlements").where("familyId", "==", familyId)
-        );
-        updateFamilyPremium(transaction, db, familyId, currentEntitlements, { id: "", familyId: "" });
+// App Store Server Notification path: renewals, expiry and refunds reach the family even
+// when the owner never reopens the app. Only refreshes a subscription an owner already
+// bound through syncSubscriptionEntitlement — Apple's payload carries no Momsy account.
+async function refreshBoundEntitlement(db, entitlement) {
+    const entitlementRef = db.collection("subscriptionEntitlements")
+        .doc(entitlement.originalTransactionId);
+    return db.runTransaction(async (transaction) => {
+        const existing = await transaction.get(entitlementRef);
+        if (!existing.exists) return false;
+        // Notifications may arrive out of order; an older period must not shorten access.
+        // Equal expiry still applies so REFUND_REVERSED can clear a revocation.
+        const currentExpiry = existing.get("expiresAt");
+        if (currentExpiry instanceof Timestamp
+            && entitlement.expiresDate < currentExpiry.toMillis()) {
+            return false;
+        }
+        const familyId = existing.get("familyId");
+        const hasFamily = typeof familyId === "string" && familyId.length > 0;
+        const siblings = hasFamily
+            ? await transaction.get(
+                db.collection("subscriptionEntitlements").where("familyId", "==", familyId)
+            )
+            : null;
+        const replacement = {
+            id: entitlement.originalTransactionId,
+            ...recordData(entitlement, existing.get("ownerUid"), familyId),
+        };
+        const write = { ...replacement };
+        if (write.revokedAt === null) write.revokedAt = FieldValue.delete();
+        transaction.set(entitlementRef, write, { merge: true });
+        if (hasFamily) updateFamilyPremium(transaction, db, familyId, siblings, replacement);
+        return true;
     });
+}
+
+// Account deletion erases the owner's records outright (GDPR), including ones an earlier
+// family departure already detached; a plain departure only unlinks them from the family.
+async function detachFamilyEntitlements(db, familyId, uid, { deleteRecords = false } = {}) {
+    const collection = db.collection("subscriptionEntitlements");
+    await db.runTransaction(async (transaction) => {
+        const familyEntitlements = await transaction.get(collection.where("familyId", "==", familyId));
+        const owned = deleteRecords
+            ? (await transaction.get(collection.where("ownerUid", "==", uid))).docs
+            : familyEntitlements.docs.filter((document) => document.get("ownerUid") === uid);
+        if (owned.length === 0) return;
+        for (const document of owned) {
+            if (deleteRecords) transaction.delete(document.ref);
+            else transaction.update(document.ref, { familyId: "", updatedAt: FieldValue.serverTimestamp() });
+        }
+        const remaining = {
+            docs: familyEntitlements.docs.filter((document) => document.get("ownerUid") !== uid),
+        };
+        updateFamilyPremium(transaction, db, familyId, remaining, { id: "", familyId: "" });
+    });
+}
+
+// Auth deletion path: also covers owners who were in no family when they deleted the account,
+// so no member-departure trigger ever ran for them.
+async function eraseOwnerEntitlements(db, uid) {
+    const owned = await db.collection("subscriptionEntitlements").where("ownerUid", "==", uid).get();
+    const familyIds = new Set(owned.docs
+        .map((document) => document.get("familyId"))
+        .filter((familyId) => typeof familyId === "string" && familyId.length > 0));
+    for (const familyId of familyIds) {
+        await detachFamilyEntitlements(db, familyId, uid, { deleteRecords: true });
+    }
+    if (familyIds.size > 0 || owned.empty) return;
+    const batch = db.batch();
+    for (const document of owned.docs) batch.delete(document.ref);
+    await batch.commit();
 }
 
 module.exports = {
@@ -340,10 +412,13 @@ module.exports = {
     authorizeRequest,
     bindEntitlementToCurrentFamily,
     detachFamilyEntitlements,
+    eraseOwnerEntitlements,
     loadAppleRootCAs,
     matchesAppAccountToken,
     premiumEntitlementFor,
+    refreshBoundEntitlement,
     updateFamilyPremium,
     verificationError,
+    verifyNotification,
     verifyTransaction,
 };

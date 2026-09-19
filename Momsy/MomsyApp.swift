@@ -126,7 +126,10 @@ private struct MomsyRootView: View {
     private var appState: AppState { container.appState }
 
     var body: some View {
-        ContentView(widgetFeatureRoute: $widgetFeatureRoute)
+        ContentView(
+            subscriptionManager: container.subscriptionManager,
+            widgetFeatureRoute: $widgetFeatureRoute
+        )
             .withContainer(container)
             .environmentObject(localization)
             .environmentObject(unitSystem)

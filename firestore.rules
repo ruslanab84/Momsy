@@ -345,26 +345,6 @@ service cloud.firestore {
         );
     }
 
-    function isLegacySelfRoleRepair(familyId, memberId) {
-      return isSignedIn()
-        && memberId == request.auth.uid
-        && isFamilyMember(familyId)
-        && !('roleRaw' in resource.data)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['roleRaw'])
-        && (
-          (
-            get(/databases/$(database)/documents/families/$(familyId)).data.createdBy
-              == request.auth.uid
-            && request.resource.data.roleRaw == 'Мама'
-          )
-          || (
-            get(/databases/$(database)/documents/families/$(familyId)).data.createdBy
-              != request.auth.uid
-            && request.resource.data.roleRaw == 'Папа'
-          )
-        );
-    }
-
     function requestedUserFamilyIdIsAuthorized() {
       return !('familyId' in request.resource.data)
         || (
@@ -553,10 +533,11 @@ service cloud.firestore {
                           && request.resource.data.uid == request.auth.uid
                           && isAtomicFamilyCreatorBootstrap(familyId))
                       || isSelfInviteJoin(familyId, memberId);
+        // roleRaw can never be removed: a role-less member doc is not a valid state.
         allow update: if memberUidUnchangedOrCanonical(memberId)
+                      && request.resource.data.roleRaw is string
                       && (
                         canManageFamilyRoster(familyId)
-                        || isLegacySelfRoleRepair(familyId, memberId)
                         || (isSignedIn()
                             && memberId == request.auth.uid
                             && isFamilyMember(familyId)
@@ -645,33 +626,17 @@ service cloud.firestore {
       }
     }
 
-    // LEGACY family-keyed log tree, still read/written during the per-baby migration
-    // rollout. Remove this block once all clients have migrated to the per-baby path.
+    // LEGACY family-keyed log tree. Read-only + delete: current clients only read it for
+    // the one-time per-baby migration and delete it during erasure. No create/update, so
+    // pre-migration clients can't resurrect tombstoned logs here.
     match /babies/{familyId} {
-      allow read, write: if canManageFamilyRoster(familyId);
+      allow read, delete: if canManageFamilyRoster(familyId);
 
       match /{subcollection}/{document=**} {
         allow get: if canReadBabyCollection(familyId, subcollection)
                    || canListOwnAuthoredData(familyId);
         allow list: if canReadBabyCollection(familyId, subcollection)
                     || canListOwnAuthoredData(familyId);
-        allow create: if (
-                        !isPrivateWellbeingCollection(subcollection)
-                        && (
-                          canManageFamilyRoster(familyId)
-                          || canCreateRoutineLog(familyId, subcollection)
-                        )
-                      )
-                      || canCreatePrivateWellbeing(familyId, subcollection);
-        allow update: if (
-                        !isPrivateWellbeingCollection(subcollection)
-                        && (
-                          canManageFamilyRoster(familyId)
-                          || canUpdateRoutineLog(familyId, subcollection)
-                          || anonymizesOwnAuthorMetadata(familyId)
-                        )
-                      )
-                      || canUpdatePrivateWellbeing(familyId, subcollection);
         allow delete: if (
                         !isPrivateWellbeingCollection(subcollection)
                         && canManageFamilyRoster(familyId)
