@@ -1,16 +1,16 @@
 # Graph Report - Momsy  (2026-09-23)
 
 ## Corpus Check
-- 632 files · ~352,095 words
+- 638 files · ~353,441 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 8479 nodes · 14079 edges · 593 communities (495 shown, 98 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 259 edges (avg confidence: 0.8)
+- 8589 nodes · 14208 edges · 631 communities (533 shown, 98 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 260 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `11759a5f`
+- Built from commit: `c5299167`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -500,10 +500,15 @@
 - [[_COMMUNITY_Community 484|Community 484]]
 - [[_COMMUNITY_Community 486|Community 486]]
 - [[_COMMUNITY_Community 487|Community 487]]
+- [[_COMMUNITY_Community 488|Community 488]]
+- [[_COMMUNITY_Community 489|Community 489]]
 - [[_COMMUNITY_Community 490|Community 490]]
 - [[_COMMUNITY_Community 491|Community 491]]
+- [[_COMMUNITY_Community 492|Community 492]]
 - [[_COMMUNITY_Community 493|Community 493]]
 - [[_COMMUNITY_Community 494|Community 494]]
+- [[_COMMUNITY_Community 495|Community 495]]
+- [[_COMMUNITY_Community 496|Community 496]]
 - [[_COMMUNITY_Community 497|Community 497]]
 - [[_COMMUNITY_Community 498|Community 498]]
 - [[_COMMUNITY_Community 499|Community 499]]
@@ -515,27 +520,36 @@
 - [[_COMMUNITY_Community 505|Community 505]]
 - [[_COMMUNITY_Community 506|Community 506]]
 - [[_COMMUNITY_Community 507|Community 507]]
+- [[_COMMUNITY_Community 508|Community 508]]
+- [[_COMMUNITY_Community 509|Community 509]]
 - [[_COMMUNITY_Community 510|Community 510]]
 - [[_COMMUNITY_Community 511|Community 511]]
 - [[_COMMUNITY_Community 512|Community 512]]
+- [[_COMMUNITY_Community 513|Community 513]]
 - [[_COMMUNITY_Community 514|Community 514]]
+- [[_COMMUNITY_Community 515|Community 515]]
 - [[_COMMUNITY_Community 516|Community 516]]
+- [[_COMMUNITY_Community 517|Community 517]]
 - [[_COMMUNITY_Community 518|Community 518]]
 - [[_COMMUNITY_Community 519|Community 519]]
 - [[_COMMUNITY_Community 520|Community 520]]
 - [[_COMMUNITY_Community 521|Community 521]]
 - [[_COMMUNITY_Community 522|Community 522]]
+- [[_COMMUNITY_Community 523|Community 523]]
 - [[_COMMUNITY_Community 524|Community 524]]
 - [[_COMMUNITY_Community 525|Community 525]]
 - [[_COMMUNITY_Community 526|Community 526]]
 - [[_COMMUNITY_Community 527|Community 527]]
 - [[_COMMUNITY_Community 528|Community 528]]
+- [[_COMMUNITY_Community 529|Community 529]]
 - [[_COMMUNITY_Community 530|Community 530]]
+- [[_COMMUNITY_Community 531|Community 531]]
 - [[_COMMUNITY_Community 532|Community 532]]
 - [[_COMMUNITY_Community 533|Community 533]]
 - [[_COMMUNITY_Community 534|Community 534]]
 - [[_COMMUNITY_Community 535|Community 535]]
 - [[_COMMUNITY_Community 536|Community 536]]
+- [[_COMMUNITY_Community 537|Community 537]]
 - [[_COMMUNITY_Community 538|Community 538]]
 - [[_COMMUNITY_Community 539|Community 539]]
 - [[_COMMUNITY_Community 540|Community 540]]
@@ -559,10 +573,12 @@
 - [[_COMMUNITY_Community 558|Community 558]]
 - [[_COMMUNITY_Community 559|Community 559]]
 - [[_COMMUNITY_Community 560|Community 560]]
+- [[_COMMUNITY_Community 561|Community 561]]
 - [[_COMMUNITY_Community 562|Community 562]]
 - [[_COMMUNITY_Community 563|Community 563]]
 - [[_COMMUNITY_Community 564|Community 564]]
 - [[_COMMUNITY_Community 565|Community 565]]
+- [[_COMMUNITY_Community 566|Community 566]]
 - [[_COMMUNITY_Community 567|Community 567]]
 - [[_COMMUNITY_Community 568|Community 568]]
 - [[_COMMUNITY_Community 569|Community 569]]
@@ -588,21 +604,43 @@
 - [[_COMMUNITY_Community 589|Community 589]]
 - [[_COMMUNITY_Community 590|Community 590]]
 - [[_COMMUNITY_Community 591|Community 591]]
+- [[_COMMUNITY_Community 592|Community 592]]
 - [[_COMMUNITY_Community 593|Community 593]]
 - [[_COMMUNITY_Community 594|Community 594]]
 - [[_COMMUNITY_Community 595|Community 595]]
 - [[_COMMUNITY_Community 596|Community 596]]
 - [[_COMMUNITY_Community 597|Community 597]]
+- [[_COMMUNITY_Community 598|Community 598]]
 - [[_COMMUNITY_Community 599|Community 599]]
+- [[_COMMUNITY_Community 600|Community 600]]
+- [[_COMMUNITY_Community 601|Community 601]]
+- [[_COMMUNITY_Community 602|Community 602]]
+- [[_COMMUNITY_Community 603|Community 603]]
+- [[_COMMUNITY_Community 604|Community 604]]
+- [[_COMMUNITY_Community 605|Community 605]]
+- [[_COMMUNITY_Community 606|Community 606]]
+- [[_COMMUNITY_Community 607|Community 607]]
+- [[_COMMUNITY_Community 608|Community 608]]
+- [[_COMMUNITY_Community 609|Community 609]]
 - [[_COMMUNITY_Community 610|Community 610]]
 - [[_COMMUNITY_Community 611|Community 611]]
 - [[_COMMUNITY_Community 612|Community 612]]
 - [[_COMMUNITY_Community 613|Community 613]]
 - [[_COMMUNITY_Community 614|Community 614]]
+- [[_COMMUNITY_Community 615|Community 615]]
 - [[_COMMUNITY_Community 616|Community 616]]
+- [[_COMMUNITY_Community 617|Community 617]]
 - [[_COMMUNITY_Community 618|Community 618]]
+- [[_COMMUNITY_Community 619|Community 619]]
+- [[_COMMUNITY_Community 620|Community 620]]
 - [[_COMMUNITY_Community 621|Community 621]]
+- [[_COMMUNITY_Community 622|Community 622]]
+- [[_COMMUNITY_Community 623|Community 623]]
+- [[_COMMUNITY_Community 624|Community 624]]
+- [[_COMMUNITY_Community 625|Community 625]]
 - [[_COMMUNITY_Community 626|Community 626]]
+- [[_COMMUNITY_Community 627|Community 627]]
+- [[_COMMUNITY_Community 628|Community 628]]
 - [[_COMMUNITY_Community 632|Community 632]]
 - [[_COMMUNITY_Community 633|Community 633]]
 
@@ -633,7 +671,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (593 total, 98 thin omitted)
+## Communities (631 total, 98 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -664,8 +702,8 @@ Cohesion: 0.08
 Nodes (7): L10n, Bool, CareTipCategory, Double, Int, Language, String
 
 ### Community 7 - "Community 7"
-Cohesion: 0.12
-Nodes (12): Date, Double, String, TemperatureEntry, UUID, Date, ModelContext, TemperatureEntry (+4 more)
+Cohesion: 0.13
+Nodes (11): Date, Double, String, TemperatureEntry, UUID, Date, ModelContext, TemperatureEntry (+3 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.08
@@ -677,7 +715,7 @@ Nodes (10): AlertRules, CareRules, DefaultTips, DevelopmentRules, SituationalRul
 
 ### Community 10 - "Community 10"
 Cohesion: 0.06
-Nodes (51): BabyAsianBlob, BabyBlob, BabyBlondeBlob, BabyDarkBlob, BabyFaceBlob, BathBlob, BearBlob, BlobFace (+43 more)
+Nodes (54): BabyAsianBlob, BabyBlob, BabyBlondeBlob, BabyDarkBlob, BabyFaceBlob, BathBlob, BearBlob, BlobFace (+46 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.23
@@ -704,8 +742,8 @@ Cohesion: 0.27
 Nodes (5): Date, SleepEntry, UInt64, DelayedAddSleepRepository, SleepRepository
 
 ### Community 17 - "Community 17"
-Cohesion: 0.07
-Nodes (35): BabyGenderFace, BabyGenderIconKind, boy, girl, unknown, BabyGenderIconView, BabyGenderSparkle, BBCardStyle (+27 more)
+Cohesion: 0.06
+Nodes (38): BabyGenderFace, BabyGenderIconKind, boy, girl, unknown, BabyGenderIconView, BabyGenderSmile, BabyGenderSparkle (+30 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.02
@@ -716,16 +754,16 @@ Cohesion: 0.13
 Nodes (16): AnalyticsServiceProtocol, AppState, BlobKind, Bool, Date, DiaryDay, DiaryItem, DiaryRepository (+8 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.06
-Nodes (30): ActivityAttributes, Hashable, LeapCalendarDayPhase, calm, hard, peak, recovery, Date (+22 more)
+Cohesion: 0.05
+Nodes (34): ActivityAttributes, AnalyticsServiceProtocol, LogAnalyticsService, AnalyticsServiceProtocol, Hashable, MockAnalyticsService, Date, String (+26 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.17
-Nodes (8): DiaperRepository, Date, DiaperEntry, Int, ModelContext, Set, UUID, SwiftDataDiaperRepository
+Cohesion: 0.12
+Nodes (12): DiaperRepository, Date, DiaperEntry, UUID, Date, DiaperEntry, Int, ModelContext (+4 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.15
-Nodes (9): Date, UUID, WalkEntry, Date, ModelContext, UUID, WalkEntry, WalkRecord (+1 more)
+Cohesion: 0.23
+Nodes (5): Date, ModelContext, UUID, WalkEntry, SwiftDataWalkRepository
 
 ### Community 23 - "Community 23"
 Cohesion: 0.11
@@ -740,8 +778,8 @@ Cohesion: 0.28
 Nodes (4): Date, Int, SleepEntry, SleepForecastEngineTests
 
 ### Community 26 - "Community 26"
-Cohesion: 0.07
-Nodes (21): AppIconView, Image, Any, AppContainer, AuthManager, Color, LocalizationManager, SettingsViewModel (+13 more)
+Cohesion: 0.06
+Nodes (26): AppIconView, Image, Bool, LocalizationManager, MedicalSource, MedicalSourceID, Any, AppContainer (+18 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.24
@@ -756,12 +794,12 @@ Cohesion: 0.17
 Nodes (11): BabyCloudView, ClosedEyeShape, SleepingBabyView, SmileArcShape, SplashView, Bool, CGFloat, CGRect (+3 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.10
-Nodes (18): FamilyDepartureCleanupJob, FamilyRepository, String, Any, CollectionReference, Firestore, StoredFamilyMember, String (+10 more)
+Cohesion: 0.15
+Nodes (14): FamilyDepartureCleanupJob, String, Any, CollectionReference, Firestore, StoredFamilyMember, String, UUID (+6 more)
 
 ### Community 31 - "Community 31"
 Cohesion: 0.07
-Nodes (39): GenerateReportUseCase, Int, AnalyticsServiceProtocol, AppState, Bool, Color, Date, DiaperRepository (+31 more)
+Nodes (41): GenerateReportUseCase, Int, AnalyticsServiceProtocol, AppState, Bool, Color, Date, DiaperRepository (+33 more)
 
 ### Community 32 - "Community 32"
 Cohesion: 0.08
@@ -864,28 +902,28 @@ Cohesion: 0.13
 Nodes (21): AccessoryCircularView, AccessoryRectangularView, FeedingColumn, FeedingTimerView, formatSeconds(), IdleSummaryView, MediumWidgetView, MomsyFeedingWidgetView (+13 more)
 
 ### Community 57 - "Community 57"
-Cohesion: 0.05
-Nodes (41): BabyAgeStage, baby, eat, kid, newborn, toddler, DiaperLog, DiaperType (+33 more)
+Cohesion: 0.11
+Nodes (18): Bool, Calendar, Color, Date, Double, Int, TimeZone, WHOPoint (+10 more)
 
 ### Community 58 - "Community 58"
-Cohesion: 0.20
-Nodes (6): ComplementaryFoodEntry, Date, ModelContext, Set, UUID, SwiftDataComplementaryFeedingRepository
+Cohesion: 0.08
+Nodes (17): ComplementaryFeedingRepository, MockComplementaryFeedingRepository, Bool, ComplementaryFoodEntry, Date, String, UUID, ComplementaryFoodEntry (+9 more)
 
 ### Community 59 - "Community 59"
 Cohesion: 0.12
 Nodes (16): AppContainer, AppState, Bool, CGFloat, Color, Int, LocalizationManager, Never (+8 more)
 
 ### Community 60 - "Community 60"
-Cohesion: 0.06
-Nodes (35): CaseIterable, ComplementaryFoodEntry, FoodCategory, cereal, dairy, egg, fish, fruit (+27 more)
+Cohesion: 0.10
+Nodes (20): ComplementaryFoodEntry, FoodCategory, cereal, dairy, egg, fish, fruit, meat (+12 more)
 
 ### Community 61 - "Community 61"
 Cohesion: 0.11
 Nodes (17): 03:30-03:45 | feature/add-app-icon, 03:40-04:00 | main, 04:08 | main, 04:37 | main, 05:03 | main, 05:10-05:20 | main, 05:39 | main, 05:45 | main (+9 more)
 
 ### Community 62 - "Community 62"
-Cohesion: 0.07
-Nodes (29): Bool, Error, L10n, LocalizationManager, MainActor, PendingFamilyInviteStore, Product, String (+21 more)
+Cohesion: 0.13
+Nodes (15): AppContainer, AppState, BabyGrowthPoint, Bool, Color, Double, Int, LocalizationManager (+7 more)
 
 ### Community 63 - "Community 63"
 Cohesion: 0.16
@@ -1001,8 +1039,8 @@ Cohesion: 0.36
 Nodes (4): DoctorVisitRepository, DoctorVisit, ModelContext, SwiftDataDoctorVisitRepository
 
 ### Community 90 - "Community 90"
-Cohesion: 0.06
-Nodes (29): InviteServiceProtocol, Any, Bool, Date, Error, FamilyRole, Firestore, Never (+21 more)
+Cohesion: 0.17
+Nodes (12): Any, Bool, Date, Error, FamilyRole, Firestore, Never, String (+4 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.33
@@ -1021,8 +1059,8 @@ Cohesion: 0.09
 Nodes (18): LeapCheckInRepository, LeapsViewModelTests, MockLeapCheckInRepository, MockLeapsRepository, BabyProfile, Bool, Int, LeapDailyCheckIn (+10 more)
 
 ### Community 97 - "Community 97"
-Cohesion: 0.07
-Nodes (33): AppStore, Decimal, SubscriptionError, catalogEmpty, failedVerification, ownedByAnotherAccount, pendingApproval, productUnavailable (+25 more)
+Cohesion: 0.11
+Nodes (20): Decimal, SubscriptionManager, AnyCancellable, Bool, Date, Duration, FamilyPremiumServicing, Int (+12 more)
 
 ### Community 98 - "Community 98"
 Cohesion: 0.14
@@ -1077,8 +1115,8 @@ Cohesion: 0.10
 Nodes (19): 1. Strict Separation of Concerns, 2. Preferred Architecture, Architecture, Code Style, Commands, Common Commands, Core Architecture Rules, Dependency injection (+11 more)
 
 ### Community 111 - "Community 111"
-Cohesion: 0.05
-Nodes (34): MockWeeklyInsightRepository, MockWeeklyInsightService, Date, ModelContext, WeeklyInsight, Int, Language, String (+26 more)
+Cohesion: 0.31
+Nodes (7): Int, Language, String, WeeklyInsightAI, WeeklyInsightContext, WeeklyStats, StaticWeeklyInsightService
 
 ### Community 112 - "Community 112"
 Cohesion: 0.18
@@ -1109,7 +1147,7 @@ Cohesion: 0.17
 Nodes (12): BlobKind, Bool, DiaryDay, Double, L10n, LocalizationManager, String, Void (+4 more)
 
 ### Community 119 - "Community 119"
-Cohesion: 0.09
+Cohesion: 0.10
 Nodes (16): DeleteAccountTests, DummyError, MockDeletionAuthenticator, SettingsAccountDeletionReauthenticationTests, waitForDeletion(), AccountDeletionProvider, ASAuthorization, ASAuthorizationAppleIDRequest (+8 more)
 
 ### Community 120 - "Community 120"
@@ -1145,16 +1183,16 @@ Cohesion: 0.14
 Nodes (13): 05:03 | feat/feeding-live-activity, 05:54-06:16 | feat/vitamins-named-entry-sheet, 09:51 | feat/vitamins-named-entry-sheet, 10:19-11:35 | feat/vitamins-named-entry-sheet, 11:36 | feat/vitamins-named-entry-sheet, 11:53-12:00 | feat/vitamins-named-entry-sheet, 17:53 | feat/vitamins-named-entry-sheet, 18:07 | feat/vitamins-named-entry-sheet (+5 more)
 
 ### Community 128 - "Community 128"
-Cohesion: 0.06
-Nodes (26): DiaryRepository, MockDiaryRepository, Date, StoredDiaryItem, UUID, Calendar, Int, LeapDailyCheckIn (+18 more)
+Cohesion: 0.23
+Nodes (8): Set, VaccinationScheduleItem, VaccinationScheduleKey, ruNational, ukNHS, usCDC, who, VaccinationScheduleProvider
 
 ### Community 129 - "Community 129"
-Cohesion: 0.07
-Nodes (35): CGSize, BlobSmile, DiaperShape, HeartShape, StarShape, BabyGenderSmile, CGRect, Path (+27 more)
+Cohesion: 0.08
+Nodes (32): CGSize, BlobSmile, DiaperShape, HeartShape, StarShape, CGRect, Path, CGFloat (+24 more)
 
 ### Community 130 - "Community 130"
-Cohesion: 0.11
-Nodes (12): FamilyPremiumServicing, MainActor, PremiumAccessState, Product, String, UUID, AccessStateRecorder, EmptyCatalogSubscriptionService (+4 more)
+Cohesion: 0.10
+Nodes (14): FamilyPremiumServicing, MainActor, PendingSubscriptionSync, PremiumAccessState, Product, String, UUID, AccessStateRecorder (+6 more)
 
 ### Community 131 - "Community 131"
 Cohesion: 0.12
@@ -1201,8 +1239,8 @@ Cohesion: 0.20
 Nodes (9): 04:10 | feat/vitamins-named-entry-sheet, 04:12-04:34 | feat/vitamins-named-entry-sheet, 04:48 | feat/vitamins-named-entry-sheet, 11:14 | feat/vitamins-named-entry-sheet, 11:34 | feat/vitamins-named-entry-sheet, 12:09 | feat/vitamins-named-entry-sheet, 16:34 | feat/vitamins-named-entry-sheet, 17:44 | feat/vitamins-named-entry-sheet (+1 more)
 
 ### Community 142 - "Community 142"
-Cohesion: 0.11
-Nodes (8): MockPhotoStorage, MockRosterEraser, PendingAccountDeletionStoreTests, RosterErasureTests, String, UIImage, UUID, PhotoStorageService
+Cohesion: 0.12
+Nodes (8): MockPhotoStorage, MockRosterEraser, RosterErasureTests, AccountErasureOutcome, String, UIImage, UUID, PhotoStorageService
 
 ### Community 143 - "Community 143"
 Cohesion: 0.22
@@ -1257,15 +1295,15 @@ Cohesion: 0.11
 Nodes (11): BabyRepository, MockBabyRepository, BabyProfile, UUID, BabyProfile, ModelContext, UUID, BabyProfile (+3 more)
 
 ### Community 158 - "Community 158"
-Cohesion: 0.12
-Nodes (25): Decodable, Any, async, Bool, Date, Duration, Error, Int (+17 more)
+Cohesion: 0.06
+Nodes (39): Decodable, FamilyDocumentSnapshot, Any, async, Bool, Date, Duration, Error (+31 more)
 
 ### Community 159 - "Community 159"
 Cohesion: 0.19
 Nodes (20): classifyAPNsResponse(), apnsError(), backgroundSleepEndPayload(), { classifyAPNsResponse, sendAPNs }, deliverLiveActivityToken(), dispatchSleepEnd(), foundationSeconds(), isDocumentId() (+12 more)
 
 ### Community 160 - "Community 160"
-Cohesion: 0.10
+Cohesion: 0.11
 Nodes (11): CareTipsCatalog, CareTip, CareTip, CareTip, CareTip, CareTip, CareTip, CareTip (+3 more)
 
 ### Community 161 - "Community 161"
@@ -1349,16 +1387,16 @@ Cohesion: 0.50
 Nodes (3): 08:23 | main, 20:15 | main, 23:19-23:21 | main
 
 ### Community 184 - "Community 184"
-Cohesion: 0.05
-Nodes (43): line, session, sessions, 00222156-4e07-4e68-981c-d4ebbbac4c99, 004bc2b7-b649-4c20-af42-2848368d1fde, 00ad0f91-3f16-4667-90c6-725cad3d1989, 01d5db97-6158-4b9b-9361-9b44ccbecc99, 0d77a67e-2c62-497b-87a9-9e247fb25c7c (+35 more)
+Cohesion: 0.04
+Nodes (48): line, session, sessions, 00222156-4e07-4e68-981c-d4ebbbac4c99, 004bc2b7-b649-4c20-af42-2848368d1fde, 00ad0f91-3f16-4667-90c6-725cad3d1989, 01d5db97-6158-4b9b-9361-9b44ccbecc99, 0d77a67e-2c62-497b-87a9-9e247fb25c7c (+40 more)
 
 ### Community 185 - "Community 185"
 Cohesion: 0.40
 Nodes (4): 2026-09-18, 2026-09-19, Identity Candidates, Recent
 
 ### Community 191 - "Community 191"
-Cohesion: 0.33
-Nodes (5): 08:08 | main, 20:27 | main, 20:32 | main, 20:34 | main, 20:39 | main
+Cohesion: 0.17
+Nodes (11): 08:08 | main, 20:27 | main, 20:32 | main, 20:34 | main, 20:39 | main, 20:48 | main, 20:53 | main, 20:59 | main (+3 more)
 
 ### Community 193 - "Community 193"
 Cohesion: 0.16
@@ -1374,7 +1412,7 @@ Nodes (14): PredictionBasis, ageOnly, personalized, PredictionConfidence, high, 
 
 ### Community 196 - "Community 196"
 Cohesion: 0.15
-Nodes (15): LocalizedList, LocalizedText, CareTip, CareTipCategory, comfort, development, feeding, hygiene (+7 more)
+Nodes (16): LocalizedList, LocalizedText, CareTip, CareTipCategory, comfort, development, feeding, hygiene (+8 more)
 
 ### Community 197 - "Community 197"
 Cohesion: 0.13
@@ -1449,8 +1487,8 @@ Cohesion: 0.17
 Nodes (11): Definition of Done, Manual QA (simulator, change device time in Settings → General → Date & Time), P1 — Sleep Midnight Rollover: Entry Disappears After Stop, Root cause (verified), Task 1 — NEW `Momsy/Features/Sleep/Domain/Services/SleepDayWindow.swift`, Task 2 — EDIT `SleepRepository.swift` — protocol extension (no conformer changes), Task 3 — EDIT `GetSleepEntriesUseCase.swift`, Task 4 — EDIT `SleepViewModel.swift` (4 spots) (+3 more)
 
 ### Community 216 - "Community 216"
-Cohesion: 0.11
-Nodes (4): PendingSubscriptionSync, SubscriptionSyncContext, UserDefaults, SubscriptionManagerLogicTests
+Cohesion: 0.12
+Nodes (3): SubscriptionSyncContext, UserDefaults, SubscriptionManagerLogicTests
 
 ### Community 218 - "Community 218"
 Cohesion: 0.26
@@ -1481,8 +1519,8 @@ Cohesion: 0.50
 Nodes (3): 19:51 | main, 20:09 | main, 20:16 | main
 
 ### Community 227 - "Community 227"
-Cohesion: 0.15
-Nodes (15): AccountDeletionRecoveryTests, Calls, MockAuth, MockCloudEraser, MockPendingAuthStore, MockPendingStore, MockSuppressedRestoreStore, AccountErasureOutcome (+7 more)
+Cohesion: 0.13
+Nodes (15): AccountDeletionRecoveryTests, Calls, MockAuth, MockCloudEraser, MockPendingAuthStore, MockPendingStore, MockSuppressedRestoreStore, PendingAccountDeletionStoreTests (+7 more)
 
 ### Community 228 - "Community 228"
 Cohesion: 0.24
@@ -1507,6 +1545,10 @@ Nodes (3): FeedingViewModelTests, FeedingViewModel, MockFeedingRepository
 ### Community 233 - "Community 233"
 Cohesion: 0.17
 Nodes (9): AppState, GetAllBabiesUseCase, GetBabyProfileUseCase, BabyProfile, Language, LocalizationManager, NSObjectProtocol, String (+1 more)
+
+### Community 234 - "Community 234"
+Cohesion: 0.50
+Nodes (3): AppLegalLinks, String, URL
 
 ### Community 235 - "Community 235"
 Cohesion: 0.17
@@ -1605,12 +1647,12 @@ Cohesion: 0.22
 Nodes (7): AppContainer, LocalizationManager, SymptomViewModel, Void, Symptom, SymptomCard, SymptomView
 
 ### Community 261 - "Community 261"
-Cohesion: 0.25
-Nodes (5): Activity, BathActivityAttributes, Date, String, BathLiveActivityManager
+Cohesion: 0.14
+Nodes (7): DeleteAccountUseCase, SettingsViewModel, Activity, BathActivityAttributes, Date, String, BathLiveActivityManager
 
 ### Community 262 - "Community 262"
-Cohesion: 0.14
-Nodes (7): DeleteAccountUseCase, SettingsViewModel, Activity, Date, PumpingActivityAttributes, String, PumpingLiveActivityManager
+Cohesion: 0.25
+Nodes (5): Activity, Date, PumpingActivityAttributes, String, PumpingLiveActivityManager
 
 ### Community 263 - "Community 263"
 Cohesion: 0.28
@@ -1629,8 +1671,8 @@ Cohesion: 0.07
 Nodes (16): NoOpCloudSyncDownloader, SleepLiveSyncService, CloudSyncDownloaderProtocol, SleepLiveSyncServiceTests, SpyCloudSyncDownloader, AsyncStream, CloudSyncDownloaderProtocol, Date (+8 more)
 
 ### Community 268 - "Community 268"
-Cohesion: 0.19
-Nodes (12): ContainerFactory, FileManager, Bool, FileManager, ModelContainer, String, URL, UserDefaults (+4 more)
+Cohesion: 0.27
+Nodes (9): ContainerFactory, FileManager, Bool, FileManager, ModelContainer, URL, UserDefaults, AppPersistence (+1 more)
 
 ### Community 269 - "Community 269"
 Cohesion: 0.11
@@ -1701,8 +1743,8 @@ Cohesion: 0.32
 Nodes (4): Date, PumpingEntry, PumpingRepository, GetPumpingEntriesUseCase
 
 ### Community 286 - "Community 286"
-Cohesion: 0.08
-Nodes (20): AnalyticsServiceProtocol, LogAnalyticsService, AnalyticsServiceProtocol, AckLatch, FirestoreAck, MockAnalyticsService, AnalyticsEvent, Bool (+12 more)
+Cohesion: 0.17
+Nodes (11): AckLatch, FirestoreAck, Bool, Error, Result, TimeInterval, Void, Int (+3 more)
 
 ### Community 287 - "Community 287"
 Cohesion: 0.25
@@ -1749,8 +1791,8 @@ Cohesion: 0.30
 Nodes (3): MockMomMoodRepository, MomMoodViewModelTests, MomMoodViewModel
 
 ### Community 299 - "Community 299"
-Cohesion: 0.12
-Nodes (14): FamilyDocumentSnapshot, Any, Bool, Date, Duration, MainActor, Result, String (+6 more)
+Cohesion: 0.05
+Nodes (40): MedicalPublisher, aap, nhs, peerReviewed, who, MedicalSource, MedicalSourceID, aapSafeSleep (+32 more)
 
 ### Community 300 - "Community 300"
 Cohesion: 0.38
@@ -1901,16 +1943,16 @@ Cohesion: 0.17
 Nodes (12): Bool, Date, SleepEntry, SleepRepository, TimeInterval, ShortSessionPolicy, discard, save (+4 more)
 
 ### Community 342 - "Community 342"
-Cohesion: 0.08
-Nodes (16): DiaryViewModelTests, MockDiaryRepository, Bool, Date, StoredDiaryItem, String, UUID, Date (+8 more)
+Cohesion: 0.24
+Nodes (5): DiaryViewModelTests, MockDiaryRepository, BabyProfile, DiaryViewModel, MockDiaryRepository
 
 ### Community 343 - "Community 343"
 Cohesion: 0.24
 Nodes (9): IndexSet, AppState, BabyProfile, Bool, LocalizationManager, String, Void, AddChildSheet (+1 more)
 
 ### Community 344 - "Community 344"
-Cohesion: 0.12
-Nodes (15): RepositoryError, networkUnavailable, notFound, notImplemented, saveFailed, FirestoreAckError, notConfirmed, LocalizedError (+7 more)
+Cohesion: 0.10
+Nodes (18): RepositoryError, networkUnavailable, notFound, notImplemented, saveFailed, FirestoreAckError, notConfirmed, LocalizedError (+10 more)
 
 ### Community 345 - "Community 345"
 Cohesion: 0.27
@@ -1941,8 +1983,8 @@ Nodes (16): {
 } (+8 more)
 
 ### Community 350 - "Community 350"
-Cohesion: 0.39
-Nodes (3): Int, TrackingViewModel, TrackingViewModelPercentileTests
+Cohesion: 0.17
+Nodes (6): Int, String, TrackingViewModel, WHOPoint, TrackingViewModelPercentileTests, WHOGrowthStandardsTests
 
 ### Community 351 - "Community 351"
 Cohesion: 0.18
@@ -2029,8 +2071,8 @@ Cohesion: 0.33
 Nodes (5): Bool, FamilyMember, LocalizationManager, Void, MemberCard
 
 ### Community 374 - "Community 374"
-Cohesion: 0.24
-Nodes (5): ComplementaryFeedingRepository, MockComplementaryFeedingRepository, ComplementaryFoodEntry, Set, UUID
+Cohesion: 0.17
+Nodes (10): FamilyRepository, InviteServiceProtocol, Date, Error, MainActor, StoredFamilyMember, AuthStub, InviteSpy (+2 more)
 
 ### Community 375 - "Community 375"
 Cohesion: 0.40
@@ -2124,20 +2166,20 @@ Cohesion: 0.50
 Nodes (3): 00:50 | main, 19:58 | main, 20:00 | main
 
 ### Community 402 - "Community 402"
-Cohesion: 0.15
-Nodes (11): BabyScoped, DoctorVisitRecord, Date, Int, MomMoodEntry, String, UUID, Date (+3 more)
+Cohesion: 0.11
+Nodes (15): BabyScoped, DoctorVisitRecord, Date, Int, MomMoodEntry, String, UUID, Date (+7 more)
 
 ### Community 403 - "Community 403"
 Cohesion: 0.33
 Nodes (7): BabyProfile, BabySex, boy, girl, Date, String, UUID
 
 ### Community 405 - "Community 405"
-Cohesion: 0.33
-Nodes (9): BabyGrowthPoint, MeasurementEntry, TemperatureEntry, WHOPoint, Date, Double, Int, String (+1 more)
+Cohesion: 0.31
+Nodes (10): Codable, BabyGrowthPoint, MeasurementEntry, TemperatureEntry, WHOPoint, Date, Double, Int (+2 more)
 
 ### Community 406 - "Community 406"
-Cohesion: 0.31
-Nodes (6): Bool, ComplementaryFoodEntry, Date, String, UUID, ComplementaryFoodRecord
+Cohesion: 0.19
+Nodes (7): Double, Int, Language, String, WeeklyStats, StaticWeeklyInsightServiceTests, WeeklyInsightPromptTests
 
 ### Community 407 - "Community 407"
 Cohesion: 0.18
@@ -2152,8 +2194,8 @@ Cohesion: 0.25
 Nodes (8): JoinAlert, cloudSyncConsent, cloudSyncFailure, confirm, failure, removedFromFamily, success, Int
 
 ### Community 410 - "Community 410"
-Cohesion: 0.25
-Nodes (3): String, WHOPoint, WHOGrowthStandardsTests
+Cohesion: 0.16
+Nodes (14): Bool, Error, L10n, LocalizationManager, MainActor, PendingFamilyInviteStore, Product, String (+6 more)
 
 ### Community 411 - "Community 411"
 Cohesion: 0.28
@@ -2204,12 +2246,12 @@ Cohesion: 0.23
 Nodes (11): BathRepository, Date, DiaperRepository, FeedingRepository, LogReportItem, PumpingRepository, SleepRepository, StoolRepository (+3 more)
 
 ### Community 442 - "Community 442"
-Cohesion: 0.07
-Nodes (20): FeedingRepository, MockFeedingRepository, Date, FeedingEntry, Int, String, UUID, Date (+12 more)
+Cohesion: 0.12
+Nodes (12): FeedingRepository, Date, FeedingEntry, Int, String, UUID, Date, FeedingEntry (+4 more)
 
 ### Community 443 - "Community 443"
-Cohesion: 0.36
-Nodes (4): Date, DiaperEntry, UUID, DiaperRecord
+Cohesion: 0.12
+Nodes (15): CaseIterable, LeapCalendarScope, month, week, SleepAgeBand, months12to18, months18to24, months24plus (+7 more)
 
 ### Community 444 - "Community 444"
 Cohesion: 0.13
@@ -2236,7 +2278,7 @@ Cohesion: 0.19
 Nodes (9): Binding, LocalizationManager, URL, MainTabView, WidgetFeatureRoute, bath, feeding, sleep (+1 more)
 
 ### Community 451 - "Community 451"
-Cohesion: 0.15
+Cohesion: 0.17
 Nodes (10): AppContainer, Bool, CareTip, CareTipsViewModel, Language, LocalizationManager, String, Void (+2 more)
 
 ### Community 452 - "Community 452"
@@ -2276,8 +2318,8 @@ Cohesion: 0.21
 Nodes (8): async, Bool, Error, MainActor, PendingFamilyInviteStore, String, Void, PaywallActionHandler
 
 ### Community 469 - "Community 469"
-Cohesion: 0.36
-Nodes (4): Date, TemperatureEntry, UUID, LocalTemperatureRepository
+Cohesion: 0.32
+Nodes (5): Date, TemperatureEntry, UUID, LocalTemperatureRepository, TemperatureRepository
 
 ### Community 470 - "Community 470"
 Cohesion: 0.36
@@ -2286,6 +2328,10 @@ Nodes (10): bytes, column_index(), fetch_table(), main(), float, int, B7' -> 1. 
 ### Community 471 - "Community 471"
 Cohesion: 0.33
 Nodes (6): SymptomLog, SymptomSeverity, high, mild, moderate, Date
+
+### Community 472 - "Community 472"
+Cohesion: 0.12
+Nodes (4): CareTipsCatalogTests, CareTip, Int, MedicalSourceID
 
 ### Community 473 - "Community 473"
 Cohesion: 0.27
@@ -2304,8 +2350,8 @@ Cohesion: 0.47
 Nodes (4): DiaperLogDTO, DiaperLog, String, Timestamp
 
 ### Community 477 - "Community 477"
-Cohesion: 0.10
-Nodes (17): Error, makeAppState(), TestError, mock, AddDiaryEntryUseCase, BabySyncRepositoryProtocol, Date, StoredDiaryItem (+9 more)
+Cohesion: 0.22
+Nodes (8): AddDiaryEntryUseCase, BabySyncRepositoryProtocol, Date, StoredDiaryItem, String, RecordLeapSkillError, emptySkill, RecordLeapSkillUseCase
 
 ### Community 478 - "Community 478"
 Cohesion: 0.24
@@ -2343,6 +2389,14 @@ Nodes (5): CheckedContinuation, Never, Void, CloudSyncConsentTests, FamilySetupG
 Cohesion: 0.12
 Nodes (13): DateFormatter, MeasurementLogDTO, DateFormatter, Date, Int, LocalizationManager, String, UnitSystemManager (+5 more)
 
+### Community 488 - "Community 488"
+Cohesion: 0.12
+Nodes (14): SubscriptionError, catalogEmpty, failedVerification, ownedByAnotherAccount, pendingApproval, productUnavailable, Error, makeAppState() (+6 more)
+
+### Community 489 - "Community 489"
+Cohesion: 0.28
+Nodes (5): Date, FamilyRole, String, TimeInterval, LocalInviteService
+
 ### Community 490 - "Community 490"
 Cohesion: 0.31
 Nodes (5): Date, SleepEntry, String, UUID, MomSleepRecord
@@ -2351,6 +2405,10 @@ Nodes (5): Date, SleepEntry, String, UUID, MomSleepRecord
 Cohesion: 0.38
 Nodes (3): WeeklyInsight, WeeklyInsightRepository, GetWeeklyInsightsUseCase
 
+### Community 492 - "Community 492"
+Cohesion: 0.14
+Nodes (13): 1. Model — `CareTipModels.swift`, 2. Catalog — 7 files `CareTipsCatalog+*.swift`, 3. Visibility — `CareTipsCatalog.swift`, 4. `CareTipDetailView.swift`, 5. `CareTipsView.swift` list row, A3 — CareTips: sources on every tip (38 tips), Changes, Deliverable for owner review (PR description) (+5 more)
+
 ### Community 493 - "Community 493"
 Cohesion: 0.52
 Nodes (6): LogEntry, BlobKind, Bool, Date, Int, String
@@ -2358,6 +2416,14 @@ Nodes (6): LogEntry, BlobKind, Bool, Date, Int, String
 ### Community 494 - "Community 494"
 Cohesion: 0.33
 Nodes (5): WeeklyInsightContext, Date, Language, String, WeeklyStats
+
+### Community 495 - "Community 495"
+Cohesion: 0.21
+Nodes (6): DiaryRepository, Date, ModelContext, StoredDiaryItem, UUID, SwiftDataDiaryRepository
+
+### Community 496 - "Community 496"
+Cohesion: 0.21
+Nodes (7): MockWeeklyInsightRepository, MockWeeklyInsightService, Date, WeeklyInsight, WeeklyInsightAI, WeeklyInsightContext, WeeklyInsightService
 
 ### Community 497 - "Community 497"
 Cohesion: 0.44
@@ -2383,6 +2449,14 @@ Nodes (4): MeasurementRepository, MeasurementEntry, UUID, MockMeasurementReposit
 Cohesion: 0.25
 Nodes (4): AccountDeletionProvider, apple, google, FirebaseAuth
 
+### Community 508 - "Community 508"
+Cohesion: 0.18
+Nodes (9): BabyAgeStage, baby, eat, kid, newborn, toddler, BlobKind, Color (+1 more)
+
+### Community 509 - "Community 509"
+Cohesion: 0.32
+Nodes (6): Calendar, Int, LeapDailyCheckIn, String, UserDefaults, LocalLeapCheckInRepository
+
 ### Community 510 - "Community 510"
 Cohesion: 0.29
 Nodes (6): Build & test gate, Manual QA script, Pre-Release Code Fixes, T10 — App Store Connect (no code), T6 — Verify `GoogleSignIn` linkage (verification only, no edit), Task summary
@@ -2395,21 +2469,33 @@ Nodes (7): Acceptance criteria, AFTER, BEFORE, Definition of Done, Open question
 Cohesion: 0.29
 Nodes (7): Acceptance criteria, AFTER, AFTER, BEFORE, BEFORE, Definition of Done, T5 — Keep `AppCheckDebugProvider` out of release builds (P2, optional)
 
+### Community 513 - "Community 513"
+Cohesion: 0.22
+Nodes (7): Date, ModelContext, WeeklyInsight, SwiftDataWeeklyInsightRepository, WeeklyInsightRepositoryError, missingBabyScope, WeeklyInsightRepository
+
 ### Community 514 - "Community 514"
 Cohesion: 0.52
 Nodes (3): WHOGrowthStandards, BabySex, WHOPoint
 
+### Community 515 - "Community 515"
+Cohesion: 0.23
+Nodes (6): Bool, Date, StoredDiaryItem, String, UUID, DiaryItemRecord
+
 ### Community 516 - "Community 516"
 Cohesion: 0.48
 Nodes (3): Date, TemperatureEntry, MockTemperatureRepository
+
+### Community 517 - "Community 517"
+Cohesion: 0.38
+Nodes (4): Date, StoredDiaryItem, UUID, LocalDiaryRepository
 
 ### Community 518 - "Community 518"
 Cohesion: 0.33
 Nodes (5): Invariants, Momsy Authentication, Repository map, Validation, Workflow
 
 ### Community 519 - "Community 519"
-Cohesion: 0.26
-Nodes (8): Notification.Name, PendingFetch, DTO, Entry, DTO, String, T, Void
+Cohesion: 0.47
+Nodes (4): DTO, Entry, DTO, Void
 
 ### Community 520 - "Community 520"
 Cohesion: 0.24
@@ -2422,6 +2508,10 @@ Nodes (5): Boundaries, Momsy Design System, Tokens and components, Validation, W
 ### Community 522 - "Community 522"
 Cohesion: 0.22
 Nodes (8): Color, Date, DateFormatter, L10n, LocalizationManager, SleepPrediction, String, NextSleepCard
+
+### Community 523 - "Community 523"
+Cohesion: 0.29
+Nodes (3): FamilyRole, String, LocalInviteServiceTests
 
 ### Community 524 - "Community 524"
 Cohesion: 0.25
@@ -2443,9 +2533,17 @@ Nodes (6): LeapLog, LeapLogDTO, Bool, Int, String, Timestamp
 Cohesion: 0.33
 Nodes (6): Acceptance criteria, AFTER, AFTER (new entries), BEFORE, Definition of Done, T9 — Localize authentication error messages (P1)
 
+### Community 529 - "Community 529"
+Cohesion: 0.38
+Nodes (4): Date, FeedingEntry, UUID, LocalFeedingRepository
+
 ### Community 530 - "Community 530"
 Cohesion: 0.43
 Nodes (4): WakeWindowCatalog, Int, SleepAgeBand, WakeWindowProfile
+
+### Community 531 - "Community 531"
+Cohesion: 0.42
+Nodes (3): StoredFamilyMember, UUID, LocalFamilyRepository
 
 ### Community 532 - "Community 532"
 Cohesion: 0.33
@@ -2462,6 +2560,10 @@ Nodes (3): InviteCodeFormat, Bool, String
 ### Community 536 - "Community 536"
 Cohesion: 0.15
 Nodes (10): PendingAccountDeletion, PendingAccountDeletionStore, PendingAuthAccountDeletionStore, SuppressedFamilyRestoreStore, UserDefaultsPendingAccountDeletionStore, UserDefaultsPendingAuthAccountDeletionStore, UserDefaultsSuppressedFamilyRestoreStore, Bool (+2 more)
+
+### Community 537 - "Community 537"
+Cohesion: 0.24
+Nodes (5): AppStore, PendingSubscriptionSync, T, Transaction, VerificationResult
 
 ### Community 538 - "Community 538"
 Cohesion: 0.33
@@ -2527,6 +2629,10 @@ Nodes (4): 14:49 | main, 14:51 | main, 19:52 | main, 21:27-21:30 | main
 Cohesion: 0.40
 Nodes (4): 21:15 | codex/update-project-guidance-build-12, 21:48-21:54 | codex/update-project-guidance-build-12, 21:56 | codex/update-project-guidance-build-12, 22:09 | codex/update-project-guidance-build-12
 
+### Community 561 - "Community 561"
+Cohesion: 0.29
+Nodes (4): MockDiaryRepository, Date, StoredDiaryItem, UUID
+
 ### Community 562 - "Community 562"
 Cohesion: 0.40
 Nodes (4): 00:08 | main, 10:14 | codex/update-project-guidance-build-12, 10:29-18:24 | codex/update-project-guidance-build-12, 18:32-18:44 | codex/update-project-guidance-build-12
@@ -2543,9 +2649,13 @@ Nodes (4): 07:55 | main, 08:00-17:30 | main, 20:27 | main, 20:35-22:12 | main
 Cohesion: 0.38
 Nodes (5): WaterIntakeLogDTO, Int, String, Timestamp, WaterIntakeLog
 
+### Community 566 - "Community 566"
+Cohesion: 0.44
+Nodes (3): Int, LeapProgress, LocalLeapsRepository
+
 ### Community 568 - "Community 568"
-Cohesion: 0.03
-Nodes (75): ClosedRange, Equatable, Identifiable, DiaryLog, DoctorVisitLog, FeedingLog, FoodDiaryLog, LeapLog (+67 more)
+Cohesion: 0.05
+Nodes (50): Equatable, Identifiable, DiaryLog, DoctorVisitLog, LeapLog, LeapBehaviorInsight, LeapCalendarDay, LeapCalendarDayPhase (+42 more)
 
 ### Community 569 - "Community 569"
 Cohesion: 0.50
@@ -2599,6 +2709,10 @@ Nodes (6): Defaults, LocalizationManager, Bool, L10n, Language, String
 Cohesion: 0.09
 Nodes (7): FamilyAccessCapability, FamilyRole, Set, FamilyAccessPolicyTests, FamilyJoinGuardTests, FamilyRoleAvatarTests, StoredFamilyMemberFirestoreMappingTests
 
+### Community 592 - "Community 592"
+Cohesion: 0.31
+Nodes (4): MockFeedingRepository, Date, FeedingEntry, UUID
+
 ### Community 596 - "Community 596"
 Cohesion: 0.29
 Nodes (7): AccountErasureGate, AuthoredDataAction, anonymize, delete, Any, Bool, String
@@ -2607,28 +2721,104 @@ Nodes (7): AccountErasureGate, AuthoredDataAction, anonymize, delete, Any, Bool,
 Cohesion: 0.40
 Nodes (3): FamilyJoinGuard, Bool, String
 
+### Community 598 - "Community 598"
+Cohesion: 0.28
+Nodes (7): LeapCheckInSymptom, appetiteShift, fussiness, newSkills, sleepWorse, wantsHeld, Language
+
 ### Community 599 - "Community 599"
-Cohesion: 0.05
-Nodes (38): Codable, BathEntry, DiaperEntry, MeasurementLogDTO, PumpingLogDTO, StoredFamilyMember, VitaminEntry, WalkEntry (+30 more)
+Cohesion: 0.29
+Nodes (9): WeeklyInsight, WeeklyInsightAI, WeeklyStats, Bool, Date, Double, Int, Language (+1 more)
+
+### Community 600 - "Community 600"
+Cohesion: 0.39
+Nodes (5): AppState, MockWeeklyInsightRepository, MockWeeklyInsightService, WeeklyInsightViewModel, WeeklyInsightViewModelTests
+
+### Community 601 - "Community 601"
+Cohesion: 0.25
+Nodes (7): SemanticColor, butter, coral, lilac, mint, rose, sky
+
+### Community 602 - "Community 602"
+Cohesion: 0.36
+Nodes (3): Date, WeeklyInsight, ThrowingWeeklyInsightRepository
+
+### Community 603 - "Community 603"
+Cohesion: 0.29
+Nodes (5): CitationPolicy, MedicalPublisher, Bool, MedicalSourceID, Set
+
+### Community 605 - "Community 605"
+Cohesion: 0.33
+Nodes (6): DiaperLog, DiaperType, both, dirty, wet, Date
+
+### Community 606 - "Community 606"
+Cohesion: 0.38
+Nodes (5): PumpingLogDTO, Int, String, Timestamp, PumpingLog
+
+### Community 607 - "Community 607"
+Cohesion: 0.33
+Nodes (5): ClosedRange, WakeWindowProfile, ClosedRange, Int, SleepAgeBand
+
+### Community 608 - "Community 608"
+Cohesion: 0.33
+Nodes (5): FeedingLog, Date, FeedingSide, Int, String
+
+### Community 609 - "Community 609"
+Cohesion: 0.47
+Nodes (4): MeasurementLogDTO, MeasurementLog, String, Timestamp
 
 ### Community 611 - "Community 611"
-Cohesion: 0.44
-Nodes (3): Bool, Date, TimeInterval
+Cohesion: 0.27
+Nodes (7): Notification.Name, PendingFetch, Bool, Date, String, T, TimeInterval
+
+### Community 615 - "Community 615"
+Cohesion: 0.33
+Nodes (5): SleepLog, Date, Int, SleepQuality, String
+
+### Community 617 - "Community 617"
+Cohesion: 0.53
+Nodes (4): StoredFamilyMember, Bool, String, UUID
+
+### Community 619 - "Community 619"
+Cohesion: 0.60
+Nodes (3): MedicalSourceCatalog, MedicalSource, MedicalSourceID
+
+### Community 620 - "Community 620"
+Cohesion: 0.40
+Nodes (4): BathEntry, Date, Int, UUID
 
 ### Community 621 - "Community 621"
 Cohesion: 0.29
 Nodes (4): MockSleepRepository, Date, SleepEntry, UUID
 
+### Community 622 - "Community 622"
+Cohesion: 0.60
+Nodes (3): DiaperEntry, Date, UUID
+
+### Community 623 - "Community 623"
+Cohesion: 0.40
+Nodes (4): FoodDiaryLog, Bool, Date, String
+
+### Community 624 - "Community 624"
+Cohesion: 0.60
+Nodes (3): QuickEventLog, Date, String
+
+### Community 625 - "Community 625"
+Cohesion: 0.40
+Nodes (4): VitaminEntry, Date, String, UUID
+
 ### Community 626 - "Community 626"
 Cohesion: 0.47
 Nodes (4): QuickEventLogDTO, String, Timestamp, QuickEventLog
+
+### Community 627 - "Community 627"
+Cohesion: 0.40
+Nodes (4): WalkEntry, Date, Int, UUID
 
 ### Community 632 - "Community 632"
 Cohesion: 0.12
 Nodes (19): SoundCategoryKey, melody, nature, newborns, pinkNoise, whiteNoise, SoundItem, SoundNameKey (+11 more)
 
 ## Knowledge Gaps
-- **2589 isolated node(s):** `npx`, `npm_config_update_notifier`, `CLAUDE_FLOW_MODE`, `CLAUDE_FLOW_HOOKS_ENABLED`, `CLAUDE_FLOW_TOPOLOGY` (+2584 more)
+- **2660 isolated node(s):** `npx`, `npm_config_update_notifier`, `CLAUDE_FLOW_MODE`, `CLAUDE_FLOW_HOOKS_ENABLED`, `CLAUDE_FLOW_TOPOLOGY` (+2655 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **98 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -2636,13 +2826,13 @@ Nodes (19): SoundCategoryKey, melody, nature, newborns, pinkNoise, whiteNoise, S
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `DateFormatter` connect `Community 487` to `Community 480`, `Community 69`, `Community 295`, `Community 296`, `Community 104`, `Community 522`, `Community 105`, `Community 43`, `Community 45`, `Community 79`, `Community 80`, `Community 466`, `Community 19`, `Community 408`, `Community 478`?**
-  _High betweenness centrality (0.064) - this node is a cross-community bridge._
-- **Why does `BabyScoped` connect `Community 402` to `Community 224`, `Community 481`, `Community 66`, `Community 484`, `Community 408`, `Community 7`, `Community 40`, `Community 490`, `Community 81`, `Community 49`, `Community 406`, `Community 502`, `Community 342`, `Community 22`, `Community 442`, `Community 443`, `Community 444`?**
-  _High betweenness centrality (0.060) - this node is a cross-community bridge._
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
+- **Why does `BabyScoped` connect `Community 402` to `Community 224`, `Community 481`, `Community 66`, `Community 515`, `Community 484`, `Community 7`, `Community 40`, `Community 490`, `Community 442`, `Community 81`, `Community 49`, `Community 21`, `Community 502`, `Community 408`, `Community 58`, `Community 444`?**
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
 - **Why does `FirebaseAuth` connect `Community 507` to `Community 101`, `Community 328`, `Community 106`, `Community 46`, `Community 14`, `Community 83`, `Community 372`, `Community 84`, `Community 158`, `Community 253`, `Community 30`?**
-  _High betweenness centrality (0.058) - this node is a cross-community bridge._
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
 - **What connects `npx`, `npm_config_update_notifier`, `CLAUDE_FLOW_MODE` to the rest of the system?**
-  _2590 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _2661 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.08547008547008547 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**

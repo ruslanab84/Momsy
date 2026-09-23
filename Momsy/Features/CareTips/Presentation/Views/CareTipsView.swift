@@ -140,6 +140,12 @@ private struct CareTipRowView: View {
     let tip: CareTip
     let lang: Language
 
+    /// "0–12 mo · WHO" — the primary publisher is the first (highest-priority) source.
+    private var caption: String {
+        let publisher = tip.sources.first.flatMap(MedicalSourceCatalog.source)?.publisher.badge
+        return [tip.ageLabel(lang), publisher].compactMap { $0 }.joined(separator: " · ")
+    }
+
     var body: some View {
         HStack(spacing: 14) {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -162,6 +168,9 @@ private struct CareTipRowView: View {
                     .foregroundColor(.bbInkSoft)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
+                Text(caption)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(.bbInkMute)
             }
 
             Spacer(minLength: 4)

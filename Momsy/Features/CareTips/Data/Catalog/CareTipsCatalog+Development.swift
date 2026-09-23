@@ -170,7 +170,8 @@ extension CareTipsCatalog {
                     "身体的一侧感觉更僵硬或明显使用较少。",
                     "头部控制能力在改善后似乎出现了倒退。",
                 ]
-            )
+            ),
+            sources: [.whoPhysicalActivitySleepUnder5]
         ),
 
         CareTip(
@@ -340,7 +341,8 @@ extension CareTipsCatalog {
                     "脸或耳朵看起来不对称。",
                     "例行检查时对头部尺寸或形状的任何担忧。",
                 ]
-            )
+            ),
+            sources: [.nhsFlatHeadSyndrome]
         ),
 
         CareTip(
@@ -510,7 +512,8 @@ extension CareTipsCatalog {
                     "对他们的名字或响亮的声音没有反应。",
                     "之前的声音、手势或目光接触消失——立即提及。",
                 ]
-            )
+            ),
+            sources: [.whoEarlyChildhoodDevelopment2020]
         ),
 
         CareTip(
@@ -673,7 +676,8 @@ extension CareTipsCatalog {
                     "趴在胸前时呼吸嘈杂或困难。",
                     "经过几周的尝试后，你根本感觉不到任何联系——这值得对专业人士说，而且很常见。",
                 ]
-            )
+            ),
+            sources: [.whoPostnatalCare2022, .whoPretermLBWCare2022]
         ),
 
         CareTip(
@@ -836,7 +840,8 @@ extension CareTipsCatalog {
                     "大约一年后，就完全没有兴趣看书或看脸了。",
                     "如果对听力或视力有任何疑问，请检查而不是观看。",
                 ]
-            )
+            ),
+            sources: [.whoEarlyChildhoodDevelopment2020]
         )
     ]
 }

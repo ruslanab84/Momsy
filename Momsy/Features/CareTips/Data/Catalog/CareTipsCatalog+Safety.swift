@@ -163,7 +163,8 @@ extension CareTipsCatalog {
                     "早产儿或低出生体重儿在出院前可能需要进行汽车座椅耐受性检查。",
                     "发生任何碰撞后，即使您的宝宝看起来完全正常，也要对其进行评估。",
                 ]
-            )
+            ),
+            sources: [.whoRoadTrafficInjuriesFactSheet, .whoWorldReportChildInjury2008]
         ),
 
         CareTip(
@@ -326,7 +327,8 @@ extension CareTipsCatalog {
                     "意识丧失、呕吐、异常嗜睡或跌倒后软组织肿胀——紧急情况。",
                     "头部肿胀，或行为、进食或反应能力有任何变化。",
                 ]
-            )
+            ),
+            sources: [.whoWorldReportChildInjury2008]
         ),
 
         CareTip(
@@ -489,7 +491,8 @@ extension CareTipsCatalog {
                     "怀疑中毒——致电紧急服务部门并随身携带包装。",
                     "窒息消失，但随后出现持续咳嗽或呼吸嘈杂。",
                 ]
-            )
+            ),
+            sources: [.whoWorldReportChildInjury2008]
         ),
 
         CareTip(
@@ -652,7 +655,8 @@ extension CareTipsCatalog {
                     "起水泡、覆盖大面积或影响面部、手部或尿布区域的烫伤。",
                     "发生水事故后数小时内出现呕吐或异常嗜睡。",
                 ]
-            )
+            ),
+            sources: [.whoDrowningFactSheet]
         ),
 
         CareTip(
@@ -815,7 +819,8 @@ extension CareTipsCatalog {
                     "癫痫发作，或在压力下不消退的皮疹。",
                     "任何需要干预的窒息事件都应在事后进行评估。",
                 ]
-            )
+            ),
+            sources: [.nhsBabyFirstAid]
         )
     ]
 }

@@ -163,7 +163,8 @@ extension CareTipsCatalog {
                     "睡眠期间出现任何呼吸暂停、颜色变化或松软的情况——请立即寻求帮助。",
                     "出于医疗原因，健康专家建议采取不同的姿势；遵循他们的指示，而不是这张卡。",
                 ]
-            )
+            ),
+            sources: [.nhsSIDS, .aapSafeSleep]
         ),
 
         CareTip(
@@ -326,7 +327,8 @@ extension CareTipsCatalog {
                     "回流非常严重，以至于您正在考虑使用楔子或斜坡——请先询问。",
                     "你会发现你的宝宝脸上盖着被褥，哪怕只有一次。",
                 ]
-            )
+            ),
+            sources: [.nhsSIDS, .aapSafeSleep]
         ),
 
         CareTip(
@@ -489,7 +491,8 @@ extension CareTipsCatalog {
                     "您发现自己在喂奶时反复睡着——请这么说；有更安全的安排。",
                     "睡眠期间打鼾、呼吸暂停或呼吸困难。",
                 ]
-            )
+            ),
+            sources: [.nhsSIDS, .aapSafeSleep]
         ),
 
         CareTip(
@@ -652,7 +655,8 @@ extension CareTipsCatalog {
                     "即使脱掉一层后，胸部仍感觉又热又湿。",
                     "发烧伴随着异常嗜睡或拒绝进食。",
                 ]
-            )
+            ),
+            sources: [.nhsSIDS]
         ),
 
         CareTip(
@@ -815,7 +819,8 @@ extension CareTipsCatalog {
                     "即使用薄层襁褓，宝宝也会过热。",
                     "您的宝宝在襁褓中滚动——立即停止并在下次检查时提及。",
                 ]
-            )
+            ),
+            sources: [.aapSwaddling]
         ),
 
         CareTip(
@@ -978,7 +983,8 @@ extension CareTipsCatalog {
                     "睡眠经常因疼痛、咳嗽或呼吸困难而中断。",
                     "您担心发育和不寻常的睡眠模式。",
                 ]
-            )
+            ),
+            sources: []
         ),
 
         CareTip(
@@ -1141,7 +1147,8 @@ extension CareTipsCatalog {
                     "您的宝宝夜复一夜地尖叫着醒来，无法安抚。",
                     "您已经没有足够的资源来应对夜晚了——请向您的医生或健康访问员大声说出这一点。",
                 ]
-            )
+            ),
+            sources: [.whoPhysicalActivitySleepUnder5, .nhsHelpingBabySleep]
         )
     ]
 }

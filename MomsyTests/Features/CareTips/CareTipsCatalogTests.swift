@@ -119,4 +119,40 @@ struct CareTipsCatalogTests {
         #expect(tip?.matches(query: "", lang: .english) == true)
         #expect(tip?.matches(query: "zzzzz", lang: .english) == false)
     }
+
+    // MARK: - Citations (A3)
+
+    private func copy(_ tip: CareTip, id: Int, sources: [MedicalSourceID]) -> CareTip {
+        CareTip(
+            id: id, category: tip.category, icon: tip.icon,
+            ageFrom: tip.ageFromMonths, ageTo: tip.ageToMonths,
+            title: tip.title, summary: tip.summary, whatToDo: tip.whatToDo,
+            whyItMatters: tip.whyItMatters, commonMistakes: tip.commonMistakes,
+            whenToCallDoctor: tip.whenToCallDoctor, sources: sources
+        )
+    }
+
+    @Test("release filter drops unsourced tips")
+    func releaseFilterDropsUnsourced() throws {
+        let base = try #require(CareTipsCatalog.tip(id: 1001))
+        let sourced = copy(base, id: 1, sources: [.whoInfantYoungChildFeeding])
+        let unsourced = copy(base, id: 2, sources: [])
+        #expect(CareTipsCatalog.publishable([sourced, unsourced]).map(\.id) == [1])
+    }
+
+    @Test("every tip that ships in Release is publishable")
+    func releaseCatalogIsPublishable() {
+        let release = CareTipsCatalog.publishable(CareTipsCatalog.all)
+        #expect(!release.isEmpty)
+        #expect(release.allSatisfy { CitationPolicy.isPublishable($0.sources) })
+    }
+
+    @Test("sources are ordered by publisher priority and resolve in the catalog")
+    func sourcesOrderedByPriority() {
+        for tip in CareTipsCatalog.all {
+            let priorities = tip.sources.compactMap { MedicalSourceCatalog.source($0)?.publisher.priority }
+            #expect(priorities.count == tip.sources.count, "tip \(tip.id) cites an unknown source")
+            #expect(priorities == priorities.sorted(), "tip \(tip.id) sources not WHO-first")
+        }
+    }
 }

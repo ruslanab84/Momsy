@@ -11,6 +11,16 @@ struct CareTipDetailView: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 header
+                #if DEBUG
+                if !tip.isPublishable {
+                    Text("UNSOURCED — hidden in Release")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(Color.red))
+                }
+                #endif
                 numberedBlock(title: lm.strings.careTipWhatToDo, items: tip.whatToDo(lang))
                 paragraphBlock(title: lm.strings.careTipWhyItMatters, text: tip.whyItMatters(lang))
                 bulletBlock(
@@ -20,6 +30,7 @@ struct CareTipDetailView: View {
                     symbolColor: .bbInkMute
                 )
                 redFlagBlock
+                MedicalSourcesSection(ids: tip.sources)
                 disclaimer
             }
             .padding(.horizontal, 20)
@@ -29,6 +40,11 @@ struct CareTipDetailView: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle(tip.category.title(lang))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                SourcesInfoButton(ids: tip.sources)
+            }
+        }
     }
 
     // MARK: - Header

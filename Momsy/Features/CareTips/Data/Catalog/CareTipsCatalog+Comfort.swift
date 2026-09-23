@@ -170,7 +170,8 @@ extension CareTipsCatalog {
                     "伴随着哭泣，体重增加缓慢。",
                     "你感到无法应对——这是寻求帮助的原因，而不是失败。",
                 ]
-            )
+            ),
+            sources: [.nhsColic]
         ),
 
         CareTip(
@@ -340,7 +341,8 @@ extension CareTipsCatalog {
                     "粪便中有血或粘液。",
                     "伴随着尖锐的波浪式尖叫，双腿抬起。",
                 ]
-            )
+            ),
+            sources: [.nhsColic]
         ),
 
         CareTip(
@@ -510,7 +512,8 @@ extension CareTipsCatalog {
                     "呼吸困难或急促、异常困倦或哭声微弱。",
                     "发烧持续超过 48 小时，或宝宝不肯喝水。",
                 ]
-            )
+            ),
+            sources: [.whoPocketBookHospitalCareChildren, .nhsFeverInChildren]
         ),
 
         CareTip(
@@ -680,7 +683,8 @@ extension CareTipsCatalog {
                     "拒绝进食超过一天。",
                     "大约 15 个月时牙龈肿胀、出血或根本没有牙齿。",
                 ]
-            )
+            ),
+            sources: [.nhsTeething]
         ),
 
         CareTip(
@@ -850,7 +854,8 @@ extension CareTipsCatalog {
                     "您的宝宝抓挠头皮或看起来很痒。",
                     "一年多了，情况没有任何改善。",
                 ]
-            )
+            ),
+            sources: [.nhsCradleCap]
         )
     ]
 }

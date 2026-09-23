@@ -163,7 +163,8 @@ extension CareTipsCatalog {
                     "疲惫会影响您的驾驶、安全或照顾宝宝的能力。",
                     "持续情绪低落或焦虑并伴有疲劳。",
                 ]
-            )
+            ),
+            sources: [.nhsParentTiredness]
         ),
 
         CareTip(
@@ -333,7 +334,8 @@ extension CareTipsCatalog {
                     "惊恐发作、侵入性的可怕想法，或者即使宝宝睡着了也无法入睡。",
                     "如果有伤害自己或宝宝的想法，请立即联系紧急服务部门或您的医生。这是紧急且可以治疗的，寻求帮助是正确的举动。",
                 ]
-            )
+            ),
+            sources: [.whoMaternalMentalHealth]
         ),
 
         CareTip(
@@ -496,7 +498,8 @@ extension CareTipsCatalog {
                     "头部撞击后出现呕吐、异常嗜睡、烦躁、囟门膨出、癫痫发作或呼吸变化。",
                     "如果您经常感觉快要失去控制，请告诉您的医生或健康访问员。支持是存在的，寻求支持可以保护每个人。",
                 ]
-            )
+            ),
+            sources: [.whoChildMaltreatmentFactSheet]
         )
     ]
 }

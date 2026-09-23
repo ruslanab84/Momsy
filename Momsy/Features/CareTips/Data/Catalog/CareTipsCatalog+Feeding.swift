@@ -170,7 +170,8 @@ extension CareTipsCatalog {
                     "体重增加减慢或尿布明显变干。",
                     "奶水会反复有力地回流，而不是轻轻地流淌。",
                 ]
-            )
+            ),
+            sources: [.nhsRefluxInBabies]
         ),
 
         CareTip(
@@ -333,7 +334,8 @@ extension CareTipsCatalog {
                     "喂食通常以持续一个多小时的无法安慰的哭泣结束。",
                     "您在喂食期间注意到喘息、咳嗽或颜色变化。",
                 ]
-            )
+            ),
+            sources: [.nhsColic]
         ),
 
         CareTip(
@@ -489,7 +491,8 @@ extension CareTipsCatalog {
                     "第一周后，每天湿尿布少于六片。",
                     "喂食提示不断出现，但喂食似乎永远不会令人满意。",
                 ]
-            )
+            ),
+            sources: [.whoInfantYoungChildFeeding, .whoPostnatalCare2022]
         ),
 
         CareTip(
@@ -652,7 +655,8 @@ extension CareTipsCatalog {
                     "喂奶需要 40 多分钟，让宝宝精疲力竭。",
                     "奶瓶喂养期间出现咳嗽、作呕或颜色变化。",
                 ]
-            )
+            ),
+            sources: [.nhsBottleFeeding]
         ),
 
         CareTip(
@@ -815,7 +819,8 @@ extension CareTipsCatalog {
                     "您的宝宝拒绝接受通常接受的配方奶，或者在喂奶后出现皮疹。",
                     "尽管饲喂量正常，但体重增加却减慢。",
                 ]
-            )
+            ),
+            sources: [.whoPowderedFormulaPreparation]
         ),
 
         CareTip(
@@ -985,7 +990,8 @@ extension CareTipsCatalog {
                     "脱水迹象：口干、囟门凹陷、湿尿布少得多、异常嗜睡。",
                     "呕吐并伴有发烧、肚子肿胀或拒绝进食。",
                 ]
-            )
+            ),
+            sources: [.whoPocketBookHospitalCareChildren, .nhsRefluxInBabies]
         ),
 
         CareTip(
@@ -1155,7 +1161,8 @@ extension CareTipsCatalog {
                     "吃新食物后出现任何皮疹、肿胀、呕吐或呼吸变化。",
                     "八个月内持续拒绝所有固体食物。",
                 ]
-            )
+            ),
+            sources: [.whoComplementaryFeeding2023, .whoInfantYoungChildFeeding]
         ),
 
         CareTip(
@@ -1318,7 +1325,8 @@ extension CareTipsCatalog {
                     "您的宝宝很难被唤醒、异常软弱或吃奶无力。",
                     "喂奶会让您感到疼痛，或者乳头破裂并流血。",
                 ]
-            )
+            ),
+            sources: [.whoInfantYoungChildFeeding]
         )
     ]
 }

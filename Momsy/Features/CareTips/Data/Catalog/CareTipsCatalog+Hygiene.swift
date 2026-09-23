@@ -170,7 +170,8 @@ extension CareTipsCatalog {
                     "当触摸该区域时，宝宝会哭泣，或者发烧。",
                     "三个星期了，树桩还没有脱落。",
                 ]
-            )
+            ),
+            sources: [.whoPostnatalCare2022]
         ),
 
         CareTip(
@@ -333,7 +334,8 @@ extension CareTipsCatalog {
                     "沐浴后扩散的皮疹。",
                     "洗澡期间或洗澡后，您的宝宝会变得寒冷并出现斑点。",
                 ]
-            )
+            ),
+            sources: [.whoPostnatalCare2022]
         ),
 
         CareTip(
@@ -503,7 +505,8 @@ extension CareTipsCatalog {
                     "经过三天的精心护理，没有任何改善。",
                     "皮疹加发烧或宝宝情绪不稳定、身体不适。",
                 ]
-            )
+            ),
+            sources: [.nhsNappyRash]
         ),
 
         CareTip(
@@ -666,7 +669,8 @@ extension CareTipsCatalog {
                     "向内生长的脚趾甲无法固定。",
                     "轻轻按压几分钟后仍持续流血的伤口。",
                 ]
-            )
+            ),
+            sources: [.nhsWashingBathingBaby]
         ),
 
         CareTip(
@@ -836,7 +840,8 @@ extension CareTipsCatalog {
                     "鼻子堵塞导致宝宝无法进食，或者呼吸看起来很费力。",
                     "怀疑有物体被推入鼻子或耳朵。",
                 ]
-            )
+            ),
+            sources: [.nhsWashingBathingBaby]
         )
     ]
 }

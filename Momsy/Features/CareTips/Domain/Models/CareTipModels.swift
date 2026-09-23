@@ -54,6 +54,10 @@ struct CareTip: Identifiable, Sendable {
     let whyItMatters: LocalizedText
     let commonMistakes: LocalizedList
     let whenToCallDoctor: LocalizedList
+    /// Ordered by `MedicalPublisher.priority` (WHO first). Empty = unsourced, hidden in Release.
+    let sources: [MedicalSourceID]
+
+    var isPublishable: Bool { CitationPolicy.isPublishable(sources) }
 
     init(
         id: Int,
@@ -66,7 +70,8 @@ struct CareTip: Identifiable, Sendable {
         whatToDo: LocalizedList,
         whyItMatters: LocalizedText,
         commonMistakes: LocalizedList,
-        whenToCallDoctor: LocalizedList
+        whenToCallDoctor: LocalizedList,
+        sources: [MedicalSourceID]
     ) {
         self.id = id
         self.category = category
@@ -79,6 +84,7 @@ struct CareTip: Identifiable, Sendable {
         self.whyItMatters = whyItMatters
         self.commonMistakes = commonMistakes
         self.whenToCallDoctor = whenToCallDoctor
+        self.sources = sources
     }
 
     func matches(ageMonths: Int) -> Bool {
