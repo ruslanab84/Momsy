@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E7A0002A1B2C3D4E5F60002 /* SymptomViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */; };
 		03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */; };
 		0BABF11E0000000000000001 /* MultiChildFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */; };
 		0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */; };
@@ -50,6 +49,8 @@
 		5A11ABF0000000000000C003 /* AckLatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000C004 /* AckLatchTests.swift */; };
 		5A11ABF0000000000000C005 /* LocalInviteServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11ABF0000000000000C006 /* LocalInviteServiceTests.swift */; };
 		5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */; };
+		A2MED0000000000000000001 /* MedicalSourceCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2MED0000000000000000002 /* MedicalSourceCatalogTests.swift */; };
+		5E7A0002A1B2C3D4E5F60002 /* SymptomViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */; };
 		802A6938D28AA6A793B23C06 /* MockFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD591BE7269DE4988EFBEDFD /* MockFeedingRepository.swift */; };
 		85B7A23DDBE7010C6C5CE3D1 /* MomsyWidgetEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */; };
 		880ACB76F459C0F289D9A8A4 /* MomsyWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4F159218252E2FF5857958F7 /* MomsyWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -157,7 +158,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SymptomViewModelTests.swift; sourceTree = "<group>"; };
 		04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
 		0A46ABCF5A1A31976CF2C739 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
@@ -193,6 +193,7 @@
 		27CCA3ED5F2ECE7D8505B730 /* MockFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockFeedingRepository.swift; sourceTree = "<group>"; };
 		3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAnalyticsService.swift; sourceTree = "<group>"; };
 		321D1FE2D7A746C099D4C639 /* AppLegalLinksTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLegalLinksTests.swift; sourceTree = "<group>"; };
+		A2MED0000000000000000002 /* MedicalSourceCatalogTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MedicalSourceCatalogTests.swift; sourceTree = "<group>"; };
 		322C5FA9E1353130E44203E6 /* MomsyWidgetEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomsyWidgetEntry.swift; sourceTree = "<group>"; };
 		33A740574DACB7A766F4A51D /* MockPushNotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPushNotificationService.swift; sourceTree = "<group>"; };
 		3BBE7E66563E0F26A2DFF70C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -215,6 +216,7 @@
 		5A11ABF0000000000000C006 /* LocalInviteServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalInviteServiceTests.swift; sourceTree = "<group>"; };
 		5C108DEF939A1DFF17A30728 /* MomsyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomsyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E13184A996317BF3FEC522E /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModelTests.swift; sourceTree = "<group>"; };
+		5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SymptomViewModelTests.swift; sourceTree = "<group>"; };
 		6284D94988BAA9F30D148420 /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
 		64F261A70D74866E7728C38F /* MockSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSleepRepository.swift; sourceTree = "<group>"; };
 		6B117796E1BA4881A6B15248 /* MockStoolRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockStoolRepository.swift; sourceTree = "<group>"; };
@@ -442,9 +444,18 @@
 				ACC001DEA000000000000003 /* Auth */,
 				0BABF12B0000000000000003 /* Family */,
 				0BABF1290000000000000001 /* Localization */,
+				A2MED0000000000000000003 /* MedicalSources */,
 				A9F0E003A9F0E003A9F0E003 /* Persistence */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		A2MED0000000000000000003 /* MedicalSources */ = {
+			isa = PBXGroup;
+			children = (
+				A2MED0000000000000000002 /* MedicalSourceCatalogTests.swift */,
+			);
+			path = MedicalSources;
 			sourceTree = "<group>";
 		};
 		0BABF1290000000000000001 /* Localization */ = {
@@ -545,6 +556,14 @@
 				5A11ABF0000000000000A00B /* UnitSystemTimeFormatTests.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		5E7A0003A1B2C3D4E5F60003 /* Symptom */ = {
+			isa = PBXGroup;
+			children = (
+				5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */,
+			);
+			path = Symptom;
 			sourceTree = "<group>";
 		};
 		6CD81E05E696492F92ABC1E4 /* Feeding */ = {
@@ -760,14 +779,6 @@
 				0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */,
 			);
 			path = Leaps;
-			sourceTree = "<group>";
-		};
-		5E7A0003A1B2C3D4E5F60003 /* Symptom */ = {
-			isa = PBXGroup;
-			children = (
-				5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */,
-			);
-			path = Symptom;
 			sourceTree = "<group>";
 		};
 		CA4E1103CA4E1103CA4E1103 /* CareTips */ = {
@@ -1109,6 +1120,7 @@
 				0BABF12B0000000000000006 /* FamilyMembershipCheckTests.swift in Sources */,
 				0BABF12B0000000000000008 /* FamilySuppressedRestoreTests.swift in Sources */,
 				5B362B749DF94C3E9F40CF2F /* AppLegalLinksTests.swift in Sources */,
+				A2MED0000000000000000001 /* MedicalSourceCatalogTests.swift in Sources */,
 				1F2E3D4C5B6A79808172635F /* SubscriptionManagerLogicTests.swift in Sources */,
 				F4A9C1B2D3E4F50617283940 /* FamilyPremiumAccessTests.swift in Sources */,
 				1EF91DA77A4D59679703557B /* DailyTipAlgorithmTests.swift in Sources */,
