@@ -570,6 +570,8 @@ struct SubscriptionManagerLogicTests {
 
         func stopObserving() {}
 
+        func reevaluate() {}
+
         func synchronize(_ pending: PendingSubscriptionSync) async throws {}
     }
 }

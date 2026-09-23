@@ -85,6 +85,96 @@ struct FamilyPremiumAccessTests {
         #expect(FamilyPremiumService.resolvedAccess(active, isFromCache: true, now: now) == true)
     }
 
+    @Test("an expired entitlement is final even when read from cache")
+    func expiredEntitlementIsFinalFromCache() {
+        let now = Date()
+        let expired = ["premiumEntitlement": validEntitlement(expiresAt: now.addingTimeInterval(-1))]
+
+        #expect(FamilyPremiumService.resolvedAccess(expired, isFromCache: true, now: now) == false)
+    }
+
+    @Test("an active family entitlement lapses when expiresAt passes without a new snapshot")
+    @MainActor
+    func activeEntitlementLapsesAtExpiry() async {
+        let clock = TestClock()
+        let document = FakeFamilyDocument()
+        let service = FamilyPremiumService(
+            documentListener: document,
+            now: { clock.now },
+            sleep: { clock.advance(by: $0) }
+        )
+        let recorder = AccessRecorder()
+        service.observe(familyId: "family-a") { recorder.values.append($0) }
+
+        document.send(["premiumEntitlement": validEntitlement(expiresAt: clock.now.addingTimeInterval(2))], fromCache: false)
+        await waitUntil { recorder.values.last == false }
+
+        #expect(recorder.values == [true, false])
+        service.stopObserving()
+    }
+
+    @Test("reevaluate reports an expired entitlement even after a server-sourced grant")
+    @MainActor
+    func reevaluateDropsExpiredServerGrant() {
+        let clock = TestClock()
+        let document = FakeFamilyDocument()
+        let service = FamilyPremiumService(
+            documentListener: document,
+            now: { clock.now },
+            sleep: { _ in try await Task.sleep(for: .seconds(3600)) }
+        )
+        let recorder = AccessRecorder()
+        service.observe(familyId: "family-a") { recorder.values.append($0) }
+        document.send(["premiumEntitlement": validEntitlement(expiresAt: clock.now.addingTimeInterval(60))], fromCache: false)
+
+        clock.advance(by: .seconds(61))
+        service.reevaluate()
+
+        #expect(recorder.values == [true, false])
+        service.stopObserving()
+    }
+
+    @Test("an offline cache-only miss resolves to no family premium after the grace period")
+    @MainActor
+    func cacheOnlyMissResolvesAfterGrace() async {
+        let clock = TestClock()
+        let document = FakeFamilyDocument()
+        let service = FamilyPremiumService(
+            documentListener: document,
+            now: { clock.now },
+            sleep: { clock.advance(by: $0) }
+        )
+        let recorder = AccessRecorder()
+        service.observe(familyId: "family-a") { recorder.values.append($0) }
+
+        document.send(nil, fromCache: true)
+        await waitUntil { !recorder.values.isEmpty }
+
+        #expect(recorder.values == [false])
+        service.stopObserving()
+    }
+
+    @Test("a server grant arriving within the grace period is the only answer")
+    @MainActor
+    func serverGrantWithinGraceWins() async {
+        let clock = TestClock()
+        let document = FakeFamilyDocument()
+        let service = FamilyPremiumService(
+            documentListener: document,
+            now: { clock.now },
+            sleep: { _ in try await Task.sleep(for: .seconds(3600)) }
+        )
+        let recorder = AccessRecorder()
+        service.observe(familyId: "family-a") { recorder.values.append($0) }
+
+        document.send(nil, fromCache: true)
+        document.send(["premiumEntitlement": validEntitlement(expiresAt: clock.now.addingTimeInterval(60))], fromCache: false)
+        await Task.yield()
+
+        #expect(recorder.values == [true])
+        service.stopObserving()
+    }
+
     @Test("an authentication change clears the persisted paywall decision")
     func authenticationChangeClearsPaywallCache() throws {
         let suiteName = "FamilyPremiumAccessTests.\(UUID().uuidString)"
@@ -174,4 +264,46 @@ struct FamilyPremiumAccessTests {
     }
 
     private struct TestJoinError: Error {}
+
+    private func waitUntil(_ condition: @MainActor () -> Bool) async {
+        for _ in 0..<1000 where !condition() {
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+    }
+
+    /// A clock whose `sleep` jumps straight to the deadline instead of waiting.
+    private final class TestClock: @unchecked Sendable {
+        private let lock = NSLock()
+        private var current = Date(timeIntervalSince1970: 1_800_000_000)
+
+        var now: Date { lock.withLock { current } }
+
+        func advance(by duration: Duration) {
+            let seconds = Double(duration.components.seconds)
+                + Double(duration.components.attoseconds) / 1e18
+            lock.withLock { current = current.addingTimeInterval(seconds) }
+        }
+    }
+
+    @MainActor
+    private final class AccessRecorder {
+        var values: [Bool] = []
+    }
+
+    @MainActor
+    private final class FakeFamilyDocument: FamilyDocumentListening {
+        private var onEvent: (@MainActor (Result<FamilyDocumentSnapshot, Error>) -> Void)?
+
+        func listen(
+            familyId: String,
+            onEvent: @escaping @MainActor (Result<FamilyDocumentSnapshot, Error>) -> Void
+        ) -> (() -> Void)? {
+            self.onEvent = onEvent
+            return { [weak self] in self?.onEvent = nil }
+        }
+
+        func send(_ data: [String: Any]?, fromCache: Bool) {
+            onEvent?(.success(FamilyDocumentSnapshot(data: data, isFromCache: fromCache)))
+        }
+    }
 }

@@ -43,6 +43,9 @@ final class SubscriptionManager: ObservableObject {
     private var bootstrapTask: Task<Void, Never>?
     private var productLoadTask: Task<[Product], Error>?
     private var accessResolutionTimeoutTask: Task<Void, Never>?
+    /// Re-runs `refreshAccess()` just after the latest personal expiration:
+    /// `Transaction.updates` does not emit when a subscription lapses.
+    private var personalExpiryTask: Task<Void, Never>?
     private var familyIDObserver: AnyCancellable?
     private var personalPremium = false
     /// A just-purchased, verified transaction keeps access until this instant even if a
@@ -91,6 +94,7 @@ final class SubscriptionManager: ObservableObject {
         listenerTask?.cancel()
         bootstrapTask?.cancel()
         accessResolutionTimeoutTask?.cancel()
+        personalExpiryTask?.cancel()
         familyIDObserver?.cancel()
     }
 
@@ -185,6 +189,7 @@ final class SubscriptionManager: ObservableObject {
     /// a previously dead network may be back — so the backoff budget is restored here.
     func refreshAccess() async {
         await updatePersonalStatus(synchronizeFamilyEntitlement: true)
+        familyPremiumService.reevaluate()
         syncQueue.resetRetryBudget()
         syncQueue.scheduleFlush()
     }
@@ -206,6 +211,7 @@ final class SubscriptionManager: ObservableObject {
 
     func eraseLocalSubscriptionState() {
         familyPremiumService.stopObserving()
+        schedulePersonalExpiry(at: nil)
         syncQueue.clear()
         personalPremium = false
         purchaseGraceUntil = nil
@@ -217,6 +223,7 @@ final class SubscriptionManager: ObservableObject {
 
     func authSessionDidChange(isAuthenticated: Bool) async {
         familyPremiumService.stopObserving()
+        schedulePersonalExpiry(at: nil)
         personalPremium = false
         purchaseGraceUntil = nil
         familyPremium = false
@@ -409,17 +416,22 @@ final class SubscriptionManager: ObservableObject {
 
     private func updatePersonalStatus(synchronizeFamilyEntitlement: Bool) async {
         var hasSub = false
+        var latestExpiry: Date?
         var pending: PendingSubscriptionSync?
         let currentUID = familyPremiumService.currentUID
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result,
                Self.grantsPremium(productID: tx.productID),
-               tx.revocationDate == nil {
+               tx.revocationDate == nil,
+               Self.isUnexpired(expirationDate: tx.expirationDate) {
                 if Self.shouldGrantPersonalEntitlement(
                     transactionAccountToken: tx.appAccountToken,
                     currentUID: currentUID
                 ) {
                     hasSub = true
+                    if let expiry = tx.expirationDate {
+                        latestExpiry = max(latestExpiry ?? expiry, expiry)
+                    }
                 }
                 if synchronizeFamilyEntitlement,
                    let candidate = pendingSync(
@@ -433,9 +445,25 @@ final class SubscriptionManager: ObservableObject {
         personalPremium = hasSub || (purchaseGraceUntil.map { $0 > Date() } ?? false)
         isResolvingPersonal = false
         updateAccessState()
+        schedulePersonalExpiry(at: latestExpiry)
         if let pending {
             syncQueue.enqueue(pending)
             syncQueue.scheduleFlush()
+        }
+    }
+
+    private func schedulePersonalExpiry(at expiry: Date?) {
+        personalExpiryTask?.cancel()
+        personalExpiryTask = nil
+        guard let expiry else { return }
+        let delay = max(0, expiry.timeIntervalSinceNow) + 1
+        personalExpiryTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled, let self else { return }
+            // Cleared first: the refresh reschedules, and cancelling this very task mid-refresh
+            // would mark the rest of it cancelled.
+            self.personalExpiryTask = nil
+            await self.refreshAccess()
         }
     }
 
