@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5E7A0002A1B2C3D4E5F60002 /* SymptomViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */; };
 		03F6063A1585A0AB0F38EC10 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D364D15CFE2570ED1E2FDD9F /* WidgetDataStore.swift */; };
 		0BABF11E0000000000000001 /* MultiChildFoundationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11E0000000000000002 /* MultiChildFoundationTests.swift */; };
 		0BABF11F0000000000000001 /* PendingWritesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BABF11F0000000000000002 /* PendingWritesStoreTests.swift */; };
@@ -156,6 +157,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SymptomViewModelTests.swift; sourceTree = "<group>"; };
 		04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		09FE55F1C1B1D105689EB87B /* MockSoundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockSoundRepository.swift; sourceTree = "<group>"; };
 		0A46ABCF5A1A31976CF2C739 /* MockBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockBabyRepository.swift; sourceTree = "<group>"; };
@@ -760,6 +762,14 @@
 			path = Leaps;
 			sourceTree = "<group>";
 		};
+		5E7A0003A1B2C3D4E5F60003 /* Symptom */ = {
+			isa = PBXGroup;
+			children = (
+				5E7A0001A1B2C3D4E5F60001 /* SymptomViewModelTests.swift */,
+			);
+			path = Symptom;
+			sourceTree = "<group>";
+		};
 		CA4E1103CA4E1103CA4E1103 /* CareTips */ = {
 			isa = PBXGroup;
 			children = (
@@ -792,6 +802,7 @@
 				F94EBA0100654CF0862AB203 /* Vitamin */,
 				DEADBEEF0000000000000010 /* WeeklyInsights */,
 				9E8D7C6B5A4938271605F4E3 /* Subscription */,
+				5E7A0003A1B2C3D4E5F60003 /* Symptom */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -1031,6 +1042,7 @@
 				DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */,
 				2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */,
 				3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */,
+				5E7A0002A1B2C3D4E5F60002 /* SymptomViewModelTests.swift in Sources */,
 				FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */,
 				CA4E1102CA4E1102CA4E1102 /* CareTipsCatalogTests.swift in Sources */,
 				CA4E1202CA4E1202CA4E1202 /* LocalizedTextTests.swift in Sources */,

@@ -14,10 +14,9 @@ struct SymptomView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 12) {
                 header
-                disclaimerCard
                 symptomGrid
-                resultCard
-                    .animation(.spring(response: 0.38, dampingFraction: 0.78), value: vm.result)
+                severityPicker
+                noteField
                 actionButtons
                 disclaimer
             }
@@ -41,15 +40,15 @@ struct SymptomView: View {
                         .foregroundColor(.white)
                 )
             VStack(alignment: .leading, spacing: 2) {
-                Text(loc.strings.somethingWrong)
+                Text(loc.strings.symptomLogTitle)
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
-                Text(loc.strings.markItGuide)
+                Text(loc.strings.symptomLogSubtitle)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundColor(.bbInkSoft)
             }
             Spacer()
-            if vm.activeCount > 0 {
+            if vm.canSave {
                 Button { vm.reset() } label: {
                     Text(loc.strings.reset)
                         .font(.system(size: 12, weight: .bold, design: .rounded))
@@ -57,27 +56,6 @@ struct SymptomView: View {
                 }
             }
         }
-    }
-
-    // MARK: - Disclaimer Banner
-
-    private var disclaimerCard: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "info.circle.fill")
-                .font(.system(size: 18))
-                .foregroundColor(.bbButter)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(loc.strings.notADiagnosis)
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .foregroundColor(.bbButter)
-                    .kerning(0.6)
-                Text(loc.strings.symptomDisclaimer)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.9))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .bbCard(pad: 12, bg: .bbSurface)
     }
 
     // MARK: - Symptom Grid
@@ -93,55 +71,31 @@ struct SymptomView: View {
         }
     }
 
-    // MARK: - Result Card
+    // MARK: - Severity
 
-    private var resultCard: some View {
+    private var severityPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 10) {
-                Image(systemName: vm.result.urgencyIcon)
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(vm.result.warningColor)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(vm.urgencyLabel(for: vm.result.urgency).uppercased())
-                        .font(.system(size: 11, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbButterDeep)
-                        .kerning(0.6)
-                    Text(vm.result.title)
-                        .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbInk)
-                }
+            Text(loc.strings.symptomSeverityQuestion)
+                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .foregroundColor(.bbInk)
+            Picker(loc.strings.symptomSeverityQuestion, selection: $vm.severity) {
+                Text(loc.strings.symptomSeverityMild).tag(SymptomSeverity.mild)
+                Text(loc.strings.symptomSeverityModerate).tag(SymptomSeverity.moderate)
+                Text(loc.strings.symptomSeverityHigh).tag(SymptomSeverity.high)
             }
-
-            if !vm.result.detail.isEmpty {
-                Text(vm.result.detail)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundColor(.bbInkSoft)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            if !vm.result.warning.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 11))
-                            .foregroundColor(vm.result.warningColor)
-                        Text(loc.strings.seeDoctorUrgently)
-                            .font(.system(size: 12, weight: .heavy, design: .rounded))
-                            .foregroundColor(vm.result.warningColor)
-                    }
-                    Text(vm.result.warning)
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(bbHex: "3D2A20"))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(10)
-                .background(Color(bbHex: "FFF7EA"))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            }
+            .pickerStyle(.segmented)
         }
-        .bbCard(pad: 16, bg: vm.result.cardBg)
-        .id(vm.result.title)
-        .transition(.opacity.combined(with: .scale(scale: 0.97)))
+        .bbCard(pad: 12)
+    }
+
+    // MARK: - Note
+
+    private var noteField: some View {
+        TextField(loc.strings.symptomNotePlaceholder, text: $vm.note, axis: .vertical)
+            .lineLimit(3...6)
+            .font(.system(size: 14, weight: .medium, design: .rounded))
+            .foregroundColor(.bbInk)
+            .bbCard(pad: 12)
     }
 
     // MARK: - Action Buttons
@@ -161,12 +115,14 @@ struct SymptomView: View {
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .bbShadowSoft()
         }
+        .disabled(!vm.canSave)
+        .opacity(vm.canSave || vm.diaryLogged ? 1 : 0.5)
     }
 
     // MARK: - Footer Disclaimer
 
     private var disclaimer: some View {
-        Text(loc.strings.symptomFooterDisclaimer)
+        Text(loc.strings.symptomLogFooter)
             .font(.system(size: 11, weight: .semibold, design: .rounded))
             .foregroundColor(.bbInkMute)
             .multilineTextAlignment(.center)
@@ -204,14 +160,9 @@ private struct SymptomCard: View {
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(symptom.label)
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundColor(.bbInk)
-                    Text(symptom.sub)
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .foregroundColor(.bbInkMute)
-                }
+                Text(symptom.label)
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbInk)
             }
             .bbCard(pad: 12)
             .overlay(

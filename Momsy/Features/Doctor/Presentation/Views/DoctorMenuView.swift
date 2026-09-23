@@ -26,7 +26,7 @@ struct DoctorMenuView: View {
                                         .font(.system(size: 11, weight: .heavy, design: .rounded))
                                         .foregroundColor(.white.opacity(0.75))
                                         .kerning(0.5)
-                                    Text(lm.strings.somethingWrong)
+                                    Text(lm.strings.symptomLogTitle)
                                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                                         .foregroundColor(.white)
                                 }
@@ -35,7 +35,7 @@ struct DoctorMenuView: View {
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(.white.opacity(0.6))
                             }
-                            Text(lm.strings.noteSymptoms)
+                            Text(lm.strings.symptomLogSubtitle)
                                 .font(.system(size: 13, weight: .medium, design: .rounded))
                                 .foregroundColor(.white.opacity(0.85))
                                 .fixedSize(horizontal: false, vertical: true)
