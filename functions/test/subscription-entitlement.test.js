@@ -9,6 +9,7 @@ const {
 } = require("@apple/app-store-server-library");
 const {
     appAccountTokenFor,
+    applyNotification,
     appleRootCAHash,
     bindEntitlementToCurrentFamily,
     loadAppleRootCAs,
@@ -197,7 +198,7 @@ test("notifications verify with the notification decoder and the same environmen
 });
 
 // Minimal in-memory Firestore: one bound entitlement doc plus the family doc writes.
-function notificationDb(existing) {
+function notificationDb(existing, receipts = new Set()) {
     const writes = [];
     const ref = (path) => ({ path, id: path.split("/").pop() });
     const db = {
@@ -213,6 +214,9 @@ function notificationDb(existing) {
                     if (target.query) {
                         return { docs: existing ? [{ id: "otid", data: () => existing }] : [] };
                     }
+                    if (target.path.startsWith("appStoreNotifications/")) {
+                        return { exists: receipts.has(target.id) };
+                    }
                     if (target.path === "subscriptionEntitlements/otid") {
                         return {
                             exists: existing !== undefined,
@@ -221,7 +225,10 @@ function notificationDb(existing) {
                     }
                     return { exists: false, get: () => undefined };
                 },
-                set(target, data) { writes.push({ path: target.path, data }); },
+                set(target, data) {
+                    writes.push({ path: target.path, data });
+                    if (target.path.startsWith("appStoreNotifications/")) receipts.add(target.id);
+                },
             });
         },
     };
@@ -286,5 +293,112 @@ test("an unbound subscription is ignored until its owner syncs it", async () => 
     const { db, writes } = notificationDb(undefined);
 
     assert.equal(await refreshBoundEntitlement(db, entitlement(Date.now() + 1_000)), false);
+    assert.deepEqual(writes, []);
+});
+
+// End-to-end notification handling with decoders stubbed: JWS strings are JSON here.
+const decodeJSON = async (value) => JSON.parse(value);
+const stubVerifiers = {
+    verifyNotification: decodeJSON,
+    verifyTransaction: decodeJSON,
+    verifyRenewalInfo: decodeJSON,
+};
+const boundRecord = (expiresDate) => ({
+    ownerUid: "uid-a",
+    familyId: "family-a",
+    productId: monthly,
+    expiresAt: Timestamp.fromMillis(expiresDate),
+    revokedAt: null,
+});
+const payload = (notificationType, transaction, renewalInfo, uuid = notificationType) =>
+    JSON.stringify({
+        notificationType,
+        notificationUUID: uuid,
+        data: {
+            signedTransactionInfo: JSON.stringify(transaction),
+            ...(renewalInfo ? { signedRenewalInfo: JSON.stringify(renewalInfo) } : {}),
+        },
+    });
+const familyWrite = (writes) =>
+    writes.find((write) => write.path === "families/family-a").data.premiumEntitlement;
+const isDeleted = (premium) => premium.isEqual?.(FieldValue.delete()) === true;
+
+test("each notification type leaves the family document in the expected state", async () => {
+    const now = Date.now();
+    const day = 86_400_000;
+    const cases = [
+        ["DID_RENEW", entitlement(now + 30 * day), null, now + 30 * day],
+        ["DID_CHANGE_RENEWAL_STATUS", entitlement(now + day), null, now + day],
+        // Billing retry with grace: the period ended, access runs until the grace end.
+        ["DID_FAIL_TO_RENEW", entitlement(now - 1_000), { gracePeriodExpiresDate: now + 6 * day },
+            now + 6 * day],
+        ["GRACE_PERIOD_EXPIRED", entitlement(now - 2 * day), { gracePeriodExpiresDate: now - 1_000 },
+            null],
+        ["EXPIRED", entitlement(now - 1_000), null, null],
+        ["REFUND", entitlement(now + day, now), null, null],
+        ["REVOKE", entitlement(now + day, now), null, null],
+    ];
+    for (const [type, transaction, renewal, expectedExpiry] of cases) {
+        // Stored expiry never exceeds the incoming one, so the out-of-order guard stays out.
+        const stored = Math.min(transaction.expiresDate,
+            renewal?.gracePeriodExpiresDate ?? transaction.expiresDate);
+        const { db, writes } = notificationDb(boundRecord(stored));
+
+        const result = await applyNotification(db, payload(type, transaction, renewal), stubVerifiers);
+
+        assert.equal(result.updated, true, type);
+        const premium = familyWrite(writes);
+        if (expectedExpiry === null) {
+            assert.equal(isDeleted(premium), true, `${type} must remove Premium`);
+        } else {
+            assert.equal(premium.active, true, type);
+            assert.equal(premium.expiresAt.toMillis(), expectedExpiry, type);
+        }
+    }
+});
+
+test("a redelivered notification UUID writes nothing the second time", async () => {
+    const now = Date.now();
+    const { db, writes } = notificationDb(boundRecord(now));
+    const body = payload("DID_RENEW", entitlement(now + 86_400_000), null, "uuid-1");
+
+    assert.equal((await applyNotification(db, body, stubVerifiers)).updated, true);
+    const firstWrites = writes.length;
+    assert.equal((await applyNotification(db, body, stubVerifiers)).updated, false);
+    assert.equal(writes.length, firstWrites);
+    assert.equal(writes.some((write) => write.path === "appStoreNotifications/uuid-1"
+        && write.data.expireAt instanceof Timestamp), true);
+});
+
+test("an unknown original transaction is acknowledged without any write", async () => {
+    const { db, writes } = notificationDb(undefined);
+
+    const result = await applyNotification(
+        db,
+        payload("DID_RENEW", entitlement(Date.now() + 1_000)),
+        stubVerifiers
+    );
+
+    assert.equal(result.updated, false);
+    assert.deepEqual(writes, []);
+});
+
+test("a bad signature is rejected as non-retryable invalid_transaction (HTTP 401)", async () => {
+    const { db, writes } = notificationDb(undefined);
+    const rejectingVerifier = () => ({
+        verifyAndDecodeNotification: async () => {
+            throw new VerificationException(VerificationStatus.VERIFICATION_FAILURE);
+        },
+    });
+
+    await assert.rejects(
+        applyNotification(db, "forged", {
+            verifyNotification: (signed) => verifyNotification(signed, {
+                appAppleId: 6784641297,
+                makeVerifier: rejectingVerifier,
+            }),
+        }),
+        (error) => error.code === "invalid_transaction" && error.retryable === false
+    );
     assert.deepEqual(writes, []);
 });

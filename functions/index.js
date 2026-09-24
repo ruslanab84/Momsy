@@ -20,9 +20,8 @@ const {
     authorizeRequest,
     bindEntitlementToCurrentFamily,
     eraseOwnerEntitlements,
+    applyNotification,
     premiumEntitlementFor,
-    refreshBoundEntitlement,
-    verifyNotification,
     verifyTransaction,
 } = require("./subscription-entitlement");
 
@@ -284,31 +283,25 @@ exports.appStoreServerNotifications = onRequest({
         if (typeof signedPayload !== "string" || signedPayload.length === 0) {
             throw new EntitlementError("invalid_request", 400, "signedPayload is required.");
         }
-        const notification = await verifyNotification(signedPayload);
-        const signedTransaction = notification.data?.signedTransactionInfo;
-        if (typeof signedTransaction !== "string") {
-            response.status(200).end();
-            return;
-        }
-        const entitlement = premiumEntitlementFor(await verifyTransaction(signedTransaction));
-        if (entitlement.isKnownProduct
-            && typeof entitlement.originalTransactionId === "string"
-            && entitlement.originalTransactionId.length > 0
-            && Number.isFinite(entitlement.expiresDate)) {
-            const updated = await refreshBoundEntitlement(getFirestore(), entitlement);
-            console.log("App Store notification applied", {
-                type: notification.notificationType,
-                subtype: notification.subtype,
-                updated,
-                active: entitlement.isActive,
-            });
-        }
+        const { notification, entitlement, updated } = await applyNotification(
+            getFirestore(),
+            signedPayload
+        );
+        // updated=false covers unbound subscriptions (no family yet), stale periods and retries.
+        console.log("App Store notification applied", {
+            type: notification.notificationType,
+            subtype: notification.subtype,
+            uuid: notification.notificationUUID,
+            updated,
+            active: entitlement?.isActive,
+        });
         response.status(200).end();
     } catch (error) {
         console.error("App Store notification failed", error);
         const failure = error instanceof EntitlementError
             ? error
             : new EntitlementError("service_unavailable", 503, "Unavailable.", true, error);
-        response.status(failure.httpStatus).end();
+        // A forged or corrupt signature is an authentication failure, not a bad request.
+        response.status(failure.code === "invalid_transaction" ? 401 : failure.httpStatus).end();
     }
 });

@@ -18,6 +18,7 @@ const productIDs = new Set([
 ]);
 const bundleID = "RuslanAbd.Momsy";
 const appleAppID = defineInt("APPLE_APP_ID", { default: 6784641297 });
+const notificationReceiptTTL = 30 * 24 * 60 * 60 * 1000;
 const appleRootCAHash = "63343abfb89a6a03ebb57e9b3f5fa7be7c4f5c756f3017b3a8c488c3653e9179";
 
 function appAccountTokenFor(uid) {
@@ -123,6 +124,10 @@ function verifyTransaction(signedTransaction, options = {}) {
 
 function verifyNotification(signedPayload, options = {}) {
     return verifySigned("verifyAndDecodeNotification", signedPayload, options);
+}
+
+function verifyRenewalInfo(signedRenewalInfo, options = {}) {
+    return verifySigned("verifyAndDecodeRenewalInfo", signedRenewalInfo, options);
 }
 
 async function verifySigned(method, signedData, options) {
@@ -336,12 +341,26 @@ async function bindEntitlementToCurrentFamily(db, uid, entitlement, expectedFami
 // App Store Server Notification path: renewals, expiry and refunds reach the family even
 // when the owner never reopens the app. Only refreshes a subscription an owner already
 // bound through syncSubscriptionEntitlement — Apple's payload carries no Momsy account.
-async function refreshBoundEntitlement(db, entitlement) {
+async function refreshBoundEntitlement(db, entitlement, notificationUUID) {
     const entitlementRef = db.collection("subscriptionEntitlements")
         .doc(entitlement.originalTransactionId);
+    const receiptRef = typeof notificationUUID === "string" && notificationUUID.length > 0
+        ? db.collection("appStoreNotifications").doc(notificationUUID)
+        : null;
     return db.runTransaction(async (transaction) => {
-        const existing = await transaction.get(entitlementRef);
-        if (!existing.exists) return false;
+        const [existing, receipt] = await Promise.all([
+            transaction.get(entitlementRef),
+            receiptRef ? transaction.get(receiptRef) : null,
+        ]);
+        if (!existing.exists || receipt?.exists) return false;
+        // Apple redelivers until it sees a 2xx; the receipt makes a retry a no-op.
+        // expireAt carries a Firestore TTL policy (firestore.indexes.json fieldOverrides).
+        if (receiptRef) {
+            transaction.set(receiptRef, {
+                originalTransactionId: entitlement.originalTransactionId,
+                expireAt: Timestamp.fromMillis(Date.now() + notificationReceiptTTL),
+            });
+        }
         // Notifications may arrive out of order; an older period must not shorten access.
         // Equal expiry still applies so REFUND_REVERSED can clear a revocation.
         const currentExpiry = existing.get("expiresAt");
@@ -366,6 +385,39 @@ async function refreshBoundEntitlement(db, entitlement) {
         if (hasFamily) updateFamilyPremium(transaction, db, familyId, siblings, replacement);
         return true;
     });
+}
+
+// Handles one App Store Server Notification V2. Returns what happened, for logging.
+// Billing grace (DID_FAIL_TO_RENEW/GRACE_PERIOD): the transaction has already expired, but
+// Apple keeps access until the renewal info's gracePeriodExpiresDate, so the family does too.
+// GRACE_PERIOD_EXPIRED, EXPIRED, REFUND and REVOKE all land as an inactive record, which
+// makes updateFamilyPremium delete premiumEntitlement. DID_CHANGE_RENEWAL_STATUS rewrites the
+// same expiry, so access is unchanged.
+async function applyNotification(db, signedPayload, verifiers = {}) {
+    const decodeNotification = verifiers.verifyNotification ?? verifyNotification;
+    const decodeTransaction = verifiers.verifyTransaction ?? verifyTransaction;
+    const decodeRenewalInfo = verifiers.verifyRenewalInfo ?? verifyRenewalInfo;
+
+    const notification = await decodeNotification(signedPayload);
+    const signedTransaction = notification.data?.signedTransactionInfo;
+    if (typeof signedTransaction !== "string") return { notification, updated: false };
+    const transaction = await decodeTransaction(signedTransaction);
+    const signedRenewalInfo = notification.data?.signedRenewalInfo;
+    const graceEnd = typeof signedRenewalInfo === "string"
+        ? Number((await decodeRenewalInfo(signedRenewalInfo)).gracePeriodExpiresDate ?? 0)
+        : 0;
+    const entitlement = premiumEntitlementFor({
+        ...transaction,
+        expiresDate: Math.max(Number(transaction.expiresDate ?? 0), graceEnd),
+    });
+    if (!entitlement.isKnownProduct
+        || typeof entitlement.originalTransactionId !== "string"
+        || entitlement.originalTransactionId.length === 0
+        || !Number.isFinite(entitlement.expiresDate)) {
+        return { notification, entitlement, updated: false };
+    }
+    const updated = await refreshBoundEntitlement(db, entitlement, notification.notificationUUID);
+    return { notification, entitlement, updated };
 }
 
 // Account deletion erases the owner's records outright (GDPR), including ones an earlier
@@ -408,6 +460,7 @@ async function eraseOwnerEntitlements(db, uid) {
 module.exports = {
     EntitlementError,
     appAccountTokenFor,
+    applyNotification,
     appleRootCAHash,
     authorizeRequest,
     bindEntitlementToCurrentFamily,
@@ -420,5 +473,6 @@ module.exports = {
     updateFamilyPremium,
     verificationError,
     verifyNotification,
+    verifyRenewalInfo,
     verifyTransaction,
 };
