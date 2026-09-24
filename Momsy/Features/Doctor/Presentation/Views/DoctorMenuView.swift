@@ -60,6 +60,15 @@ struct DoctorMenuView: View {
                         Divider().padding(.leading, 60)
                         */
                         DoctorMenuRow(
+                            destination: MedicalSourcesScreen(),
+                            icon: "books.vertical.fill",
+                            iconColor: .bbMintDeep,
+                            iconBg: Color.bbMint.opacity(0.3),
+                            title: lm.strings.medicalSourcesScreenTitle,
+                            sub: lm.strings.medicalSourcesScreenSub
+                        )
+                        Divider().padding(.leading, 60)
+                        DoctorMenuRow(
                             destination: CareTipsView(container: container),
                             icon: "lightbulb.fill",
                             iconColor: .bbButterDeep,

@@ -44,8 +44,9 @@ enum MedicalSourceID: String, Sendable, CaseIterable, Hashable, Codable {
     case whoEarlyChildhoodDevelopment2020, whoMaternalMentalHealth
     case whoDrowningFactSheet, whoChildMaltreatmentFactSheet, whoRoadTrafficInjuriesFactSheet
     case whoPocketBookHospitalCareChildren, whoWorldReportChildInjury2008
+    case whoMotorDevelopmentMilestones
     // Peer-reviewed
-    case epdsCox1987
+    case epdsCox1987, leapsVanDeRijtPlooij1992
     // NHS / AAP fallbacks — only where WHO has no document on the topic
     case nhsSIDS, aapSafeSleep, aapSwaddling
     case nhsRefluxInBabies, nhsColic, nhsNappyRash, nhsCradleCap, nhsFeverInChildren

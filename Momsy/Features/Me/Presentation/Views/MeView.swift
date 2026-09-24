@@ -30,6 +30,10 @@ struct MeView: View {
                           icon: "gearshape.fill", bg: .bbSky,
                           title: lm.strings.settings,
                           sub: lm.strings.settingsHint),
+                    MeRow(destination: MedicalSourcesScreen(),
+                          icon: "books.vertical.fill", bg: .bbMint,
+                          title: lm.strings.medicalSourcesScreenTitle,
+                          sub: lm.strings.medicalSourcesScreenSub),
                 ])
             }
             .padding(.horizontal, 20)

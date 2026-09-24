@@ -33,4 +33,10 @@ struct MedicalSourceCatalogTests {
         #expect(CitationPolicy.isPublishable([.whoGrowthStandards]))
         #expect(CitationPolicy.isPublishable([.whoGrowthStandards, .nhsColic, .epdsCox1987]))
     }
+
+    @Test func sourcesScreenListsEveryCatalogSourceWhoFirst() {
+        let groups = MedicalSourcesScreen.groups
+        #expect(groups.flatMap { $0 }.count == MedicalSourceCatalog.all.count)
+        #expect(groups.first?.allSatisfy { MedicalSourceCatalog.source($0)?.publisher == .who } == true)
+    }
 }

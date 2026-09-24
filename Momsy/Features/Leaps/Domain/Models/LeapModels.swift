@@ -61,7 +61,7 @@ extension DevelopmentLeap {
     static let catalog: [DevelopmentLeap] = [
     DevelopmentLeap(
         scheduleID: 1,
-        names: loc("World of Senses", "Мир ощущений", "Welt der Sinne", "Mundo de los sentidos", "Monde des sensations", "Mundo dos sentidos", "感官世界"),
+        names: loc("First Discoveries", "Первые открытия", "Erste Entdeckungen", "Primeros descubrimientos", "Premières découvertes", "Primeiras descobertas", "最初的发现"),
         semanticColor: .rose, isDone: true, isCurrent: false,
         descriptions: loc(
             "is learning to process sensory signals — sounds, light, and touch feel entirely new.",
@@ -98,7 +98,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 2,
-        names: loc("World of Patterns", "Мир узоров", "Welt der Muster", "Mundo de los patrones", "Monde des motifs", "Mundo dos padrões", "图案世界"),
+        names: loc("Noticing Details", "Замечаю детали", "Details entdecken", "Descubro detalles", "Je remarque les détails", "Reparo nos detalhes", "留意细节"),
         semanticColor: .butter, isDone: true, isCurrent: false,
         descriptions: loc(
             "begins recognising regular patterns — faces, rhythms, and simple geometric shapes.",
@@ -135,7 +135,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 3,
-        names: loc("Smooth Transitions", "Плавные движения", "Fließende Bewegungen", "Movimientos suaves", "Mouvements fluides", "Movimentos suaves", "顺畅的动作"),
+        names: loc("Smoother Moves", "Плавные движения", "Sanftere Bewegungen", "Movimientos más fluidos", "Des gestes plus souples", "Movimentos mais suaves", "动作更流畅"),
         semanticColor: .mint, isDone: true, isCurrent: false,
         descriptions: loc(
             "discovers the ability to control their body — arms, legs, and head start moving smoothly and intentionally.",
@@ -172,7 +172,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 4,
-        names: loc("World of Events", "Мир событий", "Welt der Ereignisse", "Mundo de los acontecimientos", "Monde des événements", "Mundo dos acontecimentos", "事件世界"),
+        names: loc("Little Experiments", "Маленькие эксперименты", "Kleine Experimente", "Pequeños experimentos", "Petites expériences", "Pequenas experiências", "小小实验"),
         semanticColor: .coral, isDone: false, isCurrent: true,
         descriptions: loc(
             "begins to understand that one action leads to another. This is enormous brain work — hence the crying and poor sleep.",
@@ -209,7 +209,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 5,
-        names: loc("Relationships", "Отношения", "Beziehungen", "Relaciones", "Relations", "Relações", "关系"),
+        names: loc("Near and Far", "Близко и далеко", "Nah und fern", "Cerca y lejos", "Près et loin", "Perto e longe", "近与远"),
         semanticColor: .lilac, isDone: false, isCurrent: false,
         descriptions: loc(
             "discovers the world of connections between people and objects. Separation anxiety is a normal and important part of this stage.",
@@ -246,7 +246,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 6,
-        names: loc("Categories", "Категории", "Kategorien", "Categorías", "Catégories", "Categorias", "分类"),
+        names: loc("Sorting the World", "Раскладываю мир", "Die Welt ordnen", "Ordenando el mundo", "Ranger le monde", "Arrumar o mundo", "整理世界"),
         semanticColor: .sky, isDone: false, isCurrent: false,
         descriptions: loc(
             "begins grouping things by properties: colour, shape, size. Actively explores the world through classification.",
@@ -283,7 +283,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 7,
-        names: loc("Sequences", "Последовательности", "Sequenzen", "Secuencias", "Séquences", "Sequências", "顺序"),
+        names: loc("Putting Things Together", "Собираю по порядку", "Dinge zusammenfügen", "Juntando las piezas", "Assembler les choses", "Juntar as peças", "把事情串起来"),
         semanticColor: .rose, isDone: false, isCurrent: false,
         descriptions: loc(
             "starts seeing that actions can happen in a predictable order: first this, then that.",
@@ -320,7 +320,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 8,
-        names: loc("Programs", "Программы", "Programme", "Programas", "Programmes", "Programas", "程序"),
+        names: loc("Little Planner", "Маленький планировщик", "Kleiner Planer", "Pequeño planificador", "Petit planificateur", "Pequeno planeador", "小小计划家"),
         semanticColor: .butter, isDone: false, isCurrent: false,
         descriptions: loc(
             "learns that a goal can be reached through several steps, choices, and corrections.",
@@ -357,7 +357,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 9,
-        names: loc("Principles", "Принципы", "Prinzipien", "Principios", "Principes", "Princípios", "原则"),
+        names: loc("Testing the Rules", "Проверяю правила", "Regeln testen", "Probando las reglas", "Tester les règles", "Testar as regras", "试探规则"),
         semanticColor: .mint, isDone: false, isCurrent: false,
         descriptions: loc(
             "starts noticing rules and reasons: why something is allowed, unsafe, fair, or not fair.",
@@ -394,7 +394,7 @@ extension DevelopmentLeap {
     ),
     DevelopmentLeap(
         scheduleID: 10,
-        names: loc("Systems", "Системы", "Systeme", "Sistemas", "Systèmes", "Sistemas", "系统"),
+        names: loc("My Own Way", "По-своему", "Auf meine Art", "A mi manera", "À ma façon", "À minha maneira", "我自己的方式"),
         semanticColor: .lilac, isDone: false, isCurrent: false,
         descriptions: loc(
             "connects roles, rules, and routines into little models of the world: family, shop, doctor, home.",

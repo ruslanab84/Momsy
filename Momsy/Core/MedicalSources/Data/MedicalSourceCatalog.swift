@@ -73,6 +73,10 @@ enum MedicalSourceCatalog {
                       title: "World report on child injury prevention",
                       url: URL(string: "https://www.who.int/publications/i/item/9789241563574"),
                       citation: nil, year: "2008"),
+        MedicalSource(id: .whoMotorDevelopmentMilestones, publisher: .who,
+                      title: "Motor development milestones (WHO Motor Development Study)",
+                      url: URL(string: "https://www.who.int/tools/child-growth-standards/standards/motor-development-milestones"),
+                      citation: nil, year: "2006"),
 
         // MARK: Peer-reviewed
         // The EPDS may be reproduced free of charge only while the authors, the title
@@ -83,6 +87,12 @@ enum MedicalSourceCatalog {
                       url: nil,
                       citation: "Cox, J.L., Holden, J.M. & Sagovsky, R. (1987). Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale. British Journal of Psychiatry, 150, 782\u{2013}786. \u{00A9} 1987 The Royal College of Psychiatrists.",
                       year: "1987"),
+        // Leap timing theory. Verified via CrossRef, DOI 10.1080/02646839208403946.
+        MedicalSource(id: .leapsVanDeRijtPlooij1992, publisher: .peerReviewed,
+                      title: "Infantile regressions: disorganization and the onset of transition periods",
+                      url: nil,
+                      citation: "van de Rijt-Plooij, H.H.C. & Plooij, F.X. (1992). Infantile regressions: disorganization and the onset of transition periods. Journal of Reproductive and Infant Psychology, 10(3), 129\u{2013}149.",
+                      year: "1992"),
 
         // MARK: NHS / AAP fallbacks
         MedicalSource(id: .nhsSIDS, publisher: .nhs,
