@@ -84,15 +84,16 @@ final class SleepViewModel: ObservableObject {
         await refreshForecast(expectedBabyId: currentBabyId)
     }
 
+    /// Recommended hours of sleep per 24 h, naps included.
+    /// Source: MedicalSourceID.whoPhysicalActivitySleepUnder5 (WHO 2019).
     var sleepNorm: (min: Double, max: Double) {
-        guard let birth = appState.babyProfile?.birthDate else { return (12, 14) }
+        guard let birth = appState.babyProfile?.birthDate else { return (12, 16) }
         let months = Calendar.current.dateComponents([.month], from: birth, to: Date()).month ?? 0
         switch months {
-        case 0..<3:  return (14, 17)
-        case 3..<6:  return (12, 15)
-        case 6..<12: return (12, 14)
-        case 12..<24: return (11, 14)
-        default:     return (10, 13)
+        case 0..<4:   return (14, 17)
+        case 4..<12:  return (12, 16)
+        case 12..<36: return (11, 14)
+        default:      return (10, 13)
         }
     }
 

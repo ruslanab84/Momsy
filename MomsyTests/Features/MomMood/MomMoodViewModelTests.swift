@@ -125,3 +125,66 @@ struct MomMoodViewModelTests {
         #expect(vm.shouldPromptEPDS == true)
     }
 }
+
+// MARK: - Water goal (A4: user-set target, not a health recommendation)
+
+@Suite("WaterIntakeGoal")
+@MainActor
+struct WaterIntakeGoalTests {
+
+    @Test func defaultsTo2000WhenNothingStored() {
+        let vm = makeVM(prefs: InMemoryPreferences())
+        #expect(vm.goalMl == 2000)
+    }
+
+    @Test func goalPersistsAcrossViewModels() {
+        let prefs = InMemoryPreferences()
+        makeVM(prefs: prefs).setGoal(2750)
+        #expect(prefs.stored.waterGoalMl == 2750)
+        #expect(makeVM(prefs: prefs).goalMl == 2750)
+    }
+
+    @Test func goalClampsTo1000Through4000() {
+        let prefs = InMemoryPreferences()
+        let vm = makeVM(prefs: prefs)
+        vm.setGoal(250)
+        #expect(vm.goalMl == 1000)
+        vm.setGoal(9000)
+        #expect(vm.goalMl == 4000)
+        #expect(prefs.stored.waterGoalMl == 4000)
+    }
+
+    @Test func storedOutOfRangeValueIsClampedOnLoad() {
+        let prefs = InMemoryPreferences()
+        prefs.stored.waterGoalMl = 12_000
+        #expect(makeVM(prefs: prefs).goalMl == 4000)
+    }
+
+    @Test func settingGoalKeepsOtherPreferences() {
+        let prefs = InMemoryPreferences()
+        prefs.stored.unitSystem = "imperial"
+        makeVM(prefs: prefs).setGoal(1500)
+        #expect(prefs.stored.unitSystem == "imperial")
+    }
+
+    private func makeVM(prefs: InMemoryPreferences) -> WaterIntakeViewModel {
+        let repo = NoopWaterRepository()
+        return WaterIntakeViewModel(
+            log: LogWaterIntakeUseCase(repository: repo),
+            get: GetWaterIntakeUseCase(repository: repo),
+            preferences: prefs
+        )
+    }
+}
+
+private final class InMemoryPreferences: UserPreferencesRepository {
+    var stored = UserPreferences(appTheme: "system", appLanguage: "en", unitSystem: "metric")
+    func load() -> UserPreferences { stored }
+    func save(_ prefs: UserPreferences) { stored = prefs }
+}
+
+private struct NoopWaterRepository: WaterIntakeRepository {
+    func add(_ entry: WaterIntakeEntry) async throws {}
+    func upsert(_ entries: [WaterIntakeEntry]) async throws {}
+    func getEntries(from: Date, to: Date) async throws -> [WaterIntakeEntry] { [] }
+}

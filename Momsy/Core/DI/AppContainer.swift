@@ -750,7 +750,7 @@ final class AppContainer {
     }
 
     func makeWaterIntakeViewModel() -> WaterIntakeViewModel {
-        WaterIntakeViewModel(log: logWaterIntake, get: getWaterIntake)
+        WaterIntakeViewModel(log: logWaterIntake, get: getWaterIntake, preferences: preferencesRepository)
     }
 
     func makeWeeklyInsightViewModel() -> WeeklyInsightViewModel {

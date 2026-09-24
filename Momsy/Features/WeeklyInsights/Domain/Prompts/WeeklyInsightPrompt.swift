@@ -88,7 +88,7 @@ enum WeeklyInsightPrompt {
 
     private static func feedingNote(for stats: WeeklyStats) -> String? {
         guard stats.ageMonths < 6 else { return nil }
-        let maxInterval = WhoNorms.maxFeedingInterval(ageMonths: stats.ageMonths)
+        let maxInterval = CareHeuristics.maxFeedingInterval(ageMonths: stats.ageMonths)
         let expectedMinimum = Int(ceil(1_440.0 / Double(maxInterval)))
         guard stats.avgFeedingsPerDay < Double(expectedMinimum) else { return nil }
         return "Feeding note: logged feedings are low for a baby under 6 months if logging is complete. Treat this as low logged feedings or possibly incomplete logging; do not praise intake as enough. Expected logged pattern is roughly \(expectedMinimum)+ milk feeds/day or max interval ~\(maxInterval) min."

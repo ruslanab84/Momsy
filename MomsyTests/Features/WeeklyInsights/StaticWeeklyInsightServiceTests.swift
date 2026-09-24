@@ -14,8 +14,8 @@ struct StaticWeeklyInsightServiceTests {
             avgSleepMinutesPerDay: avgSleep, avgNightSleepMinutes: avgSleep * 2 / 3,
             avgDaySleepMinutes: avgSleep / 3, avgNapsPerDay: 3,
             sleepTrendVsPrevWeekMinutes: 0,
-            whoMinSleepMinutes: WhoNorms.minSleepMinutes(ageMonths: ageMonths),
-            whoAwakeWindowMax: WhoNorms.awakeWindowMax(ageMonths: ageMonths),
+            whoMinSleepMinutes: CareHeuristics.minSleepMinutes(ageMonths: ageMonths),
+            whoAwakeWindowMax: CareHeuristics.awakeWindowMax(ageMonths: ageMonths),
             avgFeedingsPerDay: 6, totalFeedings: 42,
             newFoodsIntroduced: foods, allergensFlagged: allergens, totalDiapers: 35
         )
@@ -150,8 +150,8 @@ struct WeeklyInsightPromptTests {
             avgDaySleepMinutes: 54,
             avgNapsPerDay: 3.0,
             sleepTrendVsPrevWeekMinutes: 0,
-            whoMinSleepMinutes: WhoNorms.minSleepMinutes(ageMonths: ageMonths),
-            whoAwakeWindowMax: WhoNorms.awakeWindowMax(ageMonths: ageMonths),
+            whoMinSleepMinutes: CareHeuristics.minSleepMinutes(ageMonths: ageMonths),
+            whoAwakeWindowMax: CareHeuristics.awakeWindowMax(ageMonths: ageMonths),
             avgFeedingsPerDay: avgFeedings,
             totalFeedings: totalFeedings,
             newFoodsIntroduced: foods,

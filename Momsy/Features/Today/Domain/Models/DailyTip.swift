@@ -14,19 +14,27 @@ struct DailyTip: Codable {
     let contextHash: String
     var isFromCache: Bool
     let category: TipCategory
+    /// Sources behind the text; empty for neutral, non-medical copy.
+    let sources: [MedicalSourceID]
+    /// `true` when the text states health information — such a tip must cite sources.
+    let isMedicalClaim: Bool
 
     init(
         text: String,
         generatedAt: Date = Date(),
         contextHash: String,
         isFromCache: Bool = false,
-        category: TipCategory = .defaultTip
+        category: TipCategory = .defaultTip,
+        sources: [MedicalSourceID] = [],
+        isMedicalClaim: Bool = false
     ) {
         self.text = text
         self.generatedAt = generatedAt
         self.contextHash = contextHash
         self.isFromCache = isFromCache
         self.category = category
+        self.sources = sources
+        self.isMedicalClaim = isMedicalClaim
     }
 
     var ageLabel: String {

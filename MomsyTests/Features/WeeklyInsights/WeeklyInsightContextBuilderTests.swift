@@ -42,7 +42,7 @@ struct WeeklyInsightContextBuilderTests {
         #expect(stats.avgDaySleepMinutes == 60 / 7)
         #expect(stats.totalFeedings == 14)
         #expect(abs(stats.avgFeedingsPerDay - 2.0) < 0.001)
-        #expect(stats.whoMinSleepMinutes == WhoNorms.minSleepMinutes(ageMonths: 7))
+        #expect(stats.whoMinSleepMinutes == CareHeuristics.minSleepMinutes(ageMonths: 7))
     }
 
     @Test("extracts new foods and flags allergens/reactions")

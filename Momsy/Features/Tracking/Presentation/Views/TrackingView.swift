@@ -39,6 +39,11 @@ struct TrackingView: View {
         .background(Color.bbCream.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                SourcesInfoButton(ids: [.whoGrowthStandards])
+            }
+        }
         .sheet(isPresented: $vm.showAddMeasurement) {
             AddMeasurementSheet { entry in vm.addMeasurement(entry) }
         }

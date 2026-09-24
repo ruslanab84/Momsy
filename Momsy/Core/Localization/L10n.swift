@@ -468,19 +468,28 @@ struct L10n {
           "según tus datos", "d’après vos données", "com base nos seus dados", "根据您的数据")
     }
     var sleepForecastOverdueTitle: String {
-        s("Sleep overdue", "Окно сна пропущено", "Schlaf überfällig",
-          "Sueño atrasado", "Sommeil en retard", "Sono atrasado", "睡眠已超时")
+        s("Past the estimated window", "Прогнозное окно прошло", "Geschätztes Fenster vorbei",
+          "Pasó la ventana estimada", "Fenêtre estimée dépassée", "A janela estimada passou", "已过预估时段")
     }
     var sleepForecastOverdueAction: String {
-        s("Settle now", "Уложить сейчас", "Jetzt hinlegen",
-          "Acostar ya", "Coucher maintenant", "Deitar agora", "现在哄睡")
+        s("Ready for sleep?", "Пора спать?", "Bereit zum Schlafen?",
+          "¿Listo para dormir?", "Prêt à dormir ?", "Pronto para dormir?", "准备睡觉了吗？")
     }
     func sleepForecastAwakeFor(_ dur: String) -> String {
         s("awake \(dur)", "бодрствует \(dur)", "wach seit \(dur)",
           "despierto \(dur)", "éveillé depuis \(dur)", "acordado há \(dur)", "已清醒 \(dur)")
     }
     var sleepForecastOverduePill: String {
-        s("overdue", "просрочено", "überfällig", "atrasado", "en retard", "atrasado", "已超时")
+        s("estimate", "прогноз", "Schätzung", "estimación", "estimation", "estimativa", "预估")
+    }
+    var sleepForecastCaption: String {
+        s("Estimate based on your baby's logged sleep. Not medical advice.",
+          "Прогноз по записанному сну малыша. Не медицинская рекомендация.",
+          "Schätzung auf Basis des eingetragenen Schlafs deines Babys. Keine medizinische Beratung.",
+          "Estimación basada en el sueño registrado de tu bebé. No es consejo médico.",
+          "Estimation fondée sur le sommeil enregistré de votre bébé. Pas un avis médical.",
+          "Estimativa baseada no sono registado do seu bebé. Não é aconselhamento médico.",
+          "根据宝宝已记录的睡眠估算，不构成医疗建议。")
     }
 
     var feedingChartTitle: String  { s("Feeding",          "Кормление",             "Stillen",        "Tomas",   "Tétées", "Mamadas", "喂养") }
@@ -824,7 +833,6 @@ struct L10n {
           "O gráfico é uma referência e não substitui uma consulta médica. Uma única medição fora das bandas não é, por si só, motivo de alarme, e uma dentro delas não exclui um problema. Só um pediatra pode avaliar o crescimento da sua criança — fale com ele sobre qualquer dúvida.",
           "该图表仅供参考，不能替代医学检查。单次落在色带之外本身并不意味着异常，落在色带之内也不能排除问题。只有儿科医生才能评估孩子的生长情况——有任何疑虑请与医生沟通。")
     }
-    var whoMethodologyOpenSource: String { s("Open the WHO standards", "Открыть нормы ВОЗ", "WHO-Standards öffnen", "Abrir los patrones de la OMS", "Ouvrir les normes de l’OMS", "Abrir os padrões da OMS", "打开 WHO 标准") }
     var sourceLabel: String { s("Source", "Источник", "Quelle", "Fuente", "Source", "Fonte", "来源") }
     var whoAdaptationTitle: String { s("Adapted from WHO material", "Адаптация материалов ВОЗ", "Adaption von WHO-Material", "Adaptación de material de la OMS", "Adaptation de documents de l’OMS", "Adaptação de material da OMS", "改编自世卫组织资料") }
     var whoGrowthAdaptationNote: String {
@@ -1269,7 +1277,6 @@ struct L10n {
     var vaccinationCalendar: String     { s("Vaccination calendar",   "Календарь прививок",           "Impfkalender", "Calendario de vacunas", "Calendrier des vaccins", "Calendário de vacinas", "疫苗接种日历") }
     var vaccinationCalendarSub: String  { s("Schedule & reminders",   "Расписание и напоминания",     "Zeitplan & Erinnerungen", "Calendario y recordatorios", "Calendrier et rappels", "Calendário e lembretes", "计划与提醒") }
     var vaccinationSchedule: String     { s("Vaccination schedule",   "Календарь прививок",           "Impfkalender", "Calendario de vacunación", "Calendrier de vaccination", "Plano de vacinação", "疫苗接种计划") }
-    var vaccinationOpenSource: String   { s("Open the WHO recommendations", "Открыть рекомендации ВОЗ", "WHO-Empfehlungen öffnen", "Abrir las recomendaciones de la OMS", "Ouvrir les recommandations de l’OMS", "Abrir as recomendações da OMS", "打开世卫组织建议") }
     var vaccinationSourceNote: String {
         s("The default schedule is adapted from the WHO recommendations for routine immunization. This adaptation was not created by WHO, and WHO is not responsible for its content or accuracy. National schedules differ — follow the one used in your country and your paediatrician's advice.",
           "Календарь по умолчанию — адаптация рекомендаций ВОЗ по плановой иммунизации. Эта адаптация создана не ВОЗ, и ВОЗ не несёт ответственности за её содержание и точность. Национальные календари различаются — следуйте календарю своей страны и рекомендациям педиатра.",
@@ -1483,7 +1490,8 @@ struct L10n {
     var waterIntakeTitle: String       { s("Water Intake",               "Жидкость мамы",                "Flüssigkeit", "Hidratación", "Hydratation", "Hidratação", "饮水量") }
     var waterIntakeLabel: String       { s("HYDRATION",                  "ГИДРАТАЦИЯ",                   "HYDRATION", "HIDRATACIÓN", "HYDRATATION", "HIDRATAÇÃO", "补水") }
     var waterIntakeSub: String         { s("Daily hydration",            "Суточное потребление жидкости", "Tagesflüssigkeit", "Hidratación diaria", "Hydratation quotidienne", "Hidratação diária", "每日补水") }
-    var waterGoalLabel: String         { s("Goal",                       "Цель",                          "Ziel", "Objetivo", "Objectif", "Objetivo", "目标") }
+    var waterMyGoal: String            { s("My daily goal",              "Моя цель на день",              "Mein Tagesziel", "Mi objetivo diario", "Mon objectif du jour", "O meu objetivo diário", "我的每日目标") }
+    var waterEditGoal: String          { s("Edit goal",                  "Изменить цель",                 "Ziel ändern", "Editar objetivo", "Modifier l’objectif", "Editar objetivo", "修改目标") }
     var waterTodayLabel: String        { s("today",                      "сегодня",                       "heute", "hoy", "aujourd’hui", "hoje", "今天") }
     var waterAdd150: String            { s("+150 ml",                    "+150 мл",                       "+150 ml", "+150 ml", "+150 ml", "+150 ml", "+150 ml") }
     var waterAdd250: String            { s("+250 ml",                    "+250 мл",                       "+250 ml", "+250 ml", "+250 ml", "+250 ml", "+250 ml") }

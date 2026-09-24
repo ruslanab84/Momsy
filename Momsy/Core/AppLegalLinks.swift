@@ -6,12 +6,6 @@ enum AppLegalLinks {
     static let feedbackEmail = "momsy.app.support@gmail.com"
     static let manageSubscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")
 
-    // Medical sources live in `MedicalSourceCatalog`; these forwards keep the
-    // existing call sites compiling until they move to `MedicalSourcesSection`.
-    static var whoGrowthStandardsURL: URL? { MedicalSourceCatalog.source(.whoGrowthStandards)?.url }
-    static var whoImmunizationScheduleURL: URL? { MedicalSourceCatalog.source(.whoImmunizationSchedule)?.url }
-    static var epdsCitation: String { MedicalSourceCatalog.source(.epdsCox1987)?.citation ?? "" }
-
     static let appStoreID = "6784641297"
 
     static var appStoreReviewURL: URL? {

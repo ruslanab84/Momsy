@@ -7,18 +7,36 @@ final class WaterIntakeViewModel: ObservableObject {
     @Published private(set) var weeklyDayTotals: [Int] = []   // 7 values, index 0 = 6 days ago
     @Published var saveError: String?
 
-    let dailyGoalMl = 2000
+    /// The parent's own target, editable in the UI — not a health recommendation.
+    @Published private(set) var goalMl: Int
+
+    static let goalRange = 1000...4000
+    static let goalStep = 250
 
     private let logUseCase: LogWaterIntakeUseCase
     private let getUseCase: GetWaterIntakeUseCase
+    private let preferences: any UserPreferencesRepository
 
-    init(log: LogWaterIntakeUseCase, get: GetWaterIntakeUseCase) {
+    init(log: LogWaterIntakeUseCase, get: GetWaterIntakeUseCase, preferences: any UserPreferencesRepository) {
         self.logUseCase = log
         self.getUseCase = get
+        self.preferences = preferences
+        goalMl = Self.clampedGoal(preferences.load().waterGoalMl)
     }
 
     var todayTotalMl: Int { todayEntries.map(\.amountMl).reduce(0, +) }
-    var goalFraction: Double { min(1.0, Double(todayTotalMl) / Double(dailyGoalMl)) }
+    var goalFraction: Double { min(1.0, Double(todayTotalMl) / Double(goalMl)) }
+
+    func setGoal(_ ml: Int) {
+        goalMl = Self.clampedGoal(ml)
+        var prefs = preferences.load()
+        prefs.waterGoalMl = goalMl
+        preferences.save(prefs)
+    }
+
+    private static func clampedGoal(_ ml: Int) -> Int {
+        min(max(ml, goalRange.lowerBound), goalRange.upperBound)
+    }
 
     func load() async {
         let cal = Calendar.current

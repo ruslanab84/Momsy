@@ -1,9 +1,9 @@
 import Foundation
 
 /// Deterministic offline fallback. Builds a warm narrative purely from
-/// `WeeklyStats` + the app's own age thresholds (`WhoNorms`), so a report is
-/// always available without network. Those thresholds are in-house heuristics,
-/// not WHO publications — never attribute them to WHO in user-facing copy.
+/// `WeeklyStats` + the app's own age thresholds (`CareHeuristics`), so a report is
+/// always available without network. Apart from the WHO sleep lower bound, those
+/// thresholds are in-house heuristics — never attribute them to WHO in user-facing copy.
 final class StaticWeeklyInsightService: WeeklyInsightService {
 
     func generate(context: WeeklyInsightContext) async throws -> WeeklyInsightAI {

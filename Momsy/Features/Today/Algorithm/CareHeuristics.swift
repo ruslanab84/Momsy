@@ -1,8 +1,12 @@
 import Foundation
 
-enum WhoNorms {
+/// In-app thresholds that decide when a Today tip fires.
+/// Only `minSleepMinutes` comes from a published guideline; the other values
+/// are in-house heuristics with no WHO source, so tips built on them must stay
+/// neutral observations of the user's own log (no "norm", no "see a doctor").
+enum CareHeuristics {
 
-    /// Maximum feeding interval in minutes before alert triggers.
+    /// Feeding gap in minutes after which Today mentions the time since the last feed.
     static func maxFeedingInterval(ageMonths: Int) -> Int {
         switch ageMonths {
         case 0...1:  return 180
@@ -14,19 +18,19 @@ enum WhoNorms {
         }
     }
 
-    /// Minimum total sleep per day in minutes (alert threshold is this minus 90).
+    /// Lower bound of recommended total sleep per 24 h, naps included, in minutes.
+    /// Source: MedicalSourceID.whoPhysicalActivitySleepUnder5 (WHO 2019:
+    /// 0–3 mo 14–17 h, 4–11 mo 12–16 h, 1–2 y 11–14 h, 3–4 y 10–13 h).
     static func minSleepMinutes(ageMonths: Int) -> Int {
         switch ageMonths {
-        case 0...1:  return 840   // 14 h
-        case 2...3:  return 810   // 13.5 h
-        case 4...5:  return 780   // 13 h
-        case 6...8:  return 720   // 12 h
-        case 9...12: return 700   // ~11.7 h
-        default:     return 660   // 11 h
+        case 0...3:   return 840   // 14 h
+        case 4...11:  return 720   // 12 h
+        case 12...35: return 660   // 11 h
+        default:      return 600   // 10 h
         }
     }
 
-    /// Max consecutive days without stool before alert triggers.
+    /// Days without a logged stool after which Today mentions it.
     static func maxDaysWithoutStool(ageMonths: Int) -> Int {
         switch ageMonths {
         case 0...2: return 3
@@ -35,7 +39,7 @@ enum WhoNorms {
         }
     }
 
-    /// Maximum awake window in minutes before overtiredness tip triggers.
+    /// Awake minutes after which Today mentions the time since the last sleep.
     static func awakeWindowMax(ageMonths: Int) -> Int {
         switch ageMonths {
         case 0:       return 45

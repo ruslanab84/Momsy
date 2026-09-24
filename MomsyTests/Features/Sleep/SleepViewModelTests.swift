@@ -460,7 +460,7 @@ struct SleepViewModelTests {
         #expect(vm.sleepNorm.max == 17)
     }
 
-    @Test("sleepNorm returns 12-14h for 6-month-old")
+    @Test("sleepNorm returns WHO 12-16h for 6-month-old")
     func normForSixMonths() {
         let birth = Calendar.current.date(byAdding: .month, value: -6, to: Date())!
         let appState = AppState(getBabyProfile: GetBabyProfileUseCase(repository: MockBabyRepository()),
@@ -479,7 +479,7 @@ struct SleepViewModelTests {
             )
         )
         #expect(vm.sleepNorm.min == 12)
-        #expect(vm.sleepNorm.max == 14)
+        #expect(vm.sleepNorm.max == 16)
     }
 }
 

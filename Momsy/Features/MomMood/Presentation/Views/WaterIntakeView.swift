@@ -88,10 +88,18 @@ struct WaterIntakeView: View {
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundColor(.bbInkMute)
                     Spacer()
-                    Text("\(loc.strings.waterGoalLabel): \(vm.dailyGoalMl) \(loc.strings.mlUnit)")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundColor(.bbInkMute)
                 }
+                Stepper(
+                    value: Binding(get: { vm.goalMl }, set: { vm.setGoal($0) }),
+                    in: WaterIntakeViewModel.goalRange,
+                    step: WaterIntakeViewModel.goalStep
+                ) {
+                    Text("\(loc.strings.waterMyGoal): \(vm.goalMl) \(loc.strings.mlUnit)")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInkSoft)
+                }
+                .accessibilityLabel(loc.strings.waterEditGoal)
+                .accessibilityValue("\(vm.goalMl) \(loc.strings.mlUnit)")
             }
         }
         .padding(18)
@@ -141,7 +149,7 @@ struct WaterIntakeView: View {
                 let count = max(1, vm.weeklyDayTotals.count)
                 let sp: CGFloat = 6
                 let bw = max(8, (geo.size.width - sp * CGFloat(count - 1)) / CGFloat(count))
-                let maxVal = max(vm.dailyGoalMl, vm.weeklyDayTotals.max() ?? vm.dailyGoalMl)
+                let maxVal = max(vm.goalMl, vm.weeklyDayTotals.max() ?? vm.goalMl)
                 let chartH: CGFloat = 80
 
                 ZStack(alignment: .bottom) {
@@ -149,7 +157,7 @@ struct WaterIntakeView: View {
                     Rectangle()
                         .fill(Color.bbSkyDeep.opacity(0.3))
                         .frame(height: 1)
-                        .offset(y: -chartH * CGFloat(vm.dailyGoalMl) / CGFloat(maxVal))
+                        .offset(y: -chartH * CGFloat(vm.goalMl) / CGFloat(maxVal))
 
                     HStack(alignment: .bottom, spacing: sp) {
                         ForEach(vm.weeklyDayTotals.indices, id: \.self) { i in

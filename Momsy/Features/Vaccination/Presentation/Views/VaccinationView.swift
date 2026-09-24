@@ -20,17 +20,7 @@ struct VaccinationView: View {
                 .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkSoft)
                 .fixedSize(horizontal: false, vertical: true)
-            if let url = AppLegalLinks.whoImmunizationScheduleURL {
-                Link(destination: url) {
-                    HStack(spacing: 6) {
-                        Text(lm.strings.vaccinationOpenSource)
-                            .font(.system(size: 12, weight: .bold, design: .rounded))
-                        Image(systemName: "arrow.up.right.square")
-                            .font(.system(size: 11, weight: .bold))
-                    }
-                    .foregroundColor(.bbCoralDeep)
-                }
-            }
+            MedicalSourcesSection(ids: [.whoImmunizationSchedule])
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 12)

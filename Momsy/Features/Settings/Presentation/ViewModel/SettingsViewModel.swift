@@ -148,7 +148,11 @@ final class SettingsViewModel: ObservableObject {
     }
 
     private func save() {
-        repo.save(UserPreferences(appTheme: appTheme, appLanguage: appLanguage, unitSystem: unitSystem))
+        var prefs = repo.load()
+        prefs.appTheme = appTheme
+        prefs.appLanguage = appLanguage
+        prefs.unitSystem = unitSystem
+        repo.save(prefs)
     }
 
     private func reauthenticate(_ operation: @escaping () async throws -> Void) {

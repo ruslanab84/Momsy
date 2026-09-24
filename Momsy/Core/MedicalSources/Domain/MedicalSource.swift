@@ -36,7 +36,7 @@ enum MedicalPublisher: String, Sendable, CaseIterable {
     }
 }
 
-enum MedicalSourceID: String, Sendable, CaseIterable, Hashable {
+enum MedicalSourceID: String, Sendable, CaseIterable, Hashable, Codable {
     // WHO
     case whoGrowthStandards, whoImmunizationSchedule
     case whoInfantYoungChildFeeding, whoComplementaryFeeding2023, whoPowderedFormulaPreparation

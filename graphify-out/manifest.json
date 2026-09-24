@@ -1064,11 +1064,6 @@
     "ast_hash": "cd959a346c5819367b09d75f1c6b5ef4",
     "semantic_hash": ""
   },
-  "Momsy/Features/Today/Algorithm/WhoNorms.swift": {
-    "mtime": 1782143851.7721536,
-    "ast_hash": "5affb94d9aeb606e6fb1ab21534555f3",
-    "semantic_hash": ""
-  },
   "Momsy/Features/Today/Data/Persistence/DiaperRecord.swift": {
     "mtime": 1782143851.772297,
     "ast_hash": "9a5e27d1722779cd373b5b36ea32ac0a",
@@ -2140,13 +2135,13 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/.remember/tmp/last-ndc.ts": {
-    "mtime": 1790180874.299124,
-    "ast_hash": "92a6641268d337f70c6520a6d0ae2f67",
+    "mtime": 1790216838.9841297,
+    "ast_hash": "7a8d0fe6276577e01e979c24e1d9a029",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/.remember/tmp/last-save.json": {
-    "mtime": 1790183428.3756618,
-    "ast_hash": "491ab80dea507d05300621a2e5278793",
+    "mtime": 1790217548.861218,
+    "ast_hash": "3ddc3e51c90384c6f3fcf3adaf99c473",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Assets.xcassets/AccentColor.colorset/Contents.json": {
@@ -2265,8 +2260,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Core/DI/AppContainer.swift": {
-    "mtime": 1787889493.081179,
-    "ast_hash": "b66689014aa0dcea8eebcc0045cf979d",
+    "mtime": 1790217548.4201617,
+    "ast_hash": "92cebcab791413e63a732bb79f39905d",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Core/DI/AppState.swift": {
@@ -2400,8 +2395,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Core/Localization/L10n.swift": {
-    "mtime": 1790182664.9169977,
-    "ast_hash": "282652a4ed095640650114617567e87c",
+    "mtime": 1790217491.983401,
+    "ast_hash": "275ebc6502a79736ce2950a07d3a3dd8",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Core/Localization/Language.swift": {
@@ -2920,8 +2915,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/MomMood/Presentation/ViewModel/WaterIntakeViewModel.swift": {
-    "mtime": 1784044716.5052323,
-    "ast_hash": "f2b288ef57bb1eec0f2aefb669c2ca96",
+    "mtime": 1790217548.4194663,
+    "ast_hash": "dad123102537e335136bedd7e6cb5c83",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/MomMood/Presentation/Views/AddMomSleepEntrySheet.swift": {
@@ -2930,8 +2925,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/MomMood/Presentation/Views/EPDSSheet.swift": {
-    "mtime": 1787763236.08573,
-    "ast_hash": "30eb7a9473d35b3039365ed4e1649d46",
+    "mtime": 1790217433.4104445,
+    "ast_hash": "f192d628a9a46dc75069bcd40211b198",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/MomMood/Presentation/Views/MomMoodView.swift": {
@@ -2950,8 +2945,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/MomMood/Presentation/Views/WaterIntakeView.swift": {
-    "mtime": 1784991943.8235097,
-    "ast_hash": "ec0f79063c8c0715c6fb0a13501cf2fa",
+    "mtime": 1790217548.4213464,
+    "ast_hash": "df7248ec0261fda2237523e321eaa330",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Onboarding/Presentation/ViewModel/OnboardingViewModel.swift": {
@@ -3090,18 +3085,18 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Settings/Data/LocalUserPreferencesRepository.swift": {
-    "mtime": 1782143851.7623427,
-    "ast_hash": "903fd49bdf223920d370df08c9a1e976",
+    "mtime": 1790217548.418257,
+    "ast_hash": "50048a0489679927b8b79c0a7e7790d8",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Settings/Domain/UserPreferences.swift": {
-    "mtime": 1782143851.762605,
-    "ast_hash": "2d703088fe0fc81e6b7708d144fd6cc4",
+    "mtime": 1790217548.4178216,
+    "ast_hash": "1c720a6205875adae4a662c80c1f8c1c",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Settings/Presentation/ViewModel/SettingsViewModel.swift": {
-    "mtime": 1786257084.0250275,
-    "ast_hash": "b2f7f3db9c02777dd0b3f268db56efa7",
+    "mtime": 1790217548.4187987,
+    "ast_hash": "4a026082dc7bfa7420ac23a588b1bca5",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Settings/Presentation/Views/SettingsView.swift": {
@@ -3265,8 +3260,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Sleep/Presentation/ViewModel/SleepViewModel.swift": {
-    "mtime": 1786737929.4275563,
-    "ast_hash": "5519456e24e6bd550de52af3401fbf14",
+    "mtime": 1790217619.4169512,
+    "ast_hash": "eb8cd926a29962cc15240535a5e36526",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Sleep/Presentation/Views/AddSleepEntrySheet.swift": {
@@ -3275,18 +3270,18 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Sleep/Presentation/Views/NextSleepCard.swift": {
-    "mtime": 1782880235.230649,
-    "ast_hash": "fa1d5d4e08e7692c9d179c9c46afc9f6",
+    "mtime": 1790217502.9732757,
+    "ast_hash": "9dd9ea7812dc520b2b90c9e53277795c",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Sleep/Presentation/Views/SleepChartSection.swift": {
-    "mtime": 1783107554.0922012,
-    "ast_hash": "ed84d3c0a548c529146e892eca092ff6",
+    "mtime": 1790217619.4175029,
+    "ast_hash": "552088e8e5333f4f37326283b4f79483",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Sleep/Presentation/Views/SleepView.swift": {
-    "mtime": 1786257084.0272887,
-    "ast_hash": "79e0aa2818b9ed5531f6327f9d29f853",
+    "mtime": 1790217619.417902,
+    "ast_hash": "aa09bfd0fa609728fc442264e4efda6f",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Sounds/Data/Repositories/LocalSoundRepository.swift": {
@@ -3360,13 +3355,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Today/Algorithm/DailyTipRules.swift": {
-    "mtime": 1786257084.0277495,
-    "ast_hash": "bcda340a6d276a1729e36a7b8fb7c021",
-    "semantic_hash": ""
-  },
-  "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Today/Algorithm/WhoNorms.swift": {
-    "mtime": 1782143851.7721536,
-    "ast_hash": "5affb94d9aeb606e6fb1ab21534555f3",
+    "mtime": 1790217404.2813559,
+    "ast_hash": "55cd361d73b6cda817a102f73dd76af1",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Today/Data/Persistence/DiaperRecord.swift": {
@@ -3415,8 +3405,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Today/Domain/Models/DailyTip.swift": {
-    "mtime": 1782143851.774236,
-    "ast_hash": "83fc88a6ed8de163ed47a091561a56db",
+    "mtime": 1790217316.1060688,
+    "ast_hash": "7e7302c10ecba347b1a6eb82c7ccb4f3",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Today/Domain/Models/DiaperEntry.swift": {
@@ -3470,8 +3460,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Today/Presentation/Views/TodayView.swift": {
-    "mtime": 1786257084.0281851,
-    "ast_hash": "4a02556698a1cb5d4358bf80ae1a7245",
+    "mtime": 1790217420.2886548,
+    "ast_hash": "ad5cecaf5313fe9f1d4497baf3a932a7",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Tracking/Data/Persistence/MeasurementRecord.swift": {
@@ -3555,8 +3545,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Tracking/Presentation/Views/TrackingView.swift": {
-    "mtime": 1786257084.028898,
-    "ast_hash": "186cfa331bbc355d83df5b81ce4c8fa6",
+    "mtime": 1790217502.9737558,
+    "ast_hash": "0118abc097b2ec75861f2627e294f1eb",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Tracking/Presentation/Views/WHOLineChart.swift": {
@@ -3620,8 +3610,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Vaccination/Presentation/Views/VaccinationView.swift": {
-    "mtime": 1787763266.3932903,
-    "ast_hash": "cca4565e6898faa18631ebd1b5fb1833",
+    "mtime": 1790217433.409549,
+    "ast_hash": "0fa1db835747798808870427f60d3b5c",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Vitamin/Presentation/ViewModel/VitaminViewModel.swift": {
@@ -3680,8 +3670,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/WeeklyInsights/Data/Builders/WeeklyInsightContextBuilder.swift": {
-    "mtime": 1787760874.1548057,
-    "ast_hash": "23686e6ef26ca090e01a012367d64b68",
+    "mtime": 1790217308.4648407,
+    "ast_hash": "c7acf03e0fdab734c045ce963ebad54d",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/WeeklyInsights/Data/Persistence/WeeklyInsightRecord.swift": {
@@ -3695,8 +3685,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/WeeklyInsights/Data/Services/StaticWeeklyInsightService.swift": {
-    "mtime": 1787760874.156181,
-    "ast_hash": "eb35ed2a9a632658c346695ff170cc6f",
+    "mtime": 1790217816.498068,
+    "ast_hash": "d6fb205af697e3608102055b548e7f8c",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/WeeklyInsights/Domain/Models/WeeklyInsight.swift": {
@@ -3710,8 +3700,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/WeeklyInsights/Domain/Prompts/WeeklyInsightPrompt.swift": {
-    "mtime": 1787760874.1565762,
-    "ast_hash": "1c0410b07c64a6ddca25572a76703612",
+    "mtime": 1790217308.4661622,
+    "ast_hash": "59dd344058ef3512f4baf60a6a3c4116",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/WeeklyInsights/Domain/Repositories/WeeklyInsightRepository.swift": {
@@ -3925,8 +3915,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/MomMood/MomMoodViewModelTests.swift": {
-    "mtime": 1785000698.4088125,
-    "ast_hash": "d5d94f39bd19491183ee8d99a99f6938",
+    "mtime": 1790217672.4215968,
+    "ast_hash": "51a93cff987059dc7f03e39ff8d96069",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/Onboarding/OnboardingViewModelTests.swift": {
@@ -3950,8 +3940,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/Sleep/SleepViewModelTests.swift": {
-    "mtime": 1787942590.5418615,
-    "ast_hash": "85fd8a8ef8fd07871c2d04f970177590",
+    "mtime": 1790217628.8424168,
+    "ast_hash": "5f88cd99927d587b20fb71a66f2cf2a3",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/Sounds/MockSoundEngine.swift": {
@@ -4015,8 +4005,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/Today/DailyTipAlgorithmTests.swift": {
-    "mtime": 1782544420.7419717,
-    "ast_hash": "67b8f68b75e10f6bcc1b1ba9d5897868",
+    "mtime": 1790217692.8819513,
+    "ast_hash": "2c61eb01df46da9a3b7eee232c800c92",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/Today/TodayViewModelTests.swift": {
@@ -4035,13 +4025,13 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/WeeklyInsights/StaticWeeklyInsightServiceTests.swift": {
-    "mtime": 1787760874.1636915,
-    "ast_hash": "90ca86834b30d8dd222d70112186da51",
+    "mtime": 1790217308.4667602,
+    "ast_hash": "34abe3f97827197ff9e240d3cd4a6ee6",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/WeeklyInsights/WeeklyInsightContextBuilderTests.swift": {
-    "mtime": 1787760874.1637893,
-    "ast_hash": "162f64dd761206751697e4f7520707dd",
+    "mtime": 1790217308.467047,
+    "ast_hash": "f5a310ff48fc461cc65355adae537288",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Features/WeeklyInsights/WeeklyInsightViewModelTests.swift": {
@@ -4245,18 +4235,18 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/.remember/archive.md": {
-    "mtime": 1790180770.5447915,
-    "ast_hash": "4962a01adbc4efc171c71590ed6d9056",
+    "mtime": 1790217061.3543193,
+    "ast_hash": "07f4f5c603fb441e8c85dc0f365811c0",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/.remember/now.md": {
-    "mtime": 1790183428.3090696,
-    "ast_hash": "0769fbdf2ec9d0042e34df2a3b862377",
+    "mtime": 1790217548.809336,
+    "ast_hash": "e27251cbbd8d576af0e652e320199d82",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/.remember/recent.md": {
-    "mtime": 1790180770.5417564,
-    "ast_hash": "8400022c070ad74e4a2b0171e4f29f22",
+    "mtime": 1790217061.3519135,
+    "ast_hash": "13087c87d758be8ab09adffc547baa72",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/.remember/today-2026-05-20.done.md": {
@@ -4480,8 +4470,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Core/AppLegalLinks.swift": {
-    "mtime": 1790182657.3013942,
-    "ast_hash": "a12aa5688b929652aa5655437116ae4b",
+    "mtime": 1790217454.5032513,
+    "ast_hash": "eea72753a85756e15d9e63627b008a20",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Core/Family/FamilySwitchPolicy.swift": {
@@ -4725,8 +4715,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Core/AppLegalLinksTests.swift": {
-    "mtime": 1787763294.4504864,
-    "ast_hash": "7cd8063c804eb8d3097f38f52405c367",
+    "mtime": 1790217454.5035532,
+    "ast_hash": "2167966f8be1c0a34e49f369f682a57b",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Core/Auth/AccountDisplayTests.swift": {
@@ -4910,8 +4900,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Tracking/Presentation/Views/WHOMethodologySheet.swift": {
-    "mtime": 1787763266.3924222,
-    "ast_hash": "1590dad153698dc388baf612466805f8",
+    "mtime": 1790217433.409994,
+    "ast_hash": "68221e3b06988f2ba26e1f76d7f0ee1f",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Vitamin/Data/Persistence/VitaminRecord.swift": {
@@ -5315,8 +5305,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Core/MedicalSources/Domain/MedicalSource.swift": {
-    "mtime": 1790182641.3911633,
-    "ast_hash": "68e012456da8ebbcd0771147c578b20a",
+    "mtime": 1790217308.4696069,
+    "ast_hash": "b91869f25cd5bd321b0fe87a8ae04d32",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Core/MedicalSources/Presentation/MedicalSourcesSection.swift": {
@@ -5330,8 +5320,8 @@
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/MomsyTests/Core/MedicalSources/MedicalSourceCatalogTests.swift": {
-    "mtime": 1790182706.0699883,
-    "ast_hash": "fb6a93b940538d491b65d45a7ebb0653",
+    "mtime": 1790217454.503955,
+    "ast_hash": "c0569a7f86cc021b6c1d44b133100fe5",
     "semantic_hash": ""
   },
   "/Users/ruslanabdulov/Desktop/Momsy/scripts/verify_medical_sources.sh": {
@@ -5339,9 +5329,19 @@
     "ast_hash": "0ae458b4b6cdd2fb1a16bcd7cb81feb6",
     "semantic_hash": ""
   },
-  "/Users/ruslanabdulov/Desktop/Momsy/docs/A3_CARETIPS_CITATIONS_CLI_TASK.md": {
-    "mtime": 1790183088.0453634,
-    "ast_hash": "02509dfd8ab7d07e6a63f88fef80c80b",
+  "/Users/ruslanabdulov/Desktop/Momsy/Momsy/Features/Today/Algorithm/CareHeuristics.swift": {
+    "mtime": 1790217308.4623313,
+    "ast_hash": "33c1a3a546e460c7defeea10b8a50610",
+    "semantic_hash": ""
+  },
+  "/Users/ruslanabdulov/Desktop/Momsy/.remember/today-2026-09-23.done.md": {
+    "mtime": 1790216889.4872806,
+    "ast_hash": "7732cf3309ee040be953be996719fdce",
+    "semantic_hash": ""
+  },
+  "/Users/ruslanabdulov/Desktop/Momsy/docs/A4_SURFACE_CITATIONS_CLI_TASK.md": {
+    "mtime": 1790216837.0976348,
+    "ast_hash": "55750543fd23c418f91cc9bb72314d9d",
     "semantic_hash": ""
   }
 }

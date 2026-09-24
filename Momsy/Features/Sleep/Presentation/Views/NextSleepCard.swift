@@ -58,19 +58,25 @@ struct NextSleepCard: View {
     }
 
     var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 26, weight: .semibold))
-                .foregroundColor(accent)
-                .frame(width: 44, height: 44)
-                .background(accent.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundColor(accent)
+                    .frame(width: 44, height: 44)
+                    .background(accent.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-            if prediction.isOverdue {
-                overdueContent
-            } else {
-                forecastContent
+                if prediction.isOverdue {
+                    overdueContent
+                } else {
+                    forecastContent
+                }
             }
+            Text(strings.sleepForecastCaption)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundColor(cardInkMute)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .bbCard(pad: 16, bg: SleepPosterPalette.paper.opacity(0.95), radius: 24)
     }

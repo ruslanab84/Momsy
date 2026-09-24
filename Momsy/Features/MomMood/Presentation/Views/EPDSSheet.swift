@@ -280,18 +280,7 @@ struct EPDSSheet: View {
     /// and the source are quoted on every copy, so this rides along with both the
     /// questionnaire and the score.
     private var sourceFooter: some View {
-        VStack(spacing: 4) {
-            Text(lm.strings.sourceLabel.uppercased())
-                .font(.system(size: 10, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInkMute)
-                .kerning(0.5)
-            Text(AppLegalLinks.epdsCitation)
-                .font(.system(size: 11, weight: .medium, design: .rounded))
-                .foregroundColor(.bbInkMute)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity)
+        MedicalSourcesSection(ids: [.epdsCox1987, .whoMaternalMentalHealth])
     }
 
     private var safetySupportCard: some View {

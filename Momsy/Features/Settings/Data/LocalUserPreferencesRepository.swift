@@ -5,13 +5,16 @@ final class LocalUserPreferencesRepository: UserPreferencesRepository {
         static let theme      = "appTheme"
         static let language   = "appLanguage"
         static let unitSystem = "unitSystem"
+        static let waterGoalMl = "waterGoalMl"
     }
 
     func load() -> UserPreferences {
-        UserPreferences(
+        let waterGoal = UserDefaults.standard.integer(forKey: Keys.waterGoalMl)
+        return UserPreferences(
             appTheme:    UserDefaults.standard.string(forKey: Keys.theme)      ?? "system",
             appLanguage: UserDefaults.standard.string(forKey: Keys.language)   ?? "en",
-            unitSystem:  UserDefaults.standard.string(forKey: Keys.unitSystem) ?? "metric"
+            unitSystem:  UserDefaults.standard.string(forKey: Keys.unitSystem) ?? "metric",
+            waterGoalMl: waterGoal > 0 ? waterGoal : UserPreferences.defaultWaterGoalMl
         )
     }
 
@@ -19,5 +22,6 @@ final class LocalUserPreferencesRepository: UserPreferencesRepository {
         UserDefaults.standard.set(prefs.appTheme,    forKey: Keys.theme)
         UserDefaults.standard.set(prefs.appLanguage, forKey: Keys.language)
         UserDefaults.standard.set(prefs.unitSystem,  forKey: Keys.unitSystem)
+        UserDefaults.standard.set(prefs.waterGoalMl, forKey: Keys.waterGoalMl)
     }
 }

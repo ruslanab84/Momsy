@@ -6,6 +6,8 @@ struct SleepChartSection: View {
     let normMax: Double
     @Binding var selectedPeriod: Int
     let lang: String
+    /// Sources behind the norm band; the ⓘ button appears only when non-empty.
+    var sources: [MedicalSourceID] = []
 
     @EnvironmentObject private var loc: LocalizationManager
     private var cardInk: Color { SleepPosterPalette.ink }
@@ -47,6 +49,11 @@ struct SleepChartSection: View {
                 .kerning(0.5)
             Spacer()
             normBadge
+            if !sources.isEmpty {
+                SourcesInfoButton(ids: sources)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.bbMintDeep)
+            }
         }
     }
 

@@ -11,31 +11,32 @@ struct DailyTipAlgorithmTests {
         #expect(tip.category == .defaultTip)
     }
 
-    // MARK: - WhoNorms
+    // MARK: - CareHeuristics
 
     @Test("maxFeedingInterval for 0m is 180")
-    func whoNorms_feedingInterval_newborn() {
-        #expect(WhoNorms.maxFeedingInterval(ageMonths: 0) == 180)
+    func heuristics_feedingInterval_newborn() {
+        #expect(CareHeuristics.maxFeedingInterval(ageMonths: 0) == 180)
     }
 
     @Test("maxFeedingInterval for 6m is 270")
-    func whoNorms_feedingInterval_6m() {
-        #expect(WhoNorms.maxFeedingInterval(ageMonths: 6) == 270)
+    func heuristics_feedingInterval_6m() {
+        #expect(CareHeuristics.maxFeedingInterval(ageMonths: 6) == 270)
     }
 
-    @Test("minSleepMinutes for 0m is 840")
-    func whoNorms_minSleep_newborn() {
-        #expect(WhoNorms.minSleepMinutes(ageMonths: 0) == 840)
+    @Test("minSleepMinutes matches the WHO 2019 under-5 lower bounds",
+          arguments: [(0, 840), (3, 840), (4, 720), (11, 720), (12, 660), (24, 660)])
+    func heuristics_minSleep_matchesWHO(ageMonths: Int, expected: Int) {
+        #expect(CareHeuristics.minSleepMinutes(ageMonths: ageMonths) == expected)
     }
 
     @Test("maxDaysWithoutStool for 1m is 3")
-    func whoNorms_stool_1m() {
-        #expect(WhoNorms.maxDaysWithoutStool(ageMonths: 1) == 3)
+    func heuristics_stool_1m() {
+        #expect(CareHeuristics.maxDaysWithoutStool(ageMonths: 1) == 3)
     }
 
     @Test("awakeWindowMax for 4m is 110")
-    func whoNorms_awakeWindow_4m() {
-        #expect(WhoNorms.awakeWindowMax(ageMonths: 4) == 110)
+    func heuristics_awakeWindow_4m() {
+        #expect(CareHeuristics.awakeWindowMax(ageMonths: 4) == 110)
     }
 
     // MARK: - Alert Rules
@@ -45,7 +46,7 @@ struct DailyTipAlgorithmTests {
         let ctx = makeContext(ageMonths: 2, minutesSinceLastFeed: 220, hour: 14)
         let result = AlertRules.evaluate(context: ctx)
         #expect(result != nil)
-        #expect(result?.category == .alert)
+        #expect(result?.category == .situational)
     }
 
     @Test("Alert A does not fire when feed was recent")
@@ -60,7 +61,7 @@ struct DailyTipAlgorithmTests {
         let ctx = makeContext(ageMonths: 3, diaperCount: 2, hour: 19)
         let result = AlertRules.evaluate(context: ctx)
         #expect(result != nil)
-        #expect(result?.category == .alert)
+        #expect(result?.category == .situational)
     }
 
     @Test("Alert B does not fire for older baby")
@@ -82,7 +83,7 @@ struct DailyTipAlgorithmTests {
         let ctx = makeContext(ageMonths: 4, daysSinceLastStool: 4, hour: 12)
         let result = AlertRules.evaluate(context: ctx)
         #expect(result != nil)
-        #expect(result?.category == .alert)
+        #expect(result?.category == .situational)
     }
 
     @Test("Alert C does not fire when no stool has ever been logged (fresh install)")
@@ -165,11 +166,12 @@ struct DailyTipAlgorithmTests {
         #expect(tip.text.contains("купан") || tip.text.contains("bath") || tip.text.contains("Bad"))
     }
 
-    @Test("evaluate returns .alert when feed interval exceeded")
-    func evaluate_alertCategory_whenFeedLate() {
+    @Test("long feed gap is a neutral observation, not an alert")
+    func evaluate_feedLate_isNeutralObservation() {
         let ctx = makeContext(ageMonths: 1, minutesSinceLastFeed: 200, hour: 15)
         let tip = DailyTipAlgorithm.evaluate(context: ctx)
-        #expect(tip.category == .alert)
+        #expect(tip.category == .situational)
+        #expect(!tip.isMedicalClaim)
     }
 
     @Test("fresh install in evening with no logged data is never an alarming zero tip")
@@ -210,6 +212,61 @@ struct DailyTipAlgorithmTests {
         #expect(tip.category == .care)
     }
 
+    // MARK: - Citations (A4)
+
+    @Test("sleep deficit alert cites the WHO sleep guideline")
+    func alertD_citesWHO() {
+        let ctx = makeContext(ageMonths: 4, totalSleepMinutes: 580, hour: 20)
+        let tip = AlertRules.evaluate(context: ctx)
+        #expect(tip?.isMedicalClaim == true)
+        #expect(tip?.sources == [.whoPhysicalActivitySleepUnder5])
+    }
+
+    @Test("no published daily tip is an uncited medical claim", arguments: Language.allCases)
+    func publishedTips_neverUncitedClaims(language: Language) {
+        var tips: [DailyTip] = []
+        for age in 0...36 {
+            for day in 0..<12 {
+                tips.append(CareRules.evaluate(context: makeContext(ageMonths: age, dayOfYear: day, language: language)))
+            }
+            let triggers = [
+                makeContext(ageMonths: age, minutesSinceLastFeed: 600, hour: 14, language: language),
+                makeContext(ageMonths: age, minutesSinceLastFeed: 5, hour: 14, language: language),
+                makeContext(ageMonths: age, diaperCount: 2, hour: 19, language: language),
+                makeContext(ageMonths: age, daysSinceLastStool: 9, hour: 12, language: language),
+                makeContext(ageMonths: age, totalSleepMinutes: 60, hour: 20, language: language),
+                makeContext(ageMonths: age, minutesSinceLastSleepEnd: 400, hour: 11, language: language),
+                makeContext(ageMonths: age, bathCount: 0, hour: 19, language: language),
+                makeContext(ageMonths: age, walkCount: 0, hour: 12, language: language),
+                makeContext(ageMonths: age, hour: 12, language: language, recentFeedSides: ["left", "left", "left"]),
+            ]
+            for ctx in triggers {
+                if let tip = AlertRules.evaluate(context: ctx) { tips.append(tip) }
+                if let tip = SituationalRules.evaluate(context: ctx) { tips.append(tip) }
+            }
+        }
+        for tip in tips {
+            #expect(!tip.text.isEmpty)
+            #expect(!tip.text.contains("[name]"))
+            if tip.isMedicalClaim {
+                #expect(CitationPolicy.isPublishable(tip.sources), "uncited claim: \(tip.text)")
+            } else {
+                #expect(tip.sources.isEmpty)
+            }
+        }
+    }
+
+    @Test("care pools are fully translated into every language")
+    func carePools_translated() {
+        for age in [0, 1, 3, 6, 9, 12, 18] {
+            for tip in CareRules.pool(ageMonths: age) {
+                for language in Language.allCases {
+                    #expect(tip.text.isTranslated(into: language))
+                }
+            }
+        }
+    }
+
     // MARK: - Helper
 
     private func makeContext(
@@ -224,7 +281,9 @@ struct DailyTipAlgorithmTests {
         bathCount: Int = 0,
         daysSinceLastStool: Int? = 0,
         hour: Int = 10,
-        language: Language = .russian
+        dayOfYear: Int = 148,
+        language: Language = .russian,
+        recentFeedSides: [String] = []
     ) -> DailyContext {
         DailyContext(
             babyName: "Лёва",
@@ -245,9 +304,9 @@ struct DailyTipAlgorithmTests {
             walkCount: walkCount,
             bathCount: bathCount,
             daysSinceLastStool: daysSinceLastStool,
-            dayOfYear: 148,
+            dayOfYear: dayOfYear,
             lastFeedDurationMinutes: 15,
-            recentFeedSides: []
+            recentFeedSides: recentFeedSides
         )
     }
 }

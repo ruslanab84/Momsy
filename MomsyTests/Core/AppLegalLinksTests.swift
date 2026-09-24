@@ -17,7 +17,7 @@ struct AppLegalLinksTests {
     /// the title and the source stay attached to the questionnaire, so the citation
     /// losing any of the three is a licence breach, not a copy tweak.
     @Test func epdsCitationCarriesAuthorsTitleAndSource() {
-        let citation = AppLegalLinks.epdsCitation
+        let citation = MedicalSourceCatalog.source(.epdsCox1987)?.citation ?? ""
         for author in ["Cox", "Holden", "Sagovsky"] {
             #expect(citation.contains(author))
         }
@@ -28,7 +28,7 @@ struct AppLegalLinksTests {
     }
 
     @Test func whoSourceURLsPointAtWHO() {
-        for url in [AppLegalLinks.whoGrowthStandardsURL, AppLegalLinks.whoImmunizationScheduleURL] {
+        for url in [MedicalSourceCatalog.source(.whoGrowthStandards)?.url, MedicalSourceCatalog.source(.whoImmunizationSchedule)?.url] {
             #expect(url != nil)
             #expect(url?.host() == "www.who.int")
         }

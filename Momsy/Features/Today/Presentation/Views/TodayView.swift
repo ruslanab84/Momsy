@@ -358,9 +358,17 @@ struct TodayView: View {
                 .overlay(Text(tipBadgeEmoji).font(.system(size: 14)))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(loc.strings.tipOfDay)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.bbInk)
+                HStack(alignment: .firstTextBaseline) {
+                    Text(loc.strings.tipOfDay)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(.bbInk)
+                    Spacer(minLength: 0)
+                    if let sources = vm.dailyTip?.sources, !sources.isEmpty {
+                        SourcesInfoButton(ids: sources)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(tipAccentColor)
+                    }
+                }
                 dailyTipBody
             }
         }

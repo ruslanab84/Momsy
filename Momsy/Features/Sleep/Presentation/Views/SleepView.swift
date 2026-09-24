@@ -40,7 +40,8 @@ struct SleepView: View {
                         normMin: vm.sleepNorm.min,
                         normMax: vm.sleepNorm.max,
                         selectedPeriod: $vm.selectedChartPeriod,
-                        lang: loc.lang
+                        lang: loc.lang,
+                        sources: [.whoPhysicalActivitySleepUnder5]
                     )
                 }
                 .padding(.horizontal, 22)

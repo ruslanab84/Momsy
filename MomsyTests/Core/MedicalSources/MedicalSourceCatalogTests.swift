@@ -33,11 +33,4 @@ struct MedicalSourceCatalogTests {
         #expect(CitationPolicy.isPublishable([.whoGrowthStandards]))
         #expect(CitationPolicy.isPublishable([.whoGrowthStandards, .nhsColic, .epdsCox1987]))
     }
-
-    /// AppLegalLinks keeps forwarding to the catalog so existing call sites see the same values.
-    @Test func legacyAppLegalLinksForwardToCatalog() {
-        #expect(AppLegalLinks.whoGrowthStandardsURL == MedicalSourceCatalog.source(.whoGrowthStandards)?.url)
-        #expect(AppLegalLinks.whoImmunizationScheduleURL == MedicalSourceCatalog.source(.whoImmunizationSchedule)?.url)
-        #expect(AppLegalLinks.epdsCitation == MedicalSourceCatalog.source(.epdsCox1987)?.citation)
-    }
 }

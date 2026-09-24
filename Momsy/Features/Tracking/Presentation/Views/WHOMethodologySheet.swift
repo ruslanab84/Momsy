@@ -15,17 +15,7 @@ struct WHOMethodologySheet: View {
             Form {
                 Section(loc.strings.whoMethodologySourceTitle) {
                     paragraph(loc.strings.whoMethodologySource)
-                    if let url = AppLegalLinks.whoGrowthStandardsURL {
-                        Link(destination: url) {
-                            HStack(spacing: 6) {
-                                Text(loc.strings.whoMethodologyOpenSource)
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                                Image(systemName: "arrow.up.right.square")
-                                    .font(.system(size: 12, weight: .bold))
-                            }
-                            .foregroundColor(.bbCoralDeep)
-                        }
-                    }
+                    MedicalSourcesSection(ids: [.whoGrowthStandards])
                 }
                 Section(loc.strings.whoAdaptationTitle) {
                     paragraph(loc.strings.whoGrowthAdaptationNote)
