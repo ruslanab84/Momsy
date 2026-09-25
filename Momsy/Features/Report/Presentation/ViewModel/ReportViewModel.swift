@@ -273,7 +273,7 @@ final class ReportViewModel: ObservableObject {
         let diaperCount  = diapers.count
         let diaperAvg    = days > 0 ? Double(diaperCount) / Double(days) : 0
         let maxTemp   = temps.map(\.value).max() ?? 0
-        let peakCount = temps.filter { $0.value > 37.5 }.count
+        let tempCount = temps.count
 
         let sortedMeasurements = measurements.sorted { $0.date < $1.date }
         let weightValue: String
@@ -323,10 +323,8 @@ final class ReportViewModel: ObservableObject {
             (
                 lm.strings.reportStatTempLabel,
                 maxTemp > 0 ? String(format: "%.1f%@", units.displayTemp(fromCelsius: maxTemp), units.tempUnit) : "—",
-                maxTemp > 0
-                    ? (peakCount > 0 ? lm.strings.reportTempPeakSub(n: peakCount) : lm.strings.reportTempNormal)
-                    : lm.strings.noData,
-                maxTemp > 37.5 ? .bbCoralDeep : .bbMintDeep
+                maxTemp > 0 ? lm.strings.reportTempReadings(n: tempCount) : lm.strings.noData,
+                .bbSky
             ),
             (
                 lm.strings.reportStatWeightLabel,

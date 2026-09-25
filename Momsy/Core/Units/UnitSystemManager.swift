@@ -29,26 +29,6 @@ enum UnitSystem: String, CaseIterable {
     }
 }
 
-enum TempCategory {
-    case normal, subfebr, high
-
-    var color: Color {
-        switch self {
-        case .normal:  return .bbMintDeep
-        case .subfebr: return .bbButterDeep
-        case .high:    return .bbCoralDeep
-        }
-    }
-
-    func label(loc: L10n) -> String {
-        switch self {
-        case .normal:  return loc.normalOk
-        case .subfebr: return loc.subfebrLabel
-        case .high:    return loc.highTemp
-        }
-    }
-}
-
 extension Array where Element == WHOPoint {
     func scaledBy(_ factor: Double) -> [WHOPoint] {
         map {
@@ -120,16 +100,6 @@ final class UnitSystemManager: ObservableObject {
         guard s != "—", let v = parseNum(s) else { return s }
         return displayHeight(fromCm: v, localizedMetricUnit: localizedMetricUnit)
     }
-
-    // MARK: Temperature category (always in Celsius)
-    func tempCategory(_ celsius: Double) -> TempCategory {
-        celsius >= 38.5 ? .high : celsius >= 37.5 ? .subfebr : .normal
-    }
-
-    // MARK: Temp legend labels
-    var tempNormalLabel:  String { isImperial ? "normal < 99.5°"       : "normal < 37.5°" }
-    var tempSubfebrLabel: String { isImperial ? "subfebr. 99.5–101.3°" : "subfebr. 37.5–38.4°" }
-    var tempHighLabel:    String { isImperial ? "high ≥ 101.3°"        : "high ≥ 38.5°" }
 
     // MARK: Input placeholders
     var weightPlaceholder: String { isImperial ? "lb (e.g. 14.1)" : "kg (e.g. 6.4)" }

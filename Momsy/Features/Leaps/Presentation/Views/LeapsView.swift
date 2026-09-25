@@ -23,7 +23,7 @@ struct LeapsView: View {
                     checkInSection
                 }
                 behaviorInsightsSection
-                normalDoctorCard
+                aboutLeapsCard
                 timelineSection
                 if familyManager.canPerform(.viewPrivateData) {
                     historySection
@@ -50,16 +50,20 @@ struct LeapsView: View {
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            BBSectionLabel(text: loc.strings.developmentalLeaps)
-            Text(vm.currentLeap.isCurrent
-                 ? loc.strings.currentLeapTitle(id: vm.currentLeap.id)
-                 : loc.strings.nextLeapTitle(id: vm.currentLeap.id))
-                .font(.system(size: 28, weight: .heavy, design: .rounded))
-                .foregroundColor(.bbInk)
-            leapSubtitle
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                BBSectionLabel(text: loc.strings.developmentalLeaps)
+                Text(vm.currentLeap.isCurrent
+                     ? loc.strings.currentLeapTitle(id: vm.currentLeap.id)
+                     : loc.strings.nextLeapTitle(id: vm.currentLeap.id))
+                    .font(.system(size: 28, weight: .heavy, design: .rounded))
+                    .foregroundColor(.bbInk)
+                leapSubtitle
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            SourcesInfoButton(ids: Self.sourceIDs)
+                .foregroundColor(.bbCoralDeep)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
@@ -240,20 +244,23 @@ struct LeapsView: View {
         }
     }
 
-    private var normalDoctorCard: some View {
+    static let sourceIDs: [MedicalSourceID] = [
+        .leapsVanDeRijtPlooij1992, .whoMotorDevelopmentMilestones, .whoPhysicalActivitySleepUnder5
+    ]
+
+    private var aboutLeapsCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BBSectionLabel(text: loc.strings.leapNormalDoctorTitle)
-            Text(loc.strings.leapNormalText)
+            BBSectionLabel(text: loc.strings.leapsAboutTitle)
+            Text(loc.strings.leapsDisclaimerShort)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(.bbInk)
+            Text(loc.strings.leapsAboutText)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundColor(.bbInkSoft)
                 .fixedSize(horizontal: false, vertical: true)
-            Divider()
-            Text(loc.strings.leapDoctorText)
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundColor(.bbCoralDeep)
-                .fixedSize(horizontal: false, vertical: true)
+            MedicalSourcesSection(ids: Self.sourceIDs)
         }
-        .bbCard(pad: 14, bg: Color.bbRose.opacity(0.18))
+        .bbCard(pad: 14, bg: Color.bbSky.opacity(0.18))
     }
 
     private var timelineSection: some View {

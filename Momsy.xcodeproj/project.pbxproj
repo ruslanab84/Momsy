@@ -34,6 +34,7 @@
 		2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F539FDD9FA2A4DAB9E24DD3B /* FeedingViewModelTests.swift */; };
 		38944D43E482FFA7FCD38281 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4820A4E27274110E9256D2F7 /* SwiftUI.framework */; };
 		38EF65D83AACCA049FB163E3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AA2EA0D382D4DC3EE6C09A /* WidgetKit.framework */; };
+		33AFC137FFA3553E8278F929 /* LeapsSourcesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD63BAD5EE559AC49936A5F /* LeapsSourcesTests.swift */; };
 		3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */; };
 		443C7EF01C216B989D605CE2 /* MockBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50479E8852BDAA636377733 /* MockBabyRepository.swift */; };
 		4BACDEB740F77369DB5F5A01 /* MockAnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3131745181201F2C00E02DA9 /* MockAnalyticsService.swift */; };
@@ -180,6 +181,7 @@
 		0BABF12B0000000000000009 /* FamilySuppressedRestoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FamilySuppressedRestoreTests.swift; sourceTree = "<group>"; };
 		0BABF1300000000000000002 /* TombstoneWatermarkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TombstoneWatermarkTests.swift; sourceTree = "<group>"; };
 		0BABF1310000000000000002 /* MomMoodStaysLocalTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomMoodStaysLocalTests.swift; sourceTree = "<group>"; };
+		8BD63BAD5EE559AC49936A5F /* LeapsSourcesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsSourcesTests.swift; sourceTree = "<group>"; };
 		0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeapsViewModelTests.swift; sourceTree = "<group>"; };
 		0FC885445D021739FD892202 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		12001E51A26A48C69072B882 /* VitaminCategoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VitaminCategoryTests.swift; sourceTree = "<group>"; };
@@ -777,6 +779,7 @@
 				CAADDB368FFD0B2A73ADFB21 /* LeapsViewModelTests.swift */,
 				04402FABE0C13AA422DB8393 /* LeapsViewModelTests.swift */,
 				0C006F602F0EF7861C98B541 /* LeapsViewModelTests.swift */,
+				8BD63BAD5EE559AC49936A5F /* LeapsSourcesTests.swift */,
 			);
 			path = Leaps;
 			sourceTree = "<group>";
@@ -1053,6 +1056,7 @@
 				DC9F836B46F376F06E32D4BC /* DiaryViewModelTests.swift in Sources */,
 				2E9D88711D8E44E49B32B3EB /* FeedingViewModelTests.swift in Sources */,
 				3A52C57BF1B37B0575B92E76 /* LeapsViewModelTests.swift in Sources */,
+				33AFC137FFA3553E8278F929 /* LeapsSourcesTests.swift in Sources */,
 				5E7A0002A1B2C3D4E5F60002 /* SymptomViewModelTests.swift in Sources */,
 				FE11AA02FE11AA02FE11AA02 /* VaccinationScheduleTests.swift in Sources */,
 				CA4E1102CA4E1102CA4E1102 /* CareTipsCatalogTests.swift in Sources */,

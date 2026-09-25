@@ -25,15 +25,23 @@ Full test suite (Swift Testing, `@Test`/`#expect` — not XCTest):
 ```bash
 xcodebuild -project Momsy.xcodeproj -scheme Momsy -destination 'platform=iOS Simulator,name=iPhone 17' test
 ```
+- Single suite/test: append `-only-testing:MomsyTests/<SuiteName>` or
+  `-only-testing:MomsyTests/<SuiteName>/<testName>` to the `test` command.
 - Use simulator `iPhone 17` (this machine has no `iPhone 16`).
+- Release builds can OOM (exit 137) on this machine — add `-jobs 2`.
 - Full suite takes ~7-8 min and is memory-heavy — run it backgrounded/redirected to a log file, not
   through the harness's truncated task-output capture. Exit code 0 does not guarantee tests ran —
   confirm real `✔`/`✘` Swift Testing markers and a non-zero executed-test count in the log.
 - Known flake, not a regression signal: `MomsyTests/SleepViewModelTests/stopWaitsForPendingStartBeforeClosing`
   (timing race under full-suite contention) and `LogReportViewModelTests.dayModeAggregatesAllSourcesNewestFirst`
   (relative timestamps roll to the previous day near local midnight).
-- New test files are NOT auto-discovered — register manually in `Momsy.xcodeproj/project.pbxproj`
-  (PBXFileReference, PBXGroup children, PBXBuildFile, Sources build phase) or add via Xcode.
+- App sources under `Momsy/` are a file-system-synchronized group — new app files need no pbxproj
+  edit. New files in `MomsyTests/` are NOT auto-discovered — register manually in
+  `Momsy.xcodeproj/project.pbxproj` (PBXFileReference, PBXGroup children, PBXBuildFile, Sources build
+  phase), mirroring an existing sibling test file, or add via Xcode.
+- Build settings: iOS 17 deployment target, `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` (default
+  arguments that construct main-actor types in nonisolated inits fail to compile — construct inside
+  the init body instead).
 - Any `project.pbxproj`/`.xcscheme` edit: validate with `plutil -lint <path>` /
   `xmllint --noout <path>` before committing, and always verify with a real `xcodebuild` build.
 
@@ -42,7 +50,13 @@ Firebase rules/functions tests (Node, needs Firebase CLI + JDK 21+):
 npm test                      # rules + functions
 npm run test:firebase-rules   # tests/firebase-rules.test.mjs via firestore/storage emulators
 npm run test:firebase-functions
+npm run firebase:release-gate # asserts .firebaserc default is momsy-cf74a, then npm test (CI runs this)
 ```
+- `test:firebase-functions` hangs on an interactive parameter prompt unless `functions/.env.demo-momsy`
+  exists — create it for the run.
+- macOS here has no `timeout` command; don't wrap commands in it.
+- `scripts/verify_medical_sources.sh` live-checks every URL in `MedicalSourceCatalog.swift`.
+- Production deploys (`firebase deploy ... --project momsy-cf74a`) are run by the user, not the agent.
 
 ## Architecture
 
@@ -58,8 +72,16 @@ Feeding, Leaps, LogReport, Me, MomMood, Onboarding, Pumping, Report, Settings, S
 Subscription, Symptom, Today, Tracking, Vaccination, Vitamin, Walk, WeeklyInsights.
 
 Shared subsystems under `Momsy/Core/`: Account, Auth, BabySync, DesignSystem, Domain, Extensions,
-Family, Localization, Navigation, Persistence, Privacy, Units, WatchSync, Widget. Full screen-by-screen
-map: `docs/VIEW_MAP.md`.
+Family, Localization, MedicalSources, Navigation, Persistence, Privacy, Units, WatchSync, Widget.
+
+Medical claims: user-facing health/care copy must cite sources from
+`Core/MedicalSources/Data/MedicalSourceCatalog.swift`; `CitationPolicy.isPublishable` allows only
+WHO/NHS/AAP/peer-reviewed sources. Show citations with `SourcesInfoButton`/`MedicalSourcesSection`.
+If you can't find a supporting source, remove the claim or reword it as non-medical. Don't attribute
+in-house thresholds to WHO (`CareHeuristics` is the in-house version, not WHO).
+
+`AGENTS.md` holds additional governance rules (don't refactor unrelated code, don't rename/move files
+without asking, minimize Firebase reads/writes).
 
 Navigation: `MomsyApp` → `MomsyRootView` (deep links, Cloud Sync consent, widget routes) →
 `ContentView` (splash/onboarding/paywall/main) → `MainTabView` (Today, Leaps, Diary\*, Doctor\*, Me;

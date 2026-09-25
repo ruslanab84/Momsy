@@ -20,6 +20,17 @@ final class SubscriptionManager: ObservableObject {
     @Published var selectedProductID = ProductID.annual
 
     var selectedProduct: Product? { products.first { $0.id == selectedProductID } }
+
+    /// The selected plan's intro offer, only when it is a free trial the user can still redeem.
+    var selectedFreeTrial: Product.SubscriptionOffer? {
+        guard let offer = selectedProduct?.subscription?.introductoryOffer,
+              Self.freeTrial(eligible: trialEligible, paymentMode: offer.paymentMode) else { return nil }
+        return offer
+    }
+
+    static func freeTrial(eligible: Bool, paymentMode: Product.SubscriptionOffer.PaymentMode?) -> Bool {
+        eligible && paymentMode == .freeTrial
+    }
     var monthlyProduct: Product? { products.first { $0.id == ProductID.monthly } }
     var annualProduct: Product? { products.first { $0.id == ProductID.annual } }
 

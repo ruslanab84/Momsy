@@ -1,4 +1,5 @@
 import Foundation
+import StoreKit
 
 struct L10n {
     private let lang: Language
@@ -760,16 +761,6 @@ struct L10n {
     var leapFeedingInsight: String {
         s("Feeding rhythm shifted during the leap. Offer calmly and follow cues instead of pushing a fixed amount.", "Ритм кормлений изменился во время скачка. Предлагайте спокойно и идите по сигналам, не по фиксированному объёму.", "Der Fütterrhythmus hat sich im Schub verändert. Biete ruhig an und folge den Signalen statt festen Mengen.", "El ritmo de tomas cambió durante el salto. Ofrece con calma y sigue sus señales.", "Le rythme des tétées a changé pendant le bond. Proposez calmement et suivez les signaux.", "O ritmo das mamadas mudou durante o salto. Ofereça com calma e siga os sinais.", "飞跃期喂养节奏有变化。安静提供，跟随信号，不强求固定量。")
     }
-    var leapNormalDoctorTitle: String {
-        s("When to contact a doctor", "Когда обратиться к врачу", "Wann zum Arzt", "Cuándo consultar al médico", "Quand consulter un médecin", "Quando contactar o médico", "何时联系医生")
-    }
-    var leapNormalText: String {
-        s("Fussiness, clinginess and short naps are common in the first months and have many causes.", "Капризы, желание быть на руках и короткие сны часто встречаются в первые месяцы и имеют много причин.", "Quengeln, Anhänglichkeit und kurze Nickerchen sind in den ersten Monaten häufig und haben viele Ursachen.", "La irritabilidad, querer brazos y las siestas cortas son frecuentes en los primeros meses y tienen muchas causas.", "L’agitation, le besoin des bras et les siestes courtes sont fréquents les premiers mois et ont de nombreuses causes.", "Irritação, vontade de colo e sestas curtas são comuns nos primeiros meses e têm muitas causas.", "烦躁、黏人和小睡短在最初几个月很常见，原因有很多。")
-    }
-    /// Signs are the WHO Pocket Book (2013) general danger signs plus difficult breathing.
-    var leapDoctorText: String {
-        s("Seek care now if your baby cannot drink or breastfeed, vomits everything, has convulsions, is unusually sleepy or hard to wake, or has difficulty breathing.", "Срочно обратитесь за помощью, если малыш не может пить или сосать грудь, у него рвота после всего, судороги, он необычно вялый или его трудно разбудить, либо ему трудно дышать.", "Suche sofort Hilfe, wenn dein Baby nicht trinken oder stillen kann, alles erbricht, Krampfanfälle hat, ungewöhnlich schläfrig oder schwer weckbar ist oder schwer atmet.", "Busca atención ya si tu bebé no puede beber ni mamar, vomita todo, tiene convulsiones, está inusualmente adormilado o cuesta despertarlo, o respira con dificultad.", "Consultez immédiatement si votre bébé ne peut pas boire ni téter, vomit tout, a des convulsions, est anormalement somnolent ou difficile à réveiller, ou a du mal à respirer.", "Procure ajuda já se o bebé não consegue beber nem mamar, vomita tudo, tem convulsões, está invulgarmente sonolento ou difícil de acordar, ou tem dificuldade em respirar.", "如果宝宝无法喝水或吃奶、吃什么吐什么、抽搐、异常嗜睡或难以叫醒，或呼吸困难，请立即就医。")
-    }
     var leapsAboutTitle: String {
         s("About leaps", "О скачках", "Über Entwicklungsschübe", "Sobre los saltos", "À propos des bonds", "Sobre os saltos", "关于飞跃期")
     }
@@ -795,9 +786,6 @@ struct L10n {
     var addMeasurement: String  { s("Add measurement", "Добавить измерение", "Messung hinzufügen", "Añadir medida", "Ajouter une mesure", "Adicionar medição", "添加测量") }
     var logTemp: String         { s("Log temperature", "Записать температуру", "Temperatur erfassen", "Registrar temperatura", "Enregistrer la température", "Registar temperatura", "记录体温") }
     var percentile: String      { s("Percentile",    "Перцентиль",    "Perzentile",    "Percentil", "Percentile", "Percentil", "百分位") }
-    var normal: String          { s("Normal",        "Норма",         "Normal",        "Normal", "Normal", "Normal", "正常") }
-    var elevated: String        { s("Elevated",      "Повышена",      "Erhöht",        "Elevada", "Élevée", "Elevada", "偏高") }
-    var high: String            { s("High",          "Высокая",       "Hoch",          "Alta",   "Forte", "Alta", "高") }
     var health: String          { s("Health",        "Здоровье",      "Gesundheit",    "Salud",  "Santé", "Saúde", "健康") }
     var heightAndWeight: String { s("Height & Weight","Рост и вес",   "Größe & Gewicht", "Altura y peso", "Taille et poids", "Altura e peso", "身高与体重") }
     var whoRange: String        { s("0–24 mo · WHO", "0–24 мес · ВОЗ","0–24 Mon. · WHO", "0–24 meses · OMS", "0–24 mois · OMS", "0–24 meses · OMS", "0–24 月 · WHO") }
@@ -880,11 +868,6 @@ struct L10n {
     var weightLb: String        { s("Weight, lb",    "Вес, фунты",    "Gewicht, lb",   "Peso, lb", "Poids, lb", "Peso, lb", "体重，磅") }
     var heightIn: String        { s("Height, in",    "Рост, дюймы",   "Größe, in",     "Altura, in", "Taille, po", "Altura, pol", "身高，英寸") }
     var headCircIn: String      { s("Head circ., in","Окруж. головы, дюймы","Kopfumfang, in", "Perím. cefálico, in", "Périm. crânien, po", "Perím. cefálico, pol", "头围，英寸") }
-    var normalRange: String      { s("normal",        "в норме",        "normal",       "normal", "normal", "normal", "正常") }
-    var subfebr: String         { s("subfebr.",      "субфебр.",       "subfebr.",     "subfebril", "fébricule", "subfebril", "低热") }
-    var subfebrLabel: String    { s("Subfebr.",      "Субфебрильная", "Subfebril",     "Subfebril", "Fébricule", "Subfebril", "低热") }
-    var highTemp: String        { s("High 🌡",       "Высокая 🌡",    "Hoch 🌡",       "Alta 🌡", "Forte 🌡", "Alta 🌡", "高 🌡") }
-    var normalOk: String        { s("Normal ✓",      "Норма ✓",       "Normal ✓",      "Normal ✓", "Normal ✓", "Normal ✓", "正常 ✓") }
     var addWeightHeight: String { s("+ Weight / Height", "+ Вес / рост", "+ Gewicht / Größe", "+ Peso / altura", "+ Poids / taille", "+ Peso / altura", "+ 体重 / 身高") }
     var addTemperature: String  { s("+ Temperature", "+ Температура", "+ Temperatur",  "+ Temperatura", "+ Température", "+ Temperatura", "+ 体温") }
     var measurements: String    { s("Measurements",  "Замеры",        "Messungen",     "Medidas", "Mesures", "Medições", "测量") }
@@ -897,12 +880,8 @@ struct L10n {
     var tempPlaceholder: String { s("e.g. 37.2",     "напр. 37.2",    "z.B. 37.2",     "p. ej. 37.2", "p. ex. 37.2", "ex.: 37,2", "例如 37.2") }
     var noteSectionLabel: String { s("Note",         "Заметка",       "Notiz",         "Nota", "Note", "Nota", "备注") }
     var optionalNote: String    { s("Optional note…","Необязательная заметка…", "Optionale Notiz…", "Nota opcional…", "Note facultative…", "Nota opcional…", "可选备注…") }
-    var temperatureCelsius: String { s("Temperature, °C", "Температура, °C", "Temperatur, °C", "Temperatura, °C", "Température, °C", "Temperatura, °C", "体温，°C") }
     var recentReadings: String  { s("recent readings", "последние замеры", "letzte Messungen", "últimas medidas", "dernières mesures", "últimas medições", "近期读数") }
     var noTemperatureData: String { s("No temperature data", "Нет данных о температуре", "Keine Temperaturdaten", "Sin datos de temperatura", "Aucune donnée de température", "Sem dados de temperatura", "暂无体温数据") }
-    var tempNormalRange: String { s("normal < 37.5°", "норма < 37.5°", "normal < 37.5°", "normal < 37.5°", "normal < 37,5°", "normal < 37,5°", "正常 < 37.5°") }
-    var tempSubfebrRange: String { s("subfebr. 37.5–38.4°", "субфебр. 37.5–38.4°", "subfebril. 37.5–38.4°", "subfebril 37.5–38.4°", "fébricule 37,5–38,4°", "subfebril 37,5–38,4°", "低热 37.5–38.4°") }
-    var tempHighRange: String   { s("high ≥ 38.5°", "высокая ≥ 38.5°", "hoch ≥ 38.5°", "alta ≥ 38.5°", "forte ≥ 38,5°", "alta ≥ 38,5°", "高 ≥ 38.5°") }
 
     // MARK: — Sounds / Lullaby
     var sounds: String          { s("Sounds",        "Звуки",         "Klänge",        "Sonidos", "Sons", "Sons", "声音") }
@@ -1019,8 +998,9 @@ struct L10n {
     var reportStatDiapersLabel: String { s("Diapers",      "Подгузники",              "Windeln",      "Pañales", "Couches", "Fraldas", "尿布") }
     var reportNotTracked: String       { s("not tracked",  "не отслеживается",         "nicht verfolgt", "no registrado", "non suivi", "não registado", "未记录") }
     var reportStatTempLabel: String    { s("Temperature",  "Температура",             "Temperatur",   "Temperatura", "Température", "Temperatura", "体温") }
-    func reportTempPeakSub(n: Int) -> String { s("peak · \(n)×", "пик · \(n)×",      "Peak · \(n)×",  "pico · \(n)×", "pic · \(n)×", "pico · \(n)×", "峰值 · \(n)次") }
-    var reportTempNormal: String       { s("normal",       "норма",                   "normal",       "normal", "normal", "normal", "正常") }
+    func reportTempReadings(n: Int) -> String {
+        s("Readings: \(n)", "Замеров: \(n)", "Messungen: \(n)", "Mediciones: \(n)", "Mesures : \(n)", "Medições: \(n)", "测量次数：\(n)")
+    }
     var reportStatWeightLabel: String  { s("Weight & Height", "Вес и рост",           "Gewicht & Größe", "Peso y altura", "Poids et taille", "Peso e altura", "体重与身高") }
     var reportSparkWeightLabel: String { s("Weight, kg",      "Вес, кг",              "Gewicht, kg",  "Peso, kg", "Poids, kg", "Peso, kg", "体重，kg") }
     func reportSparkWeightDynamicLabel(unit: String) -> String { s("Weight, \(unit)", "Вес, \(unit)", "Gewicht, \(unit)", "Peso, \(unit)", "Poids, \(unit)", "Peso, \(unit)", "体重，\(unit)") }
@@ -1638,20 +1618,24 @@ struct L10n {
                                  "S’abonner",
                                  "Subscrever",
                                  "订阅") }
-    var trialBadge: String         { s("7 days free",
-                                       "7 дней бесплатно",
-                                       "7 Tage gratis",
-                                       "7 días gratis",
-                                       "7 jours gratuits",
-                                       "7 dias grátis",
-                                       "7 天免费") }
-    var startTrial: String         { s("Start Free Trial",
-                                       "Начать бесплатно на 7 дней",
-                                       "7 Tage gratis starten",
-                                       "Empezar prueba gratis",
-                                       "Commencer l’essai gratuit",
-                                       "Iniciar avaliação gratuita",
-                                       "开始免费试用") }
+    func trialBadge(trial: String) -> String {
+        s("\(trial) free", "\(trial) бесплатно", "\(trial) gratis", "\(trial) gratis", "Essai gratuit de \(trial)", "\(trial) grátis", "\(trial)免费")
+    }
+    /// Free-trial length from the StoreKit offer period, e.g. "1 week", "7 дн.".
+    func trialLength(_ period: Product.SubscriptionPeriod) -> String {
+        let n = period.value
+        let one = n == 1
+        switch period.unit {
+        case .day:
+            return s("\(n) \(one ? "day" : "days")", "\(n) дн.", "\(n) \(one ? "Tag" : "Tage")", "\(n) \(one ? "día" : "días")", "\(n) \(one ? "jour" : "jours")", "\(n) \(one ? "dia" : "dias")", "\(n) 天")
+        case .week:
+            return s("\(n) \(one ? "week" : "weeks")", "\(n) нед.", "\(n) \(one ? "Woche" : "Wochen")", "\(n) \(one ? "semana" : "semanas")", "\(n) \(one ? "semaine" : "semaines")", "\(n) \(one ? "semana" : "semanas")", "\(n) 周")
+        case .month:
+            return s("\(n) \(one ? "month" : "months")", "\(n) мес.", "\(n) \(one ? "Monat" : "Monate")", "\(n) \(one ? "mes" : "meses")", "\(n) mois", "\(n) \(one ? "mês" : "meses")", "\(n) 个月")
+        default:
+            return s("\(n) \(one ? "year" : "years")", "\(n) г.", "\(n) \(one ? "Jahr" : "Jahre")", "\(n) \(one ? "año" : "años")", "\(n) \(one ? "an" : "ans")", "\(n) \(one ? "ano" : "anos")", "\(n) 年")
+        }
+    }
     func paywallBilledPrice(price: String, isAnnual: Bool) -> String {
         let period = isAnnual ? "year" : "month"
         let russianPeriod = isAnnual ? "год" : "мес."
@@ -1702,23 +1686,23 @@ struct L10n {
           "As condições de renovação aparecerão assim que os preços forem carregados.",
           "价格加载完成后将显示续订条款。")
     }
-    func paywallRenewalDisclosure(price: String) -> String {
-        s("7 days free, then \(price)/month. Subscription renews automatically every month unless canceled at least 24 hours before the period ends.",
-          "7 дней бесплатно, затем \(price)/мес. Подписка автоматически продлевается каждый месяц, если не отменить её минимум за 24 часа до конца периода.",
-          "7 Tage gratis, danach \(price)/Monat. Das Abo verlängert sich jeden Monat automatisch, sofern es nicht mindestens 24 Stunden vor Periodenende gekündigt wird.",
-          "7 días gratis, luego \(price)/mes. La suscripción se renueva automáticamente cada mes salvo que se cancele al menos 24 horas antes de que termine el periodo.",
-          "7 jours gratuits, puis \(price)/mois. L'abonnement se renouvelle automatiquement chaque mois sauf annulation au moins 24 heures avant la fin de la période.",
-          "7 dias grátis, depois \(price)/mês. A subscrição renova automaticamente todos os meses, salvo cancelamento pelo menos 24 horas antes do fim do período.",
-          "7 天免费，之后 \(price)/月。订阅每月自动续订，除非在当前周期结束前至少 24 小时取消。")
+    func paywallRenewalDisclosure(price: String, trial: String) -> String {
+        s("\(trial) free, then \(price)/month. Subscription renews automatically every month unless canceled at least 24 hours before the period ends.",
+          "\(trial) бесплатно, затем \(price)/мес. Подписка автоматически продлевается каждый месяц, если не отменить её минимум за 24 часа до конца периода.",
+          "\(trial) gratis, danach \(price)/Monat. Das Abo verlängert sich jeden Monat automatisch, sofern es nicht mindestens 24 Stunden vor Periodenende gekündigt wird.",
+          "\(trial) gratis, luego \(price)/mes. La suscripción se renueva automáticamente cada mes salvo que se cancele al menos 24 horas antes de que termine el periodo.",
+          "Essai gratuit de \(trial), puis \(price)/mois. L'abonnement se renouvelle automatiquement chaque mois sauf annulation au moins 24 heures avant la fin de la période.",
+          "\(trial) grátis, depois \(price)/mês. A subscrição renova automaticamente todos os meses, salvo cancelamento pelo menos 24 horas antes do fim do período.",
+          "\(trial)免费，之后 \(price)/月。订阅每月自动续订，除非在当前周期结束前至少 24 小时取消。")
     }
-    func paywallRenewalDisclosureAnnual(price: String) -> String {
-        s("7 days free, then \(price)/year. Subscription renews automatically every year unless canceled at least 24 hours before the period ends.",
-          "7 дней бесплатно, затем \(price)/год. Подписка автоматически продлевается каждый год, если не отменить её минимум за 24 часа до конца периода.",
-          "7 Tage gratis, danach \(price)/Jahr. Das Abo verlängert sich jedes Jahr automatisch, sofern es nicht mindestens 24 Stunden vor Periodenende gekündigt wird.",
-          "7 días gratis, luego \(price)/año. La suscripción se renueva automáticamente cada año salvo que se cancele al menos 24 horas antes de que termine el periodo.",
-          "7 jours gratuits, puis \(price)/an. L'abonnement se renouvelle automatiquement chaque année sauf annulation au moins 24 heures avant la fin de la période.",
-          "7 dias grátis, depois \(price)/ano. A subscrição renova automaticamente todos os anos, salvo cancelamento pelo menos 24 horas antes do fim do período.",
-          "7 天免费，之后 \(price)/年。订阅每年自动续订，除非在当前周期结束前至少 24 小时取消。")
+    func paywallRenewalDisclosureAnnual(price: String, trial: String) -> String {
+        s("\(trial) free, then \(price)/year. Subscription renews automatically every year unless canceled at least 24 hours before the period ends.",
+          "\(trial) бесплатно, затем \(price)/год. Подписка автоматически продлевается каждый год, если не отменить её минимум за 24 часа до конца периода.",
+          "\(trial) gratis, danach \(price)/Jahr. Das Abo verlängert sich jedes Jahr automatisch, sofern es nicht mindestens 24 Stunden vor Periodenende gekündigt wird.",
+          "\(trial) gratis, luego \(price)/año. La suscripción se renueva automáticamente cada año salvo que se cancele al menos 24 horas antes de que termine el periodo.",
+          "Essai gratuit de \(trial), puis \(price)/an. L'abonnement se renouvelle automatiquement chaque année sauf annulation au moins 24 heures avant la fin de la période.",
+          "\(trial) grátis, depois \(price)/ano. A subscrição renova automaticamente todos os anos, salvo cancelamento pelo menos 24 horas antes do fim do período.",
+          "\(trial)免费，之后 \(price)/年。订阅每年自动续订，除非在当前周期结束前至少 24 小时取消。")
     }
     func paywallRenewalDisclosureMonthlyNoTrial(price: String) -> String {
         s("\(price)/month. Subscription renews automatically every month unless canceled at least 24 hours before the period ends.",

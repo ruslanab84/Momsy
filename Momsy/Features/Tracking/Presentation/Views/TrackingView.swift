@@ -80,8 +80,6 @@ struct TrackingView: View {
                     .animation(.easeInOut(duration: 0.2), value: vm.selectedTab)
             }
             Spacer()
-            BBPill(text: vm.pillText, color: vm.pillColor, fg: vm.pillFg)
-                .animation(.easeInOut(duration: 0.2), value: vm.selectedTab)
         }
     }
 
@@ -90,8 +88,9 @@ struct TrackingView: View {
             return vm.headerSummary
         }
         return String(
-            format: "%.1f°C · %@ %@",
-            entry.value,
+            format: "%.1f%@ · %@ %@",
+            units.displayTemp(fromCelsius: entry.value),
+            units.tempUnit,
             entry.dateLabel,
             entry.date.formatted(units.current.timeFormatStyle())
         )
@@ -377,7 +376,7 @@ struct TrackingView: View {
                     .frame(width: units.isImperial ? 68 : 50, alignment: .leading)
                     Text(String(format: "%.1f%@", units.displayTemp(fromCelsius: entry.value), units.tempUnit))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        .foregroundColor(tempValueColor(entry.value))
+                        .foregroundColor(.bbInk)
                     if !entry.note.isEmpty {
                         Text(entry.note)
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
@@ -385,12 +384,6 @@ struct TrackingView: View {
                             .lineLimit(1)
                     }
                     Spacer()
-                    BBPill(
-                        text: tempLabel(entry.value),
-                        color: tempBgColor(entry.value),
-                        fg: tempValueColor(entry.value),
-                        size: 10
-                    )
                 }
                 .padding(.vertical, 12)
                 .padding(.horizontal, 14)
@@ -428,17 +421,5 @@ struct TrackingView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
         }
-    }
-
-    // MARK: - Helpers
-
-    private func tempValueColor(_ v: Double) -> Color {
-        v >= 38.5 ? .bbCoralDeep : v >= 37.5 ? .bbButterDeep : .bbMintDeep
-    }
-    private func tempBgColor(_ v: Double) -> Color {
-        v >= 38.5 ? .bbRose : v >= 37.5 ? .bbButter : .bbMint
-    }
-    private func tempLabel(_ v: Double) -> String {
-        v >= 38.5 ? loc.strings.high : v >= 37.5 ? loc.strings.subfebr : loc.strings.normal
     }
 }

@@ -128,27 +128,6 @@ final class TrackingViewModel: ObservableObject {
         return fmt.string(from: date)
     }
 
-    var pillText: String {
-        if selectedTab == 3, let v = tempLog.first?.value {
-            return v >= 38.5 ? lm.strings.high.lowercased() : v >= 37.5 ? lm.strings.subfebrLabel.lowercased() : lm.strings.normal.lowercased()
-        }
-        return lm.strings.normalRange
-    }
-
-    var pillColor: Color {
-        if selectedTab == 3, let v = tempLog.first?.value {
-            return v >= 38.5 ? .bbRose : v >= 37.5 ? .bbButter : .bbMint
-        }
-        return .bbMint
-    }
-
-    var pillFg: Color {
-        if selectedTab == 3, let v = tempLog.first?.value {
-            return v >= 38.5 ? .bbCoralDeep : v >= 37.5 ? .bbButterDeep : .bbMintDeep
-        }
-        return .bbMintDeep
-    }
-
     func addMeasurement(_ entry: MeasurementEntry) {
         measurements.insert(entry, at: 0)
         Task {

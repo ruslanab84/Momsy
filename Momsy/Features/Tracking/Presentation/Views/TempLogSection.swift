@@ -8,14 +8,12 @@ struct TempBarChart: View {
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var units: UnitSystemManager
 
-    private func barColor(_ celsius: Double) -> Color {
-        celsius >= 38.5 ? .bbCoralDeep : celsius >= 37.5 ? .bbButterDeep : .bbMintDeep
-    }
+    private func barColor(_ celsius: Double) -> Color { .bbSky }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Temperature, \(units.tempUnit)")
+                Text("\(loc.strings.temperature), \(units.tempUnit)")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
@@ -41,7 +39,7 @@ struct TempBarChart: View {
                             VStack(spacing: 3) {
                                 Text(String(format: "%.1f°", units.displayTemp(fromCelsius: entry.value)))
                                     .font(.system(size: 9, weight: .heavy, design: .monospaced))
-                                    .foregroundColor(barColor(entry.value))
+                                    .foregroundColor(.bbInk)
                                     .minimumScaleFactor(0.7)
                                 Spacer(minLength: 0)
                                 RoundedRectangle(cornerRadius: 5, style: .continuous)
@@ -59,23 +57,8 @@ struct TempBarChart: View {
                 }
                 .frame(height: 130)
             }
-
-            HStack(spacing: 12) {
-                legendDot(color: .bbMintDeep,   label: units.tempNormalLabel)
-                legendDot(color: .bbButterDeep, label: units.tempSubfebrLabel)
-                legendDot(color: .bbCoralDeep,  label: units.tempHighLabel)
-            }
         }
         .bbCard(pad: 14)
-    }
-
-    private func legendDot(color: Color, label: String) -> some View {
-        HStack(spacing: 4) {
-            Circle().fill(color).frame(width: 6, height: 6)
-            Text(label)
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .foregroundColor(.bbInkSoft)
-        }
     }
 }
 
@@ -93,13 +76,7 @@ struct AddTempSheet: View {
     private var parsedInput: Double? {
         Double(tempStr.replacingOccurrences(of: ",", with: "."))
     }
-    private var parsedCelsius: Double? {
-        parsedInput.map { units.toCelsius($0) }
-    }
     private var isValid: Bool { parsedInput != nil }
-
-    private func valueColor(_ celsius: Double) -> Color { units.tempCategory(celsius).color }
-    private func valueLabel(_ celsius: Double) -> String { units.tempCategory(celsius).label(loc: loc.strings) }
 
     var body: some View {
         NavigationStack {
@@ -110,14 +87,6 @@ struct AddTempSheet: View {
                         TextField(units.tempPlaceholder, text: $tempStr)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
-                    }
-                    if let celsius = parsedCelsius {
-                        HStack {
-                            Text(valueLabel(celsius))
-                                .font(.system(size: 13, weight: .bold, design: .rounded))
-                                .foregroundColor(valueColor(celsius))
-                            Spacer()
-                        }
                     }
                 }
                 Section(loc.strings.noteSectionLabel) {

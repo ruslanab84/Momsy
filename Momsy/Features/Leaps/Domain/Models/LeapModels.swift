@@ -88,13 +88,13 @@ extension DevelopmentLeap {
             ["reconhece a voz da mãe", "reage à luz", "acalma-se ao colo"],
             ["能认出妈妈的声音", "对光有反应", "抱着就能安静下来"]),
         tips: loc(
-            "Speak in a calm voice and avoid sudden sounds — the auditory system is still calibrating.",
-            "Разговаривайте спокойным голосом и избегайте резких звуков — слуховая система ещё настраивается.",
-            "Sprich mit ruhiger Stimme und vermeide plötzliche Geräusche — das Gehör stellt sich noch ein.",
-            "Habla con voz tranquila y evita los sonidos bruscos: el sistema auditivo todavía se está calibrando.",
-            "Parlez d’une voix calme et évitez les bruits soudains — le système auditif se règle encore.",
-            "Fale com voz calma e evite sons bruscos — o sistema auditivo ainda se está a calibrar.",
-            "用平静的声音说话，避免突然的响声——听觉系统还在校准中。")
+            "Talk and sing to your baby in a calm, gentle voice. Quiet, close moments together are a good fit for these weeks.",
+            "Разговаривайте и пойте малышу спокойным, мягким голосом. Тихие моменты рядом друг с другом — то, что нужно в эти недели.",
+            "Sprich und sing mit deinem Baby mit ruhiger, sanfter Stimme. Ruhige, nahe Momente zu zweit passen gut in diese Wochen.",
+            "Háblale y cántale a tu bebé con voz tranquila y suave. Los momentos tranquilos y cercanos encajan muy bien en estas semanas.",
+            "Parlez et chantez à votre bébé d’une voix calme et douce. Les moments calmes et proches conviennent bien à ces semaines.",
+            "Fale e cante para o seu bebé com voz calma e suave. Momentos tranquilos e próximos encaixam bem nestas semanas.",
+            "用平静、温柔的声音和宝宝说话、唱歌。这几周很适合安静、亲密的相处时光。")
     ),
     DevelopmentLeap(
         scheduleID: 2,
@@ -125,13 +125,13 @@ extension DevelopmentLeap {
             ["retribui o sorriso", "segue com os olhos", "produz sons vocálicos"],
             ["会回以微笑", "用眼睛追视", "发出元音"]),
         tips: loc(
-            "Show black-and-white pictures — contrast stimulates the visual cortex.",
-            "Показывайте чёрно-белые картинки — контраст стимулирует зрительную кору.",
-            "Zeige Schwarz-Weiß-Bilder — Kontraste regen den visuellen Kortex an.",
-            "Muéstrale imágenes en blanco y negro: el contraste estimula la corteza visual.",
-            "Montrez des images en noir et blanc — le contraste stimule le cortex visuel.",
-            "Mostre imagens a preto e branco — o contraste estimula o córtex visual.",
-            "给宝宝看黑白图片——对比能刺激视觉皮层。")
+            "Many babies like looking at faces and high-contrast pictures — try a black-and-white book during awake time.",
+            "Многим малышам нравится разглядывать лица и контрастные картинки — попробуйте чёрно-белую книжку, пока малыш бодрствует.",
+            "Viele Babys schauen gern Gesichter und kontrastreiche Bilder an — probier in der Wachzeit ein Schwarz-Weiß-Buch aus.",
+            "A muchos bebés les gusta mirar caras e imágenes de alto contraste: prueba un libro en blanco y negro mientras está despierto.",
+            "Beaucoup de bébés aiment regarder des visages et des images contrastées — essayez un livre en noir et blanc pendant les moments d’éveil.",
+            "Muitos bebés gostam de olhar para caras e imagens de alto contraste — experimente um livro a preto e branco quando o bebé estiver acordado.",
+            "很多宝宝喜欢看人脸和高对比度的图片——宝宝醒着的时候，可以试试黑白绘本。")
     ),
     DevelopmentLeap(
         scheduleID: 3,
@@ -162,34 +162,34 @@ extension DevelopmentLeap {
             ["agarra uma roca", "sustém a cabeça", "vira-se de lado"],
             ["能抓住摇铃", "能抬头", "会侧身翻"]),
         tips: loc(
-            "Daily tummy time strengthens the neck and back — the foundation for rolling over.",
-            "Время на животике каждый день укрепляет шею и спину — это фундамент для переворотов.",
-            "Tägliche Bauchlage stärkt Nacken und Rücken — die Grundlage fürs Drehen.",
-            "El tiempo boca abajo a diario fortalece el cuello y la espalda: la base para darse la vuelta.",
-            "Le temps quotidien sur le ventre renforce le cou et le dos — la base pour se retourner.",
-            "O tempo de barriga para baixo diário fortalece o pescoço e as costas — a base para rolar.",
-            "每天的趴卧能锻炼颈部和背部——这是翻身的基础。")
+            "Give your baby some tummy time every day, always while awake and with you watching. Short, frequent sessions are fine.",
+            "Выкладывайте малыша на животик каждый день — только когда он бодрствует и вы рядом. Можно часто и понемногу.",
+            "Leg dein Baby jeden Tag etwas auf den Bauch — nur im Wachzustand und unter deiner Aufsicht. Kurze, häufige Einheiten reichen.",
+            "Pon a tu bebé boca abajo un rato cada día, siempre despierto y bajo tu mirada. Bastan ratos cortos y frecuentes.",
+            "Mettez votre bébé sur le ventre un peu chaque jour, toujours éveillé et sous votre surveillance. De courtes séances fréquentes suffisent.",
+            "Coloque o bebé de barriga para baixo um pouco todos os dias, sempre acordado e sob a sua vigilância. Sessões curtas e frequentes chegam.",
+            "每天让宝宝趴一会儿，但一定要在宝宝醒着且有你看护时进行。时间短、次数多就可以。")
     ),
     DevelopmentLeap(
         scheduleID: 4,
         names: loc("Little Experiments", "Маленькие эксперименты", "Kleine Experimente", "Pequeños experimentos", "Petites expériences", "Pequenas experiências", "小小实验"),
         semanticColor: .coral, isDone: false, isCurrent: true,
         descriptions: loc(
-            "begins to understand that one action leads to another. This is enormous brain work — hence the crying and poor sleep.",
-            "начинает понимать, что одно действие приводит к другому. Это огромная работа для мозга — отсюда плач и плохой сон.",
-            "beginnt zu verstehen, dass eine Handlung zur nächsten führt. Das ist enorme Gehirnarbeit — daher das Weinen und der schlechte Schlaf.",
-            "empieza a entender que una acción lleva a otra. Es un trabajo cerebral enorme: de ahí el llanto y el mal sueño.",
-            "commence à comprendre qu’une action en entraîne une autre. C’est un travail cérébral énorme — d’où les pleurs et le sommeil agité.",
-            "começa a perceber que uma ação leva a outra. É um trabalho cerebral enorme — daí o choro e o sono agitado.",
-            "开始明白一个动作会引发另一个动作。这是大脑的巨大工作——所以才会哭闹和睡不好。"),
+            "begins to notice that one action can lead to another — pressing, dropping and pulling become interesting.",
+            "начинает замечать, что одно действие может вести к другому, — нажимать, ронять и тянуть становится интересно.",
+            "beginnt zu bemerken, dass eine Handlung zu einer anderen führen kann — Drücken, Fallenlassen und Ziehen werden spannend.",
+            "empieza a notar que una acción puede llevar a otra: apretar, dejar caer y tirar se vuelven interesantes.",
+            "commence à remarquer qu’une action peut en entraîner une autre — appuyer, lâcher, tirer devient intéressant.",
+            "começa a reparar que uma ação pode levar a outra — carregar, deixar cair e puxar tornam-se interessantes.",
+            "开始注意到一个动作可能引出另一个结果——按一按、扔一扔、拉一拉都变得有趣起来。"),
         signsByLang: loc(
-            ["poor sleep", "wants to be held", "fussy", "refuses food"],
-            ["хуже спит", "требует рук", "капризничает", "отказ от еды"],
-            ["schlechter Schlaf", "will getragen werden", "quengelig", "verweigert Essen"],
-            ["duerme mal", "quiere brazos", "irritable", "rechaza la comida"],
-            ["sommeil agité", "réclame les bras", "grognon", "refuse de manger"],
-            ["sono agitado", "quer colo", "irritado", "recusa comida"],
-            ["睡得不好", "想被抱着", "爱闹脾气", "拒绝吃东西"]),
+            ["poor sleep", "wants to be held", "fussy"],
+            ["хуже спит", "требует рук", "капризничает"],
+            ["schlechter Schlaf", "will getragen werden", "quengelig"],
+            ["duerme mal", "quiere brazos", "irritable"],
+            ["sommeil agité", "réclame les bras", "grognon"],
+            ["sono agitado", "quer colo", "irritado"],
+            ["睡得不好", "想被抱着", "爱闹脾气"]),
         skillsByLang: loc(
             ["tracks with eyes", "grabs objects", "recognises toys", "coos at laughter"],
             ["следит глазами", "хватает предметы", "узнаёт игрушку", "гулит на смех"],
@@ -212,13 +212,13 @@ extension DevelopmentLeap {
         names: loc("Near and Far", "Близко и далеко", "Nah und fern", "Cerca y lejos", "Près et loin", "Perto e longe", "近与远"),
         semanticColor: .lilac, isDone: false, isCurrent: false,
         descriptions: loc(
-            "discovers the world of connections between people and objects. Separation anxiety is a normal and important part of this stage.",
-            "открывает мир связей между людьми и предметами. Тревога разлуки — нормальное и важное явление этого этапа.",
-            "entdeckt die Welt der Verbindungen zwischen Menschen und Dingen. Trennungsangst ist ein normaler und wichtiger Teil dieser Phase.",
-            "descubre el mundo de las conexiones entre las personas y los objetos. La ansiedad por separación es una parte normal e importante de esta etapa.",
-            "découvre le monde des liens entre les personnes et les objets. L’angoisse de la séparation est une étape normale et importante.",
-            "descobre o mundo das ligações entre as pessoas e os objetos. A ansiedade de separação é uma parte normal e importante desta fase.",
-            "开始发现人与物之间联系的世界。分离焦虑是这个阶段正常而重要的一部分。"),
+            "discovers connections between people and objects. Many babies get more upset when a familiar person leaves the room at this age.",
+            "открывает связи между людьми и предметами. В этом возрасте многие малыши сильнее расстраиваются, когда близкий человек выходит из комнаты.",
+            "entdeckt Verbindungen zwischen Menschen und Dingen. In diesem Alter sind viele Babys trauriger, wenn eine vertraute Person den Raum verlässt.",
+            "descubre las conexiones entre personas y objetos. A esta edad, muchos bebés se disgustan más cuando una persona conocida sale de la habitación.",
+            "découvre les liens entre les personnes et les objets. À cet âge, beaucoup de bébés sont plus contrariés quand une personne familière quitte la pièce.",
+            "descobre as ligações entre pessoas e objetos. Nesta idade, muitos bebés ficam mais aborrecidos quando uma pessoa familiar sai da divisão.",
+            "发现人与物之间的联系。这个阶段，很多宝宝在熟悉的人离开房间时会更加不安。"),
         signsByLang: loc(
             ["separation anxiety", "prefers mum", "tests your reaction"],
             ["тревога при расставании", "предпочитает маму", "проверяет вашу реакцию"],
@@ -236,13 +236,13 @@ extension DevelopmentLeap {
             ["brinca às escondidas", "acena adeus", "imita sons e gestos"],
             ["玩躲猫猫", "挥手再见", "模仿声音和动作"]),
         tips: loc(
-            "Peek-a-boo helps master object permanence — the key skill of this leap.",
-            "Игра «ку-ку» помогает освоить концепцию постоянства объектов — главный навык этого скачка.",
-            "Kuckuck hilft, die Objektpermanenz zu meistern — die Schlüsselfähigkeit dieses Schubs.",
-            "El cucú-tras ayuda a dominar la permanencia del objeto: la habilidad clave de este salto.",
-            "Le jeu de coucou aide à maîtriser la permanence de l’objet — la compétence clé de ce bond.",
-            "O jogo das escondidas ajuda a dominar a permanência do objeto — a competência-chave deste salto.",
-            "躲猫猫有助于掌握客体永存——这是这个猛长期的关键能力。")
+            "Play peek-a-boo: hide your face or a toy and let it reappear. Many babies love this game now.",
+            "Играйте в «ку-ку»: прячьте лицо или игрушку и показывайте снова. Многие малыши сейчас обожают эту игру.",
+            "Spielt Kuckuck: Versteck dein Gesicht oder ein Spielzeug und lass es wieder auftauchen. Viele Babys lieben dieses Spiel jetzt.",
+            "Juega al cucú: esconde tu cara o un juguete y haz que vuelva a aparecer. A muchos bebés les encanta este juego ahora.",
+            "Jouez à coucou-caché : cachez votre visage ou un jouet puis faites-le réapparaître. Beaucoup de bébés adorent ce jeu en ce moment.",
+            "Brinque ao cucu: esconda a cara ou um brinquedo e faça-o reaparecer. Muitos bebés adoram esta brincadeira agora.",
+            "玩躲猫猫：把脸或玩具藏起来，再让它出现。这个阶段很多宝宝都很喜欢这个游戏。")
     ),
     DevelopmentLeap(
         scheduleID: 6,
@@ -310,13 +310,13 @@ extension DevelopmentLeap {
             ["segue brincadeiras de dois passos", "ajuda a vestir", "antecipa a rotina de sono"],
             ["能跟随两步游戏", "会帮忙穿衣", "预期睡前流程"]),
         tips: loc(
-            "Keep tiny routines predictable: bath, pajamas, book, sleep. Sequences lower anxiety.",
-            "Держите маленькие ритуалы предсказуемыми: купание, пижама, книжка, сон. Последовательность снижает тревогу.",
-            "Halte kleine Routinen vorhersehbar: Bad, Schlafanzug, Buch, Schlaf. Sequenzen senken Anspannung.",
-            "Mantén rutinas pequeñas y predecibles: baño, pijama, cuento, sueño. Las secuencias reducen la ansiedad.",
-            "Gardez de petites routines prévisibles : bain, pyjama, livre, sommeil. Les séquences apaisent.",
-            "Mantenha pequenas rotinas previsíveis: banho, pijama, livro, sono. As sequências reduzem a ansiedade.",
-            "保持小流程可预期：洗澡、睡衣、读书、睡觉。固定顺序能减少焦虑。")
+            "Keep small routines in the same order: bath, pajamas, book, sleep. A familiar order helps many toddlers know what comes next.",
+            "Держите маленькие ритуалы в одном порядке: купание, пижама, книжка, сон. Привычный порядок помогает многим малышам понимать, что будет дальше.",
+            "Halte kleine Rituale in derselben Reihenfolge: Baden, Schlafanzug, Buch, Schlafen. Eine vertraute Reihenfolge hilft vielen Kleinkindern zu wissen, was als Nächstes kommt.",
+            "Mantén las pequeñas rutinas en el mismo orden: baño, pijama, cuento, dormir. Un orden conocido ayuda a muchos niños pequeños a saber qué viene después.",
+            "Gardez les petits rituels dans le même ordre : bain, pyjama, livre, dodo. Un ordre familier aide beaucoup de tout-petits à savoir ce qui vient ensuite.",
+            "Mantenha as pequenas rotinas pela mesma ordem: banho, pijama, livro, dormir. Uma ordem conhecida ajuda muitas crianças pequenas a saber o que vem a seguir.",
+            "让小仪式保持同样的顺序：洗澡、换睡衣、读书、睡觉。熟悉的顺序能帮助很多幼儿知道接下来要做什么。")
     ),
     DevelopmentLeap(
         scheduleID: 8,
@@ -384,13 +384,13 @@ extension DevelopmentLeap {
             ["entende regras simples", "espera um pouco", "diz o que pode e não pode"],
             ["理解简单规则", "能短暂等待", "说出可以和不可以"]),
         tips: loc(
-            "Keep rules short and consistent: hot, stop, hands away. Toddlers learn principles through repetition.",
-            "Держите правила короткими и одинаковыми: горячо, стоп, руки убираем. Принципы усваиваются через повтор.",
-            "Halte Regeln kurz und konsequent: heiß, stopp, Hände weg. Prinzipien entstehen durch Wiederholung.",
-            "Mantén reglas breves y constantes: caliente, alto, manos fuera. Los principios se aprenden repitiendo.",
-            "Gardez des règles courtes et constantes : chaud, stop, on enlève les mains. Les principes s’apprennent par répétition.",
-            "Mantenha regras curtas e consistentes: quente, para, mãos fora. Os princípios aprendem-se pela repetição.",
-            "规则要简短且一致：烫、停、手拿开。原则是在重复中学会的。")
+            "Keep rules short and the same every time: hot, stop, hands away. Repeating the same words makes them easier to remember.",
+            "Держите правила короткими и одинаковыми: горячо, стоп, руки убираем. Одни и те же слова легче запомнить.",
+            "Halte Regeln kurz und immer gleich: heiß, stopp, Hände weg. Dieselben Worte sind leichter zu merken.",
+            "Mantén las reglas cortas y siempre iguales: quema, para, manos fuera. Las mismas palabras son más fáciles de recordar.",
+            "Gardez des règles courtes et toujours identiques : chaud, stop, pas touche. Les mêmes mots sont plus faciles à retenir.",
+            "Mantenha as regras curtas e sempre iguais: quente, para, mãos fora. As mesmas palavras são mais fáceis de lembrar.",
+            "规则要简短、每次都一样：烫、停、手拿开。同样的词更容易记住。")
     ),
     DevelopmentLeap(
         scheduleID: 10,
@@ -421,13 +421,13 @@ extension DevelopmentLeap {
             ["brinca aos médicos ou às lojas", "combina várias regras", "explica o que vem a seguir"],
             ["玩医生或商店游戏", "组合多条规则", "解释接下来会发生什么"]),
         tips: loc(
-            "Pretend play is powerful now. A toy kitchen, doctor kit, or blocks helps build flexible thinking.",
-            "Сейчас особенно полезны ролевые игры. Кухня, набор врача или кубики помогают гибко мыслить.",
-            "Rollenspiel ist jetzt besonders stark. Küche, Arztkoffer oder Bausteine fördern flexibles Denken.",
-            "El juego simbólico es muy potente ahora. Cocinita, kit médico o bloques ayudan al pensamiento flexible.",
-            "Le jeu d’imitation est très riche maintenant. Cuisine, mallette de docteur ou cubes développent la pensée souple.",
-            "O faz de conta é muito poderoso agora. Cozinha, kit médico ou blocos ajudam o pensamento flexível.",
-            "现在假装游戏很有力量。玩具厨房、医生套装或积木能培养灵活思维。")
+            "Pretend play is a big part of this age. A toy kitchen, a doctor kit or blocks make great props.",
+            "Ролевые игры сейчас занимают много места. Игрушечная кухня, набор врача или кубики — отличный реквизит.",
+            "Rollenspiele sind in diesem Alter wichtig. Eine Spielküche, ein Arztkoffer oder Bauklötze sind tolle Requisiten.",
+            "El juego simbólico ocupa mucho a esta edad. Una cocinita, un maletín de médico o bloques son un gran atrezo.",
+            "Le jeu de faire-semblant prend beaucoup de place à cet âge. Une dînette, une mallette de docteur ou des cubes sont de parfaits accessoires.",
+            "O faz-de-conta ocupa muito espaço nesta idade. Uma cozinha de brincar, um kit de médico ou blocos são ótimos adereços.",
+            "这个年龄段，假装游戏很重要。玩具厨房、医生玩具套装或积木都是很好的道具。")
     ),
     ]
 }

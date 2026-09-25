@@ -6,6 +6,14 @@ import Testing
 
 @MainActor
 struct SubscriptionManagerLogicTests {
+    @Test func freeTrialOnlyWhenEligibleAndOfferIsFreeTrial() {
+        #expect(SubscriptionManager.freeTrial(eligible: true, paymentMode: .freeTrial))
+        #expect(!SubscriptionManager.freeTrial(eligible: false, paymentMode: .freeTrial))
+        #expect(!SubscriptionManager.freeTrial(eligible: true, paymentMode: .payAsYouGo))
+        #expect(!SubscriptionManager.freeTrial(eligible: true, paymentMode: .payUpFront))
+        #expect(!SubscriptionManager.freeTrial(eligible: true, paymentMode: nil))
+    }
+
     @Test func signOutClearsInMemoryPremiumAccess() async {
         let manager = SubscriptionManager(
             service: StalledSubscriptionService(),

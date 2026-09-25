@@ -105,8 +105,8 @@ struct PaywallView: View {
                     .padding(.horizontal, 24)
             }
 
-            if subscriptionManager.trialEligible {
-                Text(lm.trialBadge)
+            if let trial = subscriptionManager.selectedFreeTrial {
+                Text(lm.trialBadge(trial: lm.trialLength(trial.period)))
                     .font(.caption2.weight(.bold))
                     .foregroundColor(.bbLilacDeep)
                     .padding(.horizontal, 8)
@@ -268,7 +268,7 @@ struct PaywallView: View {
     private var primaryButtonTitle: String {
         if actionHandler.hasPendingInvite { return lm.joinFamilyTitle }
         guard let product = subscriptionManager.selectedProduct else {
-            return subscriptionManager.trialEligible ? lm.startTrial : lm.subscribeCTA
+            return lm.subscribeCTA
         }
         let isAnnual = product.id == ProductID.annual
         return lm.paywallCTASubscribePrice(price: product.displayPrice, isAnnual: isAnnual)
@@ -288,10 +288,11 @@ struct PaywallView: View {
         }
         let price = product.displayPrice
         let isAnnual = product.id == ProductID.annual
-        if subscriptionManager.trialEligible {
+        if let trial = subscriptionManager.selectedFreeTrial {
+            let length = lm.trialLength(trial.period)
             return isAnnual
-                ? lm.paywallRenewalDisclosureAnnual(price: price)
-                : lm.paywallRenewalDisclosure(price: price)
+                ? lm.paywallRenewalDisclosureAnnual(price: price, trial: length)
+                : lm.paywallRenewalDisclosure(price: price, trial: length)
         }
         return isAnnual
             ? lm.paywallRenewalDisclosureAnnualNoTrial(price: price)
