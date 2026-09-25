@@ -1,3 +1,5 @@
+// Apple Watch sync disabled — whole file commented out.
+/*
 import Foundation
 
 // Shared contract between the iPhone app and the Apple Watch companion.
@@ -64,3 +66,4 @@ enum WatchConnectivityKeys {
     static let command = "cmd"
     static let state = "state"
 }
+*/

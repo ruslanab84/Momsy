@@ -1,3 +1,5 @@
+// Apple Watch sync disabled — whole file commented out.
+/*
 import Foundation
 
 /// Service-level entry point for the three Watch quick actions. Routes through the
@@ -246,6 +248,11 @@ private extension FeedingSide {
         }
     }
 }
+
+*/
+
+// Kept active: FeedingViewModel still observes this notification.
+import Foundation
 
 extension Notification.Name {
     /// Posted after a feeding log is written outside `FeedingViewModel` (Watch quick

@@ -1,3 +1,5 @@
+// Apple Watch sync disabled — whole file commented out.
+/*
 import Foundation
 import WatchConnectivity
 
@@ -106,3 +108,4 @@ extension PhoneSessionManager: WCSessionDelegate {
         decodeAndProcess(message)
     }
 }
+*/

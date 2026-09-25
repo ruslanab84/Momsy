@@ -33,7 +33,8 @@ private enum AppStartupState {
 
 private struct AppRuntime {
     let container: AppContainer
-    let phoneSession: PhoneSessionManager
+    // Apple Watch sync disabled.
+    // let phoneSession: PhoneSessionManager
 }
 
 @main
@@ -78,8 +79,8 @@ struct MomsyApp: App {
         do {
             let container = try AppContainer.makeProduction()
             return .ready(AppRuntime(
-                container: container,
-                phoneSession: makePhoneSession(container: container)
+                container: container
+                // phoneSession: makePhoneSession(container: container)
             ))
         } catch let error as AppPersistenceError {
             return .failed(error)
@@ -91,6 +92,7 @@ struct MomsyApp: App {
         }
     }
 
+    /* Apple Watch sync disabled.
     @MainActor
     private static func makePhoneSession(container: AppContainer) -> PhoneSessionManager {
         let coordinator = QuickLogCoordinator(
@@ -105,6 +107,7 @@ struct MomsyApp: App {
         )
         return PhoneSessionManager(coordinator: coordinator, appState: container.appState)
     }
+    */
 }
 
 private struct MomsyRootView: View {
@@ -120,7 +123,7 @@ private struct MomsyRootView: View {
     let runtime: AppRuntime
 
     private var container: AppContainer { runtime.container }
-    private var phoneSession: PhoneSessionManager { runtime.phoneSession }
+    // private var phoneSession: PhoneSessionManager { runtime.phoneSession } // Apple Watch sync disabled.
     private let localization = LocalizationManager.shared
     private let unitSystem = UnitSystemManager.shared
     private var appState: AppState { container.appState }
@@ -139,7 +142,7 @@ private struct MomsyRootView: View {
                 let deletionStillPending = await container.recoverPendingAccountDeletion()
                 container.runMigrationIfNeeded()
                 await appState.load()
-                phoneSession.activate()
+                // phoneSession.activate() // Apple Watch sync disabled.
                 if onboardingDone {
                     await setupNotificationsOnLaunch(appState: appState)
                 }
