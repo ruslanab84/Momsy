@@ -31,16 +31,10 @@ final class SettingsViewModel: ObservableObject {
             if let sys = UnitSystem(rawValue: unitSystem) { UnitSystemManager.shared.set(sys) }
         }
     }
-    @Published var vaccinationScheduleKey: String {
-        didSet {
-            if let key = VaccinationScheduleKey(rawValue: vaccinationScheduleKey) {
-                VaccinationScheduleProvider.shared.setKey(key)
-            }
-        }
-    }
-
-    /// Schedules the user can choose between today (only WHO has data for v1).
-    let availableScheduleKeys: [VaccinationScheduleKey] = VaccinationScheduleProvider.shared.availableKeys
+    /// Active child's schedule (stored choice, else auto-detected). Optimistic: set
+    /// before the save completes and rolled back if it fails.
+    @Published private(set) var scheduleKey: VaccinationScheduleKey = .who
+    @Published var scheduleError: Error?
 
     @Published private(set) var isDeleting = false
     @Published private(set) var isReauthenticating = false
@@ -54,6 +48,12 @@ final class SettingsViewModel: ObservableObject {
     private let deleteAccount: DeleteAccountUseCase
     private let accountAuth: any AccountDeletionAuthenticating
     private let updateCloudSync: @MainActor (Bool) async throws -> Void
+    private let activeBaby: @MainActor () -> BabyProfile?
+    private let updateBaby: @MainActor (BabyProfile) async throws -> Void
+    private let canEditBaby: @MainActor () -> Bool
+    private let accessState: @MainActor () -> PremiumAccessState
+    private let cancelVaccinationReminders: @MainActor ([Int]) -> Void
+    private let scheduleResolver: any VaccinationScheduleResolving
 
     init(
         repo: any UserPreferencesRepository,
@@ -62,7 +62,13 @@ final class SettingsViewModel: ObservableObject {
         cloudSyncEnabled: Bool = CloudSyncConsent.isGranted(),
         updateCloudSync: @MainActor @escaping (Bool) async throws -> Void = {
             CloudSyncConsent.set($0 ? .granted : .denied)
-        }
+        },
+        activeBaby: @MainActor @escaping () -> BabyProfile? = { nil },
+        updateBaby: @MainActor @escaping (BabyProfile) async throws -> Void = { _ in },
+        canEditBaby: @MainActor @escaping () -> Bool = { false },
+        accessState: @MainActor @escaping () -> PremiumAccessState = { .resolving },
+        cancelVaccinationReminders: @MainActor @escaping ([Int]) -> Void = { _ in },
+        scheduleResolver: (any VaccinationScheduleResolving)? = nil
     ) {
         let prefs = repo.load()
         self.repo                   = repo
@@ -73,7 +79,47 @@ final class SettingsViewModel: ObservableObject {
         self.appTheme               = prefs.appTheme
         self.appLanguage            = prefs.appLanguage
         self.unitSystem             = prefs.unitSystem
-        self.vaccinationScheduleKey = VaccinationScheduleProvider.shared.activeKey.rawValue
+        self.activeBaby             = activeBaby
+        self.updateBaby             = updateBaby
+        self.canEditBaby            = canEditBaby
+        self.accessState            = accessState
+        self.cancelVaccinationReminders = cancelVaccinationReminders
+        self.scheduleResolver       = scheduleResolver ?? VaccinationScheduleResolver()
+        reloadSchedule()
+    }
+
+    // MARK: - Vaccination schedule (per child)
+
+    var availableScheduleKeys: [VaccinationScheduleKey] { scheduleResolver.availableKeys }
+    var scheduleSourceID: MedicalSourceID { definition(for: scheduleKey).sourceID }
+    var canEditSchedule: Bool { canEditBaby() && activeBaby() != nil }
+    var scheduleAccess: PremiumAccessState { accessState() }
+    var activeChildName: String { activeBaby()?.name ?? "" }
+
+    /// Re-read after a child switch or a co-parent change arriving via sync.
+    func reloadSchedule() {
+        scheduleKey = scheduleResolver.definition(for: activeBaby()).key
+    }
+
+    func selectSchedule(_ key: VaccinationScheduleKey) async {
+        // Defence in depth — the view already blocks these paths.
+        guard accessState() == .premium, canEditBaby(), var baby = activeBaby(),
+              key != scheduleKey else { return }
+        let previous = definition(for: scheduleKey)
+        scheduleKey = key
+        scheduleError = nil
+        baby.vaccinationScheduleKey = key.rawValue
+        do {
+            try await updateBaby(baby)
+            cancelVaccinationReminders(previous.items.map(\.id))
+        } catch {
+            scheduleKey = previous.key
+            scheduleError = error
+        }
+    }
+
+    private func definition(for key: VaccinationScheduleKey) -> VaccinationScheduleDefinition {
+        scheduleResolver.definition(for: BabyProfile(vaccinationScheduleKey: key.rawValue))
     }
 
     /// Performs full GDPR erasure. On success the cleared `onboardingDone` /

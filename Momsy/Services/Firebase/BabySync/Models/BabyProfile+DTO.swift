@@ -10,6 +10,9 @@ struct BabyProfileDTO: Codable {
     let birthDate: Timestamp
     let stage: String
     let gender: String
+    /// Optional: `nil` is omitted by the encoder, so a merge write from an "auto"
+    /// device or an older app version never erases a co-parent's choice.
+    let vaccinationScheduleKey: String?
     let updatedAt: Timestamp
 
     init(from profile: BabyProfile, updatedAt: Date = Date()) {
@@ -18,6 +21,7 @@ struct BabyProfileDTO: Codable {
         self.birthDate = Timestamp(date: profile.birthDate)
         self.stage     = profile.stage
         self.gender    = profile.gender
+        self.vaccinationScheduleKey = profile.vaccinationScheduleKey
         self.updatedAt = Timestamp(date: updatedAt)
     }
 
@@ -29,7 +33,8 @@ struct BabyProfileDTO: Codable {
             name:      name,
             birthDate: birthDate.dateValue(),
             stage:     stage,
-            gender:    gender
+            gender:    gender,
+            vaccinationScheduleKey: vaccinationScheduleKey
         )
     }
 }

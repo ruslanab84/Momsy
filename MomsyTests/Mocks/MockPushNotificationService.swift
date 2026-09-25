@@ -27,6 +27,8 @@ final class MockPushNotificationService: PushNotificationServiceProtocol, @unche
     func cancelLeapNotification(leapID: Int) { cancelledLeapIDs.append(leapID) }
     func scheduleVaccinationReminder(catalogId: Int, name: String, dueDate: Date) {}
     func cancelVaccinationReminder(catalogId: Int) {}
+    private(set) var cancelledVaccinationReminderIds: [Int] = []
+    func cancelVaccinationReminders(catalogIds: [Int]) { cancelledVaccinationReminderIds += catalogIds }
     func scheduleWeeklyReport(hour: Int, minute: Int) { weeklyReportScheduled = true }
     func cancelWeeklyReport() { weeklyReportCancelled = true }
 }

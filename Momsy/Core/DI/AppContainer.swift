@@ -326,7 +326,8 @@ final class AppContainer {
 
     // MARK: — Use Cases — Vaccination
 
-    lazy var getVaccinationStatus   = GetVaccinationStatusUseCase(repository: vaccinationRepository)
+    lazy var vaccinationScheduleResolver: any VaccinationScheduleResolving = VaccinationScheduleResolver()
+    lazy var getVaccinationStatus   = GetVaccinationStatusUseCase(repository: vaccinationRepository, resolver: vaccinationScheduleResolver)
     lazy var markVaccinationDone    = MarkVaccinationDoneUseCase(repository: vaccinationRepository)
     lazy var unmarkVaccination      = UnmarkVaccinationUseCase(repository: vaccinationRepository)
     lazy var addCustomVaccination   = AddCustomVaccinationUseCase(repository: vaccinationRepository)
@@ -648,7 +649,8 @@ final class AppContainer {
             unmark: unmarkVaccination,
             addCustom: addCustomVaccination,
             pushNotifications: pushNotifications,
-            appState: appState
+            appState: appState,
+            resolver: vaccinationScheduleResolver
         )
     }
 
@@ -736,7 +738,15 @@ final class AppContainer {
                     self.subscriptionManager.cloudSyncConsentDidChange(enabled: false)
                     self.sleepLiveSync.stop()
                 }
-            }
+            },
+            activeBaby: { [unowned self] in self.appState.babyProfile },
+            updateBaby: { [unowned self] in try await self.updateChildProfile($0) },
+            canEditBaby: { FamilyManager.shared.canPerform(.manageBabyProfiles) },
+            accessState: { [unowned self] in self.subscriptionManager.accessState },
+            cancelVaccinationReminders: { [unowned self] in
+                self.pushNotifications.cancelVaccinationReminders(catalogIds: $0)
+            },
+            scheduleResolver: vaccinationScheduleResolver
         )
     }
 

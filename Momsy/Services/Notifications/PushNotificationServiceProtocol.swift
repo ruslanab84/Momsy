@@ -12,6 +12,7 @@ protocol PushNotificationServiceProtocol: Sendable {
     func cancelLeapNotification(leapID: Int)
     func scheduleVaccinationReminder(catalogId: Int, name: String, dueDate: Date)
     func cancelVaccinationReminder(catalogId: Int)
+    func cancelVaccinationReminders(catalogIds: [Int])
     func scheduleWeeklyReport(hour: Int, minute: Int)
     func cancelWeeklyReport()
 }

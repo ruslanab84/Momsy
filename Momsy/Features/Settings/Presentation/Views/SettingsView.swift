@@ -1,9 +1,12 @@
 import SwiftUI
+import Combine
 import FirebaseAuth
 
 struct SettingsView: View {
     @StateObject private var vm: SettingsViewModel
     @ObservedObject private var authManager: AuthManager
+    @ObservedObject private var subscriptionManager: SubscriptionManager
+    @ObservedObject private var appState: AppState
     @EnvironmentObject private var lm: LocalizationManager
     @EnvironmentObject private var units: UnitSystemManager
     @Environment(\.openURL) private var openURL
@@ -13,11 +16,14 @@ struct SettingsView: View {
     init(container: AppContainer) {
         self.container = container
         _authManager = ObservedObject(wrappedValue: container.authManager)
+        _subscriptionManager = ObservedObject(wrappedValue: container.subscriptionManager)
+        _appState = ObservedObject(wrappedValue: container.appState)
         _vm = StateObject(wrappedValue: container.makeSettingsViewModel())
     }
 
     @State private var showDeleteConfirm = false
     @State private var showAuthSheet = false
+    @State private var showSchedulePaywall = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -44,6 +50,18 @@ struct SettingsView: View {
         .sheet(isPresented: $showAuthSheet) {
             AccountAuthSheet(container: container)
         }
+        .sheet(isPresented: $showSchedulePaywall) {
+            PaywallView(
+                subscriptionManager: subscriptionManager,
+                pendingInviteStore: PendingFamilyInviteStore(),
+                joinFamily: { code in
+                    try await container.joinFamilyFromOnboarding(code: code)
+                },
+                onComplete: { showSchedulePaywall = false }
+            )
+        }
+        // Child switch, or a co-parent's schedule change arriving via sync.
+        .onReceive(appState.$babyProfile.removeDuplicates()) { _ in vm.reloadSchedule() }
         .sheet(isPresented: $vm.showsDeletionReauthentication) {
             NavigationStack {
                 AuthStep(
@@ -259,14 +277,8 @@ struct SettingsView: View {
 
             HStack(spacing: 14) {
                 iconSquare(systemName: "syringe.fill", bg: .bbLilac)
-                Picker("", selection: $vm.vaccinationScheduleKey) {
-                    ForEach(vm.availableScheduleKeys) { key in
-                        Text(key.displayName).tag(key.rawValue)
-                    }
-                }
-                .pickerStyle(.menu)
-                .tint(.bbCoralDeep)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                scheduleControl
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -274,11 +286,69 @@ struct SettingsView: View {
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .bbShadow()
 
-            Text(lm.strings.vaccinationScheduleHint)
+            Text(scheduleHint)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkMute)
                 .padding(.horizontal, 2)
+
+            if let error = vm.scheduleError {
+                Text(error.localizedDescription)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(.bbCoralDeep)
+                    .padding(.horizontal, 2)
+            }
+
+            // Always visible regardless of role or tier (compliance).
+            MedicalSourcesSection(ids: [vm.scheduleSourceID])
         }
+    }
+
+    /// Role is evaluated before tier: a non-parent never sees the paywall entry.
+    @ViewBuilder
+    private var scheduleControl: some View {
+        let name = Text(vm.scheduleKey.displayName(lm.strings))
+            .font(.system(size: 15, weight: .semibold, design: .rounded))
+            .foregroundColor(.bbInk)
+        if !vm.canEditSchedule {
+            name
+        } else {
+            switch subscriptionManager.accessState {
+            case .resolving:
+                name
+            case .requiresPurchase:
+                Button { showSchedulePaywall = true } label: {
+                    HStack {
+                        name
+                        Spacer()
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.bbLilacDeep)
+                    }
+                }
+                .buttonStyle(.plain)
+            case .premium:
+                Picker("", selection: Binding(
+                    get: { vm.scheduleKey },
+                    set: { key in Task { await vm.selectSchedule(key) } }
+                )) {
+                    ForEach(vm.availableScheduleKeys) { key in
+                        Text(key.displayName(lm.strings)).tag(key)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(.bbCoralDeep)
+            }
+        }
+    }
+
+    private var scheduleHint: String {
+        var parts = [lm.strings.vaccinationScheduleHint(vm.activeChildName)]
+        if !vm.canEditSchedule {
+            parts.append(lm.strings.vaccinationScheduleReadOnlyHint)
+        } else if subscriptionManager.accessState == .requiresPurchase {
+            parts.append(lm.strings.vaccinationSchedulePremiumHint)
+        }
+        return parts.joined(separator: " ")
     }
 
     // MARK: - Children

@@ -7,6 +7,7 @@ final class VaccinationViewModel: ObservableObject {
     @Published var showMarkDone: VaccinationStatus? = nil
     @Published var showAddCustom = false
     @Published var doneDate = Date()
+    @Published private(set) var scheduleSourceID: MedicalSourceID = .whoImmunizationSchedule
 
     private let getStatus: GetVaccinationStatusUseCase
     private let markDone: MarkVaccinationDoneUseCase
@@ -14,6 +15,7 @@ final class VaccinationViewModel: ObservableObject {
     private let addCustom: AddCustomVaccinationUseCase
     private let pushNotifications: any PushNotificationServiceProtocol
     private let appState: AppState
+    private let resolver: any VaccinationScheduleResolving
 
     init(
         getStatus: GetVaccinationStatusUseCase,
@@ -21,7 +23,8 @@ final class VaccinationViewModel: ObservableObject {
         unmark: UnmarkVaccinationUseCase,
         addCustom: AddCustomVaccinationUseCase,
         pushNotifications: any PushNotificationServiceProtocol,
-        appState: AppState
+        appState: AppState,
+        resolver: any VaccinationScheduleResolving
     ) {
         self.getStatus = getStatus
         self.markDone = markDone
@@ -29,6 +32,7 @@ final class VaccinationViewModel: ObservableObject {
         self.addCustom = addCustom
         self.pushNotifications = pushNotifications
         self.appState = appState
+        self.resolver = resolver
     }
 
     var grouped: [(timing: VaccinationTiming, label: String, items: [VaccinationStatus])] {
@@ -40,8 +44,9 @@ final class VaccinationViewModel: ObservableObject {
     }
 
     func load() async {
-        let birth = appState.babyProfile?.birthDate ?? Date()
-        statuses = await getStatus.execute(birthDate: birth)
+        let baby = appState.babyProfile
+        scheduleSourceID = resolver.definition(for: baby).sourceID
+        statuses = await getStatus.execute(baby: baby)
     }
 
     func confirmDone(_ status: VaccinationStatus) async {
@@ -57,8 +62,9 @@ final class VaccinationViewModel: ObservableObject {
         guard let entry = status.entry else { return }
         await unmark.execute(entryId: entry.id)
         BabySyncService().propagateDelete(id: entry.id, in: "vaccinationLogs")
-        // Only reschedule reminders for catalog vaccinations, not custom ones
-        if !entry.isCustom {
+        // Only reschedule reminders for the active schedule — not custom entries, and not
+        // done-marks from another schedule (their dueDate is the past doneDate).
+        if !entry.isCustom && status.originKey == nil {
             pushNotifications.scheduleVaccinationReminder(
                 catalogId: status.item.id,
                 name: status.item.name(for: LocalizationManager.shared.current),

@@ -33,6 +33,7 @@ final class SwiftDataBabyRepository: BabyRepository {
             record.birthDate = profile.birthDate
             record.stage     = profile.stage
             record.gender    = profile.gender
+            record.vaccinationScheduleKey = profile.vaccinationScheduleKey
         } else {
             let count = try context.fetchCount(FetchDescriptor<BabyRecord>())
             guard count < ActiveBaby.maxChildren else { throw BabyError.maxChildrenReached }

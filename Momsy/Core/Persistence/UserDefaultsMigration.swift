@@ -101,6 +101,9 @@ enum UserDefaultsMigration {
     /// Runs once after the WHO schedule rollout so existing users keep their marked
     /// vaccinations instead of losing them when the catalog ids change.
     static func runVaccinationRemapIfNeeded(context: ModelContext) {
+        // The schedule moved onto the child (BabyProfile.vaccinationScheduleKey). The old
+        // device-level key only ever held "who", so nothing is carried over.
+        UserDefaults.standard.removeObject(forKey: "vaccinationScheduleKey")
         guard !UserDefaults.standard.bool(forKey: vaccineRemapFlag) else { return }
         remapVaccinations(context: context)
         UserDefaults.standard.set(true, forKey: vaccineRemapFlag)

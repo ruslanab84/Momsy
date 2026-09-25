@@ -14,7 +14,22 @@ host_for() {
     who) echo "www.who.int" ;;
     nhs) echo "www.nhs.uk" ;;
     aap) echo "www.healthychildren.org" ;;
+    phac) echo "www.canada.ca" ;;
+    stiko) echo "www.rki.de" ;;
+    frHealthMinistry) echo "sante.gouv.fr" ;;
+    itHealthMinistry) echo "www.salute.gov.it" ;;
+    esHealthMinistry) echo "www.sanidad.gob.es" ;;
+    brHealthMinistry) echo "www.gov.br" ;;
     *)   echo "" ;;
+  esac
+}
+
+# Mirrors MedicalPublisher.allowedPathPrefix: shared government hosts must stay
+# inside the health authority's section.
+prefix_for() {
+  case "$1" in
+    brHealthMinistry) echo "/saude/" ;;
+    *) echo "" ;;
   esac
 }
 
@@ -32,6 +47,8 @@ while IFS= read -r line; do
     url="${BASH_REMATCH[1]}"
     checked=$((checked + 1))
     expected_host="$(host_for "$publisher")"
+    prefix="$(prefix_for "$publisher")"
+    path="/${url#https://*/}"
     host="$(echo "$url" | sed -E 's#^https://([^/]+)/.*#\1#')"
     result="$(curl -sSL -A "$UA" -o "$TMP" -w "%{http_code} %{url_effective}" --max-time 20 "$url" 2>/dev/null)"
     code="${result%% *}"
@@ -42,6 +59,7 @@ while IFS= read -r line; do
     [[ "$url" == https://* ]] || reason="not https"
     [[ -z "$reason" && -z "$expected_host" ]] && reason="publisher .$publisher must not have a URL"
     [[ -z "$reason" && "$host" != "$expected_host" ]] && reason="host $host != $expected_host (.$publisher)"
+    [[ -z "$reason" && -n "$prefix" && "$path" != "$prefix"* ]] && reason="path outside $prefix"
     [[ -z "$reason" && "$code" != "200" ]] && reason="HTTP $code"
     [[ -z "$reason" && "$effective" != "$url" ]] && reason="redirects to $effective"
     [[ -z "$reason" && "$title" =~ ^(404|Page not found) ]] && reason="soft 404 (title: $title)"

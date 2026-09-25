@@ -7,6 +7,7 @@ enum VaccinationTiming: Hashable {
     case atBirth
     case weeks(Int)
     case months(Int)
+    case years(Int)
     case additional   // user-added vaccines that don't belong to a scheduled milestone
 
     /// Canonical, sortable key in days from birth (used for grouping/ordering).
@@ -15,6 +16,7 @@ enum VaccinationTiming: Hashable {
         case .atBirth:       return 0
         case .weeks(let w):  return w * 7
         case .months(let m): return m * 30
+        case .years(let y):  return y * 365
         case .additional:    return Int.max
         }
     }
@@ -24,6 +26,7 @@ enum VaccinationTiming: Hashable {
         case .atBirth:       return birth
         case .weeks(let w):  return cal.date(byAdding: .weekOfYear, value: w, to: birth) ?? birth
         case .months(let m): return cal.date(byAdding: .month, value: m, to: birth) ?? birth
+        case .years(let y):  return cal.date(byAdding: .year, value: y, to: birth) ?? birth
         case .additional:    return birth
         }
     }
@@ -60,6 +63,16 @@ enum VaccinationTiming: Hashable {
             case .chinese: return "\(m) 个月"
             default:       return m == 1 ? "1 month" : "\(m) months"
             }
+        case .years(let y):
+            switch lang {
+            case .russian: return "\(y) \(Self.ruYears(y))"
+            case .german:  return y == 1 ? "1 Jahr"  : "\(y) Jahre"
+            case .spanish: return y == 1 ? "1 año"   : "\(y) años"
+            case .french:  return y == 1 ? "1 an"    : "\(y) ans"
+            case .portuguese: return y == 1 ? "1 ano" : "\(y) anos"
+            case .chinese: return "\(y) 岁"
+            default:       return y == 1 ? "1 year" : "\(y) years"
+            }
         case .additional:
             switch lang {
             case .russian: return "Дополнительные"
@@ -77,6 +90,12 @@ enum VaccinationTiming: Hashable {
         if n % 10 == 1 && n % 100 != 11 { return "месяц" }
         if (2...4).contains(n % 10) && !(12...14).contains(n % 100) { return "месяца" }
         return "месяцев"
+    }
+
+    private static func ruYears(_ n: Int) -> String {
+        if n % 10 == 1 && n % 100 != 11 { return "год" }
+        if (2...4).contains(n % 10) && !(12...14).contains(n % 100) { return "года" }
+        return "лет"
     }
 
     private static func ruWeeks(_ n: Int) -> String {
@@ -125,6 +144,9 @@ struct VaccinationStatus: Identifiable {
     let item: VaccinationScheduleItem
     let entry: VaccinationEntry?
     let dueDate: Date
+    /// Schedule a done-mark came from when it is not in the active schedule;
+    /// `nil` for the active schedule and custom entries.
+    var originKey: VaccinationScheduleKey? = nil
 
     var id: Int { item.id }
     var isDone: Bool { entry != nil }

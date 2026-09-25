@@ -1,15 +1,18 @@
 import SwiftUI
+import Combine
 
 struct VaccinationView: View {
     @StateObject private var vm: VaccinationViewModel
     @EnvironmentObject private var lm: LocalizationManager
+    @ObservedObject private var appState: AppState
 
     init(container: AppContainer) {
         _vm = StateObject(wrappedValue: container.makeVaccinationViewModel())
+        _appState = ObservedObject(wrappedValue: container.appState)
     }
 
-    /// The default schedule is an adaptation of WHO material, which may only be
-    /// reused with the source named and WHO's endorsement explicitly disclaimed.
+    /// Every schedule is an adaptation of its publisher's material, so the source is
+    /// always named and the publisher's endorsement explicitly disclaimed.
     private var sourceFooter: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(lm.strings.sourceLabel.uppercased())
@@ -20,7 +23,7 @@ struct VaccinationView: View {
                 .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundColor(.bbInkSoft)
                 .fixedSize(horizontal: false, vertical: true)
-            MedicalSourcesSection(ids: [.whoImmunizationSchedule])
+            MedicalSourcesSection(ids: [vm.scheduleSourceID])
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 12)
@@ -78,6 +81,10 @@ struct VaccinationView: View {
             }
         }
         .task { await vm.load() }
+        // Child switch or a co-parent's schedule change arriving via sync.
+        .onReceive(appState.$babyProfile.removeDuplicates().dropFirst()) { _ in
+            Task { await vm.load() }
+        }
         .sheet(item: $vm.showMarkDone) { status in
             MarkDoneSheet(vm: vm, status: status, lm: lm)
         }
@@ -131,6 +138,11 @@ private struct VaccinationRowView: View {
                         Text(status.dueDate.formatted(date: .abbreviated, time: .omitted))
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundColor(status.isOverdue ? .bbCoralDeep : .bbInkSoft)
+                    }
+                    if let origin = status.originKey {
+                        Text(lm.strings.vaccinationFromSchedule(origin.displayName(lm.strings)))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(.bbInkMute)
                     }
                 }
                 Spacer()

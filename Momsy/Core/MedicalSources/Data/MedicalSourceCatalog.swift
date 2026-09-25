@@ -155,5 +155,23 @@ enum MedicalSourceCatalog {
                       title: "Sleep and tiredness after having a baby",
                       url: URL(string: "https://www.nhs.uk/baby/support-and-services/sleep-and-tiredness-after-having-a-baby/"),
                       citation: nil, year: "2026"),
+
+        // MARK: National vaccination schedules
+        MedicalSource(id: .aapImmunizationSchedule, publisher: .aap,
+                      title: "American Academy of Pediatrics 2026 Recommended Immunization Schedule",
+                      url: URL(string: "https://www.healthychildren.org/English/safety-prevention/immunizations/Pages/Recommended-Immunization-Schedules.aspx"),
+                      citation: nil, year: "2026"),
+        MedicalSource(id: .stikoImpfkalender, publisher: .stiko,
+                      title: "Impfkalender 2026 (STIKO, Epidemiologisches Bulletin 4/2026)",
+                      url: URL(string: "https://www.rki.de/DE/Themen/Infektionskrankheiten/Impfen/Impfkalender/impfkalender-node.html"),
+                      citation: nil, year: "2026"),
+        MedicalSource(id: .esCalendarioComun, publisher: .esHealthMinistry,
+                      title: "Calendario común de vacunación e inmunización a lo largo de toda la vida 2026",
+                      url: URL(string: "https://www.sanidad.gob.es/areas/promocionPrevencion/vacunaciones/calendario/home.htm"),
+                      citation: nil, year: "2026"),
+        MedicalSource(id: .brCalendarioNacional, publisher: .brHealthMinistry,
+                      title: "Calendário Nacional de Vacinação — Criança",
+                      url: URL(string: "https://www.gov.br/saude/pt-br/vacinacao/calendario"),
+                      citation: nil, year: "n.d."),
     ]
 }

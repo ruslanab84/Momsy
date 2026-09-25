@@ -5,6 +5,11 @@ import Foundation
 /// IDs are namespaced in the 100+ range so they never collide with custom entries
 /// (negative ids) or with future national schedules (which use their own ranges).
 enum WHOSchedule {
+    static let definition = VaccinationScheduleDefinition(
+        key: .who, sourceID: .whoImmunizationSchedule, idRange: 100...199,
+        lastReviewed: "2026-09-25", items: items
+    )
+
     static let items: [VaccinationScheduleItem] = [
         // MARK: Birth
         .init(id: 100, en: "BCG (tuberculosis)",            ru: "БЦЖ (туберкулёз)",                de: "BCG (Tuberkulose)",            es: "BCG (tuberculosis)",            fr: "BCG (tuberculose)",             pt: "BCG (tuberculose)", zh: "卡介苗（结核病）",             timing: .atBirth),

@@ -3,8 +3,11 @@ import Foundation
 /// Who stands behind a medical source. Policy: WHO first for every country;
 /// NHS, then AAP, only where WHO has no document on the topic. Peer-reviewed
 /// originals are reserved for instruments and theories (EPDS licence citation).
+/// National vaccination schedules cite their national authority; the WHO-first
+/// policy applies to every other topic.
 enum MedicalPublisher: String, Sendable, CaseIterable {
     case who, nhs, aap, peerReviewed
+    case phac, stiko, frHealthMinistry, itHealthMinistry, esHealthMinistry, brHealthMinistry
 
     var priority: Int {
         switch self {
@@ -12,6 +15,7 @@ enum MedicalPublisher: String, Sendable, CaseIterable {
         case .nhs: 1
         case .aap: 2
         case .peerReviewed: 3
+        case .phac, .stiko, .frHealthMinistry, .itHealthMinistry, .esHealthMinistry, .brHealthMinistry: 1
         }
     }
 
@@ -22,6 +26,21 @@ enum MedicalPublisher: String, Sendable, CaseIterable {
         case .nhs: "www.nhs.uk"
         case .aap: "www.healthychildren.org"
         case .peerReviewed: nil
+        case .phac: "www.canada.ca"
+        case .stiko: "www.rki.de"
+        case .frHealthMinistry: "sante.gouv.fr"
+        case .itHealthMinistry: "www.salute.gov.it"
+        case .esHealthMinistry: "www.sanidad.gob.es"
+        case .brHealthMinistry: "www.gov.br"
+        }
+    }
+
+    /// Path every URL of this publisher must start with, when the host is shared
+    /// by unrelated government bodies (gov.br hosts every federal ministry).
+    var allowedPathPrefix: String? {
+        switch self {
+        case .brHealthMinistry: "/saude/"
+        default: nil
         }
     }
 
@@ -32,6 +51,12 @@ enum MedicalPublisher: String, Sendable, CaseIterable {
         case .nhs: "NHS"
         case .aap: "AAP"
         case .peerReviewed: "Study"
+        case .phac: "PHAC"
+        case .stiko: "STIKO"
+        case .frHealthMinistry: "Ministère"
+        case .itHealthMinistry: "Ministero"
+        case .esHealthMinistry: "SNS"
+        case .brHealthMinistry: "PNI"
         }
     }
 }
@@ -52,6 +77,8 @@ enum MedicalSourceID: String, Sendable, CaseIterable, Hashable, Codable {
     case nhsRefluxInBabies, nhsColic, nhsNappyRash, nhsCradleCap, nhsFeverInChildren
     case nhsFlatHeadSyndrome, nhsWashingBathingBaby, nhsHelpingBabySleep, nhsTeething
     case nhsBottleFeeding, nhsBabyFirstAid, nhsParentTiredness
+    // National vaccination schedules — cited only by their own schedule
+    case aapImmunizationSchedule, stikoImpfkalender, esCalendarioComun, brCalendarioNacional
 }
 
 struct MedicalSource: Identifiable, Hashable, Sendable {

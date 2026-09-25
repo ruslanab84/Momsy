@@ -142,6 +142,10 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
         center.removePendingNotificationRequests(withIdentifiers: [ID.vaccination(catalogId)])
     }
 
+    func cancelVaccinationReminders(catalogIds: [Int]) {
+        center.removePendingNotificationRequests(withIdentifiers: catalogIds.map(ID.vaccination))
+    }
+
     /// Recurring Sunday reminder that the weekly AI report is ready.
     func scheduleWeeklyReport(hour: Int = 7, minute: Int = 0) {
         center.removePendingNotificationRequests(withIdentifiers: [ID.weeklyReport])

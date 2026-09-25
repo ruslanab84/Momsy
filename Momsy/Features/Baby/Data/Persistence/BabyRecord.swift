@@ -8,6 +8,7 @@ final class BabyRecord {
     var birthDate: Date = Date()
     var stage: String = ""
     var gender: String = ""
+    var vaccinationScheduleKey: String? = nil
 
     init(_ profile: BabyProfile) {
         id        = profile.id
@@ -15,9 +16,11 @@ final class BabyRecord {
         birthDate = profile.birthDate
         stage     = profile.stage
         gender    = profile.gender
+        vaccinationScheduleKey = profile.vaccinationScheduleKey
     }
 
     func toDomain() -> BabyProfile {
-        BabyProfile(id: id, name: name, birthDate: birthDate, stage: stage, gender: gender)
+        BabyProfile(id: id, name: name, birthDate: birthDate, stage: stage, gender: gender,
+                    vaccinationScheduleKey: vaccinationScheduleKey)
     }
 }

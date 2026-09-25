@@ -1,7 +1,10 @@
 import Foundation
 
 enum CitationPolicy {
-    static let allowedPublishers: Set<MedicalPublisher> = [.who, .nhs, .aap, .peerReviewed]
+    static let allowedPublishers: Set<MedicalPublisher> = [
+        .who, .nhs, .aap, .peerReviewed,
+        .phac, .stiko, .frHealthMinistry, .itHealthMinistry, .esHealthMinistry, .brHealthMinistry,
+    ]
 
     /// Medical copy may ship only when it cites at least one source and every
     /// cited source resolves in the catalog to an allowed publisher.
