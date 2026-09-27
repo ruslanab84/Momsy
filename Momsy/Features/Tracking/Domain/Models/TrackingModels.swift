@@ -1,16 +1,6 @@
 import Foundation
 
-// MARK: - WHO Reference
-
-struct WHOPoint: Identifiable {
-    let id = UUID()
-    let month: Int
-    let p3:  Double
-    let p15: Double
-    let p50: Double
-    let p85: Double
-    let p97: Double
-}
+// MARK: - Growth Points
 
 struct BabyGrowthPoint {
     let month: Int

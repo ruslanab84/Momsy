@@ -264,8 +264,6 @@ struct L10n {
     func sleepAlreadyTrackedBy(_ name: String) -> String { s("Sleep is already being tracked — started by \(name).", "Сон уже отслеживается — начал(а) \(name).", "Schlaf wird bereits erfasst – gestartet von \(name).", "El sueño ya se está registrando: iniciado por \(name).", "Le sommeil est déjà suivi — démarré par \(name).", "O sono já está a ser registado — iniciado por \(name).", "睡眠已在记录中——由\(name)开始。") }
     var sleepAlreadyTrackedGeneric: String { s("Sleep is already being tracked on another device.", "Сон уже отслеживается на другом устройстве.", "Schlaf wird bereits auf einem anderen Gerät erfasst.", "El sueño ya se está registrando en otro dispositivo.", "Le sommeil est déjà suivi sur un autre appareil.", "O sono já está a ser registado noutro dispositivo.", "睡眠已在另一台设备上记录。") }
     var symptomRecorded: String { s("Symptom · recorded","Симптом · записан","Symptom · erfasst","Síntoma · registrado","Symptôme · enregistré","Sintoma · registado", "症状 · 已记录") }
-    var belowP3: String     { s("below P3",  "ниже P3",   "unter P3", "bajo P3",  "sous P3",  "abaixo de P3", "低于 P3") }
-    var aboveP97: String    { s("above P97", "выше P97",  "über P97", "sobre P97","au-dessus de P97","acima de P97", "高于 P97") }
     var headShort: String   { s("Head",      "Голова",    "Kopf",     "Cabeza",   "Tête",     "Cabeça", "头围") }
     var hrToStop: String    { s("hr to stop",  "ч до выкл.",  "h bis Stopp",   "h para parar", "h avant l’arrêt", "h até parar", "小时后停止") }
     var minToStop: String   { s("min to stop", "мин до выкл.","min bis Stopp", "min para parar","min avant l’arrêt", "min até parar", "分钟后停止") }
@@ -785,13 +783,9 @@ struct L10n {
     var doctorVisit: String     { s("Doctor visit",  "Приём врача",   "Arztbesuch",    "Visita médica", "Visite médicale", "Consulta médica", "就诊") }
     var addMeasurement: String  { s("Add measurement", "Добавить измерение", "Messung hinzufügen", "Añadir medida", "Ajouter une mesure", "Adicionar medição", "添加测量") }
     var logTemp: String         { s("Log temperature", "Записать температуру", "Temperatur erfassen", "Registrar temperatura", "Enregistrer la température", "Registar temperatura", "记录体温") }
-    var percentile: String      { s("Percentile",    "Перцентиль",    "Perzentile",    "Percentil", "Percentile", "Percentil", "百分位") }
     var health: String          { s("Health",        "Здоровье",      "Gesundheit",    "Salud",  "Santé", "Saúde", "健康") }
+    var growthHistory: String   { s("Growth history", "История роста", "Wachstumsverlauf", "Historial de crecimiento", "Historique de croissance", "Histórico de crescimento", "生长记录") }
     var heightAndWeight: String { s("Height & Weight","Рост и вес",   "Größe & Gewicht", "Altura y peso", "Taille et poids", "Altura e peso", "身高与体重") }
-    var whoRange: String        { s("0–24 mo · WHO", "0–24 мес · ВОЗ","0–24 Mon. · WHO", "0–24 meses · OMS", "0–24 mois · OMS", "0–24 meses · OMS", "0–24 月 · WHO") }
-    var median: String          { s("Median",        "Медиана",       "Median",        "Mediana", "Médiane", "Mediana", "中位数") }
-    var setSexForPercentiles: String { s("Set your baby's sex to see WHO percentiles", "Укажите пол малыша, чтобы видеть перцентили ВОЗ", "Geschlecht des Babys angeben, um WHO-Perzentile zu sehen", "Indica el sexo del bebé para ver los percentiles de la OMS", "Indiquez le sexe du bébé pour voir les percentiles de l’OMS", "Indique o sexo do bebé para ver os percentis da OMS", "设置宝宝性别以查看 WHO 百分位") }
-    var whoChartDisclaimer: String { s("A reference, not a diagnosis. When in doubt — see your paediatrician.", "Ориентир, не диагноз. При сомнениях — к педиатру.", "Ein Anhaltspunkt, keine Diagnose. Im Zweifel — zum Kinderarzt.", "Una referencia, no un diagnóstico. Ante la duda — acude a tu pediatra.", "Un repère, pas un diagnostic. En cas de doute — consultez votre pédiatre.", "Uma referência, não um diagnóstico. Em caso de dúvida — consulte o seu pediatra.", "仅供参考，并非诊断。如有疑问——请就诊儿科医生。") }
     var medicalSourcesTitle: String { s("Sources", "Источники", "Quellen", "Fuentes", "Sources", "Fontes", "来源") }
     var medicalSourcesScreenTitle: String { s("Medical sources", "Медицинские источники", "Medizinische Quellen", "Fuentes médicas", "Sources médicales", "Fontes médicas", "医学资料来源") }
     var medicalSourcesScreenSub: String { s("Where our health information comes from", "Откуда наша информация о здоровье", "Woher unsere Gesundheitsinformationen stammen", "De dónde procede nuestra información de salud", "D’où viennent nos informations de santé", "De onde vem a nossa informação de saúde", "我们的健康信息来源") }
@@ -807,59 +801,7 @@ struct L10n {
     }
     var medicalSourcesOpensInSafari: String { s("Opens in Safari", "Откроется в Safari", "Wird in Safari geöffnet", "Se abre en Safari", "S’ouvre dans Safari", "Abre no Safari", "将在 Safari 中打开") }
     var medicalSourcesButtonA11y: String { s("Show sources", "Показать источники", "Quellen anzeigen", "Mostrar fuentes", "Afficher les sources", "Mostrar fontes", "显示来源") }
-    var whoMethodologyMore: String { s("How this chart works", "Как устроен график", "Wie dieses Diagramm funktioniert", "Cómo funciona este gráfico", "Comment fonctionne ce graphique", "Como funciona este gráfico", "该图表如何计算") }
-    var whoMethodologyTitle: String { s("About the WHO chart", "О графике ВОЗ", "Über das WHO-Diagramm", "Sobre el gráfico de la OMS", "À propos du graphique de l’OMS", "Sobre o gráfico da OMS", "关于 WHO 图表") }
-    var whoMethodologySourceTitle: String { s("Source", "Источник", "Quelle", "Fuente", "Source", "Fonte", "数据来源") }
-    var whoMethodologySource: String {
-        s("WHO Child Growth Standards: weight-for-age, length/height-for-age and head-circumference-for-age, months 0–24, percentiles P3/P15/P50/P85/P97. Separate tables are used for boys and girls.",
-          "Нормы роста детей ВОЗ (WHO Child Growth Standards): вес к возрасту, длина/рост к возрасту и окружность головы к возрасту, месяцы 0–24, перцентили P3/P15/P50/P85/P97. Для мальчиков и девочек используются разные таблицы.",
-          "WHO-Kindeswachstumsstandards: Gewicht nach Alter, Länge/Größe nach Alter und Kopfumfang nach Alter, Monate 0–24, Perzentile P3/P15/P50/P85/P97. Für Jungen und Mädchen werden getrennte Tabellen verwendet.",
-          "Patrones de crecimiento infantil de la OMS: peso para la edad, longitud/talla para la edad y perímetro cefálico para la edad, meses 0–24, percentiles P3/P15/P50/P85/P97. Se usan tablas distintas para niños y niñas.",
-          "Normes OMS de croissance de l’enfant : poids pour l’âge, taille/longueur pour l’âge et périmètre crânien pour l’âge, mois 0–24, percentiles P3/P15/P50/P85/P97. Des tables distinctes sont utilisées pour les garçons et les filles.",
-          "Padrões de crescimento infantil da OMS: peso para a idade, comprimento/altura para a idade e perímetro cefálico para a idade, meses 0–24, percentis P3/P15/P50/P85/P97. São usadas tabelas separadas para meninos e meninas.",
-          "世界卫生组织儿童生长标准：年龄别体重、年龄别身长/身高、年龄别头围，0–24 月，百分位 P3/P15/P50/P85/P97。男孩与女孩使用不同的参照表。")
-    }
-    var whoMethodologyBandsTitle: String { s("What the chart shows", "Что показано на графике", "Was das Diagramm zeigt", "Qué muestra el gráfico", "Ce que montre le graphique", "O que o gráfico mostra", "图表内容") }
-    var whoMethodologyBands: String {
-        s("The outer band covers P3–P97, the inner band P15–P85, and the dashed line is the median (P50). About 94 out of 100 healthy children of the same age and sex fall inside the outer band.",
-          "Внешняя полоса — диапазон P3–P97, внутренняя — P15–P85, пунктирная линия — медиана (P50). Примерно 94 из 100 здоровых детей того же возраста и пола попадают во внешнюю полосу.",
-          "Das äußere Band umfasst P3–P97, das innere Band P15–P85, die gestrichelte Linie ist der Median (P50). Etwa 94 von 100 gesunden Kindern gleichen Alters und Geschlechts liegen im äußeren Band.",
-          "La banda exterior abarca P3–P97, la interior P15–P85 y la línea discontinua es la mediana (P50). Alrededor de 94 de cada 100 niños sanos de la misma edad y sexo quedan dentro de la banda exterior.",
-          "La bande extérieure couvre P3–P97, la bande intérieure P15–P85 et la ligne pointillée est la médiane (P50). Environ 94 enfants en bonne santé sur 100 du même âge et du même sexe se situent dans la bande extérieure.",
-          "A banda exterior abrange P3–P97, a interior P15–P85 e a linha tracejada é a mediana (P50). Cerca de 94 em cada 100 crianças saudáveis da mesma idade e sexo ficam dentro da banda exterior.",
-          "外侧色带为 P3–P97，内侧色带为 P15–P85，虚线为中位数（P50）。同龄同性别的健康儿童中，约 94/100 落在外侧色带内。")
-    }
-    var whoMethodologyCalcTitle: String { s("How the label is calculated", "Как считается ярлык", "Wie der Wert berechnet wird", "Cómo se calcula la etiqueta", "Comment l’étiquette est calculée", "Como a etiqueta é calculada", "标签如何计算") }
-    var whoMethodologyCalc: String {
-        s("Age is rounded down to whole months, and the nearest tabulated month is used without interpolation. The label is a range between tabulated percentiles (for example P50–P85), not an exact percentile or z-score, and it reflects a single measurement — the one from the most recent recorded month.",
-          "Возраст округляется вниз до целых месяцев, берётся ближайшая табличная точка без интерполяции. Ярлык — это диапазон между табличными перцентилями (например, P50–P85), а не точный перцентиль или z-оценка, и он отражает один замер — из последнего записанного месяца.",
-          "Das Alter wird auf volle Monate abgerundet und der nächstgelegene tabellierte Monat ohne Interpolation verwendet. Die Angabe ist ein Bereich zwischen tabellierten Perzentilen (z. B. P50–P85), kein exaktes Perzentil und kein Z-Wert, und sie beruht auf einer einzelnen Messung — der aus dem zuletzt erfassten Monat.",
-          "La edad se redondea hacia abajo a meses completos y se usa el mes tabulado más cercano sin interpolación. La etiqueta es un rango entre percentiles tabulados (por ejemplo P50–P85), no un percentil exacto ni una puntuación z, y refleja una sola medición: la del último mes registrado.",
-          "L’âge est arrondi au mois inférieur et le mois tabulé le plus proche est utilisé sans interpolation. L’étiquette est un intervalle entre percentiles tabulés (par exemple P50–P85), et non un percentile exact ou un score z ; elle reflète une seule mesure, celle du dernier mois enregistré.",
-          "A idade é arredondada para baixo em meses completos e é usado o mês tabelado mais próximo, sem interpolação. A etiqueta é um intervalo entre percentis tabelados (por exemplo P50–P85), não um percentil exato nem um score z, e reflete uma única medição — a do mês registado mais recente.",
-          "月龄向下取整，并直接取最接近的表内月份，不做插值。标签是表内百分位之间的区间（例如 P50–P85），并非精确百分位或 z 分数，且仅基于一次测量——最近记录月份的那一次。")
-    }
-    var whoMethodologyMedicalTitle: String { s("This is not a diagnosis", "Это не диагноз", "Das ist keine Diagnose", "Esto no es un diagnóstico", "Ceci n’est pas un diagnostic", "Isto não é um diagnóstico", "这不是诊断") }
-    var whoMethodologyMedical: String {
-        s("The chart is a reference and does not replace a medical examination. A single measurement outside the bands is not in itself a cause for alarm, and one inside them does not rule out a problem. Only a paediatrician can assess your child's growth — discuss any concerns with them.",
-          "График — это ориентир, он не заменяет осмотр врача. Один замер за пределами полос сам по себе не повод для тревоги, а замер внутри них не исключает проблему. Оценить рост ребёнка может только педиатр — обсуждайте любые сомнения с ним.",
-          "Das Diagramm ist ein Anhaltspunkt und ersetzt keine ärztliche Untersuchung. Ein einzelner Messwert außerhalb der Bänder ist für sich genommen kein Grund zur Sorge, ein Wert innerhalb schließt ein Problem nicht aus. Nur eine Kinderärztin oder ein Kinderarzt kann das Wachstum Ihres Kindes beurteilen — besprechen Sie Bedenken dort.",
-          "El gráfico es una referencia y no sustituye una revisión médica. Una sola medición fuera de las bandas no es por sí misma motivo de alarma, y una dentro de ellas no descarta un problema. Solo un pediatra puede valorar el crecimiento de tu hijo: comenta con él cualquier duda.",
-          "Le graphique est un repère et ne remplace pas un examen médical. Une mesure isolée hors des bandes n’est pas en soi inquiétante, et une mesure à l’intérieur n’exclut pas un problème. Seul un pédiatre peut évaluer la croissance de votre enfant — parlez-lui de vos inquiétudes.",
-          "O gráfico é uma referência e não substitui uma consulta médica. Uma única medição fora das bandas não é, por si só, motivo de alarme, e uma dentro delas não exclui um problema. Só um pediatra pode avaliar o crescimento da sua criança — fale com ele sobre qualquer dúvida.",
-          "该图表仅供参考，不能替代医学检查。单次落在色带之外本身并不意味着异常，落在色带之内也不能排除问题。只有儿科医生才能评估孩子的生长情况——有任何疑虑请与医生沟通。")
-    }
     var sourceLabel: String { s("Source", "Источник", "Quelle", "Fuente", "Source", "Fonte", "来源") }
-    var whoAdaptationTitle: String { s("Adapted from WHO material", "Адаптация материалов ВОЗ", "Adaption von WHO-Material", "Adaptación de material de la OMS", "Adaptation de documents de l’OMS", "Adaptação de material da OMS", "改编自世卫组织资料") }
-    var whoGrowthAdaptationNote: String {
-        s("The tables in this app are an adaptation of the WHO Child Growth Standards. This adaptation was not created by WHO. WHO is not responsible for its content or accuracy, and does not endorse Momsy.",
-          "Таблицы в приложении — адаптация Норм роста детей ВОЗ. Эта адаптация создана не ВОЗ. ВОЗ не несёт ответственности за её содержание и точность и не поддерживает Momsy.",
-          "Die Tabellen in dieser App sind eine Adaption der WHO-Kindeswachstumsstandards. Diese Adaption wurde nicht von der WHO erstellt. Die WHO ist nicht für ihren Inhalt oder ihre Richtigkeit verantwortlich und unterstützt Momsy nicht.",
-          "Las tablas de esta app son una adaptación de los patrones de crecimiento infantil de la OMS. Esta adaptación no fue creada por la OMS. La OMS no se hace responsable de su contenido ni de su exactitud, y no respalda a Momsy.",
-          "Les tables de cette application sont une adaptation des normes OMS de croissance de l’enfant. Cette adaptation n’a pas été créée par l’OMS. L’OMS n’est pas responsable de son contenu ni de son exactitude et n’approuve pas Momsy.",
-          "As tabelas desta aplicação são uma adaptação dos padrões de crescimento infantil da OMS. Esta adaptação não foi criada pela OMS. A OMS não é responsável pelo seu conteúdo nem pela sua exatidão e não subscreve a Momsy.",
-          "本应用中的参照表改编自世界卫生组织儿童生长标准。该改编版本并非由世卫组织制作，世卫组织不对其内容或准确性负责，也不对 Momsy 作任何背书。")
-    }
     var temperatureHistory: String { s("Temperature history", "История температуры", "Temperaturverlauf", "Historial de temperatura", "Historique de température", "Histórico de temperatura", "体温历史") }
     var recentMeasurements: String { s("Recent measurements", "Последние замеры", "Letzte Messungen", "Medidas recientes", "Mesures récentes", "Medições recentes", "近期测量") }
     var weightKg: String        { s("Weight, kg",    "Вес, кг",       "Gewicht, kg",   "Peso, kg", "Poids, kg", "Peso, kg", "体重，kg") }

@@ -7,14 +7,8 @@ struct TrackingView: View {
     @EnvironmentObject var loc: LocalizationManager
     @EnvironmentObject var units: UnitSystemManager
     @EnvironmentObject var appState: AppState
-    @ObservedObject private var familyManager = FamilyManager.shared
-    @State private var showEditProfile = false
-    @State private var showWHOMethodology = false
-
-    private let container: AppContainer
 
     init(container: AppContainer) {
-        self.container = container
         _vm = StateObject(wrappedValue: container.makeTrackingViewModel())
     }
 
@@ -49,18 +43,6 @@ struct TrackingView: View {
         }
         .sheet(isPresented: $vm.showAddTemp) {
             AddTempSheet { entry in vm.addTemp(entry) }
-        }
-        .sheet(isPresented: $showWHOMethodology) {
-            WHOMethodologySheet()
-                .environmentObject(loc)
-        }
-        .sheet(isPresented: $showEditProfile) {
-            if let profile = appState.babyProfile {
-                EditBabyProfileView(profile: profile)
-                    .environmentObject(loc)
-                    .environmentObject(appState)
-                    .withContainer(container)
-            }
         }
         .errorToast($vm.saveError)
     }
@@ -124,7 +106,6 @@ struct TrackingView: View {
     private struct ChartConfig {
         let title: String
         let unit: String
-        let data: [WHOPoint]?
         let gridVals: [Int]
         let babyPoints: [BabyGrowthPoint]
     }
@@ -135,7 +116,6 @@ struct TrackingView: View {
             case 1:
                 return ChartConfig(
                     title: loc.strings.heightIn, unit: "in",
-                    data:  vm.currentReference?.scaledBy(units.heightChartFactor),
                     gridVals: [20, 26, 31, 37],
                     babyPoints: vm.babyHeightPoints.map {
                         BabyGrowthPoint(month: $0.month, value: $0.value * units.heightChartFactor)
@@ -144,7 +124,6 @@ struct TrackingView: View {
             case 2:
                 return ChartConfig(
                     title: loc.strings.headCircIn, unit: "in",
-                    data:  vm.currentReference?.scaledBy(units.heightChartFactor),
                     gridVals: [13, 15, 17, 19],
                     babyPoints: vm.babyHeadPoints.map {
                         BabyGrowthPoint(month: $0.month, value: $0.value * units.heightChartFactor)
@@ -153,7 +132,6 @@ struct TrackingView: View {
             default:
                 return ChartConfig(
                     title: loc.strings.weightLb, unit: "lb",
-                    data:  vm.currentReference?.scaledBy(units.weightChartFactor),
                     gridVals: [9, 15, 22, 29],
                     babyPoints: vm.babyWeightPoints.map {
                         BabyGrowthPoint(month: $0.month, value: $0.value * units.weightChartFactor)
@@ -162,9 +140,9 @@ struct TrackingView: View {
             }
         } else {
             switch vm.selectedTab {
-            case 1: return ChartConfig(title: loc.strings.heightCm,   unit: "cm", data: vm.currentReference, gridVals: [50, 65, 80, 95], babyPoints: vm.babyHeightPoints)
-            case 2: return ChartConfig(title: loc.strings.headCircCm, unit: "cm", data: vm.currentReference, gridVals: [33, 38, 43, 48], babyPoints: vm.babyHeadPoints)
-            default: return ChartConfig(title: loc.strings.weightKg,  unit: "kg", data: vm.currentReference, gridVals: [4, 7, 10, 13],  babyPoints: vm.babyWeightPoints)
+            case 1: return ChartConfig(title: loc.strings.heightCm,   unit: "cm", gridVals: [50, 65, 80, 95], babyPoints: vm.babyHeightPoints)
+            case 2: return ChartConfig(title: loc.strings.headCircCm, unit: "cm", gridVals: [33, 38, 43, 48], babyPoints: vm.babyHeadPoints)
+            default: return ChartConfig(title: loc.strings.weightKg,  unit: "kg", gridVals: [4, 7, 10, 13],  babyPoints: vm.babyWeightPoints)
             }
         }
     }
@@ -173,131 +151,29 @@ struct TrackingView: View {
         let cfg = currentChartConfig
         return VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .top) {
-                Text(cfg.title)
+                Text(loc.strings.growthHistory)
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundColor(.bbInk)
                 Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(whoRangeLabel)
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundColor(.bbInkMute)
-                    let pLabel = vm.currentPercentileLabel
-                    if !pLabel.isEmpty {
-                        Text(pLabel)
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .foregroundColor(.bbCoralDeep)
-                    }
-                }
+                Text(cfg.title)
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInkMute)
             }
 
-            WHOLineChart(data: cfg.data, babyPoints: cfg.babyPoints, gridVals: cfg.gridVals, unit: cfg.unit)
+            GrowthLineChart(babyPoints: cfg.babyPoints, gridVals: cfg.gridVals, unit: cfg.unit)
                 .frame(height: 160)
                 .animation(.easeInOut(duration: 0.3), value: vm.selectedTab)
 
-            HStack(spacing: 12) {
-                legendItem(color: .bbCoralDeep, isDashed: false, label: vm.displayName)
-                if vm.currentReference != nil {
-                    legendItem(color: .bbMint,     isDashed: false, label: "P15–P85")
-                    legendItem(color: .bbMintDeep, isDashed: true,  label: loc.strings.median)
-                }
+            HStack(spacing: 4) {
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(Color.bbCoralDeep).frame(width: 12, height: 3)
+                Text(vm.displayName)
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundColor(.bbInkSoft)
             }
             .padding(.top, 4)
-
-            if vm.babySex == nil {
-                sexHint
-            }
-
-            methodologyFooter
         }
         .bbCard(pad: 14)
-    }
-
-    /// Guideline 1.4.1: the chart carries WHO branding and a health label, so the
-    /// source, the approximations behind the label and the "see a paediatrician"
-    /// advice have to be reachable from the chart itself, not buried in code.
-    private var methodologyFooter: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(loc.strings.whoChartDisclaimer)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundColor(.bbInkMute)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-
-            Button { showWHOMethodology = true } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "info.circle.fill")
-                        .font(.system(size: 11, weight: .bold))
-                    Text(loc.strings.whoMethodologyMore)
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 9, weight: .heavy))
-                }
-                .foregroundColor(.bbInkSoft)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 8)
-    }
-
-    private var whoRangeLabel: String {
-        switch vm.babySex {
-        case .boy:  return "\(loc.strings.whoRange) · \(loc.strings.genderBoy)"
-        case .girl: return "\(loc.strings.whoRange) · \(loc.strings.genderGirl)"
-        case nil:   return loc.strings.whoRange
-        }
-    }
-
-    /// A co-parent without profile rights cannot fix the missing sex, so the hint
-    /// stays informational for them instead of leading into a denied save.
-    private var canEditProfile: Bool {
-        appState.babyProfile != nil && familyManager.canPerform(.manageBabyProfiles)
-    }
-
-    private var sexHint: some View {
-        Group {
-            if canEditProfile {
-                Button { showEditProfile = true } label: {
-                    sexHintLabel(showsChevron: true)
-                }
-            } else {
-                sexHintLabel(showsChevron: false)
-            }
-        }
-    }
-
-    private func sexHintLabel(showsChevron: Bool) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: "info.circle.fill")
-                .font(.system(size: 11, weight: .bold))
-            Text(loc.strings.setSexForPercentiles)
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .multilineTextAlignment(.leading)
-            if showsChevron {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 9, weight: .heavy))
-            }
-        }
-        .foregroundColor(.bbInkSoft)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 6)
-    }
-
-    private func legendItem(color: Color, isDashed: Bool, label: String) -> some View {
-        HStack(spacing: 4) {
-            if isDashed {
-                HStack(spacing: 1) {
-                    ForEach(0..<3, id: \.self) { _ in
-                        Rectangle().fill(color).frame(width: 2.5, height: 1.5)
-                    }
-                }
-            } else {
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(color).frame(width: 12, height: 3)
-            }
-            Text(label)
-                .font(.system(size: 10, weight: .bold, design: .rounded))
-                .foregroundColor(.bbInkSoft)
-        }
     }
 
     // MARK: - Measurements List

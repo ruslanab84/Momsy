@@ -31,7 +31,7 @@ final class TrackingViewModel: ObservableObject {
         tempLog = (try? await temperatureRepo.getAll()) ?? []
     }
 
-    // MARK: - WHO Baby Points
+    // MARK: - Growth Points
 
     var babyWeightPoints: [BabyGrowthPoint] {
         growthPoints(keyPath: \.weight)
@@ -41,30 +41,6 @@ final class TrackingViewModel: ObservableObject {
     }
     var babyHeadPoints: [BabyGrowthPoint] {
         growthPoints(keyPath: \.headCirc)
-    }
-
-    /// WHO growth standards are sex-specific, so without a known sex there is no
-    /// reference to plot or classify against.
-    var babySex: BabySex? { appState.babyProfile?.sex }
-
-    var currentReference: [WHOPoint]? {
-        guard let sex = babySex else { return nil }
-        switch selectedTab {
-        case 0: return WHOGrowthStandards.weight(sex)
-        case 1: return WHOGrowthStandards.height(sex)
-        case 2: return WHOGrowthStandards.head(sex)
-        default: return nil
-        }
-    }
-
-    var currentPercentileLabel: String {
-        guard let reference = currentReference else { return "" }
-        switch selectedTab {
-        case 0: return percentileLabel(babyPoints: babyWeightPoints, reference: reference)
-        case 1: return percentileLabel(babyPoints: babyHeightPoints, reference: reference)
-        case 2: return percentileLabel(babyPoints: babyHeadPoints,  reference: reference)
-        default: return ""
-        }
     }
 
     private func growthPoints(keyPath: KeyPath<MeasurementEntry, String>) -> [BabyGrowthPoint] {
@@ -81,19 +57,6 @@ final class TrackingViewModel: ObservableObject {
         guard s != "—" else { return nil }
         let token = s.components(separatedBy: .whitespaces).first ?? s
         return Double(token.replacingOccurrences(of: ",", with: "."))
-    }
-
-    private func percentileLabel(babyPoints: [BabyGrowthPoint], reference: [WHOPoint]) -> String {
-        guard let latest = babyPoints.max(by: { $0.month < $1.month }),
-              let ref = reference.min(by: { abs($0.month - latest.month) < abs($1.month - latest.month) })
-        else { return "" }
-        let v = latest.value
-        if v < ref.p3  { return lm.strings.belowP3 }
-        if v < ref.p15 { return "P3–P15" }
-        if v < ref.p50 { return "P15–P50" }
-        if v < ref.p85 { return "P50–P85" }
-        if v < ref.p97 { return "P85–P97" }
-        return lm.strings.aboveP97
     }
 
     // MARK: - Tabs

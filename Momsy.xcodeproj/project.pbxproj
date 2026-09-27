@@ -70,7 +70,6 @@
 		AA001122CC33DD44EE55FF67 /* FeedingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001122CC33DD44EE55FF66 /* FeedingActivityAttributes.swift */; };
 		AA9D8473BEC847159E9AAAA2 /* MockMomMoodRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */; };
 		AA9D8473BEC847159E9AAAA4 /* MomMoodViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */; };
-		AC00BEEF0000000000000002 /* WHOGrowthStandardsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC00BEEF0000000000000001 /* WHOGrowthStandardsTests.swift */; };
 		AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */; };
 		ACC001DEA000000000000001 /* AccountDisplayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC001DEA000000000000002 /* AccountDisplayTests.swift */; };
 		B24FC7CC0D782B29188B1E9F /* TodayViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C539C60032F0D6AC6C69067 /* TodayViewModelTests.swift */; };
@@ -245,7 +244,6 @@
 		AA001122CC33DD44EE55FF66 /* FeedingActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingActivityAttributes.swift; path = Momsy/Core/Widget/FeedingActivityAttributes.swift; sourceTree = "<group>"; };
 		AA9D8473BEC847159E9AAAA1 /* MockMomMoodRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockMomMoodRepository.swift; sourceTree = "<group>"; };
 		AA9D8473BEC847159E9AAAA3 /* MomMoodViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MomMoodViewModelTests.swift; sourceTree = "<group>"; };
-		AC00BEEF0000000000000001 /* WHOGrowthStandardsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WHOGrowthStandardsTests.swift; sourceTree = "<group>"; };
 		AC11AA01AC11AA01AC11AA01 /* DeleteAccountTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountTests.swift; sourceTree = "<group>"; };
 		ACC001DEA000000000000002 /* AccountDisplayTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountDisplayTests.swift; sourceTree = "<group>"; };
 		B0D4B0BAEF83286E9732D9C9 /* SleepViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModelTests.swift; sourceTree = "<group>"; };
@@ -687,14 +685,6 @@
 			path = Mocks;
 			sourceTree = "<group>";
 		};
-		AC00BEEF0000000000000003 /* Tracking */ = {
-			isa = PBXGroup;
-			children = (
-				AC00BEEF0000000000000001 /* WHOGrowthStandardsTests.swift */,
-			);
-			path = Tracking;
-			sourceTree = "<group>";
-		};
 		AC11AA03AC11AA03AC11AA03 /* Account */ = {
 			isa = PBXGroup;
 			children = (
@@ -812,7 +802,6 @@
 				FEED0006AAAA1111BBBB0001 /* LogReport */,
 				FE11AA03FE11AA03FE11AA03 /* Vaccination */,
 				CA4E1103CA4E1103CA4E1103 /* CareTips */,
-				AC00BEEF0000000000000003 /* Tracking */,
 				F94EBA0100654CF0862AB203 /* Vitamin */,
 				DEADBEEF0000000000000010 /* WeeklyInsights */,
 				9E8D7C6B5A4938271605F4E3 /* Subscription */,
@@ -1062,7 +1051,6 @@
 				CA4E1102CA4E1102CA4E1102 /* CareTipsCatalogTests.swift in Sources */,
 				CA4E1202CA4E1202CA4E1202 /* LocalizedTextTests.swift in Sources */,
 				2A98F7575F5748A0BF198500 /* VitaminCategoryTests.swift in Sources */,
-				AC00BEEF0000000000000002 /* WHOGrowthStandardsTests.swift in Sources */,
 				AC11AA02AC11AA02AC11AA02 /* DeleteAccountTests.swift in Sources */,
 				FA31CE02FA31CE02FA31CE02 /* FamilyCacheReauthTests.swift in Sources */,
 				5A11ABF0000000000000A003 /* AccountErasureGateTests.swift in Sources */,

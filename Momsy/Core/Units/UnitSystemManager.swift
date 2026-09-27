@@ -29,19 +29,6 @@ enum UnitSystem: String, CaseIterable {
     }
 }
 
-extension Array where Element == WHOPoint {
-    func scaledBy(_ factor: Double) -> [WHOPoint] {
-        map {
-            WHOPoint(month: $0.month,
-                     p3:  $0.p3  * factor,
-                     p15: $0.p15 * factor,
-                     p50: $0.p50 * factor,
-                     p85: $0.p85 * factor,
-                     p97: $0.p97 * factor)
-        }
-    }
-}
-
 @MainActor
 final class UnitSystemManager: ObservableObject {
     static let shared = UnitSystemManager()
