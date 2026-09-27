@@ -7,6 +7,10 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Binding private var widgetFeatureRoute: WidgetFeatureRoute?
     @State private var showSplash = true
+    // Caps the role-loading splash when setup() never runs or the network hangs;
+    // the UI then falls back to role-restricted tabs until the role arrives.
+    @State private var roleWaitExpired = false
+    @ObservedObject private var familyManager = FamilyManager.shared
     // Routed straight off the manager: a @State mirror fed by .onReceive stayed on the
     // paywall after the manager had already published requiresPurchase -> premium.
     @ObservedObject private var subscriptionManager: SubscriptionManager
@@ -44,6 +48,14 @@ struct ContentView: View {
                     onComplete: {}
                 )
                 .transition(.opacity)
+            } else if !familyManager.isRoleResolved && !roleWaitExpired {
+                SplashView()
+                    .overlay(alignment: .bottom) {
+                        ProgressView()
+                            .controlSize(.large)
+                            .padding(.bottom, 80)
+                    }
+                    .transition(.opacity)
             } else {
                 MainTabView(widgetFeatureRoute: $widgetFeatureRoute)
                     .transition(.opacity)
@@ -51,6 +63,7 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.35), value: onboardingDone)
+        .animation(.easeInOut(duration: 0.35), value: familyManager.isRoleResolved)
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
             Task { await subscriptionManager.refreshAccess() }
@@ -58,6 +71,10 @@ struct ContentView: View {
         .task {
             try? await Task.sleep(for: .seconds(2.2))
             showSplash = false
+        }
+        .task {
+            try? await Task.sleep(for: .seconds(8))
+            roleWaitExpired = true
         }
     }
 }

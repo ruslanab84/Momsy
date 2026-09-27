@@ -84,6 +84,9 @@ final class FamilyManager: ObservableObject {
     @Published private(set) var familyId: String?
     @Published private(set) var currentRole: FamilyRole?
     @Published private(set) var isReady = false
+    /// False while a cached/new familyId waits for its server-confirmed role, so the
+    /// UI can show a loading state instead of a role-restricted interface.
+    @Published private(set) var isRoleResolved = true
 
     /// True while an explicit invite-join flow owns family state. `setup()` bails while
     /// set so the auth state listener — fired by the join's own sign-in — cannot race
@@ -112,6 +115,7 @@ final class FamilyManager: ObservableObject {
         familyId = UserDefaults.standard.string(forKey: kFamilyIdDefaultsKey)
         currentRole = nil
         isReady = familyId != nil
+        isRoleResolved = familyId == nil
     }
 
     func allows(_ capability: FamilyAccessCapability) -> Bool {
@@ -252,6 +256,7 @@ final class FamilyManager: ObservableObject {
                     persist(familyId: existingId, ownerUid: uid)
                     currentRole = (memberSnap?.data()?["roleRaw"] as? String)
                         .flatMap(FamilyRole.init(storedRawValue:))
+                    isRoleResolved = true
                     try await ensureMemberDocument(
                         familyId: existingId,
                         uid: uid,
@@ -516,6 +521,8 @@ final class FamilyManager: ObservableObject {
     /// Server-truth check that `uid` still has a member doc in `familyId`.
     private func confirmMembership(familyId: String, uid: String) async -> MembershipCheck {
         currentRole = nil
+        isRoleResolved = false
+        defer { isRoleResolved = true }
         do {
             let familyRef = db.collection("families").document(familyId)
             let memberRef = familyRef.collection("members").document(uid)
@@ -596,6 +603,7 @@ final class FamilyManager: ObservableObject {
         memberRoleListener = nil
         familyId = nil
         currentRole = nil
+        isRoleResolved = true
         isReady = false
         UserDefaults.standard.removeObject(forKey: kFamilyIdDefaultsKey)
         UserDefaults.standard.removeObject(forKey: kFamilyOwnerUidDefaultsKey)
@@ -605,6 +613,7 @@ final class FamilyManager: ObservableObject {
     private func persist(familyId id: String, ownerUid uid: String) {
         if familyId != id {
             currentRole = nil
+            isRoleResolved = false
         }
         familyId = id
         UserDefaults.standard.set(id, forKey: kFamilyIdDefaultsKey)
@@ -631,6 +640,7 @@ final class FamilyManager: ObservableObject {
                     self.currentRole = failed || !exists
                         ? nil
                         : roleRaw.flatMap(FamilyRole.init(storedRawValue:))
+                    self.isRoleResolved = true
                 }
             }
     }
