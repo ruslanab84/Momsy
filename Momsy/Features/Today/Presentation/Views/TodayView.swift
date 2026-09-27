@@ -8,6 +8,7 @@ private final class TodayFeatureViewModels: ObservableObject {
     let bath: BathViewModel
     let vitamin: VitaminViewModel
     let pumping: PumpingViewModel
+    let food: FoodDiaryViewModel
 
     init(container: AppContainer) {
         feeding = container.makeFeedingViewModel()
@@ -16,6 +17,7 @@ private final class TodayFeatureViewModels: ObservableObject {
         bath = container.makeBathViewModel()
         vitamin = container.makeVitaminViewModel()
         pumping = container.makePumpingViewModel()
+        food = container.makeFoodDiaryViewModel()
     }
 }
 
@@ -30,6 +32,7 @@ struct TodayView: View {
     @State private var showVitamins = false
     @State private var showStool = false
     @State private var showPumping = false
+    @State private var showFood = false
     @State private var showAllEntries = false
     @State private var showAddChild = false
     @State private var now = Date()
@@ -53,6 +56,7 @@ struct TodayView: View {
     private var bathVM: BathViewModel { featureVMs.bath }
     private var vitaminVM: VitaminViewModel { featureVMs.vitamin }
     private var pumpingVM: PumpingViewModel { featureVMs.pumping }
+    private var foodVM: FoodDiaryViewModel { featureVMs.food }
 
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var loc: LocalizationManager
@@ -172,6 +176,10 @@ struct TodayView: View {
                 .environmentObject(loc)
                 .onDisappear { Task { await vm.loadTodayEntries() } }
         }
+        .sheet(isPresented: $showFood) {
+            AddFoodEntrySheet(vm: foodVM, lm: loc)
+                .onDisappear { Task { await vm.loadTodayEntries() } }
+        }
         .sheet(isPresented: $showAddChild) {
             AddChildSheet { profile in
                 Task { try? await container.addChild(profile) }
@@ -208,6 +216,7 @@ struct TodayView: View {
             showSymptom = false
             showVitamins = false
             showPumping = false
+            showFood = false
         }
         if !canManageProfiles {
             showAddChild = false
@@ -464,6 +473,12 @@ struct TodayView: View {
             QuickItem(kind: .bottle,  tone: .bbCoral,  label: loc.strings.feedLabel)   { showFeeding = true },
             QuickItem(kind: .sleep,   tone: .bbLilac,  label: loc.strings.sleep)       { showSleep = true },
             QuickItem(kind: .drop,    tone: .bbSky,    label: loc.strings.diaperQuick) { vm.logDiaper() },
+        ]
+        // Food diary is private data (not a routine collection in firestore.rules).
+        if canWritePrivate {
+            items.append(QuickItem(kind: .food, tone: .bbCoral, label: loc.strings.ageStageEatSubtitle) { showFood = true })
+        }
+        items += [
             QuickItem(kind: .stool,   tone: .bbMint,   label: loc.strings.stoolLabel)  { showStool = true },
             QuickItem(kind: .walk,    tone: .bbMint,   label: loc.strings.walk)        { showWalk = true },
             QuickItem(kind: .bath,    tone: .bbSky,    label: loc.strings.bath)        { showBath = true },

@@ -33,6 +33,7 @@ struct CuteBlobView: View {
         case .vitamin: VitaminBlob(s: size)
         case .stool:   StoolBlob(s: size)
         case .pump:    PumpBlob(s: size)
+        case .food:    FoodBlob(s: size)
         case .mom:     MomBlob(s: size)
         case .dad:     DadBlob(s: size)
         case .nanny:   NannyBlob(s: size)
@@ -535,6 +536,17 @@ private struct PumpBlob: View {
         Image(systemName: "drop.circle.fill")
             .font(.system(size: s * 0.44, weight: .medium))
             .foregroundColor(Color(bbHex: "D97FA8"))
+    }
+}
+
+// MARK: - Food
+
+private struct FoodBlob: View {
+    let s: CGFloat
+    var body: some View {
+        Image(systemName: "fork.knife")
+            .font(.system(size: s * 0.42, weight: .medium))
+            .foregroundColor(Color(bbHex: "E07A5F"))
     }
 }
 

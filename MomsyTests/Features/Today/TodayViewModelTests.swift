@@ -64,6 +64,7 @@ struct TodayViewModelTests {
         sleepRepo: MockSleepRepository = MockSleepRepository(),
         diaperRepo: MockDiaperRepository = MockDiaperRepository(),
         stoolRepo: MockStoolRepository = MockStoolRepository(),
+        foodRepo: MockComplementaryFeedingRepository = MockComplementaryFeedingRepository(),
         leapsRepo: MockLeapsRepository = MockLeapsRepository(),
         tipRepository: DailyTipRepository? = nil,
         profile: BabyProfile? = nil
@@ -75,6 +76,7 @@ struct TodayViewModelTests {
             getLeaps: GetLeapsUseCase(repository: leapsRepo),
             diaperRepo: diaperRepo,
             stoolRepo: stoolRepo,
+            foodRepo: foodRepo,
             quickLogRepo: QuickLogRepository(),
             tipRepository: tipRepo,
             appState: makeAppState(profile: profile),
@@ -159,6 +161,27 @@ struct TodayViewModelTests {
         vm.logWalk()
         await vm.loadTodayEntries()
         #expect(vm.logEntries.count == 2)
+    }
+
+    @Test("loadTodayEntries includes only today's food diary entries")
+    func loadIncludesTodaysFoodEntries() async throws {
+        let foodRepo = MockComplementaryFeedingRepository()
+        let today = Calendar.current.startOfDay(for: Date())
+        let todayFood = ComplementaryFoodEntry(
+            id: UUID(), date: today.addingTimeInterval(3600), foodName: "Broccoli",
+            category: .vegetable, reaction: .none, isAllergen: false, notes: ""
+        )
+        let yesterdayFood = ComplementaryFoodEntry(
+            id: UUID(), date: today.addingTimeInterval(-3600), foodName: "Apple",
+            category: .fruit, reaction: .none, isAllergen: false, notes: ""
+        )
+        foodRepo.entries = [todayFood, yesterdayFood]
+        let vm = makeVM(foodRepo: foodRepo)
+        await vm.loadTodayEntries()
+        let foods = vm.logEntries.filter { $0.kind == .food }
+        #expect(foods.count == 1)
+        #expect(foods.first?.id == "food:\(todayFood.id.uuidString)")
+        #expect(foods.first?.label.hasSuffix("Broccoli") == true)
     }
 
     @Test("loadTodayEntries sorts entries newest first")

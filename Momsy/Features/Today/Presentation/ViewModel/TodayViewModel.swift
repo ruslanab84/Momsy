@@ -17,6 +17,7 @@ final class TodayViewModel: ObservableObject {
     private let getLeaps: GetLeapsUseCase
     private let diaperRepo: any DiaperRepository
     private let stoolRepo: any StoolRepository
+    private let foodRepo: any ComplementaryFeedingRepository
     private let quickLogRepo: QuickLogRepository
     private let tipRepository: DailyTipRepository
     private let appState: AppState
@@ -35,6 +36,7 @@ final class TodayViewModel: ObservableObject {
         getLeaps: GetLeapsUseCase,
         diaperRepo: any DiaperRepository,
         stoolRepo: any StoolRepository,
+        foodRepo: any ComplementaryFeedingRepository,
         quickLogRepo: QuickLogRepository,
         tipRepository: DailyTipRepository,
         appState: AppState,
@@ -46,6 +48,7 @@ final class TodayViewModel: ObservableObject {
         self.getLeaps = getLeaps
         self.diaperRepo = diaperRepo
         self.stoolRepo = stoolRepo
+        self.foodRepo = foodRepo
         self.quickLogRepo = quickLogRepo
         self.tipRepository = tipRepository
         self.appState = appState
@@ -187,7 +190,19 @@ final class TodayViewModel: ObservableObject {
         }.map {
             LogEntry(id: "quick:\($0.id.uuidString)", time: $0.time, kind: $0.kind, label: $0.label)
         }
-        let merged = (feedingEntries + sleepEntries + quickEntries).sorted { $0.time > $1.time }
+        // Food diary is private data; a failed read just omits it rather than blanking the list.
+        let foods = canViewPrivateData
+            ? ((try? await foodRepo.getEntries(from: startOfDay, to: endOfDay)) ?? [])
+            : []
+        let foodEntries: [LogEntry] = foods.map {
+            LogEntry(
+                id: "food:\($0.id.uuidString)",
+                time: $0.date,
+                kind: .food,
+                label: "\(lm.strings.ageStageEatSubtitle): \($0.foodName)"
+            )
+        }
+        let merged = (feedingEntries + sleepEntries + quickEntries + foodEntries).sorted { $0.time > $1.time }
         logEntries = merged
     }
 

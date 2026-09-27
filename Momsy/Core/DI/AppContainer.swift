@@ -475,6 +475,7 @@ final class AppContainer {
             getLeaps: getLeaps,
             diaperRepo: diaperRepository,
             stoolRepo: stoolRepository,
+            foodRepo: complementaryFeedingRepository,
             quickLogRepo: quickLogRepository,
             tipRepository: dailyTipRepository,
             appState: appState,

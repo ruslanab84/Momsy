@@ -233,9 +233,10 @@ private struct FoodDiaryEmptyState: View {
 
 // MARK: - Add Food Entry Sheet
 
-private struct AddFoodEntrySheet: View {
+struct AddFoodEntrySheet: View {
     @ObservedObject var vm: FoodDiaryViewModel
     let lm: LocalizationManager
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
@@ -328,7 +329,7 @@ private struct AddFoodEntrySheet: View {
 
                     // Save button
                     Button {
-                        Task { await vm.saveEntry() }
+                        Task { if await vm.saveEntry() { dismiss() } }
                     } label: {
                         ZStack {
                             if vm.isUploading {
@@ -356,7 +357,7 @@ private struct AddFoodEntrySheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(lm.strings.cancel) { vm.showAddEntry = false }
+                    Button(lm.strings.cancel) { dismiss() }
                         .foregroundColor(.bbInkSoft)
                 }
             }

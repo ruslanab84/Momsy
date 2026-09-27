@@ -45,9 +45,10 @@ final class FoodDiaryViewModel: ObservableObject {
         entries = (try? await get.execute()) ?? []
     }
 
-    func saveEntry() async {
+    @discardableResult
+    func saveEntry() async -> Bool {
         let name = newFoodName.trimmingCharacters(in: .whitespaces)
-        guard !name.isEmpty else { return }
+        guard !name.isEmpty else { return false }
         isUploading = true
         defer { isUploading = false }
         do {
@@ -59,8 +60,10 @@ final class FoodDiaryViewModel: ObservableObject {
             resetForm()
             showAddEntry = false
             await load()
+            return true
         } catch {
             saveError = error.localizedDescription
+            return false
         }
     }
 
