@@ -101,7 +101,7 @@ struct DoctorMenuView: View {
                             iconColor: .bbMintDeep,
                             iconBg: Color.bbMint.opacity(0.3),
                             title: lm.strings.heightAndWeight,
-                            sub: lm.strings.whoPercentileChart
+                            sub: lm.strings.growthHistory
                         )
                         Divider().padding(.leading, 60)
                         DoctorMenuRow(

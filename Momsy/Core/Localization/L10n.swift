@@ -1222,7 +1222,6 @@ struct L10n {
     // MARK: — Doctor Menu
     var pediatricianReport: String { s("Pediatrician Report","Отчёт для педиатра","Kinderarztbericht", "Informe para el pediatra", "Rapport pour le pédiatre", "Relatório para o pediatra", "儿科医生报告") }
     var pdfForWeek: String      { s("PDF for the week — sleep, feeding, weight", "PDF за неделю — сон, кормление, вес", "PDF für die Woche — Schlaf, Ernährung, Gewicht", "PDF de la semana — sueño, tomas, peso", "PDF de la semaine — sommeil, tétées, poids", "PDF da semana — sono, mamadas, peso", "一周 PDF——睡眠、喂养、体重") }
-    var whoPercentileChart: String { s("WHO percentile chart", "График по перцентилям ВОЗ", "WHO-Perzentilkurve", "Gráfico de percentiles OMS", "Courbe de percentiles OMS", "Gráfico de percentis OMS", "WHO 百分位曲线图") }
     var vaccinations: String            { s("Vaccinations",          "Прививки",                     "Impfungen", "Vacunas", "Vaccins", "Vacinas", "疫苗接种") }
     var vaccinationCalendar: String     { s("Vaccination calendar",   "Календарь прививок",           "Impfkalender", "Calendario de vacunas", "Calendrier des vaccins", "Calendário de vacinas", "疫苗接种日历") }
     var vaccinationCalendarSub: String  { s("Schedule & reminders",   "Расписание и напоминания",     "Zeitplan & Erinnerungen", "Calendario y recordatorios", "Calendrier et rappels", "Calendário e lembretes", "计划与提醒") }
