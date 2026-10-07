@@ -19,9 +19,10 @@ enum AppPersistence {
     static func makeContainer(
         defaults: UserDefaults = .standard,
         fileManager: FileManager = .default,
-        storeURL: URL? = Self.storeURL,
+        storeURL: URL? = nil,
         containerFactory: ContainerFactory = Self.makeModelContainer
     ) throws -> ModelContainer {
+        let storeURL = storeURL ?? Self.storeURL
         let schema = makeSchema()
         let localConfig = ModelConfiguration(schema: schema)
 

@@ -4,7 +4,7 @@ import StoreKit
 struct L10n {
     private let lang: Language
 
-    init(_ lang: Language) { self.lang = lang }
+    nonisolated init(_ lang: Language) { self.lang = lang }
 
     private func s(_ en: String, _ ru: String, _ de: String, _ es: String, _ fr: String, _ pt: String, _ zh: String) -> String {
         switch lang {

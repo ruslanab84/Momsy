@@ -6,7 +6,7 @@ final class LocalPushNotificationService: PushNotificationServiceProtocol, @unch
 
     private let center = UNUserNotificationCenter.current()
 
-    private enum ID {
+    private nonisolated enum ID {
         static let feeding = "momsy.feeding.reminder"
         static let diary   = "momsy.diary.morning"
         static let weeklyReport = "momsy.weeklyreport"

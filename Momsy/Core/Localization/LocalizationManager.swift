@@ -5,7 +5,7 @@ import WidgetKit
 final class LocalizationManager: ObservableObject {
     static let shared = LocalizationManager()
 
-    private enum Defaults {
+    private nonisolated enum Defaults {
         static let appLanguageKey = "appLanguage"
         static let appGroupSuiteName = "group.RuslanAbd.Momsy"
     }

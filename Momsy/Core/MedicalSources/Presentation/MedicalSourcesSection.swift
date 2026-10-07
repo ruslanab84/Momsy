@@ -6,7 +6,7 @@ struct MedicalSourcesSection: View {
     let ids: [MedicalSourceID]
     @EnvironmentObject var loc: LocalizationManager
 
-    private var sources: [MedicalSource] { ids.compactMap(MedicalSourceCatalog.source) }
+    private var sources: [MedicalSource] { ids.compactMap { MedicalSourceCatalog.source($0) } }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

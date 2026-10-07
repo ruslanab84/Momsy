@@ -142,7 +142,7 @@ private struct CareTipRowView: View {
 
     /// "0–12 mo · WHO" — the primary publisher is the first (highest-priority) source.
     private var caption: String {
-        let publisher = tip.sources.first.flatMap(MedicalSourceCatalog.source)?.publisher.badge
+        let publisher = tip.sources.first.flatMap { MedicalSourceCatalog.source($0) }?.publisher.badge
         return [tip.ageLabel(lang), publisher].compactMap { $0 }.joined(separator: " · ")
     }
 
